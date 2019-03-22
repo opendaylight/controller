@@ -22,8 +22,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Set;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
+import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-@ThreadSafe
 public class FileBackedOutputStream extends OutputStream {
     private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStream.class);
 
@@ -77,7 +76,7 @@ public class FileBackedOutputStream extends OutputStream {
      * @param fileDirectory the directory in which to create the file if needed. If null, the default temp file
      *                      location is used.
      */
-    public FileBackedOutputStream(int fileThreshold, @Nullable String fileDirectory) {
+    public FileBackedOutputStream(final int fileThreshold, @Nullable final String fileDirectory) {
         this.fileThreshold = fileThreshold;
         this.fileDirectory = fileDirectory;
     }
@@ -118,19 +117,19 @@ public class FileBackedOutputStream extends OutputStream {
     @Override
     @SuppressFBWarnings(value = "VO_VOLATILE_INCREMENT", justification = "Findbugs erroneously complains that the "
         + "increment of count needs to be atomic even though it is inside a synchronized block.")
-    public synchronized void write(int value) throws IOException {
+    public synchronized void write(final int value) throws IOException {
         possiblySwitchToFile(1);
         out.write(value);
         count++;
     }
 
     @Override
-    public synchronized void write(byte[] bytes) throws IOException {
+    public synchronized void write(final byte[] bytes) throws IOException {
         write(bytes, 0, bytes.length);
     }
 
     @Override
-    public synchronized void write(byte[] bytes, int off, int len) throws IOException {
+    public synchronized void write(final byte[] bytes, final int off, final int len) throws IOException {
         possiblySwitchToFile(len);
         out.write(bytes, off, len);
         count += len;
@@ -180,7 +179,7 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
-    @GuardedBy("this")
+    @Holding("this")
     private void closeQuietly() {
         try {
             close();
@@ -192,8 +191,8 @@ public class FileBackedOutputStream extends OutputStream {
     /**
      * Checks if writing {@code len} bytes would go over threshold, and switches to file buffering if so.
      */
-    @GuardedBy("this")
-    private void possiblySwitchToFile(int len) throws IOException {
+    @Holding("this")
+    private void possiblySwitchToFile(final int len) throws IOException {
         if (out == null) {
             throw new IOException("Stream already closed");
         }
@@ -233,7 +232,7 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
-    private static void deleteFile(File file) {
+    private static void deleteFile(final File file) {
         if (!file.delete()) {
             LOG.warn("Could not delete temp file {}", file);
         }
@@ -258,7 +257,7 @@ public class FileBackedOutputStream extends OutputStream {
     private static class Cleanup extends FinalizablePhantomReference<FileBackedOutputStream> {
         private final File file;
 
-        Cleanup(FileBackedOutputStream referent, File file) {
+        Cleanup(final FileBackedOutputStream referent, final File file) {
             super(referent, REFERENCE_QUEUE);
             this.file = file;
 

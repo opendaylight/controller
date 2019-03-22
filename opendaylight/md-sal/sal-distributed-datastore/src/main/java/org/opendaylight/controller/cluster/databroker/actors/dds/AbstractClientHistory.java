@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
-import javax.annotation.concurrent.GuardedBy;
+import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
@@ -69,9 +72,9 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     private volatile State state = State.IDLE;
 
     AbstractClientHistory(final AbstractDataStoreClientBehavior client, final LocalHistoryIdentifier identifier) {
-        this.client = Preconditions.checkNotNull(client);
-        this.identifier = Preconditions.checkNotNull(identifier);
-        Preconditions.checkArgument(identifier.getCookie() == 0);
+        this.client = requireNonNull(client);
+        this.identifier = requireNonNull(identifier);
+        checkArgument(identifier.getCookie() == 0);
     }
 
     final State state() {
@@ -80,14 +83,14 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     final void updateState(final State expected, final State next) {
         final boolean success = STATE_UPDATER.compareAndSet(this, expected, next);
-        Preconditions.checkState(success, "Race condition detected, state changed from %s to %s", expected, state);
+        checkState(success, "Race condition detected, state changed from %s to %s", expected, state);
         LOG.debug("Client history {} changed state from {} to {}", this, expected, next);
     }
 
     final synchronized void doClose() {
         final State local = state;
         if (local != State.CLOSED) {
-            Preconditions.checkState(local == State.IDLE, "Local history %s has an open transaction", this);
+            checkState(local == State.IDLE, "Local history %s has an open transaction", this);
             histories.values().forEach(ProxyHistory::close);
             updateState(local, State.CLOSED);
         }
@@ -243,8 +246,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         }
 
         final AbstractTransactionCommitCohort previous = readyTransactions.putIfAbsent(txId, cohort);
-        Preconditions.checkState(previous == null, "Duplicate cohort %s for transaction %s, already have %s",
-                cohort, txId, previous);
+        checkState(previous == null, "Duplicate cohort %s for transaction %s, already have %s", cohort, txId, previous);
 
         LOG.debug("Local history {} readied transaction {}", this, txId);
         return cohort;
@@ -299,7 +301,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
             return null;
         }
 
-        final ProxyReconnectCohort proxy = Verify.verifyNotNull(oldProxy.startReconnect(newConn));
+        final ProxyReconnectCohort proxy = verifyNotNull(oldProxy.startReconnect(newConn));
         return new HistoryReconnectCohort() {
             @Override
             ProxyReconnectCohort getProxy() {

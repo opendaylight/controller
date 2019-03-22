@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
@@ -28,9 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.annotation.concurrent.GuardedBy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
+import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
@@ -134,9 +135,9 @@ public class DatastoreContextIntrospector {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void processDataStoreProperty(final String name, final Class<?> propertyType,
             final Method readMethod) {
-        Preconditions.checkArgument(BUILDER_SETTERS.containsKey(name), String.format(
+        checkArgument(BUILDER_SETTERS.containsKey(name),
                 "DataStoreProperties property \"%s\" does not have corresponding setter in DatastoreContext.Builder",
-                name));
+                name);
         try {
             processPropertyType(propertyType);
             DATA_STORE_PROP_INFO.put(name, new SimpleImmutableEntry<>(propertyType, readMethod));

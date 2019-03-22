@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
+import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -49,9 +48,11 @@ import scala.compat.java8.FutureConverters;
  * shard is assigned a single cookie and this mapping is stored in a bidirectional map. Information about corresponding
  * shard leader is resolved via {@link ActorUtils}. The product of resolution is {@link ShardBackendInfo}.
  *
+ * <p>
+ * This class is thread-safe.
+ *
  * @author Robert Varga
  */
-@ThreadSafe
 abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBackendInfo> {
     static final class ShardState {
         private final CompletionStage<ShardBackendInfo> stage;

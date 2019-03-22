@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import java.util.concurrent.TimeUnit;
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A ProgressTracker subclass which uses {@code ticksWorkedPerClosedTask} to compute delays.
@@ -24,9 +23,11 @@ import javax.annotation.concurrent.NotThreadSafe;
  * <p>On the other hand, there is no delay when number of open tasks is half the limit or less,
  * in order to prevent backend from running out of tasks while there may be waiting frontend threads.
  *
+ * <p>
+ * This class is NOT thread-safe.
+ *
  * @author Vratko Polak
  */
-@NotThreadSafe
 final class AveragingProgressTracker extends ProgressTracker {
     private static final long DEFAULT_TICKS_PER_TASK = TimeUnit.MILLISECONDS.toNanos(500);
 

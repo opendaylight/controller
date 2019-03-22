@@ -18,7 +18,6 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Queue;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -55,7 +54,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 abstract class TransmitQueue {
     static final class Halted extends TransmitQueue {
         // For ConnectingClientConnection.
@@ -79,7 +77,7 @@ abstract class TransmitQueue {
         }
 
         @Override
-        void preComplete(ResponseEnvelope<?> envelope) {
+        void preComplete(final ResponseEnvelope<?> envelope) {
         }
     }
 
@@ -135,7 +133,7 @@ abstract class TransmitQueue {
         }
 
         @Override
-        void preComplete(ResponseEnvelope<?> envelope) {
+        void preComplete(final ResponseEnvelope<?> envelope) {
             if (envelope.getTxSequence() == currentSlicedEnvSequenceId) {
                 // Slicing completed for the prior request - clear the cached sequence id field to enable subsequent
                 // requests to be transmitted.

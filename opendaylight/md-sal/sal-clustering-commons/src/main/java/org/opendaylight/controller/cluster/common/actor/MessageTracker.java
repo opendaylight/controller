@@ -20,7 +20,6 @@ import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableList;
 import java.util.LinkedList;
 import java.util.List;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +52,11 @@ import org.slf4j.LoggerFactory;
  *     }
  *
  * </pre>
+ *
+ * <p>
+ * This class is NOT thread-safe.
  */
 @Beta
-@NotThreadSafe
 public final class MessageTracker {
     public abstract static class Context implements AutoCloseable {
         Context() {

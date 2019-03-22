@@ -7,10 +7,13 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -23,8 +26,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.NotThreadSafe;
+import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
@@ -67,9 +69,8 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractProxyTransaction implements Identifiable<TransactionIdentifier> {
     /**
      * Marker object used instead of read-type of requests, which are satisfied only once. This has a lower footprint
-     * and allows compressing multiple requests into a single entry.
+     * and allows compressing multiple requests into a single entry. This class is not thread-safe.
      */
-    @NotThreadSafe
     private static final class IncrementSequence {
         private final long sequence;
         private long delta = 0;
@@ -99,7 +100,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         private final String string;
 
         State(final String string) {
-            this.string = Preconditions.checkNotNull(string);
+            this.string = requireNonNull(string);
         }
 
         @Override
@@ -147,26 +148,26 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
 
         State getPrevState() {
-            return Verify.verifyNotNull(prevState, "Attempted to access previous state, which was not set");
+            return verifyNotNull(prevState, "Attempted to access previous state, which was not set");
         }
 
         void setPrevState(final State prevState) {
-            Verify.verify(this.prevState == null, "Attempted to set previous state to %s when we already have %s",
-                    prevState, this.prevState);
-            this.prevState = Preconditions.checkNotNull(prevState);
+            verify(this.prevState == null, "Attempted to set previous state to %s when we already have %s", prevState,
+                    this.prevState);
+            this.prevState = requireNonNull(prevState);
             // We cannot have duplicate successor states, so this check is sufficient
             this.done = DONE.equals(prevState);
         }
 
         // To be called from safe contexts, where successor is known to be completed
         AbstractProxyTransaction getSuccessor() {
-            return Verify.verifyNotNull(successor);
+            return verifyNotNull(successor);
         }
 
         void setSuccessor(final AbstractProxyTransaction successor) {
-            Verify.verify(this.successor == null, "Attempted to set successor to %s when we already have %s",
-                    successor, this.successor);
-            this.successor = Preconditions.checkNotNull(successor);
+            verify(this.successor == null, "Attempted to set successor to %s when we already have %s", successor,
+                    this.successor);
+            this.successor = requireNonNull(successor);
         }
 
         boolean isDone() {
@@ -254,7 +255,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     private volatile State state;
 
     AbstractProxyTransaction(final ProxyHistory parent, final boolean isDone) {
-        this.parent = Preconditions.checkNotNull(parent);
+        this.parent = requireNonNull(parent);
         if (isDone) {
             state = DONE;
             // DONE implies previous seal operation completed
@@ -332,7 +333,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     final void seal() {
         // Transition user-visible state first
         final boolean success = markSealed();
-        Preconditions.checkState(success, "Proxy %s was already sealed", getIdentifier());
+        checkState(success, "Proxy %s was already sealed", getIdentifier());
 
         if (!sealAndSend(Optional.empty())) {
             sealSuccessor();
@@ -400,16 +401,16 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     private void checkNotSealed() {
-        Preconditions.checkState(sealed == 0, "Transaction %s has already been sealed", getIdentifier());
+        checkState(sealed == 0, "Transaction %s has already been sealed", getIdentifier());
     }
 
     private void checkSealed() {
-        Preconditions.checkState(sealed != 0, "Transaction %s has not been sealed yet", getIdentifier());
+        checkState(sealed != 0, "Transaction %s has not been sealed yet", getIdentifier());
     }
 
     private SuccessorState getSuccessorState() {
         final State local = state;
-        Verify.verify(local instanceof SuccessorState, "State %s has unexpected class", local);
+        verify(local instanceof SuccessorState, "State %s has unexpected class", local);
         return (SuccessorState) local;
     }
 
@@ -420,7 +421,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void recordSuccessfulRequest(final @NonNull TransactionRequest<?> req) {
-        successfulRequests.add(Verify.verifyNotNull(req));
+        successfulRequests.add(verifyNotNull(req));
     }
 
     final void recordFinishedRequest(final Response<?, ?> response) {
@@ -500,7 +501,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
                 final SettableFuture<Boolean> ret = SettableFuture.create();
-                sendRequest(Verify.verifyNotNull(commitRequest(false)), t -> {
+                sendRequest(verifyNotNull(commitRequest(false)), t -> {
                     if (t instanceof TransactionCommitSuccess) {
                         ret.set(Boolean.TRUE);
                     } else if (t instanceof RequestFailure) {
@@ -536,7 +537,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final TransactionRequest<?> req = Verify.verifyNotNull(commitRequest(true));
+                final TransactionRequest<?> req = verifyNotNull(commitRequest(true));
 
                 sendRequest(req, t -> {
                     if (t instanceof TransactionCanCommitSuccess) {
@@ -662,7 +663,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         final State prevState = STATE_UPDATER.getAndSet(this, nextState);
 
         LOG.debug("Start reconnect of proxy {} previous state {}", this, prevState);
-        Verify.verify(!(prevState instanceof SuccessorState), "Proxy %s duplicate reconnect attempt after %s", this,
+        verify(!(prevState instanceof SuccessorState), "Proxy %s duplicate reconnect attempt after %s", this,
             prevState);
 
         // We have asserted a slow-path state, seal(), canCommit(), directCommit() are forced to slow paths, which will
@@ -695,7 +696,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
                     successor.doReplayRequest((TransactionRequest<?>) obj, resp -> { /*NOOP*/ }, now);
                 } else {
-                    Verify.verify(obj instanceof IncrementSequence);
+                    verify(obj instanceof IncrementSequence);
                     final IncrementSequence increment = (IncrementSequence) obj;
                     successor.doReplayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
                         increment.getSequence(), localActor(), isSnapshotOnly(),
@@ -714,7 +715,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             final Request<?, ?> req = e.getRequest();
 
             if (getIdentifier().equals(req.getTarget())) {
-                Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
+                verify(req instanceof TransactionRequest, "Unhandled request %s", req);
                 LOG.debug("Replaying queued request {} to successor {}", req, successor);
                 successor.doReplayRequest((TransactionRequest<?>) req, e.getCallback(), e.getEnqueuedTicks());
                 it.remove();

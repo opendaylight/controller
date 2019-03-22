@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import javax.annotation.concurrent.GuardedBy;
+import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
@@ -40,7 +41,7 @@ final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
     private final boolean debugAllocation;
 
     ClientBackedTransactionChain(final ClientLocalHistory history, final boolean debugAllocation) {
-        this.history = Preconditions.checkNotNull(history);
+        this.history = requireNonNull(history);
         this.debugAllocation = debugAllocation;
     }
 
