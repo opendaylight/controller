@@ -11,12 +11,12 @@ package org.opendaylight.controller.remote.rpc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.Ignore;
@@ -53,7 +53,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         when(domRpcService2.invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture())).thenReturn(
                 FluentFutures.immediateFluentFuture(rpcResult));
 
-        final FluentFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
+        final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
         final DOMRpcResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
@@ -75,7 +75,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         when(domRpcService2.invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture())).thenReturn(
                 FluentFutures.immediateFluentFuture(rpcResult));
 
-        FluentFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, null);
+        ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, null);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
         final DOMRpcResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
@@ -98,7 +98,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         when(domRpcService2.invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture())).thenReturn(
                 FluentFutures.immediateFluentFuture(rpcResult));
 
-        final FluentFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
+        final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
         final DOMRpcResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
@@ -119,7 +119,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         when(domRpcService2.invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture())).thenReturn(
                 FluentFutures.immediateFailedFluentFuture(new RemoteDOMRpcException("Test Exception", null)));
 
-        final FluentFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
+        final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
         try {
@@ -137,7 +137,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
     @Test(expected = RemoteDOMRpcException.class)
     public void testInvokeRpcWithAkkaTimeoutException() throws Exception {
         final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
-        final FluentFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
+        final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
         frontEndFuture.get(20, TimeUnit.SECONDS);
@@ -155,7 +155,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         doThrow(new RuntimeException("test")).when(domRpcService2).invokeRpc(any(SchemaPath.class),
             any(NormalizedNode.class));
 
-        final FluentFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
+        final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
         try {
