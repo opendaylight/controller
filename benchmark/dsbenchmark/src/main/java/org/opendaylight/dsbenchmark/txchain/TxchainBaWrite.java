@@ -48,7 +48,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void executeList() {
-        final TransactionChain chain = bindingDataBroker.createTransactionChain(this);
+        final TransactionChain chain = bindingDataBroker.createMergingTransactionChain(this);
         final LogicalDatastoreType dsType = getDataStoreType();
 
         WriteTransaction tx = chain.newWriteOnlyTransaction();

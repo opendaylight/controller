@@ -80,12 +80,6 @@ public class DOMTransactionChainAdapter extends ForwardingObject
                 untrack(delegate());
                 return super.cancel();
             }
-
-            @Override
-            public void close() {
-                untrack(delegate());
-                super.close();
-            }
         });
     }
 
