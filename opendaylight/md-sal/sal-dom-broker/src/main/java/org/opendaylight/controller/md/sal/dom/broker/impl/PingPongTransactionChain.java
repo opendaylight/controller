@@ -20,7 +20,8 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import javax.annotation.concurrent.GuardedBy;
+import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -210,7 +211,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      * this method has completed executing. Also inflightTx may be updated outside
      * the lock, hence we need to re-check.
      */
-    @GuardedBy("this")
+    @Holding("this")
     private void processIfReady() {
         if (inflightTx == null) {
             final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
@@ -226,7 +227,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      *
      * @param tx Transaction which needs processing.
      */
-    @GuardedBy("this")
+    @Holding("this")
     private void processTransaction(final @NonNull PingPongTransaction tx) {
         if (failed) {
             LOG.debug("Cancelling transaction {}", tx);
