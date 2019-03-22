@@ -12,7 +12,6 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
-import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfo;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -20,11 +19,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 /**
  * Combined backend tracking. Aside from usual {@link BackendInfo}, this object also tracks the cookie assigned
- * to the shard. This assignment remains constant for as long as the client is not restarted.
+ * to the shard. This assignment remains constant for as long as the client is not restarted. This class is thread-safe.
  *
  * @author Robert Varga
  */
-@ThreadSafe
 final class ShardBackendInfo extends BackendInfo {
     private final Optional<DataTree> dataTree;
     private final UnsignedLong cookie;

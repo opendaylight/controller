@@ -12,19 +12,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maintains the state of a sliced message.
+ * Maintains the state of a sliced message. This class is NOT thread-safe.
  *
  * @author Thomas Pantelis
  * @see MessageSlicer
  */
-@NotThreadSafe
 public class SlicedMessageState<T> implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SlicedMessageState.class);
 
@@ -153,7 +151,7 @@ public class SlicedMessageState<T> implements AutoCloseable {
      * @param index the slice index to test
      * @return true if the index is the last slice, false otherwise
      */
-    public boolean isLastSlice(int index) {
+    public boolean isLastSlice(final int index) {
         return totalSlices == index;
     }
 

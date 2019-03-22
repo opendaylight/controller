@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
@@ -40,10 +39,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Registry of user commit cohorts, which is responsible for handling registration and calculation
- * of affected cohorts based on {@link DataTreeCandidate}.
+ * of affected cohorts based on {@link DataTreeCandidate}. This class is NOT thread-safe.
  *
  */
-@NotThreadSafe
 class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActorRegistry.class);

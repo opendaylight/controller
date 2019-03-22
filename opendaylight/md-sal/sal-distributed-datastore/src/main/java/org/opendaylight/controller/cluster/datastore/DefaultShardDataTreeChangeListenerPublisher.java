@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTreeChangePublisher;
@@ -22,11 +21,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of ShardDataTreeChangeListenerPublisher that directly generates and publishes
- * notifications for DataTreeChangeListeners.
+ * notifications for DataTreeChangeListeners. This class is NOT thread-safe.
  *
  * @author Thomas Pantelis
  */
-@NotThreadSafe
 final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStoreTreeChangePublisher
         implements ShardDataTreeChangeListenerPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataTreeChangeListenerPublisher.class);
