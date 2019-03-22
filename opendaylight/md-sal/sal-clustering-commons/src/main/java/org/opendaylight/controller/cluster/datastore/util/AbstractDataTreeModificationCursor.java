@@ -13,7 +13,6 @@ import static com.google.common.base.Verify.verifyNotNull;
 
 import com.google.common.annotations.Beta;
 import java.util.Optional;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -21,12 +20,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 
 /**
  * Abstract {@link DataTreeModificationCursor} which tracks the current path. Subclasses can get the current path
- * via {@link #current()}.
+ * via {@link #current()}. This class is NOT thread-safe.
  *
  * @author Thomas Pantelis
  */
 @Beta
-@NotThreadSafe
 public abstract class AbstractDataTreeModificationCursor implements DataTreeModificationCursor {
     private YangInstanceIdentifier current = YangInstanceIdentifier.EMPTY;
 
