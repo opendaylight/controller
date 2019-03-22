@@ -23,7 +23,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.Queue;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
@@ -52,9 +51,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * subtree in conceptual data tree. We define this subtree by first write
  * operation performed on transaction. All next read and write operations
  * should be performed just in this initial subtree.
+ *
  */
 // FIXME explicitly enforce just one subtree requirement
-@NotThreadSafe
 class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadWriteTransaction {
     private final DOMDataReadOnlyTransaction readTxDelegate;
     private final DOMDataWriteTransaction writeTxDelegate;
