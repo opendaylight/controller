@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.lock.qual.GuardedBy;
@@ -33,15 +32,14 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.slf4j.Logger;
@@ -218,11 +216,12 @@ public class DistributedShardChangePublisher
         DataTreeCandidateNode modifiedChild = candidate.getRootNode();
 
         for (final PathArgument pathArgument : listenerPath.getPathArguments()) {
-            modifiedChild = modifiedChild.getModifiedChild(pathArgument);
+            modifiedChild = modifiedChild.getModifiedChild(pathArgument).orElse(null);
         }
 
+
         if (modifiedChild == null) {
-            modifiedChild = new EmptyDataTreeCandidateNode(dataTree.getRootPath().getLastPathArgument());
+            modifiedChild = DataTreeCandidateNodes.empty(dataTree.getRootPath().getLastPathArgument());
         }
 
         return DataTreeCandidates.newDataTreeCandidate(dataTree.getRootPath(), modifiedChild);
@@ -315,46 +314,6 @@ public class DistributedShardChangePublisher
                 registration.close();
             }
             registrations.clear();
-        }
-    }
-
-    private static final class EmptyDataTreeCandidateNode implements DataTreeCandidateNode {
-
-        private final PathArgument identifier;
-
-        EmptyDataTreeCandidateNode(final PathArgument identifier) {
-            this.identifier = requireNonNull(identifier, "Identifier should not be null");
-        }
-
-        @Override
-        public PathArgument getIdentifier() {
-            return identifier;
-        }
-
-        @Override
-        public Collection<DataTreeCandidateNode> getChildNodes() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        @SuppressWarnings("checkstyle:hiddenField")
-        public DataTreeCandidateNode getModifiedChild(final PathArgument identifier) {
-            return null;
-        }
-
-        @Override
-        public ModificationType getModificationType() {
-            return ModificationType.UNMODIFIED;
-        }
-
-        @Override
-        public Optional<NormalizedNode<?, ?>> getDataAfter() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<NormalizedNode<?, ?>> getDataBefore() {
-            return Optional.empty();
         }
     }
 }

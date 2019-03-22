@@ -32,7 +32,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -98,7 +97,7 @@ public abstract class AbstractDataTreeChangeListenerTest {
                         NAME_QNAME, topName));
     }
 
-    protected static DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> top() {
+    protected static DataContainerNodeBuilder<NodeIdentifier, ContainerNode> top() {
         return Builders.containerBuilder().withNodeIdentifier(
                 new NodeIdentifier(Top.QNAME));
     }
