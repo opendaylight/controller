@@ -5,14 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
@@ -32,12 +32,12 @@ final class RemoteRpcImplementation implements DOMRpcImplementation {
     private final Timeout askDuration;
 
     RemoteRpcImplementation(final ActorRef remoteInvoker, final RemoteRpcProviderConfig config) {
-        this.remoteInvoker = Preconditions.checkNotNull(remoteInvoker);
+        this.remoteInvoker = requireNonNull(remoteInvoker);
         this.askDuration = config.getAskDuration();
     }
 
     @Override
-    public FluentFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
+    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
             final NormalizedNode<?, ?> input) {
         final RemoteDOMRpcFuture ret = RemoteDOMRpcFuture.create(rpc.getType().getLastComponent());
         ret.completeWith(Patterns.ask(remoteInvoker, ExecuteRpc.from(rpc, input), askDuration));

@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -32,7 +32,7 @@ public class LegacyDOMRpcServiceAdapter extends ForwardingObject implements DOMR
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type,
                                                                   final NormalizedNode<?, ?> input) {
-        final FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> future = delegate().invokeRpc(type, input);
+        final ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> future = delegate().invokeRpc(type, input);
         return future instanceof MdsalDOMRpcResultFutureAdapter ? ((MdsalDOMRpcResultFutureAdapter)future).delegate()
                 : new LegacyDOMRpcResultFutureAdapter(future);
     }
