@@ -23,6 +23,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
+import org.opendaylight.mdsal.dom.spi.PingPongTransactionChain;
 
 @Deprecated
 public class DOMDataBrokerAdapter extends ForwardingObject implements org.opendaylight.mdsal.dom.api.DOMDataBroker {
@@ -76,6 +77,11 @@ public class DOMDataBrokerAdapter extends ForwardingObject implements org.openda
     @Override
     public DOMTransactionChain createTransactionChain(final DOMTransactionChainListener listener) {
         return new DOMTransactionChainAdapter(listener, delegate::createTransactionChain);
+    }
+
+    @Override
+    public DOMTransactionChain createMergingTransactionChain(final DOMTransactionChainListener listener) {
+        return new PingPongTransactionChain(this::createTransactionChain, listener);
     }
 
     @Override
