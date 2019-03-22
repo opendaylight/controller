@@ -66,14 +66,15 @@ abstract class ContextReferenceExtractor {
             if (InstanceIdentifier.class.isAssignableFrom(returnType)) {
                 return DirectGetterRouteContextExtractor.create(contextGetter);
             }
-            final Method getValueMethod = findGetValueMethod(returnType,InstanceIdentifier.class);
+            final Method getValueMethod = findGetValueMethod(returnType, InstanceIdentifier.class);
             if (getValueMethod != null) {
                 return GetValueRouteContextExtractor.create(contextGetter, getValueMethod);
             } else {
-                LOG.warn("Class {} can not be used to determine context, falling back to NULL_EXTRACTOR.",returnType);
+                LOG.warn("Class {} can not be used to determine context, falling back to NULL_EXTRACTOR.", returnType);
             }
         } catch (final IllegalAccessException e) {
-            LOG.warn("Class {} does not conform to Binding Specification v1. Falling back to NULL_EXTRACTOR", e);
+            LOG.warn("Class {} does not conform to Binding Specification v1. Falling back to NULL_EXTRACTOR",
+                returnType, e);
         }
         return NULL_EXTRACTOR;
     }

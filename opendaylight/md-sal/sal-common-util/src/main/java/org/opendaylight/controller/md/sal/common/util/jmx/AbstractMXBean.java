@@ -110,7 +110,7 @@ public abstract class AbstractMXBean {
             LOG.debug("MBean {} registered successfully", mbeanName.getCanonicalName());
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException
                 | MalformedObjectNameException e) {
-            LOG.error("registration failed {}", e);
+            LOG.error("registration failed", e);
         }
         return registered;
     }
@@ -135,7 +135,7 @@ public abstract class AbstractMXBean {
             unregisterMBean(mbeanName);
             unregister = true;
         } catch (MBeanRegistrationException | InstanceNotFoundException | MalformedObjectNameException e) {
-            LOG.debug("Failed when unregistering MBean {}", e);
+            LOG.debug("Failed when unregistering MBean", e);
         }
 
         return unregister;
