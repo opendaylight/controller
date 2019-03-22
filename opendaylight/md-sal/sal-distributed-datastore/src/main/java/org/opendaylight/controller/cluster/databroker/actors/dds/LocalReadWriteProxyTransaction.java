@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -46,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An {@link AbstractProxyTransaction} for dispatching a transaction towards a shard leader which is co-located with
- * the client instance.
+ * the client instance. This class is NOT thread-safe.
  *
  * <p>
  * It requires a {@link DataTreeSnapshot}, which is used to instantiated a new {@link DataTreeModification}. Operations
@@ -59,7 +58,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalReadWriteProxyTransaction.class);
 

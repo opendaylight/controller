@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
@@ -29,11 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Read-only frontend transaction state as observed by the shard leader.
+ * Read-only frontend transaction state as observed by the shard leader. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 final class FrontendReadOnlyTransaction extends FrontendTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendReadOnlyTransaction.class);
 

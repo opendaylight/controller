@@ -12,19 +12,17 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.google.common.base.Optional;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
- * Implementation of ShardDataTreeChangeListenerPublisher that offloads the generation and publication
- * of data tree change notifications to an actor.
+ * Implementation of ShardDataTreeChangeListenerPublisher that offloads the generation and publication of data tree
+ * change notifications to an actor. This class is NOT thread-safe.
  *
  * @author Thomas Pantelis
  */
-@NotThreadSafe
 class ShardDataTreeChangeListenerPublisherActorProxy extends AbstractShardDataTreeNotificationPublisherActorProxy
         implements ShardDataTreeChangeListenerPublisher {
 

@@ -12,7 +12,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -26,11 +25,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Frontend state as observed by a shard follower. This class is responsible for maintaining metadata state
  * so that this can be used to seed {@link LeaderFrontendState} with proper state so that the frontend/backend
- * conversation can continue where it left off.
+ * conversation can continue where it left off. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTreeSnapshotMetadata> {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendMetadata.class);
 
