@@ -39,9 +39,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
@@ -213,7 +212,7 @@ public final class TestModel {
 
     }
 
-    public static DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> createBaseTestContainerBuilder() {
+    public static DataContainerNodeBuilder<NodeIdentifier, ContainerNode> createBaseTestContainerBuilder() {
         // Create a list of shoes
         // This is to test leaf list entry
         final LeafSetEntryNode<Object> nike = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
@@ -274,7 +273,7 @@ public final class TestModel {
         MapEntryNode augMapEntry = createAugmentedListEntry(1, "First Test");
 
         // Create a bits leaf
-        NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>>
+        NormalizedNodeBuilder<NodeIdentifier, Object, LeafNode<Object>>
                 myBits = Builders.leafBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "my-bits")))
                 .withValue(ImmutableSet.of("foo", "bar"));
@@ -368,7 +367,7 @@ public final class TestModel {
 
 
     public static ContainerNode createFamily() {
-        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>
+        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>
             familyContainerBuilder = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                         new YangInstanceIdentifier.NodeIdentifier(FAMILY_QNAME));
 
