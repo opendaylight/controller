@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.concurrent.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
@@ -301,7 +301,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
      * @param newConn New connection
      * @return ConnectionConnectCohort which will be used to complete the process of bringing the connection up.
      */
-    @GuardedBy("connectionsLock")
+    @Holding("connectionsLock")
     protected abstract @NonNull ConnectionConnectCohort connectionUp(@NonNull ConnectedClientConnection<T> newConn);
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,

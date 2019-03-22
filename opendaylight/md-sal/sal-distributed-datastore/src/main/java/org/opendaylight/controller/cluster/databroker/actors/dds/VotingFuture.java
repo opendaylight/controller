@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import javax.annotation.concurrent.GuardedBy;
+import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 
 /**
  * An {@link AbstractFuture} implementation which requires a certain number of votes before it completes. If all votes
@@ -73,7 +74,7 @@ class VotingFuture<T> extends AbstractFuture<T> {
         return votes == 0;
     }
 
-    @GuardedBy("failures")
+    @Holding("failures")
     private void resolveResult() {
         final Iterator<Throwable> it = failures.iterator();
         if (!it.hasNext()) {

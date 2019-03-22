@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
@@ -22,11 +23,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
 /**
- * A read-only specialization of {@link LocalProxyTransaction}.
+ * A read-only specialization of {@link LocalProxyTransaction}. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
 
     private final DataTreeSnapshot snapshot;
@@ -34,7 +34,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-        this.snapshot = Preconditions.checkNotNull(snapshot);
+        this.snapshot = requireNonNull(snapshot);
     }
 
     LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
@@ -50,7 +50,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
 
     @Override
     DataTreeSnapshot readOnlyView() {
-        return Preconditions.checkNotNull(snapshot, "Transaction %s is DONE", getIdentifier());
+        return checkNotNull(snapshot, "Transaction %s is DONE", getIdentifier());
     }
 
     @Override
@@ -94,9 +94,9 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     private static void commonModifyTransactionRequest(final ModifyTransactionRequest request) {
-        Verify.verify(request.getModifications().isEmpty());
+        verify(request.getModifications().isEmpty());
 
         final PersistenceProtocol protocol = request.getPersistenceProtocol().get();
-        Verify.verify(protocol == PersistenceProtocol.ABORT);
+        verify(protocol == PersistenceProtocol.ABORT);
     }
 }

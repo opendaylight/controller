@@ -11,7 +11,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
 import java.util.SortedSet;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -21,9 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A transaction chain attached to a Shard.
+ * A transaction chain attached to a Shard. This class is NOT thread-safe.
  */
-@NotThreadSafe
 final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         implements Identifiable<LocalHistoryIdentifier> {
 
