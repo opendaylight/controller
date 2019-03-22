@@ -8,11 +8,9 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 @Beta
-@NotThreadSafe
 public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
 
     ConnectedClientConnection(final AbstractClientConnection<T> oldConnection, final T newBackend) {

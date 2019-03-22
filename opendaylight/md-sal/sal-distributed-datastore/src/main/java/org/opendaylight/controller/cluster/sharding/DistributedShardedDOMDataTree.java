@@ -48,7 +48,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -332,7 +331,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         final Promise<DistributedShardRegistration> shardRegistrationPromise = akka.dispatch.Futures.promise();
         Futures.addCallback(writeFuture, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final Void result) {
 
                 final Future<Object> ask =
                         Patterns.ask(shardedDataTreeActor, new LookupPrefixShard(prefix), SHARD_FUTURE_TIMEOUT);
@@ -435,7 +434,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final Void result) {
                 LOG.debug("{} - Succesfuly removed shard for {}", memberName, prefix);
             }
 

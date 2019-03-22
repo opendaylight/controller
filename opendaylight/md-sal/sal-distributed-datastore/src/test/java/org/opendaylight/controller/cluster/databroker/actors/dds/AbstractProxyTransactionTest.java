@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.hamcrest.CoreMatchers.both;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.core.Is.isA;
 import static org.mockito.Mockito.mock;
@@ -222,9 +222,9 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     protected void checkModifications(final ModifyTransactionRequest modifyRequest) {
         final List<TransactionModification> modifications = modifyRequest.getModifications();
         Assert.assertEquals(3, modifications.size());
-        Assert.assertThat(modifications, hasItem(both(isA(TransactionWrite.class)).and(hasPath(PATH_1))));
-        Assert.assertThat(modifications, hasItem(both(isA(TransactionMerge.class)).and(hasPath(PATH_2))));
-        Assert.assertThat(modifications, hasItem(both(isA(TransactionDelete.class)).and(hasPath(PATH_3))));
+        Assert.assertThat(modifications, hasItem(allOf(isA(TransactionWrite.class), hasPath(PATH_1))));
+        Assert.assertThat(modifications, hasItem(allOf(isA(TransactionMerge.class), hasPath(PATH_2))));
+        Assert.assertThat(modifications, hasItem(allOf(isA(TransactionDelete.class), hasPath(PATH_3))));
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
