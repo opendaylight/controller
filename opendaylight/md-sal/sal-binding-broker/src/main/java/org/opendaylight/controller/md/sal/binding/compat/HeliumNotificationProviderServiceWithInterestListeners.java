@@ -60,7 +60,8 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void notifyAllListeners(final Set<SchemaPath> added) {
-        final Iterator<ListenerRegistration<NotificationInterestListener>> listeners = interestListeners.iterator();
+        final Iterator<? extends ListenerRegistration<? extends NotificationInterestListener>> listeners =
+                interestListeners.getRegistrations().iterator();
         if (listeners.hasNext()) {
             final Set<Class<? extends Notification>> baEvent = translate(added);
             while (listeners.hasNext()) {
