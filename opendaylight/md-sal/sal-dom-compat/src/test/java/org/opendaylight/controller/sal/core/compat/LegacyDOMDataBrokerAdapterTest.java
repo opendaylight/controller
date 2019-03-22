@@ -11,9 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -212,7 +212,7 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         String errorMsg = "mock read error";
         Throwable cause = new RuntimeException();
-        doReturn(Futures.immediateFailedCheckedFuture(new org.opendaylight.mdsal.common.api.ReadFailedException(
+        doReturn(FluentFutures.immediateFailedFluentFuture(new org.opendaylight.mdsal.common.api.ReadFailedException(
                 errorMsg, cause))).when(mockConfigReadTx).read(TEST_PATH);
 
         try {
@@ -512,7 +512,7 @@ public class LegacyDOMDataBrokerAdapterTest {
     }
 
     @SuppressWarnings("checkstyle:AvoidHidingCauseException")
-    private static void commit(DOMDataWriteTransaction tx)
+    private static void commit(final DOMDataWriteTransaction tx)
             throws TransactionCommitFailedException, InterruptedException, TimeoutException {
         try {
             tx.commit().get(5, TimeUnit.SECONDS);
