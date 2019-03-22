@@ -54,4 +54,9 @@ class ShardProxyProducer implements DOMDataTreeShardProducer {
     void setModificationFactory(final DistributedShardModificationFactory modificationFactory) {
         this.modificationFactory = requireNonNull(modificationFactory);
     }
+
+    @Override
+    public void close() {
+        // FIXME: implement this
+    }
 }

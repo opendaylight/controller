@@ -38,7 +38,7 @@ public final class LazySerializedDOMNotification implements DOMNotification {
     }
 
     static DOMNotification create(final BindingNormalizedNodeSerializer codec, final Notification data) {
-        final SchemaPath type = SchemaPath.create(true, BindingReflections.findQName(data.getImplementedInterface()));
+        final SchemaPath type = SchemaPath.create(true, BindingReflections.findQName(data.implementedInterface()));
         return new LazySerializedDOMNotification(codec, data, type);
     }
 
