@@ -44,11 +44,6 @@ public class DOMDataTreeReadWriteTransactionAdapter extends ForwardingObject
     }
 
     @Override
-    public void close() {
-        cancel();
-    }
-
-    @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
         TransactionUtils.put(delegate(), store, path, data);
