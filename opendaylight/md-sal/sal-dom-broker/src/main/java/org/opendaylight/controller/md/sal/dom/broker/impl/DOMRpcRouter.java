@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +76,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         org.opendaylight.mdsal.dom.api.DOMRpcImplementation delegateImpl =
             new org.opendaylight.mdsal.dom.api.DOMRpcImplementation() {
                 @Override
-                public FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> invokeRpc(
+                public ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> invokeRpc(
                         final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
                     return new MdsalDOMRpcResultFutureAdapter(implementation.invokeRpc(DOMRpcIdentifier.fromMdsal(rpc),
                         input));
@@ -107,7 +107,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type,
                                                                   final NormalizedNode<?, ?> input) {
-        final FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> future =
+        final ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> future =
                 delegateRpcService.invokeRpc(type, input);
         return future instanceof MdsalDOMRpcResultFutureAdapter ? ((MdsalDOMRpcResultFutureAdapter)future).delegate()
                 : new LegacyDOMRpcResultFutureAdapter(future);
