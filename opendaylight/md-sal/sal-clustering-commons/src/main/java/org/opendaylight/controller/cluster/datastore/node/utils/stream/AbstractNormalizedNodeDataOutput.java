@@ -44,6 +44,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     private NormalizedNodeWriter normalizedNodeWriter;
     private boolean headerWritten;
     private QName lastLeafSetQName;
+    private boolean inSimple;
 
     AbstractNormalizedNodeDataOutput(final DataOutput output) {
         this.output = Preconditions.checkNotNull(output);
@@ -162,18 +163,15 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void leafNode(final NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
+    public void startLeafNode(final NodeIdentifier name) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.trace("Writing a new leaf node");
+        LOG.trace("Starting a new leaf node");
         startNode(name.getNodeType(), NodeTypes.LEAF_NODE);
-
-        writeObject(value);
+        inSimple = true;
     }
 
     @Override
-    public void startLeafSet(final NodeIdentifier name, final int childSizeHint)
-
-            throws IOException, IllegalArgumentException {
+    public void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new leaf set");
 
@@ -182,8 +180,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new ordered leaf set");
 
@@ -192,23 +189,21 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void leafSetEntryNode(final QName name, final Object value) throws IOException, IllegalArgumentException {
-        LOG.trace("Writing a new leaf set entry node");
+    public void startLeafSetEntryNode(final NodeWithValue<?> name) throws IOException {
+        LOG.trace("Starting a new leaf set entry node");
 
         output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
 
         // lastLeafSetQName is set if the parent LeafSetNode was previously written. Otherwise this is a
         // stand alone LeafSetEntryNode so write out it's name here.
         if (lastLeafSetQName == null) {
-            writeQName(name);
+            writeQName(name.getNodeType());
         }
-
-        writeObject(value);
+        inSimple = true;
     }
 
     @Override
-    public void startContainerNode(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
 
         LOG.trace("Starting a new container node");
@@ -217,8 +212,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startYangModeledAnyXmlNode(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startYangModeledAnyXmlNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
 
         LOG.trace("Starting a new yang modeled anyXml node");
@@ -227,8 +221,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new unkeyed list");
 
@@ -236,8 +229,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalStateException {
+    public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new unkeyed list item");
 
@@ -245,8 +237,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startMapNode(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new map node");
 
@@ -255,18 +246,16 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+            throws IOException {
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
         LOG.trace("Starting a new map entry node");
         startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
 
         writeKeyValueMap(identifier.getKeyValues());
-
     }
 
     @Override
-    public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new ordered map node");
 
@@ -274,8 +263,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startChoiceNode(final NodeIdentifier name, final int childSizeHint)
-            throws IOException, IllegalArgumentException {
+    public void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new choice node");
 
@@ -283,8 +271,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startAugmentationNode(final AugmentationIdentifier identifier)
-            throws IOException, IllegalArgumentException {
+    public void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
         LOG.trace("Starting a new augmentation node");
 
@@ -293,15 +280,23 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void anyxmlNode(final NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
+    public void startAnyxmlNode(final NodeIdentifier name) throws IOException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.trace("Writing any xml node");
-
+        LOG.trace("Starting any xml node");
         startNode(name.getNodeType(), NodeTypes.ANY_XML_NODE);
+        inSimple = true;
+    }
 
+    @Override
+    public void scalarValue(final Object value) throws IOException {
+        writeObject(value);
+    }
+
+    @Override
+    public void domSourceValue(final DOMSource value) throws IOException {
         try {
             StreamResult xmlOutput = new StreamResult(new StringWriter());
-            TransformerFactory.newInstance().newTransformer().transform((DOMSource)value, xmlOutput);
+            TransformerFactory.newInstance().newTransformer().transform(value, xmlOutput);
             writeObject(xmlOutput.getWriter().toString());
         } catch (TransformerException | TransformerFactoryConfigurationError e) {
             throw new IOException("Error writing anyXml", e);
@@ -309,10 +304,13 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void endNode() throws IOException, IllegalStateException {
+    public void endNode() throws IOException {
         LOG.trace("Ending the node");
-        lastLeafSetQName = null;
-        output.writeByte(NodeTypes.END_NODE);
+        if (!inSimple) {
+            lastLeafSetQName = null;
+            output.writeByte(NodeTypes.END_NODE);
+        }
+        inSimple = false;
     }
 
     @Override
@@ -329,6 +327,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     private void startNode(final QName qname, final byte nodeType) throws IOException {
         Preconditions.checkNotNull(qname, "QName of node identifier should not be null.");
+        Preconditions.checkState(!inSimple, "Attempted to start a child in a simple node");
 
         ensureHeaderWritten();
 
