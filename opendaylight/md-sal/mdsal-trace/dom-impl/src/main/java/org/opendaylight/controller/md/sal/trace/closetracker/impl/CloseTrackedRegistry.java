@@ -20,14 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import javax.annotation.concurrent.ThreadSafe;
 
 /**
- * Registry of {@link CloseTracked} instances.
+ * Registry of {@link CloseTracked} instances. This class is thread-safe.
  *
  * @author Michael Vorburger.ch
  */
-@ThreadSafe
 public class CloseTrackedRegistry<T extends CloseTracked<T>> {
 
     private final Object anchor;

@@ -21,8 +21,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.NotThreadSafe;
+import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -36,11 +36,10 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * Base class for a connection to the backend. Responsible to queueing and dispatch of requests toward the backend.
  * Can be in three conceptual states: Connecting, Connected and Reconnecting, which are represented by public final
- * classes exposed from this package.
+ * classes exposed from this package. This class NOT thread-safe, not are its subclasses expected to be thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
@@ -198,7 +197,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     private void commonEnqueue(final ConnectionEntry entry, final long now) {
         final RequestException maybePoison = poisoned;
         if (maybePoison != null) {
@@ -223,7 +222,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         return queue.drain();
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     final void finishReplay(final ReconnectForwarder forwarder) {
         setForwarder(forwarder);
 
@@ -243,12 +242,12 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         lock.unlock();
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     final void setForwarder(final ReconnectForwarder forwarder) {
         queue.setForwarder(forwarder, currentTime());
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current,
             RequestException runtimeRequestException);
 
@@ -287,7 +286,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      *
      * @param delay Delay, in nanoseconds
      */
-    @GuardedBy("lock")
+    @Holding("lock")
     private void scheduleTimer(final long delay) {
         if (haveTimer) {
             LOG.debug("{}: timer already scheduled on {}", context.persistenceId(), this);
@@ -444,7 +443,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     private void lockedPoison(final RequestException cause) {
         poisoned = enrichPoison(cause);
         queue.poison(cause);

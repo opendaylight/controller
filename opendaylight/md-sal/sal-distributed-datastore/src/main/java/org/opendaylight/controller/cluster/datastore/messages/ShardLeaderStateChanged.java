@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
@@ -25,20 +26,19 @@ public class ShardLeaderStateChanged extends LeaderStateChanged {
 
     private final DataTree localShardDataTree;
 
-    public ShardLeaderStateChanged(@Nonnull String memberId, @Nullable String leaderId,
-            @Nonnull DataTree localShardDataTree, short leaderPayloadVersion) {
+    public ShardLeaderStateChanged(@NonNull String memberId, @Nullable String leaderId,
+            @NonNull DataTree localShardDataTree, short leaderPayloadVersion) {
         super(memberId, leaderId, leaderPayloadVersion);
-        this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
+        this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    public ShardLeaderStateChanged(@Nonnull String memberId, @Nullable String leaderId,
+    public ShardLeaderStateChanged(@NonNull String memberId, @Nullable String leaderId,
             short leaderPayloadVersion) {
         super(memberId, leaderId, leaderPayloadVersion);
         this.localShardDataTree = null;
     }
 
-    @Nonnull
-    public Optional<DataTree> getLocalShardDataTree() {
+    public @NonNull Optional<DataTree> getLocalShardDataTree() {
         return Optional.ofNullable(localShardDataTree);
     }
 }

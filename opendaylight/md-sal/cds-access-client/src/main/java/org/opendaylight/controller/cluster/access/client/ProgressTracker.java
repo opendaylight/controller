@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.base.Preconditions;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,6 @@ import org.slf4j.LoggerFactory;
  * @author Vratko Polak
  */
 // TODO: Would bulk methods be less taxing than a loop of single task calls?
-@NotThreadSafe
 abstract class ProgressTracker {
     private static final Logger LOG = LoggerFactory.getLogger(ProgressTracker.class);
 
