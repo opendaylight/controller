@@ -25,7 +25,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
@@ -178,8 +177,8 @@ public final class CompositeModel {
     }
 
     public static ContainerNode createFamily() {
-        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>
-            familyContainerBuilder = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder =
+            ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                     new YangInstanceIdentifier.NodeIdentifier(FAMILY_QNAME));
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> childrenBuilder = mapNodeBuilder(CHILDREN_QNAME);
