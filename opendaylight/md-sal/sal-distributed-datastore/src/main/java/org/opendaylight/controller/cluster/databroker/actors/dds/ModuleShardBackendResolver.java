@@ -20,8 +20,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
+import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForShardAvailabilityChanges;
@@ -38,9 +37,11 @@ import scala.concurrent.Future;
  * shard is assigned a single cookie and this mapping is stored in a bidirectional map. Information about corresponding
  * shard leader is resolved via {@link ActorUtils}. The product of resolution is {@link ShardBackendInfo}.
  *
+ * <p>
+ * This class is thread-safe.
+ *
  * @author Robert Varga
  */
-@ThreadSafe
 final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     private static final Logger LOG = LoggerFactory.getLogger(ModuleShardBackendResolver.class);
 

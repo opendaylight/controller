@@ -11,14 +11,12 @@ import static akka.actor.ActorRef.noSender;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Base class for lookup tasks. Lookup tasks are supposed to run repeatedly
- * until successful lookup or maximum retries are hit.
+ * Base class for lookup tasks. Lookup tasks are supposed to run repeatedly until successful lookup or maximum retries
+ * are hit. This class is NOT thread-safe.
  */
-@NotThreadSafe
 abstract class LookupTask implements Runnable {
     private final int maxRetries;
     private final ActorRef replyTo;

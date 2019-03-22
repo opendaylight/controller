@@ -13,7 +13,6 @@ import com.google.common.base.Verify;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceSuccess;
@@ -29,11 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Frontend common transaction state as observed by the shard leader.
+ * Frontend common transaction state as observed by the shard leader. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 abstract class FrontendTransaction implements Identifiable<TransactionIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendTransaction.class);
 

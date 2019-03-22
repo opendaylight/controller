@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.CompletionStage;
-import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -21,11 +20,11 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link BackendInfoResolver} implementation for static shard configuration based on ShardManager. Unlike the full
  * {@link ModuleShardBackendResolver}, this resolver is used in situations where the client corresponds exactly to one
- * backend shard, e.g. there is only one fixed cookie assigned and the operation path is not consulted at all.
+ * backend shard, e.g. there is only one fixed cookie assigned and the operation path is not consulted at all. This
+ * class is thread-safe.
  *
  * @author Robert Varga
  */
-@ThreadSafe
 final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardBackendResolver.class);
 

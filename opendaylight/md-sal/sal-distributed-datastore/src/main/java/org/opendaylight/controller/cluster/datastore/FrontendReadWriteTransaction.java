@@ -14,7 +14,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
 import java.util.Optional;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -50,11 +49,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Frontend read-write transaction state as observed by the shard leader.
+ * Frontend read-write transaction state as observed by the shard leader. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 final class FrontendReadWriteTransaction extends FrontendTransaction {
     private enum CommitStage {
         READY,

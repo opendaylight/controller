@@ -40,7 +40,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -87,14 +86,12 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
- * Internal shard state, similar to a DOMStore, but optimized for use in the actor system,
- * e.g. it does not expose public interfaces and assumes it is only ever called from a
- * single thread.
+ * Internal shard state, similar to a DOMStore, but optimized for use in the actor system, e.g. it does not expose
+ * public interfaces and assumes it is only ever called from a single thread.
  *
  * <p>
- * This class is not part of the API contract and is subject to change at any time.
+ * This class is not part of the API contract and is subject to change at any time. It is NOT thread-safe.
  */
-@NotThreadSafe
 public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final class CommitEntry {
         final SimpleShardDataTreeCohort cohort;
