@@ -30,7 +30,7 @@ abstract class AbstractDataTreeCandidateNode implements DataTreeCandidateNode {
     }
 
     @Override
-    public final DataTreeCandidateNode getModifiedChild(final PathArgument identifier) {
+    public final Optional<DataTreeCandidateNode> getModifiedChild(final PathArgument identifier) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
