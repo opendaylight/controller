@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Inocybe Technologies and others.  All rights reserved.
+ * Copyright (c) 2019 PANTHEON.tech and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,17 +11,16 @@ import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 
 /**
- * Adapter between the legacy controller API-based DOMDataBroker and the mdsal API-based DOMDataBroker.
- *
- * @author Thomas Pantelis
+ * Adapter between the legacy controller API-based DOMDataBroker and the mdsal API-based DOMDataBroker, equivalent
+ * to PingPongDOMDataBroker.
  */
-public class LegacyDOMDataBrokerAdapter extends AbstractLegacyDOMDataBrokerAdapter {
-    public LegacyDOMDataBrokerAdapter(final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
+public class LegacyPingPongDOMDataBrokerAdapter extends AbstractLegacyDOMDataBrokerAdapter {
+    public LegacyPingPongDOMDataBrokerAdapter(final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
         super(delegate);
     }
 
     @Override
     DOMTransactionChain createDelegateChain(DOMTransactionChainListener listener) {
-        return delegate().createTransactionChain(listener);
+        return delegate().createMergingTransactionChain(listener);
     }
 }

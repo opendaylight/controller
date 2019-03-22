@@ -10,7 +10,7 @@ package org.opendaylight.controller.sal.core.compat;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ForwardingObject;
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,7 +32,7 @@ public class DOMRpcServiceAdapter extends ForwardingObject implements org.openda
     }
 
     @Override
-    public FluentFuture<DOMRpcResult> invokeRpc(final SchemaPath type, final NormalizedNode<?, ?> input) {
+    public ListenableFuture<DOMRpcResult> invokeRpc(final SchemaPath type, final NormalizedNode<?, ?> input) {
         return new MdsalDOMRpcResultFutureAdapter(delegate().invokeRpc(type, input));
     }
 

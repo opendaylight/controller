@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.util.concurrent.FluentFuture;
@@ -47,10 +46,5 @@ public class DOMBrokerReadWriteTransaction extends AbstractDOMBrokerWriteTransac
     @Override
     protected DOMStoreReadWriteTransaction createTransaction(LogicalDatastoreType key) {
         return getTxFactory(key).newReadWriteTransaction();
-    }
-
-    @Override
-    public void close() {
-        cancel();
     }
 }

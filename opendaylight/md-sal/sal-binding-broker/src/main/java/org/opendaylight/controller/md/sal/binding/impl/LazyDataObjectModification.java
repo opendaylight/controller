@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType.UNMODIFIED;
 
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.dom.adapter.BindingStructuralType;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeNode;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingDataObjectCodecTreeNode;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.ChoiceIn;
@@ -48,33 +50,36 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
 
     private static final Logger LOG = LoggerFactory.getLogger(LazyDataObjectModification.class);
 
-    private final BindingCodecTreeNode<T> codec;
+    private final BindingDataObjectCodecTreeNode<T> codec;
     private final DataTreeCandidateNode domData;
     private final PathArgument identifier;
 
     private volatile Collection<LazyDataObjectModification<? extends DataObject>> childNodesCache;
     private volatile ModificationType modificationType;
 
-    private LazyDataObjectModification(final BindingCodecTreeNode<T> codec, final DataTreeCandidateNode domData) {
+    private LazyDataObjectModification(final BindingDataObjectCodecTreeNode<T> codec,
+            final DataTreeCandidateNode domData) {
         this.codec = requireNonNull(codec);
         this.domData = requireNonNull(domData);
         this.identifier = codec.deserializePathArgument(domData.getIdentifier());
     }
 
-    static <T extends DataObject> LazyDataObjectModification<T> create(final BindingCodecTreeNode<T> codec,
+    static <T extends DataObject> LazyDataObjectModification<T> create(final BindingDataObjectCodecTreeNode<T> codec,
             final DataTreeCandidateNode domData) {
         return new LazyDataObjectModification<>(codec, domData);
     }
 
     private static Collection<LazyDataObjectModification<? extends DataObject>> from(
-            final BindingCodecTreeNode<?> parentCodec, final Collection<DataTreeCandidateNode> domChildNodes) {
+            final BindingDataObjectCodecTreeNode<?> parentCodec,
+            final Collection<DataTreeCandidateNode> domChildNodes) {
         final List<LazyDataObjectModification<? extends DataObject>> result = new ArrayList<>(domChildNodes.size());
         populateList(result, parentCodec, domChildNodes);
         return result;
     }
 
     private static void populateList(final List<LazyDataObjectModification<? extends DataObject>> result,
-            final BindingCodecTreeNode<?> parentCodec, final Collection<DataTreeCandidateNode> domChildNodes) {
+            final BindingDataObjectCodecTreeNode<?> parentCodec,
+            final Collection<DataTreeCandidateNode> domChildNodes) {
         for (final DataTreeCandidateNode domChildNode : domChildNodes) {
             if (domChildNode.getModificationType() != UNMODIFIED) {
                 final BindingStructuralType type = BindingStructuralType.from(domChildNode);
@@ -85,9 +90,11 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
                      *  debug log.
                      */
                     try {
-                        final BindingCodecTreeNode<?> childCodec =
-                                parentCodec.yangPathArgumentChild(domChildNode.getIdentifier());
-                        populateList(result, type, childCodec, domChildNode);
+                        final BindingCodecTreeNode childCodec = parentCodec.yangPathArgumentChild(
+                            domChildNode.getIdentifier());
+                        verify(childCodec instanceof BindingDataObjectCodecTreeNode, "Unhandled codec %s for type %s",
+                            childCodec, type);
+                        populateList(result, type, (BindingDataObjectCodecTreeNode<?>) childCodec, domChildNode);
                     } catch (final IllegalArgumentException e) {
                         if (type == BindingStructuralType.UNKNOWN) {
                             LOG.debug("Unable to deserialize unknown DOM node {}", domChildNode, e);
@@ -101,7 +108,7 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     }
 
     private static void populateList(final List<LazyDataObjectModification<? extends DataObject>> result,
-            final BindingStructuralType type, final BindingCodecTreeNode<?> childCodec,
+            final BindingStructuralType type, final BindingDataObjectCodecTreeNode<?> childCodec,
             final DataTreeCandidateNode domChildNode) {
         switch (type) {
             case INVISIBLE_LIST:
@@ -121,7 +128,7 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     }
 
     private static void populateListWithSingleCodec(final List<LazyDataObjectModification<? extends DataObject>> result,
-            final BindingCodecTreeNode<?> codec, final Collection<DataTreeCandidateNode> childNodes) {
+            final BindingDataObjectCodecTreeNode<?> codec, final Collection<DataTreeCandidateNode> childNodes) {
         for (final DataTreeCandidateNode child : childNodes) {
             if (child.getModificationType() != UNMODIFIED) {
                 result.add(create(codec, child));
@@ -234,7 +241,7 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     @Override
     public DataObjectModification<? extends DataObject> getModifiedChild(final PathArgument arg) {
         final List<YangInstanceIdentifier.PathArgument> domArgumentList = new ArrayList<>();
-        final BindingCodecTreeNode<?> childCodec = codec.bindingPathArgumentChild(arg, domArgumentList);
+        final BindingDataObjectCodecTreeNode<?> childCodec = codec.bindingPathArgumentChild(arg, domArgumentList);
         final Iterator<YangInstanceIdentifier.PathArgument> toEnter = domArgumentList.iterator();
         DataTreeCandidateNode current = domData;
         while (toEnter.hasNext() && current != null) {

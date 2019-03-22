@@ -10,15 +10,13 @@
            xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
            odl:use-default-for-reference-types="true">
 
-  <reference id="domDataBroker" interface="org.opendaylight.mdsal.dom.api.DOMDataBroker" odl:type="pingpong"/>
-  <reference id="txChainDataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker" odl:type="pingpong"/>
-  <reference id="simpleTxDataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"/>
+  <reference id="domDataBroker" interface="org.opendaylight.mdsal.dom.api.DOMDataBroker"/>
+  <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"/>
 
   <bean id="provider" class="org.opendaylight.dsbenchmark.DsbenchmarkProvider"
           init-method="init" destroy-method="close">
     <argument ref="domDataBroker"/>
-    <argument ref="txChainDataBroker"/>
-    <argument ref="simpleTxDataBroker"/>
+    <argument ref="dataBroker"/>
   </bean>
 
   <odl:rpc-implementation ref="provider"/>
