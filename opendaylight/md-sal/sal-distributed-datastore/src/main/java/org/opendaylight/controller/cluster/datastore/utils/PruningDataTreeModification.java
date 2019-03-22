@@ -63,6 +63,11 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     }
 
     @Override
+    public SchemaContext getSchemaContext() {
+        return delegate.getSchemaContext();
+    }
+
+    @Override
     public void delete(final YangInstanceIdentifier yangInstanceIdentifier) {
         try {
             delegate.delete(yangInstanceIdentifier);
