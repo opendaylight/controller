@@ -264,8 +264,7 @@ public class DOMDataTreeListenerTest {
         candidateRoot = candidate.getRootNode();
         checkChange(TEST_CONTAINER, TEST_CONTAINER_2, ModificationType.SUBTREE_MODIFIED, candidateRoot);
         final DataTreeCandidateNode modifiedChild = candidateRoot
-                .getModifiedChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME));
-        assertNotNull(modifiedChild);
+                .getModifiedChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME)).get();
         checkChange(OUTER_LIST, OUTER_LIST_2, ModificationType.WRITE, modifiedChild);
         listenerReg.close();
     }
@@ -368,11 +367,11 @@ public class DOMDataTreeListenerTest {
         assertNotNull(candidate);
         candidateRoot = candidate.getRootNode();
         checkChange(OUTER_LIST, listAfter, ModificationType.SUBTREE_MODIFIED, candidateRoot);
-        final DataTreeCandidateNode entry1Canditate = candidateRoot.getModifiedChild(outerListEntryId1);
+        final DataTreeCandidateNode entry1Canditate = candidateRoot.getModifiedChild(outerListEntryId1).get();
         checkChange(outerListEntry1, null, ModificationType.DELETE, entry1Canditate);
-        final DataTreeCandidateNode entry2Canditate = candidateRoot.getModifiedChild(outerListEntryId2);
+        final DataTreeCandidateNode entry2Canditate = candidateRoot.getModifiedChild(outerListEntryId2).get();
         checkChange(null, outerListEntry2, ModificationType.WRITE, entry2Canditate);
-        final DataTreeCandidateNode entry3Canditate = candidateRoot.getModifiedChild(outerListEntryId3);
+        final DataTreeCandidateNode entry3Canditate = candidateRoot.getModifiedChild(outerListEntryId3).get();
         checkChange(null, outerListEntry3, ModificationType.WRITE, entry3Canditate);
         listenerReg.close();
     }
