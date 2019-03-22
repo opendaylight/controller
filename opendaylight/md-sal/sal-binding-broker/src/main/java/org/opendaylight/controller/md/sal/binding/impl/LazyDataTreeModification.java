@@ -15,7 +15,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeNode;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingDataObjectCodecTreeNode;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -34,7 +34,7 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
     private final DataObjectModification<T> rootNode;
 
     LazyDataTreeModification(final LogicalDatastoreType datastoreType, final InstanceIdentifier<T> path,
-            final BindingCodecTreeNode<T> codec, final DataTreeCandidate domChange) {
+            final BindingDataObjectCodecTreeNode<T> codec, final DataTreeCandidate domChange) {
         this.path = new DataTreeIdentifier<>(datastoreType, path);
         this.rootNode = LazyDataObjectModification.create(codec, domChange.getRootNode());
     }
@@ -52,7 +52,7 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T extends DataObject> DataTreeModification<T> create(final BindingToNormalizedNodeCodec codec,
             final DataTreeCandidate domChange, final LogicalDatastoreType datastoreType) {
-        final Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> codecCtx =
+        final Entry<InstanceIdentifier<?>, BindingDataObjectCodecTreeNode<?>> codecCtx =
                 codec.getSubtreeCodec(domChange.getRootPath());
         return new LazyDataTreeModification(datastoreType, codecCtx.getKey(), codecCtx.getValue(), domChange);
     }
