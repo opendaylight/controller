@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import org.eclipse.jdt.annotation.NonNull;
@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListe
 import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
-import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager.Invoker;
+import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager.BatchedInvoker;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -28,10 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChangePublisher {
-    private static final Invoker<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> MANAGER_INVOKER =
-        (listener, notification) -> {
-            // FIXME: this is inefficient, as we could grab the entire queue for the listener and post it
-            listener.getInstance().onDataTreeChanged(Collections.singletonList(notification));
+    private static final BatchedInvoker<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate>
+        MANAGER_INVOKER = (listener, notifications) -> {
+            listener.getInstance().onDataTreeChanged(ImmutableList.copyOf(notifications));
         };
 
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMStoreTreeChangePublisher.class);
@@ -39,11 +38,11 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
             notificationManager;
 
     InMemoryDOMStoreTreeChangePublisher(final ExecutorService listenerExecutor, final int maxQueueSize) {
-        notificationManager = new QueuedNotificationManager<>(listenerExecutor, MANAGER_INVOKER, maxQueueSize,
+        notificationManager = QueuedNotificationManager.create(listenerExecutor, MANAGER_INVOKER, maxQueueSize,
                 "DataTreeChangeListenerQueueMgr");
     }
 
-    private InMemoryDOMStoreTreeChangePublisher(QueuedNotificationManager<
+    private InMemoryDOMStoreTreeChangePublisher(final QueuedNotificationManager<
             AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> notificationManager) {
         this.notificationManager = notificationManager;
     }
