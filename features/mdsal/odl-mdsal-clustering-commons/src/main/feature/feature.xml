@@ -8,11 +8,11 @@
   -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
     <feature name="odl-mdsal-clustering-commons" version="${project.version}">
-        <feature version="[4,5)">odl-akka-system-2.5</feature>
-        <feature version="[4,5)">odl-akka-persistence-2.5</feature>
-        <feature version="[4,5)">odl-akka-clustering-2.5</feature>
-        <feature version="[4,5)">odl-apache-commons-lang3</feature>
-        <feature version="[4.0.8,5)">odl-dropwizard-metrics</feature>
-        <feature version="[4,5)">odl-servlet-api</feature>
+        <feature version="[5,6)">odl-akka-system-2.5</feature>
+        <feature version="[5,6)">odl-akka-persistence-2.5</feature>
+        <feature version="[5,6)">odl-akka-clustering-2.5</feature>
+        <feature version="[5,6)">odl-apache-commons-lang3</feature>
+        <feature version="[5,6)">odl-dropwizard-metrics</feature>
+        <feature version="[5,6)">odl-servlet-api</feature>
     </feature>
 </features>
