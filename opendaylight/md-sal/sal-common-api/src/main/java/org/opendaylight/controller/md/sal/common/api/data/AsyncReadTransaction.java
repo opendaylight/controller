@@ -46,7 +46,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * {@link com.google.common.util.concurrent.ListenableFuture#get()} is discouraged for most
  * uses and you should use
  * {@link com.google.common.util.concurrent.Futures#addCallback(com.google.common.util.concurrent.ListenableFuture,
- *     com.google.common.util.concurrent.FutureCallback)}
+ * com.google.common.util.concurrent.FutureCallback, java.util.concurrent.Executor)}
  * or other functions from {@link com.google.common.util.concurrent.Futures} to
  * register more specific listeners.
  *
