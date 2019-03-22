@@ -53,7 +53,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     @Override
     public void executeList() {
         final LogicalDatastoreType dsType = getDataStoreType();
-        final TransactionChain chain = bindingDataBroker.createTransactionChain(this);
+        final TransactionChain chain = bindingDataBroker.createMergingTransactionChain(this);
 
         WriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;

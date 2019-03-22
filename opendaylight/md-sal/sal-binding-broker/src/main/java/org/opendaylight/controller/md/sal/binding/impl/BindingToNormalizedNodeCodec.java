@@ -15,7 +15,7 @@ import java.util.Map;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeNode;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingDataObjectCodecTreeNode;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -91,7 +91,7 @@ public class BindingToNormalizedNodeCodec
     }
 
     @Override
-    public Map.Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> getSubtreeCodec(
+    public Map.Entry<InstanceIdentifier<?>, BindingDataObjectCodecTreeNode<?>> getSubtreeCodec(
             final YangInstanceIdentifier domIdentifier) {
         return super.getSubtreeCodec(domIdentifier);
     }

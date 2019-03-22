@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.core.compat;
 
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  * @author Thomas Pantelis
  */
 public class LegacyDOMRpcResultFutureAdapter extends AbstractDOMRpcResultFutureAdapter<DOMRpcResult,
-        org.opendaylight.mdsal.dom.api.DOMRpcResult, FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult>,
+        org.opendaylight.mdsal.dom.api.DOMRpcResult, ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult>,
         DOMRpcException> implements CheckedFuture<DOMRpcResult, DOMRpcException> {
 
     private static final ExceptionMapper<DOMRpcException> LEGACY_DOM_RPC_EX_MAPPER =
@@ -40,7 +40,7 @@ public class LegacyDOMRpcResultFutureAdapter extends AbstractDOMRpcResultFutureA
         }
     };
 
-    public LegacyDOMRpcResultFutureAdapter(FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> delegate) {
+    public LegacyDOMRpcResultFutureAdapter(ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> delegate) {
         super(delegate, LEGACY_DOM_RPC_EX_MAPPER);
     }
 
