@@ -10,24 +10,22 @@ package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.xml.transform.dom.DOMSource;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeBuilder;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -75,25 +73,9 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         state = State.OPEN;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void leafNode(final NodeIdentifier nodeIdentifier, final Object value) {
-        checkNotSealed();
-
-        NormalizedNodeBuilderWrapper parent = stack.peek();
-        LeafNode<Object> leafNode = Builders.leafBuilder().withNodeIdentifier(nodeIdentifier).withValue(value).build();
-        if (parent != null) {
-            if (hasValidSchema(nodeIdentifier.getNodeType(), parent)) {
-                parent.builder().addChild(leafNode);
-            }
-        } else {
-            // If there's no parent node then this is a stand alone LeafNode.
-            if (nodePathSchemaNode != null) {
-                this.normalizedNode = leafNode;
-            }
-
-            state = State.CLOSED;
-        }
+    public void startLeafNode(final NodeIdentifier name) {
+        addBuilder(Builders.leafBuilder().withNodeIdentifier(name), name);
     }
 
     @Override
@@ -106,28 +88,9 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void leafSetEntryNode(final QName name, final Object value) {
-        checkNotSealed();
-
-        NormalizedNodeBuilderWrapper parent = stack.peek();
-        if (parent != null) {
-            if (hasValidSchema(name, parent)) {
-                parent.builder().addChild(Builders.leafSetEntryBuilder().withValue(value)
-                        .withNodeIdentifier(new NodeWithValue<>(parent.nodeType(), value))
-                        .build());
-            }
-        } else {
-            // If there's no parent LeafSetNode then this is a stand alone
-            // LeafSetEntryNode.
-            if (nodePathSchemaNode != null) {
-                this.normalizedNode = Builders.leafSetEntryBuilder().withValue(value).withNodeIdentifier(
-                        new NodeWithValue<>(name, value)).build();
-            }
-
-            state = State.CLOSED;
-        }
+    public void startLeafSetEntryNode(final NodeWithValue<?> name) throws IOException {
+        addBuilder(Builders.leafSetEntryBuilder().withNodeIdentifier(name), name);
     }
 
     @Override
@@ -176,29 +139,21 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         addBuilder(Builders.augmentationBuilder().withNodeIdentifier(augmentationIdentifier), augmentationIdentifier);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void anyxmlNode(final NodeIdentifier nodeIdentifier, final Object value) {
-        checkNotSealed();
-
-        NormalizedNodeBuilderWrapper parent = stack.peek();
-        AnyXmlNode anyXmlNode = Builders.anyXmlBuilder().withNodeIdentifier(nodeIdentifier).withValue((DOMSource) value)
-                .build();
-        if (parent != null) {
-            if (hasValidSchema(nodeIdentifier.getNodeType(), parent)) {
-                parent.builder().addChild(anyXmlNode);
-            }
-        } else {
-            // If there's no parent node then this is a stand alone AnyXmlNode.
-            if (nodePathSchemaNode != null) {
-                this.normalizedNode = anyXmlNode;
-            }
-
-            state = State.CLOSED;
-        }
+    public void startAnyxmlNode(final NodeIdentifier name) {
+        addBuilder(Builders.anyXmlBuilder().withNodeIdentifier(name), name);
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public void domSourceValue(final DOMSource value) {
+        setValue(value);
+    }
+
+    @Override
+    public void scalarValue(final Object value) {
+        setValue(value);
+    }
+
     @Override
     public void endNode() {
         checkNotSealed();
@@ -219,13 +174,13 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
             return;
         }
 
-        final NormalizedNode<?, ?> newNode = child.builder().build();
+        final NormalizedNode<?, ?> newNode = child.build();
         final NormalizedNodeBuilderWrapper parent = stack.peek();
         if (parent == null) {
             normalizedNode = newNode;
             state = State.CLOSED;
         } else {
-            parent.builder().addChild(newNode);
+            parent.addChild(newNode);
         }
     }
 
@@ -255,25 +210,21 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         checkState(state == State.OPEN, "Illegal operation in state %s", state);
     }
 
-    private static boolean hasValidSchema(final QName name, final NormalizedNodeBuilderWrapper parent) {
-        final DataSchemaContextNode<?> parentSchema = parent.getSchema();
-        final boolean valid = parentSchema != null && parentSchema.getChild(name) != null;
-        if (!valid) {
-            LOG.debug("Schema not found for {}", name);
-        }
-
-        return valid;
+    private void setValue(final Object value) {
+        checkNotSealed();
+        final NormalizedNodeBuilderWrapper current = stack.peek();
+        checkState(current != null, "Attempted to set value %s while no node is open", value);
+        current.setValue(value);
     }
 
-    private NormalizedNodeBuilderWrapper addBuilder(final NormalizedNodeContainerBuilder<?, ?, ?, ?> builder,
+    private <T extends NormalizedNodeBuilder<?, ?, ?>> NormalizedNodeBuilderWrapper addBuilder(final T builder,
             final PathArgument identifier) {
         checkNotSealed();
 
         final DataSchemaContextNode<?> schemaNode;
         final NormalizedNodeBuilderWrapper parent = stack.peek();
         if (parent != null) {
-            final DataSchemaContextNode<?> parentSchema = parent.getSchema();
-            schemaNode = parentSchema == null ? null : parentSchema.getChild(identifier);
+            schemaNode = parent.childSchema(identifier);
         } else {
             schemaNode = nodePathSchemaNode;
         }
