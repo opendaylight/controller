@@ -16,7 +16,6 @@ import akka.actor.Scheduler;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.concurrent.ThreadSafe;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
@@ -32,12 +31,11 @@ import scala.concurrent.duration.FiniteDuration;
  * <p>
  * Time-keeping in a client actor is based on monotonic time. The precision of this time can be expected to be the
  * same as {@link System#nanoTime()}, but it is not tied to that particular clock. Actor clock is exposed as
- * a {@link Ticker}, which can be obtained via {@link #ticker()}.
+ * a {@link Ticker}, which can be obtained via {@link #ticker()}. This class is thread-safe.
  *
  * @author Robert Varga
  */
 @Beta
-@ThreadSafe
 public class ClientActorContext extends AbstractClientActorContext implements Identifiable<ClientIdentifier> {
     private final ExecutionContext executionContext;
     private final ClientIdentifier identifier;
