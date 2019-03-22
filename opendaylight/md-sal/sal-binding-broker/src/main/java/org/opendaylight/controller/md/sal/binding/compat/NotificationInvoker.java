@@ -55,7 +55,7 @@ final class NotificationInvoker
 
     @Override
     public void onNotification(final Notification notification) {
-        getContext(notification.getImplementedInterface()).invoke(notification);
+        getContext(notification.implementedInterface()).invoke(notification);
     }
 
     private InvokerContext getContext(final Class<?> type) {
