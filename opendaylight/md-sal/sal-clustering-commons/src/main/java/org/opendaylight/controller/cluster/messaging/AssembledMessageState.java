@@ -12,7 +12,6 @@ import com.google.common.io.ByteSource;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -20,11 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maintains the state of an assembled message.
+ * Maintains the state of an assembled message. This class is NOT thread-safe.
  *
  * @author Thomas Pantelis
  */
-@NotThreadSafe
 public class AssembledMessageState implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AssembledMessageState.class);
 
