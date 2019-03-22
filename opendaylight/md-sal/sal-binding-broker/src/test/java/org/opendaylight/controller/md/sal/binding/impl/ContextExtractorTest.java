@@ -18,7 +18,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.EncapsulatedRouteInGrouping;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInputBuilder;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class ContextExtractorTest {
@@ -31,7 +30,7 @@ public final class ContextExtractorTest {
     private static final Transitive TEST_GROUPING = new Transitive() {
 
         @Override
-        public Class<? extends DataContainer> getImplementedInterface() {
+        public Class<? extends Transitive> implementedInterface() {
             return Transitive.class;
         }
 

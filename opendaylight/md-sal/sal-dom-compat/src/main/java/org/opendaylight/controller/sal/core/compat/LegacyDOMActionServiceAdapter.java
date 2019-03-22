@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ForwardingObject;
-import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMActionResult;
 import org.opendaylight.mdsal.dom.api.DOMActionServiceExtension;
@@ -33,8 +33,8 @@ public class LegacyDOMActionServiceAdapter extends ForwardingObject implements D
     }
 
     @Override
-    public FluentFuture<? extends DOMActionResult> invokeAction(final SchemaPath type, final DOMDataTreeIdentifier path,
-            final ContainerNode input) {
+    public ListenableFuture<? extends DOMActionResult> invokeAction(final SchemaPath type,
+            final DOMDataTreeIdentifier path, final ContainerNode input) {
         return delegate.invokeAction(type, path, input);
     }
 
