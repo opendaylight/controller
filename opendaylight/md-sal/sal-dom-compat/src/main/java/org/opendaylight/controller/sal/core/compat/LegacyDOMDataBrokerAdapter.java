@@ -306,7 +306,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
                 }
             }, MoreExecutors.directExecutor());
 
-            return resultFuture;
+            return FluentFuture.from(resultFuture);
         }
     }
 
