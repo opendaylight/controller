@@ -5,11 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.dom.adapter.BindingDataAware;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -50,11 +48,6 @@ class LazySerializedContainerNode implements ContainerNode, BindingDataAware {
         return new WithContextRef(rpcName.getLastComponent(), data, contextRef, codec);
     }
 
-    @Override
-    public Map<QName, String> getAttributes() {
-        return delegate().getAttributes();
-    }
-
     private ContainerNode delegate() {
         if (domData == null) {
             domData = registry.toNormalizedNodeRpcData(bindingData);
@@ -81,11 +74,6 @@ class LazySerializedContainerNode implements ContainerNode, BindingDataAware {
     @Override
     public Optional<DataContainerChild<? extends PathArgument, ?>> getChild(final PathArgument child) {
         return delegate().getChild(child);
-    }
-
-    @Override
-    public final Object getAttributeValue(final QName name) {
-        return delegate().getAttributeValue(name);
     }
 
     @Override
