@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import java.net.URI;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.NoSuchElementException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -43,7 +43,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     public static final URI BASE_NAMESPACE = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
 
-    private final SimpleStack<NormalizedNodeBuilderWrapper> stack = new SimpleStack<>();
+    private final Deque<NormalizedNodeBuilderWrapper> stack = new ArrayDeque<>();
     private final DataSchemaContextNode<?> nodePathSchemaNode;
 
     private NormalizedNode<?, ?> normalizedNode;
@@ -191,9 +191,12 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     public void endNode() {
         checkNotSealed();
 
-        NormalizedNodeBuilderWrapper child = stack.pop();
-
-        checkState(child != null, "endNode called on an empty stack");
+        final NormalizedNodeBuilderWrapper child;
+        try {
+            child = stack.pop();
+        } catch (NoSuchElementException e) {
+            throw new IllegalStateException("endNode called on an empty stack", e);
+        }
 
         if (!child.getSchema().isPresent()) {
             LOG.debug("Schema not found for {}", child.identifier());
@@ -265,33 +268,5 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         }
 
         return schemaNode;
-    }
-
-    @VisibleForTesting
-    static class SimpleStack<E> {
-        List<E> stack = new LinkedList<>();
-
-        void push(final E element) {
-            stack.add(element);
-        }
-
-        E pop() {
-            if (size() == 0) {
-                return null;
-            }
-            return stack.remove(stack.size() - 1);
-        }
-
-        E peek() {
-            if (size() == 0) {
-                return null;
-            }
-
-            return stack.get(stack.size() - 1);
-        }
-
-        int size() {
-            return stack.size();
-        }
     }
 }
