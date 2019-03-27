@@ -5,18 +5,22 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
+
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
@@ -38,20 +42,20 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodePruner.class);
 
     public static final URI BASE_NAMESPACE = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
+
     private final SimpleStack<NormalizedNodeBuilderWrapper> stack = new SimpleStack<>();
-    private NormalizedNode<?,?> normalizedNode;
     private final DataSchemaContextNode<?> nodePathSchemaNode;
+
+    private NormalizedNode<?, ?> normalizedNode;
     private boolean sealed = false;
 
-    public NormalizedNodePruner(YangInstanceIdentifier nodePath, SchemaContext schemaContext) {
+    public NormalizedNodePruner(final YangInstanceIdentifier nodePath, final SchemaContext schemaContext) {
         nodePathSchemaNode = findSchemaNodeForNodePath(nodePath, schemaContext);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void leafNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object value)
-            throws IllegalArgumentException {
-
+    public void leafNode(final NodeIdentifier nodeIdentifier, final Object value) {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper parent = stack.peek();
@@ -71,31 +75,27 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     }
 
     @Override
-    public void startLeafSet(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startLeafSet(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.leafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startOrderedLeafSet(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int str)
-            throws IllegalArgumentException {
+    public void startOrderedLeafSet(final NodeIdentifier nodeIdentifier, final int str) {
         checkNotSealed();
-
         addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings("unchecked")
     @Override
-    public void leafSetEntryNode(QName name, Object value) throws IllegalArgumentException {
+    public void leafSetEntryNode(final QName name, final Object value) {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper parent = stack.peek();
         if (parent != null) {
             if (hasValidSchema(name, parent)) {
                 parent.builder().addChild(Builders.leafSetEntryBuilder().withValue(value)
-                        .withNodeIdentifier(new YangInstanceIdentifier.NodeWithValue<>(parent.nodeType(), value))
+                        .withNodeIdentifier(new NodeWithValue<>(parent.nodeType(), value))
                         .build());
             }
         } else {
@@ -103,7 +103,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
             // LeafSetEntryNode.
             if (nodePathSchemaNode != null) {
                 this.normalizedNode = Builders.leafSetEntryBuilder().withValue(value).withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeWithValue<>(name, value)).build();
+                        new NodeWithValue<>(name, value)).build();
             }
 
             sealed = true;
@@ -111,81 +111,62 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     }
 
     @Override
-    public void startContainerNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startContainerNode(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.containerBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startYangModeledAnyXmlNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startYangModeledAnyXmlNode(final NodeIdentifier nodeIdentifier, final int count) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public void startUnkeyedList(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startUnkeyedList(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.unkeyedListBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startUnkeyedListItem(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalStateException {
+    public void startUnkeyedListItem(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.unkeyedListEntryBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startMapNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startMapNode(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.mapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startMapEntryNode(YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifierWithPredicates,
-            int count)  throws IllegalArgumentException {
+    public void startMapEntryNode(final NodeIdentifierWithPredicates nodeIdentifierWithPredicates, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.mapEntryBuilder().withNodeIdentifier(nodeIdentifierWithPredicates),
                 nodeIdentifierWithPredicates);
     }
 
     @Override
-    public void startOrderedMapNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startOrderedMapNode(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.orderedMapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startChoiceNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IllegalArgumentException {
+    public void startChoiceNode(final NodeIdentifier nodeIdentifier, final int count) {
         checkNotSealed();
-
         addBuilder(Builders.choiceBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
-    public void startAugmentationNode(YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier)
-            throws IllegalArgumentException {
-
+    public void startAugmentationNode(final AugmentationIdentifier augmentationIdentifier) {
         checkNotSealed();
-
         addBuilder(Builders.augmentationBuilder().withNodeIdentifier(augmentationIdentifier), augmentationIdentifier);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void anyxmlNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object value)
-            throws IllegalArgumentException {
+    public void anyxmlNode(final NodeIdentifier nodeIdentifier, final Object value) {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper parent = stack.peek();
@@ -207,20 +188,19 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void endNode() throws IllegalStateException {
+    public void endNode() {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper child = stack.pop();
 
-        Preconditions.checkState(child != null, "endNode called on an empty stack");
+        checkState(child != null, "endNode called on an empty stack");
 
         if (!child.getSchema().isPresent()) {
             LOG.debug("Schema not found for {}", child.identifier());
             return;
         }
 
-        NormalizedNode<?,?> newNode = child.builder().build();
-
+        NormalizedNode<?, ?> newNode = child.builder().build();
         if (stack.size() > 0) {
             NormalizedNodeBuilderWrapper parent = stack.peek();
             parent.builder().addChild(newNode);
@@ -237,18 +217,18 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void flush() {
-
+        // No-op
     }
 
-    public NormalizedNode<?,?> normalizedNode() {
+    public NormalizedNode<?, ?> normalizedNode() {
         return normalizedNode;
     }
 
     private void checkNotSealed() {
-        Preconditions.checkState(!sealed, "Pruner can be used only once");
+        checkState(!sealed, "Pruner can be used only once");
     }
 
-    private static boolean hasValidSchema(QName name, NormalizedNodeBuilderWrapper parent) {
+    private static boolean hasValidSchema(final QName name, final NormalizedNodeBuilderWrapper parent) {
         boolean valid = parent.getSchema().isPresent() && parent.getSchema().get().getChild(name) != null;
         if (!valid) {
             LOG.debug("Schema not found for {}", name);
@@ -257,8 +237,8 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         return valid;
     }
 
-    private NormalizedNodeBuilderWrapper addBuilder(NormalizedNodeContainerBuilder<?,?,?,?> builder,
-            PathArgument identifier) {
+    private NormalizedNodeBuilderWrapper addBuilder(final NormalizedNodeContainerBuilder<?, ?, ?, ?> builder,
+            final PathArgument identifier) {
         final Optional<DataSchemaContextNode<?>> schemaNode;
         NormalizedNodeBuilderWrapper parent = stack.peek();
         if (parent == null) {
@@ -274,8 +254,8 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         return wrapper;
     }
 
-    private static DataSchemaContextNode<?> findSchemaNodeForNodePath(YangInstanceIdentifier nodePath,
-            SchemaContext schemaContext) {
+    private static DataSchemaContextNode<?> findSchemaNodeForNodePath(final YangInstanceIdentifier nodePath,
+            final SchemaContext schemaContext) {
         DataSchemaContextNode<?> schemaNode = DataSchemaContextTree.from(schemaContext).getRoot();
         for (PathArgument arg : nodePath.getPathArguments()) {
             schemaNode = schemaNode.getChild(arg);
@@ -291,7 +271,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     static class SimpleStack<E> {
         List<E> stack = new LinkedList<>();
 
-        void push(E element) {
+        void push(final E element) {
             stack.add(element);
         }
 
