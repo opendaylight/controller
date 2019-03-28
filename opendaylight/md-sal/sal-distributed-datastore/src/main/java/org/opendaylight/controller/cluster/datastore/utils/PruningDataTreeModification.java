@@ -5,15 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingObject;
 import java.io.IOException;
 import java.util.Optional;
-import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
+import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +33,28 @@ import org.slf4j.LoggerFactory;
  * before delegating it to the actual DataTreeModification.
  */
 public class PruningDataTreeModification extends ForwardingObject implements DataTreeModification {
-
     private static final Logger LOG = LoggerFactory.getLogger(PruningDataTreeModification.class);
-    private DataTreeModification delegate;
-    private final SchemaContext schemaContext;
+
+    private final ReusableNormalizedNodePruner pruner;
     private final DataTree dataTree;
+
+    private DataTreeModification delegate;
+
+    private PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
+            final ReusableNormalizedNodePruner pruner) {
+        this.delegate = requireNonNull(delegate);
+        this.dataTree = requireNonNull(dataTree);
+        this.pruner = requireNonNull(pruner);
+    }
 
     public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
             final SchemaContext schemaContext) {
-        this.delegate = Preconditions.checkNotNull(delegate);
-        this.dataTree = Preconditions.checkNotNull(dataTree);
-        this.schemaContext = Preconditions.checkNotNull(schemaContext);
+        this(delegate, dataTree, ReusableNormalizedNodePruner.forSchemaContext(schemaContext));
+    }
+
+    public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
+            final DataSchemaContextTree dataSchemaContext) {
+        this(delegate, dataTree, ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext));
     }
 
     @Override
@@ -78,7 +90,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
 
     private void pruneAndMergeNode(final YangInstanceIdentifier yangInstanceIdentifier,
             final NormalizedNode<?, ?> normalizedNode) {
-        NormalizedNode<?,?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
+        NormalizedNode<?, ?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
 
         if (pruned != null) {
             delegate.merge(yangInstanceIdentifier, pruned);
@@ -135,19 +147,20 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
 
     @Override
     public DataTreeModification newModification() {
-        return new PruningDataTreeModification(delegate.newModification(), dataTree, schemaContext);
+        return new PruningDataTreeModification(delegate.newModification(), dataTree, pruner.duplicate());
     }
 
     @VisibleForTesting
-    NormalizedNode<?, ?> pruneNormalizedNode(final YangInstanceIdentifier path, final NormalizedNode<?,?> input) {
-        NormalizedNodePruner pruner = new NormalizedNodePruner(path, schemaContext);
+    NormalizedNode<?, ?> pruneNormalizedNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> input) {
+        pruner.initializeForPath(path);
         try {
             NormalizedNodeWriter.forStreamWriter(pruner).write(input);
         } catch (IOException ioe) {
             LOG.error("Unexpected IOException when pruning normalizedNode", ioe);
+            return null;
         }
 
-        return pruner.normalizedNode();
+        return pruner.getResult().orElse(null);
     }
 
     private static class PruningDataTreeModificationCursor extends AbstractDataTreeModificationCursor {
