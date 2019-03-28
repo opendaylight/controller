@@ -10,9 +10,10 @@ package org.opendaylight.controller.cluster.databroker;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateFluentFuture;
+import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateTrueFluentFuture;
 
 import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.Futures;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,8 +47,8 @@ public class ClientBackedReadWriteTransactionTest
         doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
         doReturn(readyCohort).when(delegate).ready();
 
-        doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(delegate).exists(YangInstanceIdentifier.EMPTY);
-        doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.EMPTY);
+        doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.EMPTY);
+        doReturn(immediateFluentFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.EMPTY);
 
         object = new ClientBackedReadWriteTransaction(delegate, null);
     }
