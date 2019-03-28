@@ -75,13 +75,11 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startLeafSet(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.leafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
     public void startOrderedLeafSet(final NodeIdentifier nodeIdentifier, final int str) {
-        checkNotSealed();
         addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
@@ -111,7 +109,6 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startContainerNode(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.containerBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
@@ -122,44 +119,37 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startUnkeyedList(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.unkeyedListBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
     public void startUnkeyedListItem(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.unkeyedListEntryBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
     public void startMapNode(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.mapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
     public void startMapEntryNode(final NodeIdentifierWithPredicates nodeIdentifierWithPredicates, final int count) {
-        checkNotSealed();
         addBuilder(Builders.mapEntryBuilder().withNodeIdentifier(nodeIdentifierWithPredicates),
                 nodeIdentifierWithPredicates);
     }
 
     @Override
     public void startOrderedMapNode(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.orderedMapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
     public void startChoiceNode(final NodeIdentifier nodeIdentifier, final int count) {
-        checkNotSealed();
         addBuilder(Builders.choiceBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
     @Override
     public void startAugmentationNode(final AugmentationIdentifier augmentationIdentifier) {
-        checkNotSealed();
         addBuilder(Builders.augmentationBuilder().withNodeIdentifier(augmentationIdentifier), augmentationIdentifier);
     }
 
@@ -242,6 +232,8 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     private NormalizedNodeBuilderWrapper addBuilder(final NormalizedNodeContainerBuilder<?, ?, ?, ?> builder,
             final PathArgument identifier) {
+        checkNotSealed();
+
         final DataSchemaContextNode<?> schemaNode;
         final NormalizedNodeBuilderWrapper parent = stack.peek();
         if (parent != null) {
