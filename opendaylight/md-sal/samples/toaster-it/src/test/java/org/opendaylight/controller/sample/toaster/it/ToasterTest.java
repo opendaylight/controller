@@ -10,6 +10,7 @@ package org.opendaylight.controller.sample.toaster.it;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+
 import java.lang.management.ManagementFactory;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
@@ -28,7 +29,7 @@ import org.ops4j.pax.exam.util.Filter;
 @RunWith(PaxExam.class)
 public class ToasterTest extends AbstractMdsalTestBase {
     @Inject
-    @Filter(timeout=60*1000)
+    @Filter(timeout = 60*1000)
     KitchenService kitchenService;
 
     @Override
@@ -45,7 +46,8 @@ public class ToasterTest extends AbstractMdsalTestBase {
     @Test
     public void testToaster() throws Exception {
         MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-        ObjectName providerOn = new ObjectName("org.opendaylight.controller:name=OpendaylightToaster,type=toaster-provider");
+        ObjectName providerOn = new ObjectName(
+                "org.opendaylight.controller:name=OpendaylightToaster,type=toaster-provider");
 
         long toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
         assertEquals(0, toastsMade);
@@ -53,8 +55,8 @@ public class ToasterTest extends AbstractMdsalTestBase {
         boolean success = true;
 
         // Make toasts using OSGi service
-        success &= kitchenService.makeBreakfast( EggsType.SCRAMBLED, HashBrown.class, 4).get().isSuccessful();
-        success &= kitchenService.makeBreakfast( EggsType.POACHED, WhiteBread.class, 8 ).get().isSuccessful();
+        success &= kitchenService.makeBreakfast(EggsType.SCRAMBLED, HashBrown.class, 4).get().isSuccessful();
+        success &= kitchenService.makeBreakfast(EggsType.POACHED, WhiteBread.class, 8 ).get().isSuccessful();
 
         assertTrue("Not all breakfasts succeeded", success);
 
