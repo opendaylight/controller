@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Optional;
 import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -198,7 +197,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
             throw new IllegalStateException("endNode called on an empty stack", e);
         }
 
-        if (!child.getSchema().isPresent()) {
+        if (child.getSchema() == null) {
             LOG.debug("Schema not found for {}", child.identifier());
             return;
         }
@@ -232,7 +231,8 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     }
 
     private static boolean hasValidSchema(final QName name, final NormalizedNodeBuilderWrapper parent) {
-        boolean valid = parent.getSchema().isPresent() && parent.getSchema().get().getChild(name) != null;
+        final DataSchemaContextNode<?> parentSchema = parent.getSchema();
+        final boolean valid = parentSchema != null && parentSchema.getChild(name) != null;
         if (!valid) {
             LOG.debug("Schema not found for {}", name);
         }
@@ -242,14 +242,13 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     private NormalizedNodeBuilderWrapper addBuilder(final NormalizedNodeContainerBuilder<?, ?, ?, ?> builder,
             final PathArgument identifier) {
-        final Optional<DataSchemaContextNode<?>> schemaNode;
-        NormalizedNodeBuilderWrapper parent = stack.peek();
-        if (parent == null) {
-            schemaNode = Optional.fromNullable(nodePathSchemaNode);
-        } else if (parent.getSchema().isPresent()) {
-            schemaNode = Optional.fromNullable(parent.getSchema().get().getChild(identifier));
+        final DataSchemaContextNode<?> schemaNode;
+        final NormalizedNodeBuilderWrapper parent = stack.peek();
+        if (parent != null) {
+            final DataSchemaContextNode<?> parentSchema = parent.getSchema();
+            schemaNode = parentSchema == null ? null : parentSchema.getChild(identifier);
         } else {
-            schemaNode = Optional.absent();
+            schemaNode = nodePathSchemaNode;
         }
 
         NormalizedNodeBuilderWrapper wrapper = new NormalizedNodeBuilderWrapper(builder, identifier, schemaNode);
