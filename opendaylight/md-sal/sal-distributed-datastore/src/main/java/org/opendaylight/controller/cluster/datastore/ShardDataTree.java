@@ -80,6 +80,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,6 +149,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private DataTreeTip tip;
 
     private SchemaContext schemaContext;
+    private DataSchemaContextTree dataSchemaContext;
 
     private int currentTransactionBatch;
 
@@ -207,6 +209,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void updateSchemaContext(final SchemaContext newSchemaContext) {
         dataTree.setSchemaContext(newSchemaContext);
         this.schemaContext = Preconditions.checkNotNull(newSchemaContext);
+        this.dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
     }
 
     void resetTransactionBatch() {
@@ -293,7 +296,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private PruningDataTreeModification wrapWithPruning(final DataTreeModification delegate) {
-        return new PruningDataTreeModification(delegate, dataTree, schemaContext);
+        return new PruningDataTreeModification(delegate, dataTree, dataSchemaContext);
     }
 
     private static DataTreeModification unwrap(final DataTreeModification modification) {
