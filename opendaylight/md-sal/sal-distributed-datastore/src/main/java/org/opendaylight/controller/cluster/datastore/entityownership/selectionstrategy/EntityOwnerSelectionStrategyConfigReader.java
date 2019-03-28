@@ -50,7 +50,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
         for (final Entry<Object, Object> entry : properties.entrySet()) {
             final String key = (String) entry.getKey();
             if (!key.startsWith(ENTITY_TYPE_PREFIX)) {
-                LOG.debug("Ignoring non-conforming property key : {}");
+                LOG.debug("Ignoring non-conforming property key : {}", key);
                 continue;
             }
 
