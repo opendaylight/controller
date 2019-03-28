@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -16,53 +15,92 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-final class NormalizedNodeBuilderWrapper {
-    @SuppressWarnings("rawtypes")
-    private final NormalizedNodeBuilder builder;
-    private final PathArgument identifier;
+abstract class NormalizedNodeBuilderWrapper<I extends PathArgument, T extends NormalizedNodeBuilder<I, ?, ?>> {
+    static final class Container<I extends PathArgument, T extends NormalizedNodeContainerBuilder<I, ?, ?, ?>>
+            extends NormalizedNodeBuilderWrapper<I, T> {
+
+        Container(final T builder, final I identifier, final DataSchemaContextNode<?> schemaNode) {
+            super(builder, identifier, schemaNode);
+        }
+
+        @Override
+        void addChild(final NormalizedNode<?, ?> child) {
+            ((NormalizedNodeContainerBuilder)builder()).addChild(child);
+        }
+
+        @Override
+        void setValue(final Object value) {
+            throw new IllegalStateException("Attempted to set value " + value + " on container builder " + builder());
+        }
+
+        @Override
+        DataSchemaContextNode<?> startChild(final DataSchemaContextNode<?> schemaNode, final PathArgument child) {
+            return schemaNode == null ? null : schemaNode.getChild(child);
+        }
+    }
+
+    static final class Value<I extends PathArgument, T extends NormalizedNodeBuilder<I, ?, ?>>
+            extends NormalizedNodeBuilderWrapper<I, T> {
+
+        Value(final T builder, final I identifier, final DataSchemaContextNode<?> schemaNode) {
+            super(builder, identifier, schemaNode);
+        }
+
+        @Override
+        void addChild(final NormalizedNode<?, ?> child) {
+            throw new IllegalStateException("Attempted to add child " + child + " to non-container builder "
+                    + builder());
+        }
+
+        @Override
+        void setValue(final Object value) {
+            builder().withValue(value);
+        }
+
+        @Override
+        DataSchemaContextNode<?> startChild(final DataSchemaContextNode<?> schemaNode, final PathArgument child) {
+            throw new IllegalStateException("Attempted to lookup child " + child + " in non-container " + schemaNode);
+        }
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeBuilderWrapper.class);
+
+    private final T builder;
+    private final I identifier;
     private final DataSchemaContextNode<?> schemaNode;
 
-    NormalizedNodeBuilderWrapper(final NormalizedNodeBuilder<?, ?, ?> builder,
-            final PathArgument identifier, final @Nullable DataSchemaContextNode<?> schemaNode) {
+    NormalizedNodeBuilderWrapper(final T builder, final I identifier,
+            final @Nullable DataSchemaContextNode<?> schemaNode) {
         this.builder = requireNonNull(builder);
         this.identifier = requireNonNull(identifier);
+        builder.withNodeIdentifier(identifier);
         this.schemaNode = schemaNode;
     }
 
-    PathArgument identifier() {
-        return identifier;
+    @SuppressWarnings("rawtypes")
+    final NormalizedNodeBuilder builder() {
+        return builder;
     }
 
-    @Nullable DataSchemaContextNode<?> getSchema() {
-        return schemaNode;
+    final @Nullable DataSchemaContextNode<?> findChildSchema(final PathArgument child) {
+        return startChild(schemaNode, child);
     }
 
-    @Nullable DataSchemaContextNode<?> childSchema(final PathArgument child) {
+    final @Nullable NormalizedNode<?, ?> build() {
         if (schemaNode == null) {
+            LOG.debug("Schema not found for {}", identifier);
             return null;
         }
 
-        checkState(builder instanceof NormalizedNodeContainerBuilder,
-            "Attempted to lookup child %s in non-container %s", schemaNode);
-        return schemaNode.getChild(child);
-    }
-
-    NormalizedNode<?, ?> build() {
         return builder.build();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    void addChild(final NormalizedNode<?, ?> child) {
-        checkState(builder instanceof NormalizedNodeContainerBuilder,
-            "Attempted to add child %s to non-container builder %s", child, builder);
-        ((NormalizedNodeContainerBuilder) builder).addChild(child);
-    }
+    abstract void addChild(NormalizedNode<?, ?> child);
 
-    @SuppressWarnings("unchecked")
-    void setValue(final Object value) {
-        checkState(!(builder instanceof NormalizedNodeContainerBuilder),
-            "Attempted to set value %s on container builder %s", value, builder);
-        builder.withValue(value);
-    }
+    abstract void setValue(Object value);
+
+    abstract DataSchemaContextNode<?> startChild(@Nullable DataSchemaContextNode<?> schemaNode, PathArgument child);
 }
