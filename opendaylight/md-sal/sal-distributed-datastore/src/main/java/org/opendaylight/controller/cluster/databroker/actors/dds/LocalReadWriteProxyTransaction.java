@@ -364,7 +364,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         // Rebase old modification on new data tree.
         final CursorAwareDataTreeModification mod = getModification();
 
-        try (DataTreeModificationCursor cursor = mod.createCursor(YangInstanceIdentifier.EMPTY)) {
+        try (DataTreeModificationCursor cursor = mod.openCursor()) {
             request.getModification().applyToCursor(cursor);
         }
 
