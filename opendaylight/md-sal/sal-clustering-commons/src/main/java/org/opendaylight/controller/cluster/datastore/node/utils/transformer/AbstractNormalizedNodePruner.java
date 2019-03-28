@@ -219,13 +219,13 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
             return;
         }
 
-        NormalizedNode<?, ?> newNode = child.builder().build();
-        if (stack.size() > 0) {
-            NormalizedNodeBuilderWrapper parent = stack.peek();
-            parent.builder().addChild(newNode);
-        } else {
-            this.normalizedNode = newNode;
+        final NormalizedNode<?, ?> newNode = child.builder().build();
+        final NormalizedNodeBuilderWrapper parent = stack.peek();
+        if (parent == null) {
+            normalizedNode = newNode;
             state = State.CLOSED;
+        } else {
+            parent.builder().addChild(newNode);
         }
     }
 
