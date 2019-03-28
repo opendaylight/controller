@@ -49,7 +49,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     private boolean sealed = false;
 
     public NormalizedNodePruner(final YangInstanceIdentifier nodePath, final SchemaContext schemaContext) {
-        nodePathSchemaNode = findSchemaNodeForNodePath(nodePath, schemaContext);
+        nodePathSchemaNode = DataSchemaContextTree.from(schemaContext).findChild(nodePath).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -254,18 +254,5 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         NormalizedNodeBuilderWrapper wrapper = new NormalizedNodeBuilderWrapper(builder, identifier, schemaNode);
         stack.push(wrapper);
         return wrapper;
-    }
-
-    private static DataSchemaContextNode<?> findSchemaNodeForNodePath(final YangInstanceIdentifier nodePath,
-            final SchemaContext schemaContext) {
-        DataSchemaContextNode<?> schemaNode = DataSchemaContextTree.from(schemaContext).getRoot();
-        for (PathArgument arg : nodePath.getPathArguments()) {
-            schemaNode = schemaNode.getChild(arg);
-            if (schemaNode == null) {
-                break;
-            }
-        }
-
-        return schemaNode;
     }
 }
