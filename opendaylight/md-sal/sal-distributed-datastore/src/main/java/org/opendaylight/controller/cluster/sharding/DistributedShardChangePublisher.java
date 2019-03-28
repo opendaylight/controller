@@ -201,7 +201,7 @@ public class DistributedShardChangePublisher
             try {
                 DataTreeCandidates.applyToModification(modification, change);
             } catch (SchemaValidationFailedException e) {
-                LOG.error("Validation failed {}", e);
+                LOG.error("Validation failed", e);
             }
         }
 
