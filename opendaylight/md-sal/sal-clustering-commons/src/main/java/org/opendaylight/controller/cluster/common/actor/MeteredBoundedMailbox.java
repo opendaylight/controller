@@ -74,7 +74,7 @@ public class MeteredBoundedMailbox implements MailboxType,
             registry.register(fullName, metric);
         } catch (IllegalArgumentException e) {
             // already registered - shouldn't happen here since we check above...
-            LOG.debug("Unable to register '{}' in metrics registry: {}", e);
+            LOG.debug("Unable to register '{}' in metrics registry", fullName);
         }
     }
 
