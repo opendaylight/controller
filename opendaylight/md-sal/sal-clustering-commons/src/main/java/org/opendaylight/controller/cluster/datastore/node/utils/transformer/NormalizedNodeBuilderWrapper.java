@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
-import com.google.common.base.Optional;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
@@ -16,12 +18,12 @@ import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
 final class NormalizedNodeBuilderWrapper {
     private final NormalizedNodeContainerBuilder<?, ?, ?, ?> builder;
     private final PathArgument identifier;
-    private final Optional<DataSchemaContextNode<?>> schemaNode;
+    private final DataSchemaContextNode<?> schemaNode;
 
     NormalizedNodeBuilderWrapper(final NormalizedNodeContainerBuilder<?, ?, ?, ?> builder,
-            final PathArgument identifier, final Optional<DataSchemaContextNode<?>> schemaNode) {
-        this.builder = builder;
-        this.identifier = identifier;
+            final PathArgument identifier, final @Nullable DataSchemaContextNode<?> schemaNode) {
+        this.builder = requireNonNull(builder);
+        this.identifier = requireNonNull(identifier);
         this.schemaNode = schemaNode;
     }
 
@@ -38,7 +40,7 @@ final class NormalizedNodeBuilderWrapper {
         return identifier;
     }
 
-    Optional<DataSchemaContextNode<?>> getSchema() {
+    @Nullable DataSchemaContextNode<?> getSchema() {
         return schemaNode;
     }
 }
