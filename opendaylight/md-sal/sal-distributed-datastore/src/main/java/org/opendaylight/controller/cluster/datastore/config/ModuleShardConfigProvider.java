@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.config;
 
 import java.util.Map;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Interface for a class that provides module and shard configuration information.
@@ -19,5 +19,5 @@ public interface ModuleShardConfigProvider {
     /**
      * Returns a Map of ModuleConfig Builder instances keyed by module name.
      */
-    @Nonnull Map<String, ModuleConfig.Builder> retrieveModuleConfigs(@Nonnull Configuration configuration);
+    @NonNull Map<String, ModuleConfig.Builder> retrieveModuleConfigs(@NonNull Configuration configuration);
 }

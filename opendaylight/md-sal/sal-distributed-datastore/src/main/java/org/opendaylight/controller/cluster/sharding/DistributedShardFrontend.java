@@ -5,16 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -51,18 +51,18 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     DistributedShardFrontend(final AbstractDataStore distributedDataStore,
                              final DataStoreClient client,
                              final DOMDataTreeIdentifier shardRoot) {
-        this.client = Preconditions.checkNotNull(client);
-        this.shardRoot = Preconditions.checkNotNull(shardRoot);
+        this.client = requireNonNull(client);
+        this.shardRoot = requireNonNull(shardRoot);
 
-        publisher = new DistributedShardChangePublisher(client, Preconditions.checkNotNull(distributedDataStore),
-                shardRoot, childShards);
+        publisher = new DistributedShardChangePublisher(client, requireNonNull(distributedDataStore), shardRoot,
+            childShards);
     }
 
     @Override
     public synchronized DOMDataTreeShardProducer createProducer(final Collection<DOMDataTreeIdentifier> paths) {
         for (final DOMDataTreeIdentifier prodPrefix : paths) {
-            Preconditions.checkArgument(shardRoot.contains(prodPrefix), "Prefix %s is not contained under shard root",
-                    prodPrefix, paths);
+            checkArgument(shardRoot.contains(prodPrefix), "Prefix %s is not contained under shard root", prodPrefix,
+                paths);
         }
 
         final ShardProxyProducer ret =
@@ -74,7 +74,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     @Override
     public synchronized void onChildAttached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
         LOG.debug("{} : Child shard attached at {}", shardRoot, prefix);
-        Preconditions.checkArgument(child != this, "Attempted to attach child %s onto self", this);
+        checkArgument(child != this, "Attempted to attach child %s onto self", this);
         addChildShard(prefix, child);
         updateProducers();
     }
@@ -88,7 +88,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     }
 
     private void addChildShard(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
-        Preconditions.checkArgument(child instanceof WriteableDOMDataTreeShard);
+        checkArgument(child instanceof WriteableDOMDataTreeShard);
         childShards.put(prefix, new ChildShardContext(prefix, (WriteableDOMDataTreeShard) child));
     }
 
@@ -132,7 +132,6 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
         }
     }
 
-    @Nonnull
     @Override
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
             final YangInstanceIdentifier treeId, final L listener) {

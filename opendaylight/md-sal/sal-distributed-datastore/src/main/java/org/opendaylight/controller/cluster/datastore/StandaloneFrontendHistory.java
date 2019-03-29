@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -36,16 +38,16 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
             final RangeSet<UnsignedLong> purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
         this.identifier = new LocalHistoryIdentifier(clientId, 0);
-        this.tree = Preconditions.checkNotNull(tree);
+        this.tree = requireNonNull(tree);
     }
 
-    static StandaloneFrontendHistory create(final String persistenceId, final ClientIdentifier clientId,
+    static @NonNull StandaloneFrontendHistory create(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree) {
         return new StandaloneFrontendHistory(persistenceId, clientId, tree, ImmutableMap.of(),
             TreeRangeSet.create());
     }
 
-    static StandaloneFrontendHistory recreate(final String persistenceId, final ClientIdentifier clientId,
+    static @NonNull StandaloneFrontendHistory recreate(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
             final RangeSet<UnsignedLong> purgedTransactions) {
         return new StandaloneFrontendHistory(persistenceId, clientId, tree, new HashMap<>(closedTransactions),

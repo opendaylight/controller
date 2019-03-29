@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,16 +60,14 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
      *
      * @return The root node.
      */
-    @Nonnull
-    abstract NormalizedNode<?, ?> rootNode();
+    abstract @NonNull NormalizedNode<?, ?> rootNode();
 
     /**
      * Return the snapshot payload version. Implementations of this method should return a constant.
      *
      * @return Snapshot payload version
      */
-    @Nonnull
-    abstract PayloadVersion version();
+    abstract @NonNull PayloadVersion version();
 
     private void versionedSerialize(final ObjectOutput out, final PayloadVersion version) throws IOException {
         switch (version) {

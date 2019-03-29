@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import java.util.Arrays;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
@@ -41,7 +39,7 @@ public class MockConfiguration extends ConfigurationImpl {
     }
 
     @Override
-    public ShardStrategy getStrategyForPrefix(@Nonnull final DOMDataTreeIdentifier prefix) {
+    public ShardStrategy getStrategyForPrefix(final DOMDataTreeIdentifier prefix) {
         return null;
     }
 }

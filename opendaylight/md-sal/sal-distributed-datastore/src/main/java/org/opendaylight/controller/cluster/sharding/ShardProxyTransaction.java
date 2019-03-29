@@ -5,8 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
+
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AsyncFunction;
@@ -21,7 +22,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
@@ -52,9 +52,9 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     ShardProxyTransaction(final DOMDataTreeIdentifier shardRoot,
                           final Collection<DOMDataTreeIdentifier> prefixes,
                           final DistributedShardModification modification) {
-        this.shardRoot = Preconditions.checkNotNull(shardRoot);
-        this.prefixes = Preconditions.checkNotNull(prefixes);
-        this.modification = Preconditions.checkNotNull(modification);
+        this.shardRoot = requireNonNull(shardRoot);
+        this.prefixes = requireNonNull(prefixes);
+        this.modification = requireNonNull(modification);
     }
 
     private DOMDataTreeWriteCursor getCursor() {
@@ -64,9 +64,8 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
         return cursor;
     }
 
-    @Nonnull
     @Override
-    public DOMDataTreeWriteCursor createCursor(@Nonnull final DOMDataTreeIdentifier prefix) {
+    public DOMDataTreeWriteCursor createCursor(final DOMDataTreeIdentifier prefix) {
         checkAvailable(prefix);
         final YangInstanceIdentifier relativePath = toRelative(prefix.getRootIdentifier());
         final DOMDataTreeWriteCursor ret = getCursor();

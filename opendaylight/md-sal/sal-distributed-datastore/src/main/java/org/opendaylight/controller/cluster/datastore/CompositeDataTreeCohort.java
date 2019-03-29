@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
@@ -104,8 +104,7 @@ class CompositeDataTreeCohort {
     private final Executor callbackExecutor;
     private final Timeout timeout;
 
-    @Nonnull
-    private List<Success> successfulFromPrevious = Collections.emptyList();
+    private @NonNull List<Success> successfulFromPrevious = Collections.emptyList();
     private State state = State.IDLE;
 
     CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
@@ -222,8 +221,7 @@ class CompositeDataTreeCohort {
         return ret;
     }
 
-    @Nonnull
-    private CompletionStage<Void> processResponses(final List<Entry<ActorRef, Future<Object>>> futures,
+    private @NonNull CompletionStage<Void> processResponses(final List<Entry<ActorRef, Future<Object>>> futures,
             final State currentState, final State afterState) {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
         final CompletableFuture<Void> returnFuture = new CompletableFuture<>();

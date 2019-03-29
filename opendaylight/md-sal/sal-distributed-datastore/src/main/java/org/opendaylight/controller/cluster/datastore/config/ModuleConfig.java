@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.config;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
@@ -30,39 +31,33 @@ public final class ModuleConfig {
 
     ModuleConfig(final String name, final String namespace, final ShardStrategy shardStrategy,
             final Map<String, ShardConfig> shardConfigs) {
-        this.name = name;
+        this.name = requireNonNull(name);
         this.namespace = namespace;
         this.shardStrategy = shardStrategy;
         this.shardConfigs = shardConfigs;
     }
 
-    @Nonnull
-    public String getName() {
+    public @NonNull String getName() {
         return name;
     }
 
-    @Nullable
-    public String getNamespace() {
+    public @Nullable String getNamespace() {
         return namespace;
     }
 
-    @Nullable
-    public ShardStrategy getShardStrategy() {
+    public @Nullable ShardStrategy getShardStrategy() {
         return shardStrategy;
     }
 
-    @Nullable
-    public ShardConfig getShardConfig(final String forName) {
+    public @Nullable ShardConfig getShardConfig(final String forName) {
         return shardConfigs.get(forName);
     }
 
-    @Nonnull
-    public Collection<ShardConfig> getShardConfigs() {
+    public @NonNull Collection<ShardConfig> getShardConfigs() {
         return shardConfigs.values();
     }
 
-    @Nonnull
-    public Collection<String> getShardNames() {
+    public @NonNull Collection<String> getShardNames() {
         return shardConfigs.keySet();
     }
 
@@ -114,8 +109,7 @@ public final class ModuleConfig {
         }
 
         public ModuleConfig build() {
-            return new ModuleConfig(Preconditions.checkNotNull(name), nameSpace, shardStrategy,
-                    ImmutableMap.copyOf(shardConfigs));
+            return new ModuleConfig(name, nameSpace, shardStrategy, ImmutableMap.copyOf(shardConfigs));
         }
     }
 }

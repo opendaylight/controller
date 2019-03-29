@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.serialization.Serialization;
@@ -18,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
@@ -77,9 +79,8 @@ final class ShardInformation {
     }
 
     Props newProps() {
-        Preconditions.checkNotNull(builder);
-        Props props = builder.id(shardId).peerAddresses(initialPeerAddresses).datastoreContext(datastoreContext)
-                .schemaContextProvider(schemaContextProvider).props();
+        Props props = requireNonNull(builder).id(shardId).peerAddresses(initialPeerAddresses)
+                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider).props();
         builder = null;
         return props;
     }
@@ -88,8 +89,7 @@ final class ShardInformation {
         return shardName;
     }
 
-    @Nullable
-    ActorRef getActor() {
+    @Nullable ActorRef getActor() {
         return actor;
     }
 

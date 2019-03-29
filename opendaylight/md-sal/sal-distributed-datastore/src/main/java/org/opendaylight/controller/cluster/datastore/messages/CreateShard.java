@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.Shard.AbstractBuilder;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 
 /**
@@ -31,25 +33,22 @@ public class CreateShard {
      * @param shardBuilder used to obtain the Props for creating the shard actor instance.
      * @param datastoreContext the DatastoreContext for the new shard. If null, the default is used.
      */
-    public CreateShard(@Nonnull ModuleShardConfiguration moduleShardConfig,
-            @Nonnull Shard.AbstractBuilder<?, ?> shardBuilder, @Nullable DatastoreContext datastoreContext) {
-        this.moduleShardConfig = Preconditions.checkNotNull(moduleShardConfig);
-        this.shardBuilder = Preconditions.checkNotNull(shardBuilder);
+    public CreateShard(@NonNull ModuleShardConfiguration moduleShardConfig, @NonNull AbstractBuilder<?, ?> shardBuilder,
+            @Nullable DatastoreContext datastoreContext) {
+        this.moduleShardConfig = requireNonNull(moduleShardConfig);
+        this.shardBuilder = requireNonNull(shardBuilder);
         this.datastoreContext = datastoreContext;
     }
 
-    @Nonnull
-    public ModuleShardConfiguration getModuleShardConfig() {
+    public @NonNull ModuleShardConfiguration getModuleShardConfig() {
         return moduleShardConfig;
     }
 
-    @Nonnull
-    public Shard.AbstractBuilder<?, ?> getShardBuilder() {
+    public @NonNull AbstractBuilder<?, ?> getShardBuilder() {
         return shardBuilder;
     }
 
-    @Nullable
-    public DatastoreContext getDatastoreContext() {
+    public @Nullable DatastoreContext getDatastoreContext() {
         return datastoreContext;
     }
 

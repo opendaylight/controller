@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
@@ -22,10 +22,8 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * @author Robert Varga
  */
 @Beta
+@NonNullByDefault
 public interface DataStoreClient extends Identifiable<ClientIdentifier>, AutoCloseable {
-    @Override
-    @Nonnull ClientIdentifier getIdentifier();
-
     @Override
     void close();
 
@@ -34,19 +32,19 @@ public interface DataStoreClient extends Identifiable<ClientIdentifier>, AutoClo
      *
      * @return Client history handle
      */
-    @Nonnull ClientLocalHistory createLocalHistory();
+    ClientLocalHistory createLocalHistory();
 
     /**
      * Create a new free-standing snapshot.
      *
      * @return Client snapshot handle
      */
-    @Nonnull ClientSnapshot createSnapshot();
+    ClientSnapshot createSnapshot();
 
     /**
      * Create a new free-standing transaction.
      *
      * @return Client transaction handle
      */
-    @Nonnull ClientTransaction createTransaction();
+    ClientTransaction createTransaction();
 }

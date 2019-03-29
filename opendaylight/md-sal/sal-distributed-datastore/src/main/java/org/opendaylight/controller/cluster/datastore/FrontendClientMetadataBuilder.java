@@ -14,8 +14,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Collections2;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -154,7 +154,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
      * @param shard parent shard
      * @return Leader frontend state
      */
-    @Nonnull LeaderFrontendState toLeaderState(@Nonnull final Shard shard) {
+    @NonNull LeaderFrontendState toLeaderState(final @NonNull Shard shard) {
         // Note: we have to make sure to *copy* all current state and not leak any views, otherwise leader/follower
         //       interactions would get intertwined leading to inconsistencies.
         final Map<LocalHistoryIdentifier, LocalFrontendHistory> histories = new HashMap<>();

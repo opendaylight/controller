@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * An EntityOwnerSelectionStrategy is to be used by the EntityOwnershipShard to select a new owner from a collection

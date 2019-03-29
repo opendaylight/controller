@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -15,7 +14,6 @@ import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 /**
  * The LeastLoadedCandidateSelectionStrategy assigns ownership for an entity to the candidate which owns the least
@@ -31,7 +29,7 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
     }
 
     @Override
-    public String newOwner(@Nullable String currentOwner, Collection<String> viableCandidates) {
+    public String newOwner(String currentOwner, Collection<String> viableCandidates) {
         Preconditions.checkArgument(viableCandidates.size() > 0);
         String leastLoadedCandidate = null;
         long leastLoadedCount = Long.MAX_VALUE;

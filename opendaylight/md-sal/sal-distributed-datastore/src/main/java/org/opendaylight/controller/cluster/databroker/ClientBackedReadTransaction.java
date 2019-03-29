@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.databroker;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -31,8 +31,8 @@ final class ClientBackedReadTransaction extends ClientBackedTransaction<ClientSn
     @SuppressWarnings("unused")
     private volatile ClientBackedTransactionChain parent;
 
-    ClientBackedReadTransaction(final ClientSnapshot delegate, @Nullable final ClientBackedTransactionChain parent,
-        @Nullable final Throwable allocationContext) {
+    ClientBackedReadTransaction(final ClientSnapshot delegate, final @Nullable ClientBackedTransactionChain parent,
+            final @Nullable Throwable allocationContext) {
         super(delegate, allocationContext);
         this.parent = parent;
     }

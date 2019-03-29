@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 
 /**
@@ -17,6 +17,6 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
  * @author Thomas Pantelis
  */
 interface LocalTransactionReadySupport {
-    LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
+    LocalThreePhaseCommitCohort onTransactionReady(@NonNull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError);
 }

@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 import com.google.common.base.Strings;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Exception indicating a shard has no current leader.
@@ -24,6 +24,6 @@ public class NoShardLeaderException extends RuntimeException {
 
     public NoShardLeaderException(@Nullable String message, String shardName) {
         super(String.format("%sShard %s currently has no leader. Try again later.",
-                (Strings.isNullOrEmpty(message) ? "" : message + ". "), shardName));
+                Strings.isNullOrEmpty(message) ? "" : message + ". ", shardName));
     }
 }

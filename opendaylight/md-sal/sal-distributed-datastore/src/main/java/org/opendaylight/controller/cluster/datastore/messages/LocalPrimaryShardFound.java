@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
 import org.apache.commons.lang3.ObjectUtils;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 /**
@@ -22,18 +23,16 @@ public class LocalPrimaryShardFound {
     private final String primaryPath;
     private final DataTree localShardDataTree;
 
-    public LocalPrimaryShardFound(@Nonnull String primaryPath, @Nonnull DataTree localShardDataTree) {
-        this.primaryPath = Preconditions.checkNotNull(primaryPath);
-        this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
+    public LocalPrimaryShardFound(@NonNull  String primaryPath, @NonNull  DataTree localShardDataTree) {
+        this.primaryPath = requireNonNull(primaryPath);
+        this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    @Nonnull
-    public String getPrimaryPath() {
+    public @NonNull String getPrimaryPath() {
         return primaryPath;
     }
 
-    @Nonnull
-    public DataTree getLocalShardDataTree() {
+    public @NonNull DataTree getLocalShardDataTree() {
         return localShardDataTree;
     }
 

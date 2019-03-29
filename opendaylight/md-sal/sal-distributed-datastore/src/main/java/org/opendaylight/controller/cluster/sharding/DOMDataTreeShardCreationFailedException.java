@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Exception thrown when there was a at any point during the creation of a shard via {@link DistributedShardFactory}.
@@ -18,11 +17,11 @@ import javax.annotation.Nonnull;
 public class DOMDataTreeShardCreationFailedException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public DOMDataTreeShardCreationFailedException(@Nonnull final String message) {
+    public DOMDataTreeShardCreationFailedException(final @NonNull String message) {
         super(message);
     }
 
-    public DOMDataTreeShardCreationFailedException(@Nonnull final String message, @Nonnull final Throwable cause) {
+    public DOMDataTreeShardCreationFailedException(final @NonNull String message, final @NonNull Throwable cause) {
         super(message, cause);
     }
 }

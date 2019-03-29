@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
 import java.util.SortedSet;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ReadWriteShardDataTreeTransaction;
 
@@ -25,8 +25,7 @@ public class ForwardedReadyTransaction {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final boolean doImmediateCommit;
     private final short txnClientVersion;
-    @Nullable
-    private final SortedSet<String> participatingShardNames;
+    private @Nullable final SortedSet<String> participatingShardNames;
 
     public ForwardedReadyTransaction(TransactionIdentifier transactionId, short txnClientVersion,
             ReadWriteShardDataTreeTransaction transaction, boolean doImmediateCommit,

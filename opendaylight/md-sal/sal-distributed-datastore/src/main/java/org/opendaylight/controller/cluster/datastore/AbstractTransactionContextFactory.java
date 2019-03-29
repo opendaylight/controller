@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -177,8 +177,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param shardName Shard name
      * @return Future containing shard information.
      */
-    protected abstract Future<PrimaryShardInfo> findPrimaryShard(@Nonnull String shardName,
-            @Nonnull TransactionIdentifier txId);
+    protected abstract Future<PrimaryShardInfo> findPrimaryShard(@NonNull String shardName,
+            @NonNull TransactionIdentifier txId);
 
     /**
      * Create local transaction factory for specified shard, backed by specified shard leader
@@ -197,15 +197,15 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * be waited for before the next transaction is allocated.
      * @param cohortFutures Collection of futures
      */
-    protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction,
-            @Nonnull Collection<Future<T>> cohortFutures);
+    protected abstract <T> void onTransactionReady(@NonNull TransactionIdentifier transaction,
+            @NonNull Collection<Future<T>> cohortFutures);
 
     /**
      * Callback invoked when the internal TransactionContext has been created for a transaction.
      *
      * @param transactionId the ID of the transaction.
      */
-    protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId);
+    protected abstract void onTransactionContextCreated(@NonNull TransactionIdentifier transactionId);
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {

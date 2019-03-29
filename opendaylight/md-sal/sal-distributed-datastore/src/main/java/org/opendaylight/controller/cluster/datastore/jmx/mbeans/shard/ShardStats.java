@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import akka.actor.ActorRef;
@@ -15,8 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
@@ -31,6 +30,7 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static final String JMX_CATEGORY_SHARD = "Shards";
 
+    // FIXME: migrate this to Java 8 thread-safe time
     @GuardedBy("DATE_FORMAT")
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -64,7 +64,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private long lastLeadershipChangeTime;
 
-    public ShardStats(final String shardName, final String mxBeanType, @Nullable final Shard shard) {
+    public ShardStats(final String shardName, final String mxBeanType, final @Nullable Shard shard) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
         this.shard = shard;
         stateCache = new OnDemandShardStateCache(shardName, shard != null ? shard.self() : null);

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
@@ -20,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.common.api.PostCanCommitStep;
@@ -235,11 +234,9 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             }, MoreExecutors.directExecutor());
         }
 
-        @Nullable
-        abstract CohortBehaviour<?, ?> nextBehaviour(TransactionIdentifier txId, S nextStep);
+        abstract @Nullable CohortBehaviour<?, ?> nextBehaviour(TransactionIdentifier txId, S nextStep);
 
-        @Nonnull
-        abstract ListenableFuture<S> process(M command);
+        abstract @NonNull ListenableFuture<S> process(M command);
 
         abstract ListenableFuture<?> abort();
 

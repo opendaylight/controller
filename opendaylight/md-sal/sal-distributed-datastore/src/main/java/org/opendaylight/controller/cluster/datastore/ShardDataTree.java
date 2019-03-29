@@ -40,9 +40,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
@@ -221,7 +221,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      *
      * @return A state snapshot
      */
-    @Nonnull ShardDataTreeSnapshot takeStateSnapshot() {
+    @NonNull ShardDataTreeSnapshot takeStateSnapshot() {
         final NormalizedNode<?, ?> rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get();
         final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                 ImmutableMap.builder();
@@ -240,7 +240,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return !pendingTransactions.isEmpty() || !pendingCommits.isEmpty() || !pendingFinishCommits.isEmpty();
     }
 
-    private void applySnapshot(@Nonnull final ShardDataTreeSnapshot snapshot,
+    private void applySnapshot(final @NonNull ShardDataTreeSnapshot snapshot,
             final UnaryOperator<DataTreeModification> wrapper) throws DataValidationFailedException {
         final Stopwatch elapsed = Stopwatch.createStarted();
 
@@ -291,7 +291,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param snapshot Snapshot that needs to be applied
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
-    void applySnapshot(@Nonnull final ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
+    void applySnapshot(final @NonNull ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
         applySnapshot(snapshot, UnaryOperator.identity());
     }
 
@@ -313,7 +313,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param snapshot Snapshot that needs to be applied
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
-    void applyRecoverySnapshot(@Nonnull final ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
+    void applyRecoverySnapshot(final @NonNull ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
         applySnapshot(snapshot, this::wrapWithPruning);
     }
 
@@ -347,7 +347,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @throws IOException when the snapshot fails to deserialize
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
-    void applyRecoveryPayload(@Nonnull final Payload payload) throws IOException {
+    void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
         if (payload instanceof CommitTransactionPayload) {
             final Entry<TransactionIdentifier, DataTreeCandidate> e =
                     ((CommitTransactionPayload) payload).getCandidate();
@@ -446,7 +446,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void replicatePayload(final Identifier id, final Payload payload, @Nullable final Runnable callback) {
+    private void replicatePayload(final Identifier id, final Payload payload, final @Nullable Runnable callback) {
         if (callback != null) {
             replicationCallbacks.put(payload, callback);
         }
@@ -535,7 +535,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier historyId,
-            @Nullable final Runnable callback) {
+            final @Nullable Runnable callback) {
         ShardDataTreeTransactionChain chain = transactionChains.get(historyId);
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(historyId, this);
@@ -590,7 +590,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param id History identifier
      * @param callback Callback to invoke upon completion, may be null
      */
-    void closeTransactionChain(final LocalHistoryIdentifier id, @Nullable final Runnable callback) {
+    void closeTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
         final ShardDataTreeTransactionChain chain = transactionChains.get(id);
         if (chain == null) {
             LOG.debug("{}: Closing non-existent transaction chain {}", logContext, id);
@@ -611,7 +611,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param id History identifier
      * @param callback Callback to invoke upon completion, may be null
      */
-    void purgeTransactionChain(final LocalHistoryIdentifier id, @Nullable final Runnable callback) {
+    void purgeTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
         final ShardDataTreeTransactionChain chain = transactionChains.remove(id);
         if (chain == null) {
             LOG.debug("{}: Purging non-existent transaction chain {}", logContext, id);
@@ -1233,7 +1233,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void rebaseTransactions(final Iterator<CommitEntry> iter, @Nonnull final DataTreeTip newTip) {
+    private void rebaseTransactions(final Iterator<CommitEntry> iter, final @NonNull DataTreeTip newTip) {
         tip = Preconditions.checkNotNull(newTip);
         while (iter.hasNext()) {
             final SimpleShardDataTreeCohort cohort = iter.next().cohort;

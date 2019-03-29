@@ -11,8 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSelection;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -77,8 +75,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
-    public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
-            @Nullable Exception operationError) {
+    public LocalThreePhaseCommitCohort onTransactionReady(DOMStoreWriteTransaction tx, Exception operationError) {
         checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalThreePhaseCommitCohort(actorUtils, leader,

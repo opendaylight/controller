@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
@@ -26,9 +26,9 @@ public class RemoveShardReplica {
      *
      * @param shardName name of the local shard that is to be dynamically removed.
      */
-    public RemoveShardReplica(@Nonnull String shardName, @Nonnull MemberName memberName) {
-        this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
-        this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
+    public RemoveShardReplica(@NonNull String shardName, @NonNull MemberName memberName) {
+        this.shardName = requireNonNull(shardName, "shardName should not be null");
+        this.memberName = requireNonNull(memberName, "memberName should not be null");
     }
 
     public String getShardName() {

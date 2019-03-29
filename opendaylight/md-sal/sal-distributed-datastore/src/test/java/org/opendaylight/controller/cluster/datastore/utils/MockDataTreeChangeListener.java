@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -54,7 +53,7 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     }
 
     @Override
-    public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
         if (changeLatch.getCount() > 0) {
             synchronized (changeList) {
                 changeList.addAll(changes);

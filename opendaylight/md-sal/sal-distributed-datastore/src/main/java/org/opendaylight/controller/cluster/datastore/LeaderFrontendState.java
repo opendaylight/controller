@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.DeadHistoryException;
 import org.opendaylight.controller.cluster.access.commands.DestroyLocalHistoryRequest;
@@ -79,12 +80,12 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
         final UnsignedLongRangeSet purgedHistories, final AbstractFrontendHistory standaloneHistory,
         final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories) {
-        this.persistenceId = Preconditions.checkNotNull(persistenceId);
-        this.clientId = Preconditions.checkNotNull(clientId);
-        this.tree = Preconditions.checkNotNull(tree);
-        this.purgedHistories = Preconditions.checkNotNull(purgedHistories);
-        this.standaloneHistory = Preconditions.checkNotNull(standaloneHistory);
-        this.localHistories = Preconditions.checkNotNull(localHistories);
+        this.persistenceId = requireNonNull(persistenceId);
+        this.clientId = requireNonNull(clientId);
+        this.tree = requireNonNull(tree);
+        this.purgedHistories = requireNonNull(purgedHistories);
+        this.standaloneHistory = requireNonNull(standaloneHistory);
+        this.localHistories = requireNonNull(localHistories);
         this.lastSeenTicks = tree.readTime();
     }
 

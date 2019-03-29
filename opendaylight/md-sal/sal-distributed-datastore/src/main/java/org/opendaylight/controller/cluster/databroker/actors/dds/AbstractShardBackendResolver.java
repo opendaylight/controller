@@ -21,10 +21,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
@@ -63,11 +63,11 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
             stage.whenComplete(this::onStageResolved);
         }
 
-        @Nonnull CompletionStage<ShardBackendInfo> getStage() {
+        @NonNull CompletionStage<ShardBackendInfo> getStage() {
             return stage;
         }
 
-        @Nullable synchronized ShardBackendInfo getResult() {
+        synchronized @Nullable ShardBackendInfo getResult() {
             return result;
         }
 

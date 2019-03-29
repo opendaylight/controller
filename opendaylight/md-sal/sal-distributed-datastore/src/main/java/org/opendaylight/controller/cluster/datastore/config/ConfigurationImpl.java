@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.config;
 
 import com.google.common.base.Preconditions;
@@ -21,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.PrefixShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
@@ -120,9 +117,8 @@ public class ConfigurationImpl implements Configuration {
         return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName() : null;
     }
 
-    @Nullable
     @Override
-    public String getShardNameForPrefix(@Nonnull final DOMDataTreeIdentifier prefix) {
+    public String getShardNameForPrefix(final DOMDataTreeIdentifier prefix) {
         Preconditions.checkNotNull(prefix, "prefix should not be null");
 
         Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry =
@@ -196,7 +192,7 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void addPrefixShardConfiguration(@Nonnull final PrefixShardConfiguration config) {
+    public void addPrefixShardConfiguration(final PrefixShardConfiguration config) {
         Preconditions.checkNotNull(config, "PrefixShardConfiguration cannot be null");
         addPrefixConfig(config);
         allShardNames = ImmutableSet.<String>builder().addAll(allShardNames)
@@ -204,7 +200,7 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void removePrefixShardConfiguration(@Nonnull final DOMDataTreeIdentifier prefix) {
+    public void removePrefixShardConfiguration(final DOMDataTreeIdentifier prefix) {
         Preconditions.checkNotNull(prefix, "Prefix cannot be null");
 
         removePrefixConfig(prefix);
@@ -275,7 +271,7 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public ShardStrategy getStrategyForPrefix(@Nonnull final DOMDataTreeIdentifier prefix) {
+    public ShardStrategy getStrategyForPrefix(final DOMDataTreeIdentifier prefix) {
         Preconditions.checkNotNull(prefix, "Prefix cannot be null");
         // FIXME using prefix tables like in mdsal will be better
         Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry =

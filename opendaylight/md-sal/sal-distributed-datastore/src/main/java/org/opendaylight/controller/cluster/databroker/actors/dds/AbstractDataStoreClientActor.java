@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
@@ -48,7 +48,7 @@ public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
     abstract AbstractDataStoreClientBehavior initialBehavior(ClientActorContext context, ActorUtils actorUtils);
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static DataStoreClient getDistributedDataStoreClient(@Nonnull final ActorRef actor,
+    public static DataStoreClient getDistributedDataStoreClient(final @NonNull ActorRef actor,
             final long timeout, final TimeUnit unit) {
         try {
             return (DataStoreClient) Await.result(ExplicitAsk.ask(actor, GET_CLIENT_FACTORY,

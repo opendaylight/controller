@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.Shard;
 
 /**
@@ -21,7 +21,7 @@ public final class ShardMBeanFactory {
     }
 
     public static ShardStats getShardStatsMBean(final String shardName, final String mxBeanType,
-            @Nonnull final Shard shard) {
+            final @NonNull Shard shard) {
         String finalMXBeanType = mxBeanType != null ? mxBeanType : "DistDataStore";
         ShardStats shardStatsMBeanImpl = new ShardStats(shardName, finalMXBeanType, shard);
         shardStatsMBeanImpl.registerMBean();

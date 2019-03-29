@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,7 @@ abstract class AbstractTransactionContext implements TransactionContext {
     }
 
     protected AbstractTransactionContext(TransactionIdentifier transactionIdentifier, short transactionVersion) {
+        // FIXME: requireNonNull()?
         this.transactionIdentifier = transactionIdentifier;
         this.transactionVersion = transactionVersion;
     }
@@ -33,7 +34,8 @@ abstract class AbstractTransactionContext implements TransactionContext {
      *
      * @return Transaction identifier.
      */
-    @Nonnull protected final TransactionIdentifier getIdentifier() {
+    // FIXME: does this imply Identifiable?
+    protected final @NonNull TransactionIdentifier getIdentifier() {
         return transactionIdentifier;
     }
 

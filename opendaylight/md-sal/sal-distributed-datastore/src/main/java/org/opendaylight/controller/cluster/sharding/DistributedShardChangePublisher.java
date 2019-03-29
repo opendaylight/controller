@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,8 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -242,12 +241,12 @@ public class DistributedShardChangePublisher
 
         DOMDataTreeListenerWithSubshards(final YangInstanceIdentifier listenerPath,
                                          final DOMDataTreeChangeListener delegate) {
-            this.listenerPath = Preconditions.checkNotNull(listenerPath);
-            this.delegate = Preconditions.checkNotNull(delegate);
+            this.listenerPath = requireNonNull(listenerPath);
+            this.delegate = requireNonNull(delegate);
         }
 
         @Override
-        public synchronized void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+        public synchronized void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
             LOG.debug("Received data changed {}", changes);
 
             if (!stashedDataTreeCandidates.isEmpty()) {
@@ -300,7 +299,7 @@ public class DistributedShardChangePublisher
         }
 
         void addSubshard(final ChildShardContext context) {
-            Preconditions.checkState(context.getShard() instanceof DOMStoreTreeChangePublisher,
+            checkState(context.getShard() instanceof DOMStoreTreeChangePublisher,
                     "All subshards that are initialDataChangeEvent part of ListenerContext need to be listenable");
 
             final DOMStoreTreeChangePublisher listenableShard = (DOMStoreTreeChangePublisher) context.getShard();
@@ -324,41 +323,35 @@ public class DistributedShardChangePublisher
         private final PathArgument identifier;
 
         EmptyDataTreeCandidateNode(final PathArgument identifier) {
-            this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
+            this.identifier = requireNonNull(identifier, "Identifier should not be null");
         }
 
-        @Nonnull
         @Override
         public PathArgument getIdentifier() {
             return identifier;
         }
 
-        @Nonnull
         @Override
         public Collection<DataTreeCandidateNode> getChildNodes() {
             return Collections.emptySet();
         }
 
-        @Nullable
         @Override
         @SuppressWarnings("checkstyle:hiddenField")
         public DataTreeCandidateNode getModifiedChild(final PathArgument identifier) {
             return null;
         }
 
-        @Nonnull
         @Override
         public ModificationType getModificationType() {
             return ModificationType.UNMODIFIED;
         }
 
-        @Nonnull
         @Override
         public Optional<NormalizedNode<?, ?>> getDataAfter() {
             return Optional.empty();
         }
 
-        @Nonnull
         @Override
         public Optional<NormalizedNode<?, ?>> getDataBefore() {
             return Optional.empty();
