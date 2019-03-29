@@ -232,6 +232,12 @@ module cluster-admin {
               type string;
               description "The path and name of the file in which to store the backup.";
             }
+
+            leaf timeout {
+              type uint32;
+              description "Optional timeout in seconds for the backup operation which will override all the different
+                           timeouts that are being hit on the backend.";
+            }
         }
 
         description "Creates a backup file of the datastore state";
