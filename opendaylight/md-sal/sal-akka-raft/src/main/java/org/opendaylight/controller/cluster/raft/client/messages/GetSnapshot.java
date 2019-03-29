@@ -7,15 +7,25 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
+import akka.util.Timeout;
+import java.util.Optional;
+
 /**
- * Internal client message to get a snapshot of the current state based on whether or not persistence is
- * enabled. Returns a {@link GetSnapshotReply} instance.
+ * Internal client message to get a snapshot of the current state based on whether or not persistence is enabled.
+ * Returns a {@link GetSnapshotReply} instance.
  *
  * @author Thomas Pantelis
  */
 public final class GetSnapshot {
-    public static final GetSnapshot INSTANCE = new GetSnapshot();
+    public static final GetSnapshot INSTANCE = new GetSnapshot(null);
 
-    private GetSnapshot() {
+    private final Timeout timeout;
+
+    public GetSnapshot(final Timeout timeout) {
+        this.timeout = timeout;
+    }
+
+    public Optional<Timeout> getTimeout() {
+        return Optional.ofNullable(timeout);
     }
 }
