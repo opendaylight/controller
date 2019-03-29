@@ -622,9 +622,15 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             return newFailedRpcResultFuture("A valid file path must be specified");
         }
 
+        final Timeout opTimeout =
+                input.getTimeout() != null
+                        ? new Timeout(input.getTimeout().longValue() == 0
+                        ? SHARD_MGR_TIMEOUT.duration().toSeconds() : input.getTimeout().longValue(), TimeUnit.SECONDS)
+                        : SHARD_MGR_TIMEOUT;
+
         final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture = SettableFuture.create();
-        ListenableFuture<List<DatastoreSnapshot>> future = sendMessageToShardManagers(GetSnapshot.INSTANCE);
-        Futures.addCallback(future, new FutureCallback<List<DatastoreSnapshot>>() {
+        ListenableFuture<List<DatastoreSnapshot>> future = sendMessageToShardManagers(new GetSnapshot(opTimeout));
+        Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final List<DatastoreSnapshot> snapshots) {
                 saveSnapshotsToFile(new DatastoreSnapshotList(snapshots), input.getFilePath(), returnFuture);

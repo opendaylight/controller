@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
+import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.Optional;
@@ -69,7 +70,7 @@ class RaftActorSnapshotMessageSupport {
         } else if (COMMIT_SNAPSHOT.equals(message)) {
             context.getSnapshotManager().commit(-1, -1);
         } else if (message instanceof GetSnapshot) {
-            onGetSnapshot(sender);
+            onGetSnapshot(sender, (GetSnapshot) message);
         } else {
             return false;
         }
@@ -105,16 +106,21 @@ class RaftActorSnapshotMessageSupport {
         context.getSnapshotManager().apply(message);
     }
 
-    private void onGetSnapshot(ActorRef sender) {
+    private void onGetSnapshot(ActorRef sender, GetSnapshot getSnapshot) {
         log.debug("{}: onGetSnapshot", context.getId());
+
 
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             CaptureSnapshot captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
                     context.getReplicatedLog().last(), -1);
 
+            final FiniteDuration timeout =
+                    getSnapshot.getTimeout().map(Timeout::duration).orElse(snapshotReplyActorTimeout);
+
             ActorRef snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
                     ImmutableElectionTerm.copyOf(context.getTermInformation()), sender,
-                    snapshotReplyActorTimeout, context.getId(), context.getPeerServerInfo(true)));
+                    timeout.toSeconds() == 0 ? snapshotReplyActorTimeout : timeout,
+                    context.getId(), context.getPeerServerInfo(true)));
 
             cohort.createSnapshot(snapshotReplyActor, Optional.empty());
         } else {
