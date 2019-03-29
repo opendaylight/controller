@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeFromEntityPath;
@@ -15,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -37,7 +35,7 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
     }
 
     @Override
-    public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
         for (DataTreeCandidate change : changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
             LeafNode<?> ownerLeaf = (LeafNode<?>) changeRoot.getDataAfter().get();

@@ -7,13 +7,15 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -60,7 +62,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier, final boolean isDone) {
         super(parent, isDone);
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
     }
 
     @Override
@@ -68,8 +70,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         return identifier;
     }
 
-    @Nonnull
-    abstract DataTreeSnapshot readOnlyView();
+    abstract @NonNull DataTreeSnapshot readOnlyView();
 
     abstract void applyForwardedModifyTransactionRequest(ModifyTransactionRequest request,
             @Nullable Consumer<Response<?, ?>> callback);
@@ -102,8 +103,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         }
     }
 
-    private boolean handleReadRequest(final TransactionRequest<?> request,
-            @Nullable final Consumer<Response<?, ?>> callback) {
+    private boolean handleReadRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         // Note we delay completion of read requests to limit the scope at which the client can run, as they have
         // listeners, which we do not want to execute while we are reconnecting.
         if (request instanceof ReadTransactionRequest) {
@@ -132,8 +132,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    void handleReplayedRemoteRequest(final TransactionRequest<?> request,
-            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+    void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
         if (request instanceof ModifyTransactionRequest) {
             replayModifyTransactionRequest((ModifyTransactionRequest) request, callback, enqueuedTicks);
         } else if (handleReadRequest(request, callback)) {

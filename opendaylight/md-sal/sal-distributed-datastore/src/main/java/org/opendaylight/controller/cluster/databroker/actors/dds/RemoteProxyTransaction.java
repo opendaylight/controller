@@ -14,7 +14,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
@@ -434,8 +433,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    void handleReplayedRemoteRequest(final TransactionRequest<?> request,
-            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+    void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
         final Consumer<Response<?, ?>> cb = callback != null ? callback : resp -> { /* NOOP */ };
         final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
 

@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.FinalizablePhantomReference;
 import com.google.common.base.FinalizableReferenceQueue;
-import com.google.common.base.Preconditions;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
@@ -41,14 +42,13 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
         private Finalizer(final ClientBackedTransaction<?> referent, final AbstractClientHandle<?> transaction,
                 final Throwable allocationContext) {
             super(referent, QUEUE);
-            this.transaction = Preconditions.checkNotNull(transaction);
+            this.transaction = requireNonNull(transaction);
             this.allocationContext = allocationContext;
         }
 
-        @Nonnull
-        static <T extends AbstractClientHandle<?>> T recordTransaction(
-                @Nonnull final ClientBackedTransaction<T> referent, @Nonnull final T transaction,
-                @Nullable final Throwable allocationContext) {
+        static <T extends AbstractClientHandle<?>> @NonNull T recordTransaction(
+                final @NonNull ClientBackedTransaction<T> referent, final @NonNull T transaction,
+                final @Nullable Throwable allocationContext) {
             FINALIZERS.add(new Finalizer(referent, transaction, allocationContext));
             return transaction;
         }

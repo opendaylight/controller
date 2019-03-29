@@ -7,13 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
@@ -72,7 +74,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final RequestException cause;
 
         Failed(final RequestException cause) {
-            this.cause = Preconditions.checkNotNull(cause);
+            this.cause = requireNonNull(cause);
         }
 
         @Override
@@ -85,7 +87,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final ReadWriteShardDataTreeTransaction openTransaction;
 
         Open(final ReadWriteShardDataTreeTransaction openTransaction) {
-            this.openTransaction = Preconditions.checkNotNull(openTransaction);
+            this.openTransaction = requireNonNull(openTransaction);
         }
 
         @Override
@@ -99,7 +101,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         CommitStage stage;
 
         Ready(final ShardDataTreeCohort readyCohort) {
-            this.readyCohort = Preconditions.checkNotNull(readyCohort);
+            this.readyCohort = requireNonNull(readyCohort);
             this.stage = CommitStage.READY;
         }
 
@@ -113,7 +115,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final DataTreeModification sealedModification;
 
         Sealed(final DataTreeModification sealedModification) {
-            this.sealedModification = Preconditions.checkNotNull(sealedModification);
+            this.sealedModification = requireNonNull(sealedModification);
         }
 
         @Override
@@ -184,7 +186,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     // Sequence has already been checked
     @Override
-    @Nullable TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
+    TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
         if (request instanceof ModifyTransactionRequest) {
             return handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
@@ -556,8 +558,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
-    @Nullable
-    private TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
+    private @Nullable TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         // We need to examine the persistence protocol first to see if this is an idempotent request. If there is no
         // protocol, there is nothing for us to do.
@@ -619,20 +620,17 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     }
 
     private ReadWriteShardDataTreeTransaction checkOpen() {
-        Preconditions.checkState(state instanceof Open, "%s expect to be open, is in state %s", getIdentifier(),
-            state);
+        checkState(state instanceof Open, "%s expect to be open, is in state %s", getIdentifier(), state);
         return ((Open) state).openTransaction;
     }
 
     private Ready checkReady() {
-        Preconditions.checkState(state instanceof Ready, "%s expect to be ready, is in state %s", getIdentifier(),
-            state);
+        checkState(state instanceof Ready, "%s expect to be ready, is in state %s", getIdentifier(), state);
         return (Ready) state;
     }
 
     private DataTreeModification checkSealed() {
-        Preconditions.checkState(state instanceof Sealed, "%s expect to be sealed, is in state %s", getIdentifier(),
-            state);
+        checkState(state instanceof Sealed, "%s expect to be sealed, is in state %s", getIdentifier(), state);
         return ((Sealed) state).sealedModification;
     }
 

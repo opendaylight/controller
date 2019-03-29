@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nullable;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
@@ -19,7 +19,7 @@ final class SwitchShardBehavior {
     private final long term;
 
     SwitchShardBehavior(final ShardIdentifier shardId, final RaftState newState, final long term) {
-        this.newState = Preconditions.checkNotNull(newState);
+        this.newState = requireNonNull(newState);
         this.shardId = shardId;
         this.term = term;
     }

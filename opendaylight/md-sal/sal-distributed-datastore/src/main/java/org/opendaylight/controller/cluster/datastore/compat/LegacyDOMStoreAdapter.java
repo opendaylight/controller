@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.compat;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.md.sal.common.api.MappingCheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -95,22 +96,22 @@ public class LegacyDOMStoreAdapter extends ForwardingObject implements DOMStore,
         private final org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction writeDelegate;
         private final Object identifier;
 
-        DOMStoreTransactionAdapter(@Nonnull org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction readDelegate) {
-            this.readDelegate = Preconditions.checkNotNull(readDelegate);
+        DOMStoreTransactionAdapter(org.opendaylight.mdsal.dom.spi.store.@NonNull DOMStoreReadTransaction readDelegate) {
+            this.readDelegate = requireNonNull(readDelegate);
             this.identifier = readDelegate.getIdentifier();
             this.writeDelegate = null;
         }
 
         DOMStoreTransactionAdapter(
-                @Nonnull org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction writeDelegate) {
-            this.writeDelegate = Preconditions.checkNotNull(writeDelegate);
+                org.opendaylight.mdsal.dom.spi.store.@NonNull DOMStoreWriteTransaction writeDelegate) {
+            this.writeDelegate = requireNonNull(writeDelegate);
             this.identifier = writeDelegate.getIdentifier();
             this.readDelegate = null;
         }
 
         DOMStoreTransactionAdapter(
-                @Nonnull org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction rwDelegate) {
-            this.readDelegate = Preconditions.checkNotNull(rwDelegate);
+                org.opendaylight.mdsal.dom.spi.store.@NonNull DOMStoreReadWriteTransaction rwDelegate) {
+            this.readDelegate = requireNonNull(rwDelegate);
             this.writeDelegate = rwDelegate;
             this.identifier = readDelegate.getIdentifier();
         }

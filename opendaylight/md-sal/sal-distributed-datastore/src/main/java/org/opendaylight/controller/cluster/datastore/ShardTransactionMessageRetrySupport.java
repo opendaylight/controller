@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Status.Failure;
@@ -31,11 +33,11 @@ class ShardTransactionMessageRetrySupport implements Closeable {
     private final Set<MessageInfo> messagesToRetry = new LinkedHashSet<>();
     private final Shard shard;
 
-    ShardTransactionMessageRetrySupport(Shard shard) {
+    ShardTransactionMessageRetrySupport(final Shard shard) {
         this.shard = shard;
     }
 
-    void addMessageToRetry(Object message, ActorRef replyTo, String failureMessage) {
+    void addMessageToRetry(final Object message, final ActorRef replyTo, final String failureMessage) {
         LOG.debug("{}: Adding message {} to retry", shard.persistenceId(), message);
 
         MessageInfo messageInfo = new MessageInfo(message, replyTo, failureMessage);
@@ -61,7 +63,7 @@ class ShardTransactionMessageRetrySupport implements Closeable {
         }
     }
 
-    void onTimerMessage(Object message) {
+    void onTimerMessage(final Object message) {
         MessageInfo messageInfo = (MessageInfo)message;
 
         LOG.debug("{}: Timer expired for message {}", shard.persistenceId(), messageInfo.message);
@@ -85,18 +87,18 @@ class ShardTransactionMessageRetrySupport implements Closeable {
         final String failureMessage;
         Cancellable timer;
 
-        MessageInfo(Object message, ActorRef replyTo, String failureMessage) {
+        MessageInfo(final Object message, final ActorRef replyTo, final String failureMessage) {
             this.message = message;
             this.replyTo = replyTo;
-            this.failureMessage = failureMessage;
+            this.failureMessage = requireNonNull(failureMessage);
         }
 
-        void retry(Shard shard) {
+        void retry(final Shard shard) {
             timer.cancel();
             shard.getSelf().tell(message, replyTo);
         }
 
-        void timedOut(Shard shard) {
+        void timedOut(final Shard shard) {
             replyTo.tell(new Failure(new NoShardLeaderException(failureMessage, shard.persistenceId())),
                     shard.getSelf());
         }

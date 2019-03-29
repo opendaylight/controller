@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -74,8 +74,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         return tree.readTime();
     }
 
-    @Nullable
-    final TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
+    final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         if (request instanceof TransactionPurgeRequest) {
             return handleTransactionPurgeRequest(request, envelope, now);

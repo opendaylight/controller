@@ -12,8 +12,8 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -124,7 +124,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
      *
      * @return Leader frontend state
      */
-    @Nonnull Map<FrontendIdentifier, LeaderFrontendState> toLeaderState(@Nonnull final Shard shard) {
+    @NonNull Map<FrontendIdentifier, LeaderFrontendState> toLeaderState(final @NonNull Shard shard) {
         return new HashMap<>(Maps.transformValues(clients, meta -> meta.toLeaderState(shard)));
     }
 }

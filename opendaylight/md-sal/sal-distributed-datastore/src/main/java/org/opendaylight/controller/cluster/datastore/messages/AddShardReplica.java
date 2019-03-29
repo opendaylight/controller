@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A message sent to the ShardManager to dynamically add a new local shard
@@ -26,9 +26,8 @@ public class AddShardReplica {
      *
      * @param shardName name of the shard that is to be locally replicated.
      */
-
-    public AddShardReplica(@Nonnull String shardName) {
-        this.shardName = Preconditions.checkNotNull(shardName, "ShardName should not be null");
+    public AddShardReplica(@NonNull String shardName) {
+        this.shardName = requireNonNull(shardName, "ShardName should not be null");
     }
 
     public String getShardName() {

@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
@@ -41,7 +42,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
     private FrontendReadOnlyTransaction(final AbstractFrontendHistory history,
             final ReadOnlyShardDataTreeTransaction transaction) {
         super(history, transaction.getIdentifier());
-        this.openTransaction = Preconditions.checkNotNull(transaction);
+        this.openTransaction = requireNonNull(transaction);
     }
 
     static FrontendReadOnlyTransaction create(final AbstractFrontendHistory history,
@@ -51,7 +52,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
 
     // Sequence has already been checked
     @Override
-    @Nullable TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
+    TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
         if (request instanceof ExistsTransactionRequest) {
             return handleExistsTransaction((ExistsTransactionRequest) request);
@@ -75,9 +76,8 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
             final long now) {
         // The only valid request here is with abort protocol
         final Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
-        Preconditions.checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
-        Preconditions.checkArgument(optProto.get() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s",
-                request);
+        checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
+        checkArgument(optProto.get() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s", request);
         openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
             new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
     }

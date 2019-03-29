@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 import com.google.common.base.Strings;
-import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 
 /**
  * Exception indicating a shard has no current leader.
@@ -18,12 +18,16 @@ import javax.annotation.Nullable;
 public class NoShardLeaderException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public NoShardLeaderException(String message) {
+    public NoShardLeaderException(final String message) {
         super(message);
     }
 
-    public NoShardLeaderException(@Nullable String message, String shardName) {
+    public NoShardLeaderException(final String message, final String shardName) {
         super(String.format("%sShard %s currently has no leader. Try again later.",
-                (Strings.isNullOrEmpty(message) ? "" : message + ". "), shardName));
+                Strings.isNullOrEmpty(message) ? "" : message + ". ", shardName));
+    }
+
+    public NoShardLeaderException(final ShardIdentifier shardId) {
+        this("Shard " + shardId + " currently has no leader. Try again later.");
     }
 }

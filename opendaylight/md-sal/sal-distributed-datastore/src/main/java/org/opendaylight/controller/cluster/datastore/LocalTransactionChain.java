@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.AbstractSnapshotBackedTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -34,9 +34,9 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     private final DataTree tree;
 
     LocalTransactionChain(final TransactionChainProxy parent, final ActorSelection leader, final DataTree tree) {
-        this.parent = Preconditions.checkNotNull(parent);
-        this.leader = Preconditions.checkNotNull(leader);
-        this.tree = Preconditions.checkNotNull(tree);
+        this.parent = requireNonNull(parent);
+        this.leader = requireNonNull(leader);
+        this.tree = requireNonNull(tree);
     }
 
     DataTree getDataTree() {
@@ -83,9 +83,8 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
-    public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
-            @Nullable Exception operationError) {
-        Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
+    public LocalThreePhaseCommitCohort onTransactionReady(DOMStoreWriteTransaction tx, Exception operationError) {
+        checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx,
                     operationError);

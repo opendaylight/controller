@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 final class ClientBackedReadWriteTransaction extends ClientBackedWriteTransaction
         implements DOMStoreReadWriteTransaction {
 
-    ClientBackedReadWriteTransaction(final ClientTransaction delegate, @Nullable final Throwable allocationContext) {
+    ClientBackedReadWriteTransaction(final ClientTransaction delegate, final @Nullable Throwable allocationContext) {
         super(delegate, allocationContext);
     }
 

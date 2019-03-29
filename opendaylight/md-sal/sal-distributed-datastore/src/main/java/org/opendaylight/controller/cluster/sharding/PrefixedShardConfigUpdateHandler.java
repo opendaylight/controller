@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
@@ -89,7 +88,7 @@ public class PrefixedShardConfigUpdateHandler {
         }
 
         @Override
-        public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+        public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
             changes.forEach(this::resolveChange);
         }
 

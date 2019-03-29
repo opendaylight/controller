@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -95,7 +95,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      * @return null if this snapshot has already been closed, otherwise a collection of proxies, which need to be
      *         closed, too.
      */
-    @Nullable final Collection<T> ensureClosed() {
+    final @Nullable Collection<T> ensureClosed() {
         @SuppressWarnings("unchecked")
         final State<T> local = STATE_UPDATER.getAndSet(this, null);
         return local == null ? null : local.values();

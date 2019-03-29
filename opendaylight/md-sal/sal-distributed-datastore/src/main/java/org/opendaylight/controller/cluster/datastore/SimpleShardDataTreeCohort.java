@@ -17,7 +17,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.concurrent.CompletionStage;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
@@ -32,8 +32,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private final ShardDataTree dataTree;
     private final TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
-    @Nullable
-    private final SortedSet<String> participatingShardNames;
+    private final @Nullable SortedSet<String> participatingShardNames;
 
     private State state = State.READY;
     private DataTreeCandidateTip candidate;

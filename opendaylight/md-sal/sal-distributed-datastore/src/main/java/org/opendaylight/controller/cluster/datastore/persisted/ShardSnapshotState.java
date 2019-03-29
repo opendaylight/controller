@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -60,12 +61,11 @@ public class ShardSnapshotState implements Snapshot.State {
             + "aren't serialized. FindBugs does not recognize this.")
     private final ShardDataTreeSnapshot snapshot;
 
-    public ShardSnapshotState(@Nonnull final ShardDataTreeSnapshot snapshot) {
-        this.snapshot = Preconditions.checkNotNull(snapshot);
+    public ShardSnapshotState(final @NonNull ShardDataTreeSnapshot snapshot) {
+        this.snapshot = requireNonNull(snapshot);
     }
 
-    @Nonnull
-    public ShardDataTreeSnapshot getSnapshot() {
+    public @NonNull ShardDataTreeSnapshot getSnapshot() {
         return snapshot;
     }
 

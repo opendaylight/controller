@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -31,13 +30,12 @@ class ShardProxyProducer implements DOMDataTreeShardProducer {
                        final Collection<DOMDataTreeIdentifier> prefixes,
                        final DataStoreClient client,
                        final DistributedShardModificationFactory modificationFactory) {
-        this.shardRoot = Preconditions.checkNotNull(shardRoot);
-        this.prefixes = ImmutableList.copyOf(Preconditions.checkNotNull(prefixes));
-        this.modificationFactory = Preconditions.checkNotNull(modificationFactory);
-        history = Preconditions.checkNotNull(client).createLocalHistory();
+        this.shardRoot = requireNonNull(shardRoot);
+        this.prefixes = ImmutableList.copyOf(prefixes);
+        this.modificationFactory = requireNonNull(modificationFactory);
+        history = requireNonNull(client).createLocalHistory();
     }
 
-    @Nonnull
     @Override
     public Collection<DOMDataTreeIdentifier> getPrefixes() {
         return prefixes;
@@ -54,7 +52,6 @@ class ShardProxyProducer implements DOMDataTreeShardProducer {
     }
 
     void setModificationFactory(final DistributedShardModificationFactory modificationFactory) {
-        this.modificationFactory = Preconditions.checkNotNull(modificationFactory);
+        this.modificationFactory = requireNonNull(modificationFactory);
     }
 }
-

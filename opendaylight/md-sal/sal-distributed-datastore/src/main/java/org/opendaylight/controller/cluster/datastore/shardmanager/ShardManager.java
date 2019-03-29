@@ -319,7 +319,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void onRegisterForShardAvailabilityChanges(RegisterForShardAvailabilityChanges message) {
+    private void onRegisterForShardAvailabilityChanges(final RegisterForShardAvailabilityChanges message) {
         LOG.debug("{}: onRegisterForShardAvailabilityChanges: {}", persistenceId(), message);
 
         final Consumer<String> callback = message.getCallback();
@@ -787,7 +787,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void notifyShardAvailabilityCallbacks(ShardInformation shardInformation) {
+    private void notifyShardAvailabilityCallbacks(final ShardInformation shardInformation) {
         shardAvailabilityCallbacks.forEach(callback -> callback.accept(shardInformation.getShardName()));
     }
 
@@ -804,7 +804,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             message.getSender().tell(createNotInitializedException(shardInfo.getShardId()), getSelf());
         } else {
             LOG.debug("{}: Returning NoShardLeaderException for shard {}", persistenceId(), shardInfo.getShardName());
-            message.getSender().tell(createNoShardLeaderException(shardInfo.getShardId()), getSelf());
+            message.getSender().tell(new NoShardLeaderException(shardInfo.getShardId()), getSelf());
         }
     }
 
@@ -963,17 +963,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             } else {
                 LOG.debug("{}: Returning NoShardLeaderException for shard {}", persistenceId(),
                         shardInformation.getShardName());
-                getSender().tell(createNoShardLeaderException(shardInformation.getShardId()), getSelf());
+                getSender().tell(new NoShardLeaderException(shardInformation.getShardId()), getSelf());
             }
 
             return;
         }
 
         getSender().tell(messageSupplier.get(), getSelf());
-    }
-
-    private static NoShardLeaderException createNoShardLeaderException(final ShardIdentifier shardId) {
-        return new NoShardLeaderException(null, shardId.toString());
     }
 
     private static NotInitializedException createNotInitializedException(final ShardIdentifier shardId) {
@@ -1588,7 +1584,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         + "Possible causes - there was a problem replicating the data or shard leadership changed "
                         + "while replicating the shard data", leaderPath, shardId.getShardName()));
             case NO_LEADER:
-                return createNoShardLeaderException(shardId);
+                return new NoShardLeaderException(shardId);
             case NOT_SUPPORTED:
                 return new UnsupportedOperationException(String.format("%s request is not supported for shard %s",
                         serverChange.getSimpleName(), shardId.getShardName()));

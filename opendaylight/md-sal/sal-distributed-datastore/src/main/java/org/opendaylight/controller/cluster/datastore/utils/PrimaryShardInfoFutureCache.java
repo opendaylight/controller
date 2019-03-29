@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.dispatch.Futures;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import scala.concurrent.Future;
 
@@ -23,16 +23,15 @@ import scala.concurrent.Future;
 public class PrimaryShardInfoFutureCache {
     private final Cache<String, Future<PrimaryShardInfo>> primaryShardInfoCache = CacheBuilder.newBuilder().build();
 
-    @Nullable
-    public Future<PrimaryShardInfo> getIfPresent(@Nonnull String shardName) {
+    public @Nullable Future<PrimaryShardInfo> getIfPresent(@NonNull String shardName) {
         return primaryShardInfoCache.getIfPresent(shardName);
     }
 
-    public void putSuccessful(@Nonnull String shardName, @Nonnull PrimaryShardInfo info) {
+    public void putSuccessful(@NonNull String shardName, @NonNull PrimaryShardInfo info) {
         primaryShardInfoCache.put(shardName, Futures.successful(info));
     }
 
-    public void remove(@Nonnull String shardName) {
+    public void remove(@NonNull String shardName) {
         primaryShardInfoCache.invalidate(shardName);
     }
 }

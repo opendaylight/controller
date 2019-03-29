@@ -16,7 +16,7 @@ import java.io.ObjectOutput;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
@@ -33,8 +33,8 @@ public class BatchedModifications extends MutableCompositeModification {
     private boolean doCommitOnReady;
     private int totalMessagesSent;
     private TransactionIdentifier transactionId;
-    @Nullable
-    private SortedSet<String> participatingShardNames;
+
+    private @Nullable SortedSet<String> participatingShardNames;
 
     public BatchedModifications() {
     }

@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 /**
@@ -23,15 +24,15 @@ public class PrimaryShardInfo {
     private final short primaryShardVersion;
     private final DataTree localShardDataTree;
 
-    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion,
-            @Nonnull DataTree localShardDataTree) {
-        this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
+    public PrimaryShardInfo(@NonNull ActorSelection primaryShardActor, short primaryShardVersion,
+            @NonNull DataTree localShardDataTree) {
+        this.primaryShardActor = requireNonNull(primaryShardActor);
         this.primaryShardVersion = primaryShardVersion;
-        this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
+        this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion) {
-        this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
+    public PrimaryShardInfo(@NonNull ActorSelection primaryShardActor, short primaryShardVersion) {
+        this.primaryShardActor = requireNonNull(primaryShardActor);
         this.primaryShardVersion = primaryShardVersion;
         this.localShardDataTree = null;
     }
@@ -39,8 +40,7 @@ public class PrimaryShardInfo {
     /**
      * Returns an ActorSelection representing the primary shard actor.
      */
-    @Nonnull
-    public ActorSelection getPrimaryShardActor() {
+    public @NonNull ActorSelection getPrimaryShardActor() {
         return primaryShardActor;
     }
 
@@ -55,8 +55,7 @@ public class PrimaryShardInfo {
      * Returns an Optional whose value contains the primary shard's DataTree if the primary shard is local
      * to the caller. Otherwise the Optional value is absent.
      */
-    @Nonnull
-    public Optional<DataTree> getLocalShardDataTree() {
+    public @NonNull Optional<DataTree> getLocalShardDataTree() {
         return Optional.ofNullable(localShardDataTree);
     }
 }

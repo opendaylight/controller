@@ -5,15 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import static akka.actor.ActorRef.noSender;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Base class for lookup tasks. Lookup tasks are supposed to run repeatedly
@@ -32,7 +31,7 @@ abstract class LookupTask implements Runnable {
 
     abstract void reschedule(int retries);
 
-    void tryReschedule(@Nullable final Throwable throwable) {
+    void tryReschedule(final @Nullable Throwable throwable) {
         if (retried <= maxRetries) {
             retried++;
             reschedule(retried);
@@ -41,7 +40,7 @@ abstract class LookupTask implements Runnable {
         }
     }
 
-    void fail(@Nullable final Throwable throwable) {
+    void fail(final @Nullable Throwable throwable) {
         if (throwable == null) {
             replyTo.tell(new Status.Failure(
                     new DOMDataTreeShardCreationFailedException("Unable to find the backend shard."

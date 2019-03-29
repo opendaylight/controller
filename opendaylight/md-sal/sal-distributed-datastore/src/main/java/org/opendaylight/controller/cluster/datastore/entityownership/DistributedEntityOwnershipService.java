@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -213,7 +212,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     }
 
     @Override
-    public boolean isCandidateRegistered(@Nonnull final DOMEntity entity) {
+    public boolean isCandidateRegistered(final DOMEntity entity) {
         return registeredEntities.get(entity) != null;
     }
 

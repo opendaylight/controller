@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
@@ -57,7 +58,7 @@ public enum PayloadVersion implements WritableObject {
     private final short value;
 
     PayloadVersion(final int intVersion) {
-        Preconditions.checkArgument(intVersion >= 0 && intVersion <= 65535);
+        checkArgument(intVersion >= 0 && intVersion <= 65535);
         value = (short) intVersion;
     }
 
@@ -76,8 +77,7 @@ public enum PayloadVersion implements WritableObject {
      *
      * @return Current {@link PayloadVersion}
      */
-    @Nonnull
-    public static PayloadVersion current() {
+    public static @NonNull PayloadVersion current() {
         return BORON;
     }
 
@@ -90,8 +90,8 @@ public enum PayloadVersion implements WritableObject {
      * @throws FutureVersionException if the specified integer identifies a future version
      * @throws PastVersionException if the specified integer identifies a past version which is no longer supported
      */
-    @Nonnull
-    public static PayloadVersion valueOf(final short version) throws FutureVersionException, PastVersionException {
+    public static @NonNull PayloadVersion valueOf(final short version)
+            throws FutureVersionException, PastVersionException {
         switch (Short.toUnsignedInt(version)) {
             case 0:
             case 1:
@@ -119,8 +119,7 @@ public enum PayloadVersion implements WritableObject {
      * @return An {@link PayloadVersion}
      * @throws IOException If read fails or an unsupported version is encountered
      */
-    @Nonnull
-    public static PayloadVersion readFrom(@Nonnull final DataInput in) throws IOException {
+    public static @NonNull PayloadVersion readFrom(final @NonNull DataInput in) throws IOException {
         final short s = in.readShort();
         try {
             return valueOf(s);

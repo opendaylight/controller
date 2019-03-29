@@ -13,7 +13,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
@@ -116,7 +116,7 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         return parent().onTransactionReady(this, cohort);
     }
 
-    void closeCursor(@Nonnull final DOMDataTreeCursor cursorToClose) {
+    void closeCursor(final @NonNull DOMDataTreeCursor cursorToClose) {
         if (cursorToClose.equals(this.cursor)) {
             this.cursor = null;
         }

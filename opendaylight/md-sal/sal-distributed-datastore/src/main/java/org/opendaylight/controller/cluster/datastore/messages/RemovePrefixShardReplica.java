@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -27,10 +27,10 @@ public class RemovePrefixShardReplica {
      *
      * @param prefix prefix of the local shard that is to be dynamically removed.
      */
-    public RemovePrefixShardReplica(@Nonnull final YangInstanceIdentifier prefix,
-                                    @Nonnull final MemberName memberName) {
-        this.prefix = Preconditions.checkNotNull(prefix, "prefix should not be null");
-        this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
+    public RemovePrefixShardReplica(final @NonNull YangInstanceIdentifier prefix,
+                                    final @NonNull MemberName memberName) {
+        this.prefix = requireNonNull(prefix, "prefix should not be null");
+        this.memberName = requireNonNull(memberName, "memberName should not be null");
     }
 
     public YangInstanceIdentifier getShardPrefix() {

@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
 import akka.testkit.TestProbe;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
@@ -84,20 +84,19 @@ class TransactionTester<T extends AbstractProxyTransaction> {
     private static class MockFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
         private static final long serialVersionUID = 1L;
 
-        MockFailure(@Nonnull final TransactionIdentifier target, final long sequence,
-                            @Nonnull final RequestException cause) {
+        MockFailure(final @NonNull TransactionIdentifier target, final long sequence,
+                            final @NonNull RequestException cause) {
             super(target, sequence, cause);
         }
 
-        @Nonnull
         @Override
-        protected TransactionFailure cloneAsVersion(@Nonnull final ABIVersion targetVersion) {
+        protected TransactionFailure cloneAsVersion(final ABIVersion targetVersion) {
             throw new UnsupportedOperationException("Not implemented");
         }
 
         @Override
         protected AbstractRequestFailureProxy<TransactionIdentifier, TransactionFailure> externalizableProxy(
-                @Nonnull final ABIVersion version) {
+                final ABIVersion version) {
             throw new UnsupportedOperationException("Not implemented");
         }
     }

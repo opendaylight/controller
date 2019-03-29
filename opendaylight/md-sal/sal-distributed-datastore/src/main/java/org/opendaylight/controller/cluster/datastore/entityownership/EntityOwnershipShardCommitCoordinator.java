@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -226,8 +226,7 @@ class EntityOwnershipShardCommitCoordinator {
         }
     }
 
-    @Nullable
-    private BatchedModifications pruneModifications(BatchedModifications toPrune) {
+    private @Nullable BatchedModifications pruneModifications(BatchedModifications toPrune) {
         BatchedModifications prunedModifications = new BatchedModifications(toPrune.getTransactionId(),
                 toPrune.getVersion());
         prunedModifications.setDoCommitOnReady(toPrune.isDoCommitOnReady());

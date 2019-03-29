@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import static akka.actor.ActorRef.noSender;
@@ -22,7 +21,6 @@ import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ForwardingObject;
@@ -47,8 +45,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -139,9 +135,9 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     public DistributedShardedDOMDataTree(final ActorSystemProvider actorSystemProvider,
                                          final AbstractDataStore distributedOperDatastore,
                                          final AbstractDataStore distributedConfigDatastore) {
-        this.actorSystem = Preconditions.checkNotNull(actorSystemProvider).getActorSystem();
-        this.distributedOperDatastore = Preconditions.checkNotNull(distributedOperDatastore);
-        this.distributedConfigDatastore = Preconditions.checkNotNull(distributedConfigDatastore);
+        this.actorSystem = requireNonNull(actorSystemProvider).getActorSystem();
+        this.distributedOperDatastore = requireNonNull(distributedOperDatastore);
+        this.distributedConfigDatastore = requireNonNull(distributedConfigDatastore);
         shardedDOMDataTree = new ShardedDOMDataTree();
 
         shardedDataTreeActor = createShardedDataTreeActor(actorSystem,
@@ -273,7 +269,6 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         return future;
     }
 
-    @Nonnull
     @Override
     public <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(
             final T listener, final Collection<DOMDataTreeIdentifier> subtrees,
@@ -287,9 +282,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         return ImmutableClassToInstanceMap.of();
     }
 
-    @Nonnull
     @Override
-    public DOMDataTreeProducer createProducer(@Nonnull final Collection<DOMDataTreeIdentifier> subtrees) {
+    public DOMDataTreeProducer createProducer(final Collection<DOMDataTreeIdentifier> subtrees) {
         LOG.debug("{} - Creating producer for {}", memberName, subtrees);
         final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(subtrees);
 
@@ -332,7 +326,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         final Promise<DistributedShardRegistration> shardRegistrationPromise = akka.dispatch.Futures.promise();
         Futures.addCallback(writeFuture, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final Void result) {
 
                 final Future<Object> ask =
                         Patterns.ask(shardedDataTreeActor, new LookupPrefixShard(prefix), SHARD_FUTURE_TIMEOUT);
@@ -435,7 +429,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final Void result) {
                 LOG.debug("{} - Succesfuly removed shard for {}", memberName, prefix);
             }
 
@@ -457,13 +451,10 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         return shardedDOMDataTree.createProducer(prefix);
     }
 
-    @Nonnull
     @Override
     public <T extends DOMDataTreeShard> ListenerRegistration<T> registerDataTreeShard(
-            @Nonnull final DOMDataTreeIdentifier prefix,
-            @Nonnull final T shard,
-            @Nonnull final DOMDataTreeProducer producer)
-            throws DOMDataTreeShardingConflictException {
+            final DOMDataTreeIdentifier prefix, final T shard, final DOMDataTreeProducer producer)
+                    throws DOMDataTreeShardingConflictException {
 
         LOG.debug("Registering shard[{}] at prefix: {}", shard, prefix);
 
@@ -639,16 +630,14 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             this.shardTable = requireNonNull(shardLayout);
         }
 
-        @Nonnull
         @Override
         public DOMDataTreeCursorAwareTransaction createTransaction(final boolean isolated) {
             return delegate.createTransaction(isolated);
         }
 
-        @Nonnull
         @Override
         @SuppressWarnings("checkstyle:hiddenField")
-        public DOMDataTreeProducer createProducer(@Nonnull final Collection<DOMDataTreeIdentifier> subtrees) {
+        public DOMDataTreeProducer createProducer(final Collection<DOMDataTreeIdentifier> subtrees) {
             // TODO we probably don't need to distribute this on the remote nodes since once we have this producer
             // open we surely have the rights to all the subtrees.
             return delegate.createProducer(subtrees);
@@ -676,9 +665,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             return delegate;
         }
 
-        @Nonnull
         @Override
-        public CDSShardAccess getShardAccess(@Nonnull final DOMDataTreeIdentifier subtree) {
+        public CDSShardAccess getShardAccess(final DOMDataTreeIdentifier subtree) {
             checkArgument(subtrees.stream().anyMatch(dataTreeIdentifier -> dataTreeIdentifier.contains(subtree)),
                 "Subtree %s is not controlled by this producer %s", subtree, this);
 

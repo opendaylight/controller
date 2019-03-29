@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Verify;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
@@ -20,7 +20,7 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
      *
      * @param snapshot Metadata snapshot
      */
-    final void applySnapshot(@Nonnull final ShardDataTreeSnapshotMetadata<?> snapshot) {
+    final void applySnapshot(final @NonNull ShardDataTreeSnapshotMetadata<?> snapshot) {
         Verify.verify(getSupportedType().isInstance(snapshot), "Snapshot %s misrouted to handler of %s", snapshot,
             getSupportedType());
         doApplySnapshot(getSupportedType().cast(snapshot));
@@ -37,23 +37,21 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
      *
      * @param snapshot Metadata snapshot
      */
-    abstract void doApplySnapshot(@Nonnull T snapshot);
+    abstract void doApplySnapshot(@NonNull T snapshot);
 
     /**
      * Return the type of metadata snapshot this object supports.
      *
      * @return Metadata type
      */
-    @Nonnull
-    abstract Class<T> getSupportedType();
+    abstract @NonNull Class<T> getSupportedType();
 
     /**
      * Take a snapshot of current metadata state.
      *
      * @return Metadata snapshot, or null if the metadata is empty.
      */
-    @Nullable
-    abstract T toSnapshot();
+    abstract @Nullable T toSnapshot();
 
     // Lifecycle events
 

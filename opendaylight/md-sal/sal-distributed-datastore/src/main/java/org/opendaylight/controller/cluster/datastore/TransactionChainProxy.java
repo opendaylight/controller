@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
@@ -323,7 +322,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     }
 
     @Override
-    protected void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId) {
+    protected void onTransactionContextCreated(TransactionIdentifier transactionId) {
         Promise<Object> promise = priorReadOnlyTxPromises.remove(transactionId);
         if (promise != null) {
             promise.success(null);

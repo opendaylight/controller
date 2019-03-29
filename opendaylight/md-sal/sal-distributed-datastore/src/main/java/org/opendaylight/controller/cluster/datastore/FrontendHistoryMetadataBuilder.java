@@ -14,7 +14,7 @@ import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -80,7 +80,7 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
      * @param shard parent shard
      * @return Leader history state
      */
-    @Nonnull AbstractFrontendHistory toLeaderState(@Nonnull final Shard shard) {
+    @NonNull AbstractFrontendHistory toLeaderState(final @NonNull Shard shard) {
         if (identifier.getHistoryId() == 0) {
             return StandaloneFrontendHistory.recreate(shard.persistenceId(), identifier.getClientId(),
                 shard.getDataStore(), closedTransactions, purgedTransactions);

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
@@ -86,7 +86,7 @@ public class ShardManagerSnapshot implements Serializable {
     private final List<String> shardList;
     private final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration;
 
-    public ShardManagerSnapshot(@Nonnull final List<String> shardList,
+    public ShardManagerSnapshot(final @NonNull List<String> shardList,
                                 final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration) {
         this.shardList = ImmutableList.copyOf(shardList);
         this.prefixShardConfiguration = ImmutableMap.copyOf(prefixShardConfiguration);

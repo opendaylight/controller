@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.Props;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -37,7 +37,7 @@ public final class SimpleDataStoreClientActor extends AbstractDataStoreClientAct
         return new SimpleDataStoreClientBehavior(context, actorUtils, shardName);
     }
 
-    public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
+    public static Props props(final @NonNull MemberName memberName, final @NonNull String storeName,
             final ActorUtils actorUtils, final String shardName) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));

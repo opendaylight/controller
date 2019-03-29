@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import java.io.Externalizable;
 import java.io.Serializable;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Base class for various bits of metadata attached to a {@link MetadataShardDataTreeSnapshot}. This class is not
@@ -38,7 +39,7 @@ public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnaps
     }
 
     final Object writeReplace() {
-        return Verify.verifyNotNull(externalizableProxy(), "Null externalizable proxy from %s", getClass());
+        return verifyNotNull(externalizableProxy(), "Null externalizable proxy from %s", getClass());
     }
 
     /**
@@ -46,8 +47,7 @@ public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnaps
      *
      * @return Externalizable proxy, may not be null
      */
-    @Nonnull
-    protected abstract Externalizable externalizableProxy();
+    protected abstract @NonNull Externalizable externalizableProxy();
 
     public abstract Class<T> getType();
 }

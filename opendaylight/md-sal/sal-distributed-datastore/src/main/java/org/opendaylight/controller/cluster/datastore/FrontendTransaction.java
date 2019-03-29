@@ -13,8 +13,8 @@ import com.google.common.base.Verify;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceSuccess;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
@@ -120,9 +120,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
 
     // Request order has already been checked by caller and replaySequence()
     @SuppressWarnings("checkstyle:IllegalCatch")
-    @Nullable
-    final TransactionSuccess<?> handleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
-            final long now) throws RequestException {
+    final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
         if (request instanceof IncrementTransactionSequenceRequest) {
             final IncrementTransactionSequenceRequest incr = (IncrementTransactionSequenceRequest) request;
             expectedSequence += incr.getIncrement();
@@ -151,8 +150,7 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         }
     }
 
-    @Nullable
-    abstract TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
+    abstract @Nullable TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
             long now) throws RequestException;
 
     abstract void retire();

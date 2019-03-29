@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -16,8 +17,8 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -78,25 +79,22 @@ public class DatastoreSnapshot implements Serializable {
     private final ShardManagerSnapshot shardManagerSnapshot;
     private final List<ShardSnapshot> shardSnapshots;
 
-    public DatastoreSnapshot(@Nonnull String type, @Nullable ShardManagerSnapshot shardManagerSnapshot,
-            @Nonnull List<ShardSnapshot> shardSnapshots) {
-        this.type = Preconditions.checkNotNull(type);
+    public DatastoreSnapshot(@NonNull String type, @Nullable ShardManagerSnapshot shardManagerSnapshot,
+            @NonNull List<ShardSnapshot> shardSnapshots) {
+        this.type = requireNonNull(type);
         this.shardManagerSnapshot = shardManagerSnapshot;
-        this.shardSnapshots = ImmutableList.copyOf(Preconditions.checkNotNull(shardSnapshots));
+        this.shardSnapshots = ImmutableList.copyOf(shardSnapshots);
     }
 
-    @Nonnull
-    public String getType() {
+    public @NonNull String getType() {
         return type;
     }
 
-    @Nullable
-    public ShardManagerSnapshot getShardManagerSnapshot() {
+    public @Nullable ShardManagerSnapshot getShardManagerSnapshot() {
         return shardManagerSnapshot;
     }
 
-    @Nonnull
-    public List<ShardSnapshot> getShardSnapshots() {
+    public @NonNull List<ShardSnapshot> getShardSnapshots() {
         return shardSnapshots;
     }
 
@@ -142,18 +140,16 @@ public class DatastoreSnapshot implements Serializable {
         private final String name;
         private final Snapshot snapshot;
 
-        public ShardSnapshot(@Nonnull String name, @Nonnull Snapshot snapshot) {
-            this.name = Preconditions.checkNotNull(name);
-            this.snapshot = Preconditions.checkNotNull(snapshot);
+        public ShardSnapshot(@NonNull String name, @NonNull Snapshot snapshot) {
+            this.name = requireNonNull(name);
+            this.snapshot = requireNonNull(snapshot);
         }
 
-        @Nonnull
-        public String getName() {
+        public @NonNull String getName() {
             return name;
         }
 
-        @Nonnull
-        public Snapshot getSnapshot() {
+        public @NonNull Snapshot getSnapshot() {
             return snapshot;
         }
 

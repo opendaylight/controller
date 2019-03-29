@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.io.ByteStreams;
@@ -16,7 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -59,21 +61,19 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier>
             return Verify.verifyNotNull(createObject(identifier, serialized));
         }
 
-        @Nonnull
-        protected abstract T readIdentifier(@Nonnull DataInput in) throws IOException;
+        protected abstract @NonNull T readIdentifier(@NonNull DataInput in) throws IOException;
 
-        @Nonnull
         @SuppressWarnings("checkstyle:hiddenField")
-        protected abstract Identifiable<T> createObject(@Nonnull T identifier, @Nonnull byte[] serialized);
+        protected abstract @NonNull Identifiable<T> createObject(@NonNull T identifier, byte @NonNull[] serialized);
     }
 
     private static final long serialVersionUID = 1L;
     private final byte[] serialized;
     private final T identifier;
 
-    AbstractIdentifiablePayload(@Nonnull final T identifier, @Nonnull final byte[] serialized) {
-        this.identifier = Preconditions.checkNotNull(identifier);
-        this.serialized = Preconditions.checkNotNull(serialized);
+    AbstractIdentifiablePayload(final @NonNull T identifier, final byte @NonNull[] serialized) {
+        this.identifier = requireNonNull(identifier);
+        this.serialized = requireNonNull(serialized);
     }
 
     @Override
@@ -90,7 +90,6 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier>
         return Verify.verifyNotNull(externalizableProxy(serialized));
     }
 
-    @Nonnull
     @SuppressWarnings("checkstyle:hiddenField")
-    protected abstract AbstractProxy<T> externalizableProxy(@Nonnull byte[] serialized);
+    protected abstract @NonNull AbstractProxy<T> externalizableProxy(byte @NonNull[] serialized);
 }

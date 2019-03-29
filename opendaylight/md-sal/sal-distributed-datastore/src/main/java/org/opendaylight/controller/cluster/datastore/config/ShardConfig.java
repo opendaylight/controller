@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.config;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
@@ -21,18 +22,16 @@ public class ShardConfig {
     private final String name;
     private final Set<MemberName> replicas;
 
-    public ShardConfig(@Nonnull final String name, @Nonnull final Collection<MemberName> replicas) {
-        this.name = Preconditions.checkNotNull(name);
-        this.replicas = ImmutableSet.copyOf(Preconditions.checkNotNull(replicas));
+    public ShardConfig(final @NonNull String name, final @NonNull Collection<MemberName> replicas) {
+        this.name = requireNonNull(name);
+        this.replicas = ImmutableSet.copyOf(replicas);
     }
 
-    @Nonnull
-    public String getName() {
+    public @NonNull String getName() {
         return name;
     }
 
-    @Nonnull
-    public Set<MemberName> getReplicas() {
+    public @NonNull Set<MemberName> getReplicas() {
         return replicas;
     }
 }

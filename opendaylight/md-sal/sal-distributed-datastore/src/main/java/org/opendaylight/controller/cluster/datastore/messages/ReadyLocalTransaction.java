@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
 import java.util.SortedSet;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -27,8 +27,7 @@ public final class ReadyLocalTransaction {
     private final DataTreeModification modification;
     private final TransactionIdentifier transactionId;
     private final boolean doCommitOnReady;
-    @Nullable
-    private final SortedSet<String> participatingShardNames;
+    private final @Nullable SortedSet<String> participatingShardNames;
 
     // The version of the remote system used only when needing to convert to BatchedModifications.
     private short remoteVersion = DataStoreVersions.CURRENT_VERSION;

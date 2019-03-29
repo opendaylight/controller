@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -228,18 +228,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     void applyForwardedModifyTransactionRequest(final ModifyTransactionRequest request,
-            @Nullable final Consumer<Response<?, ?>> callback) {
+            final Consumer<Response<?, ?>> callback) {
         commonModifyTransactionRequest(request, callback, this::sendRequest);
     }
 
     @Override
     void replayModifyTransactionRequest(final ModifyTransactionRequest request,
-            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         commonModifyTransactionRequest(request, callback, (req, cb) -> enqueueRequest(req, cb, enqueuedTicks));
     }
 
     private void commonModifyTransactionRequest(final ModifyTransactionRequest request,
-            @Nullable final Consumer<Response<?, ?>> callback,
+            final @Nullable Consumer<Response<?, ?>> callback,
             final BiConsumer<TransactionRequest<?>, Consumer<Response<?, ?>>> sendMethod) {
         for (final TransactionModification mod : request.getModifications()) {
             if (mod instanceof TransactionWrite) {
@@ -291,7 +291,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     void handleReplayedRemoteRequest(final TransactionRequest<?> request,
-            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         LOG.debug("Applying replayed request {}", request);
 
         if (request instanceof TransactionPreCommitRequest) {
@@ -347,8 +347,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         closedException = this::abortedException;
     }
 
-    @Nonnull
-    private CursorAwareDataTreeModification getModification() {
+    private @NonNull CursorAwareDataTreeModification getModification() {
         if (closedException != null) {
             throw closedException.get();
         }
