@@ -9,18 +9,16 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
 /**
- * Abstract base for transactions running on SharrdDataTree.
+ * Abstract base for transactions running on SharrdDataTree. This class is NOT thread-safe.
  *
  * @param <T> Backing transaction type.
  */
-@NotThreadSafe
 abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         implements Identifiable<TransactionIdentifier> {
     private final ShardDataTreeTransactionParent parent;

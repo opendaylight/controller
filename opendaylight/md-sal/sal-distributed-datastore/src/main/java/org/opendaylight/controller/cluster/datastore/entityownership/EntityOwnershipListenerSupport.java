@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
+import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
@@ -29,11 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages EntityOwnershipListener registrations and notifications for the EntityOwnershipShard.
+ * Manages EntityOwnershipListener registrations and notifications for the EntityOwnershipShard. This class is
+ * thread-safe.
  *
  * @author Thomas Pantelis
  */
-@ThreadSafe
 class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnershipListenerSupport.class);
 
@@ -140,7 +140,7 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
         }
     }
 
-    @GuardedBy("listenerLock")
+    @Holding("listenerLock")
     private void notifyListeners(final DOMEntity entity, final boolean wasOwner, final boolean isOwner,
             final boolean hasOwner, final Collection<ListenerActorRefEntry> listenerEntries) {
         DOMEntityOwnershipChange changed = new DOMEntityOwnershipChange(entity,

@@ -14,7 +14,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Collections2;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -27,7 +26,9 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@NotThreadSafe
+/**
+ * This class is NOT thread-safe.
+ */
 final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetadata>, Identifiable<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendClientMetadataBuilder.class);
 
