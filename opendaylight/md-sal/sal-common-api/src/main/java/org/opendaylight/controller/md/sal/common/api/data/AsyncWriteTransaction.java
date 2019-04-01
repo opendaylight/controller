@@ -116,8 +116,8 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * Invoking cancel() on a finished transaction (future returned by {@link #submit()} already completed will always
      * fail (return false).
      *
-     * @return <tt>false</tt> if the task could not be cancelled, typically because it has already completed normally
-     * <tt>true</tt> otherwise
+     * @return {@code false} if the task could not be cancelled, typically because it has already completed normally
+     *         {@code true} otherwise
      *
      */
     boolean cancel();
@@ -228,7 +228,8 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * which are based on same initial state, Tx 1 completes successfully
      * before Tx 2 is submitted.
      *
-     * <table summary="">
+     * <table>
+     * <caption>Data store state changes</caption>
      * <tr><th>Initial state</th><th>Tx 1</th><th>Tx 2</th><th>Result</th></tr>
      * <tr><td>Empty</td><td>put(A,1)</td><td>put(A,2)</td><td>Tx 2 will fail, state is A=1</td></tr>
      * <tr><td>Empty</td><td>put(A,1)</td><td>merge(A,2)</td><td>A=2</td></tr>
@@ -253,7 +254,8 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * which are based on same initial state, Tx 1 completes successfully
      * before Tx 2 is submitted.
      *
-     * <table summary="">
+     * <table>
+     * <caption>Data store state changes</caption>
      * <tr><th>Initial state</th><th>Tx 1</th><th>Tx 2</th><th>Result</th></tr>
      *
      * <tr><td>Empty</td><td>put(TOP,[])</td><td>put(TOP,[])</td><td>Tx 2 will fail, state is TOP=[]</td></tr>
