@@ -57,6 +57,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <artifactId>scala-library</artifactId>
         </dependency>
 
+        <!-- Clustering commons for metrics -->
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-clustering-commons</artifactId>
+        </dependency>
+
         <!-- Atomix -->
         <dependency>
             <groupId>io.atomix</groupId>
