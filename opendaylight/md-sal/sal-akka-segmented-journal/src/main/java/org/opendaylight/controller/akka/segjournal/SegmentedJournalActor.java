@@ -17,7 +17,7 @@ import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.SlidingTimeWindowReservoir;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.MoreObjects;
 import io.atomix.storage.StorageLevel;
@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
+import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
+import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.collection.Iterator;
@@ -137,18 +139,18 @@ final class SegmentedJournalActor extends AbstractActor {
     private static final Namespace DELETE_NAMESPACE = Namespace.builder().register(Long.class).build();
     private static final int DELETE_SEGMENT_SIZE = 64 * 1024;
 
-    // Tracks the time it took us to write a batch of messages
-    private final Timer batchWriteTime = new Timer();
-    // Tracks the number of individual messages written
-    private final Meter messageWriteCount = new Meter();
-    // Tracks the size distribution of messages for last 5 minutes
-    private final Histogram messageSize = new Histogram(new SlidingTimeWindowReservoir(5, TimeUnit.MINUTES));
-
     private final String persistenceId;
     private final StorageLevel storage;
     private final int maxSegmentSize;
     private final int maxEntrySize;
     private final File directory;
+
+    // Tracks the time it took us to write a batch of messages
+    private Timer batchWriteTime;
+    // Tracks the number of individual messages written
+    private Meter messageWriteCount;
+    // Tracks the size distribution of messages
+    private Histogram messageSize;
 
     private SegmentedJournal<DataJournalEntry> dataJournal;
     private SegmentedJournal<Long> deleteJournal;
@@ -187,6 +189,13 @@ final class SegmentedJournalActor extends AbstractActor {
     public void preStart() throws Exception {
         LOG.debug("{}: actor starting", persistenceId);
         super.preStart();
+
+        final MetricRegistry registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
+        final String actorName = self().path().toStringWithoutAddress();
+
+        batchWriteTime = registry.timer(MetricRegistry.name(actorName, "batchWriteTime"));
+        messageWriteCount = registry.meter(MetricRegistry.name(actorName, "messageWriteCount"));
+        messageSize = registry.histogram(MetricRegistry.name(actorName, "messageSize"));
     }
 
     @Override
