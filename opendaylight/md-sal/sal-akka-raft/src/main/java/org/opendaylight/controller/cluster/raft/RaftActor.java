@@ -50,6 +50,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.messages.PersistenceComplete;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
@@ -595,38 +596,46 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         LOG.debug("{}: Persist data {}", persistenceId(), replicatedLogEntry);
 
-        final RaftActorContext raftContext = getRaftActorContext();
-
         boolean wasAppended = replicatedLog().appendAndPersist(replicatedLogEntry, persistedLogEntry -> {
-            // Clear the persistence pending flag in the log entry.
-            persistedLogEntry.setPersistencePending(false);
-
-            if (!hasFollowers()) {
-                // Increment the Commit Index and the Last Applied values
-                raftContext.setCommitIndex(persistedLogEntry.getIndex());
-                raftContext.setLastApplied(persistedLogEntry.getIndex());
-
-                // Apply the state immediately.
-                handleApplyState(new ApplyState(clientActor, identifier, persistedLogEntry));
-
-                // Send a ApplyJournalEntries message so that we write the fact that we applied
-                // the state to durable storage
-                self().tell(new ApplyJournalEntries(persistedLogEntry.getIndex()), self());
-
-            } else {
-                context.getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry);
-
-                // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
-                // normally should still be the leader) to check if consensus has now been reached in conjunction with
-                // follower replication.
-                getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
-            }
+            // This needs to be executed through the mailbox, as this would break actor containment when called
+            // directly from the persistence actor thread.
+            executeInSelf(() -> onPersistenceComplete(
+                    new PersistenceComplete(clientActor, identifier, persistedLogEntry)));
         }, true);
 
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
             getCurrentBehavior().handleMessage(getSelf(), new Replicate(clientActor, identifier, replicatedLogEntry,
                     !batchHint));
+        }
+    }
+
+    private void onPersistenceComplete(final PersistenceComplete message) {
+        final ReplicatedLogEntry persistedLogEntry = message.getPersistedLogEntry();
+        RaftActorContext raftContext = getRaftActorContext();
+
+        // Clear the persistence pending flag in the log entry.
+        persistedLogEntry.setPersistencePending(false);
+
+        if (!hasFollowers()) {
+            // Increment the Commit Index and the Last Applied values
+            raftContext.setCommitIndex(persistedLogEntry.getIndex());
+            raftContext.setLastApplied(persistedLogEntry.getIndex());
+
+            // Apply the state immediately.
+            handleApplyState(new ApplyState(message.getClientActor(), message.getIdentifier(), persistedLogEntry));
+
+            // Send a ApplyJournalEntries message so that we write the fact that we applied
+            // the state to durable storage
+            self().tell(new ApplyJournalEntries(persistedLogEntry.getIndex()), self());
+
+        } else {
+            context.getReplicatedLog().captureSnapshotIfReady(persistedLogEntry);
+
+            // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
+            // normally should still be the leader) to check if consensus has now been reached in conjunction with
+            // follower replication.
+            getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
         }
     }
 
