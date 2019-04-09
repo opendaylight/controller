@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -1474,7 +1475,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         termInfo.update(1, LEADER_ID);
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 id, termInfo, -1, -1, ImmutableMap.of(LEADER_ID, ""), configParams,
-                noPersistence, applyState -> actor.tell(applyState, actor), LOG);
+                noPersistence, applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {

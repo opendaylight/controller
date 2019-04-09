@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -48,6 +49,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.After;
@@ -59,6 +62,8 @@ import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
+import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestPersist;
+import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -1349,5 +1354,69 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.persistData(leaderActorRef, new MockIdentifier("3"), new MockPayload("3"), false);
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("AppendEntries size", 3, appendEntries.getEntries().size());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:illegalcatch")
+    public void testApplyStateRace() throws Exception {
+        final String leaderId = factory.generateActorId("leader-");
+        final String followerId = factory.generateActorId("follower-");
+
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        ActorRef mockFollowerActorRef = factory.createActor(MessageCollectorActor.props());
+
+        TestRaftActor.Builder builder = TestRaftActor.newBuilder()
+                .id(leaderId)
+                .peerAddresses(ImmutableMap.of(followerId,
+                        mockFollowerActorRef.path().toString()))
+                .config(config)
+                .collectorActor(factory.createActor(
+                        MessageCollectorActor.props(), factory.generateActorId(leaderId + "-collector")));
+
+        TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
+                builder.props(), leaderId);
+        MockRaftActor leaderActor = leaderActorRef.underlyingActor();
+        leaderActor.waitForInitializeBehaviorComplete();
+
+        leaderActor.getRaftActorContext().getTermInformation().update(1, leaderId);
+        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        leaderActor.setCurrentBehavior(leader);
+
+        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        leaderActor.setPersistence(new PersistentDataProvider(leaderActor) {
+            @Override
+            public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
+                // needs to be executed from another thread to simulate the persistence actor calling this callback
+                executorService.submit(() -> {
+                    try {
+                        procedure.apply(entry);
+                    } catch (Exception e) {
+                        TEST_LOG.info("Fail during async persist callback", e);
+                    }
+                }, "persistence-callback");
+            }
+        });
+
+        leader.getFollower(followerId).setNextIndex(0);
+        leader.getFollower(followerId).setMatchIndex(-1);
+
+        // hitting this is flimsy so run multiple times to improve the chance of things
+        // blowing up while breaking actor containment
+        for (int i = 0; i < 100; i++) {
+            final TestPersist message =
+                    new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockPayload("1"));
+            leaderActorRef.tell(message, null);
+
+            AppendEntriesReply reply =
+                    new AppendEntriesReply(followerId, 1, true, i, 1, (short) 5);
+            leaderActorRef.tell(reply, mockFollowerActorRef);
+        }
+
+        await("Persistence callback.").atMost(5, TimeUnit.SECONDS).until(() -> leaderActor.getState().size() == 100);
+        executorService.shutdown();
     }
 }
