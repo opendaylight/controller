@@ -619,7 +619,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with
                 // follower replication.
-                getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
+                // This needs to be executed through the mailbox, as this would break actor containment when called
+                // directly from the persistence actor thread.
+                getSelf().tell(CheckConsensusReached.INSTANCE, getSelf());
             }
         }, true);
 
