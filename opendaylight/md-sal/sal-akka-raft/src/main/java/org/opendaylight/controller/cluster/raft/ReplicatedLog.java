@@ -94,7 +94,8 @@ public interface ReplicatedLog {
      * @param callback the Procedure to be notified when persistence is complete (optional).
      * @param doAsync if true, the persistent actor can receive subsequent messages to process in between the persist
      *        call and the execution of the associated callback. If false, subsequent messages are stashed and get
-     *        delivered after persistence is complete and the associated callback is executed.
+     *        delivered after persistence is complete and the associated callback is executed. In either case the
+     *        callback is guaranteed to execute in the context of the actor associated with this log.
      * @return true if the entry was successfully appended, false otherwise.
      */
     boolean appendAndPersist(@Nonnull ReplicatedLogEntry replicatedLogEntry,

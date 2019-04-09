@@ -16,10 +16,12 @@ import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -64,6 +66,13 @@ public interface RaftActorContext {
      * @return the reference to the RaftActor itself. This can be used to send messages to the RaftActor
      */
     ActorRef getActor();
+
+    /**
+     * Return an Executor which is guaranteed to run tasks in the context of {@link #getActor()}.
+     *
+     * @return An executor.
+     */
+    @NonNull Executor getExecutor();
 
     /**
      * The akka Cluster singleton for the actor system if one is configured.

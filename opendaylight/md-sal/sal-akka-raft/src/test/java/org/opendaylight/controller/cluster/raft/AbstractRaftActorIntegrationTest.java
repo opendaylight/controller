@@ -90,6 +90,34 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
+    /**
+     * Message intended for testing to allow triggering persistData via the mailbox.
+     */
+    public static final class TestPersist {
+
+        private final ActorRef actorRef;
+        private final Identifier identifier;
+        private final Payload payload;
+
+        TestPersist(final ActorRef actorRef, final Identifier identifier, final Payload payload) {
+            this.actorRef = actorRef;
+            this.identifier = identifier;
+            this.payload = payload;
+        }
+
+        public ActorRef getActorRef() {
+            return actorRef;
+        }
+
+        public Identifier getIdentifier() {
+            return identifier;
+        }
+
+        public Payload getPayload() {
+            return payload;
+        }
+    }
+
     public static class TestRaftActor extends MockRaftActor {
 
         private final ActorRef collectorActor;
@@ -133,6 +161,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             if (message instanceof SetPeerAddress) {
                 setPeerAddress(((SetPeerAddress) message).getPeerId(),
                         ((SetPeerAddress) message).getPeerAddress());
+                return;
+            }
+
+            if (message instanceof TestPersist) {
+                persistData(((TestPersist) message).getActorRef(), ((TestPersist) message).getIdentifier(),
+                        ((TestPersist) message).getPayload(), false);
                 return;
             }
 

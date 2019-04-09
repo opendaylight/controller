@@ -5,8 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
@@ -15,7 +16,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -49,6 +49,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final ActorRef actor;
 
     private final ActorContext context;
+
+    private final @NonNull Executor executor;
 
     private final String id;
 
@@ -94,25 +96,27 @@ public class RaftActorContextImpl implements RaftActorContext {
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
-            @Nonnull final ElectionTerm termInformation, final long commitIndex, final long lastApplied,
-            @Nonnull final Map<String, String> peerAddresses,
-            @Nonnull final ConfigParams configParams, @Nonnull final DataPersistenceProvider persistenceProvider,
-            @Nonnull final Consumer<ApplyState> applyStateConsumer, @Nonnull final Logger logger) {
+            final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
+            final @NonNull Map<String, String> peerAddresses,
+            final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
+            final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,
+            final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
         this.id = id;
-        this.termInformation = Preconditions.checkNotNull(termInformation);
+        this.termInformation = requireNonNull(termInformation);
+        this.executor = requireNonNull(executor);
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
-        this.configParams = Preconditions.checkNotNull(configParams);
-        this.persistenceProvider = Preconditions.checkNotNull(persistenceProvider);
-        this.log = Preconditions.checkNotNull(logger);
-        this.applyStateConsumer = Preconditions.checkNotNull(applyStateConsumer);
+        this.configParams = requireNonNull(configParams);
+        this.persistenceProvider = requireNonNull(persistenceProvider);
+        this.log = requireNonNull(logger);
+        this.applyStateConsumer = requireNonNull(applyStateConsumer);
 
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
                 configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
 
-        for (Map.Entry<String, String> e: Preconditions.checkNotNull(peerAddresses).entrySet()) {
+        for (Map.Entry<String, String> e : requireNonNull(peerAddresses).entrySet()) {
             peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
         }
     }
@@ -152,6 +156,11 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
+    public final Executor getExecutor() {
+        return executor;
+    }
+
+    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public Optional<Cluster> getCluster() {
         if (cluster == null) {
@@ -159,7 +168,7 @@ public class RaftActorContextImpl implements RaftActorContext {
                 cluster = Optional.of(Cluster.get(getActorSystem()));
             } catch (Exception e) {
                 // An exception means there's no cluster configured. This will only happen in unit tests.
-                log.debug("{}: Could not obtain Cluster: {}", getId(), e);
+                log.debug("{}: Could not obtain Cluster", getId(), e);
                 cluster = Optional.empty();
             }
         }
@@ -404,7 +413,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     void setCurrentBehavior(final RaftActorBehavior behavior) {
-        this.currentBehavior = Preconditions.checkNotNull(behavior);
+        this.currentBehavior = requireNonNull(behavior);
     }
 
     @Override
@@ -429,15 +438,13 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    @Nullable
     public RaftActorLeadershipTransferCohort getRaftActorLeadershipTransferCohort() {
         return leadershipTransferCohort;
     }
 
     @Override
     @SuppressWarnings("checkstyle:hiddenField")
-    public void setRaftActorLeadershipTransferCohort(
-            @Nullable final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+    public void setRaftActorLeadershipTransferCohort(final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         this.leadershipTransferCohort = leadershipTransferCohort;
     }
 }
