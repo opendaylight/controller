@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import org.eclipse.jdt.annotation.NonNull;
@@ -48,6 +49,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final ActorRef actor;
 
     private final ActorContext context;
+
+    private final @NonNull Executor executor;
 
     private final String id;
 
@@ -96,11 +99,13 @@ public class RaftActorContextImpl implements RaftActorContext {
             final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
             final @NonNull Map<String, String> peerAddresses,
             final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
-            final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger) {
+            final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,
+            final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
         this.id = id;
         this.termInformation = requireNonNull(termInformation);
+        this.executor = requireNonNull(executor);
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
         this.configParams = requireNonNull(configParams);
@@ -148,6 +153,11 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public ActorRef getActor() {
         return actor;
+    }
+
+    @Override
+    public final Executor getExecutor() {
+        return executor;
     }
 
     @Override

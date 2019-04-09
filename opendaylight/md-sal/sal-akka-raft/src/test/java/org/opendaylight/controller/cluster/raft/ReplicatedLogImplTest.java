@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import akka.japi.Procedure;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +57,7 @@ public class ReplicatedLogImplTest {
 
         context = new RaftActorContextImpl(null, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Collections.<String,String>emptyMap(),
-                configParams, mockPersistence, applyState -> { }, LOG);
+                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
     }
 
     private void verifyPersist(Object message) throws Exception {
