@@ -48,9 +48,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -1349,5 +1351,71 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.persistData(leaderActorRef, new MockIdentifier("3"), new MockPayload("3"), false);
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("AppendEntries size", 3, appendEntries.getEntries().size());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:illegalcatch")
+    public void testApplyStateRace() throws Exception {
+        final String leaderId = factory.generateActorId("leader-");
+        final String followerId = factory.generateActorId("follower-");
+
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        ActorRef mockFollowerActorRef = factory.createActor(MessageCollectorActor.props());
+
+        TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
+                MockRaftActor.props(leaderId, ImmutableMap.of(followerId,
+                        mockFollowerActorRef.path().toString()), config),
+                leaderId);
+        MockRaftActor leaderActor = leaderActorRef.underlyingActor();
+        leaderActor.waitForInitializeBehaviorComplete();
+
+        leaderActor.getRaftActorContext().getTermInformation().update(1, leaderId);
+        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        leaderActor.setCurrentBehavior(leader);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        leaderActor.setPersistence(new PersistentDataProvider(leaderActor) {
+            @Override
+            public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
+                // needs to be executed from another thread to simulate the persistence actor calling this callback
+                new Thread(() -> {
+                    try {
+                        latch.await();
+                        procedure.apply(entry);
+                    } catch (Exception e) {
+                        TEST_LOG.info("Fail during async persist callback", e);
+                    }
+                }, "persistence-callback").start();
+            }
+        });
+
+        leader.getFollower(followerId).setNextIndex(0);
+        leader.getFollower(followerId).setMatchIndex(-1);
+
+        // hitting this is flimsy so run multiple times to improve the chance of things
+        // blowing up while breaking actor containmend
+        for (int i = 0; i < 100; i++) {
+
+            final RaftActor.TestPersist message =
+                    new RaftActor.TestPersist(leaderActorRef, new MockIdentifier("1"), new MockPayload("1"));
+            leaderActorRef.tell(message, null);
+
+            AppendEntriesReply reply =
+                    new AppendEntriesReply(followerId, 1, true, i, 1, (short) 5);
+            leaderActorRef.tell(reply, mockFollowerActorRef);
+
+            latch.countDown();
+        }
+
+        // ugly but have to let the threads finish up to have correct apply state call number
+        Thread.sleep(1000);
+
+        Assert.assertEquals("ApplyState called more/less times than intended,"
+                + "possibly due to persistence callback racing.", leaderActor.getState().size(), 100);
+
     }
 }

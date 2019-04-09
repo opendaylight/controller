@@ -264,6 +264,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             ((Runnable)message).run();
         } else if (message instanceof NoopPayload) {
             persistData(null, null, (NoopPayload) message, false);
+        } else if (message instanceof TestPersist) {
+            persistData(((TestPersist) message).getActorRef(), ((TestPersist) message).getIdentifier(),
+                    ((TestPersist) message).getPayload(), false);
         } else if (message instanceof RequestLeadership) {
             onRequestLeadership((RequestLeadership) message);
         } else if (!possiblyHandleBehaviorMessage(message)) {
@@ -619,7 +622,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with
                 // follower replication.
-                getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
+                // This needs to be executed through the mailbox, as this would break actor containment when called
+                // directly from the persistence actor thread.
+                getSelf().tell(CheckConsensusReached.INSTANCE, getSelf());
             }
         }, true);
 
@@ -1035,6 +1040,34 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             }
 
             return new SimpleBehaviorState(lastValidLeaderId, lastLeaderId, behavior);
+        }
+    }
+
+    /**
+     * Message intended for testing to allow triggering persistData via the mailbox.
+     */
+    static final class TestPersist {
+
+        private final ActorRef actorRef;
+        private final Identifier identifier;
+        private final Payload payload;
+
+        TestPersist(final ActorRef actorRef, final Identifier identifier, final Payload payload) {
+            this.actorRef = actorRef;
+            this.identifier = identifier;
+            this.payload = payload;
+        }
+
+        public ActorRef getActorRef() {
+            return actorRef;
+        }
+
+        public Identifier getIdentifier() {
+            return identifier;
+        }
+
+        public Payload getPayload() {
+            return payload;
         }
     }
 }
