@@ -18,6 +18,7 @@ import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Optional;
@@ -69,7 +70,7 @@ public class RaftActorSnapshotMessageSupportTest {
 
         context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Collections.<String,String>emptyMap(),
-                configParams, mockPersistence, applyState -> { }, LOG) {
+                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor()) {
             @Override
             public SnapshotManager getSnapshotManager() {
                 return mockSnapshotManager;
