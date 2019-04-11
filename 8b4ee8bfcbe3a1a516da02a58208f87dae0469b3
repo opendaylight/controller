@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "880f4b33_c5976829",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-11T15:10:03Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "84bd6ea8_d46d5591",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2727cfea_846c204f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
