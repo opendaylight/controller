@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "84bd6ea8_d46d5591",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-11T14:02:53Z",
+      "side": 1,
+      "message": "I think we should avoid having test mechanics in production code. This can be implemented via MockRaftActor similar to AbstractRaftActorIntegrationTest#TestRaftActor.",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2727cfea_846c204f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
@@ -19,6 +36,57 @@
         "endLine": 607,
         "endChar": 29
       },
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9d4c732_8c3f4e66",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1386,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-11T14:02:53Z",
+      "side": 1,
+      "message": "I\u0027m  not clear on the purpose/use of this latch. Its count is initialized to 1 but it\u0027s counted down 100 times below.",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23b1b690_9e0c85ff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1393,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-11T14:02:53Z",
+      "side": 1,
+      "message": "Use a thread pool here.",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7778bb7_249cd736",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1415,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-11T14:02:53Z",
+      "side": 1,
+      "message": "This is fragile. You should use a wait for leaderActor.getState().size() to reach 100 with a timeout (say 5 sec). Check out Awaitility.await().until(..) that used in infrautils et al.",
       "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
