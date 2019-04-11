@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2727cfea_846c204f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-11T12:53:04Z",
+      "side": 1,
+      "message": "Nice catch, but the problem is that the entire callback is running outside of current actor context, hence even this check is invalid, it just happens never to cause problems (follower fluctuation is much less likely).\n\nWe need to run the entire callback in a message. I think we can use execute-in-self, eventhough Replicate (below) is not a ControlMessage -- I think it should be fine if they are service out of order.",
+      "range": {
+        "startLine": 607,
+        "startChar": 17,
+        "endLine": 607,
+        "endChar": 29
+      },
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
