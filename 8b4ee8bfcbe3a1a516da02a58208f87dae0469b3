@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "94748744_e7a20276",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2019-04-12T08:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84bd6ea8_d46d5591",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2727cfea_846c204f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 2
@@ -48,6 +66,30 @@
       "writtenOn": "2019-04-11T12:53:04Z",
       "side": 1,
       "message": "Nice catch, but the problem is that the entire callback is running outside of current actor context, hence even this check is invalid, it just happens never to cause problems (follower fluctuation is much less likely).\n\nWe need to run the entire callback in a message. I think we can use execute-in-self, eventhough Replicate (below) is not a ControlMessage -- I think it should be fine if they are service out of order.",
+      "range": {
+        "startLine": 607,
+        "startChar": 17,
+        "endLine": 607,
+        "endChar": 29
+      },
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a41dcbaf_e1e6b5cd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2019-04-12T08:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2727cfea_846c204f",
       "range": {
         "startLine": 607,
         "startChar": 17,
@@ -77,6 +119,24 @@
     },
     {
       "key": {
+        "uuid": "a3288035_359db2d8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1386,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2019-04-12T08:42:00Z",
+      "side": 1,
+      "message": "Leftover from when I tried to hit the correct timing, its removed now",
+      "parentUuid": "d9d4c732_8c3f4e66",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "23b1b690_9e0c85ff",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -94,6 +154,24 @@
     },
     {
       "key": {
+        "uuid": "c7ceadd2_cc29c23a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1393,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2019-04-12T08:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "23b1b690_9e0c85ff",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7778bb7_249cd736",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -105,6 +183,24 @@
       "writtenOn": "2019-04-11T14:02:53Z",
       "side": 1,
       "message": "This is fragile. You should use a wait for leaderActor.getState().size() to reach 100 with a timeout (say 5 sec). Check out Awaitility.await().until(..) that used in infrautils et al.",
+      "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "acb55555_d30e51d9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1415,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2019-04-12T08:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7778bb7_249cd736",
       "revId": "8b4ee8bfcbe3a1a516da02a58208f87dae0469b3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
