@@ -96,6 +96,24 @@
     },
     {
       "key": {
+        "uuid": "626d72fe_c0fd0b0c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-12T16:59:36Z",
+      "side": 1,
+      "message": "yes - we do something similar in ShardDataTree et al, ie pass shard::executeInSelf in place of an Executor.",
+      "parentUuid": "97fe4c91_0d3d3236",
+      "revId": "5b0e4b23df063bb4c7e9b73784d3616f1b65e329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "041a418c_de523f7f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractRaftActorIntegrationTest.java",
         "patchSetId": 3
