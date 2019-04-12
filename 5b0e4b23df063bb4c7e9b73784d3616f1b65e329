@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "7cceb1d2_044bec93",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-12T13:20:09Z",
+      "side": 1,
+      "message": "In fact you could get even fancier by only offloading when doAsync is true.",
+      "parentUuid": "772ff830_4303f044",
+      "revId": "5b0e4b23df063bb4c7e9b73784d3616f1b65e329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "041a418c_de523f7f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractRaftActorIntegrationTest.java",
         "patchSetId": 3
