@@ -78,6 +78,24 @@
     },
     {
       "key": {
+        "uuid": "97fe4c91_0d3d3236",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-12T16:12:15Z",
+      "side": 1,
+      "message": "Looking at dispatches, I seem to be wrong. At any rate, an Executor in ReplicatedLogImpl still makes sense -- it really should be in RaftActorContext, as I suspect there are other places where it would be useful.\n\nIn order to initialize it, then, we can simply update:\n\n        context \u003d new RaftActorContextImpl(this.getSelf(),\n            this.getContext(), id, new ElectionTermImpl(persistentProvider, id, LOG),\n            -1, -1, peerAddresses,\n            configParams.isPresent() ? configParams.get() : new DefaultConfigParamsImpl(),\n            delegatingPersistenceProvider, this::handleApplyState, LOG);\n\n\nto include \"this::executeInSelf\" -- just like we inject handleApplyState.",
+      "parentUuid": "b8f2ac43_b0fe0b5c",
+      "revId": "5b0e4b23df063bb4c7e9b73784d3616f1b65e329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "041a418c_de523f7f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractRaftActorIntegrationTest.java",
         "patchSetId": 3
