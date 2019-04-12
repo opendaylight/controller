@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1c74771_865d7396",
+        "filename": "opendaylight/md-sal/sal-akka-raft/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-12T13:13:12Z",
+      "side": 1,
+      "message": "Don\u0027t we get this from odlparent?",
+      "range": {
+        "startLine": 72,
+        "startChar": 6,
+        "endLine": 72,
+        "endChar": 30
+      },
+      "revId": "5b0e4b23df063bb4c7e9b73784d3616f1b65e329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "772ff830_4303f044",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-12T13:13:12Z",
+      "side": 1,
+      "message": "You really don\u0027t need an explicit PersistenceComplete class. Also I think the offloading should be done in ReplicatedLogImpl.appendAndPersist as it updates state as well (dataSizeSinceLastSnapshot), ie\n\n  Procedure\u003cReplicatedLogEntry\u003e persistCallback \u003d persistedLogEntry -\u003e {\n       context.getActor().tell(new ExecuteInSelfMessage(\n          () -\u003e { \u003cexisting code\u003e} ), ActorRef.noSender());\n     };",
+      "revId": "5b0e4b23df063bb4c7e9b73784d3616f1b65e329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "041a418c_de523f7f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractRaftActorIntegrationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-12T13:13:12Z",
+      "side": 1,
+      "message": "This is OK here but I was actually thinking to put this in MockRaftActor.",
+      "revId": "5b0e4b23df063bb4c7e9b73784d3616f1b65e329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
