@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
@@ -93,7 +93,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-            final Procedure<ReplicatedLogEntry> callback, final boolean doAsync)  {
+            final Consumer<ReplicatedLogEntry> callback, final boolean doAsync)  {
 
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
@@ -112,23 +112,18 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     private void persistCallback(final ReplicatedLogEntry persistedLogEntry,
-            final Procedure<ReplicatedLogEntry> callback) {
+            final Consumer<ReplicatedLogEntry> callback) {
         context.getExecutor().execute(() -> syncPersistCallback(persistedLogEntry, callback));
     }
 
     private void syncPersistCallback(final ReplicatedLogEntry persistedLogEntry,
-            final Procedure<ReplicatedLogEntry> callback) {
+            final Consumer<ReplicatedLogEntry> callback) {
         context.getLogger().debug("{}: persist complete {}", context.getId(), persistedLogEntry);
 
         dataSizeSinceLastSnapshot += persistedLogEntry.size();
 
         if (callback != null) {
-            try {
-                callback.apply(persistedLogEntry);
-            } catch (Exception e) {
-                context.getLogger().error("{}: persist callback failed", context.getId(), e);
-                throw new IllegalStateException("Persist callback failed", e);
-            }
+            callback.accept(persistedLogEntry);
         }
     }
 }

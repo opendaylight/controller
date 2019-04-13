@@ -12,7 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.japi.Procedure;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
@@ -190,17 +189,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
         public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-                final Procedure<ReplicatedLogEntry> callback, final boolean doAsync) {
+                final Consumer<ReplicatedLogEntry> callback, final boolean doAsync) {
             append(replicatedLogEntry);
 
             if (callback != null) {
-                try {
-                    callback.apply(replicatedLogEntry);
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                callback.accept(replicatedLogEntry);
             }
 
             return true;
