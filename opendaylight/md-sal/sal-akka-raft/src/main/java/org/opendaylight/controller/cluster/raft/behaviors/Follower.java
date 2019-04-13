@@ -14,7 +14,6 @@ import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
-import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -24,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -303,7 +303,7 @@ public class Follower extends AbstractRaftActorBehavior {
         // applied to the state already, as the persistence callback occurs async, and we want those entries
         // purged from the persisted log as well.
         final AtomicBoolean shouldCaptureSnapshot = new AtomicBoolean(false);
-        final Procedure<ReplicatedLogEntry> appendAndPersistCallback = logEntry -> {
+        final Consumer<ReplicatedLogEntry> appendAndPersistCallback = logEntry -> {
             final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
             final ReplicatedLogEntry lastEntryToAppend = entries.get(entries.size() - 1);
             if (shouldCaptureSnapshot.get() && logEntry == lastEntryToAppend) {
