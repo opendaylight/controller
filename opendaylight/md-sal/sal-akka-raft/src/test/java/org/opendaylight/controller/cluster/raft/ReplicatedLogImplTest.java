@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import akka.japi.Procedure;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -92,12 +93,12 @@ public class ReplicatedLogImplTest {
         reset(mockPersistence);
 
         ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
-        Procedure<ReplicatedLogEntry> mockCallback = mock(Procedure.class);
+        Consumer<ReplicatedLogEntry> mockCallback = mock(Consumer.class);
         log.appendAndPersist(logEntry2, mockCallback, true);
 
         verifyPersist(logEntry2);
 
-        verify(mockCallback).apply(same(logEntry2));
+        verify(mockCallback).accept(same(logEntry2));
 
         assertEquals("size", 2, log.size());
     }
@@ -107,7 +108,7 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersisWithDuplicateEntry() throws Exception {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
-        Procedure<ReplicatedLogEntry> mockCallback = mock(Procedure.class);
+        Consumer<ReplicatedLogEntry> mockCallback = mock(Consumer.class);
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
         log.appendAndPersist(logEntry, mockCallback, true);

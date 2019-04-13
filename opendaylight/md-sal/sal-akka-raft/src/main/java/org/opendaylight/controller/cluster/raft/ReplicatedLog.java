@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.japi.Procedure;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -96,7 +96,7 @@ public interface ReplicatedLog {
      * @return true if the entry was successfully appended, false otherwise.
      */
     boolean appendAndPersist(@NonNull ReplicatedLogEntry replicatedLogEntry,
-            @Nullable Procedure<ReplicatedLogEntry> callback, boolean doAsync);
+            @Nullable Consumer<ReplicatedLogEntry> callback, boolean doAsync);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.

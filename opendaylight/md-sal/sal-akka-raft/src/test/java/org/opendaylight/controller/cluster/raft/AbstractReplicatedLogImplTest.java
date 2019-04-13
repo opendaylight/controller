@@ -13,10 +13,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.japi.Procedure;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -325,8 +325,11 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback,
+        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Consumer<ReplicatedLogEntry> callback,
                 boolean doAsync) {
+            if (callback != null) {
+                callback.accept(replicatedLogEntry);
+            }
             return true;
         }
 
