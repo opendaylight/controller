@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "3fc0bc76_3deda1b3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-13T15:33:25Z",
+      "side": 1,
+      "message": "Thanks for the explanation. I started loading the problem domain to my brain :)\n\nReading up on https://doc.akka.io/docs/akka/current/persistence.html#event-sourcing ... I wonder why can\u0027t we just integrate this into Shard the way it is outlined in the \"Failures\" section there?\n\ni.e. in preStart() check if we need to create our supervisor, and store a reference to it. In postStop() check the reference and adjust accordingly.",
+      "parentUuid": "c0c052ca_fb7967e2",
+      "range": {
+        "startLine": 20,
+        "startChar": 48,
+        "endLine": 22,
+        "endChar": 62
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b509a35f_fb53eef6",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
         "patchSetId": 2
