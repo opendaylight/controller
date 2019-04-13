@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29116022_ad748608",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-13T15:45:53Z",
+      "side": 1,
+      "message": "actually this is not necessary, because https://github.com/akka/akka/blob/v2.5.11/akka-actor/src/main/scala/akka/pattern/BackoffOptions.scala#L111\n\nHence we can just forward messages to our parent and if it is a backoff supervisor, it will forward them to ShardManager.",
+      "range": {
+        "startLine": 166,
+        "startChar": 4,
+        "endLine": 166,
+        "endChar": 43
+      },
+      "revId": "74daaf22989e055e124fb8b134b0f752f0b8723e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db99a897_3fc86414",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1196,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-13T15:45:53Z",
+      "side": 1,
+      "message": "This is replicated in 5 places. Can we encapsulate the parameters into a DTO and have a utility which creates the DTO from DatastoreContext, please?",
+      "range": {
+        "startLine": 1188,
+        "startChar": 0,
+        "endLine": 1196,
+        "endChar": 34
+      },
+      "revId": "74daaf22989e055e124fb8b134b0f752f0b8723e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "718074b2_744806fc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1312,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-13T15:45:53Z",
+      "side": 1,
+      "message": "so local shards are always supervised?",
+      "range": {
+        "startLine": 1312,
+        "startChar": 95,
+        "endLine": 1312,
+        "endChar": 118
+      },
+      "revId": "74daaf22989e055e124fb8b134b0f752f0b8723e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d04da35_f6cc7702",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStoreActor.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-13T15:45:53Z",
+      "side": 1,
+      "message": "there should be a default constructure in AbstractUntypedPersistentActorWithMetering so this is not required.",
+      "range": {
+        "startLine": 92,
+        "startChar": 8,
+        "endLine": 92,
+        "endChar": 21
+      },
+      "revId": "74daaf22989e055e124fb8b134b0f752f0b8723e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
