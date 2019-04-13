@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "204c6b37_7075b3df",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1196,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-04-13T15:52:56Z",
+      "side": 1,
+      "message": "Actually, if we create a props builder AbstractActorWithPersistenceFailureTracking, we should be able to communicate this via props down to it -- then if we instantiate the backoff supervisor there, we have all the information we need and this entire mechanics becomes invisible to subclasses (modulo needing to adjust their Props).",
+      "parentUuid": "db99a897_3fc86414",
+      "range": {
+        "startLine": 1188,
+        "startChar": 0,
+        "endLine": 1196,
+        "endChar": 34
+      },
+      "revId": "74daaf22989e055e124fb8b134b0f752f0b8723e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "718074b2_744806fc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 11
