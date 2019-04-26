@@ -32,6 +32,7 @@ final class CohortEntry {
     private Shard shard;
 
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
+        this.cohort = null;
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionId = transaction.getIdentifier();
         this.clientVersion = clientVersion;
@@ -120,6 +121,10 @@ final class CohortEntry {
             // Call the hook for unit tests.
             cohort = cohortDecorator.decorate(transactionId, cohort);
         }
+    }
+
+    boolean isSealed() {
+        return cohort != null;
     }
 
     Optional<SortedSet<String>> getParticipatingShardNames() {
