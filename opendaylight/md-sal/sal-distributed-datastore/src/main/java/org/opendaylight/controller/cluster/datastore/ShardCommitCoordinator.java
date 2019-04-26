@@ -129,7 +129,7 @@ final class ShardCommitCoordinator {
      */
     void handleBatchedModifications(final BatchedModifications batched, final ActorRef sender, final Shard shard) {
         CohortEntry cohortEntry = cohortCache.get(batched.getTransactionId());
-        if (cohortEntry == null) {
+        if (cohortEntry == null || cohortEntry.isSealed()) {
             cohortEntry = CohortEntry.createOpen(dataTree.newReadWriteTransaction(batched.getTransactionId()),
                 batched.getVersion());
             cohortCache.put(cohortEntry.getTransactionId(), cohortEntry);
