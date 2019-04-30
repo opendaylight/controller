@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -27,9 +28,15 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
 
     private final BindingToNormalizedNodeCodec codec;
     private final DOMMountPointService mountService;
+<<<<<<< HEAD
+    private final LoadingCache<DOMMountPoint, BindingMountPointAdapter> bindingMountpoints = CacheBuilder.newBuilder()
+            .weakKeys().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
+=======
     @VisibleForTesting
     final LoadingCache<DOMMountPoint, BindingMountPointAdapter> bindingMountpoints = CacheBuilder.newBuilder()
             .weakKeys().weakValues().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
+
+>>>>>>> cbb019d9b7... FI-927 Fix caching in BA mount service
                 @Override
                 public BindingMountPointAdapter load(final DOMMountPoint key) {
                     return new BindingMountPointAdapter(codec, key);
