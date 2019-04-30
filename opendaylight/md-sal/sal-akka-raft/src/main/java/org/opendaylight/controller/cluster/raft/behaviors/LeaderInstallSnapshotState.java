@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Encapsulates the leader state and logic for sending snapshot chunks to a follower.
@@ -43,6 +46,8 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private long snapshotSize;
     private InputStream snapshotInputStream;
+    private Stopwatch chunkTimer = Stopwatch.createUnstarted();
+    private byte[] currentChunk;
 
     LeaderInstallSnapshotState(final int snapshotChunkSize, final String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
@@ -81,6 +86,18 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
             chunkIndex =  chunkIndex + 1;
         }
         return chunkIndex;
+    }
+
+    void startChunkTimer() {
+        chunkTimer.start();
+    }
+
+    void resetChunkTimer() {
+        chunkTimer.reset();
+    }
+
+    boolean isChunkTimedOut(final FiniteDuration timeout) {
+        return chunkTimer.elapsed(TimeUnit.SECONDS) > timeout.toSeconds();
     }
 
     int getChunkIndex() {
@@ -123,18 +140,22 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
             size = (int) (snapshotSize - start);
         }
 
-        byte[] nextChunk = new byte[size];
-        int numRead = snapshotInputStream.read(nextChunk);
+        currentChunk = new byte[size];
+        int numRead = snapshotInputStream.read(currentChunk);
         if (numRead != size) {
             throw new IOException(String.format(
                     "The # of bytes read from the input stream, %d, does not match the expected # %d", numRead, size));
         }
 
-        nextChunkHashCode = Arrays.hashCode(nextChunk);
+        nextChunkHashCode = Arrays.hashCode(currentChunk);
 
         LOG.debug("{}: Next chunk: total length={}, offset={}, size={}, hashCode={}", logName,
                 snapshotSize, start, size, nextChunkHashCode);
-        return nextChunk;
+        return currentChunk;
+    }
+
+    byte[] getCurrentChunk() {
+        return currentChunk;
     }
 
     /**
@@ -142,6 +163,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
      */
     void reset() {
         closeStream();
+        chunkTimer.reset();
 
         offset = 0;
         replyStatus = false;
