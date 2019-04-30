@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92a31f3a_4ed7b4a9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-30T18:41:23Z",
+      "side": 1,
+      "message": "Even though I don\u0027t think we should ever hit this case but, if so, it seems we\u0027d end up in the same endless ping pong loop. I think we should close the current LeaderInstallSnapshotState, return false and have the caller just send the heartbeat AE. On the next heartbeat, it should figure out if it needs to start the entire install snapshot process again.",
+      "range": {
+        "startLine": 976,
+        "startChar": 8,
+        "endLine": 979,
+        "endChar": 9
+      },
+      "revId": "95553e5e7177b972f4ab5f68fc50c6bc238f0e5c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bca969a5_1c9594ec",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-30T18:41:23Z",
+      "side": 1,
+      "message": "This check really isn\u0027t necessary as we can assume the caller has already verified the LeaderInstallSnapshotState is present (which is currently the case with the lone caller).",
+      "range": {
+        "startLine": 981,
+        "startChar": 8,
+        "endLine": 984,
+        "endChar": 9
+      },
+      "revId": "95553e5e7177b972f4ab5f68fc50c6bc238f0e5c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d224f1b8_c24a9df7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-04-30T18:41:23Z",
+      "side": 1,
+      "message": "I think we can just call installSnapshotState.markSendStatus(false) here and use getNextChunk() and getNextIndex() normally to resend, ie just call  sendSnapshotChunk(followerActor, followerLogInfo), as is done in handleInstallSnapshotReply for an unsuccessful the reply. This way you don\u0027t need to store the additional currentChunk state in LeaderInstallSnapshotState.",
+      "revId": "95553e5e7177b972f4ab5f68fc50c6bc238f0e5c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
