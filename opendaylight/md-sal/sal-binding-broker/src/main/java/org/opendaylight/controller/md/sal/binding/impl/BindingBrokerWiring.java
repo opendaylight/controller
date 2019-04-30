@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -24,10 +23,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -43,8 +40,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
  * @author Michael Vorburger.ch, partially based on refactored code originally by Thomas Pantelis
  */
 public class BindingBrokerWiring implements AutoCloseable {
-
-    private static final JavassistUtils JAVASSIST = JavassistUtils.forClassPool(ClassPool.getDefault());
 
     private final BindingToNormalizedNodeCodec bindingToNormalizedNodeCodec;
     private final ListenerRegistration<SchemaContextListener> mappingCodecListenerReg;
@@ -64,8 +59,7 @@ public class BindingBrokerWiring implements AutoCloseable {
             DOMNotificationSubscriptionListenerRegistry domNotificationListenerRegistry, DOMDataBroker domDataBroker,
             DOMDataBroker domPingPongDataBroker) {
         // Runtime binding/normalized mapping service
-        BindingNormalizedNodeCodecRegistry codecRegistry
-            = new BindingNormalizedNodeCodecRegistry(StreamWriterGenerator.create(JAVASSIST));
+        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry();
         bindingToNormalizedNodeCodec = new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry, true);
 
         // Register the BindingToNormalizedNodeCodec with the SchemaService as a SchemaContextListener
