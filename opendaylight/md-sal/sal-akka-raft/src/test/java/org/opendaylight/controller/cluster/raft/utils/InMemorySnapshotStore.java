@@ -70,6 +70,10 @@ public class InMemorySnapshotStore extends SnapshotStore {
         return retList;
     }
 
+    public static void clearSnapshotsFor(final String persistenceId) {
+        snapshots.remove(persistenceId);
+    }
+
     public static void clear() {
         snapshots.clear();
     }

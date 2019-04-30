@@ -533,6 +533,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return;
         }
 
+        installSnapshotState.resetChunkTimer();
         followerLogInformation.markFollowerActive();
 
         if (installSnapshotState.getChunkIndex() == reply.getChunkIndex()) {
@@ -664,9 +665,18 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             LeaderInstallSnapshotState installSnapshotState = followerLogInformation.getInstallSnapshotState();
             if (installSnapshotState != null) {
+
                 // if install snapshot is in process , then sent next chunk if possible
-                if (isFollowerActive && installSnapshotState.canSendNextChunk()) {
-                    sendSnapshotChunk(followerActor, followerLogInformation);
+                if (isFollowerActive) {
+                    // 30 seconds with default settings, can be modified via heartbeat or election timeout factor
+                    FiniteDuration snapshotReplyTimeout = context.getConfigParams().getHeartBeatInterval()
+                            .$times(context.getConfigParams().getElectionTimeoutFactor() * 3);
+
+                    if (installSnapshotState.isChunkTimedOut(snapshotReplyTimeout)) {
+                        resendSnapshotChunk(followerActor, followerLogInformation);
+                    } else if (installSnapshotState.canSendNextChunk()) {
+                        sendSnapshotChunk(followerActor, followerLogInformation);
+                    }
                 } else if (sendHeartbeat) {
                     // we send a heartbeat even if we have not received a reply for the last chunk
                     sendAppendEntries = true;
@@ -931,18 +941,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     serverConfig = Optional.fromNullable(context.getPeerServerInfo(true));
                 }
 
-                followerActor.tell(
-                    new InstallSnapshot(currentTerm(), context.getId(),
-                        snapshotHolder.get().getLastIncludedIndex(),
-                        snapshotHolder.get().getLastIncludedTerm(),
-                        nextSnapshotChunk,
-                        nextChunkIndex,
-                        installSnapshotState.getTotalChunks(),
-                        Optional.of(installSnapshotState.getLastChunkHashCode()),
-                        serverConfig
-                    ).toSerializable(followerLogInfo.getRaftVersion()),
-                    actor()
-                );
+                sendSnapshotChunk(followerActor, followerLogInfo, nextSnapshotChunk, nextChunkIndex, serverConfig);
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -950,6 +949,58 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
                 installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
+        }
+    }
+
+    private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo,
+                                   final byte[] snapshotChunk, final int chunkIndex,
+                                   final Optional<ServerConfigurationPayload> serverConfig) {
+        LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
+
+        installSnapshotState.startChunkTimer();
+        followerActor.tell(
+                new InstallSnapshot(currentTerm(), context.getId(),
+                        snapshotHolder.get().getLastIncludedIndex(),
+                        snapshotHolder.get().getLastIncludedTerm(),
+                        snapshotChunk,
+                        chunkIndex,
+                        installSnapshotState.getTotalChunks(),
+                        Optional.of(installSnapshotState.getLastChunkHashCode()),
+                        serverConfig
+                ).toSerializable(followerLogInfo.getRaftVersion()),
+                actor()
+        );
+    }
+
+    private void resendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo) {
+        if (!snapshotHolder.isPresent()) {
+            // Seems like we should never hit this case, but just in case we do, reset the snapshot progress so that it
+            // can restart from the next AppendEntries.
+            log.warn("{}: Attempting to resend snapshot with no snapshot holder present.", logName());
+
+            followerLogInfo.getInstallSnapshotState().reset();
+            return;
+        }
+
+        LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
+        // we are resending, timer needs to be reset
+        installSnapshotState.resetChunkTimer();
+        installSnapshotState.markSendStatus(false);
+
+        try {
+            byte[] currentChunk = installSnapshotState.getNextChunk();
+            int chunkIndex = installSnapshotState.getChunkIndex();
+
+            Optional<ServerConfigurationPayload> serverConfig = Optional.absent();
+            if (installSnapshotState.isLastChunk(chunkIndex)) {
+                serverConfig = Optional.fromNullable(context.getPeerServerInfo(true));
+            }
+            sendSnapshotChunk(followerActor, followerLogInfo, currentChunk, chunkIndex, serverConfig);
+
+            log.debug("{}: InstallSnapshot resent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
+                    installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
