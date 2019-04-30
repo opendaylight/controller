@@ -8,13 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.VisibleForTesting;
-import javassist.ClassPool;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
-import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
-import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 
@@ -45,9 +42,7 @@ public class DatastoreContextIntrospectorFactory {
 
     private BindingNormalizedNodeSerializer newBindingSerializer() {
         BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
-                StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault())));
-        codecRegistry.onBindingRuntimeContextUpdated(BindingRuntimeContext.create(classLoadingStrategy,
-                schemaService.getGlobalContext()));
+                BindingRuntimeContext.create(classLoadingStrategy, schemaService.getGlobalContext()));
         return codecRegistry;
     }
 }

@@ -44,12 +44,9 @@ import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.mdsal.binding.dom.codec.gen.impl.DataObjectSerializerGenerator;
-import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -64,7 +61,6 @@ public class BindingTestContext implements AutoCloseable {
 
 
     private final ListeningExecutorService executor;
-    private final ClassPool classPool;
 
     private final boolean startWithSchema;
 
@@ -102,11 +98,16 @@ public class BindingTestContext implements AutoCloseable {
         return this.codec;
     }
 
+
+    protected BindingTestContext(final ListeningExecutorService executor, final boolean startWithSchema) {
+        this.executor = executor;
+        this.startWithSchema = startWithSchema;
+    }
+
+    @Deprecated
     protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool,
             final boolean startWithSchema) {
-        this.executor = executor;
-        this.classPool = classPool;
-        this.startWithSchema = startWithSchema;
+        this(executor, startWithSchema);
     }
 
     public void startDomDataBroker() {
@@ -160,11 +161,7 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void startBindingToDomMappingService() {
-        checkState(this.classPool != null, "ClassPool needs to be present");
-
-        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(
-                JavassistUtils.forClassPool(this.classPool));
-        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry();
         final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
         this.codec = new BindingToNormalizedNodeCodec(loading,  codecRegistry);
         this.mockSchemaService.registerSchemaContextListener(this.codec);
