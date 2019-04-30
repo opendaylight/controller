@@ -118,15 +118,15 @@ public class DatastoreTestTask {
         dclExecutorService.afterTestSetup();
 
         execute(write);
-        if (registration != null) {
-            registration.close();
-        }
 
         if (read != null) {
             read.verify(store.newReadOnlyTransaction());
         }
         if (cleanup != null) {
             execute(cleanup);
+        }
+        if (registration != null) {
+            registration.close();
         }
     }
 
