@@ -12,6 +12,7 @@
         <feature version="[3,4)">odl-yangtools-codec</feature>
         <feature version="[4,5)">odl-mdsal-eos-dom</feature>
         <feature version="[4,5)">odl-mdsal-dom-broker</feature>
+        <feature version="[4.0.1,5)">odl-mdsal-binding-dom-adapter</feature>
         <configfile finalname="configuration/initial/akka.conf">
             mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/akkaconf
         </configfile>
