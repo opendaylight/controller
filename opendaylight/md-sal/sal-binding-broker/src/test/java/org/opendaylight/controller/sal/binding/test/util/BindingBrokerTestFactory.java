@@ -39,13 +39,13 @@ public class BindingBrokerTestFactory {
         this.executor = executor;
     }
 
-
     public BindingTestContext getTestContext() {
         Preconditions.checkState(executor != null, "Executor is not set.");
         ListeningExecutorService listenableExecutor = MoreExecutors.listeningDecorator(executor);
-        return new BindingTestContext(listenableExecutor, getClassPool(),startWithParsedSchema);
+        return new BindingTestContext(listenableExecutor, startWithParsedSchema);
     }
 
+    @Deprecated
     public ClassPool getClassPool() {
         if (classPool == null) {
             return CLASS_POOL;
@@ -54,6 +54,7 @@ public class BindingBrokerTestFactory {
         return classPool;
     }
 
+    @Deprecated
     public void setClassPool(final ClassPool classPool) {
         this.classPool = classPool;
     }
