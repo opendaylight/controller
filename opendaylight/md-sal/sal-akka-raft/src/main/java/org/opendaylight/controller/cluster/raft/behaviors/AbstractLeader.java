@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReset;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -503,10 +504,23 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             replicate((Replicate) message);
         } else if (message instanceof InstallSnapshotReply) {
             handleInstallSnapshotReply((InstallSnapshotReply) message);
+        } else if (message instanceof InstallSnapshotReset) {
+            handleInstallSnapshotReset((InstallSnapshotReset) message);
         } else if (message instanceof CheckConsensusReached) {
             possiblyUpdateCommitIndex();
         } else {
             return super.handleMessage(sender, message);
+        }
+
+        return this;
+    }
+
+    private RaftActorBehavior handleInstallSnapshotReset(final InstallSnapshotReset message) {
+        log.info("{}: Resetting followers: {} snapshot state.", logName(), message.getFollowerLogInfo().getId());
+
+        LeaderInstallSnapshotState installSnapshotState = message.getFollowerLogInfo().getInstallSnapshotState();
+        if (installSnapshotState != null) {
+            installSnapshotState.reset();
         }
 
         return this;
@@ -541,6 +555,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 if (installSnapshotState.isLastChunk(reply.getChunkIndex())) {
                     //this was the last chunk reply
 
+                    installSnapshotState.cancelResetTimer();
                     long followerMatchIndex = snapshotHolder.get().getLastIncludedIndex();
                     followerLogInformation.setMatchIndex(followerMatchIndex);
                     followerLogInformation.setNextIndex(followerMatchIndex + 1);
@@ -929,6 +944,20 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 Optional<ServerConfigurationPayload> serverConfig = Optional.absent();
                 if (installSnapshotState.isLastChunk(nextChunkIndex)) {
                     serverConfig = Optional.fromNullable(context.getPeerServerInfo(true));
+
+
+
+                    // schedule a check that restarts the snapshot install
+                    FiniteDuration delay = FiniteDuration.create(
+                            context.getConfigParams().getSnapshotResetTimeout(), TimeUnit.SECONDS);
+                    Cancellable resetCancellable = context.getActorSystem().scheduler()
+                            .scheduleOnce(delay, () -> {
+                                log.info("{}: Follower({}) took too long to respond to last chunk of snapshot,"
+                                        + "resetting snapshot state.", logName(), followerLogInfo.getId());
+                                context.getActor().tell(new InstallSnapshotReset(followerLogInfo), null);
+                            }, context.getActorSystem().dispatcher());
+
+                    installSnapshotState.setResetTimer(resetCancellable);
                 }
 
                 followerActor.tell(

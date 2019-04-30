@@ -72,6 +72,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 .put(follower2Id, follower2Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
+        leaderConfigParams.setSnapshotResetTimeout(3);
         leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
 
         waitUntilLeader(leaderActor);
@@ -93,6 +94,16 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
 
         testLog.info("Leader created and elected");
+    }
+
+    private void setupFollower2() {
+        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+                follower1Id, testActorPath(follower1Id)), newFollowerConfigParams());
+
+        follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
+        follower2 = follower2Actor.underlyingActor().getCurrentBehavior();
+
+        follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
     }
 
     /**
@@ -381,6 +392,80 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyInstallSnapshotToLaggingFollower(8, serverConfig);
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot complete");
+    }
+
+    /**
+     * Tests whether the leader reattempts to send a snapshot when a follower crashes before replying with
+     * InstallSnapshotReply after the last chunk has been sent.
+     */
+    @Test
+    public void testLeaderInstallsSnapshotWithRestartedFollowerDuringSnapshotInstallation() throws Exception {
+        testLog.info("testLeaderInstallsSnapshotWithRestartedFollowerDuringSnapshotInstallation starting");
+
+        setup();
+
+        sendInitialPayloadsReplicatedToAllFollowers("zero", "one");
+
+        // Configure follower 2 to drop messages and lag.
+        follower2Actor.stop();
+
+        // Sleep for at least the election timeout interval so follower 2 is deemed inactive by the leader.
+        Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
+                TimeUnit.MILLISECONDS);
+
+        // Send 5 payloads - the second should cause a leader snapshot.
+        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        final MockPayload payload5 = sendPayloadData(leaderActor, "five");
+        final MockPayload payload6 = sendPayloadData(leaderActor, "six");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
+        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
+        verifyApplyState(applyStates.get(0), leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
+        verifyApplyState(applyStates.get(2), leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
+        verifyApplyState(applyStates.get(4), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+
+        testLog.info("testLeaderInstallsSnapshotWithRestartedFollowerDuringSnapshotInstallation: "
+                + "sending 1 more payload to trigger second snapshot");
+
+        // Send another payload to trigger a second leader snapshot.
+        MockPayload payload7 = sendPayloadData(leaderActor, "seven");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+
+        ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        verifyApplyState(applyState, leaderCollectorActor, payload7.toString(), currentTerm, 7, payload7);
+
+        // Verify follower 1 applies each log entry.
+        applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 6);
+        verifyApplyState(applyStates.get(0), null, null, currentTerm, 2, payload2);
+        verifyApplyState(applyStates.get(2), null, null, currentTerm, 4, payload4);
+        verifyApplyState(applyStates.get(5), null, null, currentTerm, 7, payload7);
+
+        leaderActor.underlyingActor()
+                .startDropMessages(InstallSnapshotReply.class, reply -> reply.getChunkIndex() == 5);
+
+        setupFollower2();
+
+        MessageCollectorActor.expectMatching(follower2CollectorActor, InstallSnapshot.class, 5);
+
+        follower2Actor.stop();
+
+        // need to get rid of persistence for follower2
+        InMemorySnapshotStore.clearSnapshotsFor(follower2Id);
+
+        leaderActor.underlyingActor().stopDropMessages(InstallSnapshotReply.class);
+
+        MessageCollectorActor.clearMessages(follower2CollectorActor);
+        setupFollower2();
+
+        MessageCollectorActor.expectMatching(follower2CollectorActor, SaveSnapshotSuccess.class, 1);
     }
 
     /**

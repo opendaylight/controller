@@ -144,4 +144,12 @@ public interface ConfigParams {
      * @return the threshold in terms of number of journal entries.
      */
     long getSyncIndexThreshold();
+
+    /**
+     * Returns the amount of time to wait before resetting the snapshot transfer state after the last chunk is
+     * sent in seconds.
+     *
+     * @return the amount of time to wait in seconds.
+     */
+    int getSnapshotResetTimeout();
 }

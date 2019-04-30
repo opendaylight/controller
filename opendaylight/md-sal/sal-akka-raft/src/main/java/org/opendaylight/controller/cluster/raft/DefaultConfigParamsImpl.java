@@ -76,6 +76,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int fileBackedStreamingThreshold = 128 * MEGABYTE;
 
     private long syncIndexThreshold = 10;
+    private int snapshotResetTimeout = 30;
 
     public void setHeartBeatInterval(final FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -84,6 +85,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setSnapshotBatchCount(final long snapshotBatchCount) {
         this.snapshotBatchCount = snapshotBatchCount;
+    }
+
+    public void setSnapshotResetTimeout(final int snapshotResetTimeout) {
+        this.snapshotResetTimeout = snapshotResetTimeout;
     }
 
     public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
@@ -215,6 +220,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setSyncIndexThreshold(final long syncIndexThreshold) {
         checkArgument(syncIndexThreshold >= 0);
         this.syncIndexThreshold = syncIndexThreshold;
+    }
+
+    @Override
+    public int getSnapshotResetTimeout() {
+        return snapshotResetTimeout;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")

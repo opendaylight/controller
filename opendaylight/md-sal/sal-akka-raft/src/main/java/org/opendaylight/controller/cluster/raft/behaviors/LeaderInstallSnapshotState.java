@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import akka.actor.Cancellable;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private long snapshotSize;
     private InputStream snapshotInputStream;
+    private Cancellable resetTimer = null;
 
     LeaderInstallSnapshotState(final int snapshotChunkSize, final String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
@@ -142,6 +144,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
      */
     void reset() {
         closeStream();
+        cancelResetTimer();
 
         offset = 0;
         replyStatus = false;
@@ -176,5 +179,15 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
     int getLastChunkHashCode() {
         return lastChunkHashCode;
+    }
+
+    public void setResetTimer(Cancellable resetTimer) {
+        this.resetTimer = resetTimer;
+    }
+
+    public void cancelResetTimer() {
+        if (resetTimer != null) {
+            resetTimer.cancel();
+        }
     }
 }

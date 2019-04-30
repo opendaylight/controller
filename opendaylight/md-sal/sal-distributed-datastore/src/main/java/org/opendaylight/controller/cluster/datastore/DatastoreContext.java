@@ -47,6 +47,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS =
             DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
     public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 50000;
+    public static final int DEFAULT_SNAPSHOT_RESET_TIMEOUT = 30;
     public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
     public static final boolean DEFAULT_PERSISTENT = true;
@@ -95,6 +96,7 @@ public class DatastoreContext implements ClientActorConfig {
     private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
+    private int snapshotResetTimeout = DEFAULT_SNAPSHOT_RESET_TIMEOUT;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -110,6 +112,7 @@ public class DatastoreContext implements ClientActorConfig {
         setCandidateElectionTimeoutDivisor(DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
         setMaximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE);
+        setSnapshotResetTimeout(DEFAULT_SNAPSHOT_RESET_TIMEOUT);
     }
 
     private DatastoreContext(final DatastoreContext other) {
@@ -137,6 +140,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.requestTimeout = other.requestTimeout;
         this.noProgressTimeout = other.noProgressTimeout;
         this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
+        this.snapshotResetTimeout = other.snapshotResetTimeout;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -152,6 +156,7 @@ public class DatastoreContext implements ClientActorConfig {
         setTempFileDirectory(other.getTempFileDirectory());
         setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
         setSyncIndexThreshold(other.raftConfig.getSyncIndexThreshold());
+        setSnapshotResetTimeout(other.raftConfig.getSnapshotResetTimeout());
     }
 
     public static Builder newBuilder() {
@@ -289,6 +294,10 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
     }
 
+    private void setSnapshotResetTimeout(final int snapshotResetTimeout) {
+        raftConfig.setSnapshotResetTimeout(snapshotResetTimeout);
+    }
+
     @Deprecated
     private void setShardSnapshotChunkSize(final int shardSnapshotChunkSize) {
         // We'll honor the shardSnapshotChunkSize setting for backwards compatibility but only if it doesn't exceed
@@ -387,6 +396,10 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
+        public Builder snapshotResetTimeout(final int timeout) {
+            datastoreContext.snapshotResetTimeout = timeout;
+            return this;
+        }
 
         public Builder shardTransactionIdleTimeout(final long timeout, final TimeUnit unit) {
             datastoreContext.shardTransactionIdleTimeout = FiniteDuration.create(timeout, unit);
