@@ -128,6 +128,24 @@
       "revId": "95553e5e7177b972f4ab5f68fc50c6bc238f0e5c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8b570b4_84c57aa1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-05-02T13:39:49Z",
+      "side": 1,
+      "message": "ahh yes. Of course that means that the markSendStatus mechanism is broken, luckily we never hit that case currently :)  We should still fix markSendStatus and use it.  So in LeaderInstallSnapshotState we can either utilize mark/reset on the InputStream or store the currentChunk as you\u0027ve done but automatically use the currentChunk in getNextChunk, ie\n\n  if (replyStatus || currentChuck \u003d\u003d null) {\n      currentChuck \u003d new byte[size];\n      int numRead \u003d snapshotInputStream.read(nextChunk);\n      ...\n  }",
+      "parentUuid": "b646a9d5_3f9e9773",
+      "revId": "95553e5e7177b972f4ab5f68fc50c6bc238f0e5c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
