@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e30ff242_de6aae0a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-05-03T13:05:29Z",
+      "side": 1,
+      "message": "I think we should close and remove the state. Also return false so the caller sends a heartbeat.",
+      "revId": "c3c83a3a21447d637529da1bdda143c8c238d41b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4665c4a5_d54ebe4c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1004,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-05-03T13:05:29Z",
+      "side": 1,
+      "message": "We can call sendSnapshotChunk(followerActor, followerLogInfo) here instead of duplicating the code.",
+      "range": {
+        "startLine": 990,
+        "startChar": 8,
+        "endLine": 1004,
+        "endChar": 9
+      },
+      "revId": "c3c83a3a21447d637529da1bdda143c8c238d41b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
