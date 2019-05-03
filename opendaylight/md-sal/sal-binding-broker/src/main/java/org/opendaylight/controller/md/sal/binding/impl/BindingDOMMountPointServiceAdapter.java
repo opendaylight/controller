@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -26,8 +27,9 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
 
     private final BindingToNormalizedNodeCodec codec;
     private final DOMMountPointService mountService;
-    private final LoadingCache<DOMMountPoint, BindingMountPointAdapter> bindingMountpoints = CacheBuilder.newBuilder()
-            .weakKeys().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
+    @VisibleForTesting
+    final LoadingCache<DOMMountPoint, BindingMountPointAdapter> bindingMountpoints = CacheBuilder.newBuilder()
+            .weakKeys().weakValues().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
                 @Override
                 public BindingMountPointAdapter load(final DOMMountPoint key) {
                     return new BindingMountPointAdapter(codec, key);
