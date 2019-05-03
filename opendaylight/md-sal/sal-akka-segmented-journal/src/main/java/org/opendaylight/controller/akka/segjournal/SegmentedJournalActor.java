@@ -191,7 +191,7 @@ final class SegmentedJournalActor extends AbstractActor {
         super.preStart();
 
         final MetricRegistry registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
-        final String actorName = self().path().toStringWithoutAddress();
+        final String actorName = self().path().parent().toStringWithoutAddress() + '/' + directory.getName();
 
         batchWriteTime = registry.timer(MetricRegistry.name(actorName, "batchWriteTime"));
         messageWriteCount = registry.meter(MetricRegistry.name(actorName, "messageWriteCount"));
