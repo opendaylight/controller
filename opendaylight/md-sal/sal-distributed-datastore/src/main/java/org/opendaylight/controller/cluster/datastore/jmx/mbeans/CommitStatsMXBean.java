@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.md.sal.dom.broker.impl.jmx;
+package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
 /**
  * MXBean interface for retrieving write Tx commit statistics.
