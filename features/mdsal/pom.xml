@@ -29,6 +29,7 @@
         <module>odl-controller-binding-api</module>
         <module>odl-controller-dom-api</module>
         <module>odl-mdsal-clustering-commons</module>
+        <module>odl-controller-blueprint</module>
 
         <module>odl-mdsal-all</module>
         <module>odl-mdsal-broker</module>

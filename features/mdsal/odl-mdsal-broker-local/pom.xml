@@ -24,7 +24,6 @@
     <name>OpenDaylight :: MDSAL :: Broker</name>
 
     <properties>
-        <blueprint.version>0.11.0-SNAPSHOT</blueprint.version>
         <!-- CONTROLLER-1584 -->
         <skip.karaf.featureTest>true</skip.karaf.featureTest>
     </properties>
