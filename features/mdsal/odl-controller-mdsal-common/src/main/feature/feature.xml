@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright © 2019 PANTHEON.tech, s.r.o. and others.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-controller-mdsal-common-${project.version}">
+    <feature name="odl-controller-mdsal-common" version="${project.version}">
+        <feature version="[4,5)">odl-mdsal-common</feature>
+        <feature version="[4,5)">odl-mdsal-binding-runtime</feature>
+    </feature>
+</features>

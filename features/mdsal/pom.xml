@@ -25,6 +25,7 @@
         <module>features-mdsal</module>
         <module>odl-clustering-test-app</module>
         <module>odl-controller-mdsal-common</module>
+        <module>odl-controller-dom-api</module>
         <module>odl-mdsal-all</module>
         <module>odl-mdsal-broker</module>
         <module>odl-mdsal-broker-local</module>
