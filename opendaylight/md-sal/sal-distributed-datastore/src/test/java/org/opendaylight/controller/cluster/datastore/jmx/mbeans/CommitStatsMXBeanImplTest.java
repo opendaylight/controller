@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.md.sal.dom.broker.impl.jmx;
+package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

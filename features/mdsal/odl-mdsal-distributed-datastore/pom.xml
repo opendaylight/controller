@@ -21,13 +21,25 @@
     <version>1.10.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
-    <properties>
-        <!-- CONTROLLER-1584 -->
-        <skip.karaf.featureTest>true</skip.karaf.featureTest>
-    </properties>
+    <name>OpenDaylight :: Controller :: Clustered Datastore</name>
+    <description>Controller Clustered Datastore (akka-based)</description>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yangtools-artifacts</artifactId>
+                <version>3.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.mdsal</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>4.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
@@ -40,20 +52,44 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-mdsal-broker-local</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
             <artifactId>odl-apache-commons-text</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>odl-yangtools-codec</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>odl-mdsal-eos-dom</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>odl-mdsal-dom-broker</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>odl-mdsal-binding-dom-adapter</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-clustering-commons</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-controller-blueprint</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -80,6 +116,47 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-cluster-admin-impl</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- finalname="configuration/initial/akka.conf" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>akkaconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/factory/akka.conf" override="true" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>factoryakkaconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/initial/module-shards.conf" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>moduleshardconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/initial/modules.conf" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>moduleconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="etc/org.opendaylight.controller.cluster.datastore.cfg" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>cfg</type>
+            <classifier>datastore</classifier>
         </dependency>
     </dependencies>
 </project>
