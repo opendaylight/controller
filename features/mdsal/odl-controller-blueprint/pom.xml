@@ -17,23 +17,28 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>odl-config-netty</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <artifactId>odl-controller-blueprint</artifactId>
+    <version>1.10.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
-    <name>OpenDaylight :: Config-Netty</name>
+    <name>OpenDaylight :: Controller :: Blueprint</name>
+    <description>OpenDaylight Controller Blueprint Extension</description>
+
+    <properties>
+        <blueprint.version>0.11.0-SNAPSHOT</blueprint.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>config-artifacts</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yangtools-artifacts</artifactId>
+                <version>3.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
                 <version>1.10.0-SNAPSHOT</version>
                 <type>pom</type>
@@ -44,14 +49,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-netty-4</artifactId>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>odl-yangtools-codec</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-blueprint</artifactId>
+            <artifactId>odl-controller-binding-api</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -63,24 +68,8 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>netty-event-executor-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>netty-threadgroup-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>netty-timer-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>threadpool-config-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>threadpool-config-impl</artifactId>
+            <artifactId>blueprint</artifactId>
+            <version>${blueprint.version}</version>
         </dependency>
     </dependencies>
-
 </project>

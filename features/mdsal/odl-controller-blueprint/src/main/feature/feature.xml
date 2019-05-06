@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright © 2019 PANTHEON.tech, s.r.o. and others.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-controller-blueprint-${project.version}">
+    <feature name="odl-controller-blueprint" version="${project.version}">
+        <feature version="[3,4)">odl-yangtools-codec</feature>
+        <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${blueprint.version}</bundle>
+    </feature>
+</features>
