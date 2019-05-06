@@ -73,6 +73,13 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>odl-controller-binding-api</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>odl-controller-dom-api</artifactId>
             <version>${project.version}</version>
             <type>xml</type>

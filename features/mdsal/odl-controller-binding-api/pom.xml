@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- Copyright © 2016, 2017 Red Hat, Inc. and others.
+ Copyright © 2019 PANTHEON.tech, s.r.o. and others.
 
  This program and the accompanying materials are made available under the
  terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,25 +17,26 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>odl-config-netty</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <artifactId>odl-controller-binding-api</artifactId>
+    <version>1.10.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
-    <name>OpenDaylight :: Config-Netty</name>
+    <name>OpenDaylight :: Controller :: Binding API</name>
+    <description>Controller Java Binding APIs</description>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>config-artifacts</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.opendaylight.mdsal</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>4.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.10.0-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -44,48 +45,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-netty-4</artifactId>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>odl-mdsal-binding-api</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-binding-api</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-dom-api</artifactId>
+            <artifactId>odl-controller-mdsal-common</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>netty-event-executor-config</artifactId>
+            <artifactId>sal-binding-api</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>netty-threadgroup-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>netty-timer-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>threadpool-config-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>threadpool-config-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>blueprint</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
+            <artifactId>sal-binding-util</artifactId>
         </dependency>
     </dependencies>
-
 </project>
