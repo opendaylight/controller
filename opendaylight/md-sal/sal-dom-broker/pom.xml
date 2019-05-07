@@ -47,6 +47,10 @@
       <artifactId>sal-core-spi</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-core-compat</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>util</artifactId>
     </dependency>
@@ -77,8 +81,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-inmemory-datastore</artifactId>
-      <!-- FIXME: this should be scope=test
-      <scope>test</scope-->
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
