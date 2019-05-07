@@ -16,6 +16,24 @@
       "revId": "62cb504c53d0452538693b7c7c65520e32f6738b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fb6ac2c_f5ef0a82",
+        "filename": "features/mdsal/odl-mdsal-broker/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-07T08:14:21Z",
+      "side": 1,
+      "message": "In a follow-up patch",
+      "parentUuid": "3565f40a_e7f0ab64",
+      "revId": "62cb504c53d0452538693b7c7c65520e32f6738b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
