@@ -83,6 +83,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionPayload;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
@@ -363,9 +364,10 @@ public class Shard extends RaftActor {
                         (DataTreeCohortActorRegistry.CohortRegistryCommand) message);
             } else if (message instanceof PersistAbortTransactionPayload) {
                 final TransactionIdentifier txId = ((PersistAbortTransactionPayload) message).getTransactionId();
-                persistPayload(txId, AbortTransactionPayload.create(
-                        txId, datastoreContext.getInitialPayloadSerializedBufferCapacity()), true);
-                store.purgeTransaction(txId, null);
+                persistPayload(txId, AbortTransactionPayload.create(txId,
+                    datastoreContext.getInitialPayloadSerializedBufferCapacity()), true);
+                persistPayload(txId, PurgeTransactionPayload.create(txId,
+                    datastoreContext.getInitialPayloadSerializedBufferCapacity()), false);
             } else if (message instanceof MakeLeaderLocal) {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
