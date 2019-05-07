@@ -8,9 +8,11 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.hamcrest.CoreMatchers.everyItem;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.access.client.ConnectionEntryMatcher.entryWithRequest;
 
 import akka.actor.ActorSystem;
@@ -21,10 +23,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -35,7 +35,6 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
-import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -82,14 +81,14 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
             queue.enqueueOrForward(new ConnectionEntry(request, callback, now), now);
         }
         final Collection<ConnectionEntry> entries = queue.drain();
-        Assert.assertEquals(sentMessages, entries.size());
-        Assert.assertThat(entries, everyItem(entryWithRequest(request)));
+        assertEquals(sentMessages, entries.size());
+        assertThat(entries, everyItem(entryWithRequest(request)));
     }
 
     @Test
     public void testTicksStalling() {
         final long now = Ticker.systemTicker().read();
-        Assert.assertEquals(0, queue.ticksStalling(now));
+        assertEquals(0, queue.ticksStalling(now));
     }
 
     @Test
@@ -106,38 +105,38 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
         final RequestSuccess<?, ?> success1 = new TransactionPurgeResponse(anotherTxId, requestSequence);
         final Optional<TransmittedConnectionEntry> completed1 =
                 queue.complete(new SuccessEnvelope(success1, sessionId, txSequence, 1L), now);
-        Assert.assertFalse(completed1.isPresent());
+        assertFalse(completed1.isPresent());
         //different response sequence
         final long differentResponseSequence = 1L;
         final RequestSuccess<?, ?> success2 =
                 new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, differentResponseSequence);
         final Optional<TransmittedConnectionEntry> completed2 =
                 queue.complete(new SuccessEnvelope(success2, sessionId, txSequence, 1L), now);
-        Assert.assertFalse(completed2.isPresent());
+        assertFalse(completed2.isPresent());
         //different tx sequence
         final long differentTxSequence = 1L;
         final RequestSuccess<?, ?> success3 =
                 new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, requestSequence);
         final Optional<TransmittedConnectionEntry> completed3 =
                 queue.complete(new SuccessEnvelope(success3, sessionId, differentTxSequence, 1L), now);
-        Assert.assertFalse(completed3.isPresent());
+        assertFalse(completed3.isPresent());
         //different session id
         final long differentSessionId = 1L;
         final RequestSuccess<?, ?> success4 =
                 new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, requestSequence);
         final Optional<TransmittedConnectionEntry> completed4 =
                 queue.complete(new SuccessEnvelope(success4, differentSessionId, differentTxSequence, 1L), now);
-        Assert.assertFalse(completed4.isPresent());
+        assertFalse(completed4.isPresent());
     }
 
     @Test
     public void testIsEmpty() {
-        Assert.assertTrue(queue.isEmpty());
+        assertTrue(queue.isEmpty());
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
         queue.enqueueOrForward(new ConnectionEntry(request, callback, now), now);
-        Assert.assertFalse(queue.isEmpty());
+        assertFalse(queue.isEmpty());
     }
 
     @Test
@@ -150,7 +149,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
         final ConnectionEntry entry2 = new ConnectionEntry(request2, callback, now);
         queue.enqueueOrForward(entry1, now);
         queue.enqueueOrForward(entry2, now);
-        Assert.assertEquals(entry1.getRequest(), queue.peek().getRequest());
+        assertEquals(entry1.getRequest(), queue.peek().getRequest());
     }
 
     @Test
@@ -159,9 +158,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
         queue.enqueueOrForward(new ConnectionEntry(request, callback, now), now);
-        queue.poison(new RuntimeRequestException("fail", new RuntimeException("fail")));
-        verify(callback).accept(any(TransactionFailure.class));
-        Assert.assertTrue(queue.isEmpty());
+        assertEquals(1, queue.poison().size());
     }
 
     @SuppressWarnings("unchecked")
