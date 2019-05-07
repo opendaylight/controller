@@ -13,14 +13,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
@@ -336,9 +337,13 @@ abstract class TransmitQueue {
         return pending.peek();
     }
 
-    final void poison(final RequestException cause) {
-        poisonQueue(inflight, cause);
-        poisonQueue(pending, cause);
+    final List<ConnectionEntry> poison() {
+        final List<ConnectionEntry> entries = new ArrayList<>(inflight.size() + pending.size());
+        entries.addAll(inflight);
+        inflight.clear();
+        entries.addAll(pending);
+        pending.clear();
+        return entries;
     }
 
     final void setForwarder(final ReconnectForwarder forwarder, final long now) {
@@ -441,14 +446,5 @@ abstract class TransmitQueue {
         }
 
         return null;
-    }
-
-    private static void poisonQueue(final Queue<? extends ConnectionEntry> queue, final RequestException cause) {
-        for (ConnectionEntry e : queue) {
-            final Request<?, ?> request = e.getRequest();
-            LOG.trace("Poisoning request {}", request, cause);
-            e.complete(request.toRequestFailure(cause));
-        }
-        queue.clear();
     }
 }
