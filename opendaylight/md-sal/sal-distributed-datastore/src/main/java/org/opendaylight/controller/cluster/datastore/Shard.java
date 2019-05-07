@@ -367,6 +367,7 @@ public class Shard extends RaftActor {
                 final TransactionIdentifier txId = ((PersistAbortTransactionPayload) message).getTransactionId();
                 persistPayload(txId, AbortTransactionPayload.create(
                         txId, datastoreContext.getInitialPayloadSerializedBufferCapacity()), true);
+                store.purgeTransaction(txId, null);
             } else if (message instanceof MakeLeaderLocal) {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
