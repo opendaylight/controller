@@ -7,11 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -30,14 +34,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  */
 final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<TransactionIdentifier>
         implements LocalTransactionFactory {
-
     private final ActorSelection leader;
     private final DataTree dataTree;
     private final ActorContext actorContext;
 
     LocalTransactionFactoryImpl(final ActorContext actorContext, final ActorSelection leader, final DataTree dataTree) {
-        this.leader = Preconditions.checkNotNull(leader);
-        this.dataTree = Preconditions.checkNotNull(dataTree);
+        this.leader = requireNonNull(leader);
+        this.dataTree = requireNonNull(dataTree);
         this.actorContext = actorContext;
     }
 
@@ -47,7 +50,8 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
-        return SnapshotBackedTransactions.newReadTransaction(identifier, false, dataTree.takeSnapshot());
+        return new ReadTransactionWrapper(SnapshotBackedTransactions.newReadTransaction(identifier, false,
+            dataTree.takeSnapshot()), leader);
     }
 
     @Override
@@ -62,7 +66,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     @Override
     protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier> tx) {
-        // No-op
+        leader.tell(new PersistAbortTransactionPayload(tx.getIdentifier()), ActorRef.noSender());
     }
 
     @Override
@@ -77,7 +81,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     @Override
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
-        Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
+        checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalThreePhaseCommitCohort(actorContext, leader,
                     (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, operationError);
