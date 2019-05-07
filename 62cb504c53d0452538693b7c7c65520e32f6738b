@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3565f40a_e7f0ab64",
+        "filename": "features/mdsal/odl-mdsal-broker/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-05-07T08:09:20Z",
+      "side": 1,
+      "message": "Do you want to fix this before the patch goes in, or do you want to fix it later?",
+      "revId": "62cb504c53d0452538693b7c7c65520e32f6738b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
