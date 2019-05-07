@@ -21,10 +21,14 @@
     <version>1.10.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
-    <name>OpenDaylight :: MDSAL :: Broker</name>
+    <name>OpenDaylight :: MDSAL :: Broker (local)</name>
+    <description>OpenDaylight Controller stack without clustering</description>
 
     <properties>
-        <!-- CONTROLLER-1584 -->
+        <!-- FIXME: CONTROLLER-1584:
+            - mdsal-eos-dom-simple does not activate
+            - we need a DOMDataBroker instance activation
+            -->
         <skip.karaf.featureTest>true</skip.karaf.featureTest>
     </properties>
 
@@ -56,39 +60,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>odl-yangtools-codec</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-binding-dom-adapter</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-config-netty</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-lmax-3</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-mdsal-common</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
-        <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
-        <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-dom</artifactId>
             <type>xml</type>
@@ -112,21 +83,28 @@
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
+
+        <!-- Single-node Entity Ownership Service -->
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>mdsal-eos-dom-simple</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-config-netty</artifactId>
+            <version>0.11.0-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-broker-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sal-binding-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>sal-binding-util</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
