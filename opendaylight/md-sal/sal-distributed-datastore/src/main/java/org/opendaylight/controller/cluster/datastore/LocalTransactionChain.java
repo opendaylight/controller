@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -17,6 +20,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -34,9 +38,9 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     private final DataTree tree;
 
     LocalTransactionChain(final TransactionChainProxy parent, final ActorSelection leader, final DataTree tree) {
-        this.parent = Preconditions.checkNotNull(parent);
-        this.leader = Preconditions.checkNotNull(leader);
-        this.tree = Preconditions.checkNotNull(tree);
+        this.parent = requireNonNull(parent);
+        this.leader = requireNonNull(leader);
+        this.tree = requireNonNull(tree);
     }
 
     DataTree getDataTree() {
@@ -68,7 +72,9 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
-        return super.newReadOnlyTransaction(identifier);
+        final DOMStoreReadTransaction tx = super.newReadOnlyTransaction(identifier);
+        verify(tx instanceof SnapshotBackedReadTransaction);
+        return new ReadTransactionWrapper((SnapshotBackedReadTransaction<TransactionIdentifier>) tx, leader);
     }
 
     @Override
@@ -85,7 +91,7 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     @Override
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
-        Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
+        checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx,
                     operationError);
