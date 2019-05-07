@@ -21,28 +21,68 @@
     <version>1.10.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
+    <name>OpenDaylight :: MDSAL :: Broker (clustered)</name>
+    <description>OpenDaylight Controller stack with clustering</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.opendaylight.mdsal</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>4.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>odl-mdsal-singleton-dom</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-remoterpc-connector</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-distributed-datastore</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
+
         <dependency>
-            <!-- FIXME: this is not quite right -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-mdsal-broker-local</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-config-netty</artifactId>
+            <version>0.11.0-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-broker-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-binding-broker-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-connector-api</artifactId>
         </dependency>
     </dependencies>
 </project>
