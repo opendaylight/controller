@@ -42,12 +42,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>odl-mdsal-broker-local</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-model-inventory</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
