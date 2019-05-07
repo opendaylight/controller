@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSelection;
@@ -17,6 +18,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -68,7 +70,9 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
-        return super.newReadOnlyTransaction(identifier);
+        final DOMStoreReadTransaction tx = super.newReadOnlyTransaction(identifier);
+        verify(tx instanceof SnapshotBackedReadTransaction);
+        return new ReadTransactionWrapper((SnapshotBackedReadTransaction<TransactionIdentifier>) tx, leader);
     }
 
     @Override
