@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
+import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedReadTransaction.TransactionClosePrototype;
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
@@ -26,10 +29,25 @@ public final class SnapshotBackedTransactions {
      * @param identifier Transaction Identifier
      * @param debug Enable transaction debugging
      * @param snapshot Snapshot which will be modified.
+     * @return A new read-only transaction
      */
     public static <T> SnapshotBackedReadTransaction<T> newReadTransaction(final T identifier, final boolean debug,
             final DataTreeSnapshot snapshot) {
-        return new SnapshotBackedReadTransaction<>(identifier, debug, snapshot);
+        return new SnapshotBackedReadTransaction<>(identifier, debug, snapshot, null);
+    }
+
+    /**
+     * Creates a new read-only transaction.
+     *
+     * @param identifier Transaction Identifier
+     * @param debug Enable transaction debugging
+     * @param snapshot Snapshot which will be modified.
+     * @param closeImpl Implementation of close method
+     * @return A new read-only transaction
+     */
+    public static <T> SnapshotBackedReadTransaction<T> newReadTransaction(final T identifier,
+            final boolean debug, final DataTreeSnapshot snapshot, final TransactionClosePrototype<T> closeImpl) {
+        return new SnapshotBackedReadTransaction<>(identifier, debug, snapshot, requireNonNull(closeImpl));
     }
 
     /**
@@ -39,6 +57,7 @@ public final class SnapshotBackedTransactions {
      * @param debug Enable transaction debugging
      * @param snapshot Snapshot which will be modified.
      * @param readyImpl Implementation of ready method.
+     * @return A new read-write transaction
      */
     public static <T> SnapshotBackedReadWriteTransaction<T> newReadWriteTransaction(final T identifier,
             final boolean debug, final DataTreeSnapshot snapshot, final TransactionReadyPrototype<T> readyImpl) {
@@ -52,6 +71,7 @@ public final class SnapshotBackedTransactions {
      * @param debug Enable transaction debugging
      * @param snapshot Snapshot which will be modified.
      * @param readyImpl Implementation of ready method.
+     * @return A new write transaction
      */
     public static <T> SnapshotBackedWriteTransaction<T> newWriteTransaction(final T identifier, final boolean debug,
             final DataTreeSnapshot snapshot, final TransactionReadyPrototype<T> readyImpl) {
