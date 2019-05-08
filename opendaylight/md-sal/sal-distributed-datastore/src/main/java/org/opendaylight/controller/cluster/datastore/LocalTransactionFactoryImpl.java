@@ -19,6 +19,8 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadTransaction.TransactionClosePrototype;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
@@ -31,7 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  * to instantiate transactions on shards which are co-located with the shard leader.
  */
 final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<TransactionIdentifier>
-        implements LocalTransactionFactory {
+        implements LocalTransactionFactory, TransactionClosePrototype<TransactionIdentifier> {
     private final ActorSelection leader;
     private final DataTree dataTree;
     private final ActorUtils actorUtils;
@@ -48,8 +50,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
-        return new ReadTransactionWrapper(SnapshotBackedTransactions.newReadTransaction(identifier, false,
-            dataTree.takeSnapshot()), leader);
+        return SnapshotBackedTransactions.newReadTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
     @Override
@@ -85,5 +86,10 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
         }
 
         return (LocalThreePhaseCommitCohort) tx.ready();
+    }
+
+    @Override
+    public void transactionClosed(SnapshotBackedReadTransaction<TransactionIdentifier> tx) {
+        leader.tell(new PersistAbortTransactionPayload(tx.getIdentifier()), ActorRef.noSender());
     }
 }

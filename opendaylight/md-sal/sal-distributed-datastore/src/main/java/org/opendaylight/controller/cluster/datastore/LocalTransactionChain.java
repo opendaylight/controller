@@ -8,11 +8,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.mdsal.dom.spi.store.AbstractSnapshotBackedTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -70,9 +71,7 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
-        final DOMStoreReadTransaction tx = super.newReadOnlyTransaction(identifier);
-        verify(tx instanceof SnapshotBackedReadTransaction);
-        return new ReadTransactionWrapper((SnapshotBackedReadTransaction<TransactionIdentifier>) tx, leader);
+        return super.newReadOnlyTransaction(identifier);
     }
 
     @Override
@@ -83,6 +82,11 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
         return super.newWriteOnlyTransaction(identifier);
+    }
+
+    @Override
+    public void transactionClosed(final SnapshotBackedReadTransaction<TransactionIdentifier> tx) {
+        leader.tell(new PersistAbortTransactionPayload(tx.getIdentifier()), ActorRef.noSender());
     }
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
