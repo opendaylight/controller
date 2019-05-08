@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedReadTransaction.TransactionClosePrototype;
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 public abstract class AbstractSnapshotBackedTransactionChain<T> extends TransactionReadyPrototype<T>
-        implements DOMStoreTransactionChain {
+        implements DOMStoreTransactionChain, TransactionClosePrototype<T> {
     private abstract static class State {
         /**
          * Allocate a new snapshot.
@@ -129,7 +130,13 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
 
     protected DOMStoreReadTransaction newReadOnlyTransaction(T transactionId) {
         final Entry<State, DataTreeSnapshot> entry = getSnapshot(transactionId);
-        return SnapshotBackedTransactions.newReadTransaction(transactionId, getDebugTransactions(), entry.getValue());
+        return SnapshotBackedTransactions.newReadTransaction(transactionId, getDebugTransactions(), entry.getValue(),
+            this);
+    }
+
+    @Override
+    public void transactionClosed(final SnapshotBackedReadTransaction<T> tx) {
+        // Defaults to no-op
     }
 
     @Override
