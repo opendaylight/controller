@@ -190,7 +190,9 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
-    private final FrontendMetadata frontendMetadata;
+    @VisibleForTesting
+    final FrontendMetadata frontendMetadata;
+
     private Map<FrontendIdentifier, LeaderFrontendState> knownFrontends = ImmutableMap.of();
     private boolean paused;
 
@@ -1084,16 +1086,17 @@ public class Shard extends RaftActor {
     }
 
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T, S>, S extends Shard> {
-        private final Class<S> shardClass;
+        private final Class<? extends S> shardClass;
         private ShardIdentifier id;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private SchemaContextProvider schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private DataTree dataTree;
+
         private volatile boolean sealed;
 
-        protected AbstractBuilder(final Class<S> shardClass) {
+        protected AbstractBuilder(final Class<? extends S> shardClass) {
             this.shardClass = shardClass;
         }
 
@@ -1194,7 +1197,11 @@ public class Shard extends RaftActor {
 
     public static class Builder extends AbstractBuilder<Builder, Shard> {
         Builder() {
-            super(Shard.class);
+            this(Shard.class);
+        }
+
+        Builder(Class<? extends Shard> shardClass) {
+            super(shardClass);
         }
     }
 
