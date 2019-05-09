@@ -81,12 +81,14 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
+import org.opendaylight.controller.cluster.datastore.messages.RequestFrontendMetadata;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPayload;
+import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionPayload;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
@@ -376,12 +378,19 @@ public class Shard extends RaftActor {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
                 store.resumeNextPendingTransaction();
+            } else if (message instanceof RequestFrontendMetadata) {
+                handleRequestFrontendMetadata(sender());
             } else if (message instanceof DisableTransactionTracking) {
                 onDisableTransactionTracking(((DisableTransactionTracking) message).getClientId());
             } else if (!responseMessageSlicer.handleMessage(message)) {
                 super.handleNonRaftCommand(message);
             }
         }
+    }
+
+    private void handleRequestFrontendMetadata(final ActorRef respondTo) {
+        FrontendShardDataTreeSnapshotMetadata metadataSnapshot = frontendMetadata.toSnapshot();
+        respondTo.tell(metadataSnapshot, self());
     }
 
     private void handleRequestAssemblerMessage(final Object message) {
