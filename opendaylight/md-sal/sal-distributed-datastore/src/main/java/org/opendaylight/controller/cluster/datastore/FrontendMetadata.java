@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Verify.verify;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
@@ -33,7 +34,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTreeSnapshotMetadata> {
+@VisibleForTesting
+public final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTreeSnapshotMetadata> {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendMetadata.class);
 
     private final Map<FrontendIdentifier, FrontendClientMetadataBuilder> clients = new HashMap<>();
@@ -72,7 +74,8 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     }
 
     @Override
-    FrontendShardDataTreeSnapshotMetadata toSnapshot() {
+    @VisibleForTesting
+    public FrontendShardDataTreeSnapshotMetadata toSnapshot() {
         return new FrontendShardDataTreeSnapshotMetadata(Collections2.transform(clients.values(),
             FrontendClientMetadataBuilder::build));
     }
