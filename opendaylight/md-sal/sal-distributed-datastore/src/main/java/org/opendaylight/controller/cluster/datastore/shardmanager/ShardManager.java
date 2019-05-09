@@ -137,7 +137,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     // Stores a mapping between a shard name and it's corresponding information
     // Shard names look like inventory, topology etc and are as specified in
     // configuration
-    private final Map<String, ShardInformation> localShards = new HashMap<>();
+    final Map<String, ShardInformation> localShards = new HashMap<>();
 
     // The type of a ShardManager reflects the type of the datastore itself
     // A data store could be of type config/operational
@@ -147,7 +147,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final Configuration configuration;
 
-    private final String shardDispatcherPath;
+    final String shardDispatcherPath;
 
     private final ShardManagerInfo shardManagerMBean;
 
@@ -157,7 +157,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
-    private final ShardPeerAddressResolver peerAddressResolver;
+    final ShardPeerAddressResolver peerAddressResolver;
 
     private SchemaContext schemaContext;
 
@@ -742,12 +742,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private DatastoreContext.Builder newShardDatastoreContextBuilder(final String shardName) {
+    DatastoreContext.Builder newShardDatastoreContextBuilder(final String shardName) {
         return DatastoreContext.newBuilderFrom(datastoreContextFactory.getShardDatastoreContext(shardName))
                 .shardPeerAddressResolver(peerAddressResolver);
     }
 
-    private DatastoreContext newShardDatastoreContext(final String shardName) {
+    DatastoreContext newShardDatastoreContext(final String shardName) {
         return newShardDatastoreContextBuilder(shardName).build();
     }
 
@@ -1252,7 +1252,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * @param shardName the shard name
      * @return a b
      */
-    private ShardIdentifier getShardIdentifier(final MemberName memberName, final String shardName) {
+    ShardIdentifier getShardIdentifier(final MemberName memberName, final String shardName) {
         return peerAddressResolver.getShardIdentifier(memberName, shardName);
     }
 
@@ -1279,10 +1279,19 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{}: Creating local shard: {}", persistenceId(), shardId);
 
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
-            localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses,
-                    newShardDatastoreContext(shardName), Shard.builder().restoreFromSnapshot(
-                        shardSnapshots.get(shardName)), peerAddressResolver));
+            localShards.put(shardName, createShardInfoFor(shardName, shardId, peerAddresses,
+                    newShardDatastoreContext(shardName), shardSnapshots));
         }
+    }
+
+    @VisibleForTesting
+    ShardInformation createShardInfoFor(String shardName, ShardIdentifier shardId,
+                                        Map<String, String> peerAddresses,
+                                        DatastoreContext datastoreContext,
+                                        Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
+        return new ShardInformation(shardName, shardId, peerAddresses,
+                datastoreContext, Shard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
+                peerAddressResolver);
     }
 
     /**
@@ -1290,7 +1299,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      *
      * @param shardName the shard name
      */
-    private Map<String, String> getPeerAddresses(final String shardName) {
+    Map<String, String> getPeerAddresses(final String shardName) {
         final Collection<MemberName> members = configuration.getMembersFromShardName(shardName);
         return getPeerAddresses(shardName, members);
     }
