@@ -189,7 +189,7 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
-    private final FrontendMetadata frontendMetadata;
+    protected final FrontendMetadata frontendMetadata;
     private Map<FrontendIdentifier, LeaderFrontendState> knownFrontends = ImmutableMap.of();
     private boolean paused;
 
@@ -1072,7 +1072,7 @@ public class Shard extends RaftActor {
         private SchemaContextProvider schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private DataTree dataTree;
-        private volatile boolean sealed;
+        volatile boolean sealed;
 
         protected AbstractBuilder(final Class<S> shardClass) {
             this.shardClass = shardClass;
