@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-toaster</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.1</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Toaster</name>

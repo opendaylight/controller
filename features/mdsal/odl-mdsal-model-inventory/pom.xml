@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-model-inventory</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.1</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MD-SAL :: Inventory Model</name>
