@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.serialization.Serialization;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.HashSet;
@@ -278,6 +279,11 @@ final class ShardInformation {
 
     void setSchemaContext(final SchemaContext schemaContext) {
         schemaContextProvider.set(Preconditions.checkNotNull(schemaContext));
+    }
+
+    @VisibleForTesting
+    Shard.AbstractBuilder<?, ?> getBuilder() {
+        return builder;
     }
 
     @Override

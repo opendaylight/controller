@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2019 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.cluster.datastore;
+
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import org.opendaylight.controller.cluster.datastore.messages.RequestFrontendMetadata;
+import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
+
+public class TestShard extends Shard {
+    protected TestShard(AbstractBuilder<?, ?> builder) {
+        super(builder);
+    }
+
+    @Override
+    protected void handleNonRaftCommand(Object message) {
+        if (message instanceof RequestFrontendMetadata) {
+            handleRequestFrontendMetadata(sender());
+            return;
+        }
+        super.handleNonRaftCommand(message);
+    }
+
+    private void handleRequestFrontendMetadata(final ActorRef respondTo) {
+        FrontendShardDataTreeSnapshotMetadata metadataSnapshot = frontendMetadata.toSnapshot();
+        respondTo.tell(metadataSnapshot, self());
+    }
+
+    public static Shard.Builder builder() {
+        return new TestShard.Builder();
+    }
+
+    public static class Builder extends Shard.Builder {
+        Builder() {
+            super();
+        }
+
+        @Override
+        public Props props() {
+            sealed = true;
+            verify();
+            return Props.create(TestShard.class, this);
+        }
+    }
+}
+
