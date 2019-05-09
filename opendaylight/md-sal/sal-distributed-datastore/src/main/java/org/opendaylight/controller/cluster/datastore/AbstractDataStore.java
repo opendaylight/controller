@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIde
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
@@ -89,7 +90,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
         PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
 
-        ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration)
+        AbstractShardManagerCreator<?> creator = getShardManagerCreator().cluster(cluster).configuration(configuration)
                 .datastoreContextFactory(datastoreContextFactory)
                 .waitTillReadyCountDownLatch(waitTillReadyCountDownLatch)
                 .primaryShardInfoCache(primaryShardInfoCache)
@@ -145,6 +146,10 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         this.identifier = requireNonNull(identifier);
         this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
                 .duration().toMillis() * READY_WAIT_FACTOR;
+    }
+
+    protected AbstractShardManagerCreator<?> getShardManagerCreator() {
+        return new ShardManagerCreator();
     }
 
     protected final DataStoreClient getClient() {
@@ -253,8 +258,9 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static ActorRef createShardManager(final ActorSystem actorSystem, final ShardManagerCreator creator,
-            final String shardDispatcher, final String shardManagerId) {
+    private static ActorRef createShardManager(final ActorSystem actorSystem,
+                                               final AbstractShardManagerCreator<?> creator,
+                                               final String shardDispatcher, final String shardManagerId) {
         Exception lastException = null;
 
         for (int i = 0; i < 100; i++) {
