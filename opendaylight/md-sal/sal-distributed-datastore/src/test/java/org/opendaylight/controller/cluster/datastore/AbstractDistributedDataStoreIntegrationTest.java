@@ -18,9 +18,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
+import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -30,8 +33,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +48,10 @@ import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
+import org.opendaylight.controller.cluster.datastore.messages.RequestFrontendMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
+import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
@@ -256,15 +264,40 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
             testKit.doCommit(writeTx.ready());
 
-            writeTx = txChain.newWriteOnlyTransaction();
-
             int numCars = 5;
             for (int i = 0; i < numCars; i++) {
+                writeTx = txChain.newWriteOnlyTransaction();
                 writeTx.write(CarsModel.newCarPath("car" + i),
                     CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
+
+                testKit.doCommit(writeTx.ready());
+
+                DOMStoreReadTransaction domStoreReadTransaction = txChain.newReadOnlyTransaction();
+                domStoreReadTransaction.read(CarsModel.BASE_PATH).get();
+
+                domStoreReadTransaction.close();
             }
 
-            testKit.doCommit(writeTx.ready());
+            // verify frontend metadata has no holes in purged transactions causing overtime memory leak
+            com.google.common.base.Optional<ActorRef> localShard = dataStore.getActorUtils().findLocalShard("cars-1");
+            FrontendShardDataTreeSnapshotMetadata frontendMetadata =
+                    (FrontendShardDataTreeSnapshotMetadata) dataStore.getActorUtils()
+                            .executeOperation(localShard.get(), new RequestFrontendMetadata());
+
+            if (dataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
+                Iterator<FrontendHistoryMetadata> iterator =
+                        frontendMetadata.getClients().get(0).getCurrentHistories().iterator();
+                FrontendHistoryMetadata metadata = iterator.next();
+                while (iterator.hasNext() && metadata.getHistoryId() != 1) {
+                    metadata = iterator.next();
+                }
+                Set<Range<UnsignedLong>> ranges = metadata.getPurgedTransactions().asRanges();
+
+                assertEquals(1, ranges.size());
+            } else {
+                // ask based should track no metadata
+                assertTrue(frontendMetadata.getClients().get(0).getCurrentHistories().isEmpty());
+            }
 
             final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
                     .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
@@ -341,7 +374,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 } catch (final ExecutionException e) {
                     final String msg = "Unexpected exception: "
                             + Throwables.getStackTraceAsString(e.getCause());
-                    if (DistributedDataStore.class.equals(testParameter)) {
+                    if (TestDistributedDataStore.class.equals(testParameter)) {
                         assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
                     } else {
                         assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
