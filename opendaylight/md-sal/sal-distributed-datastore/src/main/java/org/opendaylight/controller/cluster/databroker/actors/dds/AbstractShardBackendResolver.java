@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
+import org.opendaylight.controller.cluster.datastore.messages.DisableTransactionTracking;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -89,14 +90,16 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
     // TODO: maybe make this configurable somehow?
     private static final Timeout CONNECT_TIMEOUT = Timeout.apply(5, TimeUnit.SECONDS);
 
+    private final Set<Consumer<Long>> staleBackendInfoCallbacks = ConcurrentHashMap.newKeySet();
     private final AtomicLong nextSessionId = new AtomicLong();
     private final Function1<ActorRef, ?> connectFunction;
+    private final ClientIdentifier clientId;
     private final ActorUtils actorUtils;
-    private final Set<Consumer<Long>> staleBackendInfoCallbacks = ConcurrentHashMap.newKeySet();
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
         this.actorUtils = requireNonNull(actorUtils);
+        this.clientId = requireNonNull(clientId);
         this.connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.BORON,
             ABIVersion.current()));
     }
@@ -107,7 +110,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         return () -> staleBackendInfoCallbacks.remove(callback);
     }
 
-    protected void notifyStaleBackendInfoCallbacks(Long cookie) {
+    protected void notifyStaleBackendInfoCallbacks(final Long cookie) {
         staleBackendInfoCallbacks.forEach(callback -> callback.accept(cookie));
     }
 
@@ -180,6 +183,14 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         LOG.debug("Resolved backend information to {}", response);
         checkArgument(response instanceof ConnectClientSuccess, "Unhandled response %s", response);
         final ConnectClientSuccess success = (ConnectClientSuccess) response;
+
+        // For ask-based protocol let's make sure we disable transaction state tracking
+        if (!actorUtils.getDatastoreContext().isUseTellBasedProtocol()) {
+            final ActorRef backend = success.getBackend();
+            LOG.debug("Disabling backend transaction tracking on {}", backend);
+            backend.tell(new DisableTransactionTracking(clientId), ActorRef.noSender());
+        }
+
         future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
             success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
             success.getMaxMessages()));
