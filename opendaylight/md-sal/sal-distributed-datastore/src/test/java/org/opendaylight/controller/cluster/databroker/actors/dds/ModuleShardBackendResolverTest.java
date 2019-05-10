@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForShardAvailabilityChanges;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
@@ -192,6 +193,11 @@ public class ModuleShardBackendResolverTest {
         promise.success(shardInfo);
         when(mock.findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD)).thenReturn(promise.future());
         when(mock.getClientDispatcher()).thenReturn(system.dispatchers().defaultGlobalDispatcher());
+
+        final DatastoreContext datastoreContext = mock(DatastoreContext.class);
+        when(datastoreContext.isUseTellBasedProtocol()).thenReturn(false);
+        when(mock.getDatastoreContext()).thenReturn(datastoreContext);
+
         return mock;
     }
 }

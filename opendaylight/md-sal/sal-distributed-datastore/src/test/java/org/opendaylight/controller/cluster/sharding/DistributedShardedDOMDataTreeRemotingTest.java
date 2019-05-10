@@ -30,9 +30,12 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -78,11 +81,11 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
 
-    private DistributedDataStore leaderConfigDatastore;
-    private DistributedDataStore leaderOperDatastore;
+    private AbstractDataStore leaderConfigDatastore;
+    private AbstractDataStore leaderOperDatastore;
 
-    private DistributedDataStore followerConfigDatastore;
-    private DistributedDataStore followerOperDatastore;
+    private AbstractDataStore followerConfigDatastore;
+    private AbstractDataStore followerOperDatastore;
 
 
     private IntegrationTestKit followerTestKit;
@@ -142,10 +145,10 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     private void initEmptyDatastores(final String moduleShardsConfig) throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        leaderConfigDatastore = leaderTestKit.setupDistributedDataStore(
+        leaderConfigDatastore = leaderTestKit.setupAbstractDataStore(ClientBackedDataStore.class,
                 "config", moduleShardsConfig, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
-        leaderOperDatastore = leaderTestKit.setupDistributedDataStore(
+        leaderOperDatastore = leaderTestKit.setupAbstractDataStore(ClientBackedDataStore.class,
                 "operational", moduleShardsConfig, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
@@ -155,9 +158,9 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
 
-        followerConfigDatastore = followerTestKit.setupDistributedDataStore(
+        followerConfigDatastore = followerTestKit.setupAbstractDataStore(ClientBackedDataStore.class,
                 "config", moduleShardsConfig, true, SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
-        followerOperDatastore = followerTestKit.setupDistributedDataStore(
+        followerOperDatastore = followerTestKit.setupAbstractDataStore(ClientBackedDataStore.class,
                 "operational", moduleShardsConfig, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
