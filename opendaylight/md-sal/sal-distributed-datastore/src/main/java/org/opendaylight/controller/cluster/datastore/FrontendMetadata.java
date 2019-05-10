@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Verify.verify;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
@@ -57,7 +59,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
 
         for (FrontendClientMetadata m : snapshot.getClients()) {
             LOG.debug("{}: applying metadata {}", shardName, m);
-            final FrontendClientMetadataBuilder b = new FrontendClientMetadataBuilder(shardName, m);
+            final FrontendClientMetadataBuilder b = FrontendClientMetadataBuilder.of(shardName, m);
             final FrontendIdentifier client = m.getIdentifier().getFrontendId();
 
             LOG.debug("{}: client {} updated to {}", shardName, client, b);
@@ -77,7 +79,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
             return existing;
         }
 
-        final FrontendClientMetadataBuilder client = new FrontendClientMetadataBuilder(shardName, id);
+        final FrontendClientMetadataBuilder client = new FrontendClientMetadataBuilder.Enabled(shardName, id);
         final FrontendClientMetadataBuilder previous = clients.put(id.getFrontendId(), client);
         if (previous != null) {
             LOG.debug("{}: Replaced client {} with {}", shardName, previous, client);
@@ -124,5 +126,24 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
      */
     @NonNull Map<FrontendIdentifier, LeaderFrontendState> toLeaderState(final @NonNull Shard shard) {
         return new HashMap<>(Maps.transformValues(clients, meta -> meta.toLeaderState(shard)));
+    }
+
+    void disableTracking(final ClientIdentifier clientId) {
+        final FrontendIdentifier frontendId = clientId.getFrontendId();
+        final FrontendClientMetadataBuilder client = clients.get(frontendId);
+        if (client == null) {
+            LOG.debug("{}: disableTracking {} does not match any client, ignoring", shardName, clientId);
+            return;
+        }
+        if (!clientId.equals(client.getIdentifier())) {
+            LOG.debug("{}: disableTracking {} does not match client {}, ignoring", shardName, clientId, client);
+            return;
+        }
+        if (client instanceof FrontendClientMetadataBuilder.Disabled) {
+            LOG.debug("{}: client {} is has already disabled tracking", shardName, client);
+            return;
+        }
+
+        verify(clients.replace(frontendId, client, new FrontendClientMetadataBuilder.Disabled(shardName, clientId)));
     }
 }
