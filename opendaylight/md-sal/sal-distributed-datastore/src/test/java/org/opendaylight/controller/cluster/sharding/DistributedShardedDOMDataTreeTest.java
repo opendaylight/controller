@@ -53,14 +53,15 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
@@ -120,8 +121,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                     .shardElectionTimeoutFactor(2)
                     .logicalStoreType(LogicalDatastoreType.CONFIGURATION);
 
-    private DistributedDataStore leaderDistributedDataStore;
-    private DistributedDataStore operDistributedDatastore;
+    private AbstractDataStore leaderDistributedDataStore;
+    private AbstractDataStore operDistributedDatastore;
     private IntegrationTestKit leaderTestKit;
 
     private DistributedShardedDOMDataTree leaderShardFactory;
@@ -166,11 +167,11 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     private void initEmptyDatastores() throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(
+        leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(ClientBackedDataStore.class,
                 "config", MODULE_SHARDS_CONFIG, "empty-modules.conf", true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
-        operDistributedDatastore = leaderTestKit.setupDistributedDataStore(
+        operDistributedDatastore = leaderTestKit.setupAbstractDataStore(ClientBackedDataStore.class,
                 "operational", MODULE_SHARDS_CONFIG, "empty-modules.conf",true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
