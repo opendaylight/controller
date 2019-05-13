@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -30,6 +30,7 @@ import org.opendaylight.yangtools.util.ImmutableOffsetMapTemplate;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
@@ -63,8 +64,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private QName lastLeafSetQName;
 
-    private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
-                                      Object, LeafNode<Object>> leafBuilder;
+    private NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>> leafBuilder;
 
     @SuppressWarnings("rawtypes")
     private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
@@ -72,7 +72,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private boolean readSignatureMarker = true;
 
     NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
-        this.input = Preconditions.checkNotNull(input);
+        this.input = requireNonNull(input);
         readSignatureMarker = !versionChecked;
     }
 
@@ -110,43 +110,31 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         }
 
         switch (nodeType) {
-            case NodeTypes.AUGMENTATION_NODE :
-                YangInstanceIdentifier.AugmentationIdentifier augIdentifier =
-                    new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
-
+            case NodeTypes.AUGMENTATION_NODE:
+                AugmentationIdentifier augIdentifier = readAugmentationIdentifier();
                 LOG.trace("Reading augmentation node {} ", augIdentifier);
+                return addDataContainerChildren(Builders.augmentationBuilder().withNodeIdentifier(augIdentifier))
+                        .build();
 
-                return addDataContainerChildren(Builders.augmentationBuilder()
-                        .withNodeIdentifier(augIdentifier)).build();
-
-            case NodeTypes.LEAF_SET_ENTRY_NODE :
-                QName name = lastLeafSetQName;
-                if (name == null) {
-                    name = readQName();
-                }
-
-                Object value = readObject();
-                NodeWithValue<Object> leafIdentifier = new NodeWithValue<>(name, value);
-
+            case NodeTypes.LEAF_SET_ENTRY_NODE:
+                final QName name = lastLeafSetQName != null ? lastLeafSetQName : readQName();
+                final Object value = readObject();
+                final NodeWithValue<Object> leafIdentifier = new NodeWithValue<>(name, value);
                 LOG.trace("Reading leaf set entry node {}, value {}", leafIdentifier, value);
-
                 return leafSetEntryBuilder().withNodeIdentifier(leafIdentifier).withValue(value).build();
 
-            case NodeTypes.MAP_ENTRY_NODE :
-                NodeIdentifierWithPredicates entryIdentifier = readNormalizedNodeWithPredicates();
-
+            case NodeTypes.MAP_ENTRY_NODE:
+                final NodeIdentifierWithPredicates entryIdentifier = readNormalizedNodeWithPredicates();
                 LOG.trace("Reading map entry node {} ", entryIdentifier);
+                return addDataContainerChildren(Builders.mapEntryBuilder().withNodeIdentifier(entryIdentifier))
+                        .build();
 
-                return addDataContainerChildren(Builders.mapEntryBuilder()
-                        .withNodeIdentifier(entryIdentifier)).build();
-
-            default :
-                return readNodeIdentifierDependentNode(nodeType, new NodeIdentifier(readQName()));
+            default:
+                return readNodeIdentifierDependentNode(nodeType, readNodeIdentifier());
         }
     }
 
-    private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
-                                      Object, LeafNode<Object>> leafBuilder() {
+    private NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>> leafBuilder() {
         if (leafBuilder == null) {
             leafBuilder = Builders.leafBuilder();
         }
@@ -168,16 +156,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         throws IOException {
 
         switch (nodeType) {
-            case NodeTypes.LEAF_NODE :
+            case NodeTypes.LEAF_NODE:
                 LOG.trace("Read leaf node {}", identifier);
                 // Read the object value
                 return leafBuilder().withNodeIdentifier(identifier).withValue(readObject()).build();
 
-            case NodeTypes.ANY_XML_NODE :
+            case NodeTypes.ANY_XML_NODE:
                 LOG.trace("Read xml node");
                 return Builders.anyXmlBuilder().withNodeIdentifier(identifier).withValue(readDOMSource()).build();
 
-            case NodeTypes.MAP_NODE :
+            case NodeTypes.MAP_NODE:
                 LOG.trace("Read map node {}", identifier);
                 return addDataContainerChildren(Builders.mapBuilder().withNodeIdentifier(identifier)).build();
 
@@ -202,7 +190,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 LOG.trace("Read container node {}", identifier);
                 return addDataContainerChildren(Builders.containerBuilder().withNodeIdentifier(identifier)).build();
 
-            case NodeTypes.LEAF_SET :
+            case NodeTypes.LEAF_SET:
                 LOG.trace("Read leaf set node {}", identifier);
                 return addLeafSetChildren(identifier.getNodeType(),
                         Builders.leafSetBuilder().withNodeIdentifier(identifier)).build();
@@ -271,6 +259,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         return children;
     }
 
+    private AugmentationIdentifier readAugmentationIdentifier() throws IOException {
+        // FIXME: we should have a cache for these, too
+        return new AugmentationIdentifier(readQNameSet());
+    }
+
+    private NodeIdentifier readNodeIdentifier() throws IOException {
+        // FIXME: we should have a cache for these, too
+        return new NodeIdentifier(readQName());
+    }
+
     private NodeIdentifierWithPredicates readNormalizedNodeWithPredicates() throws IOException {
         final QName qname = readQName();
         final int count = input.readInt();
@@ -299,42 +297,42 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
             case ValueTypes.BITS_TYPE:
                 return readObjSet();
 
-            case ValueTypes.BOOL_TYPE :
+            case ValueTypes.BOOL_TYPE:
                 return input.readBoolean();
 
-            case ValueTypes.BYTE_TYPE :
+            case ValueTypes.BYTE_TYPE:
                 return input.readByte();
 
-            case ValueTypes.INT_TYPE :
+            case ValueTypes.INT_TYPE:
                 return input.readInt();
 
-            case ValueTypes.LONG_TYPE :
+            case ValueTypes.LONG_TYPE:
                 return input.readLong();
 
-            case ValueTypes.QNAME_TYPE :
+            case ValueTypes.QNAME_TYPE:
                 return readQName();
 
-            case ValueTypes.SHORT_TYPE :
+            case ValueTypes.SHORT_TYPE:
                 return input.readShort();
 
-            case ValueTypes.STRING_TYPE :
+            case ValueTypes.STRING_TYPE:
                 return input.readUTF();
 
             case ValueTypes.STRING_BYTES_TYPE:
                 return readStringBytes();
 
-            case ValueTypes.BIG_DECIMAL_TYPE :
+            case ValueTypes.BIG_DECIMAL_TYPE:
                 return new BigDecimal(input.readUTF());
 
-            case ValueTypes.BIG_INTEGER_TYPE :
+            case ValueTypes.BIG_INTEGER_TYPE:
                 return new BigInteger(input.readUTF());
 
-            case ValueTypes.BINARY_TYPE :
+            case ValueTypes.BINARY_TYPE:
                 byte[] bytes = new byte[input.readInt()];
                 input.readFully(bytes);
                 return bytes;
 
-            case ValueTypes.YANG_IDENTIFIER_TYPE :
+            case ValueTypes.YANG_IDENTIFIER_TYPE:
                 return readYangInstanceIdentifierInternal();
 
             case ValueTypes.EMPTY_TYPE:
@@ -346,7 +344,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
             case ValueTypes.NULL_TYPE:
                 return Empty.getInstance();
 
-            default :
+            default:
                 return null;
         }
     }
@@ -401,20 +399,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         int type = input.readByte();
 
         switch (type) {
-
-            case PathArgumentTypes.AUGMENTATION_IDENTIFIER :
-                return new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
-
-            case PathArgumentTypes.NODE_IDENTIFIER :
-                return new NodeIdentifier(readQName());
-
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES :
+            case PathArgumentTypes.AUGMENTATION_IDENTIFIER:
+                return readAugmentationIdentifier();
+            case PathArgumentTypes.NODE_IDENTIFIER:
+                return readNodeIdentifier();
+            case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES:
                 return readNormalizedNodeWithPredicates();
-
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
+            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE:
                 return new NodeWithValue<>(readQName(), readObject());
-
-            default :
+            default:
+                // FIXME: throw hard error
                 return null;
         }
     }
