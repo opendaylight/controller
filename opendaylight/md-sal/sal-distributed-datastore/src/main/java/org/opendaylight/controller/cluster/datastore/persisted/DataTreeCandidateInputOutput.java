@@ -8,12 +8,12 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
@@ -55,25 +55,25 @@ public final class DataTreeCandidateInputOutput {
         if (children.isEmpty()) {
             LOG.debug("Modified node {} does not have any children, not instantiating it", identifier);
             return null;
-        } else {
-            return ModifiedDataTreeCandidateNode.create(identifier, type, children);
         }
+
+        return ModifiedDataTreeCandidateNode.create(identifier, type, children);
     }
 
     private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in) throws IOException {
         final int size = in.readInt();
-        if (size != 0) {
-            final Collection<DataTreeCandidateNode> ret = new ArrayList<>(size);
-            for (int i = 0; i < size; ++i) {
-                final DataTreeCandidateNode child = readNode(in);
-                if (child != null) {
-                    ret.add(child);
-                }
-            }
-            return ret;
-        } else {
-            return Collections.emptyList();
+        if (size == 0) {
+            return ImmutableList.of();
         }
+
+        final Collection<DataTreeCandidateNode> ret = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
+            final DataTreeCandidateNode child = readNode(in);
+            if (child != null) {
+                ret.add(child);
+            }
+        }
+        return ret;
     }
 
     private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in) throws IOException {
@@ -90,7 +90,7 @@ public final class DataTreeCandidateInputOutput {
             case UNMODIFIED:
                 return null;
             case WRITE:
-                return DataTreeCandidateNodes.fromNormalizedNode(in.readNormalizedNode());
+                return DataTreeCandidateNodes.written(in.readNormalizedNode());
             default:
                 throw new IllegalArgumentException("Unhandled node type " + type);
         }
@@ -117,7 +117,7 @@ public final class DataTreeCandidateInputOutput {
                         readChildren(reader));
                 break;
             case WRITE:
-                rootNode = DataTreeCandidateNodes.fromNormalizedNode(reader.readNormalizedNode());
+                rootNode = DataTreeCandidateNodes.written(reader.readNormalizedNode());
                 break;
             case UNMODIFIED:
                 rootNode = AbstractDataTreeCandidateNode.createUnmodified();
@@ -172,7 +172,8 @@ public final class DataTreeCandidateInputOutput {
         }
     }
 
-    public static void writeDataTreeCandidate(final DataOutput out, DataTreeCandidate candidate) throws IOException {
+    public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
+            throws IOException {
         try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
