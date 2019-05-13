@@ -47,11 +47,14 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort.State;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.node.utils.transformer.PruningDataTreeCandidateTransactionCursor;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifiablePayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CloseLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CreateLocalHistoryPayload;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateReader;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionPayload;
@@ -68,12 +71,14 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -147,6 +152,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private SchemaContext schemaContext;
     private DataSchemaContextTree dataSchemaContext;
+    private PruningDataTreeCandidateTransactionCursor candidatePruner;
 
     private int currentTransactionBatch;
 
@@ -205,8 +211,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     void updateSchemaContext(final SchemaContext newSchemaContext) {
         dataTree.setSchemaContext(newSchemaContext);
-        this.schemaContext = Preconditions.checkNotNull(newSchemaContext);
-        this.dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
+        schemaContext = Preconditions.checkNotNull(newSchemaContext);
+        dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
+        candidatePruner = new PruningDataTreeCandidateTransactionCursor(dataSchemaContext);
     }
 
     void resetTransactionBatch() {
@@ -316,22 +323,28 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
-        final Entry<TransactionIdentifier, DataTreeCandidate> entry = payload.getCandidate();
+        final Entry<TransactionIdentifier, DataTreeCandidateReader> entry = payload.getCandidateReader();
+        final DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        Verify.verify(mod instanceof CursorAwareDataTreeModification);
 
-        final PruningDataTreeModification mod = wrapWithPruning(dataTree.takeSnapshot().newModification());
-        DataTreeCandidates.applyToModification(mod, entry.getValue());
+        try (DataTreeModificationCursor cursor = ((CursorAwareDataTreeModification) mod).openCursor()) {
+            candidatePruner.init(cursor);
+            DataTreeCandidateInputOutput.applyDataTreeCandidate(entry.getValue(), candidatePruner);
+        } finally {
+            candidatePruner.reset();
+        }
+
         mod.ready();
 
-        final DataTreeModification unwrapped = mod.delegate();
-        LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
+        LOG.trace("{}: Applying recovery modification {}", logContext, mod);
 
         try {
-            dataTree.validate(unwrapped);
-            dataTree.commit(dataTree.prepare(unwrapped));
+            dataTree.validate(mod);
+            dataTree.commit(dataTree.prepare(mod));
         } catch (Exception e) {
             File file = new File(System.getProperty("karaf.data", "."),
                     "failed-recovery-payload-" + logContext + ".out");
-            DataTreeModificationOutput.toFile(file, unwrapped);
+            DataTreeModificationOutput.toFile(file, mod);
             throw new IllegalStateException(String.format(
                     "%s: Failed to apply recovery payload. Modification data was written to file %s",
                     logContext, file), e);
