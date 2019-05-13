@@ -82,18 +82,23 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     final void initialize(final YangInstanceIdentifier nodePath) {
-        final Optional<DataSchemaContextNode<?>> optRoot = tree.findChild(nodePath);
-        if (optRoot.isPresent()) {
-            nodePathSchemaNode = optRoot.get();
-        } else {
-            nodePathSchemaNode = null;
-        }
+        initialize(tree.findChild(nodePath).orElse(null));
+    }
 
+    final void initialize(final DataSchemaContextNode<?> root) {
+        reset(root, State.OPEN);
+    }
+
+    final void reset() {
+        reset(null, State.UNITIALIZED);
+    }
+
+    private void reset(final DataSchemaContextNode<?> root, final State newState) {
         unknown = 0;
         normalizedNode = null;
         stack.clear();
         delegate.reset();
-        state = State.OPEN;
+        state = requireNonNull(newState);
     }
 
     @Override
