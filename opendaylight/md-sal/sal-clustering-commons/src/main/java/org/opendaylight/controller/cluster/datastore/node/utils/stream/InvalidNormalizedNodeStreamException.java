@@ -25,4 +25,8 @@ public class InvalidNormalizedNodeStreamException extends IOException {
     public InvalidNormalizedNodeStreamException(final String message, final Throwable cause) {
         super(message, cause);
     }
+
+    public InvalidNormalizedNodeStreamException(final String format, final Object... args) {
+        this(String.format(format, args));
+    }
 }
