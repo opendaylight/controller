@@ -30,7 +30,7 @@ public final class NormalizedNodeInputOutput {
     public static NormalizedNodeDataInput newDataInput(final @NonNull DataInput input) throws IOException {
         final byte marker = input.readByte();
         if (marker != TokenTypes.SIGNATURE_MARKER) {
-            throw new InvalidNormalizedNodeStreamException(String.format("Invalid signature marker: %d", marker));
+            throw new InvalidNormalizedNodeStreamException("Invalid signature marker: %d", marker);
         }
 
         final short version = input.readShort();
@@ -38,7 +38,7 @@ public final class NormalizedNodeInputOutput {
             case TokenTypes.LITHIUM_VERSION:
                 return new NormalizedNodeInputStreamReader(input, true);
             default:
-                throw new InvalidNormalizedNodeStreamException(String.format("Unhandled stream version %s", version));
+                throw new InvalidNormalizedNodeStreamException("Unhandled stream version %s", version);
         }
     }
 
