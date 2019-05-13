@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateReader;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
@@ -107,6 +108,18 @@ public final class CommitTransactionPayload extends Payload implements Serializa
         final DataInput in = ByteStreams.newDataInput(serialized);
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in, writer));
+    }
+
+    /**
+     * Access the underlying identifier and candidate in serialized form, as defined by DataTreeCandidateInputOutput.
+     *
+     * @return TransactionIdentifier and handle to a DataInput containing serialized candidate
+     * @throws IOException if an IO error occurs
+     */
+    public Entry<TransactionIdentifier, DataTreeCandidateReader> getCandidateReader() throws IOException {
+        final DataInput in = ByteStreams.newDataInput(serialized);
+        return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
+                DataTreeCandidateInputOutput.createReader(in));
     }
 
     @Override
