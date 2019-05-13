@@ -102,6 +102,17 @@ public final class CommitTransactionPayload extends Payload implements Serializa
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in));
     }
 
+    /**
+     * Access the underlying identifier and candidate in serialized form, as defined by DataTreeCandidateInputOutput.
+     *
+     * @return TransactionIdentifier and handle to a DataInput containing serialized candidate
+     * @throws IOException if an IO error occurs
+     */
+    public Entry<TransactionIdentifier, DataInput> getCandidateInput() throws IOException {
+        final DataInput in = ByteStreams.newDataInput(serialized);
+        return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in), in);
+    }
+
     @Override
     public int size() {
         return serialized.length;

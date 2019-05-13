@@ -17,6 +17,7 @@ import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.transformer.DataTreeCandidateTransactionCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -129,6 +130,10 @@ public final class DataTreeCandidateInputOutput {
         return DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode);
     }
 
+    public static void applyDataTreeCandidate(final DataInput in, final DataTreeCandidateTransactionCursor cursor)
+            throws IOException {
+        // FIXME: implement this
+    }
 
     private static void writeChildren(final NormalizedNodeDataOutput out,
             final Collection<DataTreeCandidateNode> children) throws IOException {
