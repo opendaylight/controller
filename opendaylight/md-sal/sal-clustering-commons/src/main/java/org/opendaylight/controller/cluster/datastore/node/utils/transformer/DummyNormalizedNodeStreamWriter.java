@@ -24,8 +24,7 @@ final class DummyNormalizedNodeStreamWriter implements NormalizedNodeStreamWrite
 
     @Override
     public void startLeafNode(final NodeIdentifier name) {
-        // TODO Auto-generated method stub
-
+        // No-op
     }
 
     @Override
