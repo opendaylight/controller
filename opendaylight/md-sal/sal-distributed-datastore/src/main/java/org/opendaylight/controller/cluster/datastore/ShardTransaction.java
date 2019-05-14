@@ -22,7 +22,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
-import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
@@ -78,7 +77,6 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     private void closeTransaction(final boolean sendReply) {
         getDOMStoreTransaction().abortFromTransactionActor();
-        shardActor.tell(new PersistAbortTransactionPayload(transactionId), ActorRef.noSender());
 
         if (sendReply && returnCloseTransactionReply()) {
             getSender().tell(new CloseTransactionReply(), getSelf());

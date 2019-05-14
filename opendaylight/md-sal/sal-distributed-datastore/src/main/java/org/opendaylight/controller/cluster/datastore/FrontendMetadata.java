@@ -132,7 +132,10 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
         final FrontendIdentifier frontendId = clientId.getFrontendId();
         final FrontendClientMetadataBuilder client = clients.get(frontendId);
         if (client == null) {
-            LOG.debug("{}: disableTracking {} does not match any client, ignoring", shardName, clientId);
+            // When we havent seen the client before, we still need to disable tracking for him since this only gets
+            // triggered once.
+            LOG.debug("{}: disableTracking {} does not match any client, pre-disabling client.", shardName, clientId);
+            clients.put(frontendId, new FrontendClientMetadataBuilder.Disabled(shardName, clientId));
             return;
         }
         if (!clientId.equals(client.getIdentifier())) {
