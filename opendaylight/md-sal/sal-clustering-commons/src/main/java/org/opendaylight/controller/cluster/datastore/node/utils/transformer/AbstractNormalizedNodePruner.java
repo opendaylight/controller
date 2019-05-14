@@ -24,10 +24,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithV
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +43,28 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         CLOSED;
     }
 
+    @FunctionalInterface
+    private interface WriterMethod<T extends PathArgument> {
+
+        void apply(ReusableImmutableNormalizedNodeStreamWriter writer, T name) throws IOException;
+    }
+
+    @FunctionalInterface
+    private interface SizedWriterMethod<T extends PathArgument> {
+
+        void apply(ReusableImmutableNormalizedNodeStreamWriter writer, T name, int childSizeHint) throws IOException;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNormalizedNodePruner.class);
 
-    private final Deque<NormalizedNodeBuilderWrapper> stack = new ArrayDeque<>();
+    private final Deque<DataSchemaContextNode<?>> stack = new ArrayDeque<>();
+    private final ReusableImmutableNormalizedNodeStreamWriter delegate =
+            ReusableImmutableNormalizedNodeStreamWriter.create();
     private final DataSchemaContextTree tree;
 
     private DataSchemaContextNode<?> nodePathSchemaNode;
     private State state = State.UNITIALIZED;
+    private int unknown;
 
     // FIXME: package-private to support unguarded NormalizedNodePruner access
     NormalizedNode<?, ?> normalizedNode;
@@ -68,131 +83,136 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
 
     final void initialize(final YangInstanceIdentifier nodePath) {
         nodePathSchemaNode = tree.findChild(nodePath).orElse(null);
+        unknown = 0;
         normalizedNode = null;
         stack.clear();
+        delegate.reset();
         state = State.OPEN;
     }
 
     @Override
-    public void startLeafNode(final NodeIdentifier name) {
-        addBuilder(Builders.leafBuilder().withNodeIdentifier(name), name);
+    public void startLeafNode(final NodeIdentifier name) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startLeafNode, name);
     }
 
     @Override
-    public void startLeafSet(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.leafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startLeafSet, name, childSizeHint);
     }
 
     @Override
-    public void startOrderedLeafSet(final NodeIdentifier nodeIdentifier, final int str) {
-        addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startOrderedLeafSet, name, childSizeHint);
     }
 
     @Override
     public void startLeafSetEntryNode(final NodeWithValue<?> name) throws IOException {
-        addBuilder(Builders.leafSetEntryBuilder().withNodeIdentifier(name), name);
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startLeafSetEntryNode, name);
     }
 
     @Override
-    public void startContainerNode(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.containerBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startContainerNode, name, childSizeHint);
     }
 
     @Override
     public void startYangModeledAnyXmlNode(final NodeIdentifier nodeIdentifier, final int count) {
+        // FIXME: implement this
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public void startUnkeyedList(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.unkeyedListBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startUnkeyedList, name, childSizeHint);
     }
 
     @Override
-    public void startUnkeyedListItem(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.unkeyedListEntryBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startUnkeyedListItem, name, childSizeHint);
     }
 
     @Override
-    public void startMapNode(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.mapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startMapNode, name, childSizeHint);
     }
 
     @Override
-    public void startMapEntryNode(final NodeIdentifierWithPredicates nodeIdentifierWithPredicates, final int count) {
-        addBuilder(Builders.mapEntryBuilder().withNodeIdentifier(nodeIdentifierWithPredicates),
-                nodeIdentifierWithPredicates);
+    public void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
+            throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startMapEntryNode, identifier, childSizeHint);
     }
 
     @Override
-    public void startOrderedMapNode(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.orderedMapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startOrderedMapNode, name, childSizeHint);
     }
 
     @Override
-    public void startChoiceNode(final NodeIdentifier nodeIdentifier, final int count) {
-        addBuilder(Builders.choiceBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    public void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startChoiceNode, name, childSizeHint);
     }
 
     @Override
-    public void startAugmentationNode(final AugmentationIdentifier augmentationIdentifier) {
-        addBuilder(Builders.augmentationBuilder().withNodeIdentifier(augmentationIdentifier), augmentationIdentifier);
+    public void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startAugmentationNode, identifier);
     }
 
     @Override
-    public void startAnyxmlNode(final NodeIdentifier name) {
-        addBuilder(Builders.anyXmlBuilder().withNodeIdentifier(name), name);
+    public void startAnyxmlNode(final NodeIdentifier name) throws IOException {
+        enter(ReusableImmutableNormalizedNodeStreamWriter::startAnyxmlNode, name);
     }
 
     @Override
-    public void domSourceValue(final DOMSource value) {
-        setValue(value);
+    public void domSourceValue(final DOMSource value) throws IOException {
+        checkNotSealed();
+        if (unknown == 0) {
+            delegate.domSourceValue(value);
+        }
     }
 
     @Override
-    public void scalarValue(final Object value) {
-        setValue(value);
+    public void scalarValue(final Object value) throws IOException {
+        checkNotSealed();
+        if (unknown == 0) {
+            delegate.scalarValue(value);
+        }
     }
 
     @Override
-    public void endNode() {
+    public void endNode() throws IOException {
         checkNotSealed();
 
-        final NormalizedNodeBuilderWrapper child;
-        try {
-            child = stack.pop();
-        } catch (NoSuchElementException e) {
-            throw new IllegalStateException("endNode called on an empty stack", e);
-        }
-
-        if (child.getSchema() == null) {
-            LOG.debug("Schema not found for {}", child.identifier());
-            if (stack.isEmpty()) {
-                normalizedNode = null;
-                state = State.CLOSED;
+        if (unknown == 0) {
+            try {
+                stack.pop();
+            } catch (NoSuchElementException e) {
+                throw new IllegalStateException("endNode called on an empty stack", e);
             }
-            return;
+            delegate.endNode();
+        } else {
+            unknown--;
+            if (unknown != 0) {
+                // Still at unknown, do not attempt to create result
+                return;
+            }
         }
 
-        final NormalizedNode<?, ?> newNode = child.build();
-        final NormalizedNodeBuilderWrapper parent = stack.peek();
-        if (parent == null) {
-            normalizedNode = newNode;
+        if (stack.isEmpty()) {
+            normalizedNode = delegate.getResult();
             state = State.CLOSED;
-        } else {
-            parent.addChild(newNode);
         }
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         state = State.CLOSED;
         stack.clear();
+        delegate.close();
     }
 
     @Override
-    public void flush() {
-        // No-op
+    public void flush() throws IOException {
+        delegate.flush();
     }
 
     /**
@@ -210,27 +230,47 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         checkState(state == State.OPEN, "Illegal operation in state %s", state);
     }
 
-    private void setValue(final Object value) {
-        checkNotSealed();
-        final NormalizedNodeBuilderWrapper current = stack.peek();
-        checkState(current != null, "Attempted to set value %s while no node is open", value);
-        current.setValue(value);
-    }
-
-    private <T extends NormalizedNodeBuilder<?, ?, ?>> NormalizedNodeBuilderWrapper addBuilder(final T builder,
-            final PathArgument identifier) {
+    private boolean enter(final PathArgument name) {
         checkNotSealed();
 
-        final DataSchemaContextNode<?> schemaNode;
-        final NormalizedNodeBuilderWrapper parent = stack.peek();
-        if (parent != null) {
-            schemaNode = parent.childSchema(identifier);
-        } else {
-            schemaNode = nodePathSchemaNode;
+        if (unknown != 0) {
+            LOG.debug("Skipping child {} in unknown subtree", name);
+            unknown++;
+            return false;
         }
 
-        NormalizedNodeBuilderWrapper wrapper = new NormalizedNodeBuilderWrapper(builder, identifier, schemaNode);
-        stack.push(wrapper);
-        return wrapper;
+        final DataSchemaContextNode<?> schema;
+        final DataSchemaContextNode<?> parent = stack.peek();
+        if (parent != null) {
+            schema = parent.getChild(name);
+        } else {
+            schema = nodePathSchemaNode;
+        }
+
+        if (schema == null) {
+            LOG.debug("Schema not found for {}", name);
+            unknown = 1;
+            return false;
+        }
+
+        stack.push(schema);
+        final DataSchemaNode dataSchema = schema.getDataSchemaNode();
+        if (dataSchema != null) {
+            delegate.nextDataSchemaNode(dataSchema);
+        }
+        return true;
+    }
+
+    private <A extends PathArgument> void enter(final WriterMethod<A> method, final A name) throws IOException {
+        if (enter(name)) {
+            method.apply(delegate, name);
+        }
+    }
+
+    private <A extends PathArgument> void enter(final SizedWriterMethod<A> method, final A name, final int size)
+            throws IOException {
+        if (enter(name)) {
+            method.apply(delegate, name, size);
+        }
     }
 }
