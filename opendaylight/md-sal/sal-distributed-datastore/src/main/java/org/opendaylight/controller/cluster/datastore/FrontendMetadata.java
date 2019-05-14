@@ -19,6 +19,8 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.FrontendClientMetadataBuilder.Disabled;
+import org.opendaylight.controller.cluster.datastore.FrontendClientMetadataBuilder.Enabled;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.slf4j.Logger;
@@ -36,6 +38,8 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
 
     private final Map<FrontendIdentifier, FrontendClientMetadataBuilder> clients = new HashMap<>();
     private final String shardName;
+
+    private boolean trackingEnabled = true;
 
     FrontendMetadata(final String shardName) {
         this.shardName = Preconditions.checkNotNull(shardName);
@@ -79,7 +83,8 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
             return existing;
         }
 
-        final FrontendClientMetadataBuilder client = new FrontendClientMetadataBuilder.Enabled(shardName, id);
+        final FrontendClientMetadataBuilder client =
+                trackingEnabled ? new Enabled(shardName, id) : new Disabled(shardName, id);
         final FrontendClientMetadataBuilder previous = clients.put(id.getFrontendId(), client);
         if (previous != null) {
             LOG.debug("{}: Replaced client {} with {}", shardName, previous, client);
@@ -139,11 +144,15 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
             LOG.debug("{}: disableTracking {} does not match client {}, ignoring", shardName, clientId, client);
             return;
         }
-        if (client instanceof FrontendClientMetadataBuilder.Disabled) {
+        if (client instanceof Disabled) {
             LOG.debug("{}: client {} is has already disabled tracking", shardName, client);
             return;
         }
 
-        verify(clients.replace(frontendId, client, new FrontendClientMetadataBuilder.Disabled(shardName, clientId)));
+        verify(clients.replace(frontendId, client, new Disabled(shardName, clientId)));
+    }
+
+    void disableAllTracking() {
+        trackingEnabled = false;
     }
 }
