@@ -77,16 +77,13 @@ import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
-import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
-import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPayload;
-import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionPayload;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
@@ -365,12 +362,6 @@ public class Shard extends RaftActor {
             } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand) {
                 store.processCohortRegistryCommand(getSender(),
                         (DataTreeCohortActorRegistry.CohortRegistryCommand) message);
-            } else if (message instanceof PersistAbortTransactionPayload) {
-                final TransactionIdentifier txId = ((PersistAbortTransactionPayload) message).getTransactionId();
-                persistPayload(txId, AbortTransactionPayload.create(txId,
-                    datastoreContext.getInitialPayloadSerializedBufferCapacity()), true);
-                persistPayload(txId, PurgeTransactionPayload.create(txId,
-                    datastoreContext.getInitialPayloadSerializedBufferCapacity()), false);
             } else if (message instanceof MakeLeaderLocal) {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
@@ -461,6 +452,8 @@ public class Shard extends RaftActor {
                 }
             } else {
                 LOG.debug("{}: leader state for {} not found", persistenceId(), clientId);
+                knownFrontends.put(frontendId, new LeaderFrontendState.Disabled(persistenceId(), clientId,
+                    getDataStore()));
             }
         }
     }
@@ -871,9 +864,12 @@ public class Shard extends RaftActor {
 
     // Called on leader only
     private void askProtocolEncountered(final ClientIdentifier clientId) {
-        final LeaderFrontendState state = knownFrontends.get(clientId.getFrontendId());
-        if (state instanceof LeaderFrontendState.Enabled) {
+        final FrontendIdentifier frontend = clientId.getFrontendId();
+        final LeaderFrontendState state = knownFrontends.get(frontend);
+        if (!(state instanceof LeaderFrontendState.Disabled)) {
             LOG.debug("{}: encountered ask-based client {}, disabling transaction tracking", persistenceId(), clientId);
+            knownFrontends.put(frontend, new LeaderFrontendState.Disabled(persistenceId(), clientId, getDataStore()));
+
             persistPayload(clientId, DisableTrackingPayload.create(clientId,
                 datastoreContext.getInitialPayloadSerializedBufferCapacity()), false);
         }
