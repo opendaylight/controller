@@ -211,6 +211,10 @@ public class Shard extends RaftActor {
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
         this.frontendMetadata = new FrontendMetadata(name);
 
+        if (!datastoreContext.isUseTellBasedProtocol()) {
+            frontendMetadata.disableAllTracking();
+        }
+
         setPersistence(datastoreContext.isPersistent());
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
@@ -641,6 +645,10 @@ public class Shard extends RaftActor {
 
     protected void onDatastoreContext(final DatastoreContext context) {
         datastoreContext = context;
+
+        if (!datastoreContext.isUseTellBasedProtocol()) {
+            frontendMetadata.disableAllTracking();
+        }
 
         setTransactionCommitTimeout();
 
