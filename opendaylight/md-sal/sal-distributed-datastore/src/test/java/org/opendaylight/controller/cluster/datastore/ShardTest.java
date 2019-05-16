@@ -558,7 +558,7 @@ public class ShardTest extends AbstractShardTest {
 
                 verifyOuterListEntry(shard, 1);
 
-                verifyLastApplied(shard, 6);
+                verifyLastApplied(shard, 3);
             }
         };
     }
@@ -1067,8 +1067,8 @@ public class ShardTest extends AbstractShardTest {
                 // Committed transaction count should increase as usual
                 assertEquals(1, shardStats.getCommittedTransactionsCount());
 
-                // Commit index should advance 2 to account for disabling metadata
-                assertEquals(2, shardStats.getCommitIndex());
+                // Commit index should advance 1 to account for disabling metadata
+                assertEquals(1, shardStats.getCommitIndex());
             }
         };
     }
