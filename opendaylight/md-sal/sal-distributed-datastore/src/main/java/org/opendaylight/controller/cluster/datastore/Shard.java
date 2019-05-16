@@ -72,6 +72,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionCh
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.DisableTransactionTracking;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
@@ -375,6 +376,8 @@ public class Shard extends RaftActor {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
                 store.resumeNextPendingTransaction();
+            } else if (message instanceof DisableTransactionTracking) {
+                onDisableTransactionTracking(((DisableTransactionTracking) message).getClientId());
             } else if (!responseMessageSlicer.handleMessage(message)) {
                 super.handleNonRaftCommand(message);
             }
@@ -437,6 +440,15 @@ public class Shard extends RaftActor {
 
         // If this frontend has freshly connected, give it some time to catch up before killing its transactions.
         return Optional.of(state.getLastConnectTicks());
+    }
+
+    private void onDisableTransactionTracking(final ClientIdentifier clientId) {
+        if (isLeader()) {
+            persistPayload(clientId, DisableTrackingPayload.create(clientId,
+                datastoreContext.getInitialPayloadSerializedBufferCapacity()), false);
+        } else {
+            LOG.debug("{}: not a leader, not disabling transaction tracking", persistenceId());
+        }
     }
 
     private void disableTracking(final DisableTrackingPayload payload) {

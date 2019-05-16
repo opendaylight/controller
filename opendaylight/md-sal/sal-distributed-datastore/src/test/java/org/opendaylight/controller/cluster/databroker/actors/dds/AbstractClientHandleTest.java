@@ -44,6 +44,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -207,6 +208,11 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
         promise.success(shardInfo);
         when(mock.findPrimaryShardAsync(any())).thenReturn(promise.future());
+
+        final DatastoreContext mockContext = mock(DatastoreContext.class);
+        when(mockContext.isUseTellBasedProtocol()).thenReturn(true);
+        when(mock.getDatastoreContext()).thenReturn(mockContext);
+
         return mock;
     }
 
