@@ -389,8 +389,8 @@ public class ClusterAdminRpcServiceTest {
         // 2 ServerConfigurationPayload entries,  the transaction payload entry plus a purge payload.
 
         RaftStateVerifier verifier = raftState -> {
-            assertEquals("Commit index", 5, raftState.getCommitIndex());
-            assertEquals("Last applied index", 5, raftState.getLastApplied());
+            assertEquals("Commit index", 4, raftState.getCommitIndex());
+            assertEquals("Last applied index", 4, raftState.getLastApplied());
         };
 
         verifyRaftState(leaderNode1.configDataStore(), "cars", verifier);
