@@ -5,13 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
+import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManagerMXBean;
 
 /**
  * Implementation of the QueuedNotificationManagerMXBean interface.
@@ -29,10 +30,10 @@ public class QueuedNotificationManagerMXBeanImpl extends AbstractMXBean
 
     private final QueuedNotificationManager<?,?> manager;
 
-    public QueuedNotificationManagerMXBeanImpl(QueuedNotificationManager<?,?> manager,
-            String beanName, String beanType, String beanCategory) {
+    public QueuedNotificationManagerMXBeanImpl(final QueuedNotificationManager<?,?> manager,
+            final String beanName, final String beanType, final String beanCategory) {
         super(beanName, beanType, beanCategory);
-        this.manager = Preconditions.checkNotNull(manager);
+        this.manager = requireNonNull(manager);
     }
 
     @Override
