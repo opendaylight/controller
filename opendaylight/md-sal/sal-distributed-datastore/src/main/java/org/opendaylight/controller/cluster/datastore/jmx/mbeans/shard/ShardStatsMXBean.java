@@ -28,8 +28,6 @@ public interface ShardStatsMXBean {
 
     long getReadOnlyTransactionCount();
 
-    long getWriteOnlyTransactionCount();
-
     long getReadWriteTransactionCount();
 
     long getLastLogIndex();

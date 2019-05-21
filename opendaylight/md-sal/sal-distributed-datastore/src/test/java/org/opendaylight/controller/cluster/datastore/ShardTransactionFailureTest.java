@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -37,7 +40,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final TransactionType RO = TransactionType.READ_ONLY;
     private static final TransactionType RW = TransactionType.READ_WRITE;
 
-    private static final Shard MOCK_SHARD = Mockito.mock(Shard.class);
+    private static final Shard MOCK_SHARD = mock(Shard.class);
 
     private static final ShardDataTree STORE = new ShardDataTree(MOCK_SHARD, TEST_SCHEMA_CONTEXT, TreeType.OPERATIONAL);
 
@@ -53,6 +56,12 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 .schemaContextProvider(() -> TEST_SCHEMA_CONTEXT).props());
         ShardTestKit.waitUntilLeader(shard);
         return shard;
+    }
+
+    @Before
+    public void setup() {
+        ShardStats stats = mock(ShardStats.class);
+        when(MOCK_SHARD.getShardMBean()).thenReturn(stats);
     }
 
     @Test(expected = ReadFailedException.class)

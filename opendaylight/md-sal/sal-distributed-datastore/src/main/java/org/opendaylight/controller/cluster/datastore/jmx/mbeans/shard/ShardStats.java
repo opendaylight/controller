@@ -44,8 +44,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private long readOnlyTransactionCount;
 
-    private long writeOnlyTransactionCount;
-
     private long readWriteTransactionCount;
 
     private long lastCommittedTransactionTime;
@@ -111,11 +109,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public long getReadOnlyTransactionCount() {
         return readOnlyTransactionCount;
-    }
-
-    @Override
-    public long getWriteOnlyTransactionCount() {
-        return writeOnlyTransactionCount;
     }
 
     @Override
@@ -221,10 +214,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return ++readOnlyTransactionCount;
     }
 
-    public long incrementWriteOnlyTransactionCount() {
-        return ++writeOnlyTransactionCount;
-    }
-
     public long incrementReadWriteTransactionCount() {
         return ++readWriteTransactionCount;
     }
@@ -263,8 +252,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         committedTransactionsCount = 0;
 
         readOnlyTransactionCount = 0;
-
-        writeOnlyTransactionCount = 0;
 
         readWriteTransactionCount = 0;
 

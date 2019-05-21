@@ -68,15 +68,10 @@ class ShardTransactionActorFactory {
         switch (type) {
             case READ_ONLY:
                 transaction = dataTree.newReadOnlyTransaction(transactionID);
-                shardMBean.incrementReadOnlyTransactionCount();
                 break;
             case READ_WRITE:
-                transaction = dataTree.newReadWriteTransaction(transactionID);
-                shardMBean.incrementReadWriteTransactionCount();
-                break;
             case WRITE_ONLY:
                 transaction = dataTree.newReadWriteTransaction(transactionID);
-                shardMBean.incrementWriteOnlyTransactionCount();
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported transaction type " + type);
