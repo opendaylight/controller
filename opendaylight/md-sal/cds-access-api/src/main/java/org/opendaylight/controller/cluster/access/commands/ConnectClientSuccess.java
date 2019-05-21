@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 
 /**
  * Successful reply to an {@link ConnectClientRequest}. Client actor which initiated this connection should use
@@ -41,24 +41,24 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     private final @NonNull List<ActorSelection> alternates;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See justification above.")
-    private final DataTree dataTree;
+    private final ReadOnlyDataTree dataTree;
     private final @NonNull ActorRef backend;
     private final int maxMessages;
 
     ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
-        final List<ActorSelection> alternates, final Optional<DataTree> dataTree, final int maxMessages) {
+        final List<ActorSelection> alternates, final int maxMessages, final ReadOnlyDataTree dataTree) {
         super(target, sequence);
         this.backend = requireNonNull(backend);
         this.alternates = ImmutableList.copyOf(alternates);
-        this.dataTree = dataTree.orElse(null);
+        this.dataTree = dataTree;
         checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
         this.maxMessages = maxMessages;
     }
 
     public ConnectClientSuccess(final @NonNull ClientIdentifier target, final long sequence,
             final @NonNull ActorRef backend, final @NonNull List<ActorSelection> alternates,
-            final @NonNull DataTree dataTree, final int maxMessages) {
-        this(target, sequence, backend, alternates, Optional.of(dataTree), maxMessages);
+            final @NonNull ReadOnlyDataTree dataTree, final int maxMessages) {
+        this(target, sequence, backend, alternates, maxMessages, requireNonNull(dataTree));
     }
 
     /**
@@ -74,7 +74,7 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
         return backend;
     }
 
-    public Optional<DataTree> getDataTree() {
+    public Optional<ReadOnlyDataTree> getDataTree() {
         return Optional.ofNullable(dataTree);
     }
 

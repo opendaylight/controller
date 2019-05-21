@@ -13,7 +13,7 @@ import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 
 /**
  * A local message derived from LeaderStateChanged containing additional Shard-specific info that is sent
@@ -23,11 +23,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  * @author Thomas Pantelis
  */
 public class ShardLeaderStateChanged extends LeaderStateChanged {
-
-    private final DataTree localShardDataTree;
+    private final ReadOnlyDataTree localShardDataTree;
 
     public ShardLeaderStateChanged(@NonNull String memberId, @Nullable String leaderId,
-            @NonNull DataTree localShardDataTree, short leaderPayloadVersion) {
+            @NonNull ReadOnlyDataTree localShardDataTree, short leaderPayloadVersion) {
         super(memberId, leaderId, leaderPayloadVersion);
         this.localShardDataTree = requireNonNull(localShardDataTree);
     }
@@ -38,7 +37,7 @@ public class ShardLeaderStateChanged extends LeaderStateChanged {
         this.localShardDataTree = null;
     }
 
-    public @NonNull Optional<DataTree> getLocalShardDataTree() {
+    public @NonNull Optional<ReadOnlyDataTree> getLocalShardDataTree() {
         return Optional.ofNullable(localShardDataTree);
     }
 }

@@ -7,15 +7,17 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfo;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 
 /**
  * Combined backend tracking. Aside from usual {@link BackendInfo}, this object also tracks the cookie assigned
@@ -24,26 +26,26 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  * @author Robert Varga
  */
 final class ShardBackendInfo extends BackendInfo {
-    private final Optional<DataTree> dataTree;
+    private final Optional<ReadOnlyDataTree> dataTree;
     private final UnsignedLong cookie;
 
     ShardBackendInfo(final ActorRef actor, final long sessionId, final ABIVersion version, final String shardName,
-        final UnsignedLong cookie, final Optional<DataTree> dataTree, final int maxMessages) {
+        final UnsignedLong cookie, final Optional<ReadOnlyDataTree> dataTree, final int maxMessages) {
         super(actor, shardName, sessionId, version, maxMessages);
-        this.cookie = Preconditions.checkNotNull(cookie);
-        this.dataTree = Preconditions.checkNotNull(dataTree);
+        this.cookie = requireNonNull(cookie);
+        this.dataTree = requireNonNull(dataTree);
     }
 
     UnsignedLong getCookie() {
         return cookie;
     }
 
-    Optional<DataTree> getDataTree() {
+    Optional<ReadOnlyDataTree> getDataTree() {
         return dataTree;
     }
 
     LocalHistoryIdentifier brandHistory(final LocalHistoryIdentifier id) {
-        Preconditions.checkArgument(id.getCookie() == 0, "History %s is already branded", id);
+        checkArgument(id.getCookie() == 0, "History %s is already branded", id);
         return new LocalHistoryIdentifier(id.getClientId(), id.getHistoryId(), cookie.longValue());
     }
 

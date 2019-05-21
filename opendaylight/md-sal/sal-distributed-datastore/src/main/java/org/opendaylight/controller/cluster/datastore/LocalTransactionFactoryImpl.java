@@ -20,8 +20,8 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 
 /**
  * {@link LocalTransactionFactory} for instantiating backing transactions which are
@@ -32,16 +32,17 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
         implements LocalTransactionFactory {
 
     private final ActorSelection leader;
-    private final DataTree dataTree;
+    private final ReadOnlyDataTree dataTree;
     private final ActorUtils actorUtils;
 
-    LocalTransactionFactoryImpl(final ActorUtils actorUtils, final ActorSelection leader, final DataTree dataTree) {
+    LocalTransactionFactoryImpl(final ActorUtils actorUtils, final ActorSelection leader,
+            final ReadOnlyDataTree dataTree) {
         this.leader = requireNonNull(leader);
         this.dataTree = requireNonNull(dataTree);
         this.actorUtils = actorUtils;
     }
 
-    DataTree getDataTree() {
+    ReadOnlyDataTree getDataTree() {
         return dataTree;
     }
 

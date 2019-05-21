@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
@@ -37,8 +39,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +51,12 @@ import org.slf4j.LoggerFactory;
  */
 abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private abstract static class AbstractLocal extends ProxyHistory {
-        private final DataTree dataTree;
+        private final ReadOnlyDataTree dataTree;
 
         AbstractLocal(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier, final DataTree dataTree) {
+            final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
             super(parent, connection, identifier);
-            this.dataTree = Preconditions.checkNotNull(dataTree);
+            this.dataTree = requireNonNull(dataTree);
         }
 
         final DataTreeSnapshot takeSnapshot() {
@@ -80,14 +82,14 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         private volatile LocalReadWriteProxyTransaction lastSealed;
 
         Local(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier, final DataTree dataTree) {
+            final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
             super(parent, connection, identifier, dataTree);
         }
 
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
                 final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
-            Preconditions.checkState(lastOpen == null, "Proxy %s has %s currently open", this, lastOpen);
+            checkState(lastOpen == null, "Proxy %s has %s currently open", this, lastOpen);
 
             if (isDone) {
                 // Done transactions do not register on our radar on should not have any state associated.
@@ -136,7 +138,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         void onTransactionSealed(final AbstractProxyTransaction tx) {
-            Preconditions.checkState(tx.equals(lastOpen));
+            checkState(tx.equals(lastOpen));
             lastSealed = lastOpen;
             lastOpen = null;
         }
@@ -144,7 +146,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     private static final class LocalSingle extends AbstractLocal {
         LocalSingle(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier, final DataTree dataTree) {
+            final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
             super(parent, connection, identifier, dataTree);
         }
 
@@ -328,14 +330,14 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     private ProxyHistory(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
-        this.parent = Preconditions.checkNotNull(parent);
-        this.connection = Preconditions.checkNotNull(connection);
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.parent = requireNonNull(parent);
+        this.connection = requireNonNull(connection);
+        this.identifier = requireNonNull(identifier);
     }
 
     static ProxyHistory createClient(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
-        final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+        final Optional<ReadOnlyDataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
         return dataTree.isPresent() ? new Local(parent, connection, identifier, dataTree.get())
              : new Remote(parent, connection, identifier);
     }
@@ -343,7 +345,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     static ProxyHistory createSingle(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
-        final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+        final Optional<ReadOnlyDataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
         return dataTree.isPresent() ? new LocalSingle(parent, connection, identifier, dataTree.get())
              : new RemoteSingle(parent, connection, identifier);
     }

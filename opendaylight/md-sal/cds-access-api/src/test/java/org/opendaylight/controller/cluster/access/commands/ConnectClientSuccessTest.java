@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 
 public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<ConnectClientSuccess> {
@@ -62,7 +63,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
 
     @Test
     public void testGetDataTree() {
-        final DataTree tree = OBJECT.getDataTree().get();
+        final ReadOnlyDataTree tree = OBJECT.getDataTree().get();
         Assert.assertEquals(TREE, tree);
     }
 

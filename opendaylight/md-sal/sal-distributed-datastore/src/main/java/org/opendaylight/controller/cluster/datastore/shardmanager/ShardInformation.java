@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ final class ShardInformation {
     private final AtomicShardContextProvider schemaContextProvider = new AtomicShardContextProvider();
     private ActorRef actor;
 
-    private Optional<DataTree> localShardDataTree;
+    private Optional<ReadOnlyDataTree> localShardDataTree;
     private boolean leaderAvailable = false;
 
     // flag that determines if the actor is ready for business
@@ -101,11 +101,11 @@ final class ShardInformation {
         return shardId;
     }
 
-    void setLocalDataTree(final Optional<DataTree> dataTree) {
+    void setLocalDataTree(final Optional<ReadOnlyDataTree> dataTree) {
         this.localShardDataTree = dataTree;
     }
 
-    Optional<DataTree> getLocalShardDataTree() {
+    Optional<ReadOnlyDataTree> getLocalShardDataTree() {
         return localShardDataTree;
     }
 

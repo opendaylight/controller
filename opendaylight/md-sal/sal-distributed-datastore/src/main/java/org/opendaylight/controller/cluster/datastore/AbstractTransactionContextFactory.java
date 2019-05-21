@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -143,7 +143,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     }
 
     private void updateShardInfo(final String shardName, final PrimaryShardInfo primaryShardInfo) {
-        final Optional<DataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
+        final Optional<ReadOnlyDataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
         if (maybeDataTree.isPresent()) {
             if (!knownLocal.containsKey(shardName)) {
                 LOG.debug("Shard {} resolved to local data tree - adding local factory", shardName);
@@ -190,7 +190,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      *                 read-only manner.
      * @return Transaction factory for local use.
      */
-    protected abstract F factoryForShard(String shardName, ActorSelection shardLeader, DataTree dataTree);
+    protected abstract F factoryForShard(String shardName, ActorSelection shardLeader, ReadOnlyDataTree dataTree);
 
     /**
      * Callback invoked from child transactions to push any futures, which need to

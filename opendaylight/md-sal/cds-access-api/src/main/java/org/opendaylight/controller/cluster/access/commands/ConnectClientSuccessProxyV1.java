@@ -17,7 +17,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
@@ -78,7 +77,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
 
     @Override
     protected ConnectClientSuccess createSuccess(final ClientIdentifier target, final long sequence) {
-        return new ConnectClientSuccess(target, sequence, backend, alternates, Optional.empty(), maxMessages);
+        return new ConnectClientSuccess(target, sequence, backend, alternates, maxMessages, null);
     }
 
     @Override

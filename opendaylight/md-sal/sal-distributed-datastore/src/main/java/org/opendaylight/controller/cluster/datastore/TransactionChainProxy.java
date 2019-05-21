@@ -27,7 +27,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -192,7 +192,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
     @Override
     protected LocalTransactionChain factoryForShard(final String shardName, final ActorSelection shardLeader,
-            final DataTree dataTree) {
+            final ReadOnlyDataTree dataTree) {
         final LocalTransactionChain ret = new LocalTransactionChain(this, shardLeader, dataTree);
         LOG.debug("Allocated transaction chain {} for shard {} leader {}", ret, shardName, shardLeader);
         return ret;

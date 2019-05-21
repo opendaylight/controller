@@ -18,9 +18,9 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 
 /**
  * Transaction chain instantiated on top of a locally-available DataTree. It does not instantiate
@@ -31,15 +31,16 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     private static final Throwable ABORTED = new Throwable("Transaction aborted");
     private final TransactionChainProxy parent;
     private final ActorSelection leader;
-    private final DataTree tree;
+    private final ReadOnlyDataTree tree;
 
-    LocalTransactionChain(final TransactionChainProxy parent, final ActorSelection leader, final DataTree tree) {
+    LocalTransactionChain(final TransactionChainProxy parent, final ActorSelection leader,
+            final ReadOnlyDataTree tree) {
         this.parent = requireNonNull(parent);
         this.leader = requireNonNull(leader);
         this.tree = requireNonNull(tree);
     }
 
-    DataTree getDataTree() {
+    ReadOnlyDataTree getDataTree() {
         return tree;
     }
 
