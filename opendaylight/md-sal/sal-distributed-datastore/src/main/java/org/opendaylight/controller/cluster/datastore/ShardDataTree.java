@@ -547,6 +547,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
+        shard.getShardMBean().incrementReadOnlyTransactionCount();
+
         if (txId.getHistoryId().getHistoryId() == 0) {
             return new ReadOnlyShardDataTreeTransaction(this, txId, dataTree.takeSnapshot());
         }
@@ -555,6 +557,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
+        shard.getShardMBean().incrementReadWriteTransactionCount();
+
         if (txId.getHistoryId().getHistoryId() == 0) {
             return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
                     .newModification());
