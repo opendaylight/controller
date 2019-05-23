@@ -591,18 +591,33 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param callback Callback to invoke upon completion, may be null
      */
     void closeTransactionChain(final LocalHistoryIdentifier id, @Nullable final Runnable callback) {
+        if (commonCloseTransactionChain(id, callback)) {
+            replicatePayload(id, CloseLocalHistoryPayload.create(id,
+                shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        }
+    }
+
+    /**
+     * Close a single transaction chain which is received through ask-based protocol. It does not keep a commit record.
+     *
+     * @param id History identifier
+     */
+    void closeTransactionChain(final LocalHistoryIdentifier id) {
+        commonCloseTransactionChain(id, null);
+    }
+
+    private boolean commonCloseTransactionChain(final LocalHistoryIdentifier id, @Nullable final Runnable callback) {
         final ShardDataTreeTransactionChain chain = transactionChains.get(id);
         if (chain == null) {
             LOG.debug("{}: Closing non-existent transaction chain {}", logContext, id);
             if (callback != null) {
                 callback.run();
             }
-            return;
+            return false;
         }
 
         chain.close();
-        replicatePayload(id, CloseLocalHistoryPayload.create(
-                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        return true;
     }
 
     /**

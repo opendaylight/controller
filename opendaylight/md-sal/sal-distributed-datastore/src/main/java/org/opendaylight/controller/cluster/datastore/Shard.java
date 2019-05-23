@@ -824,10 +824,7 @@ public class Shard extends RaftActor {
         if (isLeader()) {
             final LocalHistoryIdentifier id = closeTransactionChain.getIdentifier();
             askProtocolEncountered(id.getClientId());
-
-            // FIXME: CONTROLLER-1628: stage purge once no transactions are present
-            store.closeTransactionChain(id, null);
-            store.purgeTransactionChain(id, null);
+            store.closeTransactionChain(id);
         } else if (getLeader() != null) {
             getLeader().forward(closeTransactionChain, getContext());
         } else {
