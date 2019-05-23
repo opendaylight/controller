@@ -223,7 +223,13 @@ public class LocalSnapshotStore extends SnapshotStore {
 
         LOG.debug("Deleting files: {}", files);
 
-        files.forEach(File::delete);
+        files.forEach(file -> {
+            try {
+                Files.delete(file.toPath());
+            } catch (IOException | SecurityException e) {
+                LOG.error("Unable to delete snapshot file: {}, persistenceId: {} ", file, persistenceId);
+            }
+        });
         return null;
     }
 
@@ -232,7 +238,13 @@ public class LocalSnapshotStore extends SnapshotStore {
 
         LOG.debug("Deleting files: {}", files);
 
-        files.forEach(File::delete);
+        files.forEach(file -> {
+            try {
+                Files.delete(file.toPath());
+            } catch (IOException | SecurityException e) {
+                LOG.error("Unable to delete snapshot file: {}", file);
+            }
+        });
         return null;
     }
 
