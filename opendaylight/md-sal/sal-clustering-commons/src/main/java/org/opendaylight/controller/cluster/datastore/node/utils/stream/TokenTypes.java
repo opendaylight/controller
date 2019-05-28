@@ -31,6 +31,6 @@ final class TokenTypes {
     // Tokens supported in SODIUM_VERSION
     static final byte IS_QNAME_CODE = 4;
     static final byte IS_QNAME_VALUE = 5;
-    static final byte IS_QNAMESET_CODE = 6;
-    static final byte IS_QNAMESET_VALUE = 7;
+    static final byte IS_AUGMENT_CODE = 6;
+    static final byte IS_AUGMENT_VALUE = 7;
 }
