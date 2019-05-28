@@ -434,11 +434,11 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    private void writeQNameSet(final Set<QName> children) throws IOException {
+    void writeQNameSet(final Set<QName> qnames) throws IOException {
         // Write each child's qname separately, if list is empty send count as 0
-        if (children != null && !children.isEmpty()) {
-            output.writeInt(children.size());
-            for (QName qname : children) {
+        if (!qnames.isEmpty()) {
+            output.writeInt(qnames.size());
+            for (QName qname : qnames) {
                 writeQName(qname);
             }
         } else {
