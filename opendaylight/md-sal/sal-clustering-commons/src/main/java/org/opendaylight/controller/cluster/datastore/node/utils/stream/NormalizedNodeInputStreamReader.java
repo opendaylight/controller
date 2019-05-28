@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.util.ImmutableOffsetMapTemplate;
 import org.opendaylight.yangtools.yang.common.Empty;
@@ -54,11 +55,11 @@ import org.xml.sax.SAXException;
  * nodes. This process goes in recursive manner, where each NodeTypes object signifies the start of the object, except
  * END_NODE. If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  */
-public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput {
+public class NormalizedNodeInputStreamReader extends ForwardingDataInput implements NormalizedNodeDataInput {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
-    private final DataInput input;
+    private final @NonNull DataInput input;
 
     private final List<String> codedStringMap = new ArrayList<>();
 
@@ -69,34 +70,18 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     @SuppressWarnings("rawtypes")
     private NormalizedNodeBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
-    private boolean readSignatureMarker = true;
-
-    NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
+    NormalizedNodeInputStreamReader(final DataInput input) {
         this.input = requireNonNull(input);
-        readSignatureMarker = !versionChecked;
+    }
+
+    @Override
+    final DataInput delegate() {
+        return input;
     }
 
     @Override
     public NormalizedNode<?, ?> readNormalizedNode() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return readNormalizedNodeInternal();
-    }
-
-    private void readSignatureMarkerAndVersionIfNeeded() throws IOException {
-        if (readSignatureMarker) {
-            readSignatureMarker = false;
-
-            final byte marker = input.readByte();
-            if (marker != TokenTypes.SIGNATURE_MARKER) {
-                throw new InvalidNormalizedNodeStreamException(String.format(
-                        "Invalid signature marker: %d", marker));
-            }
-
-            final short version = input.readShort();
-            if (version != TokenTypes.LITHIUM_VERSION) {
-                throw new InvalidNormalizedNodeStreamException(String.format("Unhandled stream version %s", version));
-            }
-        }
     }
 
     private NormalizedNode<?, ?> readNormalizedNodeInternal() throws IOException {
@@ -356,8 +341,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     @Override
     public SchemaPath readSchemaPath() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-
         final boolean absolute = input.readBoolean();
         final int size = input.readInt();
 
@@ -370,7 +353,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     @Override
     public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return readYangInstanceIdentifierInternal();
     }
 
@@ -441,95 +423,5 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
             child = readNormalizedNodeInternal();
         }
         return builder;
-    }
-
-    @Override
-    public void readFully(final byte[] value) throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        input.readFully(value);
-    }
-
-    @Override
-    public void readFully(final byte[] str, final int off, final int len) throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        input.readFully(str, off, len);
-    }
-
-    @Override
-    public int skipBytes(final int num) throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.skipBytes(num);
-    }
-
-    @Override
-    public boolean readBoolean() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readBoolean();
-    }
-
-    @Override
-    public byte readByte() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readByte();
-    }
-
-    @Override
-    public int readUnsignedByte() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readUnsignedByte();
-    }
-
-    @Override
-    public short readShort() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readShort();
-    }
-
-    @Override
-    public int readUnsignedShort() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readUnsignedShort();
-    }
-
-    @Override
-    public char readChar() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readChar();
-    }
-
-    @Override
-    public int readInt() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readInt();
-    }
-
-    @Override
-    public long readLong() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readLong();
-    }
-
-    @Override
-    public float readFloat() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readFloat();
-    }
-
-    @Override
-    public double readDouble() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readDouble();
-    }
-
-    @Override
-    public String readLine() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readLine();
-    }
-
-    @Override
-    public String readUTF() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-        return input.readUTF();
     }
 }
