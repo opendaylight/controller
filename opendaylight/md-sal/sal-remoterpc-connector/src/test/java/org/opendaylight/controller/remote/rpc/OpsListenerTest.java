@@ -16,19 +16,24 @@ import java.util.Collections;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class RpcListenerTest {
+public class OpsListenerTest {
 
     private static final QName TEST_QNAME = QName.create("test", "2015-06-12", "test");
     private static final SchemaPath RPC_TYPE = SchemaPath.create(true, TEST_QNAME);
     private static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier
             .create(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME));
     private static final DOMRpcIdentifier RPC_ID = DOMRpcIdentifier.create(RPC_TYPE, TEST_PATH);
+    private static final DOMActionInstance ACTION_INSTANCE = DOMActionInstance.of(RPC_TYPE,
+            LogicalDatastoreType.OPERATIONAL, TEST_PATH);
 
     private static ActorSystem SYSTEM;
 
@@ -49,9 +54,20 @@ public class RpcListenerTest {
         final TestKit probeReg = new TestKit(SYSTEM);
         final ActorRef rpcRegistry = probeReg.getRef();
 
-        final RpcListener rpcListener = new RpcListener(rpcRegistry);
-        rpcListener.onRpcAvailable(Collections.singleton(RPC_ID));
+        final OpsListener opsListener = new OpsListener(rpcRegistry, rpcRegistry);
+        opsListener.onRpcAvailable(Collections.singleton(RPC_ID));
         probeReg.expectMsgClass(RpcRegistry.Messages.AddOrUpdateRoutes.class);
+    }
+
+    @Test
+    public void testActionRouteAdd() {
+        // Test announcements
+        final TestKit probeReg = new TestKit(SYSTEM);
+        final ActorRef actionRegistry = probeReg.getRef();
+
+        final OpsListener opsListener = new OpsListener(actionRegistry, actionRegistry);
+        opsListener.onActionsChanged(Collections.EMPTY_SET,Collections.singleton(ACTION_INSTANCE));
+        probeReg.expectMsgClass(ActionRegistry.Messages.UpdateActions.class);
     }
 
     @Test
@@ -60,8 +76,18 @@ public class RpcListenerTest {
         final TestKit probeReg = new TestKit(SYSTEM);
         final ActorRef rpcRegistry = probeReg.getRef();
 
-        final RpcListener rpcListener = new RpcListener(rpcRegistry);
-        rpcListener.onRpcUnavailable(Collections.singleton(RPC_ID));
+        final OpsListener opsListener = new OpsListener(rpcRegistry, rpcRegistry);
+        opsListener.onRpcUnavailable(Collections.singleton(RPC_ID));
         probeReg.expectMsgClass(RpcRegistry.Messages.RemoveRoutes.class);
     }
+
+//    @Test
+//    public void testAcceptsImplementation(){
+//
+//        final TestKit probeReg = new TestKit(SYSTEM);
+//        final ActorRef opsRegistry = probeReg.getRef();
+//
+//        final OpsListener opsListener = new OpsListener(opsRegistry, opsRegistry);
+//        opsListener.acceptsImplementation()
+//    }
 }
