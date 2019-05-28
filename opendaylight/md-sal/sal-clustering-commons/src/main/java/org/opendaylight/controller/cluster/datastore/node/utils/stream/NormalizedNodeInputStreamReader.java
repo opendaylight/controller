@@ -57,8 +57,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
-    private static final String REVISION_ARG = "?revision=";
-
     private final DataInput input;
 
     private final Map<Integer, String> codedStringMap = new HashMap<>();
@@ -70,8 +68,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     @SuppressWarnings("rawtypes")
     private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
-
-    private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
     private boolean readSignatureMarker = true;
 
@@ -238,18 +234,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         // Read in the same sequence of writing
         String localName = readCodedString();
         String namespace = readCodedString();
-        String revision = readCodedString();
+        String revision = Strings.emptyToNull(readCodedString());
 
-        String qname;
-        if (!Strings.isNullOrEmpty(revision)) {
-            qname = reusableStringBuilder.append('(').append(namespace).append(REVISION_ARG).append(revision)
-                    .append(')').append(localName).toString();
-        } else {
-            qname = reusableStringBuilder.append('(').append(namespace).append(')').append(localName).toString();
-        }
-
-        reusableStringBuilder.delete(0, reusableStringBuilder.length());
-        return QNameFactory.create(qname);
+        return QNameFactory.create(new QNameFactory.Key(localName, namespace, revision));
     }
 
 

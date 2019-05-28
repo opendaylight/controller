@@ -5,32 +5,45 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory.Key;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 
 public class QNameFactoryTest {
 
     @Test
-    public void testBasic() {
+    @Deprecated
+    public void testBasicString() {
         QName expected = TestModel.AUG_NAME_QNAME;
         QName created = QNameFactory.create(expected.toString());
-
-        assertFalse(expected == created);
-
+        assertNotSame(expected, created);
         assertEquals(expected, created);
 
         QName cached = QNameFactory.create(expected.toString());
+        assertSame(created, cached);
+    }
 
-        assertEquals(expected, cached);
+    @Test
+    public void testBasic() {
+        QName expected = TestModel.AUG_NAME_QNAME;
+        QName created = QNameFactory.create(createKey(expected));
+        assertNotSame(expected, created);
+        assertEquals(expected, created);
 
-        assertTrue(cached == created);
+        QName cached = QNameFactory.create(createKey(expected));
+        assertSame(created, cached);
+    }
+
+    private static Key createKey(final QName qname) {
+        return new Key(qname.getLocalName(), qname.getNamespace().toString(),
+            qname.getRevision().map(Revision::toString).orElse(null));
     }
 }
