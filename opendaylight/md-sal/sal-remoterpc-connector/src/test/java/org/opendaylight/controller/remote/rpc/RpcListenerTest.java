@@ -49,7 +49,7 @@ public class RpcListenerTest {
         final TestKit probeReg = new TestKit(SYSTEM);
         final ActorRef rpcRegistry = probeReg.getRef();
 
-        final RpcListener rpcListener = new RpcListener(rpcRegistry);
+        final RpcListener rpcListener = new RpcListener(rpcRegistry, rpcRegistry);
         rpcListener.onRpcAvailable(Collections.singleton(RPC_ID));
         probeReg.expectMsgClass(RpcRegistry.Messages.AddOrUpdateRoutes.class);
     }
@@ -60,7 +60,7 @@ public class RpcListenerTest {
         final TestKit probeReg = new TestKit(SYSTEM);
         final ActorRef rpcRegistry = probeReg.getRef();
 
-        final RpcListener rpcListener = new RpcListener(rpcRegistry);
+        final RpcListener rpcListener = new RpcListener(rpcRegistry, rpcRegistry);
         rpcListener.onRpcUnavailable(Collections.singleton(RPC_ID));
         probeReg.expectMsgClass(RpcRegistry.Messages.RemoveRoutes.class);
     }

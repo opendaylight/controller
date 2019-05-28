@@ -38,7 +38,9 @@ public class RemoteRpcProviderConfigTest {
         Assert.assertNotNull(config.getRpcManagerName());
         Assert.assertNotNull(config.getRpcManagerPath());
         Assert.assertNotNull(config.getRpcRegistryName());
+        Assert.assertNotNull(config.getActionRegistryName());
         Assert.assertNotNull(config.getRpcRegistryPath());
+        Assert.assertNotNull(config.getActionRegistryPath());
         Assert.assertNotNull(config.getAskDuration());
         Assert.assertNotNull(config.getGossipTickInterval());
     }

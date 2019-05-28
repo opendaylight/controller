@@ -19,6 +19,8 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
+import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import scala.concurrent.Await;
@@ -46,10 +48,10 @@ public class RemoteRpcProviderTest {
     @Test
     public void testRemoteRpcProvider() throws Exception {
         try (RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
-            mock(DOMRpcService.class), new RemoteRpcProviderConfig(system.settings().config()))) {
+                mock(DOMRpcService.class), new RemoteRpcProviderConfig(system.settings().config()), mock(DOMActionProviderService.class), mock(DOMActionService.class))) {
 
             rpcProvider.start();
-
+            System.out.println(moduleConfig.getRpcManagerName());
             final ActorRef actorRef = Await.result(
                     system.actorSelection(moduleConfig.getRpcManagerPath()).resolveOne(
                             FiniteDuration.create(1, TimeUnit.SECONDS)), FiniteDuration.create(2, TimeUnit.SECONDS));

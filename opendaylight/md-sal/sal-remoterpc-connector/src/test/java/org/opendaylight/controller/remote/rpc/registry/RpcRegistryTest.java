@@ -299,7 +299,7 @@ public class RpcRegistryTest {
     }
 
     private static void assertEndpoints(final UpdateRemoteEndpoints msg, final Address address, final TestKit invoker) {
-        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getEndpoints();
+        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getRpcEndpoints();
         assertEquals(1, endpoints.size());
 
         final Optional<RemoteRpcEndpoint> maybeEndpoint = endpoints.get(address);

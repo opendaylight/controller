@@ -12,6 +12,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Preconditions;
+import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
+import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.slf4j.Logger;
@@ -29,15 +31,19 @@ public class RemoteRpcProvider implements AutoCloseable {
     private final RemoteRpcProviderConfig config;
     private final ActorSystem actorSystem;
     private final DOMRpcService rpcService;
+    private final DOMActionProviderService actionProvisionRegistry;
+    private final DOMActionService actionService;
 
     private ActorRef rpcManager;
 
     public RemoteRpcProvider(final ActorSystem actorSystem, final DOMRpcProviderService rpcProvisionRegistry,
-            final DOMRpcService rpcService, final RemoteRpcProviderConfig config) {
+                             final DOMRpcService rpcService, final RemoteRpcProviderConfig config, final DOMActionProviderService actionProviderService, DOMActionService actionService) {
         this.actorSystem = Preconditions.checkNotNull(actorSystem);
         this.rpcProvisionRegistry = Preconditions.checkNotNull(rpcProvisionRegistry);
         this.rpcService = Preconditions.checkNotNull(rpcService);
         this.config = Preconditions.checkNotNull(config);
+        this.actionProvisionRegistry = Preconditions.checkNotNull(actionProviderService);
+        this.actionService = Preconditions.checkNotNull(actionService);
     }
 
     @Override
@@ -51,7 +57,7 @@ public class RemoteRpcProvider implements AutoCloseable {
 
     public void start() {
         LOG.info("Starting Remote RPC service...");
-        rpcManager = actorSystem.actorOf(RpcManager.props(rpcProvisionRegistry, rpcService, config),
+        rpcManager = actorSystem.actorOf(RpcManager.props(rpcProvisionRegistry, rpcService, config, actionProvisionRegistry, actionService),
                 config.getRpcManagerName());
         LOG.debug("RPC Manager started at {}", rpcManager);
     }

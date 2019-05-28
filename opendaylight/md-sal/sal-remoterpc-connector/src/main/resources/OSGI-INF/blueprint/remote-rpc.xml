@@ -14,6 +14,8 @@
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider" />
   <reference id="domRpcService" interface="org.opendaylight.mdsal.dom.api.DOMRpcService"/>
   <reference id="domRpcRegistry" interface="org.opendaylight.mdsal.dom.api.DOMRpcProviderService"/>
+  <reference id="domActionService" interface="org.opendaylight.mdsal.dom.api.DOMActionService"/>
+  <reference id="domActionRegistry" interface="org.opendaylight.mdsal.dom.api.DOMActionProviderService"/>
 
   <bean id="actorSystem" factory-ref="actorSystemProvider" factory-method="getActorSystem"/>
 
@@ -32,6 +34,8 @@
     <argument ref="domRpcService"/>
     <argument ref="actorSystem"/>
     <argument ref="remoteRpcProviderConfig"/>
+    <argument ref="domActionRegistry"/>
+    <argument ref="domActionService"/>
   </bean>
 
 </blueprint>

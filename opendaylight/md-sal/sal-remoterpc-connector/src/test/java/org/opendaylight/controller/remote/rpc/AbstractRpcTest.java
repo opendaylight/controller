@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
@@ -77,7 +78,11 @@ public class AbstractRpcTest {
     @Mock
     protected DOMRpcService domRpcService1;
     @Mock
+    protected DOMActionService domActionService1;
+    @Mock
     protected DOMRpcService domRpcService2;
+    @Mock
+    protected DOMActionService domActionService2;
 
     @BeforeClass
     public static void setup() {
@@ -102,16 +107,16 @@ public class AbstractRpcTest {
         MockitoAnnotations.initMocks(this);
 
         rpcRegistry1Probe = new TestKit(node1);
-        rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1));
+        rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1, domActionService1));
         rpcRegistry2Probe = new TestKit(node2);
-        rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2));
+        rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2, domActionService2));
         remoteRpcImpl1 = new RemoteRpcImplementation(rpcInvoker2, config1);
         remoteRpcImpl2 = new RemoteRpcImplementation(rpcInvoker1, config2);
     }
 
     static void assertRpcErrorEquals(final RpcError rpcError, final ErrorSeverity severity,
-            final ErrorType errorType, final String tag, final String message, final String applicationTag,
-            final String info, final String causeMsg) {
+                                     final ErrorType errorType, final String tag, final String message, final String applicationTag,
+                                     final String info, final String causeMsg) {
         assertEquals("getSeverity", severity, rpcError.getSeverity());
         assertEquals("getErrorType", errorType, rpcError.getErrorType());
         assertEquals("getTag", tag, rpcError.getTag());
@@ -132,7 +137,7 @@ public class AbstractRpcTest {
 
     public static ContainerNode makeRPCInput(final String data) {
         return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(TEST_RPC_INPUT))
-            .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data)).build();
+                .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data)).build();
 
     }
 
@@ -142,8 +147,8 @@ public class AbstractRpcTest {
     }
 
     static void assertFailedRpcResult(final DOMRpcResult rpcResult, final ErrorSeverity severity,
-            final ErrorType errorType, final String tag, final String message, final String applicationTag,
-            final String info, final String causeMsg) {
+                                      final ErrorType errorType, final String tag, final String message, final String applicationTag,
+                                      final String info, final String causeMsg) {
         assertNotNull("RpcResult was null", rpcResult);
         final Collection<? extends RpcError> rpcErrors = rpcResult.getErrors();
         assertEquals("RpcErrors count", 1, rpcErrors.size());
@@ -152,7 +157,7 @@ public class AbstractRpcTest {
     }
 
     static void assertSuccessfulRpcResult(final DOMRpcResult rpcResult,
-            final NormalizedNode<? , ?> expOutput) {
+                                          final NormalizedNode<? , ?> expOutput) {
         assertNotNull("RpcResult was null", rpcResult);
         assertCompositeNodeEquals(expOutput, rpcResult.getResult());
     }
