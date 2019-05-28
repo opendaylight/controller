@@ -233,7 +233,7 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         }
     }
 
-    private Set<QName> readQNameSet() throws IOException {
+    final Set<QName> readQNameSet() throws IOException {
         // Read the children count
         int count = input.readInt();
         Set<QName> children = new HashSet<>(count);
@@ -243,13 +243,12 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         return children;
     }
 
-    private AugmentationIdentifier readAugmentationIdentifier() throws IOException {
+    AugmentationIdentifier readAugmentationIdentifier() throws IOException {
         // FIXME: we should have a cache for these, too
         return new AugmentationIdentifier(readQNameSet());
     }
 
-    private NodeIdentifier readNodeIdentifier() throws IOException {
-        // FIXME: we should have a cache for these, too
+    NodeIdentifier readNodeIdentifier() throws IOException {
         return new NodeIdentifier(readQName());
     }
 

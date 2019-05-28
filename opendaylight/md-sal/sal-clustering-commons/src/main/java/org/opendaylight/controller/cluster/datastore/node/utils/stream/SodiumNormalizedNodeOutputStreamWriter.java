@@ -11,8 +11,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -29,8 +29,8 @@ import org.opendaylight.yangtools.yang.common.QName;
  * while reading.
  */
 class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
+    private final Map<AugmentationIdentifier, Integer> aidCodeMap = new HashMap<>();
     private final Map<QName, Integer> qnameCodeMap = new HashMap<>();
-    private final Map<Set<QName>, Integer> qnameSetCodeMap = new HashMap<>();
 
     SodiumNormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
@@ -57,16 +57,16 @@ class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutput
     }
 
     @Override
-    void writeQNameSet(final Set<QName> qnames) throws IOException {
-        final Integer value = qnameSetCodeMap.get(qnames);
+    void writeAugmentationIdentifier(final AugmentationIdentifier aid) throws IOException {
+        final Integer value = aidCodeMap.get(aid);
         if (value == null) {
             // Fresh QName, remember it and emit as three strings
-            qnameSetCodeMap.put(qnames, qnameSetCodeMap.size());
-            writeByte(TokenTypes.IS_QNAMESET_VALUE);
-            super.writeQNameSet(qnames);
+            aidCodeMap.put(aid, aidCodeMap.size());
+            writeByte(TokenTypes.IS_AUGMENT_VALUE);
+            super.writeAugmentationIdentifier(aid);
         } else {
             // We have already seen this QName set: write its code
-            writeByte(TokenTypes.IS_QNAMESET_CODE);
+            writeByte(TokenTypes.IS_AUGMENT_CODE);
             writeInt(value);
         }
     }
