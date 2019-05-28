@@ -18,9 +18,19 @@ final class TokenTypes {
      * Original stream version. Uses a per-stream dictionary for strings. QNames are serialized as three strings.
      */
     static final short LITHIUM_VERSION = 1;
+    /**
+     * Revised stream version. Unlike {@link #LITHIUM_VERSION}, QNames are using a per-stream dictionary, too.
+     */
+    static final short SODIUM_VERSION = 2;
 
     // Tokens supported in LITHIUM_VERSION
     static final byte IS_CODE_VALUE = 1;
     static final byte IS_STRING_VALUE = 2;
     static final byte IS_NULL_VALUE = 3;
+
+    // Tokens supported in SODIUM_VERSION
+    static final byte IS_QNAME_CODE = 4;
+    static final byte IS_QNAME_VALUE = 5;
+    static final byte IS_QNAMESET_CODE = 6;
+    static final byte IS_QNAMESET_VALUE = 7;
 }
