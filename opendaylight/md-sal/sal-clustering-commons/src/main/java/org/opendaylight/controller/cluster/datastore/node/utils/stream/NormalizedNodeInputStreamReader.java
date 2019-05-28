@@ -61,6 +61,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private final DataInput input;
 
     private final List<String> codedStringMap = new ArrayList<>();
+    private final List<QName> codedQNames = new ArrayList<>();
 
     private QName lastLeafSetQName;
 
@@ -69,34 +70,13 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     @SuppressWarnings("rawtypes")
     private NormalizedNodeBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
-    private boolean readSignatureMarker = true;
-
-    NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
+    NormalizedNodeInputStreamReader(final DataInput input) {
         this.input = requireNonNull(input);
-        readSignatureMarker = !versionChecked;
     }
 
     @Override
     public NormalizedNode<?, ?> readNormalizedNode() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return readNormalizedNodeInternal();
-    }
-
-    private void readSignatureMarkerAndVersionIfNeeded() throws IOException {
-        if (readSignatureMarker) {
-            readSignatureMarker = false;
-
-            final byte marker = input.readByte();
-            if (marker != TokenTypes.SIGNATURE_MARKER) {
-                throw new InvalidNormalizedNodeStreamException(String.format(
-                        "Invalid signature marker: %d", marker));
-            }
-
-            final short version = input.readShort();
-            if (version != TokenTypes.LITHIUM_VERSION) {
-                throw new InvalidNormalizedNodeStreamException(String.format("Unhandled stream version %s", version));
-            }
-        }
     }
 
     private NormalizedNode<?, ?> readNormalizedNodeInternal() throws IOException {
@@ -218,14 +198,27 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     }
 
     private QName readQName() throws IOException {
-        // Read in the same sequence of writing
-        String localName = readCodedString();
-        String namespace = readCodedString();
-        String revision = Strings.emptyToNull(readCodedString());
-
-        return QNameFactory.create(new QNameFactory.Key(localName, namespace, revision));
+        final byte valueType = input.readByte();
+        switch (valueType) {
+            case TokenTypes.IS_QNAME_CODE:
+                final int code = input.readInt();
+                try {
+                    return codedQNames.get(code);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IOException("QName code " + code + " was not found", e);
+                }
+            case TokenTypes.IS_QNAME_VALUE:
+                // Read in the same sequence of writing
+                String localName = readCodedString();
+                String namespace = readCodedString();
+                String revision = Strings.emptyToNull(readCodedString());
+                final QName qname = QNameFactory.create(new QNameFactory.Key(localName, namespace, revision));
+                codedQNames.add(qname);
+                return qname;
+            default:
+                throw new IOException("Unhandled QName value type " + valueType);
+        }
     }
-
 
     private String readCodedString() throws IOException {
         final byte valueType = input.readByte();
@@ -356,8 +349,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     @Override
     public SchemaPath readSchemaPath() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
-
         final boolean absolute = input.readBoolean();
         final int size = input.readInt();
 
@@ -370,7 +361,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     @Override
     public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return readYangInstanceIdentifierInternal();
     }
 
@@ -445,91 +435,76 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     @Override
     public void readFully(final byte[] value) throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         input.readFully(value);
     }
 
     @Override
     public void readFully(final byte[] str, final int off, final int len) throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         input.readFully(str, off, len);
     }
 
     @Override
     public int skipBytes(final int num) throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.skipBytes(num);
     }
 
     @Override
     public boolean readBoolean() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readBoolean();
     }
 
     @Override
     public byte readByte() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readByte();
     }
 
     @Override
     public int readUnsignedByte() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readUnsignedByte();
     }
 
     @Override
     public short readShort() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readShort();
     }
 
     @Override
     public int readUnsignedShort() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readUnsignedShort();
     }
 
     @Override
     public char readChar() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readChar();
     }
 
     @Override
     public int readInt() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readInt();
     }
 
     @Override
     public long readLong() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readLong();
     }
 
     @Override
     public float readFloat() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readFloat();
     }
 
     @Override
     public double readDouble() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readDouble();
     }
 
     @Override
     public String readLine() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readLine();
     }
 
     @Override
     public String readUTF() throws IOException {
-        readSignatureMarkerAndVersionIfNeeded();
         return input.readUTF();
     }
 }

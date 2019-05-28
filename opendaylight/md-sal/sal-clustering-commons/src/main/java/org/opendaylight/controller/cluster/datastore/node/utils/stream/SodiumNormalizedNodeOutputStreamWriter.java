@@ -8,6 +8,10 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import java.io.DataOutput;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import org.opendaylight.yangtools.yang.common.QName;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -23,8 +27,30 @@ import java.io.DataOutput;
  * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-class NormalizedNodeOutputStreamWriter extends SodiumNormalizedNodeOutputStreamWriter {
-    NormalizedNodeOutputStreamWriter(final DataOutput output) {
+class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
+    private final Map<QName, Integer> qnameCodeMap = new HashMap<>();
+
+    SodiumNormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
+    }
+
+    @Override
+    protected short streamVersion() {
+        return TokenTypes.SODIUM_VERSION;
+    }
+
+    @Override
+    protected final void writeQName(final QName qname) throws IOException {
+        final Integer value = qnameCodeMap.get(qname);
+        if (value == null) {
+            // Fresh QName, remember it and emit as three strings
+            qnameCodeMap.put(qname, qnameCodeMap.size());
+            writeByte(TokenTypes.IS_QNAME_VALUE);
+            super.writeQName(qname);
+        } else {
+            // We have already seen this QName: write its code
+            writeByte(TokenTypes.IS_QNAME_CODE);
+            writeInt(value);
+        }
     }
 }

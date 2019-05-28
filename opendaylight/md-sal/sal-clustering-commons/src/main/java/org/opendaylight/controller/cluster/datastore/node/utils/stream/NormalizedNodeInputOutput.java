@@ -36,7 +36,10 @@ public final class NormalizedNodeInputOutput {
         final short version = input.readShort();
         switch (version) {
             case TokenTypes.LITHIUM_VERSION:
-                return new NormalizedNodeInputStreamReader(input, true);
+                return new NormalizedNodeInputStreamReader(input);
+            case TokenTypes.SODIUM_VERSION:
+                // FIXME: this wrong
+                return new NormalizedNodeInputStreamReader(input);
             default:
                 throw new InvalidNormalizedNodeStreamException(String.format("Unhandled stream version %s", version));
         }
@@ -50,7 +53,7 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataInput} instance
      */
     public static NormalizedNodeDataInput newDataInputWithoutValidation(final @NonNull DataInput input) {
-        return new NormalizedNodeInputStreamReader(input, false);
+        return new VersionedNormalizedNodeDataInput(input);
     }
 
     /**
