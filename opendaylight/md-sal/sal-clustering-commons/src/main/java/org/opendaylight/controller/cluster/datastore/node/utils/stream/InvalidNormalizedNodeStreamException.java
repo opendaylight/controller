@@ -18,7 +18,11 @@ import java.io.IOException;
 public class InvalidNormalizedNodeStreamException extends IOException {
     private static final long serialVersionUID = 1L;
 
-    public InvalidNormalizedNodeStreamException(String message) {
+    public InvalidNormalizedNodeStreamException(final String message) {
         super(message);
+    }
+
+    public InvalidNormalizedNodeStreamException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }
