@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import com.google.common.cache.CacheBuilder;
@@ -14,21 +13,22 @@ import com.google.common.cache.LoadingCache;
 import org.opendaylight.yangtools.yang.common.QName;
 
 public final class QNameFactory {
-
-    private static final int MAX_QNAME_CACHE_SIZE = 10000;
-
-    private QNameFactory() {
-    }
+    private static final int MAX_QNAME_CACHE_SIZE = Integer.getInteger(
+        "org.opendaylight.controller.cluster.datastore.node.utils.qname-cache.max-size", 10000);
 
     private static final LoadingCache<String, QName> CACHE = CacheBuilder.newBuilder().maximumSize(MAX_QNAME_CACHE_SIZE)
-            .softValues().build(new CacheLoader<String, QName>() {
+            .weakValues().build(new CacheLoader<String, QName>() {
                 @Override
-                public QName load(String key) {
+                public QName load(final String key) {
                     return QName.create(key);
                 }
             });
 
-    public static QName create(String name) {
+    private QNameFactory() {
+
+    }
+
+    public static QName create(final String name) {
         return CACHE.getUnchecked(name);
     }
 }
