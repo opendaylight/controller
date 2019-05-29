@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -35,19 +36,19 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public MutableCompositeModification(short version) {
+    public MutableCompositeModification(final short version) {
         super(version);
     }
 
     @Override
-    public void apply(DOMStoreWriteTransaction transaction) {
+    public void apply(final DOMStoreWriteTransaction transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
     }
 
     @Override
-    public void apply(DataTreeModification transaction) {
+    public void apply(final DataTreeModification transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
@@ -63,12 +64,11 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
      *
      * @param modification the modification to add.
      */
-    public void addModification(Modification modification) {
-        Preconditions.checkNotNull(modification);
-        modifications.add(modification);
+    public void addModification(final Modification modification) {
+        modifications.add(requireNonNull(modification));
     }
 
-    public void addModifications(Iterable<Modification> newMods) {
+    public void addModifications(final Iterable<Modification> newMods) {
         for (Modification mod : newMods) {
             addModification(mod);
         }
@@ -84,7 +84,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
 
         int size = in.readInt();
@@ -118,17 +118,17 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
 
         out.writeInt(modifications.size());
 
         if (modifications.size() > 1) {
-            SerializationUtils.REUSABLE_WRITER_TL.set(NormalizedNodeInputOutput.newDataOutput(out));
+            SerializationUtils.REUSABLE_WRITER_TL.set(NormalizedNodeInputOutput.newDataOutput(out, getStreamVersion()));
         }
 
         try {
-            for (Modification mod: modifications) {
+            for (Modification mod : modifications) {
                 out.writeByte(mod.getType());
                 mod.writeExternal(out);
             }
@@ -137,8 +137,8 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         }
     }
 
-    public static MutableCompositeModification fromSerializable(Object serializable) {
-        Preconditions.checkArgument(serializable instanceof MutableCompositeModification);
+    public static MutableCompositeModification fromSerializable(final Object serializable) {
+        checkArgument(serializable instanceof MutableCompositeModification);
         return (MutableCompositeModification)serializable;
     }
 }
