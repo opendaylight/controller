@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -20,6 +21,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 
 /**
  * Externalizable proxy for use with {@link ExistsTransactionRequest}. It implements the initial (Boron) serialization
@@ -31,6 +33,7 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
     private static final long serialVersionUID = 1L;
     private List<TransactionModification> modifications;
     private Optional<PersistenceProtocol> protocol;
+    private transient NormalizedNodeStreamVersion streamVersion;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
     // be able to create instances via reflection.
@@ -41,8 +44,9 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
 
     ModifyTransactionRequestProxyV1(final ModifyTransactionRequest request) {
         super(request);
-        this.modifications = Preconditions.checkNotNull(request.getModifications());
+        this.modifications = requireNonNull(request.getModifications());
         this.protocol = request.getPersistenceProtocol();
+        this.streamVersion = request.getVersion().getStreamVersion();
     }
 
     @Override
@@ -70,7 +74,7 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         out.writeByte(PersistenceProtocol.byteValue(protocol.orElse(null)));
         out.writeInt(modifications.size());
         if (!modifications.isEmpty()) {
-            try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out)) {
+            try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out, streamVersion)) {
                 for (TransactionModification op : modifications) {
                     op.writeTo(nnout);
                 }

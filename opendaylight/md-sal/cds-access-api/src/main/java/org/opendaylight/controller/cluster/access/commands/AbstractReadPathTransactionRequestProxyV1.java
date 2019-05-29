@@ -14,6 +14,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -27,7 +28,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 abstract class AbstractReadPathTransactionRequestProxyV1<T extends AbstractReadPathTransactionRequest<T>>
         extends AbstractReadTransactionRequestProxyV1<T> {
     private static final long serialVersionUID = 1L;
+
     private YangInstanceIdentifier path;
+    private transient NormalizedNodeStreamVersion streamVersion;
 
     protected AbstractReadPathTransactionRequestProxyV1() {
         // For Externalizable
@@ -36,12 +39,13 @@ abstract class AbstractReadPathTransactionRequestProxyV1<T extends AbstractReadP
     AbstractReadPathTransactionRequestProxyV1(final T request) {
         super(request);
         path = request.getPath();
+        streamVersion = request.getVersion().getStreamVersion();
     }
 
     @Override
     public final void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out)) {
+        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out, streamVersion)) {
             nnout.writeYangInstanceIdentifier(path);
         }
     }

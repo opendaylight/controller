@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest<ModifyTransactionSuccess> {
-    private static final ModifyTransactionSuccess OBJECT = new ModifyTransactionSuccess(
-            TRANSACTION_IDENTIFIER, 0);
+    private static final ModifyTransactionSuccess OBJECT = new ModifyTransactionSuccess(TRANSACTION_IDENTIFIER, 0);
 
     @Override
     protected ModifyTransactionSuccess object() {
@@ -23,13 +24,13 @@ public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest
     @Test
     public void cloneAsVersionTest() {
         final ModifyTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT.getVersion(), clone.getVersion());
-        Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());
-        Assert.assertEquals(OBJECT.getTarget(), clone.getTarget());
+        assertEquals(ABIVersion.BORON, clone.getVersion());
+        assertEquals(OBJECT.getSequence(), clone.getSequence());
+        assertEquals(OBJECT.getTarget(), clone.getTarget());
     }
 
     @Override
     protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof ModifyTransactionSuccess);
+        assertTrue(deserialize instanceof ModifyTransactionSuccess);
     }
 }
