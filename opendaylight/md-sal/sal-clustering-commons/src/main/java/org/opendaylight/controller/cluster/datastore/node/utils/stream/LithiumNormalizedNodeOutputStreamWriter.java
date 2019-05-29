@@ -42,7 +42,7 @@ class LithiumNormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeData
     }
 
     @Override
-    protected void writeQName(final QName qname) throws IOException {
+    public void writeQName(final QName qname) throws IOException {
         writeString(qname.getLocalName());
         writeModule(qname.getModule());
     }
