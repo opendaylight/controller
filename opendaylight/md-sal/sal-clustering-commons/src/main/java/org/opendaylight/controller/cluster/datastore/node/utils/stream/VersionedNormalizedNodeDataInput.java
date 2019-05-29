@@ -35,7 +35,10 @@ final class VersionedNormalizedNodeDataInput extends ForwardingNormalizedNodeDat
         final NormalizedNodeDataInput ret;
         switch (version) {
             case TokenTypes.LITHIUM_VERSION:
-                ret = new NormalizedNodeInputStreamReader(input);
+                ret = new LithiumNormalizedNodeInputStreamReader(input);
+                break;
+            case TokenTypes.SODIUM_VERSION:
+                ret = new SodiumNormalizedNodeInputStreamReader(input);
                 break;
             default:
                 throw defunct("Unhandled stream version %s", version);
