@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -64,7 +66,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             final int metaSize = in.readInt();
-            Preconditions.checkArgument(metaSize >= 0, "Invalid negative metadata map length %s", metaSize);
+            checkArgument(metaSize >= 0, "Invalid negative metadata map length %s", metaSize);
 
             // Default pre-allocate is 4, which should be fine
             final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>>
@@ -103,7 +105,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     public MetadataShardDataTreeSnapshot(final NormalizedNode<?, ?> rootNode,
             final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata) {
-        this.rootNode = Preconditions.checkNotNull(rootNode);
+        this.rootNode = requireNonNull(rootNode);
         this.metadata = ImmutableMap.copyOf(metadata);
     }
 
@@ -118,7 +120,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     @Override
     PayloadVersion version() {
-        return PayloadVersion.BORON;
+        return PayloadVersion.SODIUM;
     }
 
     private Object writeReplace() {

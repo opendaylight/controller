@@ -129,7 +129,6 @@ public final class DataTreeCandidateInputOutput {
         return DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode);
     }
 
-
     private static void writeChildren(final NormalizedNodeDataOutput out,
             final Collection<DataTreeCandidateNode> children) throws IOException {
         out.writeInt(children.size());
@@ -174,7 +173,8 @@ public final class DataTreeCandidateInputOutput {
 
     public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
             throws IOException {
-        try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
+        try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out,
+                PayloadVersion.current().getStreamVersion())) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();
