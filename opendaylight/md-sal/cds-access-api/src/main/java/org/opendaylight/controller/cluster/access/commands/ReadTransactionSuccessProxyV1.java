@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -24,7 +25,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProxy<ReadTransactionSuccess> {
     private static final long serialVersionUID = 1L;
+
     private Optional<NormalizedNode<?, ?>> data;
+    private transient NormalizedNodeStreamVersion streamVersion;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
     // be able to create instances via reflection.
@@ -36,6 +39,7 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
     ReadTransactionSuccessProxyV1(final ReadTransactionSuccess request) {
         super(request);
         this.data = request.getData();
+        this.streamVersion = request.getVersion().getStreamVersion();
     }
 
     @Override
@@ -44,7 +48,7 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
 
         if (data.isPresent()) {
             out.writeBoolean(true);
-            try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out)) {
+            try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out, streamVersion)) {
                 nnout.writeNormalizedNode(data.get());
             }
         } else {

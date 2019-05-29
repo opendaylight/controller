@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHistorySuccess> {
-
-    private static final LocalHistorySuccess OBJECT = new LocalHistorySuccess(
-            HISTORY_IDENTIFIER, 0);
+    private static final LocalHistorySuccess OBJECT = new LocalHistorySuccess(HISTORY_IDENTIFIER, 0);
 
     @Override
     protected LocalHistorySuccess object() {
@@ -24,13 +24,13 @@ public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHis
     @Test
     public void cloneAsVersionTest() {
         final LocalHistorySuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());
-        Assert.assertEquals(OBJECT.getTarget(), clone.getTarget());
-        Assert.assertEquals(OBJECT.getVersion(), clone.getVersion());
+        assertEquals(ABIVersion.BORON, clone.getVersion());
+        assertEquals(OBJECT.getSequence(), clone.getSequence());
+        assertEquals(OBJECT.getTarget(), clone.getTarget());
     }
 
     @Override
     protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof LocalHistorySuccess);
+        assertTrue(deserialize instanceof LocalHistorySuccess);
     }
 }
