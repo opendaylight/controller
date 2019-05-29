@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -27,6 +28,11 @@ abstract class ForwardingNormalizedNodeDataInput extends ForwardingDataInput imp
     @Override
     public final YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
         return delegate().readYangInstanceIdentifier();
+    }
+
+    @Override
+    public final QName readQName() throws IOException {
+        return delegate().readQName();
     }
 
     @Override
