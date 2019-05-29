@@ -55,9 +55,9 @@ import org.xml.sax.SAXException;
  * nodes. This process goes in recursive manner, where each NodeTypes object signifies the start of the object, except
  * END_NODE. If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  */
-public class NormalizedNodeInputStreamReader extends ForwardingDataInput implements NormalizedNodeDataInput {
+class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput implements NormalizedNodeDataInput {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LithiumNormalizedNodeInputStreamReader.class);
 
     private final @NonNull DataInput input;
 
@@ -70,13 +70,18 @@ public class NormalizedNodeInputStreamReader extends ForwardingDataInput impleme
     @SuppressWarnings("rawtypes")
     private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
-    NormalizedNodeInputStreamReader(final DataInput input) {
+    LithiumNormalizedNodeInputStreamReader(final DataInput input) {
         this.input = requireNonNull(input);
     }
 
     @Override
     final DataInput delegate() {
         return input;
+    }
+
+    @Override
+    public NormalizedNodeStreamVersion getVersion() throws IOException {
+        return NormalizedNodeStreamVersion.LITHIUM;
     }
 
     @Override
@@ -203,7 +208,7 @@ public class NormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         }
     }
 
-    private QName readQName() throws IOException {
+    QName readQName() throws IOException {
         // Read in the same sequence of writing
         String localName = readCodedString();
         String namespace = readCodedString();
@@ -244,8 +249,7 @@ public class NormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         return children;
     }
 
-    private AugmentationIdentifier readAugmentationIdentifier() throws IOException {
-        // FIXME: we should have a cache for these, too
+    AugmentationIdentifier readAugmentationIdentifier() throws IOException {
         return new AugmentationIdentifier(readQNameSet());
     }
 

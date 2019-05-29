@@ -289,7 +289,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         LOG.trace("Starting a new augmentation node");
 
         output.writeByte(NodeTypes.AUGMENTATION_NODE);
-        writeQNameSet(identifier.getPossibleChildNames());
+        writeAugmentationIdentifier(identifier);
     }
 
     @Override
@@ -411,10 +411,8 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
             case PathArgumentTypes.AUGMENTATION_IDENTIFIER :
 
-                AugmentationIdentifier augmentationIdentifier = (AugmentationIdentifier) pathArgument;
-
                 // No Qname in augmentation identifier
-                writeQNameSet(augmentationIdentifier.getPossibleChildNames());
+                writeAugmentationIdentifier((AugmentationIdentifier) pathArgument);
                 break;
             default :
                 throw new IllegalStateException("Unknown node identifier type is found : "
@@ -435,11 +433,12 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    private void writeQNameSet(final Set<QName> children) throws IOException {
+    void writeAugmentationIdentifier(final AugmentationIdentifier aid) throws IOException {
+        final Set<QName> qnames = aid.getPossibleChildNames();
         // Write each child's qname separately, if list is empty send count as 0
-        if (children != null && !children.isEmpty()) {
-            output.writeInt(children.size());
-            for (QName qname : children) {
+        if (!qnames.isEmpty()) {
+            output.writeInt(qnames.size());
+            for (QName qname : qnames) {
                 writeQName(qname);
             }
         } else {

@@ -35,4 +35,12 @@ public interface NormalizedNodeDataInput extends DataInput {
     PathArgument readPathArgument() throws IOException;
 
     SchemaPath readSchemaPath() throws IOException;
+
+    /**
+     * Return the version of the underlying input stream.
+     *
+     * @return Stream version
+     * @throws IOException if the version cannot be ascertained
+     */
+    NormalizedNodeStreamVersion getVersion() throws IOException;
 }
