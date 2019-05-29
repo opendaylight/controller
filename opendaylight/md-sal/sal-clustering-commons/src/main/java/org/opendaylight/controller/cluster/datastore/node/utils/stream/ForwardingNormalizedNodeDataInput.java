@@ -38,4 +38,9 @@ abstract class ForwardingNormalizedNodeDataInput extends ForwardingDataInput imp
     public final SchemaPath readSchemaPath() throws IOException {
         return delegate().readSchemaPath();
     }
+
+    @Override
+    public final NormalizedNodeStreamVersion getVersion() throws IOException {
+        return delegate().getVersion();
+    }
 }
