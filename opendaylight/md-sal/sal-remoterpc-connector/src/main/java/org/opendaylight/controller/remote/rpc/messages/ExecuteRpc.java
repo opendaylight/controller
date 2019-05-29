@@ -18,7 +18,9 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -78,16 +80,17 @@ public final class ExecuteRpc implements Serializable {
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            // FIXME: QName is a WritableObject
-            out.writeObject(executeRpc.getRpc());
-            SerializationUtils.writeNormalizedNode(out, executeRpc.getInputNormalizedNode());
+            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+                stream.writeQName(executeRpc.getRpc());
+                stream.writeOptionalNormalizedNode(executeRpc.getInputNormalizedNode());
+            }
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            // FIXME: QName is a WritableObject
-            QName qname = (QName) in.readObject();
-            executeRpc = new ExecuteRpc(SerializationUtils.readNormalizedNode(in).orElse(null), qname);
+            final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
+            final QName qname = stream.readQName();
+            executeRpc = new ExecuteRpc(stream.readOptionalNormalizedNode().orElse(null), qname);
         }
 
         private Object readResolve() {
