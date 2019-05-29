@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eef052ef_65724825",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ActionInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "we\u0027re using static import of Objects.requireNonNull for these simple things...",
+      "range": {
+        "startLine": 25,
+        "startChar": 29,
+        "endLine": 25,
+        "endChar": 55
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef6fd0f3_e9415449",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/ActionInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "... like\nrequireNonNull(actionService, \"DOMActionService cannot be null\")\n\nnote that requireNonNull returns the same object",
+      "range": {
+        "startLine": 30,
+        "startChar": 49,
+        "endLine": 30,
+        "endChar": 62
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f2ac0fc_e6611f56",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "please configure your IDE -- we do not use .* imports anywhere",
+      "range": {
+        "startLine": 25,
+        "startChar": 36,
+        "endLine": 25,
+        "endChar": 40
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c844f75_5ad6c4e4",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "} else if (\n\non one line, to not waste vertical space",
+      "range": {
+        "startLine": 53,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 15
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "06253479_b3dd225d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "I wonder how much of this code could be shared between RPC and Action... both deal with input/output containers and are identified by SchemaPath, so most messages/machinery should be sharable.",
+      "range": {
+        "startLine": 110,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 37
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "059687b7_ac3bb31d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "This does not look right: the path should be part of the message as it is the invocation context",
+      "range": {
+        "startLine": 117,
+        "startChar": 55,
+        "endLine": 118,
+        "endChar": 80
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6776abb2_885add67",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcInvoker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-05-29T11:20:58Z",
+      "side": 1,
+      "message": "Java: actionPath :)",
+      "range": {
+        "startLine": 119,
+        "startChar": 120,
+        "endLine": 119,
+        "endChar": 131
+      },
+      "revId": "f1137f9ad5e5ed789b2ac62fee1d7ffa9c389dee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
