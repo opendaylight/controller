@@ -207,7 +207,8 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         }
     }
 
-    QName readQName() throws IOException {
+    @Override
+    public QName readQName() throws IOException {
         // Read in the same sequence of writing
         String localName = readCodedString();
         String namespace = readCodedString();
