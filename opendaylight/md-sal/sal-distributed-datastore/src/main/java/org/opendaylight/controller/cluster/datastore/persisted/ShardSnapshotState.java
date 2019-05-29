@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class ShardSnapshotState implements Snapshot.State {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            snapshotState = new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
+            snapshotState = ShardDataTreeSnapshot.deserialize(in);
         }
 
         private Object readResolve() {
@@ -59,14 +60,25 @@ public class ShardSnapshotState implements Snapshot.State {
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
             + "aren't serialized. FindBugs does not recognize this.")
     private final ShardDataTreeSnapshot snapshot;
+    private final boolean migrated;
+
+    ShardSnapshotState(@Nonnull final ShardDataTreeSnapshot snapshot, final boolean migrated) {
+        this.snapshot = requireNonNull(snapshot);
+        this.migrated = migrated;
+    }
 
     public ShardSnapshotState(@Nonnull final ShardDataTreeSnapshot snapshot) {
-        this.snapshot = Preconditions.checkNotNull(snapshot);
+        this(snapshot, false);
     }
 
     @Nonnull
     public ShardDataTreeSnapshot getSnapshot() {
         return snapshot;
+    }
+
+    @Override
+    public boolean needsMigration() {
+        return migrated;
     }
 
     private Object writeReplace() {
