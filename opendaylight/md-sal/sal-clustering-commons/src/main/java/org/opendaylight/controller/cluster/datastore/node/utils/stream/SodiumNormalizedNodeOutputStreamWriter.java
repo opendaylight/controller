@@ -42,7 +42,7 @@ class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutput
     }
 
     @Override
-    protected final void writeQName(final QName qname) throws IOException {
+    public final void writeQName(final QName qname) throws IOException {
         final Integer value = qnameCodeMap.get(qname);
         if (value == null) {
             // Fresh QName, remember it and emit as three strings
