@@ -154,6 +154,19 @@ public final class SerializationUtils {
         }
     }
 
+    public static void writeNormalizedNode(final DataOutput out, final NormalizedNodeStreamVersion version,
+            final @Nullable NormalizedNode<?, ?> node) throws IOException {
+        if (node != null) {
+            out.writeBoolean(true);
+
+            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
+                stream.writeNormalizedNode(node);
+            }
+        } else {
+            out.writeBoolean(false);
+        }
+    }
+
     @Deprecated
     public static void serializePath(final YangInstanceIdentifier path, final DataOutput out) {
         Preconditions.checkNotNull(path);
@@ -172,6 +185,13 @@ public final class SerializationUtils {
     public static void writePath(final DataOutput out, final @NonNull YangInstanceIdentifier path)
             throws IOException {
         try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+            stream.writeYangInstanceIdentifier(path);
+        }
+    }
+
+    public static void writePath(final DataOutput out, final NormalizedNodeStreamVersion version,
+            final @NonNull YangInstanceIdentifier path) throws IOException {
+        try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
             stream.writeYangInstanceIdentifier(path);
         }
     }
