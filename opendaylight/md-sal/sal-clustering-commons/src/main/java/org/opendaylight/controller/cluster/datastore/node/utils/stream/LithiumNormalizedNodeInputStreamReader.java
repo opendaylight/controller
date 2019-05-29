@@ -80,6 +80,11 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
     }
 
     @Override
+    public NormalizedNodeStreamVersion getVersion() throws IOException {
+        return NormalizedNodeStreamVersion.LITHIUM;
+    }
+
+    @Override
     public NormalizedNode<?, ?> readNormalizedNode() throws IOException {
         return readNormalizedNodeInternal();
     }

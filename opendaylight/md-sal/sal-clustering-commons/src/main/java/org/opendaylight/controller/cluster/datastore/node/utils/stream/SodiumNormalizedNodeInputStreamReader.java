@@ -27,6 +27,11 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
     }
 
     @Override
+    public NormalizedNodeStreamVersion getVersion() throws IOException {
+        return NormalizedNodeStreamVersion.SODIUM;
+    }
+
+    @Override
     QName readQName() throws IOException {
         final byte valueType = readByte();
         switch (valueType) {

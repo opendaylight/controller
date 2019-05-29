@@ -43,7 +43,8 @@ public final class NormalizedNodeInputOutput {
     }
 
     /**
-     * Creates a new {@link NormalizedNodeDataOutput} instance that writes to the given output.
+     * Creates a new {@link NormalizedNodeDataOutput} instance that writes to the given output and latest current
+     * stream version.
      *
      * @param output the DataOutput to write to
      * @return a new {@link NormalizedNodeDataOutput} instance
@@ -51,4 +52,24 @@ public final class NormalizedNodeInputOutput {
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output) {
         return new NormalizedNodeOutputStreamWriter(output);
     }
+
+    /**
+     * Creates a new {@link NormalizedNodeDataOutput} instance that writes to the given output.
+     *
+     * @param output the DataOutput to write to
+     * @param version Streaming version to use
+     * @return a new {@link NormalizedNodeDataOutput} instance
+     */
+    public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output,
+            final @NonNull NormalizedNodeStreamVersion version) {
+        switch (version) {
+            case LITHIUM:
+                return new LithiumNormalizedNodeOutputStreamWriter(output);
+            case SODIUM:
+                return new SodiumNormalizedNodeOutputStreamWriter(output);
+            default:
+                throw new IllegalStateException("Unhandled version " + version);
+        }
+    }
+
 }
