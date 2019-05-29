@@ -70,6 +70,13 @@ public final class SerializationUtils {
         }
     }
 
+    public static void writePath(final DataOutput out, final NormalizedNodeStreamVersion version,
+            final @NonNull YangInstanceIdentifier path) throws IOException {
+        try (final NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
+            stream.writeYangInstanceIdentifier(path);
+        }
+    }
+
     public static void writeNodeAndPath(final DataOutput out, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> node) throws IOException {
         try (final NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
