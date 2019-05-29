@@ -49,7 +49,7 @@ public class ShardDataTreeSnapshotTest {
 
         ShardDataTreeSnapshot deserialized;
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            deserialized = ShardDataTreeSnapshot.deserialize(in);
+            deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
@@ -75,7 +75,7 @@ public class ShardDataTreeSnapshotTest {
 
         ShardDataTreeSnapshot deserialized;
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            deserialized = ShardDataTreeSnapshot.deserialize(in);
+            deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
@@ -91,7 +91,7 @@ public class ShardDataTreeSnapshotTest {
 
         private final String data;
 
-        TestShardDataTreeSnapshotMetadata(String data) {
+        TestShardDataTreeSnapshotMetadata(final String data) {
             this.data = data;
         }
 
@@ -111,7 +111,7 @@ public class ShardDataTreeSnapshotTest {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj instanceof TestShardDataTreeSnapshotMetadata
                     && data.equals(((TestShardDataTreeSnapshotMetadata)obj).data);
         }
@@ -123,17 +123,17 @@ public class ShardDataTreeSnapshotTest {
             public Proxy() {
             }
 
-            Proxy(String data) {
+            Proxy(final String data) {
                 this.data = data;
             }
 
             @Override
-            public void writeExternal(ObjectOutput out) throws IOException {
+            public void writeExternal(final ObjectOutput out) throws IOException {
                 out.writeObject(data);
             }
 
             @Override
-            public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
                 data = (String) in.readObject();
             }
 

@@ -52,7 +52,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
             final ShardDataTreeSnapshot deserialized;
             try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
                 installSnapshotStream.toByteArray()))) {
-                deserialized = ShardDataTreeSnapshot.deserialize(in);
+                deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
             }
 
             assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
