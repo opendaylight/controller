@@ -12,6 +12,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -23,6 +24,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  */
 @Beta
 public interface NormalizedNodeDataOutput extends AutoCloseable, DataOutput {
+    void writeQName(@NonNull QName qname) throws IOException;
+
     void writeNormalizedNode(@NonNull NormalizedNode<?, ?> normalizedNode) throws IOException;
 
     void writePathArgument(PathArgument pathArgument) throws IOException;
