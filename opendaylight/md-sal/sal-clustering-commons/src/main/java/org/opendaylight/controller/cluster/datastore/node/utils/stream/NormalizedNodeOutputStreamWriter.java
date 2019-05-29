@@ -23,8 +23,7 @@ import java.io.DataOutput;
  * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-// FIXME: CONTROLLER-1888: switch this to Sodium once we have a corresponding datastore version
-class NormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
+class NormalizedNodeOutputStreamWriter extends SodiumNormalizedNodeOutputStreamWriter {
     NormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
     }
