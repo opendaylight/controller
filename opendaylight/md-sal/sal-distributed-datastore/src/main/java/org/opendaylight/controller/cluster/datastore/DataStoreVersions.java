@@ -8,16 +8,21 @@
 package org.opendaylight.controller.cluster.datastore;
 
 /**
- * Defines version numbers.
+ * Defines version numbers where ask-based protocol is concerned.
  *
  * @author Thomas Pantelis
  */
-public interface DataStoreVersions {
-    short BASE_HELIUM_VERSION = 0;
-    short HELIUM_1_VERSION = 1;
-    short HELIUM_2_VERSION = 2;
-    short LITHIUM_VERSION = 3;
-    short BORON_VERSION = 5;
-    short FLUORINE_VERSION = 9;
-    short CURRENT_VERSION = FLUORINE_VERSION;
+public final class DataStoreVersions {
+    public static final short BASE_HELIUM_VERSION = 0;
+    public static final short HELIUM_1_VERSION = 1;
+    public static final short HELIUM_2_VERSION = 2;
+    public static final short LITHIUM_VERSION = 3;
+    public static final short BORON_VERSION = 5;
+    public static final short FLUORINE_VERSION = 9;
+    public static final short SODIUM_VERSION = 10;
+    public static final short CURRENT_VERSION = SODIUM_VERSION;
+
+    private DataStoreVersions() {
+
+    }
 }
