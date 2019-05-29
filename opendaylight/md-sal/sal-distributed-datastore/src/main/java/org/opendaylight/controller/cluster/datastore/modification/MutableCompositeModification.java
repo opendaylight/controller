@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -65,8 +66,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
      * @param modification the modification to add.
      */
     public void addModification(final Modification modification) {
-        Preconditions.checkNotNull(modification);
-        modifications.add(modification);
+        modifications.add(requireNonNull(modification));
     }
 
     public void addModifications(final Iterable<Modification> newMods) {
@@ -119,7 +119,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         final int size = modifications.size();
         out.writeInt(size);
         if (size > 0) {
-            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, getStreamVersion())) {
                 for (Modification mod : modifications) {
                     out.writeByte(mod.getType());
                     mod.writeTo(stream);
@@ -129,7 +129,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     public static MutableCompositeModification fromSerializable(final Object serializable) {
-        Preconditions.checkArgument(serializable instanceof MutableCompositeModification);
+        checkArgument(serializable instanceof MutableCompositeModification);
         return (MutableCompositeModification)serializable;
     }
 

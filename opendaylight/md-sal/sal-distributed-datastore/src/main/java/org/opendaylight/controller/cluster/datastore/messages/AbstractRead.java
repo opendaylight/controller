@@ -49,7 +49,7 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        SerializationUtils.writePath(out, path);
+        SerializationUtils.writePath(out, getStreamVersion(), path);
     }
 
     public AbstractRead<T> asVersion(final short version) {
