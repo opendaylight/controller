@@ -35,7 +35,7 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
     }
 
     @Override
-    QName readQName() throws IOException {
+    public QName readQName() throws IOException {
         final byte valueType = readByte();
         switch (valueType) {
             case TokenTypes.IS_QNAME_CODE:
