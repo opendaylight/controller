@@ -14,6 +14,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
@@ -129,7 +130,6 @@ public final class DataTreeCandidateInputOutput {
         return DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode);
     }
 
-
     private static void writeChildren(final NormalizedNodeDataOutput out,
             final Collection<DataTreeCandidateNode> children) throws IOException {
         out.writeInt(children.size());
@@ -175,11 +175,16 @@ public final class DataTreeCandidateInputOutput {
     public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
             throws IOException {
 <<<<<<< HEAD
+<<<<<<< HEAD
         try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
 =======
         try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out,
                 PayloadVersion.current().getStreamVersion())) {
 >>>>>>> ecfd4cd188... Bump persisted PayloadVersion
+=======
+        try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out,
+                DataStoreVersions.CURRENT_STREAM_VERSION)) {
+>>>>>>> 540f4003b9... WIP: Bump datastore version
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();
