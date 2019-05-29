@@ -31,6 +31,15 @@ public class Snapshot implements Serializable {
      * @author Thomas Pantelis
      */
     public interface State extends Serializable {
+        /**
+         * Indicate whether the snapshot requires migration, i.e. a new snapshot should be created after recovery.
+         * Default implementation returns false, i.e. do not re-snapshot.
+         *
+         * @return True if complete recovery based upon this snapshot should trigger a new snapshot.
+         */
+        default boolean needsMigration() {
+            return false;
+        }
     }
 
     private static final class Proxy implements Externalizable {
