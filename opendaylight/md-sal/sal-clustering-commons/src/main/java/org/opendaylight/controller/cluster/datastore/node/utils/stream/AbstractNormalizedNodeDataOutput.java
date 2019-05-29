@@ -60,8 +60,6 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     protected abstract short streamVersion();
 
-    protected abstract void writeQName(QName qname) throws IOException;
-
     protected abstract void writeString(String string) throws IOException;
 
     @Override
