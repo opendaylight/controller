@@ -99,7 +99,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     @Override
     public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
         try (ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
-            return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
+            return ShardDataTreeSnapshot.deserialize(in);
         }
     }
 }
