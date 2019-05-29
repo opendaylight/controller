@@ -15,6 +15,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +33,45 @@ public enum ABIVersion implements WritableObject {
      * Version which is older than any other version. This version exists purely for testing purposes.
      */
     @VisibleForTesting
-    TEST_PAST_VERSION(0),
+    TEST_PAST_VERSION(0) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            throw new UnsupportedOperationException();
+        }
+    },
 
     /**
      * Initial ABI version, as shipped with Boron Simultaneous release.
      */
     // We seed the initial version to be the same as DataStoreVersions.BORON-VERSION for compatibility reasons.
-    BORON(5),
+    BORON(5) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.LITHIUM;
+        }
+    },
+
+    /**
+     * Revised ABI version. The messages remain the same as {@link #BORON}, but messages bearing QNames in any shape
+     * are using {@link NormalizedNodeStreamVersion#SODIUM}, which improves encoding.
+     */
+    SODIUM(6) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.SODIUM;
+        }
+    },
 
     /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
      */
     @VisibleForTesting
-    TEST_FUTURE_VERSION(65535);
+    TEST_FUTURE_VERSION(65535) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            throw new UnsupportedOperationException();
+        }
+    };
 
     private static final Logger LOG = LoggerFactory.getLogger(ABIVersion.class);
 
@@ -71,7 +98,7 @@ public enum ABIVersion implements WritableObject {
      * @return Current {@link ABIVersion}
      */
     public static @NonNull ABIVersion current() {
-        return BORON;
+        return SODIUM;
     }
 
     /**
@@ -93,8 +120,10 @@ public enum ABIVersion implements WritableObject {
                 throw new PastVersionException(value, BORON);
             case 5:
                 return BORON;
+            case 6:
+                return SODIUM;
             default:
-                throw new FutureVersionException(value, BORON);
+                throw new FutureVersionException(value, SODIUM);
         }
     }
 
@@ -102,6 +131,13 @@ public enum ABIVersion implements WritableObject {
     public void writeTo(final DataOutput out) throws IOException {
         out.writeShort(value);
     }
+
+    /**
+     * Return the NormalizedNode stream version corresponding to this particular ABI.
+     *
+     * @return Stream Version to use for this ABI version
+     */
+    public abstract @NonNull NormalizedNodeStreamVersion getStreamVersion();
 
     /**
      * Read an {@link ABIVersion} from a {@link DataInput}. This method is provided for callers which do not have
