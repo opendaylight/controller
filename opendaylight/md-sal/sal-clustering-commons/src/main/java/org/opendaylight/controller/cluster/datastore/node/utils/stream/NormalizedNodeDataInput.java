@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -32,6 +35,8 @@ public interface NormalizedNodeDataInput extends DataInput {
 
     YangInstanceIdentifier readYangInstanceIdentifier() throws IOException;
 
+    @NonNull QName readQName() throws IOException;
+
     PathArgument readPathArgument() throws IOException;
 
     SchemaPath readSchemaPath() throws IOException;
@@ -43,4 +48,8 @@ public interface NormalizedNodeDataInput extends DataInput {
      * @throws IOException if the version cannot be ascertained
      */
     NormalizedNodeStreamVersion getVersion() throws IOException;
+
+    default Optional<NormalizedNode<?, ?>> readOptionalNormalizedNode() throws IOException {
+        return readBoolean() ? Optional.of(readNormalizedNode()) : Optional.empty();
+    }
 }
