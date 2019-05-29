@@ -40,7 +40,7 @@ public class ReadDataReply extends VersionedExternalizableMessage {
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        SerializationUtils.writeNormalizedNode(out, normalizedNode);
+        SerializationUtils.writeNormalizedNode(out, getStreamVersion(), normalizedNode);
     }
 
     public static ReadDataReply fromSerializable(final Object serializable) {
