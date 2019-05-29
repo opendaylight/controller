@@ -248,7 +248,7 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         return new AugmentationIdentifier(readQNameSet());
     }
 
-    private NodeIdentifier readNodeIdentifier() throws IOException {
+    NodeIdentifier readNodeIdentifier() throws IOException {
         return new NodeIdentifier(readQName());
     }
 
