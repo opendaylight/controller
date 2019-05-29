@@ -47,7 +47,7 @@ public class ShardSnapshotState implements Snapshot.State {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            snapshotState = new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
+            snapshotState = ShardDataTreeSnapshot.deserialize(in);
         }
 
         private Object readResolve() {
@@ -58,15 +58,26 @@ public class ShardSnapshotState implements Snapshot.State {
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
             + "aren't serialized. FindBugs does not recognize this.")
-    private final ShardDataTreeSnapshot snapshot;
+    private final @NonNull ShardDataTreeSnapshot snapshot;
+    private final boolean migrated;
+
+    ShardSnapshotState(@Nonnull final ShardDataTreeSnapshot snapshot, final boolean migrated) {
+        this.snapshot = requireNonNull(snapshot);
+        this.migrated = migrated;
+    }
 
     public ShardSnapshotState(@Nonnull final ShardDataTreeSnapshot snapshot) {
-        this.snapshot = Preconditions.checkNotNull(snapshot);
+        this(snapshot, false);
     }
 
     @Nonnull
     public ShardDataTreeSnapshot getSnapshot() {
         return snapshot;
+    }
+
+    @Override
+    public boolean needsMigration() {
+        return migrated;
     }
 
     private Object writeReplace() {

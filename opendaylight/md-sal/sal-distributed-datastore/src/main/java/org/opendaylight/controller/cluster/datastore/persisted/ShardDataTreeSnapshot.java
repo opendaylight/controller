@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -25,15 +26,14 @@ public abstract class ShardDataTreeSnapshot {
         // Hidden to prevent subclassing from outside of this package
     }
 
-    public static ShardDataTreeSnapshot deserialize(final ObjectInput in) throws IOException {
-        final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.versionedDeserialize(in);
+    public static @NonNull ShardSnapshotState deserialize(final ObjectInput in) throws IOException {
+        final ShardSnapshotState ret = AbstractVersionedShardDataTreeSnapshot.versionedDeserialize(in);
 
         // Make sure we consume all bytes, otherwise something went very wrong
         final int bytesLeft = in.available();
         if (bytesLeft != 0) {
             throw new IOException("Deserialization left " + bytesLeft + " in the buffer");
         }
-
 
         return ret;
     }
