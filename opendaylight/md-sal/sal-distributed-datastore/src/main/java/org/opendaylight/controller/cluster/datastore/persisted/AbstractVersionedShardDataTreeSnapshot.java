@@ -31,7 +31,8 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
         final PayloadVersion version = PayloadVersion.readFrom(in);
         switch (version) {
             case BORON:
-                // Boron snapshots use Java Serialization
+            case SODIUM:
+                // Boron and Sodium snapshots use Java Serialization, but differ in serialization format
                 try {
                     return (ShardDataTreeSnapshot) in.readObject();
                 } catch (ClassNotFoundException e) {
@@ -72,7 +73,8 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     private void versionedSerialize(final ObjectOutput out, final PayloadVersion version) throws IOException {
         switch (version) {
             case BORON:
-                // Boron snapshots use Java Serialization
+            case SODIUM:
+                // Boron and Sodium snapshots use Java Serialization, but differ in serialization format
                 out.writeObject(this);
                 return;
             case TEST_FUTURE_VERSION:
