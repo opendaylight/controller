@@ -11,7 +11,9 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 
 /**
  * Abstract base class for a versioned Externalizable message.
@@ -26,7 +28,7 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     public VersionedExternalizableMessage() {
     }
 
-    public VersionedExternalizableMessage(short version) {
+    public VersionedExternalizableMessage(final short version) {
         this.version = version <= DataStoreVersions.CURRENT_VERSION ? version : DataStoreVersions.CURRENT_VERSION;
     }
 
@@ -34,13 +36,18 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
         return version;
     }
 
+    protected final @NonNull NormalizedNodeStreamVersion getStreamVersion() {
+        return version < DataStoreVersions.SODIUM_VERSION
+                ? NormalizedNodeStreamVersion.LITHIUM : NormalizedNodeStreamVersion.SODIUM;
+    }
+
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         version = in.readShort();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeShort(version);
     }
 
