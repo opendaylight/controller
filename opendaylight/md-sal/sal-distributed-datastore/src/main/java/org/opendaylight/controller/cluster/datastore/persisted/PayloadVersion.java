@@ -15,6 +15,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
@@ -35,25 +36,51 @@ import org.opendaylight.yangtools.concepts.WritableObject;
  */
 @Beta
 public enum PayloadVersion implements WritableObject {
-    // NOTE: enumeration values need to be sorted in asceding order of their version to keep Comparable working
+    // NOTE: enumeration values need to be sorted in ascending order of their version to keep Comparable working
 
     /**
      * Version which is older than any other version. This version exists purely for testing purposes.
      */
     @VisibleForTesting
-    TEST_PAST_VERSION(0),
+    TEST_PAST_VERSION(0) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            throw new UnsupportedOperationException();
+        }
+    },
 
     /**
      * Initial ABI version, as shipped with Boron Simultaneous release.
      */
-    // We seed the initial version to be the same as DataStoreVersions.BORON-VERSION for compatibility reasons.
-    BORON(5),
+    // We seed the initial version to be the same as DataStoreVersions.BORON_VERSION for compatibility reasons.
+    BORON(5) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.LITHIUM;
+        }
+    },
+
+    /**
+     * Revised payload version. Payloads remain the same as {@link #BORON}, but messages bearing QNames in any shape
+     * are using {@link NormalizedNodeStreamVersion#SODIUM}, which improves encoding.
+     */
+    SODIUM(6) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.SODIUM;
+        }
+    },
 
     /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
      */
     @VisibleForTesting
-    TEST_FUTURE_VERSION(65535);
+    TEST_FUTURE_VERSION(65535) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            throw new UnsupportedOperationException();
+        }
+    };
 
     private final short value;
 
@@ -72,13 +99,20 @@ public enum PayloadVersion implements WritableObject {
     }
 
     /**
+     * Return the NormalizedNode stream version corresponding to this particular ABI.
+     *
+     * @return Stream Version to use for this ABI version
+     */
+    public abstract @NonNull NormalizedNodeStreamVersion getStreamVersion();
+
+    /**
      * Return the codebase-native persistence version. This version is the default version allocated to messages
      * at runtime. Conversion to previous versions may incur additional overhead (such as object allocation).
      *
      * @return Current {@link PayloadVersion}
      */
     public static @NonNull PayloadVersion current() {
-        return BORON;
+        return SODIUM;
     }
 
     /**
@@ -101,8 +135,10 @@ public enum PayloadVersion implements WritableObject {
                 throw new PastVersionException(version, BORON);
             case 5:
                 return BORON;
+            case 6:
+                return SODIUM;
             default:
-                throw new FutureVersionException(version, BORON);
+                throw new FutureVersionException(version, SODIUM);
         }
     }
 
@@ -127,5 +163,4 @@ public enum PayloadVersion implements WritableObject {
             throw new IOException("Unsupported version", e);
         }
     }
-
 }
