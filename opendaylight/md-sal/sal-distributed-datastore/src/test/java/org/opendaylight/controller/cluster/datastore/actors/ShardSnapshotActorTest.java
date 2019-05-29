@@ -18,6 +18,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Stopwatch;
+import net.jpountz.lz4.LZ4FrameInputStream;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
@@ -50,8 +54,10 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
         if (installSnapshotStream != null) {
             final ShardDataTreeSnapshot deserialized;
-            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
-                installSnapshotStream.toByteArray()))) {
+//            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
+//                installSnapshotStream.toByteArray()))) {
+            try (ObjectInputStream in = new ObjectInputStream(new LZ4FrameInputStream(
+                    new ByteArrayInputStream(installSnapshotStream.toByteArray())))) {
                 deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
             }
 

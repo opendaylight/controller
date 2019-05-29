@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+
+import net.jpountz.lz4.LZ4FrameInputStream;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -99,7 +101,8 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     @Override
     public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
-        try (ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
+//        try (ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
+        try (ObjectInputStream in = new ObjectInputStream(new LZ4FrameInputStream(snapshotBytes.openStream()))) {
             return ShardDataTreeSnapshot.deserialize(in);
         }
     }

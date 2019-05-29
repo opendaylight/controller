@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+
+import net.jpountz.lz4.LZ4FrameOutputStream;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
@@ -72,7 +74,9 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     private void onSerializeSnapshot(final SerializeSnapshot request) {
         Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
         if (installSnapshotStream.isPresent()) {
-            try (ObjectOutputStream out = new ObjectOutputStream(installSnapshotStream.get())) {
+//            try (ObjectOutputStream out = new ObjectOutputStream(installSnapshotStream.get())) {
+            try (ObjectOutputStream out =
+                         new ObjectOutputStream(new LZ4FrameOutputStream(installSnapshotStream.get()))) {
                 request.getSnapshot().serialize(out);
             } catch (IOException e) {
                 // TODO - we should communicate the failure in the CaptureSnapshotReply.
