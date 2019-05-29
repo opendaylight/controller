@@ -174,7 +174,12 @@ public final class DataTreeCandidateInputOutput {
 
     public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
             throws IOException {
+<<<<<<< HEAD
         try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
+=======
+        try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out,
+                PayloadVersion.current().getStreamVersion())) {
+>>>>>>> ecfd4cd188... Bump persisted PayloadVersion
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();
