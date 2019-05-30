@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import java.io.DataInput;
@@ -56,8 +59,27 @@ import org.xml.sax.SAXException;
  * END_NODE. If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  */
 class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput implements NormalizedNodeDataInput {
-
     private static final Logger LOG = LoggerFactory.getLogger(LithiumNormalizedNodeInputStreamReader.class);
+
+    private static final int BIGDEC_MAX_CACHE_SIZE = Integer.getInteger(
+        "org.opendaylight.controller.cluster.datastore.node.utils.bigdecimal-cache.max-size", 8000);
+    private static final int BIGINT_MAX_CACHE_SIZE = Integer.getInteger(
+        "org.opendaylight.controller.cluster.datastore.node.utils.bigint-cache.max-size", 8000);
+
+    private static final LoadingCache<String, BigDecimal> BIG_DECIMALS = CacheBuilder.newBuilder()
+            .maximumSize(BIGDEC_MAX_CACHE_SIZE).weakValues().build(new CacheLoader<String, BigDecimal>() {
+                @Override
+                public BigDecimal load(final String key) {
+                    return new BigDecimal(key);
+                }
+            });
+    private static final LoadingCache<String, BigInteger> BIG_INTEGERS = CacheBuilder.newBuilder()
+            .maximumSize(BIGINT_MAX_CACHE_SIZE).weakValues().build(new CacheLoader<String, BigInteger>() {
+                @Override
+                public BigInteger load(final String key) {
+                    return new BigInteger(key);
+                }
+            });
 
     private final @NonNull DataInput input;
 
@@ -310,10 +332,10 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
                 return readStringBytes();
 
             case ValueTypes.BIG_DECIMAL_TYPE:
-                return new BigDecimal(input.readUTF());
+                return BIG_DECIMALS.getUnchecked(input.readUTF());
 
             case ValueTypes.BIG_INTEGER_TYPE:
-                return new BigInteger(input.readUTF());
+                return BIG_INTEGERS.getUnchecked(input.readUTF());
 
             case ValueTypes.BINARY_TYPE:
                 byte[] bytes = new byte[input.readInt()];
