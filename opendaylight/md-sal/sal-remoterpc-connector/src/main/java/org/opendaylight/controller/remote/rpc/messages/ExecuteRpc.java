@@ -85,8 +85,9 @@ public final class ExecuteRpc implements Serializable {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+            // FIXME: QName is a WritableObject
             QName qname = (QName) in.readObject();
-            executeRpc = new ExecuteRpc(SerializationUtils.deserializeNormalizedNode(in), qname);
+            executeRpc = new ExecuteRpc(SerializationUtils.readNormalizedNode(in).orElse(null), qname);
         }
 
         private Object readResolve() {

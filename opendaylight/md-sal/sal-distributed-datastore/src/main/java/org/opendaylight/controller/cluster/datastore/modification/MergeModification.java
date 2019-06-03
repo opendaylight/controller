@@ -57,7 +57,11 @@ public class MergeModification extends WriteModification {
     @Deprecated
     public static MergeModification fromStream(final ObjectInput in, final short version) {
         MergeModification mod = new MergeModification(version);
-        mod.readExternal(in);
+        try {
+            mod.readExternal(in);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error deserializing MergeModification", e);
+        }
         return mod;
     }
 

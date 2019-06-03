@@ -57,8 +57,8 @@ public class DeleteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(final ObjectInput in) {
-        setPath(SerializationUtils.deserializePath(in));
+    public void readExternal(final ObjectInput in) throws IOException {
+        setPath(SerializationUtils.readPath(in));
     }
 
     @Override
@@ -74,7 +74,11 @@ public class DeleteModification extends AbstractModification {
     @Deprecated
     public static DeleteModification fromStream(final ObjectInput in, final short version) {
         DeleteModification mod = new DeleteModification(version);
-        mod.readExternal(in);
+        try {
+            mod.readExternal(in);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error deserializing DeleteModification", e);
+        }
         return mod;
     }
 
