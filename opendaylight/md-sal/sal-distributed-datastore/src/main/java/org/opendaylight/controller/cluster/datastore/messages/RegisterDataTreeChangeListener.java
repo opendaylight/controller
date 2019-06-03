@@ -62,7 +62,7 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         dataTreeChangeListenerPath = (ActorRef) in.readObject();
-        path = SerializationUtils.deserializePath(in);
+        path = SerializationUtils.readPath(in);
         registerOnAllInstances = in.readBoolean();
     }
 

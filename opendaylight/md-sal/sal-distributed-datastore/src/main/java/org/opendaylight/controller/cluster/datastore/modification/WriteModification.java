@@ -15,7 +15,6 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils.Applier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -67,8 +66,11 @@ public class WriteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(final ObjectInput in) {
-        SerializationUtils.deserializePathAndNode(in, this, APPLIER);
+    public void readExternal(final ObjectInput in) throws IOException {
+        SerializationUtils.readNodeAndPath(in, this, (instance, path, node) -> {
+            instance.setPath(path);
+            instance.data = node;
+        });
     }
 
     @Override
@@ -89,9 +91,4 @@ public class WriteModification extends AbstractModification {
         out.writeNormalizedNode(data);
         out.writeYangInstanceIdentifier(getPath());
     }
-
-    private static final Applier<WriteModification> APPLIER = (instance, path, node) -> {
-        instance.setPath(path);
-        instance.data = node;
-    };
 }
