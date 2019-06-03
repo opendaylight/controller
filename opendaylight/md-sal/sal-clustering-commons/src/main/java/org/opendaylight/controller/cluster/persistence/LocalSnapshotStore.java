@@ -17,6 +17,7 @@ import akka.persistence.serialization.SnapshotSerializer;
 import akka.persistence.snapshot.japi.SnapshotStore;
 import akka.serialization.JavaSerializer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
 import java.io.BufferedInputStream;
@@ -341,9 +342,12 @@ public class LocalSnapshotStore extends SnapshotStore {
 
     @VisibleForTesting
     static int compare(final SnapshotMetadata m1, final SnapshotMetadata m2) {
-        return (int) (!m1.persistenceId().equals(m2.persistenceId())
-                ? m1.persistenceId().compareTo(m2.persistenceId()) :
-            m1.sequenceNr() != m2.sequenceNr() ? m1.sequenceNr() - m2.sequenceNr() :
-                m1.timestamp() != m2.timestamp() ? m1.timestamp() - m2.timestamp() : 0);
+        Preconditions.checkArgument(m1.persistenceId().equals(m2.persistenceId()),
+                "Persistence id does not match. id1: %s, id2: %s", m1.persistenceId(), m2.persistenceId());
+        if (m1.timestamp() == m2.timestamp()) {
+            return (int) (m1.sequenceNr() - m2.sequenceNr());
+        }
+
+        return (int) (m1.timestamp() - m2.timestamp());
     }
 }
