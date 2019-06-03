@@ -72,8 +72,8 @@ public class WriteModification extends AbstractModification {
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) {
-        SerializationUtils.serializePathAndNode(getPath(), data, out);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        SerializationUtils.writeNodeAndPath(out, getPath(), data);
     }
 
     @Deprecated

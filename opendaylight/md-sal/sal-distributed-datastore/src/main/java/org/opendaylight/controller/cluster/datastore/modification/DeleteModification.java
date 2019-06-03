@@ -62,8 +62,8 @@ public class DeleteModification extends AbstractModification {
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) {
-        SerializationUtils.serializePath(getPath(), out);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        SerializationUtils.writePath(out, getPath());
     }
 
     @Override
