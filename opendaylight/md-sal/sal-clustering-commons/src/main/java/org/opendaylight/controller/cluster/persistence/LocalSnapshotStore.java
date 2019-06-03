@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.persistence;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import akka.actor.ExtendedActorSystem;
 import akka.dispatch.Futures;
 import akka.persistence.SelectedSnapshot;
@@ -342,9 +344,9 @@ public class LocalSnapshotStore extends SnapshotStore {
 
     @VisibleForTesting
     static int compare(final SnapshotMetadata m1, final SnapshotMetadata m2) {
-        return (int) (!m1.persistenceId().equals(m2.persistenceId())
-                ? m1.persistenceId().compareTo(m2.persistenceId()) :
-            m1.sequenceNr() != m2.sequenceNr() ? m1.sequenceNr() - m2.sequenceNr() :
-                m1.timestamp() != m2.timestamp() ? m1.timestamp() - m2.timestamp() : 0);
+        checkArgument(m1.persistenceId().equals(m2.persistenceId()),
+                "Persistence id does not match. id1: %s, id2: %s", m1.persistenceId(), m2.persistenceId());
+        final int cmp = Long.compare(m1.timestamp(), m2.timestamp());
+        return cmp != 0 ? cmp : Long.compare(m1.sequenceNr(), m2.sequenceNr());
     }
 }

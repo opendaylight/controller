@@ -469,7 +469,7 @@ public class SnapshotManager implements SnapshotState {
                 context.getReplicatedLog().snapshotCommit();
             }
 
-            context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(sequenceNumber,
+            context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                     timeStamp - 1, 0L, 0L));
 
             context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
