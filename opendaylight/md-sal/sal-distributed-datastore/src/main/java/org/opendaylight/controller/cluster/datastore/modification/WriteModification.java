@@ -72,8 +72,8 @@ public class WriteModification extends AbstractModification {
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) {
-        SerializationUtils.serializePathAndNode(getPath(), data, out);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        SerializationUtils.writeNodeAndPath(out, getPath(), data);
     }
 
     public static WriteModification fromStream(final NormalizedNodeDataInput in, final short version)
@@ -83,6 +83,7 @@ public class WriteModification extends AbstractModification {
         return new WriteModification(version, path, node);
     }
 
+    @Override
     public void writeTo(final NormalizedNodeDataOutput out) throws IOException {
         // FIXME: this should be inverted, as the path helps receivers in establishment of context
         out.writeNormalizedNode(data);
