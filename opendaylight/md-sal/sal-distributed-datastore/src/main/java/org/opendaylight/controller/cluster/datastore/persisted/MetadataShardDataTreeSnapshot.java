@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -80,7 +79,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
             }
 
             metadata = metaBuilder.build();
-            rootNode = Verify.verifyNotNull(SerializationUtils.deserializeNormalizedNode(in));
+            rootNode = SerializationUtils.readNormalizedNode(in).get();
         }
 
         private Object readResolve() {
