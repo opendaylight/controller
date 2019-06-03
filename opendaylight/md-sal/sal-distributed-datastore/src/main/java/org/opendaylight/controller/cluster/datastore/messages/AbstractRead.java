@@ -41,9 +41,9 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+    public final void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        path = SerializationUtils.deserializePath(in);
+        path = SerializationUtils.readPath(in);
     }
 
     @Override
