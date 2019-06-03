@@ -7,11 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.concepts.Registration;
 
 @Beta
 public final class NormalizedNodeInputOutput {
@@ -72,4 +79,31 @@ public final class NormalizedNodeInputOutput {
         }
     }
 
+    private static final ThreadLocal<Entry<DataInput, NormalizedNodeDataInput>> TL_INPUT =
+            new ThreadLocal<>();
+    private static final ThreadLocal<Entry<DataOutput, NormalizedNodeDataOutput>> TL_OUTPUT =
+            new ThreadLocal<>();
+
+    public static Registration setupLazyDataInput(final @NonNull DataInput input) {
+        verify(TL_INPUT.get() == null);
+
+        final Entry<DataInput, NormalizedNodeDataInput> state = new SimpleImmutableEntry<>(input,
+                newDataInputWithoutValidation(input));
+        TL_INPUT.set(state);
+        return () -> {
+            final Entry<DataInput, NormalizedNodeDataInput> local = verifyNotNull(TL_INPUT.get(),
+                "No thread-local state present");
+            checkState(local.equals(state), "Unexpected thread-local state %s when cleaning %s", local, state);
+            TL_INPUT.set(null);
+        };
+    }
+
+    public static NormalizedNodeDataInput coerceDataInput(final @NonNull DataInput input) {
+        final Entry<DataInput, NormalizedNodeDataInput> local = verifyNotNull(TL_INPUT.get(),
+            "No thread-local output set up");
+        final NormalizedNodeDataInput stream = local.getValue();
+        checkState(local.getKey().equals(input), "Mismatches thread-local output %s and requested input %s",
+            stream, input);
+        return stream;
+    }
 }
