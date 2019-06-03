@@ -72,18 +72,19 @@ public final class ExecuteRpc implements Serializable {
         public Proxy() {
         }
 
-        Proxy(ExecuteRpc executeRpc) {
+        Proxy(final ExecuteRpc executeRpc) {
             this.executeRpc = executeRpc;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
+            // FIXME: QName is a WritableObject
             out.writeObject(executeRpc.getRpc());
-            SerializationUtils.serializeNormalizedNode(executeRpc.getInputNormalizedNode(), out);
+            SerializationUtils.writeNormalizedNode(out, executeRpc.getInputNormalizedNode());
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             QName qname = (QName) in.readObject();
             executeRpc = new ExecuteRpc(SerializationUtils.deserializeNormalizedNode(in), qname);
         }
