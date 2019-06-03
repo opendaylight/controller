@@ -448,7 +448,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider).deleteSnapshots(criteriaCaptor.capture());
 
-        assertEquals(100L, criteriaCaptor.getValue().maxSequenceNr());
+        assertEquals(Long.MAX_VALUE, criteriaCaptor.getValue().maxSequenceNr());
         assertEquals(1233L, criteriaCaptor.getValue().maxTimestamp());
 
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
