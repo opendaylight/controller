@@ -9,11 +9,9 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -114,12 +112,6 @@ public final class SerializationUtils {
             throw new IllegalArgumentException(String.format("Error serializing NormalizedNode %s",
                     node), e);
         }
-    }
-
-    public static byte [] serializeNormalizedNode(NormalizedNode<?, ?> node) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        serializeNormalizedNode(node, new DataOutputStream(bos));
-        return bos.toByteArray();
     }
 
     public static void serializePath(YangInstanceIdentifier path, DataOutput out) {
