@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -23,6 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 public final class RegisterDataTreeChangeListener implements Externalizable {
     private static final long serialVersionUID = 1L;
+
     private ActorRef dataTreeChangeListenerPath;
     private YangInstanceIdentifier path;
     private boolean registerOnAllInstances;
@@ -33,8 +35,8 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
 
     public RegisterDataTreeChangeListener(final YangInstanceIdentifier path, final ActorRef dataTreeChangeListenerPath,
             final boolean registerOnAllInstances) {
-        this.path = Preconditions.checkNotNull(path);
-        this.dataTreeChangeListenerPath = Preconditions.checkNotNull(dataTreeChangeListenerPath);
+        this.path = requireNonNull(path);
+        this.dataTreeChangeListenerPath = requireNonNull(dataTreeChangeListenerPath);
         this.registerOnAllInstances = registerOnAllInstances;
     }
 
@@ -53,7 +55,7 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeObject(dataTreeChangeListenerPath);
-        SerializationUtils.serializePath(path, out);
+        SerializationUtils.writePath(out, path);
         out.writeBoolean(registerOnAllInstances);
     }
 

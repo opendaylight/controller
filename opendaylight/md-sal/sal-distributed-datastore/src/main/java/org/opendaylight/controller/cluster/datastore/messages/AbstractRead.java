@@ -41,18 +41,18 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         path = SerializationUtils.deserializePath(in);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        SerializationUtils.serializePath(path, out);
+        SerializationUtils.writePath(out, path);
     }
 
-    public AbstractRead<T> asVersion(short version) {
+    public AbstractRead<T> asVersion(final short version) {
         return version == getVersion() ? this : newInstance(version);
     }
 

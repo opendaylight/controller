@@ -22,7 +22,7 @@ public class ReadDataReply extends VersionedExternalizableMessage {
     public ReadDataReply() {
     }
 
-    public ReadDataReply(NormalizedNode<?, ?> normalizedNode, short version) {
+    public ReadDataReply(final NormalizedNode<?, ?> normalizedNode, final short version) {
         super(version);
         this.normalizedNode = normalizedNode;
     }
@@ -32,22 +32,22 @@ public class ReadDataReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         normalizedNode = SerializationUtils.deserializeNormalizedNode(in);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        SerializationUtils.serializeNormalizedNode(normalizedNode, out);
+        SerializationUtils.writeNormalizedNode(out, normalizedNode);
     }
 
-    public static ReadDataReply fromSerializable(Object serializable) {
+    public static ReadDataReply fromSerializable(final Object serializable) {
         return (ReadDataReply) serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof ReadDataReply;
     }
 }
