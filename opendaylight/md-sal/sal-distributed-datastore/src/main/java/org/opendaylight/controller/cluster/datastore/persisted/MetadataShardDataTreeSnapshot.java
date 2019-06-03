@@ -59,7 +59,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
                 out.writeObject(m);
             }
 
-            SerializationUtils.serializeNormalizedNode(rootNode, out);
+            SerializationUtils.writeNormalizedNode(out, rootNode);
         }
 
         @Override
