@@ -12,6 +12,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -59,4 +60,6 @@ public interface Modification extends Externalizable {
 
     @Override
     void readExternal(ObjectInput in) throws IOException, ClassNotFoundException;
+
+    void writeTo(NormalizedNodeDataOutput out) throws IOException;
 }

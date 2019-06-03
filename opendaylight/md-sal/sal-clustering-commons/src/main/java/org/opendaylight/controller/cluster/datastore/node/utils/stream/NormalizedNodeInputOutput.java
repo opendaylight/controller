@@ -71,5 +71,4 @@ public final class NormalizedNodeInputOutput {
                 throw new IllegalStateException("Unhandled version " + version);
         }
     }
-
 }
