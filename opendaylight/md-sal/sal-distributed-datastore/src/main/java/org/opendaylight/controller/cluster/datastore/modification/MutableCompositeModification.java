@@ -17,8 +17,9 @@ import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -35,19 +36,19 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public MutableCompositeModification(short version) {
+    public MutableCompositeModification(final short version) {
         super(version);
     }
 
     @Override
-    public void apply(DOMStoreWriteTransaction transaction) {
+    public void apply(final DOMStoreWriteTransaction transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
     }
 
     @Override
-    public void apply(DataTreeModification transaction) {
+    public void apply(final DataTreeModification transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
@@ -63,12 +64,12 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
      *
      * @param modification the modification to add.
      */
-    public void addModification(Modification modification) {
+    public void addModification(final Modification modification) {
         Preconditions.checkNotNull(modification);
         modifications.add(modification);
     }
 
-    public void addModifications(Iterable<Modification> newMods) {
+    public void addModifications(final Iterable<Modification> newMods) {
         for (Modification mod : newMods) {
             addModification(mod);
         }
@@ -84,61 +85,56 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
 
         int size = in.readInt();
-
-        if (size > 1) {
-            SerializationUtils.REUSABLE_READER_TL.set(NormalizedNodeInputOutput.newDataInputWithoutValidation(in));
-        }
-
-        try {
+        if (size > 0) {
+            final NormalizedNodeDataInput input = NormalizedNodeInputOutput.newDataInputWithoutValidation(in);
             for (int i = 0; i < size; i++) {
                 byte type = in.readByte();
                 switch (type) {
                     case Modification.WRITE:
-                        modifications.add(WriteModification.fromStream(in, getVersion()));
+                        modifications.add(WriteModification.fromStream(input, getVersion()));
                         break;
 
                     case Modification.MERGE:
-                        modifications.add(MergeModification.fromStream(in, getVersion()));
+                        modifications.add(MergeModification.fromStream(input, getVersion()));
                         break;
 
                     case Modification.DELETE:
-                        modifications.add(DeleteModification.fromStream(in, getVersion()));
+                        modifications.add(DeleteModification.fromStream(input, getVersion()));
                         break;
                     default:
                         break;
                 }
             }
-        } finally {
-            SerializationUtils.REUSABLE_READER_TL.remove();
         }
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
 
-        out.writeInt(modifications.size());
-
-        if (modifications.size() > 1) {
-            SerializationUtils.REUSABLE_WRITER_TL.set(NormalizedNodeInputOutput.newDataOutput(out));
-        }
-
-        try {
-            for (Modification mod: modifications) {
-                out.writeByte(mod.getType());
-                mod.writeExternal(out);
+        final int size = modifications.size();
+        out.writeInt(size);
+        if (size > 0) {
+            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+                for (Modification mod : modifications) {
+                    out.writeByte(mod.getType());
+                    mod.writeTo(stream);
+                }
             }
-        } finally {
-            SerializationUtils.REUSABLE_WRITER_TL.remove();
         }
     }
 
-    public static MutableCompositeModification fromSerializable(Object serializable) {
+    public static MutableCompositeModification fromSerializable(final Object serializable) {
         Preconditions.checkArgument(serializable instanceof MutableCompositeModification);
         return (MutableCompositeModification)serializable;
+    }
+
+    @Override
+    public void writeTo(final NormalizedNodeDataOutput out) throws IOException {
+        throw new UnsupportedOperationException();
     }
 }
