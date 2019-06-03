@@ -58,8 +58,8 @@ public class RpcResponse implements Serializable {
         }
 
         @Override
-        public void readExternal(final ObjectInput in) {
-            rpcResponse = new RpcResponse(SerializationUtils.deserializeNormalizedNode(in));
+        public void readExternal(final ObjectInput in) throws IOException {
+            rpcResponse = new RpcResponse(SerializationUtils.readNormalizedNode(in).orElse(null));
         }
 
         private Object readResolve() {
