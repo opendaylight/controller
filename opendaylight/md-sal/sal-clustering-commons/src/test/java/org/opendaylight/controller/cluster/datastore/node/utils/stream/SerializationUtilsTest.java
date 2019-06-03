@@ -49,7 +49,7 @@ public class SerializationUtilsTest {
     @Test
     public void testSerializeDeserializeNodes() {
         final NormalizedNode<?, ?> normalizedNode = createNormalizedNode();
-        final byte[] bytes = SerializationUtils.serializeNormalizedNode(normalizedNode);
+        final byte[] bytes = serializeNormalizedNode(normalizedNode);
         Assert.assertEquals(normalizedNode, SerializationUtils.deserializeNormalizedNode(bytes));
 
     }
@@ -63,7 +63,7 @@ public class SerializationUtilsTest {
                 .withNodeIdentifier(id("anyXmlNode"))
                 .withValue(new DOMSource(parse))
                 .build();
-        final byte[] bytes = SerializationUtils.serializeNormalizedNode(anyXmlNode);
+        final byte[] bytes = serializeNormalizedNode(anyXmlNode);
         final NormalizedNode<?, ?> deserialized = SerializationUtils.deserializeNormalizedNode(bytes);
         final DOMSource value = (DOMSource) deserialized.getValue();
         final Diff diff = XMLUnit.compareXML((Document) anyXmlNode.getValue().getNode(),
@@ -102,6 +102,12 @@ public class SerializationUtilsTest {
             applierCalled.set(true);
         });
         Assert.assertTrue(applierCalled.get());
+    }
+
+    private static byte[] serializeNormalizedNode(final NormalizedNode<?, ?> node) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        SerializationUtils.serializeNormalizedNode(node, new DataOutputStream(bos));
+        return bos.toByteArray();
     }
 
     private static NormalizedNode<?, ?> createNormalizedNode() {
