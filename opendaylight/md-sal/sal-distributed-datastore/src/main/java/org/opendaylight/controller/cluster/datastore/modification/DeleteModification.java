@@ -57,8 +57,8 @@ public class DeleteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(final ObjectInput in) {
-        setPath(SerializationUtils.deserializePath(in));
+    public void readExternal(final ObjectInput in) throws IOException {
+        setPath(SerializationUtils.readPath(in));
     }
 
     @Override
