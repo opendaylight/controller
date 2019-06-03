@@ -18,15 +18,20 @@ public abstract class AbstractModification implements Modification {
     private YangInstanceIdentifier path;
     private short version;
 
-    protected AbstractModification(short version) {
+    protected AbstractModification(final short version) {
         this.version = version;
     }
 
-    protected AbstractModification(YangInstanceIdentifier path) {
+    protected AbstractModification(final short version, final YangInstanceIdentifier path) {
+        this.path = path;
+        this.version = version;
+    }
+
+    protected AbstractModification(final YangInstanceIdentifier path) {
         this.path = path;
     }
 
-    protected void setPath(YangInstanceIdentifier path) {
+    protected void setPath(final YangInstanceIdentifier path) {
         this.path = path;
     }
 

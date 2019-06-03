@@ -8,9 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils.Applier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
@@ -30,8 +33,13 @@ public class WriteModification extends AbstractModification {
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public WriteModification(short version) {
+    public WriteModification(final short version) {
         super(version);
+    }
+
+    WriteModification(final short version, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        super(version, path);
+        this.data = data;
     }
 
     public WriteModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
@@ -59,19 +67,34 @@ public class WriteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(ObjectInput in) {
+    public void readExternal(final ObjectInput in) {
         SerializationUtils.deserializePathAndNode(in, this, APPLIER);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) {
+    public void writeExternal(final ObjectOutput out) {
         SerializationUtils.serializePathAndNode(getPath(), data, out);
     }
 
-    public static WriteModification fromStream(ObjectInput in, short version) {
+    @Deprecated
+    public static WriteModification fromStream(final ObjectInput in, final short version) {
         WriteModification mod = new WriteModification(version);
         mod.readExternal(in);
         return mod;
+    }
+
+    public static WriteModification fromStream(final NormalizedNodeDataInput in, final short version)
+            throws IOException {
+        final NormalizedNode<?, ?> node = in.readNormalizedNode();
+        final YangInstanceIdentifier path = in.readYangInstanceIdentifier();
+        return new WriteModification(version, path, node);
+    }
+
+    @Override
+    public void writeTo(final NormalizedNodeDataOutput out) throws IOException {
+        // FIXME: this should be inverted, as the path helps receivers in establishment of context
+        out.writeNormalizedNode(data);
+        out.writeYangInstanceIdentifier(getPath());
     }
 
     private static final Applier<WriteModification> APPLIER = (instance, path, node) -> {

@@ -8,8 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import java.io.IOException;
 import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -25,12 +27,16 @@ public class MergeModification extends WriteModification {
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public MergeModification(short version) {
+    public MergeModification(final short version) {
         super(version);
     }
 
     public MergeModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         super(path, data);
+    }
+
+    MergeModification(final short version, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        super(version, path, data);
     }
 
     @Override
@@ -48,9 +54,17 @@ public class MergeModification extends WriteModification {
         return MERGE;
     }
 
-    public static MergeModification fromStream(ObjectInput in, short version) {
+    @Deprecated
+    public static MergeModification fromStream(final ObjectInput in, final short version) {
         MergeModification mod = new MergeModification(version);
         mod.readExternal(in);
         return mod;
+    }
+
+    public static MergeModification fromStream(final NormalizedNodeDataInput in, final short version)
+            throws IOException {
+        final NormalizedNode<?, ?> node = in.readNormalizedNode();
+        final YangInstanceIdentifier path = in.readYangInstanceIdentifier();
+        return new MergeModification(version, path, node);
     }
 }
