@@ -34,7 +34,7 @@ public class ReadDataReply extends VersionedExternalizableMessage {
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        normalizedNode = SerializationUtils.deserializeNormalizedNode(in);
+        normalizedNode = SerializationUtils.readNormalizedNode(in).orElse(null);
     }
 
     @Override
