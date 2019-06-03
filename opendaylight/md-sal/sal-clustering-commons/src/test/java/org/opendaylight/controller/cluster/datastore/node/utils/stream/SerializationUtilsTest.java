@@ -83,7 +83,7 @@ public class SerializationUtilsTest {
                 .build();
         SerializationUtils.writePath(out, path);
         final YangInstanceIdentifier deserialized =
-                SerializationUtils.deserializePath(new DataInputStream(new ByteArrayInputStream(bos.toByteArray())));
+                SerializationUtils.readPath(new DataInputStream(new ByteArrayInputStream(bos.toByteArray())));
         Assert.assertEquals(path, deserialized);
     }
 
@@ -96,7 +96,7 @@ public class SerializationUtilsTest {
         SerializationUtils.writeNodeAndPath(out, path, node);
         final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
         final AtomicBoolean applierCalled = new AtomicBoolean(false);
-        SerializationUtils.deserializePathAndNode(in, applierCalled, (instance, deserializedPath, deserializedNode) -> {
+        SerializationUtils.readNodeAndPath(in, applierCalled, (instance, deserializedPath, deserializedNode) -> {
             Assert.assertEquals(path, deserializedPath);
             Assert.assertEquals(node, deserializedNode);
             applierCalled.set(true);
