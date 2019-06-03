@@ -38,9 +38,6 @@
     <!-- Samples -->
     <module>samples</module>
 
-    <!-- Connectors -->
-    <module>sal-connector-api</module>
-
     <module>sal-akka-raft</module>
     <module>sal-akka-raft-example</module>
 

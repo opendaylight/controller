@@ -108,10 +108,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sal-connector-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>sal-inmemory-datastore</artifactId>
         </dependency>
     </dependencies>
