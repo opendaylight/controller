@@ -112,10 +112,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-connector-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-inmemory-datastore</artifactId>
         </dependency>
         <dependency>

@@ -78,11 +78,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sal-connector-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>sal-inmemory-datastore</artifactId>
                 <version>${project.version}</version>
             </dependency>
