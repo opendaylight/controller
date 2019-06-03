@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Set;
@@ -47,11 +48,10 @@ public class SerializationUtilsTest {
     private static final QName CONTAINER_Q_NAME = QName.create("ns-1", "2017-03-17", "container1");
 
     @Test
-    public void testSerializeDeserializeNodes() {
+    public void testSerializeDeserializeNodes() throws IOException {
         final NormalizedNode<?, ?> normalizedNode = createNormalizedNode();
         final byte[] bytes = SerializationUtils.serializeNormalizedNode(normalizedNode);
         Assert.assertEquals(normalizedNode, SerializationUtils.deserializeNormalizedNode(bytes));
-
     }
 
     @Test
@@ -72,7 +72,7 @@ public class SerializationUtilsTest {
     }
 
     @Test
-    public void testSerializeDeserializePath() {
+    public void testSerializeDeserializePath() throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput out = new DataOutputStream(bos);
         final YangInstanceIdentifier path = YangInstanceIdentifier.builder()
@@ -81,19 +81,19 @@ public class SerializationUtilsTest {
                 .node(listId("list1", "keyName1", "keyValue1"))
                 .node(leafSetId("leafSer1", "leafSetValue1"))
                 .build();
-        SerializationUtils.serializePath(path, out);
+        SerializationUtils.writePath(out, path);
         final YangInstanceIdentifier deserialized =
                 SerializationUtils.deserializePath(new DataInputStream(new ByteArrayInputStream(bos.toByteArray())));
         Assert.assertEquals(path, deserialized);
     }
 
     @Test
-    public void testSerializeDeserializePathAndNode() {
+    public void testSerializeDeserializePathAndNode() throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput out = new DataOutputStream(bos);
         final NormalizedNode<?, ?> node = createNormalizedNode();
         final YangInstanceIdentifier path = YangInstanceIdentifier.create(id("container1"));
-        SerializationUtils.serializePathAndNode(path, node, out);
+        SerializationUtils.writeNodeAndPath(out, path, node);
         final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
         final AtomicBoolean applierCalled = new AtomicBoolean(false);
         SerializationUtils.deserializePathAndNode(in, applierCalled, (instance, deserializedPath, deserializedNode) -> {
