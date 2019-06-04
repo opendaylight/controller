@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Sets;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.StringReader;
@@ -240,8 +241,8 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
 
     private Set<QName> readQNameSet() throws IOException {
         // Read the children count
-        int count = input.readInt();
-        Set<QName> children = new HashSet<>(count);
+        final int count = input.readInt();
+        final Set<QName> children = Sets.newHashSetWithExpectedSize(count);
         for (int i = 0; i < count; i++) {
             children.add(readQName());
         }
