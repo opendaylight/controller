@@ -126,7 +126,7 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
     }
 
     private AugmentationIdentifier rawAugmentId() throws IOException {
-        final AugmentationIdentifier aid = super.readAugmentationIdentifier();
+        final AugmentationIdentifier aid = AugmentationIdentifier.create(readQNameSet());
         codedAugments.add(aid);
         return aid;
     }

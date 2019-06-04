@@ -239,7 +239,7 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         }
     }
 
-    private Set<QName> readQNameSet() throws IOException {
+    final Set<QName> readQNameSet() throws IOException {
         // Read the children count
         final int count = input.readInt();
         final Set<QName> children = Sets.newHashSetWithExpectedSize(count);
