@@ -87,13 +87,13 @@ public abstract class AbstractDataTreeChangeListenerTest {
     public static final YangInstanceIdentifier path(final String topName,
             final String nestedName) {
         return path(topName).node(NestedList.QNAME).node(
-                new NodeIdentifierWithPredicates(NestedList.QNAME, NAME_QNAME,
+                NodeIdentifierWithPredicates.of(NestedList.QNAME, NAME_QNAME,
                         nestedName));
     }
 
     public static final YangInstanceIdentifier path(final String topName) {
         return TOP_LEVEL.node(TopLevelList.QNAME).node(
-                new NodeIdentifierWithPredicates(TopLevelList.QNAME,
+                NodeIdentifierWithPredicates.of(TopLevelList.QNAME,
                         NAME_QNAME, topName));
     }
 

@@ -211,7 +211,7 @@ public class SerializationUtilsTest {
     private static YangInstanceIdentifier.NodeIdentifierWithPredicates listId(final String listName,
                                                                               final String keyName,
                                                                               final Object keyValue) {
-        return new YangInstanceIdentifier.NodeIdentifierWithPredicates(QName.create(CONTAINER_Q_NAME, listName),
+        return YangInstanceIdentifier.NodeIdentifierWithPredicates.of(QName.create(CONTAINER_Q_NAME, listName),
                 QName.create(CONTAINER_Q_NAME, keyName), keyValue);
     }
 

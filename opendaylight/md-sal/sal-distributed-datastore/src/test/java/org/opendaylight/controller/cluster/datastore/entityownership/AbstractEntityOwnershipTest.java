@@ -130,7 +130,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         assertTrue("Missing " + childMap.toString(), childNode.isPresent());
 
         MapNode entityTypeMapNode = (MapNode) childNode.get();
-        Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.getChild(new NodeIdentifierWithPredicates(
+        Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.getChild(NodeIdentifierWithPredicates.of(
                 childMap, child, key));
         if (expectPresent && !entityTypeEntry.isPresent()) {
             fail("Missing " + childMap.toString() + " entry for " + key + ". Actual: " + entityTypeMapNode.getValue());

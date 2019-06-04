@@ -64,7 +64,7 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTran
         int writeCnt = 0;
 
         for (int l = 0; l < outerListElem; l++) {
-            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
+            YangInstanceIdentifier yid = pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, olId, l));
             tx.delete(dsType, yid);
 
             writeCnt++;

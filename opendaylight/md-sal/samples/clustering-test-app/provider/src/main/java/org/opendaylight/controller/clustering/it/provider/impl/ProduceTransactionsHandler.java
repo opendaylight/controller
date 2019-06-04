@@ -67,7 +67,7 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
         final String id = input.getId();
         LOG.debug("Filling the item list {} with initial values.", id);
 
-        final YangInstanceIdentifier idListWithKey = ID_INT_YID.node(new NodeIdentifierWithPredicates(ID_INT, ID, id));
+        final YangInstanceIdentifier idListWithKey = ID_INT_YID.node(NodeIdentifierWithPredicates.of(ID_INT, ID, id));
 
         final DOMDataTreeProducer itemProducer = domDataTreeService.createProducer(
             Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey)));
@@ -112,7 +112,7 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
         final DOMDataTreeCursorAwareTransaction tx = itemProducer.createTransaction(false);
         final DOMDataTreeWriteCursor cursor = tx.createCursor(idListItem);
 
-        final NodeIdentifierWithPredicates entryId = new NodeIdentifierWithPredicates(ITEM, NUMBER, i);
+        final NodeIdentifierWithPredicates entryId = NodeIdentifierWithPredicates.of(ITEM, NUMBER, i);
         if (usedValues.contains(i)) {
             LOG.debug("Deleting item: {}", i);
             deleteTx++;

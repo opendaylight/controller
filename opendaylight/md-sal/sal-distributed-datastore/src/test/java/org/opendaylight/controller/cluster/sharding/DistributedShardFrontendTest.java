@@ -64,7 +64,7 @@ public class DistributedShardFrontendTest {
     private DOMDataTreeWriteCursor cursor;
 
     private static final YangInstanceIdentifier OUTER_LIST_YID = TestModel.OUTER_LIST_PATH.node(
-            new NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
+            NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
     private static final DOMDataTreeIdentifier OUTER_LIST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, OUTER_LIST_YID);
 
