@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Set;
-import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -102,12 +101,6 @@ public class BindingTestContext implements AutoCloseable {
     protected BindingTestContext(final ListeningExecutorService executor, final boolean startWithSchema) {
         this.executor = executor;
         this.startWithSchema = startWithSchema;
-    }
-
-    @Deprecated
-    protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool,
-            final boolean startWithSchema) {
-        this(executor, startWithSchema);
     }
 
     public void startDomDataBroker() {
