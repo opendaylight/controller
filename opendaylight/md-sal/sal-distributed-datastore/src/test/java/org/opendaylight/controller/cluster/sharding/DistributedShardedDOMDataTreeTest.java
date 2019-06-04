@@ -514,7 +514,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         final Collection<MapEntryNode> ret = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             ret.add(ImmutableNodes.mapEntryBuilder()
-                    .withNodeIdentifier(new NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME,
                             QName.create(TestModel.OUTER_LIST_QNAME, "id"), i))
                     .withChild(ImmutableNodes
                             .leafNode(QName.create(TestModel.OUTER_LIST_QNAME, "id"), i))
@@ -534,7 +534,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         final Collection<MapEntryNode> ret = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             ret.add(ImmutableNodes.mapEntryBuilder()
-                    .withNodeIdentifier(new NodeIdentifierWithPredicates(TestModel.INNER_LIST_QNAME,
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.INNER_LIST_QNAME,
                             QName.create(TestModel.INNER_LIST_QNAME, "name"), Integer.toString(i)))
                     .withChild(ImmutableNodes
                             .leafNode(QName.create(TestModel.INNER_LIST_QNAME, "value"), valuePrefix + "-" + i))
@@ -545,7 +545,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     private static YangInstanceIdentifier getOuterListIdFor(final int id) {
-        return TestModel.OUTER_LIST_PATH.node(new NodeIdentifierWithPredicates(
+        return TestModel.OUTER_LIST_PATH.node(NodeIdentifierWithPredicates.of(
                 TestModel.OUTER_LIST_QNAME, QName.create(TestModel.OUTER_LIST_QNAME, "id"), id));
     }
 }

@@ -205,7 +205,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         final int i = nextInt(MAX_ITEM + 1);
 
         final YangInstanceIdentifier entryId =
-                idListItem.node(ITEM).node(new YangInstanceIdentifier.NodeIdentifierWithPredicates(ITEM, NUMBER, i));
+                idListItem.node(ITEM).node(YangInstanceIdentifier.NodeIdentifierWithPredicates.of(ITEM, NUMBER, i));
 
         final DOMDataWriteTransaction tx = createTransaction();
 

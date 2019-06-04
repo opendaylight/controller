@@ -325,13 +325,13 @@ public class DOMDataTreeListenerTest {
                 .registerDataTreeChangeListener(OUTER_LIST_DATA_TREE_ID, listener);
 
         final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId1
-                = new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                = YangInstanceIdentifier.NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME,
                                                                           TestModel.ID_QNAME, 1);
         final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId2
-                = new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                = YangInstanceIdentifier.NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME,
                                                                           TestModel.ID_QNAME, 2);
         final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId3
-                = new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                = YangInstanceIdentifier.NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME,
                                                                           TestModel.ID_QNAME, 3);
 
         final MapEntryNode outerListEntry1 = ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1);
