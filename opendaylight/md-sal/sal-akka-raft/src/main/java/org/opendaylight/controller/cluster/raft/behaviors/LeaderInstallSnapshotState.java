@@ -200,4 +200,21 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     int getLastChunkHashCode() {
         return lastChunkHashCode;
     }
+
+    @Override
+    public String toString() {
+        return "LeaderInstallSnapshotState{"
+                + "snapshotChunkSize=" + snapshotChunkSize
+                + ", offset=" + offset
+                + ", replyReceivedForOffset=" + replyReceivedForOffset
+                + ", replyStatus=" + replyStatus
+                + ", chunkIndex=" + chunkIndex
+                + ", totalChunks=" + totalChunks
+                + ", lastChunkHashCode=" + lastChunkHashCode
+                + ", nextChunkHashCode=" + nextChunkHashCode
+                + ", snapshotSize=" + snapshotSize
+                + ", chunkTimer=" + chunkTimer
+                + ", currentChunk=" + Arrays.toString(currentChunk)
+                + '}';
+    }
 }
