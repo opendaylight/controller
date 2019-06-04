@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42387815_35737f7b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/SodiumNormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-06-04T22:51:00Z",
+      "side": 1,
+      "message": "Why not just modify super.readAugmentationIdentifier() to call AugmentationIdentifier.create?",
+      "revId": "9b9b068c5ee58d64bc4cfe182b182a77a862abb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
