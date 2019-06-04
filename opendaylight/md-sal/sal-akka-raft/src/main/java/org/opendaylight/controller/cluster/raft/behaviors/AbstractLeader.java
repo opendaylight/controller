@@ -944,12 +944,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 sendSnapshotChunk(followerActor, followerLogInfo, nextSnapshotChunk, nextChunkIndex, serverConfig);
 
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+                log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
+                        installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
 
-            log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
-                installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
+            } catch (IOException e) {
+                log.warn("{}: Unable to send chunk: {}/{}. Reseting snapshot progress. Snapshot state: {}", logName(),
+                        installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks(),
+                        installSnapshotState);
+                installSnapshotState.reset();
+            }
         }
     }
 

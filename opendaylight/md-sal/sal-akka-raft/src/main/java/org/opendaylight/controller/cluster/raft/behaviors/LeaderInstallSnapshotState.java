@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
@@ -199,5 +200,21 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
     int getLastChunkHashCode() {
         return lastChunkHashCode;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("snapshotChunkSize", snapshotChunkSize)
+                .add("offset", offset)
+                .add("replyReceivedForOffset", replyReceivedForOffset)
+                .add("replyStatus", replyStatus)
+                .add("chunkIndex", chunkIndex)
+                .add("totalChunks", totalChunks)
+                .add("lastChunkHashCode", lastChunkHashCode)
+                .add("nextChunkHashCode", nextChunkHashCode)
+                .add("snapshotSize", snapshotSize)
+                .add("chunkTimer", chunkTimer)
+                .toString();
     }
 }
