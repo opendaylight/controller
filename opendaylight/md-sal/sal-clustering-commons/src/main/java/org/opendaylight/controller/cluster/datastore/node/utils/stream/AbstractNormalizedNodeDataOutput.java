@@ -325,6 +325,15 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
+    private void startNode(final QName qname, final byte nodeType, final int sizeHint) throws IOException {
+        startNode(qname, nodeType);
+        writeNodeSize(sizeHint);
+    }
+
+    void writeNodeSize(final int hintedSize) {
+        // Defaults to no-op
+    }
+
     private void startNode(final QName qname, final byte nodeType) throws IOException {
         Preconditions.checkNotNull(qname, "QName of node identifier should not be null.");
         Preconditions.checkState(!inSimple, "Attempted to start a child in a simple node");
