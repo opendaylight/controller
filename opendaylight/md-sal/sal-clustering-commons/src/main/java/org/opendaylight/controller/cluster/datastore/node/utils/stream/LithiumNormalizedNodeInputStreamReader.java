@@ -261,9 +261,9 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         final int count = input.readInt();
         switch (count) {
             case 0:
-                return new NodeIdentifierWithPredicates(qname);
+                return NodeIdentifierWithPredicates.of(qname);
             case 1:
-                return new NodeIdentifierWithPredicates(qname, readQName(), readObject());
+                return NodeIdentifierWithPredicates.of(qname, readQName(), readObject());
             default:
                 // ImmutableList is used by ImmutableOffsetMapTemplate for lookups, hence we use that.
                 final Builder<QName> keys = ImmutableList.builderWithExpectedSize(count);
@@ -273,7 +273,7 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
                     values[i] = readObject();
                 }
 
-                return new NodeIdentifierWithPredicates(qname, ImmutableOffsetMapTemplate.ordered(keys.build())
+                return NodeIdentifierWithPredicates.of(qname, ImmutableOffsetMapTemplate.ordered(keys.build())
                     .instantiateWithValues(values));
         }
     }

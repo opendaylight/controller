@@ -286,7 +286,7 @@ public final class TestModel {
         // Create YangInstanceIdentifier with all path arg types.
         YangInstanceIdentifier instanceID = YangInstanceIdentifier.create(
                 new NodeIdentifier(QName.create(TEST_QNAME, "qname")),
-                new NodeIdentifierWithPredicates(QName.create(TEST_QNAME, "list-entry"),
+                NodeIdentifierWithPredicates.of(QName.create(TEST_QNAME, "list-entry"),
                         QName.create(TEST_QNAME, "key"), 10),
                 new AugmentationIdentifier(ImmutableSet.of(
                         QName.create(TEST_QNAME, "aug1"), QName.create(TEST_QNAME, "aug2"))),

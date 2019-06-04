@@ -107,7 +107,7 @@ class PrefixedShardConfigWriter {
 
     boolean checkDefaultIsPresent() {
         final NodeIdentifierWithPredicates pag =
-                new NodeIdentifierWithPredicates(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
+                NodeIdentifierWithPredicates.of(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
                 YangInstanceIdentifier.EMPTY);
 
         final YangInstanceIdentifier defaultId = ClusterUtils.SHARD_LIST_PATH.node(pag);
@@ -138,7 +138,7 @@ class PrefixedShardConfigWriter {
 
         final MapEntryNode newEntry = ImmutableMapEntryNodeBuilder.create()
                 .withNodeIdentifier(
-                        new NodeIdentifierWithPredicates(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
+                        NodeIdentifierWithPredicates.of(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
                                 path))
                 .withChild(ImmutableLeafNodeBuilder.create()
                         .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PREFIX_QNAME))
@@ -169,7 +169,7 @@ class PrefixedShardConfigWriter {
         ClusterUtils.SHARD_LIST_PATH.getPathArguments().forEach(cursor::enter);
 
         cursor.delete(
-                new NodeIdentifierWithPredicates(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME, path));
+                NodeIdentifierWithPredicates.of(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME, path));
         cursor.close();
 
         return tx.ready();

@@ -60,7 +60,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements DOMTrans
 
         for (MapEntryNode element : this.list) {
             YangInstanceIdentifier yid =
-                    pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
+                    pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, element.getIdentifier().getKeyValues()));
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, yid, element);

@@ -77,7 +77,7 @@ public final class EntityOwnersModel {
     }
 
     static NodeIdentifierWithPredicates candidateNodeKey(final String candidateName) {
-        return new NodeIdentifierWithPredicates(Candidate.QNAME, NODE_KEY_TEMPLATE.instantiateWithValue(candidateName));
+        return NodeIdentifierWithPredicates.of(Candidate.QNAME, NODE_KEY_TEMPLATE.instantiateWithValue(candidateName));
     }
 
     static NormalizedNode<?, ?> entityOwnersWithCandidate(final String entityType,

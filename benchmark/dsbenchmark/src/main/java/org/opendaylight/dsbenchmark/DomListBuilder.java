@@ -35,7 +35,7 @@ public final class DomListBuilder {
         List<MapEntryNode> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(ImmutableNodes.mapEntryBuilder()
-                                .withNodeIdentifier(new NodeIdentifierWithPredicates(OuterList.QNAME, OL_ID, j))
+                                .withNodeIdentifier(NodeIdentifierWithPredicates.of(OuterList.QNAME, OL_ID, j))
                                 .withChild(ImmutableNodes.leafNode(OL_ID, j))
                                 .withChild(buildInnerList(j, innerElements))
                                 .build());
@@ -49,7 +49,7 @@ public final class DomListBuilder {
         final String itemStr = "Item-" + String.valueOf(index) + "-";
         for (int i = 0; i < elements; i++) {
             innerList.addChild(ImmutableNodes.mapEntryBuilder()
-                                .withNodeIdentifier(new NodeIdentifierWithPredicates(InnerList.QNAME, IL_NAME, i))
+                                .withNodeIdentifier(NodeIdentifierWithPredicates.of(InnerList.QNAME, IL_NAME, i))
                                 .withChild(ImmutableNodes.leafNode(IL_NAME, i))
                                 .withChild(ImmutableNodes.leafNode(IL_VALUE, itemStr + String.valueOf(i)))
                                 .build());

@@ -105,7 +105,7 @@ public final class TestModel {
     }
 
     public static NodeIdentifierWithPredicates outerEntryKey(final int id) {
-        return new NodeIdentifierWithPredicates(OUTER_LIST_QNAME, ID_QNAME, id);
+        return NodeIdentifierWithPredicates.of(OUTER_LIST_QNAME, ID_QNAME, id);
     }
 
     public static YangInstanceIdentifier outerEntryPath(final int id) {
@@ -113,7 +113,7 @@ public final class TestModel {
     }
 
     public static NodeIdentifierWithPredicates innerEntryKey(final String name) {
-        return new NodeIdentifierWithPredicates(INNER_LIST_QNAME, NAME_QNAME, name);
+        return NodeIdentifierWithPredicates.of(INNER_LIST_QNAME, NAME_QNAME, name);
     }
 
     public static YangInstanceIdentifier innerEntryPath(final int id, final String name) {
