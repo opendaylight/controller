@@ -318,9 +318,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void applyRecoveryCandidate(final DataTreeCandidate candidate) {
+    private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
+        final Entry<TransactionIdentifier, DataTreeCandidate> entry = payload.getCandidate(reusableWriter);
+
         final PruningDataTreeModification mod = wrapWithPruning(dataTree.takeSnapshot().newModification());
-        DataTreeCandidates.applyToModification(mod, candidate);
+        DataTreeCandidates.applyToModification(mod, entry.getValue());
         mod.ready();
 
         final DataTreeModification unwrapped = mod.delegate();
@@ -337,6 +339,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     "%s: Failed to apply recovery payload. Modification data was written to file %s",
                     logContext, file), e);
         }
+
+        allMetadataCommittedTransaction(entry.getKey());
     }
 
     /**
@@ -349,10 +353,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
         if (payload instanceof CommitTransactionPayload) {
-            final Entry<TransactionIdentifier, DataTreeCandidate> e =
-                    ((CommitTransactionPayload) payload).getCandidate(reusableWriter);
-            applyRecoveryCandidate(e.getValue());
-            allMetadataCommittedTransaction(e.getKey());
+            applyRecoveryCandidate((CommitTransactionPayload) payload);
         } else if (payload instanceof AbortTransactionPayload) {
             allMetadataAbortedTransaction(((AbortTransactionPayload) payload).getIdentifier());
         } else if (payload instanceof PurgeTransactionPayload) {
@@ -368,12 +369,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void applyReplicatedCandidate(final TransactionIdentifier identifier, final DataTreeCandidate foreign)
-            throws DataValidationFailedException {
+    private void applyReplicatedCandidate(final CommitTransactionPayload payload)
+            throws DataValidationFailedException, IOException {
+        final Entry<TransactionIdentifier, DataTreeCandidate> entry = payload.getCandidate(reusableWriter);
+        final TransactionIdentifier identifier = entry.getKey();
         LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
         final DataTreeModification mod = dataTree.takeSnapshot().newModification();
-        DataTreeCandidates.applyToModification(mod, foreign);
+        DataTreeCandidates.applyToModification(mod, entry.getValue());
         mod.ready();
 
         LOG.trace("{}: Applying foreign modification {}", logContext, mod);
@@ -409,9 +412,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
          */
         if (payload instanceof CommitTransactionPayload) {
             if (identifier == null) {
-                final Entry<TransactionIdentifier, DataTreeCandidate> e =
-                        ((CommitTransactionPayload) payload).getCandidate(reusableWriter);
-                applyReplicatedCandidate(e.getKey(), e.getValue());
+                applyReplicatedCandidate((CommitTransactionPayload) payload);
             } else {
                 Verify.verify(identifier instanceof TransactionIdentifier);
                 payloadReplicationComplete((TransactionIdentifier) identifier);
