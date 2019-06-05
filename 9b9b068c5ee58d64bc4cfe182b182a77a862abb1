@@ -16,6 +16,24 @@
       "revId": "9b9b068c5ee58d64bc4cfe182b182a77a862abb1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ef05b7f_51d999fb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/SodiumNormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-06-05T08:10:20Z",
+      "side": 1,
+      "message": "Yeah, I was thinking to retain the performance characteristic of Lithium, as .create() is a lookup.\n\nThinking about it a bit more, it might make sense to just change it there -- although it is not guarded by the lookup table, side-stepping the cost of ImmutableSet.copyOf() might well be worth a lookup.",
+      "parentUuid": "42387815_35737f7b",
+      "revId": "9b9b068c5ee58d64bc4cfe182b182a77a862abb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
