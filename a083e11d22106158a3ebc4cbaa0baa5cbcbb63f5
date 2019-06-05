@@ -22,6 +22,30 @@
       "revId": "a083e11d22106158a3ebc4cbaa0baa5cbcbb63f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd74a7ca_761a604a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/SerializationUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-06-05T07:35:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c801c78a_25eeecec",
+      "range": {
+        "startLine": 34,
+        "startChar": 27,
+        "endLine": 34,
+        "endChar": 49
+      },
+      "revId": "a083e11d22106158a3ebc4cbaa0baa5cbcbb63f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
