@@ -34,6 +34,24 @@
       "revId": "9b9b068c5ee58d64bc4cfe182b182a77a862abb1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "541d9ba1_99381fed",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/SodiumNormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-06-05T09:12:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ef05b7f_51d999fb",
+      "revId": "9b9b068c5ee58d64bc4cfe182b182a77a862abb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
