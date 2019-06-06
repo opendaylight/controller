@@ -78,6 +78,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -130,6 +131,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     private final Map<Payload, Runnable> replicationCallbacks = new HashMap<>();
 
+    private final ReusableImmutableNormalizedNodeStreamWriter reusableWriter =
+            ReusableImmutableNormalizedNodeStreamWriter.create();
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final Collection<ShardDataTreeMetadata<?>> metadata;
     private final DataTree dataTree;
@@ -347,7 +350,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
         if (payload instanceof CommitTransactionPayload) {
             final Entry<TransactionIdentifier, DataTreeCandidate> e =
-                    ((CommitTransactionPayload) payload).getCandidate();
+                    ((CommitTransactionPayload) payload).getCandidate(reusableWriter);
             applyRecoveryCandidate(e.getValue());
             allMetadataCommittedTransaction(e.getKey());
         } else if (payload instanceof AbortTransactionPayload) {
@@ -407,7 +410,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (payload instanceof CommitTransactionPayload) {
             if (identifier == null) {
                 final Entry<TransactionIdentifier, DataTreeCandidate> e =
-                        ((CommitTransactionPayload) payload).getCandidate();
+                        ((CommitTransactionPayload) payload).getCandidate(reusableWriter);
                 applyReplicatedCandidate(e.getKey(), e.getValue());
             } else {
                 Verify.verify(identifier instanceof TransactionIdentifier);
