@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
@@ -50,6 +51,24 @@ public interface NormalizedNodeDataInput extends DataInput {
             streamNormalizedNode(writer);
         }
         return result.getResult();
+    }
+
+    /**
+     * Read a normalized node from the reader, using specified writer to construct the result.
+     *
+     * @param writer Reusable writer to
+     * @return Next node from the stream, or null if end of stream has been reached.
+     * @throws IOException if an error occurs
+     * @throws IllegalStateException if the dictionary has been detached
+     */
+    default NormalizedNode<?, ?> readNormalizedNode(final ReusableImmutableNormalizedNodeStreamWriter writer)
+            throws IOException {
+        try {
+            streamNormalizedNode(writer);
+            return writer.getResult();
+        } finally {
+            writer.reset();
+        }
     }
 
     YangInstanceIdentifier readYangInstanceIdentifier() throws IOException;

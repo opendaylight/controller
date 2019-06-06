@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
 /**
  * Externalizable proxy for use with {@link ExistsTransactionRequest}. It implements the initial (Boron) serialization
@@ -59,8 +60,10 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         if (size != 0) {
             modifications = new ArrayList<>(size);
             final NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(in);
+            final ReusableImmutableNormalizedNodeStreamWriter writer =
+                    ReusableImmutableNormalizedNodeStreamWriter.create();
             for (int i = 0; i < size; ++i) {
-                modifications.add(TransactionModification.readFrom(nnin));
+                modifications.add(TransactionModification.readFrom(nnin, writer));
             }
         } else {
             modifications = ImmutableList.of();
