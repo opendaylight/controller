@@ -19,7 +19,8 @@ final class TokenTypes {
      */
     static final short LITHIUM_VERSION = 1;
     /**
-     * Revised stream version. Unlike {@link #LITHIUM_VERSION}, QNames are using a per-stream dictionary, too.
+     * Revised stream version. Unlike {@link #LITHIUM_VERSION}, QNames and QNameModules are using a per-stream
+     * dictionary, too.
      */
     static final short SODIUM_VERSION = 2;
 
@@ -33,4 +34,6 @@ final class TokenTypes {
     static final byte IS_QNAME_VALUE = 5;
     static final byte IS_AUGMENT_CODE = 6;
     static final byte IS_AUGMENT_VALUE = 7;
+    static final byte IS_MODULE_CODE = 8;
+    static final byte IS_MODULE_VALUE = 9;
 }

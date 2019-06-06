@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 
 /**
@@ -30,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.Augmentat
  */
 class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
     private final Map<AugmentationIdentifier, Integer> aidCodeMap = new HashMap<>();
+    private final Map<QNameModule, Integer> moduleCodeMap = new HashMap<>();
     private final Map<QName, Integer> qnameCodeMap = new HashMap<>();
 
     SodiumNormalizedNodeOutputStreamWriter(final DataOutput output) {
@@ -60,13 +62,28 @@ class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutput
     void writeAugmentationIdentifier(final AugmentationIdentifier aid) throws IOException {
         final Integer value = aidCodeMap.get(aid);
         if (value == null) {
-            // Fresh QName, remember it and emit as three strings
+            // Fresh AugmentationIdentifier, remember it and emit as three strings
             aidCodeMap.put(aid, aidCodeMap.size());
             writeByte(TokenTypes.IS_AUGMENT_VALUE);
             super.writeAugmentationIdentifier(aid);
         } else {
-            // We have already seen this QName set: write its code
+            // We have already seen this AugmentationIdentifier: write its code
             writeByte(TokenTypes.IS_AUGMENT_CODE);
+            writeInt(value);
+        }
+    }
+
+    @Override
+    void writeModule(final QNameModule module) throws IOException {
+        final Integer value = moduleCodeMap.get(module);
+        if (value == null) {
+            // Fresh QNameModule, remember it and emit as three strings
+            moduleCodeMap.put(module, moduleCodeMap.size());
+            writeByte(TokenTypes.IS_MODULE_VALUE);
+            super.writeModule(module);
+        } else {
+            // We have already seen this QNameModule: write its code
+            writeByte(TokenTypes.IS_MODULE_CODE);
             writeInt(value);
         }
     }

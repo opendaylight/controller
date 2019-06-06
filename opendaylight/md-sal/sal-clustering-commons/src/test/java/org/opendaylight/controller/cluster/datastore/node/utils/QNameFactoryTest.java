@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory.Key;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Revision;
@@ -34,16 +33,16 @@ public class QNameFactoryTest {
     @Test
     public void testBasic() {
         QName expected = TestModel.AUG_NAME_QNAME;
-        QName created = QNameFactory.create(createKey(expected));
+        QName created = lookup(expected);
         assertNotSame(expected, created);
         assertEquals(expected, created);
 
-        QName cached = QNameFactory.create(createKey(expected));
+        QName cached = lookup(expected);
         assertSame(created, cached);
     }
 
-    private static Key createKey(final QName qname) {
-        return new Key(qname.getLocalName(), qname.getNamespace().toString(),
+    private static QName lookup(final QName qname) {
+        return QNameFactory.create(qname.getLocalName(), qname.getNamespace().toString(),
             qname.getRevision().map(Revision::toString).orElse(null));
     }
 }
