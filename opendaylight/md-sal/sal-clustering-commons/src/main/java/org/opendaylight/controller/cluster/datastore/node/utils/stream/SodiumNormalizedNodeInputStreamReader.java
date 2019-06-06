@@ -13,13 +13,16 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
 final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeInputStreamReader {
     private final ArrayList<NodeIdentifier> codedNodeIdentifiers = new ArrayList<>();
     private final List<AugmentationIdentifier> codedAugments = new ArrayList<>();
+    private final List<QNameModule> codedModules = new ArrayList<>();
     private final List<QName> codedQNames = new ArrayList<>();
 
     SodiumNormalizedNodeInputStreamReader(final DataInput input) {
@@ -49,7 +52,7 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
         final byte valueType = readByte();
         switch (valueType) {
             case TokenTypes.IS_AUGMENT_CODE:
-                return codecAugmentId(readInt());
+                return codedAugmentId(readInt());
             case TokenTypes.IS_AUGMENT_VALUE:
                 return rawAugmentId();
             default:
@@ -67,6 +70,18 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
                 return codedNodeIdentifier(readInt());
             case TokenTypes.IS_QNAME_VALUE:
                 return rawNodeIdentifier();
+            default:
+                throw new IOException("Unhandled QName value type " + valueType);
+        }
+    }
+
+    private QNameModule readModule() throws IOException {
+        final byte valueType = readByte();
+        switch (valueType) {
+            case TokenTypes.IS_MODULE_CODE:
+                return codedModule(readInt());
+            case TokenTypes.IS_MODULE_VALUE:
+                return rawModule();
             default:
                 throw new IOException("Unhandled QName value type " + valueType);
         }
@@ -112,12 +127,14 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
     }
 
     private QName rawQName() throws IOException {
-        final QName qname = super.readQName();
+        final String localName = readCodedString();
+        final QNameModule module = readModule();
+        final QName qname = QNameFactory.create(module, localName);
         codedQNames.add(qname);
         return qname;
     }
 
-    private AugmentationIdentifier codecAugmentId(final int code) throws IOException {
+    private AugmentationIdentifier codedAugmentId(final int code) throws IOException {
         try {
             return codedAugments.get(code);
         } catch (IndexOutOfBoundsException e) {
@@ -129,5 +146,21 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
         final AugmentationIdentifier aid = super.readAugmentationIdentifier();
         codedAugments.add(aid);
         return aid;
+    }
+
+    private QNameModule codedModule(final int code) throws IOException {
+        try {
+            return codedModules.get(code);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IOException("Module code " + code + " was not found", e);
+        }
+    }
+
+    private QNameModule rawModule() throws IOException {
+        final String namespace = readCodedString();
+        final String revision = readCodedString();
+        final QNameModule mod = QNameFactory.createModule(namespace, revision);
+        codedModules.add(mod);
+        return mod;
     }
 }
