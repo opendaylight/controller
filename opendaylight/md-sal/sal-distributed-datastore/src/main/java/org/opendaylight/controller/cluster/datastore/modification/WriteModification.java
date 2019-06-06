@@ -19,6 +19,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
 /**
  * WriteModification stores all the parameters required to write data to the specified path.
@@ -78,9 +79,9 @@ public class WriteModification extends AbstractModification {
         SerializationUtils.writeNodeAndPath(out, getPath(), data);
     }
 
-    public static WriteModification fromStream(final NormalizedNodeDataInput in, final short version)
-            throws IOException {
-        final NormalizedNode<?, ?> node = in.readNormalizedNode();
+    public static WriteModification fromStream(final NormalizedNodeDataInput in, final short version,
+            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+        final NormalizedNode<?, ?> node = in.readNormalizedNode(writer);
         final YangInstanceIdentifier path = in.readYangInstanceIdentifier();
         return new WriteModification(version, path, node);
     }
