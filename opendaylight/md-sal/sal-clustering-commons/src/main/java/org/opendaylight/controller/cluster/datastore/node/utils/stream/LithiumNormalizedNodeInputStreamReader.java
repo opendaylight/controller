@@ -215,11 +215,10 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         String namespace = readCodedString();
         String revision = Strings.emptyToNull(readCodedString());
 
-        return QNameFactory.create(new QNameFactory.Key(localName, namespace, revision));
+        return QNameFactory.create(localName, namespace, revision);
     }
 
-
-    private String readCodedString() throws IOException {
+    final String readCodedString() throws IOException {
         final byte valueType = input.readByte();
         switch (valueType) {
             case TokenTypes.IS_NULL_VALUE:
