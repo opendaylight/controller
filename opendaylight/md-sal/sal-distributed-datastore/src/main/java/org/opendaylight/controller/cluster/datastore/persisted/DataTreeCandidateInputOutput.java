@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNod
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +49,11 @@ public final class DataTreeCandidateInputOutput {
     }
 
     private static DataTreeCandidateNode readModifiedNode(final ModificationType type,
-            final NormalizedNodeDataInput in) throws IOException {
+            final NormalizedNodeDataInput in, final ReusableImmutableNormalizedNodeStreamWriter writer)
+                    throws IOException {
 
         final PathArgument identifier = in.readPathArgument();
-        final Collection<DataTreeCandidateNode> children = readChildren(in);
+        final Collection<DataTreeCandidateNode> children = readChildren(in, writer);
         if (children.isEmpty()) {
             LOG.debug("Modified node {} does not have any children, not instantiating it", identifier);
             return null;
@@ -60,7 +62,8 @@ public final class DataTreeCandidateInputOutput {
         return ModifiedDataTreeCandidateNode.create(identifier, type, children);
     }
 
-    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in) throws IOException {
+    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in,
+            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
         final int size = in.readInt();
         if (size == 0) {
             return ImmutableList.of();
@@ -68,7 +71,7 @@ public final class DataTreeCandidateInputOutput {
 
         final Collection<DataTreeCandidateNode> ret = new ArrayList<>(size);
         for (int i = 0; i < size; ++i) {
-            final DataTreeCandidateNode child = readNode(in);
+            final DataTreeCandidateNode child = readNode(in, writer);
             if (child != null) {
                 ret.add(child);
             }
@@ -76,27 +79,29 @@ public final class DataTreeCandidateInputOutput {
         return ret;
     }
 
-    private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in) throws IOException {
+    private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in,
+            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
         final byte type = in.readByte();
         switch (type) {
             case APPEARED:
-                return readModifiedNode(ModificationType.APPEARED, in);
+                return readModifiedNode(ModificationType.APPEARED, in, writer);
             case DELETE:
                 return DeletedDataTreeCandidateNode.create(in.readPathArgument());
             case DISAPPEARED:
-                return readModifiedNode(ModificationType.DISAPPEARED, in);
+                return readModifiedNode(ModificationType.DISAPPEARED, in, writer);
             case SUBTREE_MODIFIED:
-                return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in);
+                return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in, writer);
             case UNMODIFIED:
                 return null;
             case WRITE:
-                return DataTreeCandidateNodes.written(in.readNormalizedNode());
+                return DataTreeCandidateNodes.written(in.readNormalizedNode(writer));
             default:
                 throw new IllegalArgumentException("Unhandled node type " + type);
         }
     }
 
-    public static DataTreeCandidate readDataTreeCandidate(final DataInput in) throws IOException {
+    public static DataTreeCandidate readDataTreeCandidate(final DataInput in,
+            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
         final NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(in);
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
@@ -104,20 +109,22 @@ public final class DataTreeCandidateInputOutput {
         final DataTreeCandidateNode rootNode;
         switch (type) {
             case APPEARED:
-                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED, readChildren(reader));
+                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED,
+                    readChildren(reader, writer));
                 break;
             case DELETE:
                 rootNode = DeletedDataTreeCandidateNode.create();
                 break;
             case DISAPPEARED:
-                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED, readChildren(reader));
+                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED,
+                    readChildren(reader, writer));
                 break;
             case SUBTREE_MODIFIED:
                 rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.SUBTREE_MODIFIED,
-                        readChildren(reader));
+                        readChildren(reader, writer));
                 break;
             case WRITE:
-                rootNode = DataTreeCandidateNodes.written(reader.readNormalizedNode());
+                rootNode = DataTreeCandidateNodes.written(reader.readNormalizedNode(writer));
                 break;
             case UNMODIFIED:
                 rootNode = AbstractDataTreeCandidateNode.createUnmodified();
