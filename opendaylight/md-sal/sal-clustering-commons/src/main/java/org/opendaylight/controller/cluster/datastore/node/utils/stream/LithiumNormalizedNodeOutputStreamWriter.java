@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
 
 /**
@@ -43,8 +44,12 @@ class LithiumNormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeData
     @Override
     protected void writeQName(final QName qname) throws IOException {
         writeString(qname.getLocalName());
-        writeString(qname.getNamespace().toString());
-        writeString(qname.getRevision().map(Revision::toString).orElse(null));
+        writeModule(qname.getModule());
+    }
+
+    void writeModule(final QNameModule module) throws IOException {
+        writeString(module.getNamespace().toString());
+        writeString(module.getRevision().map(Revision::toString).orElse(null));
     }
 
     @Override
