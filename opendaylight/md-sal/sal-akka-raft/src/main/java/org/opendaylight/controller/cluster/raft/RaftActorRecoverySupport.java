@@ -241,11 +241,12 @@ class RaftActorRecoverySupport {
             endCurrentLogRecoveryBatch();
         }
 
-        String recoveryTime = "";
+        final String recoveryTime;
         if (recoveryTimer != null) {
-            recoveryTimer.stop();
-            recoveryTime = " in " + recoveryTimer.toString();
+            recoveryTime = " in " + recoveryTimer.stop();
             recoveryTimer = null;
+        } else {
+            recoveryTime = "";
         }
 
         log.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
