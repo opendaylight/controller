@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79b3b000_5dda199e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderInstallSnapshotState.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-06-07T14:47:29Z",
+      "side": 1,
+      "message": "MoreObjects.toStringHelper() is more maintainable",
+      "range": {
+        "startLine": 206,
+        "startChar": 14,
+        "endLine": 208,
+        "endChar": 38
+      },
+      "revId": "3462878331ea63430e26c66f08d446c0283ced78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5168f4a_01d3e27d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderInstallSnapshotState.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-06-07T14:47:29Z",
+      "side": 1,
+      "message": "let\u0027s skip this one -- it can be large-ish",
+      "range": {
+        "startLine": 217,
+        "startChar": 16,
+        "endLine": 217,
+        "endChar": 67
+      },
+      "revId": "3462878331ea63430e26c66f08d446c0283ced78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
