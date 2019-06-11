@@ -323,15 +323,18 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     logName(), followerId, context.getCommitIndex(), context.getLastApplied(), currentTerm());
         }
 
-        possiblyUpdateCommitIndex();
 
-        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
-        sendUpdatesToFollower(followerId, followerLogInformation, false, !updated);
+        final boolean updatedCommitIndex = possiblyUpdateCommitIndex();
+
+        // Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event. If we
+        // have updated the commit index, we should expedite application of state and not wait for next heartbeat to do
+        // that.
+        sendUpdatesToFollower(followerId, followerLogInformation, false, !updated || updatedCommitIndex);
 
         return this;
     }
 
-    private void possiblyUpdateCommitIndex() {
+    private boolean possiblyUpdateCommitIndex() {
         // Figure out if we can update the the commitIndex as follows:
         //   If there exists an index N such that N > commitIndex, a majority of matchIndex[i] ≥ N,
         //     and log[N].term == currentTerm:
@@ -392,16 +395,22 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         // Apply the change to the state machine
+        final boolean appliedUpdated;
         if (context.getCommitIndex() > context.getLastApplied()) {
             log.debug("{}: Applying to log - commitIndex: {}, lastAppliedIndex: {}", logName(),
                     context.getCommitIndex(), context.getLastApplied());
 
             applyLogToStateMachine(context.getCommitIndex());
+            appliedUpdated = true;
+        } else {
+            appliedUpdated = false;
         }
 
         if (!context.getSnapshotManager().isCapturing()) {
             purgeInMemoryLog();
         }
+
+        return appliedUpdated;
     }
 
     private boolean updateFollowerLogInformation(final FollowerLogInformation followerLogInformation,
