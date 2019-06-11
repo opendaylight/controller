@@ -56,7 +56,7 @@ public class FollowerLogInformationTest {
     // we cannot rely comfortably that the sleep will indeed sleep for the desired time
     // hence getting the actual elapsed time and do a match.
     // if the sleep has spilled over, then return the test gracefully
-    private static long sleepWithElaspsedTimeReturned(long millis) {
+    private static long sleepWithElaspsedTimeReturned(final long millis) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         Uninterruptibles.sleepUninterruptibly(millis, TimeUnit.MILLISECONDS);
         stopwatch.stop();
@@ -70,16 +70,17 @@ public class FollowerLogInformationTest {
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 10, context);
 
-        assertTrue(followerLogInformation.okToReplicate());
-        assertFalse(followerLogInformation.okToReplicate());
+        followerLogInformation.setSentCommitIndex(0);
+        assertTrue(followerLogInformation.okToReplicate(0));
+        assertFalse(followerLogInformation.okToReplicate(0));
 
         // wait for 150 milliseconds and it should work again
         Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
-        assertTrue(followerLogInformation.okToReplicate());
+        assertTrue(followerLogInformation.okToReplicate(0));
 
         //increment next index and try immediately and it should work again
         followerLogInformation.incrNextIndex();
-        assertTrue(followerLogInformation.okToReplicate());
+        assertTrue(followerLogInformation.okToReplicate(0));
     }
 
     @Test
@@ -89,13 +90,13 @@ public class FollowerLogInformationTest {
         context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
-        assertFalse(followerLogInformation.okToReplicate());
+        assertFalse(followerLogInformation.okToReplicate(0));
 
         followerLogInformation.markFollowerActive();
         assertFalse(followerLogInformation.isFollowerActive());
 
         peerInfo.setVotingState(VotingState.VOTING);
-        assertTrue(followerLogInformation.okToReplicate());
+        assertTrue(followerLogInformation.okToReplicate(0));
 
         followerLogInformation.markFollowerActive();
         assertTrue(followerLogInformation.isFollowerActive());
@@ -108,7 +109,7 @@ public class FollowerLogInformationTest {
         context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
-        assertTrue(followerLogInformation.okToReplicate());
+        assertTrue(followerLogInformation.okToReplicate(0));
 
         followerLogInformation.markFollowerActive();
         assertTrue(followerLogInformation.isFollowerActive());
