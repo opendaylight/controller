@@ -695,7 +695,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     log.debug("{}: sendAppendEntries: {} is present for follower {}", logName(),
                             followerNextIndex, followerId);
 
-                    if (followerLogInformation.okToReplicate()) {
+                    if (followerLogInformation.okToReplicate(context.getCommitIndex())) {
                         entries = getEntriesToSend(followerLogInformation, followerActor);
                         sendAppendEntries = true;
                     }
