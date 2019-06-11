@@ -677,7 +677,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     } else if (installSnapshotState.canSendNextChunk()) {
                         sendSnapshotChunk(followerActor, followerLogInformation);
                     }
-                } else if (sendHeartbeat) {
+                } else if (sendHeartbeat || followerLogInformation.hasStaleCommitIndex(context.getCommitIndex())) {
                     // we send a heartbeat even if we have not received a reply for the last chunk
                     sendAppendEntries = true;
                 }
@@ -698,7 +698,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     log.debug("{}: sendAppendEntries: {} is present for follower {}", logName(),
                             followerNextIndex, followerId);
 
-                    if (followerLogInformation.okToReplicate()) {
+                    if (followerLogInformation.okToReplicate(context.getCommitIndex())) {
                         entries = getEntriesToSend(followerLogInformation, followerActor);
                         sendAppendEntries = true;
                     }
@@ -726,7 +726,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                                 context.getReplicatedLog().size());
                     }
 
-                } else if (sendHeartbeat) {
+                } else if (sendHeartbeat || followerLogInformation.hasStaleCommitIndex(context.getCommitIndex())) {
                     // we send an AppendEntries, even if the follower is inactive
                     // in-order to update the followers timestamp, in case it becomes active again
                     sendAppendEntries = true;
@@ -837,6 +837,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     appendEntries);
         }
 
+        followerLogInformation.setSentCommitIndex(leaderCommitIndex);
         followerActor.tell(appendEntries, actor());
     }
 

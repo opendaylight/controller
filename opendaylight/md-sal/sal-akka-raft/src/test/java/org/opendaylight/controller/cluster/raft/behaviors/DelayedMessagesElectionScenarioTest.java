@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -148,15 +149,19 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         // should switch to Candidate and send out RequestVote messages. Set member 1 and 3 actors
         // to capture RequestVote but not to forward to the behavior just yet as we want to
         // control the order of RequestVote messages to member 1 and 3.
-
-        member1Actor.dropMessagesToBehavior(RequestVote.class);
-
         member2Actor.expectBehaviorStateChange();
 
+        // member 1 and member 3 may reach consensus to consider leader's initial Noop entry as committed, hence
+        // leader would elicit this information to member 2.
+        // We do not want that, as member 2 would respond to that request either before it bumps or after it bumps its
+        // term -- if it would see that message post-bump, it would leak term 2 back to member 1, hence leader would
+        // know about it.
+        member2Actor.dropMessagesToBehavior(AppendEntries.class);
+
+        member1Actor.dropMessagesToBehavior(RequestVote.class);
         member3Actor.dropMessagesToBehavior(RequestVote.class);
 
         member2ActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
-
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);
 
