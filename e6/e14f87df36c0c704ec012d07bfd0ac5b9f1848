@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Wed, 12 Jun 2019 13:38:46 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/82468
+Project: controller
+Branch: refs/heads/stable/neon
