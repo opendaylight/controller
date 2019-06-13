@@ -16,8 +16,8 @@ import static org.mockito.Mockito.when;
 import akka.actor.Status.Failure;
 import java.time.Duration;
 import org.junit.Test;
-import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
-import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
+import org.opendaylight.controller.remote.rpc.messages.ExecuteOps;
+import org.opendaylight.controller.remote.rpc.messages.OpsResponse;
 import org.opendaylight.mdsal.dom.api.DOMRpcException;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
@@ -25,7 +25,7 @@ import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
-public class RpcBrokerTest extends AbstractRpcTest {
+public class OpsBrokerTest extends AbstractOpsTest {
 
     @Test
     public void testExecuteRpc() {
@@ -34,13 +34,13 @@ public class RpcBrokerTest extends AbstractRpcTest {
         when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(
             FluentFutures.immediateFluentFuture(rpcResult));
 
-        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
+        final ExecuteOps executeOps = ExecuteOps.from(TEST_RPC_ID.getType().getLastComponent(), null, null, true);
 
-        rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
+        rpcInvoker1.tell(executeOps, rpcRegistry1Probe.getRef());
 
-        final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), RpcResponse.class);
+        final OpsResponse opsResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), OpsResponse.class);
 
-        assertEquals(rpcResult.getResult(), rpcResponse.getResultNormalizedNode());
+        assertEquals(rpcResult.getResult(), opsResponse.getResultNormalizedNode());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
         when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(FluentFutures.immediateFailedFluentFuture(
             new DOMRpcImplementationNotAvailableException("NOT FOUND")));
 
-        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
+        final ExecuteOps executeMsg = ExecuteOps.from(TEST_RPC_ID.getType().getLastComponent(), null, null, true);
 
         rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
 

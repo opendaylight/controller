@@ -19,18 +19,20 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
+import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
 
-public class RemoteRpcProviderTest {
+public class RemoteOpsProviderTest {
     static ActorSystem system;
-    static RemoteRpcProviderConfig moduleConfig;
+    static RemoteOpsProviderConfig moduleConfig;
 
     @BeforeClass
     public static void setup() {
-        moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc")
+        moduleConfig = new RemoteOpsProviderConfig.Builder("odl-cluster-rpc")
                 .withConfigReader(ConfigFactory::load).build();
         final Config config = moduleConfig.get();
         system = ActorSystem.create("odl-cluster-rpc", config);
@@ -45,11 +47,11 @@ public class RemoteRpcProviderTest {
 
     @Test
     public void testRemoteRpcProvider() throws Exception {
-        try (RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
-            mock(DOMRpcService.class), new RemoteRpcProviderConfig(system.settings().config()))) {
+        try (RemoteOpsProvider rpcProvider = new RemoteOpsProvider(system, mock(DOMRpcProviderService.class),
+                mock(DOMRpcService.class), new RemoteOpsProviderConfig(system.settings().config()),
+                mock(DOMActionProviderService.class), mock(DOMActionService.class))) {
 
             rpcProvider.start();
-
             final ActorRef actorRef = Await.result(
                     system.actorSelection(moduleConfig.getRpcManagerPath()).resolveOne(
                             FiniteDuration.create(1, TimeUnit.SECONDS)), FiniteDuration.create(2, TimeUnit.SECONDS));

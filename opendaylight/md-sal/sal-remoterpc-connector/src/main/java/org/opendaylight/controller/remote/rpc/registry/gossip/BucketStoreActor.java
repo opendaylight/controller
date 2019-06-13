@@ -37,7 +37,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 
 /**
  * A store that syncs its data across nodes in the cluster.
@@ -72,7 +72,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      */
     private final SetMultimap<ActorRef, Address> watchedActors = HashMultimap.create(1, 1);
 
-    private final RemoteRpcProviderConfig config;
+    private final RemoteOpsProviderConfig config;
     private final String persistenceId;
 
     /**
@@ -88,7 +88,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private Integer incarnation;
     private boolean persisting;
 
-    protected BucketStoreActor(final RemoteRpcProviderConfig config, final String persistenceId, final T initialData) {
+    protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
         this.config = Preconditions.checkNotNull(config);
         this.initialData = Preconditions.checkNotNull(initialData);
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
@@ -212,7 +212,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         }
     }
 
-    protected final RemoteRpcProviderConfig getConfig() {
+    protected final RemoteOpsProviderConfig getConfig() {
         return config;
     }
 
