@@ -15,7 +15,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-mdsal-benchmark-aggregator</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 

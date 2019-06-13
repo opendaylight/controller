@@ -10,7 +10,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>odl-jolokia-osgi</artifactId>
-  <version>0.8.3-SNAPSHOT</version>
+  <version>0.8.3</version>
   <packaging>jar</packaging>
 
   <build>

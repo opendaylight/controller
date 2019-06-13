@@ -13,14 +13,14 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.13.3-SNAPSHOT</version>
+        <version>0.13.3</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller.model</groupId>
     <artifactId>model-inventory</artifactId>
     <packaging>bundle</packaging>
-    <version>1.8.3-SNAPSHOT</version>
+    <version>1.8.3</version>
 
     <dependencies>
         <dependency>
