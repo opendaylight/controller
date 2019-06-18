@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardM
 import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
-public class TestDistributedDataStore extends DistributedDataStore {
+public class TestDistributedDataStore extends DistributedDataStore implements LocalShardStore {
 
     public TestDistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
                                     final Configuration configuration,
@@ -31,5 +31,14 @@ public class TestDistributedDataStore extends DistributedDataStore {
     @Override
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
         return new TestShardManager.TestShardManagerCreator();
+    }
+
+    @Override
+    public TestShardManager.GetLocalShardsReply getLocalShards() {
+        TestShardManager.GetLocalShardsReply reply =
+            (TestShardManager.GetLocalShardsReply) getActorUtils()
+                .executeOperation(getActorUtils().getShardManager(), TestShardManager.GetLocalShards.INSTANCE);
+
+        return reply;
     }
 }
