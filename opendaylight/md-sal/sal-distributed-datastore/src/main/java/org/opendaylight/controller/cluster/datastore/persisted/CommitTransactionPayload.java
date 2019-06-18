@@ -28,6 +28,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -42,9 +43,12 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public abstract class CommitTransactionPayload extends Payload implements Serializable {
+public abstract class CommitTransactionPayload extends Payload
+        implements Identifiable<TransactionIdentifier>, Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
+
+    private Entry<TransactionIdentifier, DataTreeCandidate> candidate = null;
 
     CommitTransactionPayload() {
 
@@ -71,7 +75,10 @@ public abstract class CommitTransactionPayload extends Payload implements Serial
     }
 
     public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
-        return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
+        if (candidate == null) {
+            candidate = getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
+        }
+        return candidate;
     }
 
     public final Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
@@ -79,6 +86,14 @@ public abstract class CommitTransactionPayload extends Payload implements Serial
         final DataInput in = newDataInput();
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver));
+    }
+
+    public TransactionIdentifier getIdentifier() {
+        try  {
+            return getCandidate().getKey();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     abstract void writeBytes(ObjectOutput out) throws IOException;

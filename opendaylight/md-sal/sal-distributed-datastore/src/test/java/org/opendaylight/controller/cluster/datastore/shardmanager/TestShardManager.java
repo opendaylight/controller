@@ -20,6 +20,15 @@ public class TestShardManager extends ShardManager {
         super(builder);
     }
 
+    @Override
+    public void handleCommand(Object message) throws Exception {
+        if (GetLocalShards.INSTANCE.equals(message)) {
+            sender().tell(new GetLocalShardsReply(localShards), null);
+        } else {
+            super.handleCommand(message);
+        }
+    }
+
     /**
      * Plug into shard actor creation to replace info with our testing one.
      * @param info shard info.
@@ -27,10 +36,12 @@ public class TestShardManager extends ShardManager {
      */
     @Override
     protected ActorRef newShardActor(ShardInformation info) {
+        Map<String, String> peerAddresses = getPeerAddresses(info.getShardName());
         ShardInformation newInfo = new ShardInformation(info.getShardName(),
-                info.getShardId(), getPeerAddresses(info.getShardName()),
+                info.getShardId(), peerAddresses,
                 info.getDatastoreContext(),
-                TestShard.builder().restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
+                TestShard.builder()
+                        .restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
                 peerAddressResolver);
         newInfo.setSchemaContext(info.getSchemaContext());
         newInfo.setActiveMember(info.isActiveMember());
@@ -56,6 +67,27 @@ public class TestShardManager extends ShardManager {
         public Props props() {
             verify();
             return Props.create(TestShardManager.class, this);
+        }
+    }
+
+    public static final class GetLocalShards {
+        public static final GetLocalShards INSTANCE = new GetLocalShards();
+
+        private GetLocalShards() {
+
+        }
+    }
+
+    public static class GetLocalShardsReply {
+
+        private final Map<String, ShardInformation> localShards;
+
+        public GetLocalShardsReply(Map<String, ShardInformation> localShards) {
+            this.localShards = localShards;
+        }
+
+        public Map<String, ShardInformation> getLocalShards() {
+            return localShards;
         }
     }
 }
