@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.testkit.TestActorRef;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.TestShard;
@@ -22,8 +24,23 @@ public class TestShardManager extends ShardManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestShardManager.class);
 
+    private final Map<String, TestActorRef<TestShard>> shardActors = new HashMap<>();
+
     TestShardManager(AbstractShardManagerCreator<?> builder) {
         super(builder);
+    }
+
+    @Override
+    public void handleCommand(Object message) throws Exception {
+        if (GetShardActors.INSTANCE.equals(message)) {
+            sender().tell(new GetShardActorsReply(shardActors), null);
+            return;
+        }
+        if (GetLocalShards.INSTANCE.equals(message)) {
+            sender().tell(new GetLocalShardsReply(localShards), null);
+            return;
+        }
+        super.handleCommand(message);
     }
 
     /**
@@ -33,10 +50,12 @@ public class TestShardManager extends ShardManager {
      */
     @Override
     protected ActorRef newShardActor(ShardInformation info) {
+        Map<String, String> peerAddresses = getPeerAddresses(info.getShardName());
         ShardInformation newInfo = new ShardInformation(info.getShardName(),
-                info.getShardId(), getPeerAddresses(info.getShardName()),
+                info.getShardId(), peerAddresses,
                 info.getDatastoreContext(),
-                TestShard.builder().restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
+                TestShard.builder()
+                        .restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
                 peerAddressResolver);
         newInfo.setSchemaContext(info.getSchemaContext());
         newInfo.setActiveMember(info.isActiveMember());
@@ -45,6 +64,7 @@ public class TestShardManager extends ShardManager {
 
         return getContext().actorOf(newInfo.newProps().withDispatcher(shardDispatcherPath),
                 info.getShardId().toString());
+//        return newTestShardActor(newInfo.getShardId().toString(), newInfo.newProps());
     }
 
     ShardInformation createShardInfoFor(String shardName, ShardIdentifier shardId,
@@ -63,4 +83,47 @@ public class TestShardManager extends ShardManager {
             return Props.create(TestShardManager.class, this);
         }
     }
+
+    public static final class GetLocalShards {
+        public static final GetLocalShards INSTANCE = new GetLocalShards();
+
+        private GetLocalShards() {
+
+        }
+    }
+
+    public static class GetLocalShardsReply {
+
+        private Map<String, ShardInformation> localShards;
+
+        public GetLocalShardsReply(Map<String, ShardInformation> localShards) {
+            this.localShards = localShards;
+        }
+
+        public Map<String, ShardInformation> getLocalShards() {
+            return localShards;
+        }
+    }
+
+    public static final class GetShardActors {
+        public static final GetShardActors INSTANCE = new GetShardActors();
+
+        private GetShardActors() {
+
+        }
+    }
+
+    public static class GetShardActorsReply {
+        private Map<String, TestActorRef<TestShard>> actors;
+
+        public GetShardActorsReply(Map<String, TestActorRef<TestShard>> actors) {
+            this.actors = actors;
+        }
+
+        public Map<String, TestActorRef<TestShard>> getActors() {
+            return actors;
+        }
+    }
+
+
 }

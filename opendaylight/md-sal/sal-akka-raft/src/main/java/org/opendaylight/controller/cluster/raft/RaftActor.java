@@ -219,6 +219,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     // FIXME: make this method final once our unit tests do not need to override it
     protected void handleCommand(final Object message) {
+        LOG.debug("{}: received message {}", persistenceId(), message);
         if (serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
         }

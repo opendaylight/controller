@@ -35,7 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -55,7 +54,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { TestDistributedDataStore.class }, { TestClientBackedDataStore.class }
+                { TestDistributedDataStore.class }
         });
     }
 
@@ -77,7 +76,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void testTransactionWritesWithShardNotInitiallyReady(final String testName, final boolean writeOnly)
             throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder, 20);
         final String shardName = "test-1";
 
         // Setup the InMemoryJournal to block shard recovery to ensure
