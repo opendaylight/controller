@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CheckConsensusReached;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -55,6 +56,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -433,8 +436,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         super.performSnapshotWithoutCapture(minReplicatedToAllIndex);
     }
 
-    @Override
-    protected ClientRequestTracker removeClientRequestTracker(final long logIndex) {
+    /**
+     * Removes and returns the ClientRequestTracker for the specified log index.
+     * @param logIndex the log index
+     * @return the ClientRequestTracker or null if none available
+     */
+    private ClientRequestTracker removeClientRequestTracker(final long logIndex) {
         final Iterator<ClientRequestTracker> it = trackers.iterator();
         while (it.hasNext()) {
             final ClientRequestTracker t = it.next();
@@ -445,6 +452,28 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         return null;
+    }
+
+    @Override
+    final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
+        // first check whether a ClientRequestTracker exists for this entry.
+        // If it does that means the leader wasn't dropped before the transaction applied.
+        // That means that this transaction can be safely applied as a local transaction since we
+        // have the ClientRequestTracker.
+        final ClientRequestTracker tracker = removeClientRequestTracker(entry.getIndex());
+        if (tracker != null) {
+            return new ApplyState(tracker.getClientActor(), tracker.getIdentifier(), entry);
+        }
+
+        // Tracker is missing, this means that we switched behaviours between replicate and applystate
+        // and became the leader again,. We still want to apply this as a local modification because
+        // we have resumed leadership with that log entry having been committed.
+        final Payload payload = entry.getData();
+        if (payload instanceof IdentifiablePayload) {
+            return new ApplyState(null, ((IdentifiablePayload<?>) payload).getIdentifier(), entry);
+        }
+
+        return new ApplyState(null, null, entry);
     }
 
     @Override
