@@ -55,7 +55,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { TestDistributedDataStore.class }, { TestClientBackedDataStore.class }
+                { TestDistributedDataStore.class} , {TestClientBackedDataStore.class }
         });
     }
 
@@ -77,7 +77,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void testTransactionWritesWithShardNotInitiallyReady(final String testName, final boolean writeOnly)
             throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder, 20);
         final String shardName = "test-1";
 
         // Setup the InMemoryJournal to block shard recovery to ensure
