@@ -397,13 +397,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
 
-                final ApplyState applyState;
-                final ClientRequestTracker tracker = removeClientRequestTracker(i);
-                if (tracker != null) {
-                    applyState = new ApplyState(tracker.getClientActor(), tracker.getIdentifier(), replicatedLogEntry);
-                } else {
-                    applyState = new ApplyState(null, null, replicatedLogEntry);
-                }
+                final ApplyState applyState = getApplyStateFor(replicatedLogEntry);
 
                 log.debug("{}: Setting last applied to {}", logName(), i);
 
@@ -423,6 +417,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         //in case if the above code throws an error and this message is not sent, it would be fine
         // as the  append entries received later would initiate add this message to the journal
         actor().tell(new ApplyJournalEntries(context.getLastApplied()), actor());
+    }
+
+    /**
+     * Create an ApplyState message for a particular log entry so we can determine how to apply this entry.
+     * @param entry the log entry
+     * @return ApplyState for this entry
+     */
+    protected ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
+        return new ApplyState(null, null, entry);
     }
 
     @Override
