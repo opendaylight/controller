@@ -13,13 +13,14 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
+import org.opendaylight.controller.cluster.datastore.LocalShardStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
-public class TestClientBackedDataStore extends ClientBackedDataStore {
+public class TestClientBackedDataStore extends ClientBackedDataStore implements LocalShardStore {
 
     public TestClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
                                      final Configuration configuration,
@@ -36,5 +37,14 @@ public class TestClientBackedDataStore extends ClientBackedDataStore {
     @Override
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
         return new TestShardManager.TestShardManagerCreator();
+    }
+
+    @Override
+    public TestShardManager.GetLocalShardsReply getLocalShards() {
+        TestShardManager.GetLocalShardsReply reply =
+                (TestShardManager.GetLocalShardsReply) getActorUtils()
+                        .executeOperation(getActorUtils().getShardManager(), TestShardManager.GetLocalShards.INSTANCE);
+
+        return reply;
     }
 }
