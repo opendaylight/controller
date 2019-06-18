@@ -159,6 +159,7 @@ public class TestActorFactory implements AutoCloseable {
             }
         }
 
+        LOG.warn("Actor failed to ready {}", actorRef);
         throw new RuntimeException(lastError);
     }
 
