@@ -119,6 +119,10 @@ public class DatastoreTestTask {
 
         execute(write);
         if (registration != null) {
+            // DCL is asynchronous, we need to make sure all tasks are executed before we close the registration,
+            // otherwise they would get lost
+            dclExecutorService.shutdown();
+            dclExecutorService.awaitTermination(5, TimeUnit.SECONDS);
             registration.close();
         }
 
