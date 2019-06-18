@@ -37,4 +37,12 @@ public class TestClientBackedDataStore extends ClientBackedDataStore {
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
         return new TestShardManager.TestShardManagerCreator();
     }
+
+    public TestShardManager.GetLocalShardsReply getLocalShards() {
+        TestShardManager.GetLocalShardsReply reply =
+                (TestShardManager.GetLocalShardsReply) getActorUtils()
+                        .executeOperation(getActorUtils().getShardManager(), TestShardManager.GetLocalShards.INSTANCE);
+
+        return reply;
+    }
 }
