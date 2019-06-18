@@ -12,6 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
@@ -34,7 +36,8 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public final class CommitTransactionPayload extends Payload implements Serializable {
+public final class CommitTransactionPayload extends Payload
+        implements Identifiable<TransactionIdentifier>, Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
 
     private static final class Proxy implements Externalizable {
@@ -74,6 +77,10 @@ public final class CommitTransactionPayload extends Payload implements Serializa
 
     private final byte[] serialized;
 
+    private TransactionIdentifier identifier = null;
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not serializable but this class is.")
+    private DataTreeCandidate candidate = null;
+
     CommitTransactionPayload(final byte[] serialized) {
         this.serialized = Preconditions.checkNotNull(serialized);
     }
@@ -93,19 +100,37 @@ public final class CommitTransactionPayload extends Payload implements Serializa
 
     @VisibleForTesting
     public static CommitTransactionPayload create(final TransactionIdentifier transactionId,
-            final DataTreeCandidate candidate) throws IOException {
+                                                  final DataTreeCandidate candidate) throws IOException {
         return create(transactionId, candidate, 512);
     }
 
     public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
-        return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
+        deserializeIfNeeded(ReusableImmutableNormalizedNodeStreamWriter.create());
+        return new SimpleImmutableEntry<>(identifier, candidate);
     }
 
     public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
             final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
-        final DataInput in = ByteStreams.newDataInput(serialized);
-        return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
-                DataTreeCandidateInputOutput.readDataTreeCandidate(in, writer));
+        deserializeIfNeeded(writer);
+        return new SimpleImmutableEntry<>(identifier, candidate);
+    }
+
+    @Override
+    public TransactionIdentifier getIdentifier() {
+        try {
+            deserializeIfNeeded(ReusableImmutableNormalizedNodeStreamWriter.create());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return identifier;
+    }
+
+    private void deserializeIfNeeded(final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+        if (candidate == null) {
+            final DataInput in = ByteStreams.newDataInput(serialized);
+            identifier = TransactionIdentifier.readFrom(in);
+            candidate = DataTreeCandidateInputOutput.readDataTreeCandidate(in, writer);
+        }
     }
 
     @Override
