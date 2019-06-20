@@ -10,7 +10,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-binding-dom-it</artifactId>
-  <version>1.8.3-SNAPSHOT</version>
+  <version>1.8.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <dependencyManagement>
@@ -25,21 +25,21 @@
       <dependency>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>2.5.3-SNAPSHOT</version>
+        <version>2.5.4-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.mdsal.model</groupId>
         <artifactId>mdsal-model-artifacts</artifactId>
-        <version>0.13.3-SNAPSHOT</version>
+        <version>0.13.4-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>1.8.3-SNAPSHOT</version>
+        <version>1.8.4-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
