@@ -29,7 +29,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 
 
@@ -106,8 +106,8 @@ public class GossiperTest {
      * @return instance of Gossiper class
      */
     private static Gossiper createGossiper() {
-        final RemoteRpcProviderConfig config =
-                new RemoteRpcProviderConfig.Builder("unit-test")
+        final RemoteOpsProviderConfig config =
+                new RemoteOpsProviderConfig.Builder("unit-test")
                         .withConfigReader(ConfigFactory::load).build();
         final Props props = Gossiper.testProps(config);
         final TestActorRef<Gossiper> testRef = TestActorRef.create(system, props, "testGossiper");

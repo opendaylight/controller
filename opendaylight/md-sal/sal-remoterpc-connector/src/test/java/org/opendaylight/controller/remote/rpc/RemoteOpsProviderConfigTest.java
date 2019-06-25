@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedAbstractActor;
@@ -14,33 +19,34 @@ import akka.testkit.TestActorRef;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import scala.concurrent.duration.FiniteDuration;
 
-public class RemoteRpcProviderConfigTest {
+public class RemoteOpsProviderConfigTest {
 
     @Test
     public void testConfigDefaults() {
-        RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("unit-test").build();
+        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test").build();
 
         //Assert on configurations from common config
-        Assert.assertFalse(config.isMetricCaptureEnabled()); //should be disabled by default
-        Assert.assertNotNull(config.getMailBoxCapacity());
-        Assert.assertNotNull(config.getMailBoxName());
-        Assert.assertNotNull(config.getMailBoxPushTimeout());
+        assertFalse(config.isMetricCaptureEnabled()); //should be disabled by default
+        assertNotNull(config.getMailBoxCapacity());
+        assertNotNull(config.getMailBoxName());
+        assertNotNull(config.getMailBoxPushTimeout());
 
         //rest of the configurations should be set
-        Assert.assertNotNull(config.getActorSystemName());
-        Assert.assertNotNull(config.getRpcBrokerName());
-        Assert.assertNotNull(config.getRpcBrokerPath());
-        Assert.assertNotNull(config.getRpcManagerName());
-        Assert.assertNotNull(config.getRpcManagerPath());
-        Assert.assertNotNull(config.getRpcRegistryName());
-        Assert.assertNotNull(config.getRpcRegistryPath());
-        Assert.assertNotNull(config.getAskDuration());
-        Assert.assertNotNull(config.getGossipTickInterval());
+        assertNotNull(config.getActorSystemName());
+        assertNotNull(config.getRpcBrokerName());
+        assertNotNull(config.getRpcBrokerPath());
+        assertNotNull(config.getRpcManagerName());
+        assertNotNull(config.getRpcManagerPath());
+        assertNotNull(config.getRpcRegistryName());
+        assertNotNull(config.getActionRegistryName());
+        assertNotNull(config.getRpcRegistryPath());
+        assertNotNull(config.getActionRegistryPath());
+        assertNotNull(config.getAskDuration());
+        assertNotNull(config.getGossipTickInterval());
     }
 
     @Test
@@ -52,16 +58,16 @@ public class RemoteRpcProviderConfigTest {
         String timeOutVal = "10ms";
         FiniteDuration expectedTimeout = FiniteDuration.create(10, TimeUnit.MILLISECONDS);
 
-        RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("unit-test")
+        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test")
                 .metricCaptureEnabled(true)//enable metric capture
                 .mailboxCapacity(expectedCapacity)
                 .mailboxPushTimeout(timeOutVal)
                 .withConfigReader(reader)
                 .build();
 
-        Assert.assertTrue(config.isMetricCaptureEnabled());
-        Assert.assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
-        Assert.assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
+        assertTrue(config.isMetricCaptureEnabled());
+        assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
+        assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
 
         //Now check this config inside an actor
         ActorSystem system = ActorSystem.create("unit-test", config.get());
@@ -71,11 +77,11 @@ public class RemoteRpcProviderConfigTest {
         ConfigTestActor actor = configTestActorTestActorRef.underlyingActor();
         Config actorConfig = actor.getConfig();
 
-        config = new RemoteRpcProviderConfig(actorConfig);
+        config = new RemoteOpsProviderConfig(actorConfig);
 
-        Assert.assertTrue(config.isMetricCaptureEnabled());
-        Assert.assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
-        Assert.assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
+        assertTrue(config.isMetricCaptureEnabled());
+        assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
+        assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
     }
 
     public static class ConfigTestActor extends UntypedAbstractActor {
@@ -87,7 +93,7 @@ public class RemoteRpcProviderConfigTest {
         }
 
         @Override
-        public void onReceive(Object message) {
+        public void onReceive(final Object message) {
         }
 
         /**

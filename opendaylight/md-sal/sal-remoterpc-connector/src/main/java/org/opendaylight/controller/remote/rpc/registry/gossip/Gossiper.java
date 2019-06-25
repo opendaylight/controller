@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -61,7 +61,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     };
 
     private final boolean autoStartGossipTicks;
-    private final RemoteRpcProviderConfig config;
+    private final RemoteOpsProviderConfig config;
 
     /**
      * All known cluster members.
@@ -84,20 +84,20 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     private BucketStoreAccess bucketStore;
 
-    Gossiper(final RemoteRpcProviderConfig config, final Boolean autoStartGossipTicks) {
+    Gossiper(final RemoteOpsProviderConfig config, final Boolean autoStartGossipTicks) {
         this.config = Preconditions.checkNotNull(config);
         this.autoStartGossipTicks = autoStartGossipTicks.booleanValue();
     }
 
-    Gossiper(final RemoteRpcProviderConfig config) {
+    Gossiper(final RemoteOpsProviderConfig config) {
         this(config, Boolean.TRUE);
     }
 
-    public static Props props(final RemoteRpcProviderConfig config) {
+    public static Props props(final RemoteOpsProviderConfig config) {
         return Props.create(Gossiper.class, config);
     }
 
-    static Props testProps(final RemoteRpcProviderConfig config) {
+    static Props testProps(final RemoteOpsProviderConfig config) {
         return Props.create(Gossiper.class, config, Boolean.FALSE);
     }
 

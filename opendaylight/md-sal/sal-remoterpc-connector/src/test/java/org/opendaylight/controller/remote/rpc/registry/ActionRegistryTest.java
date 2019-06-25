@@ -45,19 +45,20 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.UpdateActions;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.UpdateRemoteActionEndpoints;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
-import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RpcRegistryTest {
-    private static final Logger LOG = LoggerFactory.getLogger(RpcRegistryTest.class);
+public class ActionRegistryTest {
+    private static final Logger LOG = LoggerFactory.getLogger(ActionRegistryTest.class);
 
     private static ActorSystem node1;
     private static ActorSystem node2;
@@ -122,13 +123,13 @@ public class RpcRegistryTest {
     public void setup() {
         invoker1 = new TestKit(node1);
         registrar1 = new TestKit(node1);
-        registry1 = node1.actorOf(RpcRegistry.props(config(node1), invoker1.getRef(), registrar1.getRef()));
+        registry1 = node1.actorOf(ActionRegistry.props(config(node1), invoker1.getRef(), registrar1.getRef()));
         invoker2 = new TestKit(node2);
         registrar2 = new TestKit(node2);
-        registry2 = node2.actorOf(RpcRegistry.props(config(node2), invoker2.getRef(), registrar2.getRef()));
+        registry2 = node2.actorOf(ActionRegistry.props(config(node2), invoker2.getRef(), registrar2.getRef()));
         invoker3 = new TestKit(node3);
         registrar3 = new TestKit(node3);
-        registry3 = node3.actorOf(RpcRegistry.props(config(node3), invoker3.getRef(), registrar3.getRef()));
+        registry3 = node3.actorOf(ActionRegistry.props(config(node3), invoker3.getRef(), registrar3.getRef()));
     }
 
     private static RemoteOpsProviderConfig config(final ActorSystem node) {
@@ -169,78 +170,79 @@ public class RpcRegistryTest {
     }
 
     /**
-     * One node cluster. 1. Register rpc, ensure router can be found 2. Then remove rpc, ensure its
+     * One node cluster. 1. Register action, ensure router can be found 2. Then remove action, ensure its
      * deleted
      */
     @Test
-    public void testAddRemoveRpcOnSameNode() {
-        LOG.info("testAddRemoveRpcOnSameNode starting");
+    public void testAddRemoveActionOnSameNode() {
+        LOG.info("testAddRemoveActionOnSameNode starting");
 
         Address nodeAddress = node1.provider().getDefaultAddress();
 
-        // Add rpc on node 1
+        // Add action on node 1
 
-        List<DOMRpcIdentifier> addedRouteIds = createRouteIds();
+        List<DOMActionInstance> addedRouteIds = createRouteIds();
 
-        registry1.tell(new AddOrUpdateRoutes(addedRouteIds), ActorRef.noSender());
+        registry1.tell(new ActionRegistry.Messages.UpdateActions(addedRouteIds,
+                Collections.emptyList()), ActorRef.noSender());
 
-        // Bucket store should get an update bucket message. Updated bucket contains added rpc.
+        // Bucket store should get an update bucket message. Updated bucket contains added action.
         final TestKit testKit = new TestKit(node1);
 
-        Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry1, testKit, nodeAddress);
+        Map<Address, Bucket<ActionRoutingTable>> buckets = retrieveBuckets(registry1, testKit, nodeAddress);
         verifyBucket(buckets.get(nodeAddress), addedRouteIds);
 
         Map<Address, Long> versions = retrieveVersions(registry1, testKit);
         assertEquals("Version for bucket " + nodeAddress, (Long) buckets.get(nodeAddress).getVersion(),
                 versions.get(nodeAddress));
 
-        // Now remove rpc
-        registry1.tell(new RemoveRoutes(addedRouteIds), ActorRef.noSender());
+        // Now remove action
+        registry1.tell(new UpdateActions(Collections.emptyList(),addedRouteIds), ActorRef.noSender());
 
-        // Bucket store should get an update bucket message. Rpc is removed in the updated bucket
+        // Bucket store should get an update bucket message. Action is removed in the updated bucket
 
         verifyEmptyBucket(testKit, registry1, nodeAddress);
 
-        LOG.info("testAddRemoveRpcOnSameNode ending");
+        LOG.info("testAddRemoveActionOnSameNode ending");
 
     }
 
     /**
-     * Three node cluster. 1. Register rpc on 1 node, ensure 2nd node gets updated 2. Remove rpc on
+     * Three node cluster. 1. Register action on 1 node, ensure 2nd node gets updated 2. Remove action on
      * 1 node, ensure 2nd node gets updated
      */
     @Test
-    public void testRpcAddRemoveInCluster() {
+    public void testActionAddRemoveInCluster() {
 
-        LOG.info("testRpcAddRemoveInCluster starting");
+        LOG.info("testActionAddRemoveInCluster starting");
 
-        List<DOMRpcIdentifier> addedRouteIds = createRouteIds();
+        List<DOMActionInstance> addedRouteIds = createRouteIds();
 
         Address node1Address = node1.provider().getDefaultAddress();
 
-        // Add rpc on node 1
-        registry1.tell(new AddOrUpdateRoutes(addedRouteIds), ActorRef.noSender());
+        // Add action on node 1
+        registry1.tell(new UpdateActions(addedRouteIds, Collections.emptyList()), ActorRef.noSender());
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets
         final TestKit testKit = new TestKit(node2);
 
-        Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry2, testKit, node1Address);
+        Map<Address, Bucket<ActionRoutingTable>> buckets = retrieveBuckets(registry2, testKit, node1Address);
         verifyBucket(buckets.get(node1Address), addedRouteIds);
 
         // Now remove
-        registry1.tell(new RemoveRoutes(addedRouteIds), ActorRef.noSender());
+        registry1.tell(new UpdateActions(Collections.emptyList(), addedRouteIds), ActorRef.noSender());
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets.
         // Wait for the bucket for node1 to be empty.
 
         verifyEmptyBucket(testKit, registry2, node1Address);
 
-        LOG.info("testRpcAddRemoveInCluster ending");
+        LOG.info("testActionAddRemoveInCluster ending");
     }
 
     private void verifyEmptyBucket(final TestKit testKit, final ActorRef registry, final Address address)
             throws AssertionError {
-        Map<Address, Bucket<RoutingTable>> buckets;
+        Map<Address, Bucket<ActionRoutingTable>> buckets;
         int numTries = 0;
         while (true) {
             buckets = retrieveBuckets(registry1, testKit, address);
@@ -259,29 +261,29 @@ public class RpcRegistryTest {
     }
 
     /**
-     * Three node cluster. Register rpc on 2 nodes. Ensure 3rd gets updated.
+     * Three node cluster. Register action on 2 nodes. Ensure 3rd gets updated.
      */
     @Test
-    public void testRpcAddedOnMultiNodes() {
+    public void testActionAddedOnMultiNodes() {
         final TestKit testKit = new TestKit(node3);
 
-        // Add rpc on node 1
-        List<DOMRpcIdentifier> addedRouteIds1 = createRouteIds();
-        registry1.tell(new AddOrUpdateRoutes(addedRouteIds1), ActorRef.noSender());
+        // Add action on node 1
+        List<DOMActionInstance> addedRouteIds1 = createRouteIds();
+        registry1.tell(new UpdateActions(addedRouteIds1, Collections.emptyList()), ActorRef.noSender());
 
-        final UpdateRemoteEndpoints req1 = registrar3.expectMsgClass(Duration.ofSeconds(3),
-            UpdateRemoteEndpoints.class);
+        final UpdateRemoteActionEndpoints req1 = registrar3.expectMsgClass(Duration.ofSeconds(3),
+                UpdateRemoteActionEndpoints.class);
 
-        // Add rpc on node 2
-        List<DOMRpcIdentifier> addedRouteIds2 = createRouteIds();
-        registry2.tell(new AddOrUpdateRoutes(addedRouteIds2), ActorRef.noSender());
+        // Add action on node 2
+        List<DOMActionInstance> addedRouteIds2 = createRouteIds();
+        registry2.tell(new UpdateActions(addedRouteIds2, Collections.emptyList()), ActorRef.noSender());
 
-        final UpdateRemoteEndpoints req2 = registrar3.expectMsgClass(Duration.ofSeconds(3),
-            UpdateRemoteEndpoints.class);
+        final UpdateRemoteActionEndpoints req2 = registrar3.expectMsgClass(Duration.ofSeconds(3),
+                UpdateRemoteActionEndpoints.class);
         Address node2Address = node2.provider().getDefaultAddress();
         Address node1Address = node1.provider().getDefaultAddress();
 
-        Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry3, testKit, node1Address,
+        Map<Address, Bucket<ActionRoutingTable>> buckets = retrieveBuckets(registry3, testKit, node1Address,
                 node2Address);
 
         verifyBucket(buckets.get(node1Address), addedRouteIds1);
@@ -298,15 +300,16 @@ public class RpcRegistryTest {
 
     }
 
-    private static void assertEndpoints(final UpdateRemoteEndpoints msg, final Address address, final TestKit invoker) {
-        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getRpcEndpoints();
+    private static void assertEndpoints(final ActionRegistry.Messages.UpdateRemoteActionEndpoints msg,
+                                        final Address address, final TestKit invoker) {
+        final Map<Address, Optional<RemoteActionEndpoint>> endpoints = msg.getActionEndpoints();
         assertEquals(1, endpoints.size());
 
-        final Optional<RemoteRpcEndpoint> maybeEndpoint = endpoints.get(address);
+        final Optional<RemoteActionEndpoint> maybeEndpoint = endpoints.get(address);
         assertNotNull(maybeEndpoint);
         assertTrue(maybeEndpoint.isPresent());
 
-        final RemoteRpcEndpoint endpoint = maybeEndpoint.get();
+        final RemoteActionEndpoint endpoint = maybeEndpoint.get();
         final ActorRef router = endpoint.getRouter();
         assertNotNull(router);
 
@@ -322,29 +325,31 @@ public class RpcRegistryTest {
         return reply;
     }
 
-    private static void verifyBucket(final Bucket<RoutingTable> bucket, final List<DOMRpcIdentifier> expRouteIds) {
-        RoutingTable table = bucket.getData();
-        assertNotNull("Bucket RoutingTable is null", table);
-        for (DOMRpcIdentifier r : expRouteIds) {
+    private static void verifyBucket(final Bucket<ActionRoutingTable> bucket,
+                                     final List<DOMActionInstance> expRouteIds) {
+        ActionRoutingTable table = bucket.getData();
+        assertNotNull("Bucket ActionRoutingTable is null", table);
+        for (DOMActionInstance r : expRouteIds) {
             if (!table.contains(r)) {
-                fail("RoutingTable does not contain " + r + ". Actual: " + table);
+                fail("ActionRoutingTable does not contain " + r + ". Actual: " + table);
             }
         }
 
-        assertEquals("RoutingTable size", expRouteIds.size(), table.size());
+        assertEquals("ActionRoutingTable size", expRouteIds.size(), table.size());
     }
 
-    private static Map<Address, Bucket<RoutingTable>> retrieveBuckets(final ActorRef bucketStore,
-            final TestKit testKit, final Address... addresses) {
+    private static Map<Address, Bucket<ActionRoutingTable>> retrieveBuckets(
+            final ActorRef bucketStore, final TestKit testKit, final Address... addresses) {
         int numTries = 0;
         while (true) {
             bucketStore.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.ofSeconds(3), Map.class);
+            Map<Address, Bucket<ActionRoutingTable>> buckets = testKit.expectMsgClass(Duration.ofSeconds(3),
+                    Map.class);
 
             boolean foundAll = true;
             for (Address addr : addresses) {
-                Bucket<RoutingTable> bucket = buckets.get(addr);
+                Bucket<ActionRoutingTable> bucket = buckets.get(addr);
                 if (bucket == null) {
                     foundAll = false;
                     break;
@@ -356,7 +361,8 @@ public class RpcRegistryTest {
             }
 
             if (++numTries >= 50) {
-                fail("Missing expected buckets for addresses: " + Arrays.toString(addresses) + ", Actual: " + buckets);
+                fail("Missing expected buckets for addresses: " + Arrays.toString(addresses)
+                        + ", Actual: " + buckets);
             }
 
             Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
@@ -368,14 +374,16 @@ public class RpcRegistryTest {
         final TestKit testKit = new TestKit(node1);
 
         final int nRoutes = 500;
-        final Collection<DOMRpcIdentifier> added = new ArrayList<>(nRoutes);
+        final Collection<DOMActionInstance> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
-            final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(SchemaPath.create(true,
-                    QName.create(URI.create("/mockrpc"), "type" + i)));
+            QName type = QName.create(URI.create("/mockaction"), "mockaction" + routeIdCounter++);
+            final DOMActionInstance routeId = DOMActionInstance.of(SchemaPath.create(true,
+                    type), LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.create(new
+                    YangInstanceIdentifier.NodeIdentifier(type)));
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            registry1.tell(new AddOrUpdateRoutes(Arrays.asList(routeId)),
+            registry1.tell(new UpdateActions(Arrays.asList(routeId), Collections.emptyList()),
                     ActorRef.noSender());
         }
 
@@ -383,13 +391,14 @@ public class RpcRegistryTest {
         while (true) {
             registry1.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.ofSeconds(3), Map.class);
+            Map<Address, Bucket<ActionRoutingTable>> buckets = testKit.expectMsgClass(Duration.ofSeconds(3),
+                    Map.class);
 
-            Bucket<RoutingTable> localBucket = buckets.values().iterator().next();
-            RoutingTable table = localBucket.getData();
+            Bucket<ActionRoutingTable> localBucket = buckets.values().iterator().next();
+            ActionRoutingTable table = localBucket.getData();
             if (table != null && table.size() == nRoutes) {
-                for (DOMRpcIdentifier r : added) {
-                    assertTrue("RoutingTable contains " + r, table.contains(r));
+                for (DOMActionInstance r : added) {
+                    assertTrue("ActionRoutingTable contains " + r, table.contains(r));
                 }
 
                 break;
@@ -403,10 +412,12 @@ public class RpcRegistryTest {
         }
     }
 
-    private List<DOMRpcIdentifier> createRouteIds() {
-        QName type = QName.create(URI.create("/mockrpc"), "mockrpc" + routeIdCounter++);
-        List<DOMRpcIdentifier> routeIds = new ArrayList<>(1);
-        routeIds.add(DOMRpcIdentifier.create(SchemaPath.create(true, type)));
+    private List<DOMActionInstance> createRouteIds() {
+        QName type = QName.create(URI.create("/mockaction"), "mockaction" + routeIdCounter++);
+        List<DOMActionInstance> routeIds = new ArrayList<>(1);
+        routeIds.add(DOMActionInstance.of(SchemaPath.create(true, type),
+                LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.create(
+                        new YangInstanceIdentifier.NodeIdentifier(type))));
         return routeIds;
     }
 }
