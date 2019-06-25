@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.Terminated;
@@ -21,7 +20,8 @@ public class TerminationMonitor extends UntypedAbstractActor {
         LOG.debug("Created TerminationMonitor");
     }
 
-    @Override public void onReceive(Object message) {
+    @Override
+    public void onReceive(final Object message) {
         if (message instanceof Terminated) {
             Terminated terminated = (Terminated) message;
             LOG.debug("Actor terminated : {}", terminated.actor());

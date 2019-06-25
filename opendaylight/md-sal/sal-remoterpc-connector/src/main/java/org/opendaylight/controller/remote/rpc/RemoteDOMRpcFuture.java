@@ -7,94 +7,31 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import static java.util.Objects.requireNonNull;
-
-import akka.dispatch.OnComplete;
-import com.google.common.util.concurrent.AbstractFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.mdsal.dom.api.DOMRpcException;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import scala.concurrent.ExecutionContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import scala.concurrent.Future;
 
-final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RemoteDOMRpcFuture.class);
-
-    private final QName rpcName;
-
-    private RemoteDOMRpcFuture(final QName rpcName) {
-        this.rpcName = requireNonNull(rpcName, "rpcName");
-    }
-
-    public static RemoteDOMRpcFuture create(final QName rpcName) {
-        return new RemoteDOMRpcFuture(rpcName);
-    }
-
-    protected void failNow(final Throwable error) {
-        LOG.debug("Failing future {} for rpc {}", this, rpcName, error);
-        setException(error);
-    }
-
-    protected void completeWith(final Future<Object> future) {
-        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
+final class RemoteDOMRpcFuture extends AbstractRemoteFuture<DOMRpcResult, DOMRpcException> {
+    RemoteDOMRpcFuture(final @NonNull SchemaPath type, final @NonNull Future<Object> requestFuture) {
+        super(type, requestFuture);
     }
 
     @Override
-    public DOMRpcResult get() throws InterruptedException, ExecutionException {
-        try {
-            return super.get();
-        } catch (ExecutionException e) {
-            throw mapException(e);
-        }
+    DOMRpcResult processReply(final Object reply) {
+        return reply instanceof RpcResponse ? new DefaultDOMRpcResult(((RpcResponse) reply).getOutput()) : null;
     }
 
     @Override
-    public DOMRpcResult get(final long timeout, final TimeUnit unit)
-            throws InterruptedException, ExecutionException, TimeoutException {
-        try {
-            return super.get(timeout, unit);
-        } catch (final ExecutionException e) {
-            throw mapException(e);
-        }
+    Class<DOMRpcException> exceptionClass() {
+        return DOMRpcException.class;
     }
 
-    private static ExecutionException mapException(final ExecutionException ex) {
-        final Throwable cause = ex.getCause();
-        if (cause instanceof DOMRpcException) {
-            return ex;
-        }
-        return new ExecutionException(ex.getMessage(),
-                new RemoteDOMRpcException("Exception during invoking RPC", ex.getCause()));
-    }
-
-    private final class FutureUpdater extends OnComplete<Object> {
-
-        @Override
-        public void onComplete(final Throwable error, final Object reply) {
-            if (error != null) {
-                RemoteDOMRpcFuture.this.failNow(error);
-            } else if (reply instanceof RpcResponse) {
-                final RpcResponse rpcReply = (RpcResponse) reply;
-                final NormalizedNode<?, ?> result = rpcReply.getResultNormalizedNode();
-
-                LOG.debug("Received response for rpc {}: result is {}", rpcName, result);
-
-                RemoteDOMRpcFuture.this.set(new DefaultDOMRpcResult(result));
-
-                LOG.debug("Future {} for rpc {} successfully completed", RemoteDOMRpcFuture.this, rpcName);
-            } else {
-                RemoteDOMRpcFuture.this.failNow(new IllegalStateException("Incorrect reply type " + reply
-                        + "from Akka"));
-            }
-        }
+    @Override
+    DOMRpcException wrapCause(final Throwable cause) {
+        return new RemoteDOMRpcException("Exception during invoking RPC", cause);
     }
 }
