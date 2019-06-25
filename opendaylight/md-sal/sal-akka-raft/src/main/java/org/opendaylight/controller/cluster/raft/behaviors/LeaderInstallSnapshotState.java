@@ -168,10 +168,11 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
         offset = 0;
         replyStatus = false;
-        replyReceivedForOffset = offset;
+        replyReceivedForOffset = INITIAL_LAST_CHUNK_HASH_CODE;
         chunkIndex = FIRST_CHUNK_INDEX;
         currentChunk = null;
         lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
+        nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
 
         try {
             snapshotInputStream = snapshotBytes.openStream();
