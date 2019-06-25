@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
@@ -54,7 +54,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
         buckets = Lists.newArrayList(emptyRpcIdentifier, localRpcIdentifier);
 
-        final RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("system").build();
+        final RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("system").build();
         final TestKit invoker = new TestKit(system);
         final TestKit registrar = new TestKit(system);
         final TestKit supervisor = new TestKit(system);
