@@ -23,6 +23,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMActionService;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
@@ -45,44 +48,49 @@ import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
  *
  * @author Thomas Pantelis
  */
-public class AbstractRpcTest {
+public class AbstractOpsTest {
     static final String TEST_REV = "2014-08-28";
     static final String TEST_NS = "urn:test";
     static final URI TEST_URI = URI.create(TEST_NS);
-    static final QName TEST_RPC = QName.create(TEST_NS, TEST_REV, "test-rpc");
+    static final QName TEST_RPC = QName.create(TEST_NS, TEST_REV, "test-something");
     static final QName TEST_RPC_INPUT = QName.create(TEST_NS, TEST_REV, "input");
     static final QName TEST_RPC_INPUT_DATA = QName.create(TEST_NS, TEST_REV, "input-data");
     static final QName TEST_RPC_OUTPUT = QName.create(TEST_NS, TEST_REV, "output");
-    static final QName TEST_RPC_OUTPUT_DATA = QName.create(TEST_URI, "output-data");
 
 
     static final SchemaPath TEST_RPC_TYPE = SchemaPath.create(true, TEST_RPC);
     static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.create(
             new YangInstanceIdentifier.NodeIdentifier(TEST_RPC));
     public static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC_TYPE, TEST_PATH);
+    public static final DOMDataTreeIdentifier TEST_DATA_TREE_ID = new DOMDataTreeIdentifier(
+            LogicalDatastoreType.OPERATIONAL, TEST_PATH);
 
     static ActorSystem node1;
     static ActorSystem node2;
-    static RemoteRpcProviderConfig config1;
-    static RemoteRpcProviderConfig config2;
+    static RemoteOpsProviderConfig config1;
+    static RemoteOpsProviderConfig config2;
 
     protected ActorRef rpcInvoker1;
     protected TestKit rpcRegistry1Probe;
     protected ActorRef rpcInvoker2;
     protected TestKit rpcRegistry2Probe;
     protected SchemaContext schemaContext;
-    protected RemoteRpcImplementation remoteRpcImpl1;
-    protected RemoteRpcImplementation remoteRpcImpl2;
+    protected RemoteOpsImplementation remoteRpcImpl1;
+    protected RemoteOpsImplementation remoteRpcImpl2;
 
     @Mock
     protected DOMRpcService domRpcService1;
     @Mock
+    protected DOMActionService domActionService1;
+    @Mock
     protected DOMRpcService domRpcService2;
+    @Mock
+    protected DOMActionService domActionService2;
 
     @BeforeClass
     public static void setup() {
-        config1 = new RemoteRpcProviderConfig.Builder("memberA").build();
-        config2 = new RemoteRpcProviderConfig.Builder("memberB").build();
+        config1 = new RemoteOpsProviderConfig.Builder("memberA").build();
+        config2 = new RemoteOpsProviderConfig.Builder("memberB").build();
         node1 = ActorSystem.create("opendaylight-rpc", config1.get());
         node2 = ActorSystem.create("opendaylight-rpc", config2.get());
     }
@@ -97,21 +105,21 @@ public class AbstractRpcTest {
 
     @Before
     public void setUp() {
-        schemaContext = YangParserTestUtils.parseYangResources(AbstractRpcTest.class, "/test-rpc.yang");
+        schemaContext = YangParserTestUtils.parseYangResources(AbstractOpsTest.class, "/test-rpc.yang");
 
         MockitoAnnotations.initMocks(this);
 
         rpcRegistry1Probe = new TestKit(node1);
-        rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1));
+        rpcInvoker1 = node1.actorOf(OpsInvoker.props(domRpcService1, domActionService1));
         rpcRegistry2Probe = new TestKit(node2);
-        rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2));
-        remoteRpcImpl1 = new RemoteRpcImplementation(rpcInvoker2, config1);
-        remoteRpcImpl2 = new RemoteRpcImplementation(rpcInvoker1, config2);
+        rpcInvoker2 = node2.actorOf(OpsInvoker.props(domRpcService2, domActionService2));
+        remoteRpcImpl1 = new RemoteOpsImplementation(rpcInvoker2, config1);
+        remoteRpcImpl2 = new RemoteOpsImplementation(rpcInvoker1, config2);
     }
 
     static void assertRpcErrorEquals(final RpcError rpcError, final ErrorSeverity severity,
-            final ErrorType errorType, final String tag, final String message, final String applicationTag,
-            final String info, final String causeMsg) {
+                                     final ErrorType errorType, final String tag, final String message,
+                                     final String applicationTag, final String info, final String causeMsg) {
         assertEquals("getSeverity", severity, rpcError.getSeverity());
         assertEquals("getErrorType", errorType, rpcError.getErrorType());
         assertEquals("getTag", tag, rpcError.getTag());
@@ -132,7 +140,7 @@ public class AbstractRpcTest {
 
     public static ContainerNode makeRPCInput(final String data) {
         return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(TEST_RPC_INPUT))
-            .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data)).build();
+                .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data)).build();
 
     }
 
@@ -142,8 +150,8 @@ public class AbstractRpcTest {
     }
 
     static void assertFailedRpcResult(final DOMRpcResult rpcResult, final ErrorSeverity severity,
-            final ErrorType errorType, final String tag, final String message, final String applicationTag,
-            final String info, final String causeMsg) {
+                                      final ErrorType errorType, final String tag, final String message,
+                                      final String applicationTag, final String info, final String causeMsg) {
         assertNotNull("RpcResult was null", rpcResult);
         final Collection<? extends RpcError> rpcErrors = rpcResult.getErrors();
         assertEquals("RpcErrors count", 1, rpcErrors.size());
@@ -152,7 +160,7 @@ public class AbstractRpcTest {
     }
 
     static void assertSuccessfulRpcResult(final DOMRpcResult rpcResult,
-            final NormalizedNode<? , ?> expOutput) {
+                                          final NormalizedNode<? , ?> expOutput) {
         assertNotNull("RpcResult was null", rpcResult);
         assertCompositeNodeEquals(expOutput, rpcResult.getResult());
     }

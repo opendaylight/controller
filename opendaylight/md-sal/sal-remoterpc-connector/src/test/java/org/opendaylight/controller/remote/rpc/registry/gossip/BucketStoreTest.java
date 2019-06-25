@@ -22,7 +22,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 
 public class BucketStoreTest {
@@ -140,13 +140,13 @@ public class BucketStoreTest {
      */
     private static BucketStoreActor<T> createStore() {
         final Props props = Props.create(TestingBucketStoreActor.class,
-                new RemoteRpcProviderConfig(system.settings().config()), "testing-store",new T());
+                new RemoteOpsProviderConfig(system.settings().config()), "testing-store",new T());
         return TestActorRef.<BucketStoreActor<T>>create(system, props, "testStore").underlyingActor();
     }
 
     private static final class TestingBucketStoreActor extends BucketStoreActor<T> {
 
-        protected TestingBucketStoreActor(final RemoteRpcProviderConfig config,
+        protected TestingBucketStoreActor(final RemoteOpsProviderConfig config,
                                           final String persistenceId,
                                           final T initialData) {
             super(config, persistenceId, initialData);

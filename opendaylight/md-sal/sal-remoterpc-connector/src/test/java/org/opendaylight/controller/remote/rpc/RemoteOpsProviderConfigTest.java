@@ -19,11 +19,11 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import scala.concurrent.duration.FiniteDuration;
 
-public class RemoteRpcProviderConfigTest {
+public class RemoteOpsProviderConfigTest {
 
     @Test
     public void testConfigDefaults() {
-        RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("unit-test").build();
+        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test").build();
 
         //Assert on configurations from common config
         Assert.assertFalse(config.isMetricCaptureEnabled()); //should be disabled by default
@@ -38,7 +38,9 @@ public class RemoteRpcProviderConfigTest {
         Assert.assertNotNull(config.getRpcManagerName());
         Assert.assertNotNull(config.getRpcManagerPath());
         Assert.assertNotNull(config.getRpcRegistryName());
+        Assert.assertNotNull(config.getActionRegistryName());
         Assert.assertNotNull(config.getRpcRegistryPath());
+        Assert.assertNotNull(config.getActionRegistryPath());
         Assert.assertNotNull(config.getAskDuration());
         Assert.assertNotNull(config.getGossipTickInterval());
     }
@@ -52,7 +54,7 @@ public class RemoteRpcProviderConfigTest {
         String timeOutVal = "10ms";
         FiniteDuration expectedTimeout = FiniteDuration.create(10, TimeUnit.MILLISECONDS);
 
-        RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("unit-test")
+        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test")
                 .metricCaptureEnabled(true)//enable metric capture
                 .mailboxCapacity(expectedCapacity)
                 .mailboxPushTimeout(timeOutVal)
@@ -71,7 +73,7 @@ public class RemoteRpcProviderConfigTest {
         ConfigTestActor actor = configTestActorTestActorRef.underlyingActor();
         Config actorConfig = actor.getConfig();
 
-        config = new RemoteRpcProviderConfig(actorConfig);
+        config = new RemoteOpsProviderConfig(actorConfig);
 
         Assert.assertTrue(config.isMetricCaptureEnabled());
         Assert.assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
