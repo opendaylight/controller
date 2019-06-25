@@ -14,10 +14,12 @@
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider" />
   <reference id="domRpcService" interface="org.opendaylight.mdsal.dom.api.DOMRpcService"/>
   <reference id="domRpcRegistry" interface="org.opendaylight.mdsal.dom.api.DOMRpcProviderService"/>
+  <reference id="domActionService" interface="org.opendaylight.mdsal.dom.api.DOMActionService"/>
+  <reference id="domActionRegistry" interface="org.opendaylight.mdsal.dom.api.DOMActionProviderService"/>
 
   <bean id="actorSystem" factory-ref="actorSystemProvider" factory-method="getActorSystem"/>
 
-  <bean id="remoteRpcProviderConfig" class="org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig"
+  <bean id="remoteOpsProviderConfig" class="org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig"
           factory-method="newInstance">
     <argument>
       <bean factory-ref="actorSystem" factory-method="name"/>
@@ -26,12 +28,14 @@
     <argument value="${bounded-mailbox-capacity}"/>
   </bean>
 
-  <bean id="remoteRpcProvider" class="org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory"
+  <bean id="remoteOpsProvider" class="org.opendaylight.controller.remote.rpc.RemoteOpsProviderFactory"
           factory-method="createInstance" init-method="start" destroy-method="close">
     <argument ref="domRpcRegistry"/>
     <argument ref="domRpcService"/>
     <argument ref="actorSystem"/>
-    <argument ref="remoteRpcProviderConfig"/>
+    <argument ref="remoteOpsProviderConfig"/>
+    <argument ref="domActionRegistry"/>
+    <argument ref="domActionService"/>
   </bean>
 
 </blueprint>
