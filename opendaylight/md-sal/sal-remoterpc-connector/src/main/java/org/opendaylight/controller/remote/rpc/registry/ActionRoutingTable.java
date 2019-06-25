@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2019 Nordix Foundation.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -28,14 +28,19 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
-import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMActionInstance;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public final class RoutingTable implements BucketData<RoutingTable>, Serializable {
+public final class ActionRoutingTable implements BucketData<ActionRoutingTable>, Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
+        private static final Logger LOG = LoggerFactory.getLogger(ActionRoutingTable.class);
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "We deal with the field in serialization methods.")
-        private Collection<DOMRpcIdentifier> rpcs;
+        private Collection<DOMActionInstance> actions;
         private ActorRef opsInvoker;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -45,49 +50,55 @@ public final class RoutingTable implements BucketData<RoutingTable>, Serializabl
             // For Externalizable
         }
 
-        Proxy(final RoutingTable table) {
-            rpcs = table.getRoutes();
+        Proxy(final ActionRoutingTable table) {
+            actions = table.getActions();
             opsInvoker = table.getRpcInvoker();
         }
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
+            LOG.debug("serializing ActionRoutingTable.");
             out.writeObject(Serialization.serializedActorPath(opsInvoker));
 
             final NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out);
-            nnout.writeInt(rpcs.size());
-            for (DOMRpcIdentifier id : rpcs) {
+            nnout.writeInt(actions.size());
+            for (DOMActionInstance id : actions) {
                 nnout.writeSchemaPath(id.getType());
-                nnout.writeYangInstanceIdentifier(id.getContextReference());
+                YangInstanceIdentifier actionPath = YangInstanceIdentifier.create(
+                        new YangInstanceIdentifier.NodeIdentifier(id.getType().getLastComponent()));
+                nnout.writeYangInstanceIdentifier(actionPath);
             }
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+            LOG.debug("deserializing ActionRoutingTable");
             opsInvoker = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
 
             final NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(in);
             final int size = nnin.readInt();
-            rpcs = new ArrayList<>(size);
+            actions = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {
-                rpcs.add(DOMRpcIdentifier.create(nnin.readSchemaPath(), nnin.readYangInstanceIdentifier()));
+                actions.add(DOMActionInstance.of(nnin.readSchemaPath(), LogicalDatastoreType.OPERATIONAL,
+                        nnin.readYangInstanceIdentifier()));
             }
         }
 
         private Object readResolve() {
-            return new RoutingTable(opsInvoker, rpcs);
+            return new ActionRoutingTable(opsInvoker, actions);
         }
     }
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOG = LoggerFactory.getLogger(ActionRoutingTable.class);
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "We deal with the field in serialization methods.")
-    private final Set<DOMRpcIdentifier> rpcs;
+    private Collection<DOMActionInstance> actions;
     private final ActorRef opsInvoker;
 
-    RoutingTable(final ActorRef opsInvoker, final Collection<DOMRpcIdentifier> table) {
+    ActionRoutingTable(final ActorRef opsInvoker, Collection<DOMActionInstance> actions) {
         this.opsInvoker = Preconditions.checkNotNull(opsInvoker);
-        this.rpcs = ImmutableSet.copyOf(table);
+        this.actions = ImmutableSet.copyOf(actions);
     }
 
     @Override
@@ -95,24 +106,21 @@ public final class RoutingTable implements BucketData<RoutingTable>, Serializabl
         return Optional.of(opsInvoker);
     }
 
-    public Set<DOMRpcIdentifier> getRoutes() {
-        return rpcs;
+    public Collection<DOMActionInstance> getActions() {
+        return actions;
     }
 
     ActorRef getRpcInvoker() {
         return opsInvoker;
     }
 
-    RoutingTable addRpcs(final Collection<DOMRpcIdentifier> toAdd) {
-        final Set<DOMRpcIdentifier> newRpcs = new HashSet<>(rpcs);
-        newRpcs.addAll(toAdd);
-        return new RoutingTable(opsInvoker, newRpcs);
-    }
-
-    RoutingTable removeRpcs(final Collection<DOMRpcIdentifier> toRemove) {
-        final Set<DOMRpcIdentifier> newRpcs = new HashSet<>(rpcs);
-        newRpcs.removeAll(toRemove);
-        return new RoutingTable(opsInvoker, newRpcs);
+    ActionRoutingTable updateActions(final Collection<DOMActionInstance> toAdd,
+                                     final Collection<DOMActionInstance> toRemove) {
+        LOG.debug("Updating actions in ActionRoutingTable");
+        final Set<DOMActionInstance> newActions = new HashSet<>(actions);
+        newActions.addAll(toAdd);
+        newActions.removeAll(toRemove);
+        return new ActionRoutingTable(opsInvoker, newActions);
     }
 
     private Object writeReplace() {
@@ -120,17 +128,17 @@ public final class RoutingTable implements BucketData<RoutingTable>, Serializabl
     }
 
     @VisibleForTesting
-    boolean contains(final DOMRpcIdentifier routeId) {
-        return rpcs.contains(routeId);
+    public boolean contains(final DOMActionInstance routeId) {
+        return actions.contains(routeId);
     }
 
     @VisibleForTesting
-    int size() {
-        return rpcs.size();
+    public int size() {
+        return actions.size();
     }
 
     @Override
     public String toString() {
-        return "RoutingTable{" + "rpcs=" + rpcs + ", opsInvoker=" + opsInvoker + '}';
+        return "ActionRoutingTable{" + "Actions=" + actions + ", opsInvoker=" + opsInvoker + '}';
     }
 }
