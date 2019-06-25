@@ -74,8 +74,12 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     }
 
     int incrementOffset() {
+        // if first chunk was retried, reset offset back to initial 0
+        if (offset == -1) {
+            offset = 0;
+        }
         if (replyStatus) {
-            // if prev chunk failed, we would want to sent the same chunk again
+            // if prev chunk failed, we would want to send the same chunk again
             offset = offset + snapshotChunkSize;
         }
         return offset;
@@ -83,7 +87,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
     int incrementChunkIndex() {
         if (replyStatus) {
-            // if prev chunk failed, we would want to sent the same chunk again
+            // if prev chunk failed, we would want to send the same chunk again
             chunkIndex =  chunkIndex + 1;
         }
         return chunkIndex;
@@ -126,15 +130,17 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
             replyStatus = true;
             lastChunkHashCode = nextChunkHashCode;
         } else {
-            // if the chunk sent was failure
-            replyReceivedForOffset = offset;
+            // if the chunk sent was failure, revert offset to previous so we can retry
+            offset = replyReceivedForOffset;
             replyStatus = false;
         }
     }
 
     byte[] getNextChunk() throws IOException {
+        // increment offset to indicate next chunk is in flight, canSendNextChunk() wont let us hit this again until,
+        // markSendStatus() is called with either success or failure
+        int start = incrementOffset();
         if (replyStatus || currentChunk == null) {
-            int start = incrementOffset();
             int size = snapshotChunkSize;
             if (snapshotChunkSize > snapshotSize) {
                 size = (int) snapshotSize;
