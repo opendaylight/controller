@@ -40,7 +40,7 @@ class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutput
 
     @Override
     protected short streamVersion() {
-        return TokenTypes.SODIUM_VERSION;
+        return TokenTypes.NEON_SR2_VERSION;
     }
 
     @Override
