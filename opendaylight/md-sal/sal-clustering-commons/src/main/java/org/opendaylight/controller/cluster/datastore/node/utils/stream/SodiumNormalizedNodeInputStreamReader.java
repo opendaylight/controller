@@ -31,7 +31,7 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
 
     @Override
     public NormalizedNodeStreamVersion getVersion() throws IOException {
-        return NormalizedNodeStreamVersion.SODIUM;
+        return NormalizedNodeStreamVersion.NEON_SR2;
     }
 
     @Override

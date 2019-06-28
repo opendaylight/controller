@@ -37,7 +37,7 @@ final class VersionedNormalizedNodeDataInput extends ForwardingNormalizedNodeDat
             case TokenTypes.LITHIUM_VERSION:
                 ret = new LithiumNormalizedNodeInputStreamReader(input);
                 break;
-            case TokenTypes.SODIUM_VERSION:
+            case TokenTypes.NEON_SR2_VERSION:
                 ret = new SodiumNormalizedNodeInputStreamReader(input);
                 break;
             default:
