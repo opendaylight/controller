@@ -112,7 +112,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
 
         switch (toVersion) {
             case BORON:
-            case SODIUM:
+            case NEON_SR2:
                 return verifyNotNull(cloneAsVersion(toVersion));
             case TEST_PAST_VERSION:
             case TEST_FUTURE_VERSION:

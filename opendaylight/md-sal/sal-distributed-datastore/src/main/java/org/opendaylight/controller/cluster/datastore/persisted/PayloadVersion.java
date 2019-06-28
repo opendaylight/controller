@@ -61,12 +61,12 @@ public enum PayloadVersion implements WritableObject {
 
     /**
      * Revised payload version. Payloads remain the same as {@link #BORON}, but messages bearing QNames in any shape
-     * are using {@link NormalizedNodeStreamVersion#SODIUM}, which improves encoding.
+     * are using {@link NormalizedNodeStreamVersion#NEON_SR2}, which improves encoding.
      */
-    SODIUM(6) {
+    NEON_SR2(6) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.SODIUM;
+            return NormalizedNodeStreamVersion.NEON_SR2;
         }
     },
 
@@ -112,7 +112,7 @@ public enum PayloadVersion implements WritableObject {
      */
     @Nonnull
     public static PayloadVersion current() {
-        return SODIUM;
+        return NEON_SR2;
     }
 
     /**
@@ -136,9 +136,9 @@ public enum PayloadVersion implements WritableObject {
             case 5:
                 return BORON;
             case 6:
-                return SODIUM;
+                return NEON_SR2;
             default:
-                throw new FutureVersionException(version, SODIUM);
+                throw new FutureVersionException(version, NEON_SR2);
         }
     }
 
