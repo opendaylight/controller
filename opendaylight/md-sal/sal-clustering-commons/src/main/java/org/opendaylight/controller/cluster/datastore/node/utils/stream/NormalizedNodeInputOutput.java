@@ -65,7 +65,7 @@ public final class NormalizedNodeInputOutput {
         switch (version) {
             case LITHIUM:
                 return new LithiumNormalizedNodeOutputStreamWriter(output);
-            case SODIUM:
+            case NEON_SR2:
                 return new SodiumNormalizedNodeOutputStreamWriter(output);
             default:
                 throw new IllegalStateException("Unhandled version " + version);
