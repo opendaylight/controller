@@ -1,12 +1,10 @@
 module event-source {
-    yang-version 1;
+    yang-version 1.1;
     namespace "urn:cisco:params:xml:ns:yang:messagebus:eventsource";
     prefix "eventsource";
 
     import event-aggregator { prefix aggr; }
-    import network-topology { prefix nt; revision-date "2013-10-21"; }
-    import opendaylight-inventory {prefix inv; revision-date "2013-08-19"; }
-    import yang-ext {prefix ext; revision-date "2013-07-09"; }
+    import ietf-network { prefix nw; }
 
     organization "Cisco Systems, Inc.";
     contact "Robert Gallas";
@@ -38,10 +36,9 @@ module event-source {
         description "Object status";
     }
 
-    // FIXME: migrate to topology
     typedef node-ref {
         type leafref {
-            path "/inv:nodes/inv:node/inv:id";
+            path "/nw:networks/nw:network/nw:node/nw:node-id";
         }
     }
 
@@ -63,46 +60,7 @@ module event-source {
         }
     }
 
-    rpc join-topic {
-        input {
-            leaf node {
-               ext:context-reference "inv:node-context";
-               type "instance-identifier";
-            }
-            leaf topic-id {
-                type aggr:topic-id;
-                description "in current implementation notification-pattern is defined by topic-id.
-                             By persisting topic definition we could omit notification-pattern";
-            }
-            leaf notification-pattern {
-                type aggr:notification-pattern;
-            }
-        }
-
-        output {
-            leaf status {
-                type join-topic-status;
-            }
-        }
-    }
-
-    rpc dis-join-topic {
-        input {
-            leaf node {
-               ext:context-reference "inv:node-context";
-               type "instance-identifier";
-            }
-            leaf topic-id {
-                type aggr:topic-id;
-                mandatory true;
-                description "identifier of topic to be disjoin";
-            }
-        }
-
-    }
-
     notification event-source-status-notification {
-
         description
             "Notification of change event source status.";
 
@@ -111,17 +69,46 @@ module event-source {
             mandatory true;
             description "Current status of event source.";
         }
-
     }
 
-    augment "/nt:network-topology/nt:topology/nt:topology-types" {
+    augment "/nw:networks/nw:network/nw:network-types" {
         uses topology-event-source-type;
     }
 
-    augment "/nt:network-topology/nt:topology/nt:node" {
-        when "../../nt:topology-types/topology-event-source";
+    augment "/nw:networks/nw:network/nw:node" {
+        when "../../nw:network-types/topology-event-source";
         leaf event-source-node {
             type node-ref;
         }
+
+        action join-topic {
+            input {
+                leaf topic-id {
+                    type aggr:topic-id;
+                    description "in current implementation notification-pattern is defined by topic-id.
+                        By persisting topic definition we could omit notification-pattern";
+                }
+                leaf notification-pattern {
+                    type aggr:notification-pattern;
+                }
+            }
+
+            output {
+                leaf status {
+                    type join-topic-status;
+                }
+            }
+        }
+
+        action dis-join-topic {
+            input {
+                leaf topic-id {
+                    type aggr:topic-id;
+                    mandatory true;
+                    description "identifier of topic to be disjoin";
+                }
+            }
+        }
     }
 }
+
