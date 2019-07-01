@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -26,6 +27,7 @@ final class CohortEntry {
 
     private RuntimeException lastBatchedModificationsException;
     private int totalBatchedModificationsReceived;
+    private int totalOperationsProcessed;
     private ShardDataTreeCohort cohort;
     private boolean doImmediateCommit;
     private ActorRef replySender;
@@ -77,14 +79,19 @@ final class CohortEntry {
         return totalBatchedModificationsReceived;
     }
 
+    int getTotalOperationsProcessed() {
+        return totalOperationsProcessed;
+    }
+
     RuntimeException getLastBatchedModificationsException() {
         return lastBatchedModificationsException;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void applyModifications(final Iterable<Modification> modifications) {
+    void applyModifications(final List<Modification> modifications) {
         totalBatchedModificationsReceived++;
         if (lastBatchedModificationsException == null) {
+            totalOperationsProcessed += modifications.size();
             for (Modification modification : modifications) {
                 try {
                     modification.apply(transaction.getSnapshot());

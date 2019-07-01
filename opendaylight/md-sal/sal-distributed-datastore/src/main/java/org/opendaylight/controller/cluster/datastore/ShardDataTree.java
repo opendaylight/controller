@@ -676,7 +676,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
             final java.util.Optional<SortedSet<String>> participatingShardNames) {
         final DataTreeModification snapshot = transaction.getSnapshot();
+        final TransactionIdentifier id = transaction.getIdentifier();
+        LOG.debug("{}: readying transaction {}", logContext, id);
         snapshot.ready();
+        LOG.debug("{}: transaction {} ready", logContext, id);
 
         return createReadyCohort(transaction.getIdentifier(), snapshot, participatingShardNames);
     }
@@ -934,11 +937,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final SimpleShardDataTreeCohort current = entry.cohort;
         Verify.verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
 
-        LOG.debug("{}: Preparing transaction {}", logContext, current.getIdentifier());
+        final TransactionIdentifier currentId = current.getIdentifier();
+        LOG.debug("{}: Preparing transaction {}", logContext, currentId);
 
         final DataTreeCandidateTip candidate;
         try {
             candidate = tip.prepare(cohort.getDataTreeModification());
+            LOG.debug("{}: Transaction {} candidate ready", logContext, currentId);
         } catch (RuntimeException e) {
             failPreCommit(e);
             return;
@@ -955,7 +960,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 pendingTransactions.remove();
                 pendingCommits.add(entry);
 
-                LOG.debug("{}: Transaction {} prepared", logContext, current.getIdentifier());
+                LOG.debug("{}: Transaction {} prepared", logContext, currentId);
 
                 cohort.successfulPreCommit(candidate);
 
