@@ -156,8 +156,8 @@ final class ShardCommitCoordinator {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("{}: Readying Tx {}, client version {}", name,
-                        batched.getTransactionId(), batched.getVersion());
+                log.debug("{}: Readying Tx {} of {} operations, client version {}", name,
+                        batched.getTransactionId(), cohortEntry.getTotalOperationsProcessed(), batched.getVersion());
             }
 
             cohortEntry.setDoImmediateCommit(batched.isDoCommitOnReady());
