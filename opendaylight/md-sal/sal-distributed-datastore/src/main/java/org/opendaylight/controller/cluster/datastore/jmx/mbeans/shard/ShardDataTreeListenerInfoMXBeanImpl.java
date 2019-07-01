@@ -58,7 +58,7 @@ public class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implemen
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private List<DataTreeListenerInfo> getListenerActorsInfo(Collection<ActorSelection> actors) {
+    private static List<DataTreeListenerInfo> getListenerActorsInfo(Collection<ActorSelection> actors) {
         final Timeout timeout = new Timeout(20, TimeUnit.SECONDS);
         final List<Future<Object>> futureList = new ArrayList<>(actors.size());
         for (ActorSelection actor: actors) {

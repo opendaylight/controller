@@ -50,7 +50,7 @@ public class Bug1333DataChangeListenerTest extends AbstractDataTreeChangeListene
                 BindingReflections.getModuleInfo(TreeComplexUsesAugment.class));
     }
 
-    private Top topWithListItem() {
+    private static Top topWithListItem() {
         return top(topLevelList(TOP_FOO_KEY, complexUsesAugment(USES_ONE_KEY, USES_TWO_KEY)));
     }
 

@@ -160,7 +160,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataTreeChangeL
         barListener.verify();
     }
 
-    private Function<DataTreeModification<Top>, Boolean> topSubtreeModified(final TopLevelList topFoo,
+    private static Function<DataTreeModification<Top>, Boolean> topSubtreeModified(final TopLevelList topFoo,
             final TopLevelList topBar) {
         return match(ModificationType.SUBTREE_MODIFIED, TOP,
             (Function<Top, Boolean>) dataBefore -> Objects.equals(top(topFoo), dataBefore),

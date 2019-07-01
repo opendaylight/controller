@@ -87,7 +87,7 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
         assertEquals(Optional.absent(), rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet());
     }
 
-    private DataContainerChild<?, ?> outerNode(int... ids) {
+    private static DataContainerChild<?, ?> outerNode(int... ids) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME);
         for (int id : ids) {
             outer.addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, id));
@@ -96,11 +96,11 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
         return outer.build();
     }
 
-    private NormalizedNode<?, ?> testNodeWithOuter(int... ids) {
+    private static NormalizedNode<?, ?> testNodeWithOuter(int... ids) {
         return testNodeWithOuter(outerNode(ids));
     }
 
-    private NormalizedNode<?, ?> testNodeWithOuter(DataContainerChild<?, ?> outer) {
+    private static NormalizedNode<?, ?> testNodeWithOuter(DataContainerChild<?, ?> outer) {
         return ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(outer)
                 .build();

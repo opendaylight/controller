@@ -82,7 +82,7 @@ public class DatastoreContextContextPropertiesUpdaterTest {
         updater.close();
     }
 
-    private Object resolveField(final String name, final Object obj) throws Exception {
+    private static Object resolveField(final String name, final Object obj) throws Exception {
         final Field currProps = obj.getClass().getDeclaredField(name);
         currProps.setAccessible(true);
         return currProps.get(obj);

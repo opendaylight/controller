@@ -183,7 +183,7 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
         assertEquals(TOP_INITIAL_DATA, initialNode.getDataAfter());
     }
 
-    private void verifyModification(final DataObjectModification<? extends DataObject> barWrite,
+    private static void verifyModification(final DataObjectModification<? extends DataObject> barWrite,
             final PathArgument pathArg, final ModificationType eventType) {
         assertEquals(pathArg.getType(), barWrite.getDataType());
         assertEquals(eventType,barWrite.getModificationType());
