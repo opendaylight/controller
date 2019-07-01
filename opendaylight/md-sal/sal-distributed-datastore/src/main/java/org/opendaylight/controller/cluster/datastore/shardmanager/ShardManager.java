@@ -112,9 +112,7 @@ import org.opendaylight.controller.cluster.sharding.PrefixedShardConfigUpdateHan
 import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -176,7 +174,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final String persistenceId;
     private final AbstractDataStore dataStore;
 
-    private ListenerRegistration<DOMDataTreeChangeListener> configListenerReg = null;
     private PrefixedShardConfigUpdateHandler configUpdateHandler;
 
     ShardManager(final AbstractShardManagerCreator<?> builder) {
@@ -216,11 +213,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.info("Stopping ShardManager {}", persistenceId());
 
         shardManagerMBean.unregisterMBean();
-
-        if (configListenerReg != null) {
-            configListenerReg.close();
-            configListenerReg = null;
-        }
     }
 
     @Override
