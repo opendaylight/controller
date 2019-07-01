@@ -7,7 +7,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
+@Deprecated
 public class DOMForwardedWriteTransactionTest {
 
     @Mock

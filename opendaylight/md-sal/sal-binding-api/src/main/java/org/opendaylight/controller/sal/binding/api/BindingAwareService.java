@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import org.opendaylight.controller.md.sal.binding.api.BindingService;
+
 /**
  * Session-specific instance of the broker functionality.
  *
@@ -27,7 +29,10 @@ package org.opendaylight.controller.sal.binding.api;
  * {@link BindingAwareProvider} exposes the necessary supporting functionality
  * to implement specific functionality of YANG and to reuse it in the
  * development of {@link BindingAwareConsumer}s and {@link BindingAwareProvider}s.
+ *
+ * @deprecated Use {@link BindingService} instead.
  */
+@Deprecated
 public interface BindingAwareService {
 
 }

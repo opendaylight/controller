@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
+@Deprecated
 public class DataNormalizationException extends Exception {
     private static final long serialVersionUID = 1L;
 

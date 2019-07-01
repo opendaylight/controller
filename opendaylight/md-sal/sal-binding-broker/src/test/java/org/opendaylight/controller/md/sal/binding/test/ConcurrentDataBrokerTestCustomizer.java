@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
  *
  * @author Michael Vorburger
  */
+@Deprecated
 public class ConcurrentDataBrokerTestCustomizer extends AbstractDataBrokerTestCustomizer {
 
     private final ListeningExecutorService dataTreeChangeListenerExecutorSingleton;

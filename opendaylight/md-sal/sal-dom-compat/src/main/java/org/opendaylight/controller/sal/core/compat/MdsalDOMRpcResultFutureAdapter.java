@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class MdsalDOMRpcResultFutureAdapter extends AbstractDOMRpcResultFutureAdapter<
         DOMRpcResult, org.opendaylight.controller.md.sal.dom.api.DOMRpcResult,
         CheckedFuture<org.opendaylight.controller.md.sal.dom.api.DOMRpcResult,

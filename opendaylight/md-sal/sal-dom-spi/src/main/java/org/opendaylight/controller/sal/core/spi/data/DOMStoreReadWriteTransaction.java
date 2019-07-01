@@ -9,7 +9,10 @@ package org.opendaylight.controller.sal.core.spi.data;
 
 /**
  * Combination of a {@link DOMStoreReadTransaction} and {@link DOMStoreWriteTransaction}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction} instead.
  */
+@Deprecated
 public interface DOMStoreReadWriteTransaction extends DOMStoreReadTransaction, DOMStoreWriteTransaction {
 
 }

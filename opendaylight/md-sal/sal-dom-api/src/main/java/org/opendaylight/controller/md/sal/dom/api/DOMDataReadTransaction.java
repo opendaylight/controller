@@ -20,7 +20,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncReadTransaction}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction} instead.
  */
+@Deprecated
 public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
     /**
      * Reads data from provided logical data store located at the provided path.

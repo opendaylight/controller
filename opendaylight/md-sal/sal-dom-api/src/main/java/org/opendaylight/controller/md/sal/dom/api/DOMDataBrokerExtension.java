@@ -8,9 +8,11 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 /**
- * Type capture of a {@link DOMServiceExtension} applicable to {@link DOMDataBroker}
- * implementations.
+ * Type capture of a {@link DOMServiceExtension} applicable to {@link DOMDataBroker} implementations.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension} instead.
  */
+@Deprecated
 public interface DOMDataBrokerExtension extends DOMServiceExtension<DOMDataBroker, DOMDataBrokerExtension> {
 
 }

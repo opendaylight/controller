@@ -14,7 +14,10 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 
 /**
  * An exception for a failed read.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.ReadFailedException} instead.
  */
+@Deprecated
 public class ReadFailedException extends OperationFailedException {
 
     private static final long serialVersionUID = 1L;

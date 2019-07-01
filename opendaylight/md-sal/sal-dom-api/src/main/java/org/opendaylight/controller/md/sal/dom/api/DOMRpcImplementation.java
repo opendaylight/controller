@@ -15,7 +15,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Interface implemented by an individual RPC implementation. This API allows for dispatch
  * implementations, e.g. an individual object handling a multitude of RPCs.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcImplementation} instead.
  */
+@Deprecated
 public interface DOMRpcImplementation {
     /**
      * Initiate invocation of the RPC. Implementations of this method are

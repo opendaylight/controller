@@ -13,7 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -60,6 +60,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class DOMRpcRouterTest {
 
     private static final NormalizedNode<?, ?> RPC_INPUT = ImmutableNodes.leafNode(

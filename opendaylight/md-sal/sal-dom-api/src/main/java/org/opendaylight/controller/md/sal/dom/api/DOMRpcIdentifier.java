@@ -21,7 +21,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * always has global context. It allows an RPC to have a instance identifier
  * attached, so that there can be multiple implementations bound to different
  * contexts concurrently.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcIdentifier} instead.
  */
+@Deprecated
 public abstract class DOMRpcIdentifier {
 
     private static final class Global extends DOMRpcIdentifier {

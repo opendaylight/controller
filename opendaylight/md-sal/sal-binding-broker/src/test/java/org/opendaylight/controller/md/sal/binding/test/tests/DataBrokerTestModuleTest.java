@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestModule;
  *
  * @author Michael Vorburger
  */
+@Deprecated
 public class DataBrokerTestModuleTest {
 
     @Test

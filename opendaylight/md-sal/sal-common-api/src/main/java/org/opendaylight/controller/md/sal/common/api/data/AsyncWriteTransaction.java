@@ -101,6 +101,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  * @param <D>
  *            Type of data (payload), which represents data payload
  */
+@Deprecated
 public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransaction<P, D> {
     /**
      * Cancels the transaction.

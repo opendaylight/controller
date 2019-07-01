@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 final class BindingClusteredDOMDataTreeChangeListenerAdapter<T extends DataObject>
         extends BindingDOMDataTreeChangeListenerAdapter<T> implements ClusteredDOMDataTreeChangeListener {
     BindingClusteredDOMDataTreeChangeListenerAdapter(BindingToNormalizedNodeCodec codec,

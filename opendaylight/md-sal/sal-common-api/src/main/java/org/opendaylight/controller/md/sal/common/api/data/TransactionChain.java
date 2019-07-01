@@ -43,8 +43,8 @@ import org.opendaylight.yangtools.concepts.Path;
  * and leads to expected behavior: t2 will always see the data written in t1
  * present.
  */
-public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
-        AsyncDataTransactionFactory<P, D> {
+@Deprecated
+public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable, AsyncDataTransactionFactory<P, D> {
 
     /**
      * Create a new read only transaction which will continue the chain.

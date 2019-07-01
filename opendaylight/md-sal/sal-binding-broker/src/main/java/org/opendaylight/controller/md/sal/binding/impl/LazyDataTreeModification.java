@@ -28,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * which are directly accessed by user of data object modification.
  *
  */
+@Deprecated
 class LazyDataTreeModification<T extends DataObject> implements DataTreeModification<T> {
 
     private final DataTreeIdentifier<T> path;

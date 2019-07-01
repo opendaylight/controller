@@ -12,7 +12,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * Marker interface for services which can be obtained from a {@link DOMMountPoint} instance. No further semantics are
  * implied.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMService} instead.
  */
+@Deprecated
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
 public interface DOMService extends org.opendaylight.mdsal.dom.api.DOMService {
 

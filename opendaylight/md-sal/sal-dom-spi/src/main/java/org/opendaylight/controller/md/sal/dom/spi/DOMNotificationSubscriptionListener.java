@@ -15,8 +15,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * provides set of notification types for which currently
  * subscriptions are in place.
  *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListener} instead.
  */
 @Beta
+@Deprecated
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
 public interface DOMNotificationSubscriptionListener
         extends org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListener {

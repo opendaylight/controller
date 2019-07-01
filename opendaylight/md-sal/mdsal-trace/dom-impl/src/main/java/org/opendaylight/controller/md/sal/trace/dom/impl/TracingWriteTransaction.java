@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRe
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedTrait;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 
+@Deprecated
 class TracingWriteTransaction extends AbstractTracingWriteTransaction
         implements CloseTracked<TracingWriteTransaction> {
 

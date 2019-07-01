@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.binding.test.mock;
 
 import org.opendaylight.yangtools.yang.binding.Identifier;
 
+@Deprecated
 public class ReferencableObjectKey implements Identifier<ReferencableObject> {
     private static final long serialVersionUID = 1L;
     final Integer value;

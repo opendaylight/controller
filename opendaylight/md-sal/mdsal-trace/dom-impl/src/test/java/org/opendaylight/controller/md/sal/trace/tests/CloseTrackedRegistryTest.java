@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.trace.closetracker.impl.AbstractCloseT
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistryReportEntry;
 
+@Deprecated
 public class CloseTrackedRegistryTest {
 
     private static class SomethingClosable extends AbstractCloseTracked<SomethingClosable> implements AutoCloseable {

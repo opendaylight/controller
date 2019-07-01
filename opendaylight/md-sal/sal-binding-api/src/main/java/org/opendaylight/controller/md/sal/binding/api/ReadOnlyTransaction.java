@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * <p>
  * For more information on usage and examples, please see the documentation in
  *  {@link org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.ReadTransaction} instead.
  */
+@Deprecated
 public interface ReadOnlyTransaction extends ReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>,
         DataObject> {
 }

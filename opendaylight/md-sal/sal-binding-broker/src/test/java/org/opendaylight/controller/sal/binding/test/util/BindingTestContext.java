@@ -51,6 +51,7 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 @Beta
+@Deprecated
 public class BindingTestContext implements AutoCloseable {
     private BindingToNormalizedNodeCodec codec;
 

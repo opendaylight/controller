@@ -31,9 +31,9 @@ import java.util.concurrent.ExecutorService;
  * FIXME: Consider clarification of execution/delivery policy, how it will be
  * affected by Actor model and cluster-wide notifications.
  *
- * @param <N>
- *            the type of notifications
+ * @param <N> the type of notifications
  */
+@Deprecated
 public interface NotificationPublishService<N> {
 
     /**

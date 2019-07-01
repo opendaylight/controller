@@ -20,7 +20,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * <p>
  * Note: this interface enables notifications only at the leader of the data store, if clustered. If you want
  * notifications on all instances in a cluster, use the {@link ClusteredDOMDataTreeChangeListener}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener} instead.
  */
+@Deprecated
 public interface DOMDataTreeChangeListener extends EventListener {
     /**
      * Invoked when there was data change for the supplied path, which was used

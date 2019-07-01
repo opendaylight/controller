@@ -30,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltra
  *
  * @author Michael Vorburger.ch
  */
+@Deprecated
 public class TracingBrokerTest {
 
     @Test

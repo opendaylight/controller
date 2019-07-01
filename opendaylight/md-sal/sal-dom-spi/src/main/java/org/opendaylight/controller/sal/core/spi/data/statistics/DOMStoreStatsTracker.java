@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public interface DOMStoreStatsTracker {
 
     /**

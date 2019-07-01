@@ -14,7 +14,9 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
  * with a {@link DOMRpcProviderService}.
  *
  * @param <T> RPC implementation type
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration} instead.
  */
+@Deprecated
 public interface DOMRpcImplementationRegistration<T extends DOMRpcImplementation> extends ObjectRegistration<T> {
     @Override
     void close();

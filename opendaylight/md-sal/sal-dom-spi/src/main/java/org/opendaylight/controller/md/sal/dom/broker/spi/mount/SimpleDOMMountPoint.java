@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.spi.mount;
 
 import com.google.common.base.Optional;
@@ -18,6 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public final class SimpleDOMMountPoint implements DOMMountPoint {
 
     private final YangInstanceIdentifier identifier;

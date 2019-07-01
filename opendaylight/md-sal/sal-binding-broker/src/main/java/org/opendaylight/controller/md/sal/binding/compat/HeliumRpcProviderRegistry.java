@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
+@Deprecated
 public class HeliumRpcProviderRegistry implements RpcProviderRegistry {
 
     private final RpcConsumerRegistry consumerRegistry;

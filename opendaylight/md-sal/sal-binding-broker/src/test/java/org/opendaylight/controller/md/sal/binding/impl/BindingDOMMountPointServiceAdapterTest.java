@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
@@ -25,6 +25,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+@Deprecated
 public class BindingDOMMountPointServiceAdapterTest {
 
     @Mock

@@ -20,7 +20,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * A unique identifier for a particular subtree. It is composed of the logical
  * data store type and the instance identifier of the root node.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeIdentifier} instead.
  */
+@Deprecated
 public final class DataTreeIdentifier<T extends DataObject> implements Immutable,
         Path<DataTreeIdentifier<?>>, Serializable {
     private static final long serialVersionUID = 1L;

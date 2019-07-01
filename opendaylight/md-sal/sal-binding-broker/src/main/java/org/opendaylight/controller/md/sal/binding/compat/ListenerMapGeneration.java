@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 /**
  * An immutable view of the current generation of listeners.
  */
+@Deprecated
 final class ListenerMapGeneration {
     private static final int CACHE_MAX_ENTRIES = 1000;
 

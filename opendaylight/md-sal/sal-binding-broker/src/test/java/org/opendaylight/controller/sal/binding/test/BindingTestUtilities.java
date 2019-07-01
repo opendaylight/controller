@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.test;
 
+@Deprecated
 public class BindingTestUtilities {
 
 }

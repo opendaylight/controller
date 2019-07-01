@@ -20,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInputBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated
 public final class ContextExtractorTest {
 
     public interface Transitive extends EncapsulatedRouteInGrouping {

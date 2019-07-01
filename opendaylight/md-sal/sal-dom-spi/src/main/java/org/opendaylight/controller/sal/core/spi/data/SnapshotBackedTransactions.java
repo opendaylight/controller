@@ -16,7 +16,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
 /**
  * Public utility class for instantiating snapshot-backed transactions.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions} instead.
  */
+@Deprecated
 @Beta
 public final class SnapshotBackedTransactions {
     private SnapshotBackedTransactions() {

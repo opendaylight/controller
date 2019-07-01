@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Utility class which implements {@link DOMRpcResult} by forwarding all methods
  * to a backing instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMRpcResult} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMRpcResult extends ForwardingObject implements DOMRpcResult {
     @Override
     protected abstract @NonNull DOMRpcResult delegate();

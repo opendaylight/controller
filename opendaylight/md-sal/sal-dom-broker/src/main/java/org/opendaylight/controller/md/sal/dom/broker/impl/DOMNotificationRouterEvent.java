@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  * A single notification event in the disruptor ringbuffer. These objects are reused,
  * so they do have mutable state.
  */
+@Deprecated
 final class DOMNotificationRouterEvent {
     private static final Logger LOG = LoggerFactory.getLogger(DOMNotificationRouterEvent.class);
     public static final EventFactory<DOMNotificationRouterEvent> FACTORY = DOMNotificationRouterEvent::new;

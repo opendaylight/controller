@@ -18,6 +18,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated
 class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTransaction {
     private final DOMDataTreeWriteTransaction delegateTx;
     private final Object txIdentifier;

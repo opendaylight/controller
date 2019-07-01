@@ -54,6 +54,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  *
  */
 // FIXME explicitly enforce just one subtree requirement
+@Deprecated
 class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadWriteTransaction {
     private final DOMDataReadOnlyTransaction readTxDelegate;
     private final DOMDataWriteTransaction writeTxDelegate;

@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
  * supplier and backend commit coordinator.
  *
  * @param <T> transaction identifier type
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.AbstractSnapshotBackedTransactionChain} instead.
  */
+@Deprecated
 @Beta
 public abstract class AbstractSnapshotBackedTransactionChain<T> extends TransactionReadyPrototype<T>
         implements DOMStoreTransactionChain, TransactionClosePrototype<T> {

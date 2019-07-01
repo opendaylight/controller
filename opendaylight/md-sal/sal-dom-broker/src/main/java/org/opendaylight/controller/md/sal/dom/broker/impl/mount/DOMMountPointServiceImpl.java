@@ -36,7 +36,9 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public class DOMMountPointServiceImpl implements DOMMountPointService {
+    @Deprecated
     private abstract static class CompatFactory<M extends org.opendaylight.mdsal.dom.api.DOMService,
             C extends DOMService> {
         private final Class<C> controllerClass;

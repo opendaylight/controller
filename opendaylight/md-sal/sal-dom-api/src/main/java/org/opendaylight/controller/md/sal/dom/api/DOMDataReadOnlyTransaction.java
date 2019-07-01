@@ -12,6 +12,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncReadOnlyTransacti
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated
 public interface DOMDataReadOnlyTransaction extends DOMDataReadTransaction,
         AsyncReadOnlyTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 }

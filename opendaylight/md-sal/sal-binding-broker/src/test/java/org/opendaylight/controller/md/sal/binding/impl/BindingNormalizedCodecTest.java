@@ -45,6 +45,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.util.AbstractSchemaContext;
 
+@Deprecated
 public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
 
     private static final TopLevelListKey TOP_FOO_KEY = new TopLevelListKey("foo");

@@ -15,7 +15,10 @@ package org.opendaylight.controller.md.sal.binding.api;
  * <p>
  * Expected use: {@link NotificationPublishService}
  * </p>
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.NotificationRejectedException} instead.
  */
+@Deprecated
 public class NotificationRejectedException extends Exception {
     private static final long serialVersionUID = 1L;
 

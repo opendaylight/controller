@@ -47,7 +47,10 @@ import org.eclipse.jdt.annotation.NonNull;
  * some other RPC or action, or similar, which can separately fail. If a sub-request fails, such implementations are
  * required do report {@link DOMRpcImplementationNotAvailableException} as the invocation result, with the underlying
  * failure being linked as a cause.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener} instead.
  */
+@Deprecated
 public interface DOMRpcAvailabilityListener extends EventListener {
     /**
      * Method invoked whenever an RPC type becomes available.

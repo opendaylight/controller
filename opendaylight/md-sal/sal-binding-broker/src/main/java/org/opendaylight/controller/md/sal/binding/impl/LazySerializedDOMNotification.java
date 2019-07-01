@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * of notification actually accessed data from notification.
  *
  */
+@Deprecated
 public final class LazySerializedDOMNotification implements DOMNotification {
 
     private final BindingNormalizedNodeSerializer codec;

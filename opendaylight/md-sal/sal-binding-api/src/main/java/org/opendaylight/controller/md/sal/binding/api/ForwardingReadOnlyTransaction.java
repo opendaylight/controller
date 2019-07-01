@@ -18,8 +18,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * Utility {@link ReadOnlyTransaction} implementation which forwards all interface method
  * invocation to a delegate instance.
+ *
+ * @deprecated Use org.opendaylight.mdsal.binding.spi.ForwardingReadTransaction instead.
  */
-@SuppressWarnings("deprecation") // due to CheckedFuture
+@Deprecated
 public class ForwardingReadOnlyTransaction extends ForwardingObject implements ReadOnlyTransaction {
 
     private final ReadOnlyTransaction delegate;

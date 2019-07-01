@@ -16,7 +16,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 /**
  * Utility implementations of {@link DOMNotificationPublishService} which forwards
  * all requests to a delegate instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMNotificationPublishService} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMNotificationPublishService extends ForwardingObject
         implements DOMNotificationPublishService {
     @Override

@@ -25,6 +25,7 @@ import org.opendaylight.yang.gen.v1.opendaylight.test.bug._2562.namespace.rev160
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 
+@Deprecated
 public class Bug2562DeserializedUnkeyedListTest extends AbstractDataTreeChangeListenerTest {
     private static final InstanceIdentifier<Root> ROOT_PATH = InstanceIdentifier.create(Root.class);
 

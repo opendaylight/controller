@@ -34,6 +34,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @author Michael Vorburger
  */
+@Deprecated
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractDataBrokerTestTest extends AbstractConcurrentDataBrokerTest {
 

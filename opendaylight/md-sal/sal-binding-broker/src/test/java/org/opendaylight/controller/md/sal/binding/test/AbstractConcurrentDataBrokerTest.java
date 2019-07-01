@@ -18,6 +18,7 @@ package org.opendaylight.controller.md.sal.binding.test;
  *
  * @author Michael Vorburger
  */
+@Deprecated
 public abstract class AbstractConcurrentDataBrokerTest extends AbstractBaseDataBrokerTest {
     private final boolean useMTDataTreeChangeListenerExecutor;
 

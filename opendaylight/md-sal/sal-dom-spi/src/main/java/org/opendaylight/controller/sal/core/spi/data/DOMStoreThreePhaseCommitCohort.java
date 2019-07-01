@@ -14,7 +14,10 @@ import com.google.common.util.concurrent.ListenableFuture;
  * upon its transition to Ready state. The frontend (DOMStore user) uses this interface to drive the
  * commit procedure across potentially multiple DOMStores using the Three-Phase-Commit (3PC) Protocol,
  * as described in <a href="https://en.wikipedia.org/wiki/Three-phase_commit">Three-Phase-Commit Protocol</a>.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort} instead.
  */
+@Deprecated
 public interface DOMStoreThreePhaseCommitCohort {
 
     /**

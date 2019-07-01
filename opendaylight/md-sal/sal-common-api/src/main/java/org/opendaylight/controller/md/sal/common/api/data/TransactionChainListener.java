@@ -12,6 +12,7 @@ import java.util.EventListener;
 /**
  * Listener for transaction chain events.
  */
+@Deprecated
 public interface TransactionChainListener extends EventListener {
     /**
      * Invoked if when a transaction in the chain fails. All other transactions are automatically cancelled by the time

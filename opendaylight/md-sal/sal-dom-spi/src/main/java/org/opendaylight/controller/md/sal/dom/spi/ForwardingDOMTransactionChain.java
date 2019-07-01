@@ -17,7 +17,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 /**
  * Utility {@link DOMTransactionChain} implementation which forwards all interface
  * method invocation to a delegate instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMTransactionChain} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMTransactionChain extends ForwardingObject implements DOMTransactionChain {
     @Override
     protected abstract @NonNull DOMTransactionChain delegate();

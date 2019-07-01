@@ -81,6 +81,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class LegacyDOMDataBrokerAdapterTest {
     public static final QName TEST_QNAME = QName.create("test", "2018-07-11", "test");
     private static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);

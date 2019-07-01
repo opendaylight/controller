@@ -10,14 +10,14 @@ package org.opendaylight.controller.md.sal.common.api.data;
 /**
  * This exception occurs if the datastore is temporarily unavailable.
  * A retry of the transaction may succeed after a period of time
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.DataStoreUnavailableException} instead.
  */
-
+@Deprecated
 public class DataStoreUnavailableException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public DataStoreUnavailableException(String message, Throwable cause) {
         super(message, cause);
     }
-
-
 }

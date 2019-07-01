@@ -12,6 +12,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
+@Deprecated
 public class HeliumNotificationServiceAdapter
         implements org.opendaylight.controller.sal.binding.api.NotificationService, AutoCloseable {
 

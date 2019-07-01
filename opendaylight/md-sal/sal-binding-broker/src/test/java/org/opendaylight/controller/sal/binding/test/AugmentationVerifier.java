@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import org.opendaylight.yangtools.yang.binding.Augmentable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 
+@Deprecated
 public class AugmentationVerifier<T extends Augmentable<T>> {
 
     private final T object;

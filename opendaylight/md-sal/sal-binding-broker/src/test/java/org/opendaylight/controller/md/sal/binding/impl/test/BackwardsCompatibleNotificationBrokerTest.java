@@ -30,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
+@Deprecated
 public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificationBrokerTest {
 
     private NotificationProviderService notificationProviderService;

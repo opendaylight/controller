@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
+@Deprecated
 public final class MockSchemaService implements DOMSchemaService, SchemaContextProvider {
 
     private SchemaContext schemaContext;

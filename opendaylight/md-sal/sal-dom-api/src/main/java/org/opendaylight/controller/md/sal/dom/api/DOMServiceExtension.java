@@ -10,10 +10,12 @@ package org.opendaylight.controller.md.sal.dom.api;
 import com.google.common.annotations.Beta;
 
 /**
- * Marker interface for services which expose additional functionality on top
- * of some base {@link DOMService}.
+ * Marker interface for services which expose additional functionality on top of some base {@link DOMService}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMServiceExtension} instead.
  */
 @Beta
+@Deprecated
 public interface DOMServiceExtension<T extends DOMExtensibleService<T, E>, E extends DOMServiceExtension<T, E>> {
 
 }

@@ -8,9 +8,9 @@
 package org.opendaylight.controller.md.sal.common.api.routing;
 
 import java.util.Map;
-
 import org.opendaylight.yangtools.concepts.Path;
 
+@Deprecated
 public interface RoutingTable<C, P extends Path<P>, T> {
 
     C getIdentifier();

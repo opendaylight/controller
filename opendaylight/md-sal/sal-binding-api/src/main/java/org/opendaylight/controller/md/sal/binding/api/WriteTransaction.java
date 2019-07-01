@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncWriteTransaction}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.WriteTransaction} instead.
  */
+@Deprecated
 public interface WriteTransaction extends AsyncWriteTransaction<InstanceIdentifier<?>, DataObject> {
 
     /**

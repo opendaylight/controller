@@ -135,6 +135,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * @param <D>
  *            Type of data (payload), which represents data payload
  */
+@Deprecated
 public interface AsyncReadWriteTransaction<P extends Path<P>, D> extends AsyncReadTransaction<P, D>,
         AsyncWriteTransaction<P, D> {
 

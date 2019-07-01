@@ -14,7 +14,9 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * Registry of {@link DOMNotificationSubscriptionListener}
  * which listens for changes in notification types.
  *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry} instead.
  */
+@Deprecated
 @Beta
 public interface DOMNotificationSubscriptionListenerRegistry  {
 

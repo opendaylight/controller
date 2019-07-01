@@ -30,7 +30,10 @@ import org.slf4j.LoggerFactory;
  * which delegates most of its calls to similar methods provided by underlying snapshot.
  *
  * @param <T> identifier type
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadTransaction} instead.
  */
+@Deprecated
 @Beta
 public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTransaction<T>
         implements DOMStoreReadTransaction {

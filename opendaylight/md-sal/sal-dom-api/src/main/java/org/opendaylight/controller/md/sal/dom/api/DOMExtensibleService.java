@@ -18,7 +18,9 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @param <T> Base {@link DOMService}
  * @param <E> Extension type
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMExtensibleService} instead.
  */
+@Deprecated
 @Beta
 public interface DOMExtensibleService<T extends DOMExtensibleService<T, E>,
         E extends DOMServiceExtension<T, E>> extends DOMService {

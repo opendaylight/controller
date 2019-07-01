@@ -11,7 +11,9 @@ package org.opendaylight.controller.md.sal.dom.api;
  * Default implementation of DOMRpcException.
  *
  * @author Thomas Pantelis
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DefaultDOMRpcException} instead.
  */
+@Deprecated
 public class DefaultDOMRpcException extends DOMRpcException {
     private static final long serialVersionUID = 1L;
 

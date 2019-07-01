@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * @param <D>
  *            Type of data (payload), which represents data payload
  */
+@Deprecated
 public interface AsyncConfigurationCommitCoordinator<P extends Path<P>, D> {
 
     /**

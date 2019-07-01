@@ -21,7 +21,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * <p>
  * This interface is type capture of {@link TransactionChain} for DOM Data Contracts.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMTransactionChain} instead.
  */
+@Deprecated
 public interface DOMTransactionChain extends TransactionChain<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     @Override

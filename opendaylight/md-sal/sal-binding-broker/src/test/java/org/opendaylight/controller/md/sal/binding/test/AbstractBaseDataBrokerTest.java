@@ -15,6 +15,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public abstract class AbstractBaseDataBrokerTest extends AbstractSchemaAwareTest {
 
     private static final int ASSERT_COMMIT_DEFAULT_TIMEOUT = 5000;

@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
+@Deprecated
 public class BindingDOMNotificationPublishServiceAdapter implements NotificationPublishService, AutoCloseable {
 
     static final Factory<NotificationPublishService> BUILDER_FACTORY = Builder::new;

@@ -54,6 +54,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public class DOMDataTreeListenerTest {
 
     private SchemaContext schemaContext;

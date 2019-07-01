@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
+@Deprecated
 final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntry {
     private final DOMRpcIdentifier rpcId;
 

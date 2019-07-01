@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
+@Deprecated
 public class DataBrokerTestModule {
 
     public static DataBroker dataBroker() {

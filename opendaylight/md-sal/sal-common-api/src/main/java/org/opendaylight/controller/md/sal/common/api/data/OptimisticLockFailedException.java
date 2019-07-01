@@ -25,7 +25,9 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 *  retrieving current state and submitting new updated
 *  transaction.
 *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.OptimisticLockFailedException} instead.
 */
+@Deprecated
 public class OptimisticLockFailedException extends TransactionCommitFailedException {
 
     private static final long serialVersionUID = 1L;

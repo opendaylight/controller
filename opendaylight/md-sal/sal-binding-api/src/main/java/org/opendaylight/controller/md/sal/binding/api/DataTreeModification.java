@@ -15,7 +15,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  *
  * @author Tony Tkacik &lt;ttkacik@cisco.com&gt;
  *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeModification} instead.
  */
+@Deprecated
 public interface DataTreeModification<T extends DataObject> {
 
     /**

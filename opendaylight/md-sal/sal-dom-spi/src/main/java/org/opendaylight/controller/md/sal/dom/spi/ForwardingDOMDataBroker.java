@@ -21,7 +21,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 /**
  * Utility {@link DOMDataBroker} implementation which forwards all interface
  * method invocation to a delegate instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMDataBroker} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMDataBroker extends ForwardingObject implements DOMDataBroker {
     @Override
     protected abstract @NonNull DOMDataBroker delegate();

@@ -11,9 +11,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
- * A {@link DOMServiceExtension} which allows users to register for changes to a
- * subtree.
+ * A {@link DOMServiceExtension} which allows users to register for changes to a subtree.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService} instead.
  */
+@Deprecated
 public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
     /**
      * Registers a {@link DOMDataTreeChangeListener} to receive

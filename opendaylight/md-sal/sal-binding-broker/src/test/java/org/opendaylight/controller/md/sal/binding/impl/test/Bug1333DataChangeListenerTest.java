@@ -37,6 +37,7 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
  * <p>
  * See  https://bugs.opendaylight.org/show_bug.cgi?id=1333 for Bug Description
  */
+@Deprecated
 public class Bug1333DataChangeListenerTest extends AbstractDataTreeChangeListenerTest {
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);

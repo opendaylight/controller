@@ -16,6 +16,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @see ExceptionMapper
  */
+@Deprecated
 public final class TransactionCommitFailedExceptionMapper extends ExceptionMapper<TransactionCommitFailedException> {
 
     public static final TransactionCommitFailedExceptionMapper PRE_COMMIT_MAPPER = create("preCommit");

@@ -37,6 +37,7 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
  * which were described in
  * https://lists.opendaylight.org/pipermail/controller-dev/2014-July/005541.html.
  */
+@Deprecated
 public class ListInsertionDataChangeListenerTest extends AbstractDataTreeChangeListenerTest {
 
     private static final InstanceIdentifier<Top> TOP = InstanceIdentifier.create(Top.class);

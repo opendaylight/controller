@@ -8,10 +8,10 @@
 package org.opendaylight.controller.sal.binding.test.mock;
 
 import java.util.concurrent.Future;
-
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+@Deprecated
 public interface FooService extends RpcService {
 
     Future<RpcResult<Void>> foo();

@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class DOMNotificationRouterTest {
     private static final ContainerNode BODY = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
         new NodeIdentifier(QName.create(TestModel.TEST_QNAME.getModule(), "test-notification")))

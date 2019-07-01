@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated
 public interface MountPoint extends Identifiable<InstanceIdentifier<?>> {
     <T extends BindingService> Optional<T> getService(Class<T> service);
 }

@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * @param <C> Type, which is used to represent Routing context.
  * @param <P> Type of data tree path, which is used to identify route.
  */
+@Deprecated
 public interface RouteChangePublisher<C,P> {
 
     <L extends RouteChangeListener<C,P>> ListenerRegistration<L> registerRouteChangeListener(L listener);

@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class MappingCheckedFutureTest {
 
     interface FutureInvoker {

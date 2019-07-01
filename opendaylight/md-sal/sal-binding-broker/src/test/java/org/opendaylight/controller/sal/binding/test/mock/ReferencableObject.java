@@ -12,5 +12,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 
-public interface ReferencableObject extends DataObject, Identifiable<ReferencableObjectKey>,ChildOf<DataRoot> {
+@Deprecated
+public interface ReferencableObject extends DataObject, Identifiable<ReferencableObjectKey>, ChildOf<DataRoot> {
+
 }

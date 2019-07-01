@@ -13,7 +13,9 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
 /**
  * Abstract base class for {@link DOMRpcImplementationRegistration} implementations.
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.AbstractDOMRpcImplementationRegistration} instead.
  */
+@Deprecated
 public abstract class AbstractDOMRpcImplementationRegistration<T extends DOMRpcImplementation>
         extends AbstractObjectRegistration<T> implements DOMRpcImplementationRegistration<T> {
     protected AbstractDOMRpcImplementationRegistration(final T instance) {

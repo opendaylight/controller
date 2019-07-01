@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
+@Deprecated
 class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> extends
         AbstractWriteTransaction<T> implements WriteTransaction {
 

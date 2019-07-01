@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
+@Deprecated
 public abstract class AbstractBindingSalProviderInstance<N extends NotificationProviderService,
                                                          R extends RpcProviderRegistry>
         extends AbstractBindingSalConsumerInstance<N, R>

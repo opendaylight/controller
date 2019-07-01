@@ -14,7 +14,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 /**
  * Abstract base class for {@link DOMStoreThreePhaseCommitCohort} implementations,
  * which forward most of their functionality to a backend {@link #delegate()}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.ForwardingDOMStoreThreePhaseCommitCohort} instead.
  */
+@Deprecated
 @Beta
 public abstract class ForwardingDOMStoreThreePhaseCommitCohort extends ForwardingObject
         implements DOMStoreThreePhaseCommitCohort {

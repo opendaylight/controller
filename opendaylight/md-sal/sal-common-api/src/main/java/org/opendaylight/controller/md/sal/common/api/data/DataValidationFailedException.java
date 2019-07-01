@@ -21,10 +21,13 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
  * failed, because other data submitted via transactions.
  *
  * <p>
- *  Clients usually are not able recover from this error condition by
- *  retrieving same transaction, since data introduced by this transaction
- *  are invalid.
+ * Clients usually are not able recover from this error condition by
+ * retrieving same transaction, since data introduced by this transaction
+ * are invalid.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.DataValidationFailedException} instead.
  */
+@Deprecated
 public class DataValidationFailedException extends TransactionCommitFailedException {
 
     private static final long serialVersionUID = 1L;

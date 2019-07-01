@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * by several {@link DOMStoreTransactionChain} differentiated by provided
  * {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} type.
  */
+@Deprecated
 final class DOMDataBrokerTransactionChainImpl extends
         AbstractDOMForwardedTransactionFactory<DOMStoreTransactionChain> implements DOMTransactionChain {
     private enum State {

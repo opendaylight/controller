@@ -12,6 +12,7 @@ import com.google.common.cache.CacheLoader;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+@Deprecated
 public abstract class AdapterLoader<T, D> extends CacheLoader<Class<? extends T>, Optional<T>> {
 
     @Override

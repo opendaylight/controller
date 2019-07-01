@@ -25,7 +25,9 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareService;
  * and via
  * {@link org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext}
  *
+ * @deprecated Use {@link BindingService} instead.
  */
+@Deprecated
 public interface BindingService extends BindingAwareService {
 
 }

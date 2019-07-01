@@ -21,7 +21,10 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
  * won't occur.
  *
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.TransactionCommitDeadlockException} instead.
  */
+@Deprecated
 public class TransactionCommitDeadlockException extends TransactionCommitFailedException {
     private static final long serialVersionUID = 1L;
     private static final String DEADLOCK_MESSAGE =

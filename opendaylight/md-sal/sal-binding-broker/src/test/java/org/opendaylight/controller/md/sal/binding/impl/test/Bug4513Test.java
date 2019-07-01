@@ -34,6 +34,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * Regression test suite for https://bugs.opendaylight.org/show_bug.cgi?id=4513 - Change event is empty when
  * Homogeneous composite key is used homogeneous composite key is used.
  */
+@Deprecated
 public class Bug4513Test extends AbstractDataBrokerTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

@@ -22,7 +22,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Utility {@link DOMDataReadWriteTransaction} implementation which forwards all interface
  * method invocation to a delegate instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMDataReadWriteTransaction} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMDataReadWriteTransaction extends ForwardingObject
         implements DOMDataReadWriteTransaction {
     @Override

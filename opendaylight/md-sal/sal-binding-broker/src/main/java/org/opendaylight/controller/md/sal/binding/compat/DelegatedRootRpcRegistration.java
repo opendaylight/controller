@@ -11,6 +11,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistr
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
+@Deprecated
 final class DelegatedRootRpcRegistration<T extends RpcService> implements RpcRegistration<T> {
 
     private final ObjectRegistration<T> delegate;

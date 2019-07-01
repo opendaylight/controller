@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import javassist.ClassPool;
 
 @Beta
+@Deprecated
 public class BindingBrokerTestFactory {
 
     private static final ClassPool CLASS_POOL = ClassPool.getDefault();

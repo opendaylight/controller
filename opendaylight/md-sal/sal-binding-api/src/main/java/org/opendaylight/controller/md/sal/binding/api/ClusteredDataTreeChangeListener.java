@@ -21,7 +21,10 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  * @author Thomas Pantelis
  *
  * @param <T> the DataObject type
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener} instead.
  */
+@Deprecated
 public interface ClusteredDataTreeChangeListener<T extends DataObject> extends DataTreeChangeListener<T> {
 
 }

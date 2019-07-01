@@ -14,7 +14,9 @@ import java.util.Date;
 
 /**
  * Generic event interface.
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMEvent} instead.
  */
+@Deprecated
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
 public interface DOMEvent extends org.opendaylight.mdsal.dom.api.DOMEvent {
 

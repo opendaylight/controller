@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
+@Deprecated
 final class CompositeRoutedRpcRegistration<T extends RpcService> implements RoutedRpcRegistration<T> {
 
     private final Class<T> type;

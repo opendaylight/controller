@@ -22,7 +22,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 /**
  * A unique identifier for a particular subtree. It is composed of the logical
  * data store type and the instance identifier of the root node.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier} instead.
  */
+@Deprecated
 public final class DOMDataTreeIdentifier implements Immutable,
         Path<DOMDataTreeIdentifier>, Serializable, Comparable<DOMDataTreeIdentifier> {
     private static final long serialVersionUID = 1L;

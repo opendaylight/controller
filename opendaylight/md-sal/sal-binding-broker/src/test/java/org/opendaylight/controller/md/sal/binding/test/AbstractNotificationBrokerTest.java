@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public class AbstractNotificationBrokerTest extends AbstractSchemaAwareTest {
 
     private BindingToNormalizedNodeCodec bindingToNormalizedNodeCodec;

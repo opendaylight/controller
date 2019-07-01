@@ -11,6 +11,7 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 
+@Deprecated
 public interface Grouping {
 
     @RoutingContext(BaseIdentity.class)

@@ -11,4 +11,5 @@
  */
 // This generic infra may be moved somewhere else, later
 @org.eclipse.jdt.annotation.NonNullByDefault
+@Deprecated
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;

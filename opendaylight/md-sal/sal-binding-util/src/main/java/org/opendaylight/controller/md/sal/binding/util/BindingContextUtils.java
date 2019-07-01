@@ -26,6 +26,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
+@Deprecated
 public final class BindingContextUtils {
     private BindingContextUtils() {
     }

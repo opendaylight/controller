@@ -17,8 +17,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * Utility {@link WriteTransaction} implementation which forwards all interface method
  * invocation to a delegate instance.
+ *
+ * @deprecated Use org.opendaylight.mdsal.binding.spi.ForwardingWriteTransaction instead.
  */
-@SuppressWarnings("deprecation") // due to CheckedFuture & TransactionStatus
+@Deprecated
 public class ForwardingWriteTransaction extends ForwardingObject implements WriteTransaction {
 
     private final WriteTransaction delegate;

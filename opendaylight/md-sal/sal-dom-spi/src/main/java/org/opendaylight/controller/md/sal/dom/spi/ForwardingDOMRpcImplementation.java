@@ -19,7 +19,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Utility implementation which implements {@link DOMRpcImplementation} by forwarding it to
  * a backing delegate.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMRpcImplementation} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMRpcImplementation extends ForwardingObject implements DOMRpcImplementation {
     @Override
     protected abstract @NonNull DOMRpcImplementation delegate();

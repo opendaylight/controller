@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 @Beta
+@Deprecated
 @NonNullByDefault
 public interface AdapterFactory {
     /**

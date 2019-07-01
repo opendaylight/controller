@@ -26,7 +26,9 @@ import org.eclipse.jdt.annotation.Nullable;
  * It can optionally capture the context where it was allocated.
  *
  * @param <T> identifier type
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction} instead.
  */
+@Deprecated
 @Beta
 public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransaction {
     private final Throwable debugContext;

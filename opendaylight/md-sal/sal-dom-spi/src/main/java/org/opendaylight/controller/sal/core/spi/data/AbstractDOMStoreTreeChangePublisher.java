@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for {@link DOMStoreTreeChangePublisher} implementations.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTreeChangePublisher} instead.
  */
+@Deprecated
 public abstract class AbstractDOMStoreTreeChangePublisher
         extends AbstractRegistrationTree<AbstractDOMDataTreeChangeListenerRegistration<?>>
         implements DOMStoreTreeChangePublisher {

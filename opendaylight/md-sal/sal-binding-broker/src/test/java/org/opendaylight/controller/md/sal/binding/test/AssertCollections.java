@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 import org.junit.Assert;
 
+@Deprecated
 public final class AssertCollections {
     private AssertCollections() {
     }

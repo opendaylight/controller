@@ -51,6 +51,7 @@ import org.osgi.framework.BundleContext;
  * For more information about session-based access see {@link ConsumerContext}
  * and {@link ProviderContext}
  */
+@Deprecated
 public interface BindingAwareBroker {
     @Deprecated
     ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx);

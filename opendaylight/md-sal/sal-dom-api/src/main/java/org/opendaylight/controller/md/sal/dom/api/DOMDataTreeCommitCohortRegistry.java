@@ -13,7 +13,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * Interface for a DOM commit cohort registry.
  *
  * @author Thomas Pantelis
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry} instead.
  */
+@Deprecated
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 public interface DOMDataTreeCommitCohortRegistry extends DOMDataBrokerExtension,
         org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry {

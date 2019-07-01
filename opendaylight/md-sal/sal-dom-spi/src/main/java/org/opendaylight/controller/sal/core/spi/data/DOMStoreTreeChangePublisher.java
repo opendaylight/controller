@@ -15,7 +15,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 /**
  * Interface implemented by DOMStore implementations which allow registration
  * of {@link DOMDataTreeChangeListener} instances.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher} instead.
  */
+@Deprecated
 public interface DOMStoreTreeChangePublisher {
     /**
      * Registers a {@link DOMDataTreeChangeListener} to receive

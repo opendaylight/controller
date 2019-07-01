@@ -12,9 +12,11 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
- * A {@link BindingService} which allows users to register for changes to a
- * subtree.
+ * A {@link BindingService} which allows users to register for changes to a subtree.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeChangeService} instead.
  */
+@Deprecated
 public interface DataTreeChangeService extends BindingService {
     /**
      * Registers a {@link DataTreeChangeListener} to receive

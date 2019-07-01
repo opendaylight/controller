@@ -12,7 +12,10 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 
 /**
  * Failed commit of asynchronous transaction. This exception is raised and returned when transaction commit failed.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.TransactionCommitFailedException} instead.
  */
+@Deprecated
 public class TransactionCommitFailedException extends OperationFailedException {
 
     private static final long serialVersionUID = 1L;

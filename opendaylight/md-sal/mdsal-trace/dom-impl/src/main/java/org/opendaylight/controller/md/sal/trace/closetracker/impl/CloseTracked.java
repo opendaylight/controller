@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Michael Vorburger.ch
  */
+@Deprecated
 public interface CloseTracked<T extends CloseTracked<T>> {
 
     /**

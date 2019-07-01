@@ -13,7 +13,10 @@ import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Exception indicating that no implementation of the requested RPC service is available.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException} instead.
  */
+@Deprecated
 public class DOMRpcImplementationNotAvailableException extends DOMRpcException {
     private static final long serialVersionUID = 1L;
 

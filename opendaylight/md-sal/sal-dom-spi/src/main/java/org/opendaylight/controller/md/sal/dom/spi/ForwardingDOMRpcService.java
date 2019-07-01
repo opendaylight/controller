@@ -20,7 +20,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
  * Utility {@link DOMRpcService} which forwards all requests to a backing delegate instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMRpcService} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMRpcService extends ForwardingObject implements DOMRpcService {
     @Override
     protected abstract @NonNull DOMRpcService delegate();

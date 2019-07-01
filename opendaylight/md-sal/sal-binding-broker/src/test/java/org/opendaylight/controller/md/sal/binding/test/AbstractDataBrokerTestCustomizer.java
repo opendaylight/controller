@@ -29,6 +29,7 @@ import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrate
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Deprecated
 public abstract class AbstractDataBrokerTestCustomizer {
 
     private DOMDataBroker domDataBroker;

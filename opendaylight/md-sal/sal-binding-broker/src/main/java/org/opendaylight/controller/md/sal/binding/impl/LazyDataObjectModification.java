@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> Type of Binding Data Object
  */
+@Deprecated
 final class LazyDataObjectModification<T extends DataObject> implements DataObjectModification<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(LazyDataObjectModification.class);

@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.core.spi.data;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated
 public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
 
     /**

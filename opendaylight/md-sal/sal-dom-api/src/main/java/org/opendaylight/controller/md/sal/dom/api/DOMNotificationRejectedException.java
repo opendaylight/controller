@@ -13,7 +13,9 @@ package org.opendaylight.controller.md.sal.dom.api;
  *
  * <p>
  * Expected use: {@link DOMNotificationPublishService}
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMNotificationRejectedException} instead.
  */
+@Deprecated
 public class DOMNotificationRejectedException extends Exception {
     private static final long serialVersionUID = 1L;
 

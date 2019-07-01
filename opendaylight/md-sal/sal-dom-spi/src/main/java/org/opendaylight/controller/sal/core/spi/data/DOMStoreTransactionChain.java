@@ -12,7 +12,10 @@ package org.opendaylight.controller.sal.core.spi.data;
  * sequence and each transaction must see the effects of previous transactions
  * as if they happened. A chain makes no guarantees of atomicity, in fact
  * transactions are committed as soon as possible.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain} instead.
  */
+@Deprecated
 public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, AutoCloseable {
 
     /**

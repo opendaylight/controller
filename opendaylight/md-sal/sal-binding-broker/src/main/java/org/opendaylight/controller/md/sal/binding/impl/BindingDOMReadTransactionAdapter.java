@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated
 class BindingDOMReadTransactionAdapter extends AbstractForwardedTransaction<DOMDataReadOnlyTransaction> implements
         ReadOnlyTransaction {
 

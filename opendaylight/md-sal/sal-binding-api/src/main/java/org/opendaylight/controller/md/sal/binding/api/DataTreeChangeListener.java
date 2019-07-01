@@ -20,7 +20,10 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  * <p>
  * Note: this interface enables notifications only at the leader of the data store, if clustered. If you want
  * notifications on all instances in a cluster, use the {@link ClusteredDataTreeChangeListener}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeChangeListener} instead.
  */
+@Deprecated
 public interface DataTreeChangeListener<T extends DataObject> extends EventListener {
     /**
      * Invoked when there was data change for the supplied path, which was used

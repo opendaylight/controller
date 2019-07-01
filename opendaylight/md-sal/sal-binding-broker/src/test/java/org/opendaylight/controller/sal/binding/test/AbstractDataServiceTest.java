@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 
+@Deprecated
 public abstract class AbstractDataServiceTest {
 
     protected BindingTestContext testContext;

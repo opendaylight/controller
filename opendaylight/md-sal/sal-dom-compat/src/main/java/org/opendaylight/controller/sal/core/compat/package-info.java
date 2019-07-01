@@ -9,4 +9,5 @@
  * Controller/MDSAL compatibility library. Contains classes useful for bridging Controller's sal-core-{api,spi}
  * to MD-SAL's mdsal-dom-{api,spi}.
  */
+@Deprecated
 package org.opendaylight.controller.sal.core.compat;

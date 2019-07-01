@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListen
  * futures ({@link #getFailFuture()} and {@link #getSuccessFuture()} when
  * transaction chain event is retrieved.
  */
+@Deprecated
 class BlockingTransactionChainListener implements TransactionChainListener {
 
     private final SettableFuture<Throwable> failFuture = SettableFuture.create();

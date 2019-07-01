@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class AbstractDataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest {
     protected static final class TestListener<T extends DataObject> implements DataTreeChangeListener<T> {
 

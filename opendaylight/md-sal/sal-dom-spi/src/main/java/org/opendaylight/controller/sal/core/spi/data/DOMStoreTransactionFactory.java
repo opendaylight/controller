@@ -23,7 +23,9 @@ package org.opendaylight.controller.sal.core.spi.data;
  * between {@link DOMStore} and {@link DOMStoreTransactionChain}, which
  * further specify behaviour of returned transactions.
  *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory} instead.
  */
+@Deprecated
 public interface DOMStoreTransactionFactory {
 
     /**

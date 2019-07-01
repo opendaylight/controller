@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class ForwardedNotificationAdapterTest extends AbstractNotificationBrokerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ForwardedNotificationAdapterTest.class);

@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 
+@Deprecated
 public interface SimpleInput extends DataObject,Augmentable<SimpleInput> {
 
     @RoutingContext(BaseIdentity.class)

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.test.mock;
 
+@Deprecated
 public interface InheritedContextInput extends Grouping {
 
 }

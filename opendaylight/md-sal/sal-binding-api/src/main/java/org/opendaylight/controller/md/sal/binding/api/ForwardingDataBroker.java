@@ -16,7 +16,10 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 /**
  * Utility {@link DataBroker} implementation which forwards all interface method
  * invocation to a delegate instance.
+ *
+ * @deprecated Use org.opendaylight.mdsal.binding.spi.ForwardingDataBroker instead.
  */
+@Deprecated
 public abstract class ForwardingDataBroker extends ForwardingObject implements DataBroker {
 
     @Override

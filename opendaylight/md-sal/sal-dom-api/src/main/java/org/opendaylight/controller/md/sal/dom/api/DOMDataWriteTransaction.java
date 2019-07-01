@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncWriteTransaction}.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction} instead.
  */
+@Deprecated
 public interface DOMDataWriteTransaction extends AsyncWriteTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     @Override

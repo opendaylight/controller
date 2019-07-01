@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 /**
  * Utility implementation of a {@link DOMNotificationService} which forwards all requests
  * to a delegate instance.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMNotificationService} instead.
  */
+@Deprecated
 public abstract class ForwardingDOMNotificationService extends ForwardingObject implements DOMNotificationService {
     @Override
     protected abstract DOMNotificationService delegate();

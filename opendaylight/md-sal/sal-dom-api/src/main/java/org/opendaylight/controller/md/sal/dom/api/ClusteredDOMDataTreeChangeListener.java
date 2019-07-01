@@ -17,7 +17,9 @@ package org.opendaylight.controller.md.sal.dom.api;
  * {@link DOMDataTreeChangeListener} enables notifications only at the leader of the data store.
  *
  * @author Thomas Pantelis
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener} instead.
  */
+@Deprecated
 public interface ClusteredDOMDataTreeChangeListener extends DOMDataTreeChangeListener {
 
 }

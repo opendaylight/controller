@@ -12,6 +12,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated
 public class DOMStoreReadWriteTransactionAdapter
         extends DOMStoreReadTransactionAdapter<org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction>
         implements DOMStoreReadWriteTransaction {

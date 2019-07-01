@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory;
  * and executed according to {@link TransactionReadyPrototype}.
  *
  * @param <T> identifier type
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadWriteTransaction} instead.
  */
+@Deprecated
 @Beta
 public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedWriteTransaction<T>
         implements DOMStoreReadWriteTransaction {

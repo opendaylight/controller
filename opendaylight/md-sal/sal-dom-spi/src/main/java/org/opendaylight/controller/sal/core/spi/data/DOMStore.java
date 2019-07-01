@@ -22,7 +22,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * {@link #newWriteOnlyTransaction()} and {@link #newReadWriteTransaction()}, or
  * by creating {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChain}.
  *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStore} instead.
  */
+@Deprecated
 public interface DOMStore extends DOMStoreTransactionFactory {
     /**
      * Creates new transaction chain.

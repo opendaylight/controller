@@ -12,6 +12,7 @@ import org.opendaylight.yangtools.concepts.Path;
 /**
  * Interface for creating transaction chains.
  */
+@Deprecated
 public interface TransactionChainFactory<P extends Path<P>, D> {
 
     /**

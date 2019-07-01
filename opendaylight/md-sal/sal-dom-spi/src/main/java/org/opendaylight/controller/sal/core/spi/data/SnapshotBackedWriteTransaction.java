@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
  * {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype}.
  *
  * @param <T> Identifier type
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction} instead.
  */
+@Deprecated
 @Beta
 public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransaction<T>
         implements DOMStoreWriteTransaction {
@@ -180,6 +182,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
      *
      * @param <T> identifier type
      */
+    @Deprecated
     public abstract static class TransactionReadyPrototype<T> {
         /**
          * Called when a transaction is closed without being readied. This is not invoked for

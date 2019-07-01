@@ -16,6 +16,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+@Deprecated
 public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
     private static final ExecutorService MD_ACTIVATION_POOL = Executors.newCachedThreadPool();

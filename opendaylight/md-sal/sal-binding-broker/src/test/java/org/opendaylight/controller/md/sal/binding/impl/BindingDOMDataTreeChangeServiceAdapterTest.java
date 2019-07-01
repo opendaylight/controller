@@ -42,6 +42,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class BindingDOMDataTreeChangeServiceAdapterTest {
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
 
@@ -99,12 +100,14 @@ public class BindingDOMDataTreeChangeServiceAdapterTest {
                         && yangID.equals(treeId.getRootIdentifier()));
     }
 
+    @Deprecated
     private static class TestClusteredDataTreeChangeListener implements ClusteredDataTreeChangeListener<Top> {
         @Override
         public void onDataTreeChanged(final Collection<DataTreeModification<Top>> changes) {
         }
     }
 
+    @Deprecated
     private static class TestDataTreeChangeListener implements DataTreeChangeListener<Top> {
         @Override
         public void onDataTreeChanged(final Collection<DataTreeModification<Top>> changes) {

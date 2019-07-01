@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
+@Deprecated
 public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
 
     protected static final Factory<RpcConsumerRegistry> BUILDER_FACTORY = Builder::new;
