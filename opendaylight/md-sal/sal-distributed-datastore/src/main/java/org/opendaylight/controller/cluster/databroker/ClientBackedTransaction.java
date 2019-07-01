@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
-import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
+import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
