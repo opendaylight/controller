@@ -4,9 +4,10 @@ module event-source {
     prefix "eventsource";
 
     import event-aggregator { prefix aggr; }
-    import network-topology { prefix nt; revision-date "2013-10-21"; }
-    import opendaylight-inventory {prefix inv; revision-date "2013-08-19"; }
-    import yang-ext {prefix ext; revision-date "2013-07-09"; }
+    import ietf-network { prefix nw; }
+
+    // FIXME: we do not really need this with YANG 1.1
+    import yang-ext { prefix ext; }
 
     organization "Cisco Systems, Inc.";
     contact "Robert Gallas";
@@ -38,10 +39,9 @@ module event-source {
         description "Object status";
     }
 
-    // FIXME: migrate to topology
     typedef node-ref {
         type leafref {
-            path "/inv:nodes/inv:node/inv:id";
+            path "/nw:networks/nw:network/nw:node/nw:node-id";
         }
     }
 
@@ -63,6 +63,7 @@ module event-source {
         }
     }
 
+    // FIXME: this should be an action
     rpc join-topic {
         input {
             leaf node {
@@ -86,6 +87,7 @@ module event-source {
         }
     }
 
+    // FIXME: this should be an action
     rpc dis-join-topic {
         input {
             leaf node {
@@ -111,17 +113,17 @@ module event-source {
             mandatory true;
             description "Current status of event source.";
         }
-
     }
 
-    augment "/nt:network-topology/nt:topology/nt:topology-types" {
+    augment "/nw:networks/nw:network/nw:network-types" {
         uses topology-event-source-type;
     }
 
-    augment "/nt:network-topology/nt:topology/nt:node" {
-        when "../../nt:topology-types/topology-event-source";
+    augment "/nw:networks/nw:network/nw:node" {
+        when "../../nw:network-types/topology-event-source";
         leaf event-source-node {
             type node-ref;
         }
     }
 }
+
