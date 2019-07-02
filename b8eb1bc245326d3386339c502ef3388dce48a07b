@@ -16,6 +16,29 @@
       "revId": "b8eb1bc245326d3386339c502ef3388dce48a07b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fad6820_cdab28ae",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteOps.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-07-02T15:22:34Z",
+      "side": 1,
+      "message": "this really should be handled through subclasses. RPCs are uniquely identified by a QName (as they can only appear in module top-level), but actions are identified by SchemaPath (as they can appear anywhere but module top-level)",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 33
+      },
+      "revId": "b8eb1bc245326d3386339c502ef3388dce48a07b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
