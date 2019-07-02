@@ -468,25 +468,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-                log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
-                        logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
-
-                // This is a special case. Normally when stepping down as leader we don't process and reply to the
-                // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
-                // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
-                // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
-                // state and starting a new election and grabbing leadership back before the other candidate node can
-                // start a new election due to lack of responses. This case would only occur if there isn't a majority
-                // of other nodes available that can elect the requesting candidate. Since we're transferring
-                // leadership, we should make every effort to get the requesting node elected.
-                if (message instanceof RequestVote && context.getRaftActorLeadershipTransferCohort() != null) {
-                    log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
-                    super.handleMessage(sender, message);
+                if (message instanceof RequestVote) {
+                    if (shouldUpdateTerm((RequestVote) message)) {
+                        return dropLeadership(sender, rpc);
+                    }
+                } else {
+                    return dropLeadership(sender, rpc);
                 }
-
-                return internalSwitchBehavior(RaftState.Follower);
             }
         }
 
@@ -510,6 +499,28 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         return this;
+    }
+
+    private RaftActorBehavior dropLeadership(final ActorRef sender, final RaftRPC rpc) {
+        log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
+                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+
+        context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+
+        // This is a special case. Normally when stepping down as leader we don't process and reply to the
+        // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
+        // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
+        // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
+        // state and starting a new election and grabbing leadership back before the other candidate node can
+        // start a new election due to lack of responses. This case would only occur if there isn't a majority
+        // of other nodes available that can elect the requesting candidate. Since we're transferring
+        // leadership, we should make every effort to get the requesting node elected.
+        if (rpc instanceof RequestVote && context.getRaftActorLeadershipTransferCohort() != null) {
+            log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
+            super.handleMessage(sender, rpc);
+        }
+
+        return internalSwitchBehavior(RaftState.Follower);
     }
 
     @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS",
