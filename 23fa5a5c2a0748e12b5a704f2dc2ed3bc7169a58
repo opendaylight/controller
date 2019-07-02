@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "066ce77a_7d564b35",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-07-02T15:05:49Z",
+      "side": 0,
+      "message": "This move is a bit problematic because it changes the identity of the serialization proxy, hence the on-wire formats are not compatible.",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 70
+      },
+      "revId": "23fa5a5c2a0748e12b5a704f2dc2ed3bc7169a58",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
