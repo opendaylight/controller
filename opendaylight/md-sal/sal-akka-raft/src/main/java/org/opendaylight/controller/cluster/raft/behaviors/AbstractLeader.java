@@ -469,7 +469,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
-            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm() && shouldUpdateTerm(rpc)) {
                 log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
                         logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
@@ -483,9 +483,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // start a new election due to lack of responses. This case would only occur if there isn't a majority
                 // of other nodes available that can elect the requesting candidate. Since we're transferring
                 // leadership, we should make every effort to get the requesting node elected.
-                if (message instanceof RequestVote && context.getRaftActorLeadershipTransferCohort() != null) {
+                if (rpc instanceof RequestVote && context.getRaftActorLeadershipTransferCohort() != null) {
                     log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
-                    super.handleMessage(sender, message);
+                    super.handleMessage(sender, rpc);
                 }
 
                 return internalSwitchBehavior(RaftState.Follower);
