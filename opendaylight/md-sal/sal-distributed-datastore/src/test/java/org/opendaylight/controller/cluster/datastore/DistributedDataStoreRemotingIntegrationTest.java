@@ -24,6 +24,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
+import akka.cluster.Member;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.testkit.javadsl.TestKit;
@@ -81,7 +82,10 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardData
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
@@ -1248,6 +1252,60 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             followerTestKit.doCommit(rwTx.ready());
         }
+    }
+
+    @Test
+    public void testSemiReachableCandidateNotDroppingLeader() throws Exception {
+        final String testName = "testSemiReachableCandidateNotDroppingLeader";
+        initDatastores(testName, MODULE_SHARDS_CARS_1_2_3, CARS);
+
+        final DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder()
+                .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(10);
+        final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
+                follower2System, follower2DatastoreContextBuilder, commitTimeout);
+
+        final AbstractDataStore ds2 =
+                     follower2TestKit.setupAbstractDataStore(
+                             testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS);
+
+        followerTestKit.waitForMembersUp("member-1", "member-3");
+        follower2TestKit.waitForMembersUp("member-1", "member-2");
+
+        TestKit.shutdownActorSystem(follower2System);
+
+        ActorRef cars = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").get();
+        OnDemandRaftState initialState = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
+                .executeOperation(cars, GetOnDemandRaftState.INSTANCE);
+
+        Cluster leaderCluster = Cluster.get(leaderSystem);
+        Cluster followerCluster = Cluster.get(followerSystem);
+        Cluster follower2Cluster = Cluster.get(follower2System);
+
+        Member follower2Member = follower2Cluster.readView().self();
+
+        await().atMost(10, TimeUnit.SECONDS)
+                .until(() -> leaderCluster.readView().unreachableMembers().contains(follower2Member));
+        await().atMost(10, TimeUnit.SECONDS)
+                .until(() -> followerCluster.readView().unreachableMembers().contains(follower2Member));
+
+        ActorRef followerCars = followerDistributedDataStore.getActorUtils().findLocalShard("cars").get();
+
+        // to simulate a follower not being able to receive messages, but still being able to send messages and becoming
+        // candidate, we can just send a couple of RequestVotes to both leader and follower.
+        cars.tell(new RequestVote(initialState.getCurrentTerm() + 1, "member-3-shard-cars", -1, -1), null);
+        followerCars.tell(new RequestVote(initialState.getCurrentTerm() + 1, "member-3-shard-cars", -1, -1), null);
+        cars.tell(new RequestVote(initialState.getCurrentTerm() + 3, "member-3-shard-cars", -1, -1), null);
+        followerCars.tell(new RequestVote(initialState.getCurrentTerm() + 3, "member-3-shard-cars", -1, -1), null);
+
+        OnDemandRaftState stateAfter = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
+                .executeOperation(cars, GetOnDemandRaftState.INSTANCE);
+        OnDemandRaftState followerState = (OnDemandRaftState) followerDistributedDataStore.getActorUtils()
+                .executeOperation(cars, GetOnDemandRaftState.INSTANCE);
+
+        assertEquals(initialState.getCurrentTerm(), stateAfter.getCurrentTerm());
+        assertEquals(initialState.getCurrentTerm(), followerState.getCurrentTerm());
+
+        ds2.close();
     }
 
     @Test
