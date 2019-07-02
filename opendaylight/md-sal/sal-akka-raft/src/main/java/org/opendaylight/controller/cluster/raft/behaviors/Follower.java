@@ -455,10 +455,13 @@ public class Follower extends AbstractRaftActorBehavior {
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
         if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-            log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
-
-            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+            if (message instanceof RequestVote) {
+                if (shouldUpdateTerm((RequestVote) message)) {
+                    updateTerm(rpc);
+                }
+            } else {
+                updateTerm(rpc);
+            }
         }
 
         if (rpc instanceof InstallSnapshot) {
@@ -474,6 +477,13 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         return super.handleMessage(sender, rpc);
+    }
+
+    private void updateTerm(RaftRPC rpc) {
+        log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
+                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+
+        context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
     }
 
     private RaftActorBehavior handleElectionTimeout(final Object message) {

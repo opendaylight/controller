@@ -10,9 +10,12 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import akka.cluster.Cluster;
+import akka.cluster.Member;
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -501,5 +504,33 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     protected String getId() {
         return context.getId();
+    }
+
+    protected boolean shouldUpdateTerm(final RequestVote requestVote) {
+        log.debug("{}: Found higher term in RequestVote rpc, verifying whether it's safe to update term.",
+                logName());
+        final java.util.Optional<Cluster> maybeCluster = context.getCluster();
+        if (!maybeCluster.isPresent()) {
+            return true;
+        }
+
+        final Cluster cluster = maybeCluster.get();
+
+        final Set<Member> unreachable = cluster.state().getUnreachable();
+        log.debug("{}: Cluster state: {}", logName(), unreachable);
+
+        for (Member member : unreachable) {
+            for (String role : member.getRoles()) {
+                if (requestVote.getCandidateId().startsWith(role)) {
+                    log.debug("{}: Unreachable member: {}, matches candidateId in: {}, not updating term",
+                            logName(), member, requestVote);
+                    return false;
+                }
+            }
+        }
+
+        log.debug("{}: Candidate in requestVote:{} with higher term appears reachable, updating term.",
+                logName(), requestVote);
+        return true;
     }
 }
