@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "373b334d_6e7e34b8",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/OpsInvoker.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 8453
+      },
+      "writtenOn": "2019-07-04T10:12:33Z",
+      "side": 1,
+      "message": "why is the response for the action response so different compared to the rpc response, considering they should both response function in nearly the same way? or should the rpc code above be changed to match the action response code here?",
+      "range": {
+        "startLine": 132,
+        "startChar": 12,
+        "endLine": 135,
+        "endChar": 13
+      },
+      "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
