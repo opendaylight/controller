@@ -69,6 +69,30 @@
       "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c75cb302_bcc6a78d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-07-04T14:35:58Z",
+      "side": 1,
+      "message": "ah, darn, I forgot about that additional level. The intent is to efficiently check if SchemaPath has more than one element, but we *also* could end up having SchemaPath.ROOT -- which would incur NPE from a straight getParent().getParent().",
+      "parentUuid": "8ead680f_aa54040b",
+      "range": {
+        "startLine": 36,
+        "startChar": 14,
+        "endLine": 36,
+        "endChar": 31
+      },
+      "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
