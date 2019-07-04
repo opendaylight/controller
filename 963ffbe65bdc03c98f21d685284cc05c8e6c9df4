@@ -22,6 +22,30 @@
       "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77b7ae3b_b0092349",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/OpsInvoker.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-07-04T12:17:09Z",
+      "side": 1,
+      "message": "legacy RPC behavior, see javadoc of this class. we do not want to carry that over to actions.\n\nwe can fix RPC invocations, but that would be a separate patch, which needs careful consideration.",
+      "parentUuid": "373b334d_6e7e34b8",
+      "range": {
+        "startLine": 132,
+        "startChar": 12,
+        "endLine": 135,
+        "endChar": 13
+      },
+      "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
