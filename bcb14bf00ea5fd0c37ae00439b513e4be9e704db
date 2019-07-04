@@ -46,6 +46,30 @@
       "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cff22629_31b72585",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ActionResponse.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 8453
+      },
+      "writtenOn": "2019-07-04T16:15:58Z",
+      "side": 1,
+      "message": "reason I bring it up is because i\u0027m getting two spotbug errors relating to it:\nTransient field that isn\u0027t set by deserialization. \nThis class contains a field that is updated at multiple places in the class, thus it seems to be part of the state of the class. However, since the field is marked as transient and not set in readObject or readResolve, it will contain the default value in any deserialized instance of the class.\n\nNon serializable object written to ObjectOutput\nThis code seems to be passing a non-serializable object to the ObjectOutput.writeObject method. If the object is, indeed, non-serializable, an error will result.\n\nis it alright if I just supress the errors?",
+      "parentUuid": "030a6ad1_a245b78d",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 77
+      },
+      "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
