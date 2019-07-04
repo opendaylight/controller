@@ -22,10 +22,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
@@ -43,7 +42,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private final ActorRef rpcRegistrar;
     private final RemoteRpcRegistryMXBeanImpl mxBean;
 
-    public RpcRegistry(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
+    public RpcRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
         this.mxBean = new RemoteRpcRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
@@ -58,8 +57,8 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
      * @param rpcInvoker Actor handling RPC invocation requests from remote nodes
      * @return A new {@link Props} instance
      */
-    public static Props props(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker,
-            final ActorRef rpcRegistrar) {
+    public static Props props(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
+                              final ActorRef rpcRegistrar) {
         return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar);
     }
 
@@ -97,7 +96,8 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void onBucketRemoved(final Address address, final Bucket<RoutingTable> bucket) {
-        rpcRegistrar.tell(new UpdateRemoteEndpoints(ImmutableMap.of(address, Optional.empty())), ActorRef.noSender());
+        rpcRegistrar.tell(new Messages.UpdateRemoteEndpoints(ImmutableMap.of(address, Optional.empty())),
+                ActorRef.noSender());
     }
 
     @Override
@@ -107,13 +107,13 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         for (Entry<Address, Bucket<RoutingTable>> e : buckets.entrySet()) {
             final RoutingTable table = e.getValue().getData();
 
-            final Collection<DOMRpcIdentifier> rpcs = table.getRoutes();
+            final Collection<DOMRpcIdentifier> rpcs = table.getItems();
             endpoints.put(e.getKey(), rpcs.isEmpty() ? Optional.empty()
-                    : Optional.of(new RemoteRpcEndpoint(table.getRpcInvoker(), rpcs)));
+                    : Optional.of(new RemoteRpcEndpoint(table.getInvoker(), rpcs)));
         }
 
         if (!endpoints.isEmpty()) {
-            rpcRegistrar.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
+            rpcRegistrar.tell(new Messages.UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
         }
     }
 
@@ -141,46 +141,48 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
      */
     public static class Messages {
         abstract static class AbstractRouteMessage {
-            final List<DOMRpcIdentifier> routeIdentifiers;
+            final List<DOMRpcIdentifier> rpcRouteIdentifiers;
 
-            AbstractRouteMessage(final Collection<DOMRpcIdentifier> routeIdentifiers) {
-                Preconditions.checkArgument(routeIdentifiers != null && !routeIdentifiers.isEmpty(),
+            AbstractRouteMessage(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
+                Preconditions.checkArgument(rpcRouteIdentifiers != null && !rpcRouteIdentifiers.isEmpty(),
                         "Route Identifiers must be supplied");
-                this.routeIdentifiers = ImmutableList.copyOf(routeIdentifiers);
+                this.rpcRouteIdentifiers = ImmutableList.copyOf(rpcRouteIdentifiers);
             }
 
             List<DOMRpcIdentifier> getRouteIdentifiers() {
-                return this.routeIdentifiers;
+                return this.rpcRouteIdentifiers;
             }
 
             @Override
             public String toString() {
-                return "ContainsRoute{" + "routeIdentifiers=" + routeIdentifiers + '}';
+                return "ContainsRoute{" + "routeIdentifiers=" + rpcRouteIdentifiers + '}';
             }
         }
 
-        public static final class AddOrUpdateRoutes extends AbstractRouteMessage {
-            public AddOrUpdateRoutes(final Collection<DOMRpcIdentifier> routeIdentifiers) {
-                super(routeIdentifiers);
+        public static final class AddOrUpdateRoutes extends Messages.AbstractRouteMessage {
+            public AddOrUpdateRoutes(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
+                super(rpcRouteIdentifiers);
             }
+
         }
 
         public static final class RemoveRoutes extends AbstractRouteMessage {
-            public RemoveRoutes(final Collection<DOMRpcIdentifier> routeIdentifiers) {
-                super(routeIdentifiers);
+            public RemoveRoutes(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
+                super(rpcRouteIdentifiers);
             }
         }
 
         public static final class UpdateRemoteEndpoints {
-            private final Map<Address, Optional<RemoteRpcEndpoint>> endpoints;
+            private final Map<Address, Optional<RemoteRpcEndpoint>> rpcEndpoints;
+
 
             @VisibleForTesting
-            public UpdateRemoteEndpoints(final Map<Address, Optional<RemoteRpcEndpoint>> endpoints) {
-                this.endpoints = ImmutableMap.copyOf(endpoints);
+            public UpdateRemoteEndpoints(final Map<Address, Optional<RemoteRpcEndpoint>> rpcEndpoints) {
+                this.rpcEndpoints = ImmutableMap.copyOf(rpcEndpoints);
             }
 
-            public Map<Address, Optional<RemoteRpcEndpoint>> getEndpoints() {
-                return endpoints;
+            public Map<Address, Optional<RemoteRpcEndpoint>> getRpcEndpoints() {
+                return rpcEndpoints;
             }
         }
     }
