@@ -46,6 +46,29 @@
       "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ead680f_aa54040b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 8453
+      },
+      "writtenOn": "2019-07-04T14:25:44Z",
+      "side": 1,
+      "message": "do you mean to use type.getParent().getParent() ? from what I can see from the SchemaPath class implementation even if I create a SchemaPath with no parents the returned value will still have an AbsolouteSchemaPath or RelativeSchemaPath as its parent:\n\npublic static SchemaPath create(final boolean absolute, final QName... path) {\n        return create(Arrays.asList(path), absolute);\n    }\n\npublic static SchemaPath create(final Iterable\u003cQName\u003e path, final boolean absolute) {\n        final SchemaPath parent \u003d absolute ? ROOT : SAME;\n        return parent.createChild(path);\n    }\n\nlikewise for ExecuteAction",
+      "range": {
+        "startLine": 36,
+        "startChar": 14,
+        "endLine": 36,
+        "endChar": 31
+      },
+      "revId": "963ffbe65bdc03c98f21d685284cc05c8e6c9df4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
