@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73f7632f_6bcf5070",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ActionResponse.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 8453
+      },
+      "writtenOn": "2019-07-04T15:57:48Z",
+      "side": 1,
+      "message": "is it ok not to serialize the RpcErrors - are they not needed? although even if they were needed they don\u0027t implement serializable so it would fail... any suggestions?",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 77
+      },
+      "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
