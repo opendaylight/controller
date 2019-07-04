@@ -9,67 +9,27 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
 import akka.actor.Address;
 import akka.util.Timeout;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
 
-public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements RemoteRpcRegistryMXBean {
-
-    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
-    protected final Logger log = LoggerFactory.getLogger(getClass());
-
-    private static final String LOCAL_CONSTANT = "local";
-
-    private static final String ROUTE_CONSTANT = "route:";
-
-    private static final String NAME_CONSTANT = " | name:";
-
-    private final BucketStoreAccess rpcRegistryAccess;
-    private final Timeout timeout;
-
+public class RemoteRpcRegistryMXBeanImpl extends AbstractRegistryMXBean<RoutingTable, DOMRpcIdentifier>
+        implements RemoteRpcRegistryMXBean {
     public RemoteRpcRegistryMXBeanImpl(final BucketStoreAccess rpcRegistryAccess, final Timeout timeout) {
-        super("RemoteRpcRegistry", "RemoteRpcBroker", null);
-        this.rpcRegistryAccess = rpcRegistryAccess;
-        this.timeout = timeout;
-        registerMBean();
-    }
-
-    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch", "rawtypes"})
-    private RoutingTable getLocalData() {
-        try {
-            return (RoutingTable) Await.result((Future) rpcRegistryAccess.getLocalData(), timeout.duration());
-        } catch (Exception e) {
-            throw new RuntimeException("getLocalData failed", e);
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch", "rawtypes"})
-    private Map<Address, Bucket<RoutingTable>> getRemoteBuckets() {
-        try {
-            return (Map<Address, Bucket<RoutingTable>>) Await.result((Future)rpcRegistryAccess.getRemoteBuckets(),
-                    timeout.duration());
-        } catch (Exception e) {
-            throw new RuntimeException("getRemoteBuckets failed", e);
-        }
+        super("RemoteRpcRegistry", "RemoteRpcBroker", rpcRegistryAccess, timeout);
     }
 
     @Override
     public Set<String> getGlobalRpc() {
-        RoutingTable table = getLocalData();
-        Set<String> globalRpc = new HashSet<>(table.getRoutes().size());
-        for (DOMRpcIdentifier route : table.getRoutes()) {
+        RoutingTable table = localData();
+        Set<String> globalRpc = new HashSet<>(table.getItems().size());
+        for (DOMRpcIdentifier route : table.getItems()) {
             if (route.getContextReference().isEmpty()) {
                 globalRpc.add(route.getType().toString());
             }
@@ -81,9 +41,9 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Set<String> getLocalRegisteredRoutedRpc() {
-        RoutingTable table = getLocalData();
-        Set<String> routedRpc = new HashSet<>(table.getRoutes().size());
-        for (DOMRpcIdentifier route : table.getRoutes()) {
+        RoutingTable table = localData();
+        Set<String> routedRpc = new HashSet<>(table.getItems().size());
+        for (DOMRpcIdentifier route : table.getItems()) {
             if (!route.getContextReference().isEmpty()) {
                 routedRpc.add(ROUTE_CONSTANT + route.getContextReference() + NAME_CONSTANT + route.getType());
             }
@@ -95,12 +55,12 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Map<String, String> findRpcByName(final String name) {
-        RoutingTable localTable = getLocalData();
+        RoutingTable localTable = localData();
         // Get all RPCs from local bucket
         Map<String, String> rpcMap = new HashMap<>(getRpcMemberMapByName(localTable, name, LOCAL_CONSTANT));
 
         // Get all RPCs from remote bucket
-        Map<Address, Bucket<RoutingTable>> buckets = getRemoteBuckets();
+        Map<Address, Bucket<RoutingTable>> buckets = remoteBuckets();
         for (Entry<Address, Bucket<RoutingTable>> entry : buckets.entrySet()) {
             RoutingTable table = entry.getValue().getData();
             rpcMap.putAll(getRpcMemberMapByName(table, name, entry.getKey().toString()));
@@ -112,10 +72,10 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Map<String, String> findRpcByRoute(final String routeId) {
-        RoutingTable localTable = getLocalData();
+        RoutingTable localTable = localData();
         Map<String, String> rpcMap = new HashMap<>(getRpcMemberMapByRoute(localTable, routeId, LOCAL_CONSTANT));
 
-        Map<Address, Bucket<RoutingTable>> buckets = getRemoteBuckets();
+        Map<Address, Bucket<RoutingTable>> buckets = remoteBuckets();
         for (Entry<Address, Bucket<RoutingTable>> entry : buckets.entrySet()) {
             RoutingTable table = entry.getValue().getData();
             rpcMap.putAll(getRpcMemberMapByRoute(table, routeId, entry.getKey().toString()));
@@ -129,8 +89,8 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
      * Search if the routing table route String contains routeName.
      */
     private static Map<String,String> getRpcMemberMapByRoute(final RoutingTable table, final String routeName,
-                                                      final String address) {
-        Set<DOMRpcIdentifier> routes = table.getRoutes();
+                                                             final String address) {
+        Set<DOMRpcIdentifier> routes = table.getItems();
         Map<String, String> rpcMap = new HashMap<>(routes.size());
         for (DOMRpcIdentifier route : routes) {
             if (!route.getContextReference().isEmpty()) {
@@ -146,9 +106,9 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
     /**
      * Search if the routing table route type contains name.
      */
-    private static Map<String, String>  getRpcMemberMapByName(final RoutingTable table, final String name,
-                                                       final String address) {
-        Set<DOMRpcIdentifier> routes = table.getRoutes();
+    private static Map<String, String> getRpcMemberMapByName(final RoutingTable table, final String name,
+                                                             final String address) {
+        Set<DOMRpcIdentifier> routes = table.getItems();
         Map<String, String> rpcMap = new HashMap<>(routes.size());
         for (DOMRpcIdentifier route : routes) {
             if (!route.getContextReference().isEmpty()) {
@@ -162,12 +122,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch", "rawtypes"})
     public String getBucketVersions() {
-        try {
-            return Await.result((Future)rpcRegistryAccess.getBucketVersions(), timeout.duration()).toString();
-        } catch (Exception e) {
-            throw new RuntimeException("getVersions failed", e);
-        }
+        return bucketVersions();
     }
 }

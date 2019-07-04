@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2019 Nordix Foundation.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,18 +10,13 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * JMX bean to check remote rpc registry.
- */
-public interface RemoteRpcRegistryMXBean {
-
-    Set<String> getGlobalRpc();
+public interface RemoteActionRegistryMXBean {
 
     String getBucketVersions();
 
-    Set<String> getLocalRegisteredRoutedRpc();
+    Set<String> getLocalRegisteredAction();
 
-    Map<String, String> findRpcByName(String name);
+    Map<String, String> findActionByName(String name);
 
-    Map<String, String> findRpcByRoute(String route);
+    Map<String, String> findActionByRoute(String route);
 }
