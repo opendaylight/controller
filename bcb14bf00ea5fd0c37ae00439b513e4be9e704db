@@ -70,6 +70,30 @@
       "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7caf1f0e_48814a22",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ActionResponse.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-07-04T16:19:21Z",
+      "side": 1,
+      "message": "The first one is certainly a fair game -- I think SB is being stupid for not recognizing writeReplace().\n\nI am not sure about the second -- ImmutableList is Serializable, so not sure what is triggering it.",
+      "parentUuid": "cff22629_31b72585",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 77
+      },
+      "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
