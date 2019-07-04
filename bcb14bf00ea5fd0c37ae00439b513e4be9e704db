@@ -22,6 +22,30 @@
       "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "030a6ad1_a245b78d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ActionResponse.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-07-04T16:08:10Z",
+      "side": 1,
+      "message": "That\u0027s being done on line 61. I think there is only a single implementation, which is serializable, so it should be fine.",
+      "parentUuid": "73f7632f_6bcf5070",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 77
+      },
+      "revId": "bcb14bf00ea5fd0c37ae00439b513e4be9e704db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
