@@ -17,20 +17,12 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>odl-mdsal-broker-local</artifactId>
+    <artifactId>odl-controller-broker-local</artifactId>
     <version>1.10.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MDSAL :: Broker (local)</name>
     <description>OpenDaylight Controller stack without clustering</description>
-
-    <properties>
-        <!-- FIXME: CONTROLLER-1584:
-            - mdsal-eos-dom-simple does not activate
-            - we need a DOMDataBroker instance activation
-            -->
-        <skip.karaf.featureTest>true</skip.karaf.featureTest>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
