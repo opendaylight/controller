@@ -7,7 +7,7 @@
  and is available at http://www.eclipse.org/legal/epl-v10.html
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-mdsal-${project.version}">
-    <feature name="odl-mdsal-broker-local" version="${project.version}">
+    <feature name="odl-controller-broker-local" version="${project.version}">
         <feature version="[7,8)">odl-mdsal-dom</feature>
         <feature version="[7,8)">odl-mdsal-eos-binding</feature>
         <feature version="[7,8)">odl-mdsal-eos-dom</feature>
