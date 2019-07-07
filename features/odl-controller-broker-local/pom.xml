@@ -15,10 +15,10 @@
         <relativePath>../single-feature-parent</relativePath>
     </parent>
 
-    <artifactId>odl-mdsal-broker-local</artifactId>
+    <artifactId>odl-controller-broker-local</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenDaylight :: MDSAL :: Broker (local)</name>
+    <name>OpenDaylight :: Controller :: Broker (local)</name>
     <description>OpenDaylight Controller stack without clustering</description>
 
     <properties>

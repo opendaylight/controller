@@ -279,7 +279,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>odl-mdsal-broker-local</artifactId>
+                <artifactId>odl-controller-broker-local</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
