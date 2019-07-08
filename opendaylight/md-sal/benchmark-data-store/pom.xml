@@ -33,12 +33,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-core</artifactId>
-      <version>1.17.5</version>
+      <version>1.21</version>
     </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
-      <version>1.17.5</version>
+      <version>1.21</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
