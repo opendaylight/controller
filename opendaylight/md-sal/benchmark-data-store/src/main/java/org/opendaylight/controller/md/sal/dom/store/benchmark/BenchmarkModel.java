@@ -7,13 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
@@ -40,19 +36,7 @@ public final class BenchmarkModel {
     private BenchmarkModel() {
     }
 
-    private static InputStream getInputStream() {
-        return BenchmarkModel.class.getResourceAsStream(DATASTORE_TEST_YANG);
-    }
-
     public static SchemaContext createTestContext() {
-        final SchemaContext schemaContext;
-        final List<InputStream> streams = Collections.singletonList(getInputStream());
-
-        try {
-            schemaContext = YangParserTestUtils.parseYangStreams(streams);
-        } catch (ReactorException e) {
-            throw new RuntimeException("Unable to build schema context from " + streams, e);
-        }
-        return schemaContext;
+        return YangParserTestUtils.parseYangResources(BenchmarkModel.class, DATASTORE_TEST_YANG);
     }
 }

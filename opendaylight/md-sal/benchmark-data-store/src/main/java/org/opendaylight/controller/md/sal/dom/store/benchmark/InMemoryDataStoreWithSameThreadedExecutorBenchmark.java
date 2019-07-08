@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -44,7 +44,8 @@ public class InMemoryDataStoreWithSameThreadedExecutorBenchmark
     public void setUp() throws Exception {
         final String name = "DS_BENCHMARK";
         final ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
-                MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE, MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE, name + "-DCL");
+                MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE, MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE, name + "-DCL",
+                InMemoryDataStoreWithSameThreadedExecutorBenchmark.class);
 
         domStore = new InMemoryDOMDataStore("SINGLE_THREADED_DS_BENCHMARK", dataChangeListenerExecutor);
         schemaContext = BenchmarkModel.createTestContext();
