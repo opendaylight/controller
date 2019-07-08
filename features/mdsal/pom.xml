@@ -31,7 +31,6 @@
         <module>odl-mdsal-clustering-commons</module>
         <module>odl-controller-blueprint</module>
 
-        <module>odl-mdsal-all</module>
         <module>odl-mdsal-broker</module>
         <module>odl-mdsal-broker-local</module>
         <module>odl-mdsal-clustering</module>
