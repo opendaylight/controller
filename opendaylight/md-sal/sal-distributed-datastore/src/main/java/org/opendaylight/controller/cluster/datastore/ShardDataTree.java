@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.OptionalLong;
 import java.util.Queue;
 import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
@@ -1106,7 +1107,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
     void checkForExpiredTransactions(final long transactionCommitTimeoutMillis,
-            final Function<SimpleShardDataTreeCohort, Optional<Long>> accessTimeUpdater) {
+            final Function<SimpleShardDataTreeCohort, OptionalLong> accessTimeUpdater) {
         final long timeout = TimeUnit.MILLISECONDS.toNanos(transactionCommitTimeoutMillis);
         final long now = readTime();
 
@@ -1124,9 +1125,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        final Optional<Long> updateOpt = accessTimeUpdater.apply(currentTx.cohort);
+        final OptionalLong updateOpt = accessTimeUpdater.apply(currentTx.cohort);
         if (updateOpt.isPresent()) {
-            final long newAccess =  updateOpt.get().longValue();
+            final long newAccess =  updateOpt.getAsLong();
             final long newDelta = now - newAccess;
             if (newDelta < delta) {
                 LOG.debug("{}: Updated current transaction {} access time", logContext,
