@@ -166,9 +166,6 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     @Override
     public DOMEntityOwnershipListenerRegistration registerListener(final String entityType,
             final DOMEntityOwnershipListener listener) {
-        Preconditions.checkNotNull(entityType, "entityType cannot be null");
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-
         RegisterListenerLocal registerListener = new RegisterListenerLocal(listener, entityType);
 
         LOG.debug("Registering listener with message: {}", registerListener);
