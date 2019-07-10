@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.Consumer;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
@@ -35,9 +37,9 @@ public class ReconnectingClientConnectionTest
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
         final long now = context.ticker().read() + ConnectedClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS;
-        final Optional<Long> timeout = connection.checkTimeout(now);
-        Assert.assertNotNull(timeout);
-        Assert.assertTrue(timeout.isPresent());
+        final OptionalLong timeout = connection.checkTimeout(now);
+        assertNotNull(timeout);
+        assertTrue(timeout.isPresent());
     }
 
     @Override
@@ -54,7 +56,7 @@ public class ReconnectingClientConnectionTest
     @Test
     public void testReconnectConnection() {
         final ClientActorBehavior<BackendInfo> behavior = mock(ClientActorBehavior.class);
-        Assert.assertSame(behavior, connection.lockedReconnect(behavior, mock(RequestException.class)));
+        assertSame(behavior, connection.lockedReconnect(behavior, mock(RequestException.class)));
     }
 
     @Override

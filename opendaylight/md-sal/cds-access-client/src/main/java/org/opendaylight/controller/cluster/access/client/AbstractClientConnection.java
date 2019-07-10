@@ -17,6 +17,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -334,7 +335,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
                 // Requests are always scheduled in sequence, hence checking for timeout is relatively straightforward.
                 // Note we use also inquire about the delay, so we can re-schedule if needed, hence the unusual
                 // tri-state return convention.
-                final Optional<Long> delay = lockedCheckTimeout(now);
+                final OptionalLong delay = lockedCheckTimeout(now);
                 if (delay == null) {
                     // We have timed out. There is no point in scheduling a timer
                     LOG.debug("{}: connection {} timed out", context.persistenceId(), this);
@@ -344,7 +345,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
                 if (delay.isPresent()) {
                     // If there is new delay, schedule a timer
-                    scheduleTimer(delay.get());
+                    scheduleTimer(delay.getAsLong());
                 } else {
                     LOG.debug("{}: not scheduling timeout on {}", context.persistenceId(), this);
                 }
@@ -366,7 +367,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     @VisibleForTesting
-    final Optional<Long> checkTimeout(final long now) {
+    final OptionalLong checkTimeout(final long now) {
         lock.lock();
         try {
             return lockedCheckTimeout(now);
@@ -388,10 +389,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL",
             justification = "Returning null Optional is documented in the API contract.")
     @GuardedBy("lock")
-    private Optional<Long> lockedCheckTimeout(final long now) {
+    private OptionalLong lockedCheckTimeout(final long now) {
         if (queue.isEmpty()) {
             LOG.debug("{}: connection {} is empty", context.persistenceId(), this);
-            return Optional.empty();
+            return OptionalLong.empty();
         }
 
         final long backendSilentTicks = backendSilentTicks(now);
@@ -406,7 +407,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             final long beenOpen = now - head.getEnqueuedTicks();
             final long requestTimeout = context.config().getRequestTimeout();
             if (beenOpen < requestTimeout) {
-                return Optional.of(requestTimeout - beenOpen);
+                return OptionalLong.of(requestTimeout - beenOpen);
             }
 
             tasksTimedOut++;
@@ -421,7 +422,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             queue.tryTransmit(now);
         }
 
-        return Optional.empty();
+        return OptionalLong.empty();
     }
 
     private void timeoutEntry(final ConnectionEntry entry, final long beenOpen) {
