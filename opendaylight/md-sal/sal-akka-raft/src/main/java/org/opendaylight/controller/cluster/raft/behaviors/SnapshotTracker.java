@@ -5,15 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.io.ByteSource;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.OptionalInt;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
@@ -32,10 +32,10 @@ class SnapshotTracker implements AutoCloseable {
     private int lastChunkHashCode = LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE;
     private long count;
 
-    SnapshotTracker(Logger log, int totalChunks, String leaderId, RaftActorContext context) {
+    SnapshotTracker(final Logger log, final int totalChunks, final String leaderId, final RaftActorContext context) {
         this.log = log;
         this.totalChunks = totalChunks;
-        this.leaderId = Preconditions.checkNotNull(leaderId);
+        this.leaderId = requireNonNull(leaderId);
         fileBackedStream = context.getFileBackedOutputStreamFactory().newInstance();
         bufferedStream = new BufferedOutputStream(fileBackedStream);
     }
@@ -49,7 +49,7 @@ class SnapshotTracker implements AutoCloseable {
      * @return true if this is the last chunk is received
      * @throws InvalidChunkException if the chunk index is invalid or out of order
      */
-    boolean addChunk(int chunkIndex, byte[] chunk, Optional<Integer> maybeLastChunkHashCode)
+    boolean addChunk(final int chunkIndex, final byte[] chunk, final OptionalInt maybeLastChunkHashCode)
             throws InvalidChunkException, IOException {
         log.debug("addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
                 chunkIndex, lastChunkIndex, count, this.lastChunkHashCode);
@@ -63,10 +63,10 @@ class SnapshotTracker implements AutoCloseable {
             throw new InvalidChunkException("Expected chunkIndex " + (lastChunkIndex + 1) + " got " + chunkIndex);
         }
 
-        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.get() != this.lastChunkHashCode) {
+        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.getAsInt() != this.lastChunkHashCode) {
             throw new InvalidChunkException("The hash code of the recorded last chunk does not match "
                     + "the senders hash code, expected " + this.lastChunkHashCode + " was "
-                    + maybeLastChunkHashCode.get());
+                    + maybeLastChunkHashCode.getAsInt());
         }
 
         bufferedStream.write(chunk);
@@ -99,7 +99,7 @@ class SnapshotTracker implements AutoCloseable {
     public static class InvalidChunkException extends IOException {
         private static final long serialVersionUID = 1L;
 
-        InvalidChunkException(String message) {
+        InvalidChunkException(final String message) {
             super(message);
         }
     }

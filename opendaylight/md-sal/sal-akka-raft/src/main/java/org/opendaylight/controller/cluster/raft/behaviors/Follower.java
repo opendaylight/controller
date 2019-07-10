@@ -408,8 +408,8 @@ public class Follower extends AbstractRaftActorBehavior {
         return false;
     }
 
-    private void sendOutOfSyncAppendEntriesReply(final ActorRef sender, boolean forceInstallSnapshot,
-            short leaderRaftVersion) {
+    private void sendOutOfSyncAppendEntriesReply(final ActorRef sender, final boolean forceInstallSnapshot,
+            final short leaderRaftVersion) {
         // We found that the log was out of sync so just send a negative reply.
         final AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex(),
                 lastTerm(), context.getPayloadVersion(), forceInstallSnapshot, needsLeaderAddress(),
@@ -600,7 +600,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         installSnapshot.getLastIncludedTerm(),
                         context.getTermInformation().getCurrentTerm(),
                         context.getTermInformation().getVotedFor(),
-                        installSnapshot.getServerConfig().orNull());
+                        installSnapshot.getServerConfig().orElse(null));
 
                 ApplySnapshot.Callback applySnapshotCallback = new ApplySnapshot.Callback() {
                     @Override
