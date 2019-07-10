@@ -5,17 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
 
 import akka.actor.ActorRef;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateRemoved;
@@ -53,19 +52,19 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
     private final ActorRef shard;
     private final Map<YangInstanceIdentifier, Collection<String>> currentCandidates = new HashMap<>();
 
-    CandidateListChangeListener(ActorRef shard, String logId) {
-        this.shard = Preconditions.checkNotNull(shard, "shard should not be null");
+    CandidateListChangeListener(final ActorRef shard, final String logId) {
+        this.shard = requireNonNull(shard, "shard should not be null");
         this.logId = logId;
     }
 
-    void init(ShardDataTree shardDataTree) {
+    void init(final ShardDataTree shardDataTree) {
         shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH)
             .node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME)
-                .node(Candidate.QNAME).node(Candidate.QNAME).build(), this, Optional.absent(), noop -> { /* NOOP */ });
+                .node(Candidate.QNAME).node(Candidate.QNAME).build(), this, Optional.empty(), noop -> { /* NOOP */ });
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
         for (DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
             ModificationType type = changeRoot.getModificationType();
@@ -92,14 +91,14 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
-    private Collection<String> addToCurrentCandidates(YangInstanceIdentifier entityId, String newCandidate) {
+    private Collection<String> addToCurrentCandidates(final YangInstanceIdentifier entityId, final String newCandidate) {
         Collection<String> candidates = currentCandidates.computeIfAbsent(entityId, k -> new LinkedHashSet<>());
 
         candidates.add(newCandidate);
         return candidates;
     }
 
-    private Collection<String> removeFromCurrentCandidates(YangInstanceIdentifier entityId, String candidateToRemove) {
+    private Collection<String> removeFromCurrentCandidates(final YangInstanceIdentifier entityId, final String candidateToRemove) {
         Collection<String> candidates = currentCandidates.get(entityId);
         if (candidates != null) {
             candidates.remove(candidateToRemove);
@@ -110,7 +109,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
         return Collections.emptyList();
     }
 
-    private static YangInstanceIdentifier extractEntityPath(YangInstanceIdentifier candidatePath) {
+    private static YangInstanceIdentifier extractEntityPath(final YangInstanceIdentifier candidatePath) {
         List<PathArgument> newPathArgs = new ArrayList<>();
         for (PathArgument pathArg: candidatePath.getPathArguments()) {
             newPathArgs.add(pathArg);

@@ -11,7 +11,6 @@ import akka.actor.ActorRef;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Verify;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Queue;
 import java.util.SortedSet;
@@ -266,7 +266,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         // delete everything first
         mod.delete(YangInstanceIdentifier.EMPTY);
 
-        final java.util.Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
+        final Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
         if (maybeNode.isPresent()) {
             // Add everything from the remote node back
             mod.write(YangInstanceIdentifier.EMPTY, maybeNode.get());
@@ -643,10 +643,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     Optional<DataTreeCandidate> readCurrentData() {
-        final java.util.Optional<NormalizedNode<?, ?>> currentState =
-                dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
-        return currentState.isPresent() ? Optional.of(DataTreeCandidates.fromNormalizedNode(
-            YangInstanceIdentifier.EMPTY, currentState.get())) : Optional.<DataTreeCandidate>absent();
+        return dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY)
+                .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.EMPTY, state));
     }
 
     public void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
@@ -675,7 +673,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @Override
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
-            final java.util.Optional<SortedSet<String>> participatingShardNames) {
+            final Optional<SortedSet<String>> participatingShardNames) {
         final DataTreeModification snapshot = transaction.getSnapshot();
         final TransactionIdentifier id = transaction.getIdentifier();
         LOG.debug("{}: readying transaction {}", logContext, id);
@@ -692,7 +690,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
-        return Optional.fromJavaUtil(dataTree.takeSnapshot().readNode(path));
+        return dataTree.takeSnapshot().readNode(path);
     }
 
     DataTreeSnapshot takeSnapshot() {
@@ -918,8 +916,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         tempStack.forEach(queue::addFirst);
     }
 
-    private Collection<String> extractPrecedingShardNames(
-            final java.util.Optional<SortedSet<String>> participatingShardNames) {
+    private Collection<String> extractPrecedingShardNames(final Optional<SortedSet<String>> participatingShardNames) {
         return participatingShardNames.map((Function<SortedSet<String>, Collection<String>>)
             set -> set.headSet(shard.getShardName())).orElse(Collections.<String>emptyList());
     }
@@ -1086,7 +1083,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final java.util.Optional<SortedSet<String>> participatingShardNames) {
+            final Optional<SortedSet<String>> participatingShardNames) {
         SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(this, mod, txId,
                 cohortRegistry.createCohort(schemaContext, txId, shard::executeInSelf,
                         COMMIT_STEP_TIMEOUT), participatingShardNames);
@@ -1097,7 +1094,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     // Exposed for ShardCommitCoordinator so it does not have deal with local histories (it does not care), this mimics
     // the newReadWriteTransaction()
     ShardDataTreeCohort newReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final java.util.Optional<SortedSet<String>> participatingShardNames) {
+            final Optional<SortedSet<String>> participatingShardNames) {
         if (txId.getHistoryId().getHistoryId() == 0) {
             return createReadyCohort(txId, mod, participatingShardNames);
         }

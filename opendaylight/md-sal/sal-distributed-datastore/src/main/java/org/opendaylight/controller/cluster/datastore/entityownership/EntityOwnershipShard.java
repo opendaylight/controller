@@ -30,7 +30,6 @@ import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.pattern.Patterns;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -41,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -200,13 +200,13 @@ class EntityOwnershipShard extends Shard {
         getSender().tell(SuccessReply.INSTANCE, getSelf());
 
         searchForEntities((entityTypeNode, entityNode) -> {
-            java.util.Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+            Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
             String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
             if (registerListener.getEntityType().equals(entityType)) {
                 final boolean hasOwner;
                 final boolean isOwner;
 
-                java.util.Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
                 if (possibleOwner.isPresent()) {
                     isOwner = localMemberName.getName().equals(possibleOwner.get().getValue().toString());
                     hasOwner = true;
@@ -300,12 +300,12 @@ class EntityOwnershipShard extends Shard {
 
     private void notifyAllListeners() {
         searchForEntities((entityTypeNode, entityNode) -> {
-            java.util.Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+            Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
             if (possibleType.isPresent()) {
                 final boolean hasOwner;
                 final boolean isOwner;
 
-                java.util.Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
                 if (possibleOwner.isPresent()) {
                     isOwner = localMemberName.getName().equals(possibleOwner.get().getValue().toString());
                     hasOwner = true;
@@ -389,7 +389,7 @@ class EntityOwnershipShard extends Shard {
                     .node(entityTypeNode.getIdentifier()).node(ENTITY_NODE_ID).node(entityNode.getIdentifier())
                     .node(ENTITY_OWNER_NODE_ID).build();
 
-            java.util.Optional<String> possibleOwner =
+            Optional<String> possibleOwner =
                     entityNode.getChild(ENTITY_OWNER_NODE_ID).map(node -> node.getValue().toString());
             String newOwner = newOwner(possibleOwner.orElse(null), getCandidateNames(entityNode),
                     getEntityOwnerElectionStrategy(entityPath));
@@ -404,7 +404,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void initializeDownPeerMemberNamesFromClusterState() {
-        java.util.Optional<Cluster> cluster = getRaftActorContext().getCluster();
+        Optional<Cluster> cluster = getRaftActorContext().getCluster();
         if (!cluster.isPresent()) {
             return;
         }
@@ -558,7 +558,7 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("{}: Searching for entities owned by {}", persistenceId(), ownedBy);
 
         searchForEntities((entityTypeNode, entityNode) -> {
-            java.util.Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
+            Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
                     entityNode.getChild(ENTITY_OWNER_NODE_ID);
             String currentOwner = possibleOwner.isPresent() ? possibleOwner.get().getValue().toString() : "";
             if (ownedBy.contains(currentOwner)) {
@@ -599,8 +599,8 @@ class EntityOwnershipShard extends Shard {
             return;
         }
 
-        for (MapEntryNode entityType:  ((MapNode) possibleEntityTypes.get()).getValue()) {
-            java.util.Optional<DataContainerChild<?, ?>> possibleEntities = entityType.getChild(ENTITY_NODE_ID);
+        for (MapEntryNode entityType : ((MapNode) possibleEntityTypes.get()).getValue()) {
+            Optional<DataContainerChild<?, ?>> possibleEntities = entityType.getChild(ENTITY_NODE_ID);
             if (!possibleEntities.isPresent()) {
                 // shouldn't happen but handle anyway
                 continue;
@@ -669,11 +669,9 @@ class EntityOwnershipShard extends Shard {
     }
 
     private String getCurrentOwner(final YangInstanceIdentifier entityId) {
-        Optional<NormalizedNode<?, ?>> optionalEntityOwner = getDataStore().readNode(entityId.node(ENTITY_OWNER_QNAME));
-        if (optionalEntityOwner.isPresent()) {
-            return optionalEntityOwner.get().getValue().toString();
-        }
-        return null;
+        return getDataStore().readNode(entityId.node(ENTITY_OWNER_QNAME))
+                .map(owner -> owner.getValue().toString())
+                .orElse(null);
     }
 
     @FunctionalInterface

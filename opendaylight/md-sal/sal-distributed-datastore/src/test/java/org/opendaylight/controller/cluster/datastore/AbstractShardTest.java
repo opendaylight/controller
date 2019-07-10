@@ -291,7 +291,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard,
             final YangInstanceIdentifier id) {
-        return shard.underlyingActor().getDataStore().readNode(id).orNull();
+        return shard.underlyingActor().getDataStore().readNode(id).orElse(null);
     }
 
     public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
