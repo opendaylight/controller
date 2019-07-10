@@ -22,6 +22,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -335,7 +336,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         final boolean success = markSealed();
         checkState(success, "Proxy %s was already sealed", getIdentifier());
 
-        if (!sealAndSend(Optional.empty())) {
+        if (!sealAndSend(OptionalLong.empty())) {
             sealSuccessor();
         }
     }
@@ -359,7 +360,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     private void predecessorSealed() {
-        if (markSealed() && !sealAndSend(Optional.empty())) {
+        if (markSealed() && !sealAndSend(OptionalLong.empty())) {
             sealSuccessor();
         }
     }
@@ -381,7 +382,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @param enqueuedTicks Enqueue ticks when this is invoked from replay path.
      * @return True if seal operation was successful, false if this proxy has a successor.
      */
-    boolean sealAndSend(final Optional<Long> enqueuedTicks) {
+    boolean sealAndSend(final OptionalLong enqueuedTicks) {
         return sealState();
     }
 
@@ -735,7 +736,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                 successor.handleReplayedRemoteRequest(optState.get(), null, enqueuedTicks);
             }
             if (successor.markSealed()) {
-                successor.sealAndSend(Optional.of(enqueuedTicks));
+                successor.sealAndSend(OptionalLong.of(enqueuedTicks));
             }
         }
     }
@@ -853,7 +854,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract void handleReplayedRemoteRequest(TransactionRequest<?> request,
             @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
 
-    private static IllegalStateException unhandledResponseException(Response<?, ?> resp) {
+    private static IllegalStateException unhandledResponseException(final Response<?, ?> resp) {
         return new IllegalStateException("Unhandled response " + resp.getClass());
     }
 

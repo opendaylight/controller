@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -100,17 +101,17 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void doDelete(final YangInstanceIdentifier path) {
-        appendModification(new TransactionDelete(path), Optional.empty());
+        appendModification(new TransactionDelete(path), OptionalLong.empty());
     }
 
     @Override
     void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        appendModification(new TransactionMerge(path, data), Optional.empty());
+        appendModification(new TransactionMerge(path, data), OptionalLong.empty());
     }
 
     @Override
     void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        appendModification(new TransactionWrite(path, data), Optional.empty());
+        appendModification(new TransactionWrite(path, data), OptionalLong.empty());
     }
 
     private <T> FluentFuture<T> sendReadRequest(final AbstractReadTransactionRequest<?> request,
@@ -150,35 +151,35 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     private void ensureFlushedBuider() {
-        ensureFlushedBuider(Optional.empty());
+        ensureFlushedBuider(OptionalLong.empty());
     }
 
-    private void ensureFlushedBuider(final Optional<Long> enqueuedTicks) {
+    private void ensureFlushedBuider(final OptionalLong enqueuedTicks) {
         if (builderBusy) {
             flushBuilder(enqueuedTicks);
         }
     }
 
-    private void flushBuilder(final Optional<Long> enqueuedTicks) {
+    private void flushBuilder(final OptionalLong enqueuedTicks) {
         final ModifyTransactionRequest request = builder.build();
         builderBusy = false;
 
         sendModification(request, enqueuedTicks);
     }
 
-    private void sendModification(final TransactionRequest<?> request, final Optional<Long> enqueuedTicks) {
+    private void sendModification(final TransactionRequest<?> request, final OptionalLong enqueuedTicks) {
         if (enqueuedTicks.isPresent()) {
-            enqueueRequest(request, response -> completeModify(request, response), enqueuedTicks.get().longValue());
+            enqueueRequest(request, response -> completeModify(request, response), enqueuedTicks.getAsLong());
         } else {
             sendRequest(request, response -> completeModify(request, response));
         }
     }
 
     private void appendModification(final TransactionModification modification) {
-        appendModification(modification, Optional.empty());
+        appendModification(modification, OptionalLong.empty());
     }
 
-    private void appendModification(final TransactionModification modification, final Optional<Long> enqueuedTicks) {
+    private void appendModification(final TransactionModification modification, final OptionalLong enqueuedTicks) {
         if (operationFailure == null) {
             ensureInitializedBuilder();
 
@@ -275,7 +276,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    boolean sealAndSend(final Optional<Long> enqueuedTicks) {
+    boolean sealAndSend(final OptionalLong enqueuedTicks) {
         if (sendReadyOnSeal) {
             ensureInitializedBuilder();
             builder.setReady();
@@ -410,7 +411,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private void replayLocalCommitRequest(final CommitLocalTransactionRequest request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         final DataTreeModification mod = request.getModification();
-        final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
+        final OptionalLong optTicks = OptionalLong.of(enqueuedTicks);
 
         mod.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
@@ -436,7 +437,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         final Consumer<Response<?, ?>> cb = callback != null ? callback : resp -> { /* NOOP */ };
-        final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
+        final OptionalLong optTicks = OptionalLong.of(enqueuedTicks);
 
         if (request instanceof ModifyTransactionRequest) {
             handleReplayedModifyTransactionRequest(enqueuedTicks, cb, (ModifyTransactionRequest) request);
