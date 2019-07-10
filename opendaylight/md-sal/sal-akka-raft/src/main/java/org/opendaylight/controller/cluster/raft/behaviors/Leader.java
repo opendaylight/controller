@@ -12,8 +12,8 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -57,16 +57,16 @@ public class Leader extends AbstractLeader {
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
-    Leader(RaftActorContext context, @Nullable AbstractLeader initializeFromLeader) {
+    Leader(final RaftActorContext context, @Nullable final AbstractLeader initializeFromLeader) {
         super(context, RaftState.Leader, initializeFromLeader);
     }
 
-    public Leader(RaftActorContext context) {
+    public Leader(final RaftActorContext context) {
         this(context, null);
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object originalMessage) {
         requireNonNull(sender, "sender should not be null");
 
         if (ISOLATED_LEADER_CHECK.equals(originalMessage)) {
@@ -98,7 +98,8 @@ public class Leader extends AbstractLeader {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
+    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
+            final AppendEntriesReply appendEntriesReply) {
         RaftActorBehavior returnBehavior = super.handleAppendEntriesReply(sender, appendEntriesReply);
         tryToCompleteLeadershipTransfer(appendEntriesReply.getFollowerId());
         return returnBehavior;
@@ -122,7 +123,7 @@ public class Leader extends AbstractLeader {
      *
      * @param leadershipTransferCohort the cohort participating in the leadership transfer
      */
-    public void transferLeadership(@NonNull RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+    public void transferLeadership(@NonNull final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         log.debug("{}: Attempting to transfer leadership", logName());
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);
@@ -131,7 +132,7 @@ public class Leader extends AbstractLeader {
         sendAppendEntries(0, false);
     }
 
-    private void tryToCompleteLeadershipTransfer(String followerId) {
+    private void tryToCompleteLeadershipTransfer(final String followerId) {
         if (leadershipTransferContext == null) {
             return;
         }
@@ -184,12 +185,12 @@ public class Leader extends AbstractLeader {
     }
 
     @VisibleForTesting
-    void markFollowerActive(String followerId) {
+    void markFollowerActive(final String followerId) {
         getFollower(followerId).markFollowerActive();
     }
 
     @VisibleForTesting
-    void markFollowerInActive(String followerId) {
+    void markFollowerInActive(final String followerId) {
         getFollower(followerId).markFollowerInActive();
     }
 
@@ -197,11 +198,11 @@ public class Leader extends AbstractLeader {
         RaftActorLeadershipTransferCohort transferCohort;
         Stopwatch timer = Stopwatch.createStarted();
 
-        LeadershipTransferContext(RaftActorLeadershipTransferCohort transferCohort) {
+        LeadershipTransferContext(final RaftActorLeadershipTransferCohort transferCohort) {
             this.transferCohort = transferCohort;
         }
 
-        boolean isExpired(long timeout) {
+        boolean isExpired(final long timeout) {
             if (timer.elapsed(TimeUnit.MILLISECONDS) >= timeout) {
                 transferCohort.abortTransfer();
                 return true;

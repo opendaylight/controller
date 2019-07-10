@@ -12,12 +12,12 @@ import static org.junit.Assert.assertEquals;
 import akka.actor.ActorRef;
 import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.junit.After;
@@ -72,16 +72,16 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
                 actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
             }
 
             @Override
-            public void applySnapshot(Snapshot.State snapshotState) {
+            public void applySnapshot(final Snapshot.State snapshotState) {
             }
 
             @Override
-            public State deserializeSnapshot(ByteSource snapshotBytes) {
+            public State deserializeSnapshot(final ByteSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };
@@ -102,8 +102,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(String id, boolean persistent,
-            Consumer<Snapshot> snapshotVerifier, final State snapshotState) {
+    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(final String id,
+            final boolean persistent, final Consumer<Snapshot> snapshotVerifier, final State snapshotState) {
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -111,16 +111,16 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
                 actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
             }
 
             @Override
-            public void applySnapshot(State newState) {
+            public void applySnapshot(final State newState) {
             }
 
             @Override
-            public State deserializeSnapshot(ByteSource snapshotBytes) {
+            public State deserializeSnapshot(final ByteSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };

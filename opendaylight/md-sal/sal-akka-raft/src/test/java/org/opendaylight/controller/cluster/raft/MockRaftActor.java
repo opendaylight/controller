@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
@@ -50,7 +50,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
         super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.<String, String>emptyMap(), Optional.fromNullable(builder.config), PAYLOAD_VERSION);
+            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
         state = Collections.synchronizedList(new ArrayList<>());
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
@@ -181,7 +181,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final java.util.Optional<OutputStream> installSnapshotStream) {
+    public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         LOG.info("{}: createSnapshot called", persistenceId());
         snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
     }
@@ -209,7 +209,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override
     protected Optional<ActorRef> getRoleChangeNotifier() {
-        return Optional.fromNullable(roleChangeNotifier);
+        return Optional.ofNullable(roleChangeNotifier);
     }
 
     @Override public String persistenceId() {
@@ -281,7 +281,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private ActorRef roleChangeNotifier;
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
         private Snapshot restoreFromSnapshot;
-        private Optional<Boolean> persistent = Optional.absent();
+        private Optional<Boolean> persistent = Optional.empty();
         private final Class<A> actorClass;
         private Function<Runnable, Void> pauseLeaderFunction;
         private RaftActorSnapshotCohort snapshotCohort;

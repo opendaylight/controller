@@ -11,10 +11,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -206,7 +206,7 @@ public class RaftActorLeadershipTransferCohort {
     }
 
     public Optional<String> getRequestedFollowerId() {
-        return Optional.fromNullable(requestedFollowerId);
+        return Optional.ofNullable(requestedFollowerId);
     }
 
     interface OnComplete {
