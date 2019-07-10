@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;

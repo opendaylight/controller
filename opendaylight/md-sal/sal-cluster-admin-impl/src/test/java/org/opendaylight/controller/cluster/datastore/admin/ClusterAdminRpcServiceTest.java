@@ -26,7 +26,6 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -44,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
@@ -454,8 +454,8 @@ public class ClusterAdminRpcServiceTest {
 
     private static void readCarsNodeAndVerify(final AbstractDataStore readFromStore,
             final NormalizedNode<?, ?> expCarsNode) throws Exception {
-        java.util.Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction()
-                .read(CarsModel.BASE_PATH).get(15, TimeUnit.SECONDS);
+        Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction().read(CarsModel.BASE_PATH)
+                .get(15, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());
     }

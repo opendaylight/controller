@@ -251,7 +251,7 @@ public class IntegrationTestKit extends ShardTestKit {
         ActorRef shard = null;
         for (int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            com.google.common.base.Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
+            Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
             if (shardReply.isPresent()) {
                 shard = shardReply.get();
             }
@@ -263,7 +263,7 @@ public class IntegrationTestKit extends ShardTestKit {
         for (int i = 0; i < 20 * 5 ; i++) {
             LOG.debug("Waiting for shard down {}", shardName);
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            com.google.common.base.Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
+            Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
             if (!shardReply.isPresent()) {
                 return;
             }

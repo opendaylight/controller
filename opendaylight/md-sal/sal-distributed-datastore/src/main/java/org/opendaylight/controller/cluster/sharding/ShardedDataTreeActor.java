@@ -25,7 +25,6 @@ import akka.cluster.Member;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -436,7 +436,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             localShardFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
-                public void onComplete(Throwable throwable, ActorRef actorRef) {
+                public void onComplete(final Throwable throwable, final ActorRef actorRef) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {
@@ -453,7 +453,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         @Override
-        void reschedule(int retries) {
+        void reschedule(final int retries) {
             LOG.debug("Local backend for shard[{}] not found, try: {}, rescheduling..", toLookup, retries);
             system.scheduler().scheduleOnce(
                     SHARD_LOOKUP_TASK_INTERVAL, ShardCreationLookupTask.this, system.dispatcher());
@@ -525,7 +525,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         @Override
-        void reschedule(int retries) {
+        void reschedule(final int retries) {
             LOG.debug("{} - Leader for shard[{}] backend not found on try: {}, retrying..",
                     clusterWrapper.getCurrentMemberName(), toLookup, retries);
             system.scheduler().scheduleOnce(
@@ -587,7 +587,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         @Override
-        void reschedule(int retries) {
+        void reschedule(final int retries) {
             LOG.debug("Frontend for shard[{}] not found on try: {}, retrying..", toLookup, retries);
             system.scheduler().scheduleOnce(
                     SHARD_LOOKUP_TASK_INTERVAL, FrontendLookupTask.this, system.dispatcher());
@@ -624,7 +624,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             localShardFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
-                public void onComplete(Throwable throwable, ActorRef actorRef) {
+                public void onComplete(final Throwable throwable, final ActorRef actorRef) {
                     if (throwable != null) {
                         //TODO Shouldn't we check why findLocalShard failed?
                         LOG.debug("Backend shard[{}] removal lookup successful notifying the registration future",
@@ -638,7 +638,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         @Override
-        void reschedule(int retries) {
+        void reschedule(final int retries) {
             LOG.debug("Backend shard[{}] removal lookup failed, shard is still present, try: {}, rescheduling..",
                     toLookup, retries);
             system.scheduler().scheduleOnce(
@@ -667,7 +667,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         @Override
-        void reschedule(int retries) {
+        void reschedule(final int retries) {
             LOG.debug("Local backend for prefix configuration shard not found, try: {}, rescheduling..", retries);
             system.scheduler().scheduleOnce(
                     SHARD_LOOKUP_TASK_INTERVAL, ConfigShardLookupTask.this, system.dispatcher());
@@ -713,7 +713,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         @Override
-        void reschedule(int retries) {
+        void reschedule(final int retries) {
             LOG.debug("{} - Leader for config shard not found on try: {}, retrying..",
                     clusterWrapper.getCurrentMemberName(), retries);
             system.scheduler().scheduleOnce(
