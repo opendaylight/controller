@@ -8,14 +8,13 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonOutput;
@@ -62,11 +61,11 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
                 .child(Person.class, person.key()).build();
         // Place entry in data store tree
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);
+        tx.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, personId, person);
 
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+        tx.commit().addCallback(new FutureCallback<Object>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Object result) {
                 LOG.info("RPC addPerson : person added successfully [{}]", person);
                 rpcRegistration.registerPath(PersonContext.class, personId);
                 LOG.info("RPC addPerson : routed rpc registered for instance ID [{}]", personId);

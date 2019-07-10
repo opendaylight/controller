@@ -4,17 +4,17 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
     odl:use-default-for-reference-types="true">
 
-  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
+  <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"/>
   <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
   <reference id="entityOwnershipService" interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService"/>
-  <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
-  <reference id="domRpcProviderService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
+  <reference id="bindingRpcRegistry" interface="org.opendaylight.mdsal.binding.api.RpcProviderRegistry"/>
+  <reference id="domRpcProviderService" interface="org.opendaylight.mdsal.dom.api.DOMRpcProviderService"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
-  <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
+  <reference id="domDataBroker" interface="org.opendaylight.mdsal.dom.api.DOMDataBroker"/>
   <reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService"/>
   <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
-  <reference id="notificationPublishService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService" />
-  <reference id="notificationListenerService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService" />
+  <reference id="notificationPublishService" interface="org.opendaylight..mdsal.binding.api.NotificationPublishService" />
+  <reference id="notificationListenerService" interface="org.opendaylight.mdsal.binding.api.NotificationService" />
   <reference id="domDataTreeService" interface="org.opendaylight.mdsal.dom.api.DOMDataTreeService"/>
   <reference id="distributedShardFactory" interface="org.opendaylight.controller.cluster.sharding.DistributedShardFactory"/>
   <reference id="configDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface"

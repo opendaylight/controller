@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.clustering.it.provider.impl;
 
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
-import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
+import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
+import org.opendaylight.mdsal.dom.api.DOMRpcResult;
+import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
@@ -71,8 +69,7 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
     }
 
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(DOMRpcIdentifier rpc,
-            NormalizedNode<?, ?> input) {
+    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
         LOG.debug("get-singleton-constant invoked, current value: {}", constant);
 
         final LeafNode<Object> value = ImmutableLeafNodeBuilder.create()
@@ -85,7 +82,7 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
                 .withChild(value)
                 .build();
 
-        return Futures.immediateCheckedFuture(new DefaultDOMRpcResult(result));
+        return Futures.immediateFuture(new DefaultDOMRpcResult(result));
     }
 
     @Override

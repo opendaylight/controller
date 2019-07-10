@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutputBuilder;
@@ -22,27 +21,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
-    private NotificationProviderService notificationProvider;
+    private NotificationPublishService notificationProvider;
 
-
-    public void setNotificationProvider(final NotificationProviderService salService) {
+    public void setNotificationProvider(final NotificationPublishService salService) {
         this.notificationProvider = salService;
     }
-
 
     @Override
     public ListenableFuture<RpcResult<BuyCarOutput>> buyCar(final BuyCarInput input) {
         LOG.info("Routed RPC buyCar : generating notification for buying car [{}]", input);
-        final SettableFuture<RpcResult<BuyCarOutput>> futureResult = SettableFuture.create();
         CarBoughtBuilder carBoughtBuilder = new CarBoughtBuilder();
         carBoughtBuilder.setCarId(input.getCarId());
         carBoughtBuilder.setPersonId(input.getPersonId());
-        notificationProvider.publish(carBoughtBuilder.build());
-        futureResult.set(RpcResultBuilder.success(new BuyCarOutputBuilder().build()).build());
-        return futureResult;
+        try {
+            notificationProvider.putNotification(carBoughtBuilder.build());
+        } catch (InterruptedException e) {
+            return Futures.immediateFailedFuture(e);
+        }
+
+        return Futures.immediateFuture(RpcResultBuilder.success(new BuyCarOutputBuilder().build()).build());
     }
 
     @Override

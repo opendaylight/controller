@@ -15,7 +15,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -23,6 +22,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -48,21 +48,21 @@ import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstant
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.WriteTransactionsHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.YnlListener;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
-import org.opendaylight.controller.md.sal.binding.api.NotificationService;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
+import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeLoopException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
@@ -154,10 +154,7 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService {
-
     private static final Logger LOG = LoggerFactory.getLogger(MdsalLowLevelTestProvider.class);
-    private static final org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType CONTROLLER_CONFIG =
-            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 
     private final RpcProviderRegistry rpcRegistry;
     private final BindingAwareBroker.RpcRegistration<OdlMdsalLowlevelControlService> registration;
@@ -219,8 +216,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         this.prefixLeaderHandler = new PrefixLeaderHandler(domDataTreeService, bindingNormalizedNodeSerializer);
 
-        domDataTreeChangeService =
-                (DOMDataTreeChangeService) domDataBroker.getSupportedExtensions().get(DOMDataTreeChangeService.class);
+        domDataTreeChangeService = domDataBroker.getExtensions().getInstance(DOMDataTreeChangeService.class);
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
 
@@ -278,11 +274,9 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         idIntsListener = new IdIntsListener();
 
-        dtclReg = domDataTreeChangeService
-                .registerDataTreeChangeListener(
-                        new org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier(
-                                CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID),
-                        idIntsListener);
+        dtclReg = domDataTreeChangeService.registerDataTreeChangeListener(
+            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, WriteTransactionsHandler.ID_INT_YID),
+            idIntsListener);
 
         return RpcResultBuilder.success(new SubscribeDtclOutputBuilder().build()).buildFuture();
     }
@@ -504,10 +498,10 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                     "id-ints listener has not received any notifications.").buildFuture();
         }
 
-        final DOMDataReadOnlyTransaction rTx = domDataBroker.newReadOnlyTransaction();
+        final DOMDataTreeReadTransaction rTx = domDataBroker.newReadOnlyTransaction();
         try {
             final Optional<NormalizedNode<?, ?>> readResult =
-                    rTx.read(CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID).get();
+                    rTx.read(LogicalDatastoreType.CONFIGURATION, WriteTransactionsHandler.ID_INT_YID).get();
 
             if (!readResult.isPresent()) {
                 return RpcResultBuilder.<UnsubscribeDtclOutput>failed().withError(ErrorType.APPLICATION, "data-missing",

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.base.Preconditions;
@@ -13,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequenceBuilder;
 import org.slf4j.Logger;
@@ -76,7 +75,7 @@ public class PublishNotificationsTask implements Runnable {
         LOG.debug("current {}, starttime: {}, timetotake: {}, current-start = {}",
                 current, startTime, timeToTake, current - startTime);
 
-        if ((current - startTime) > timeToTake) {
+        if (current - startTime > timeToTake) {
             LOG.debug("Sequence number: {}", sequenceNumber);
             scheduledFuture.cancel(false);
             executor.shutdown();

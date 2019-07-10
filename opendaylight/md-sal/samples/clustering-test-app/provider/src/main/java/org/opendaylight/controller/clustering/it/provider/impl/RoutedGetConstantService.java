@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.clustering.it.provider.impl;
 
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
-import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
+import org.opendaylight.mdsal.dom.api.DOMRpcResult;
+import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -62,8 +61,7 @@ public final class RoutedGetConstantService implements DOMRpcImplementation {
     }
 
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc,
-                                                                  final NormalizedNode<?, ?> input) {
+    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
         LOG.debug("get-contexted-constant invoked, current value: {}", constant);
 
         final LeafNode<Object> value = ImmutableLeafNodeBuilder.create()
@@ -76,6 +74,6 @@ public final class RoutedGetConstantService implements DOMRpcImplementation {
                 .withChild(value)
                 .build();
 
-        return Futures.immediateCheckedFuture(new DefaultDOMRpcResult(result));
+        return Futures.immediateFuture(new DefaultDOMRpcResult(result));
     }
 }
