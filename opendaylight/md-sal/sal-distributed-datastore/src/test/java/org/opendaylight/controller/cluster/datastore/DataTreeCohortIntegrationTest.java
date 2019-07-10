@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
@@ -24,12 +23,12 @@ import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
@@ -113,7 +112,7 @@ public class DataTreeCohortIntegrationTest {
             kit.testWriteTransaction(dataStore, TestModel.TEST_PATH, node);
             verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), candidateCapt.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapt.getValue().iterator().next(), TEST_ID,
-                    ModificationType.WRITE, Optional.of(node), Optional.absent());
+                    ModificationType.WRITE, Optional.of(node), Optional.empty());
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
@@ -201,7 +200,7 @@ public class DataTreeCohortIntegrationTest {
             verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), candidateCapture.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapture.getValue().iterator().next(),
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.WRITE,
-                    Optional.of(optimaNode), Optional.absent());
+                    Optional.of(optimaNode), Optional.empty());
 
             // Write replace the cars container with 2 new car entries. The cohort should get invoked with 3
             // DOMDataTreeCandidates: once for each of the 2 new car entries (WRITE mod) and once for the deleted prior
@@ -224,15 +223,15 @@ public class DataTreeCohortIntegrationTest {
 
             assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.WRITE,
-                    Optional.of(sportageNode), Optional.absent());
+                    Optional.of(sportageNode), Optional.empty());
 
             assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, soulPath), ModificationType.WRITE,
-                    Optional.of(soulNode), Optional.absent());
+                    Optional.of(soulNode), Optional.empty());
 
             assertDataTreeCandidate(findCandidate(candidateCapture, optimaPath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.DELETE,
-                    Optional.absent(), Optional.of(optimaNode));
+                    Optional.empty(), Optional.of(optimaNode));
 
             // Delete the cars container - cohort should be invoked for the 2 deleted car entries.
 
@@ -249,11 +248,11 @@ public class DataTreeCohortIntegrationTest {
 
             assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.DELETE,
-                    Optional.absent(), Optional.of(sportageNode));
+                    Optional.empty(), Optional.of(sportageNode));
 
             assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, soulPath), ModificationType.DELETE,
-                    Optional.absent(), Optional.of(soulNode));
+                    Optional.empty(), Optional.of(soulNode));
 
         }
     }

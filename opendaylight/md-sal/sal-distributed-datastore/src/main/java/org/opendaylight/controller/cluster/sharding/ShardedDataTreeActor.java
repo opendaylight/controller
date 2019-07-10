@@ -505,7 +505,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                         tryReschedule(throwable);
                     } else {
                         final FindLeaderReply findLeader = (FindLeaderReply) findLeaderReply;
-                        final java.util.Optional<String> leaderActor = findLeader.getLeaderActor();
+                        final Optional<String> leaderActor = findLeader.getLeaderActor();
                         if (leaderActor.isPresent()) {
                             // leader is found, backend seems ready, check if the frontend is ready
                             LOG.debug("{} - Leader for shard[{}] backend ready, starting frontend lookup..",
@@ -731,7 +731,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                         tryReschedule(throwable);
                     } else {
                         final FindLeaderReply findLeader = (FindLeaderReply) findLeaderReply;
-                        final java.util.Optional<String> leaderActor = findLeader.getLeaderActor();
+                        final Optional<String> leaderActor = findLeader.getLeaderActor();
                         if (leaderActor.isPresent()) {
                             // leader is found, backend seems ready, check if the frontend is ready
                             LOG.debug("{} - Leader for config shard is ready. Ending lookup.",

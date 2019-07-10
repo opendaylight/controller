@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -26,14 +26,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 class ShardDataTreeChangeListenerPublisherActorProxy extends AbstractShardDataTreeNotificationPublisherActorProxy
         implements ShardDataTreeChangeListenerPublisher {
 
-    ShardDataTreeChangeListenerPublisherActorProxy(ActorContext actorContext, String actorName, String logContext) {
+    ShardDataTreeChangeListenerPublisherActorProxy(final ActorContext actorContext, final String actorName,
+        final String logContext) {
         super(actorContext, actorName, logContext);
     }
 
     @Override
-    public void registerTreeChangeListener(YangInstanceIdentifier treeId,
-            DOMDataTreeChangeListener listener, Optional<DataTreeCandidate> currentState,
-            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+    public void registerTreeChangeListener(final YangInstanceIdentifier treeId,
+            final DOMDataTreeChangeListener listener, final Optional<DataTreeCandidate> currentState,
+            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         final ShardDataTreeChangePublisherActor.RegisterListener regMessage =
                 new ShardDataTreeChangePublisherActor.RegisterListener(treeId, listener, currentState, onRegistration);
         log.debug("{}: Sending {} to publisher actor {}", logContext(), regMessage, publisherActor());
