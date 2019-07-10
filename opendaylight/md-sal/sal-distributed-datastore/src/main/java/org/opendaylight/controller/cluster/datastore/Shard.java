@@ -306,7 +306,7 @@ public class Shard extends RaftActor {
     @Override
     protected void handleNonRaftCommand(final Object message) {
         try (MessageTracker.Context context = appendEntriesReplyTracker.received(message)) {
-            final Optional<Error> maybeError = context.error();
+            final java.util.Optional<Error> maybeError = context.error();
             if (maybeError.isPresent()) {
                 LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
                     maybeError.get());

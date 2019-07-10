@@ -5,21 +5,22 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,7 @@ public final class MessageTracker {
         private final long elapsedTimeInNanos;
 
         MessageProcessingTime(final Class<?> messageClass, final long elapsedTimeInNanos) {
-            this.messageClass = Preconditions.checkNotNull(messageClass);
+            this.messageClass = requireNonNull(messageClass);
             this.elapsedTimeInNanos = elapsedTimeInNanos;
         }
 
@@ -112,7 +113,7 @@ public final class MessageTracker {
 
         @Override
         public Optional<Error> error() {
-            return Optional.absent();
+            return Optional.empty();
         }
     };
 
@@ -133,10 +134,10 @@ public final class MessageTracker {
     @VisibleForTesting
     MessageTracker(final Class<?> expectedMessageClass, final long expectedArrivalIntervalInMillis,
             final Ticker ticker) {
-        Preconditions.checkArgument(expectedArrivalIntervalInMillis >= 0);
-        this.expectedMessageClass = Preconditions.checkNotNull(expectedMessageClass);
+        checkArgument(expectedArrivalIntervalInMillis >= 0);
+        this.expectedMessageClass = requireNonNull(expectedMessageClass);
         this.expectedArrivalInterval = MILLISECONDS.toNanos(expectedArrivalIntervalInMillis);
-        this.ticker = Preconditions.checkNotNull(ticker);
+        this.ticker = requireNonNull(ticker);
         this.expectedMessageWatch = Stopwatch.createUnstarted(ticker);
         this.currentMessageContext = new CurrentMessageContext();
     }
@@ -224,11 +225,11 @@ public final class MessageTracker {
 
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("\n> Last Expected Message = ").append(lastExpectedMessage);
-            builder.append("\n> Current Expected Message = ").append(currentExpectedMessage);
-            builder.append("\n> Expected time in between messages = ").append(expectedTimeInMillis);
-            builder.append("\n> Actual time in between messages = ").append(actualTimeInMillis);
+            StringBuilder builder = new StringBuilder()
+                    .append("\n> Last Expected Message = ").append(lastExpectedMessage)
+                    .append("\n> Current Expected Message = ").append(currentExpectedMessage)
+                    .append("\n> Expected time in between messages = ").append(expectedTimeInMillis)
+                    .append("\n> Actual time in between messages = ").append(actualTimeInMillis);
             for (MessageProcessingTime time : messagesSinceLastExpectedMessage) {
                 builder.append("\n\t> ").append(time);
             }
@@ -252,9 +253,9 @@ public final class MessageTracker {
         private Object message;
 
         void reset(final Object newMessage) {
-            this.message = Preconditions.checkNotNull(newMessage);
-            Preconditions.checkState(!stopwatch.isRunning(),
-                "Trying to reset a context that is not done (%s). currentMessage = %s", this, newMessage);
+            this.message = requireNonNull(newMessage);
+            checkState(!stopwatch.isRunning(), "Trying to reset a context that is not done (%s). currentMessage = %s",
+                this, newMessage);
             stopwatch.start();
         }
 
@@ -270,7 +271,7 @@ public final class MessageTracker {
 
         @Override
         public Optional<Error> error() {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -280,8 +281,8 @@ public final class MessageTracker {
         private final Error error;
 
         ErrorContext(final Object message, final Error error) {
-            this.message = Preconditions.checkNotNull(message);
-            this.error = Preconditions.checkNotNull(error);
+            this.message = requireNonNull(message);
+            this.error = requireNonNull(error);
         }
 
         @Override
