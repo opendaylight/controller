@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Props;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -59,10 +60,10 @@ public final class ShardDataTreeChangePublisherActor
         RegisterListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
                 final Optional<DataTreeCandidate> initialState,
                 final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
-            this.path = Preconditions.checkNotNull(path);
-            this.listener = Preconditions.checkNotNull(listener);
-            this.initialState = Preconditions.checkNotNull(initialState);
-            this.onRegistration = Preconditions.checkNotNull(onRegistration);
+            this.path = requireNonNull(path);
+            this.listener = requireNonNull(listener);
+            this.initialState = requireNonNull(initialState);
+            this.onRegistration = requireNonNull(onRegistration);
         }
 
         @Override
