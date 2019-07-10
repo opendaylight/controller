@@ -24,7 +24,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
 import com.google.common.testing.FakeTicker;
-import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -198,7 +198,7 @@ public class ConnectingClientConnectionTest {
     @Test
     public void testSendRequestNeedsBackend() {
         queue.sendRequest(mockRequest, mockCallback);
-        final Optional<Long> ret = queue.checkTimeout(ticker.read());
+        final OptionalLong ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -214,7 +214,7 @@ public class ConnectingClientConnectionTest {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
-        final Optional<Long> ret = queue.checkTimeout(ticker.read());
+        final OptionalLong ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
         assertTransmit(mockRequest, 0);
@@ -222,7 +222,7 @@ public class ConnectingClientConnectionTest {
 
     @Test
     public void testRunTimeoutEmpty() {
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
+        OptionalLong ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertFalse(ret.isPresent());
     }
@@ -230,7 +230,7 @@ public class ConnectingClientConnectionTest {
     @Test
     public void testRunTimeoutWithoutShift() {
         queue.sendRequest(mockRequest, mockCallback);
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
+        OptionalLong ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -241,7 +241,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS - 1);
 
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
+        OptionalLong ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -254,7 +254,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS);
 
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
+        OptionalLong ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
     }
 
@@ -266,8 +266,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS + 1);
 
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
-        assertNull(ret);
+        assertNull(queue.checkTimeout(ticker.read()));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -297,9 +296,7 @@ public class ConnectingClientConnectionTest {
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS);
 
         // No problem
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
-        assertNotNull(ret);
-        assertFalse(ret.isPresent());
+        assertEquals(OptionalLong.empty(), queue.checkTimeout(ticker.read()));
     }
 
     @Test
@@ -307,9 +304,7 @@ public class ConnectingClientConnectionTest {
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS + 1);
 
         // No problem
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
-        assertNotNull(ret);
-        assertFalse(ret.isPresent());
+        assertEquals(OptionalLong.empty(), queue.checkTimeout(ticker.read()));
     }
 
     @Test
@@ -355,8 +350,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS - 11);
 
-        Optional<Long> ret = queue.checkTimeout(ticker.read());
-        assertNull(ret);
+        assertNull(queue.checkTimeout(ticker.read()));
     }
 
     private void setupBackend() {
