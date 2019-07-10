@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
@@ -16,7 +17,6 @@ import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.Optional;
@@ -74,7 +74,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     private volatile DataTree localEntityOwnershipShardDataTree;
 
     DistributedEntityOwnershipService(final ActorUtils context) {
-        this.context = Preconditions.checkNotNull(context);
+        this.context = requireNonNull(context);
     }
 
     public static DistributedEntityOwnershipService start(final ActorUtils context,
@@ -87,9 +87,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                 "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
                         newShardBuilder(context, strategyConfig), null);
 
-        Future<Object> createFuture = context.executeOperationAsync(shardManagerActor,
-                createShard, MESSAGE_TIMEOUT);
-
+        Future<Object> createFuture = context.executeOperationAsync(shardManagerActor, createShard, MESSAGE_TIMEOUT);
         createFuture.onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
@@ -110,7 +108,8 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
-                    LOG.debug("Error sending message {} to {}", message, shardActor, failure);
+                    // FIXME: CONTROLLER-1904: reduce the severity to info once we have a retry mechanism
+                    LOG.error("Error sending message {} to {}", message, shardActor, failure);
                 } else {
                     LOG.debug("{} message to {} succeeded", message, shardActor);
                 }
@@ -126,6 +125,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef shardActor) {
                     if (failure != null) {
+                        // FIXME: CONTROLLER-1904: reduce the severity to info once we have a retry mechanism
                         LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, failure);
                     } else {
                         localEntityOwnershipShard = shardActor;
@@ -142,7 +142,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     @Override
     public DOMEntityOwnershipCandidateRegistration registerCandidate(final DOMEntity entity)
             throws CandidateAlreadyRegisteredException {
-        Preconditions.checkNotNull(entity, "entity cannot be null");
+        requireNonNull(entity, "entity cannot be null");
 
         if (registeredEntities.putIfAbsent(entity, entity) != null) {
             throw new CandidateAlreadyRegisteredException(entity);
@@ -176,7 +176,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     @Override
     public Optional<EntityOwnershipState> getOwnershipState(final DOMEntity forEntity) {
-        Preconditions.checkNotNull(forEntity, "forEntity cannot be null");
+        requireNonNull(forEntity, "forEntity cannot be null");
 
         DataTree dataTree = getLocalEntityOwnershipShardDataTree();
         if (dataTree == null) {
