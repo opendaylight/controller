@@ -37,7 +37,6 @@ import akka.persistence.SnapshotOffer;
 import akka.protobuf.ByteString;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
@@ -49,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -340,8 +340,7 @@ public class RaftActorTest extends AbstractActorTest {
         doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(applySnapshot);
 
-        CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(ByteState.empty(),
-                java.util.Optional.empty());
+        CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(ByteState.empty(), Optional.empty());
         doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshotReply);
 
@@ -615,7 +614,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("foo-3"),
                 new MockRaftActorContext.MockPayload("foo-4")));
 
-        leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotState, java.util.Optional.empty(),
+        leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotState, Optional.empty(),
                 Runtime.getRuntime().totalMemory());
 
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
@@ -707,7 +706,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("foo-3"),
                 new MockRaftActorContext.MockPayload("foo-4")));
         followerActor.handleCommand(new CaptureSnapshotReply(ByteState.of(snapshotBytes.toByteArray()),
-                java.util.Optional.empty()));
+                Optional.empty()));
         assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         // The commit is needed to complete the snapshot creation process
@@ -799,7 +798,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("foo-3"),
                 new MockRaftActorContext.MockPayload("foo-4")));
         leaderActor.handleCommand(new CaptureSnapshotReply(ByteState.of(snapshotBytes.toByteArray()),
-                java.util.Optional.empty()));
+                Optional.empty()));
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0,
@@ -846,7 +845,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Now send a CaptureSnapshotReply
         mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()),
-                java.util.Optional.empty()), mockActorRef);
+                Optional.empty()), mockActorRef);
 
         // Trimming log in this scenario is a no-op
         assertEquals(-1, leaderActor.getReplicatedLog().getSnapshotIndex());
@@ -887,7 +886,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Now send a CaptureSnapshotReply
         mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()),
-                java.util.Optional.empty()), mockActorRef);
+                Optional.empty()), mockActorRef);
 
         // Trimming log in this scenario is a no-op
         assertEquals(3, leaderActor.getReplicatedLog().getSnapshotIndex());
@@ -1042,10 +1041,10 @@ public class RaftActorTest extends AbstractActorTest {
 
         ArgumentCaptor<ActorRef> replyActor = ArgumentCaptor.forClass(ActorRef.class);
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(replyActor.capture(),
-                eq(java.util.Optional.empty()));
+                eq(Optional.empty()));
 
         byte[] stateSnapshot = new byte[]{1,2,3};
-        replyActor.getValue().tell(new CaptureSnapshotReply(ByteState.of(stateSnapshot), java.util.Optional.empty()),
+        replyActor.getValue().tell(new CaptureSnapshotReply(ByteState.of(stateSnapshot), Optional.empty()),
                 ActorRef.noSender());
 
         GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
