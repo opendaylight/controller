@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -189,7 +190,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    boolean sealAndSend(final Optional<Long> enqueuedTicks) {
+    boolean sealAndSend(final OptionalLong enqueuedTicks) {
         sealModification();
         return super.sealAndSend(enqueuedTicks);
     }
