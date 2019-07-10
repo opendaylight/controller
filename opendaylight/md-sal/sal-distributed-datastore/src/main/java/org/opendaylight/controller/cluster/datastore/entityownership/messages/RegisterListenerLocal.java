@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 
 /**
@@ -18,9 +20,9 @@ public class RegisterListenerLocal {
     private final DOMEntityOwnershipListener listener;
     private final String entityType;
 
-    public RegisterListenerLocal(DOMEntityOwnershipListener listener, String entityType) {
-        this.listener = listener;
-        this.entityType = entityType;
+    public RegisterListenerLocal(final DOMEntityOwnershipListener listener, final String entityType) {
+        this.listener = requireNonNull(listener, "listener cannot be null");
+        this.entityType = requireNonNull(entityType, "entityType cannot be null");
     }
 
     public DOMEntityOwnershipListener getListener() {
