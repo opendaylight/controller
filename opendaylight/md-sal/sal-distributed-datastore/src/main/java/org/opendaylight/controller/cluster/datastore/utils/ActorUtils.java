@@ -21,9 +21,9 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -266,7 +266,7 @@ public class ActorUtils {
             return Optional.of(found.getPath());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
