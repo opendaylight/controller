@@ -1200,7 +1200,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
         assertEquals(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE,
-                installSnapshot.getLastChunkHashCode().get().intValue());
+                installSnapshot.getLastChunkHashCode().getAsInt());
 
         final int hashCode = Arrays.hashCode(installSnapshot.getData());
 
@@ -1213,7 +1213,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(2, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
-        assertEquals(hashCode, installSnapshot.getLastChunkHashCode().get().intValue());
+        assertEquals(hashCode, installSnapshot.getLastChunkHashCode().getAsInt());
     }
 
     @Test

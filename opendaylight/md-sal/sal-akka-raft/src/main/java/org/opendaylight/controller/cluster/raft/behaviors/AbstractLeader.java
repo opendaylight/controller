@@ -13,7 +13,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
@@ -26,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.Nullable;
@@ -98,7 +99,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private final MessageSlicer appendEntriesMessageSlicer;
 
     private Cancellable heartbeatSchedule = null;
-    private Optional<SnapshotHolder> snapshotHolder = Optional.absent();
+    private Optional<SnapshotHolder> snapshotHolder = Optional.empty();
     private int minReplicationCount;
 
     protected AbstractLeader(final RaftActorContext context, final RaftState state,
@@ -186,7 +187,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     @VisibleForTesting
     void setSnapshotHolder(final @Nullable SnapshotHolder snapshotHolder) {
-        this.snapshotHolder = Optional.fromNullable(snapshotHolder);
+        this.snapshotHolder = Optional.ofNullable(snapshotHolder);
     }
 
     @VisibleForTesting
@@ -937,9 +938,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         nextSnapshotChunk.length);
 
                 int nextChunkIndex = installSnapshotState.incrementChunkIndex();
-                Optional<ServerConfigurationPayload> serverConfig = Optional.absent();
+                Optional<ServerConfigurationPayload> serverConfig = Optional.empty();
                 if (installSnapshotState.isLastChunk(nextChunkIndex)) {
-                    serverConfig = Optional.fromNullable(context.getPeerServerInfo(true));
+                    serverConfig = Optional.ofNullable(context.getPeerServerInfo(true));
                 }
 
                 sendSnapshotChunk(followerActor, followerLogInfo, nextSnapshotChunk, nextChunkIndex, serverConfig);
@@ -969,7 +970,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         snapshotChunk,
                         chunkIndex,
                         installSnapshotState.getTotalChunks(),
-                        Optional.of(installSnapshotState.getLastChunkHashCode()),
+                        OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
                         serverConfig
                 ).toSerializable(followerLogInfo.getRaftVersion()),
                 actor()

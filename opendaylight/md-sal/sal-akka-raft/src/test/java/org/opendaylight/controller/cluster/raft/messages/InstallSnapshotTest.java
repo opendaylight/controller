@@ -10,9 +10,10 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Optional;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.OptionalInt;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
@@ -38,8 +39,8 @@ public class InstallSnapshotTest {
 
         ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo("leader", true), new ServerInfo("follower", false)));
-        InstallSnapshot expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6,
-                Optional.<Integer>of(54321), Optional.of(serverConfig));
+        InstallSnapshot expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
+            Optional.of(serverConfig));
 
         Object serialized = expected.toSerializable(RaftVersions.CURRENT_VERSION);
         assertEquals("Serialized type", InstallSnapshot.class, serialized.getClass());
@@ -53,7 +54,7 @@ public class InstallSnapshotTest {
         verifyInstallSnapshot(expected, actual);
     }
 
-    private static void verifyInstallSnapshot(InstallSnapshot expected, InstallSnapshot actual) {
+    private static void verifyInstallSnapshot(final InstallSnapshot expected, final InstallSnapshot actual) {
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getChunkIndex", expected.getChunkIndex(), actual.getChunkIndex());
         assertEquals("getTotalChunks", expected.getTotalChunks(), actual.getTotalChunks());
@@ -66,8 +67,8 @@ public class InstallSnapshotTest {
         assertEquals("getLastChunkHashCode present", expected.getLastChunkHashCode().isPresent(),
                 actual.getLastChunkHashCode().isPresent());
         if (expected.getLastChunkHashCode().isPresent()) {
-            assertEquals("getLastChunkHashCode", expected.getLastChunkHashCode().get(),
-                    actual.getLastChunkHashCode().get());
+            assertEquals("getLastChunkHashCode", expected.getLastChunkHashCode(),
+                    actual.getLastChunkHashCode());
         }
 
         assertEquals("getServerConfig present", expected.getServerConfig().isPresent(),
