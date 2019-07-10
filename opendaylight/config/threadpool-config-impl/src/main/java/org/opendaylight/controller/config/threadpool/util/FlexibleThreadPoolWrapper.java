@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.config.threadpool.util;
 
-import com.google.common.base.Optional;
 import java.io.Closeable;
+import java.util.OptionalInt;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,18 +27,18 @@ import org.opendaylight.controller.config.threadpool.ThreadPool;
 public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
     private final ThreadPoolExecutor executor;
 
-    public FlexibleThreadPoolWrapper(int minThreadCount, int maxThreadCount, long keepAlive, TimeUnit timeUnit,
-            ThreadFactory threadFactory) {
-        this(minThreadCount, maxThreadCount, keepAlive, timeUnit, threadFactory, getQueue(Optional.<Integer>absent()));
+    public FlexibleThreadPoolWrapper(final int minThreadCount, final int maxThreadCount, final long keepAlive,
+            final TimeUnit timeUnit, final ThreadFactory threadFactory) {
+        this(minThreadCount, maxThreadCount, keepAlive, timeUnit, threadFactory, getQueue(OptionalInt.empty()));
     }
 
-    public FlexibleThreadPoolWrapper(int minThreadCount, int maxThreadCount, long keepAlive, TimeUnit timeUnit,
-            ThreadFactory threadFactory, Optional<Integer> queueCapacity) {
+    public FlexibleThreadPoolWrapper(final int minThreadCount, final int maxThreadCount, final long keepAlive,
+            final TimeUnit timeUnit, final ThreadFactory threadFactory, final OptionalInt queueCapacity) {
         this(minThreadCount, maxThreadCount, keepAlive, timeUnit, threadFactory, getQueue(queueCapacity));
     }
 
-    private FlexibleThreadPoolWrapper(int minThreadCount, int maxThreadCount, long keepAlive, TimeUnit timeUnit,
-            ThreadFactory threadFactory, BlockingQueue<Runnable> queue) {
+    private FlexibleThreadPoolWrapper(final int minThreadCount, final int maxThreadCount, final long keepAlive,
+            final TimeUnit timeUnit, final ThreadFactory threadFactory, final BlockingQueue<Runnable> queue) {
 
         executor = new ThreadPoolExecutor(minThreadCount, maxThreadCount, keepAlive, timeUnit,
                 queue, threadFactory, new FlexibleRejectionHandler());
@@ -52,8 +51,9 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
      * occurs in RejectedExecutionHandler.
      * This impl saturates threadpool first, then queue. When both are full caller will get blocked.
      */
-    private static ForwardingBlockingQueue getQueue(Optional<Integer> capacity) {
-        final BlockingQueue<Runnable> delegate = capacity.isPresent() ? new LinkedBlockingQueue<>(capacity.get()) : new LinkedBlockingQueue<>();
+    private static ForwardingBlockingQueue getQueue(final OptionalInt capacity) {
+        final BlockingQueue<Runnable> delegate = capacity.isPresent() ? new LinkedBlockingQueue<>(capacity.getAsInt())
+                : new LinkedBlockingQueue<>();
         return new ForwardingBlockingQueue(delegate);
     }
 
@@ -66,7 +66,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
         return executor.getCorePoolSize();
     }
 
-    public void setMinThreadCount(int minThreadCount) {
+    public void setMinThreadCount(final int minThreadCount) {
         executor.setCorePoolSize(minThreadCount);
     }
 
@@ -75,7 +75,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
         return executor.getMaximumPoolSize();
     }
 
-    public void setMaxThreadCount(int maxThreadCount) {
+    public void setMaxThreadCount(final int maxThreadCount) {
         executor.setMaximumPoolSize(maxThreadCount);
     }
 
@@ -83,11 +83,11 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
         return executor.getKeepAliveTime(TimeUnit.MILLISECONDS);
     }
 
-    public void setKeepAliveMillis(long keepAliveMillis) {
+    public void setKeepAliveMillis(final long keepAliveMillis) {
         executor.setKeepAliveTime(keepAliveMillis, TimeUnit.MILLISECONDS);
     }
 
-    public void setThreadFactory(ThreadFactory threadFactory) {
+    public void setThreadFactory(final ThreadFactory threadFactory) {
         executor.setThreadFactory(threadFactory);
     }
 
@@ -114,10 +114,11 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
         }
     }
 
-    private static class ForwardingBlockingQueue extends com.google.common.util.concurrent.ForwardingBlockingQueue<Runnable> {
+    private static class ForwardingBlockingQueue
+            extends com.google.common.util.concurrent.ForwardingBlockingQueue<Runnable> {
         private final BlockingQueue<Runnable> delegate;
 
-        public ForwardingBlockingQueue(BlockingQueue<Runnable> delegate) {
+        public ForwardingBlockingQueue(final BlockingQueue<Runnable> delegate) {
             this.delegate = delegate;
         }
 
