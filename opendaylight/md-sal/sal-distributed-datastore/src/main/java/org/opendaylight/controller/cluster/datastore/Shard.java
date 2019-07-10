@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -413,22 +414,22 @@ public class Shard extends RaftActor {
         requestMessageAssembler.checkExpiredAssembledMessageState();
     }
 
-    private Optional<Long> updateAccess(final SimpleShardDataTreeCohort cohort) {
+    private OptionalLong updateAccess(final SimpleShardDataTreeCohort cohort) {
         final FrontendIdentifier frontend = cohort.getIdentifier().getHistoryId().getClientId().getFrontendId();
         final LeaderFrontendState state = knownFrontends.get(frontend);
         if (state == null) {
             // Not tell-based protocol, do nothing
-            return Optional.absent();
+            return OptionalLong.empty();
         }
 
         if (isIsolatedLeader()) {
             // We are isolated and no new request can come through until we emerge from it. We are still updating
             // liveness of frontend when we see it attempting to communicate. Use the last access timer.
-            return Optional.of(state.getLastSeenTicks());
+            return OptionalLong.of(state.getLastSeenTicks());
         }
 
         // If this frontend has freshly connected, give it some time to catch up before killing its transactions.
-        return Optional.of(state.getLastConnectTicks());
+        return OptionalLong.of(state.getLastConnectTicks());
     }
 
     private void disableTracking(final DisableTrackingPayload payload) {
