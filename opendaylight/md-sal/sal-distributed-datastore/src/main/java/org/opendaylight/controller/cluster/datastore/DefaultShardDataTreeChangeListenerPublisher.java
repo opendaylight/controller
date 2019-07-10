@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Optional;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
@@ -30,7 +30,7 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataTreeChangeListenerPublisher.class);
     private String logContext;
 
-    DefaultShardDataTreeChangeListenerPublisher(String logContext) {
+    DefaultShardDataTreeChangeListenerPublisher(final String logContext) {
         this.logContext = logContext;
     }
 
@@ -46,8 +46,8 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     }
 
     @Override
-    protected void notifyListener(AbstractDOMDataTreeChangeListenerRegistration<?> registration,
-            Collection<DataTreeCandidate> changes) {
+    protected void notifyListener(final AbstractDOMDataTreeChangeListenerRegistration<?> registration,
+            final Collection<DataTreeCandidate> changes) {
         LOG.debug("{}: notifyListener: listener: {}", logContext, registration.getInstance());
         registration.getInstance().onDataTreeChanged(changes);
     }
@@ -58,9 +58,9 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     }
 
     @Override
-    public void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
-            Optional<DataTreeCandidate> initialState,
-            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+    public void registerTreeChangeListener(final YangInstanceIdentifier treeId,
+            final DOMDataTreeChangeListener listener, final Optional<DataTreeCandidate> initialState,
+            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         registerTreeChangeListener(treeId, listener, onRegistration);
 
         if (initialState.isPresent()) {
@@ -70,8 +70,8 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
         }
     }
 
-    void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
-            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+    void registerTreeChangeListener(final YangInstanceIdentifier treeId, final DOMDataTreeChangeListener listener,
+            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         LOG.debug("{}: registerTreeChangeListener: path: {}, listener: {}", logContext, treeId, listener);
 
         AbstractDOMDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> registration =
@@ -80,8 +80,8 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
         onRegistration.accept(registration);
     }
 
-    static void notifySingleListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
-            DataTreeCandidate state, String logContext) {
+    static void notifySingleListener(final YangInstanceIdentifier treeId, final DOMDataTreeChangeListener listener,
+            final DataTreeCandidate state, final String logContext) {
         LOG.debug("{}: notifySingleListener: path: {}, listener: {}", logContext, treeId, listener);
         DefaultShardDataTreeChangeListenerPublisher publisher =
                 new DefaultShardDataTreeChangeListenerPublisher(logContext);
