@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 
 import akka.actor.ActorRef;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
