@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +24,6 @@ import akka.dispatch.Dispatchers;
 import akka.protobuf.ByteString;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -37,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
@@ -1342,8 +1341,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             final AtomicReference<MockRaftActor> followerRaftActor) {
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(final ActorRef actorRef,
-                    final java.util.Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
                 try {
                     actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
                             installSnapshotStream), actorRef);

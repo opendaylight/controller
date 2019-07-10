@@ -5,12 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
@@ -18,6 +16,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
@@ -53,8 +52,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     private long persistIdentifier = 1;
 
-    public ExampleActor(String id, Map<String, String> peerAddresses,
-        Optional<ConfigParams> configParams) {
+    public ExampleActor(final String id, final Map<String, String> peerAddresses,
+        final Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams, (short)0);
         setPersistence(true);
         roleChangeNotifier = createRoleChangeNotifier(id);
@@ -66,7 +65,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    protected void handleNonRaftCommand(Object message) {
+    protected void handleNonRaftCommand(final Object message) {
         if (message instanceof KeyValue) {
             if (isLeader()) {
                 persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message, false);
@@ -107,7 +106,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
             + ", im-mem journal size=" + getRaftActorContext().getReplicatedLog().size();
     }
 
-    public Optional<ActorRef> createRoleChangeNotifier(String actorId) {
+    public Optional<ActorRef> createRoleChangeNotifier(final String actorId) {
         ActorRef exampleRoleChangeNotifier = this.getContext().actorOf(
             RoleChangeNotifier.getProps(actorId), actorId + "-notifier");
         return Optional.<ActorRef>of(exampleRoleChangeNotifier);
@@ -131,7 +130,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+    public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         try {
             if (installSnapshotStream.isPresent()) {
                 SerializationUtils.serialize((Serializable) state, installSnapshotStream.get());
@@ -144,7 +143,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    public void applySnapshot(Snapshot.State snapshotState) {
+    public void applySnapshot(final Snapshot.State snapshotState) {
         state.clear();
         state.putAll(((MapState)snapshotState).state);
 
@@ -169,11 +168,11 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    public void startLogRecoveryBatch(int maxBatchSize) {
+    public void startLogRecoveryBatch(final int maxBatchSize) {
     }
 
     @Override
-    public void appendRecoveredLogEntry(Payload data) {
+    public void appendRecoveredLogEntry(final Payload data) {
     }
 
     @Override
@@ -185,7 +184,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    public void applyRecoverySnapshot(Snapshot.State snapshotState) {
+    public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
     }
 
     @Override
@@ -200,7 +199,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @SuppressWarnings("unchecked")
     @Override
-    public Snapshot.State deserializeSnapshot(ByteSource snapshotBytes) {
+    public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
         try {
             return new MapState((Map<String, String>) SerializationUtils.deserialize(snapshotBytes.read()));
         } catch (IOException e) {
@@ -213,7 +212,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
         Map<String, String> state;
 
-        MapState(Map<String, String> state) {
+        MapState(final Map<String, String> state) {
             this.state = state;
         }
     }

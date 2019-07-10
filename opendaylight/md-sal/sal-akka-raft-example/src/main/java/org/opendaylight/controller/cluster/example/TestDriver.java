@@ -5,12 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.io.BufferedReader;
@@ -19,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
@@ -63,7 +62,7 @@ public class TestDriver {
      *  AbstractUptypedActor and AbstractUptypedPersistentActor would need to be commented out.
      *  Also RaftActor handleCommand(), debug log which prints for every command other than AE/AER
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
 
         actorSystem = ActorSystem.create("raft-test", ConfigFactory
             .load().getConfig("raft-test"));
@@ -135,7 +134,7 @@ public class TestDriver {
     }
 
     // create the listener using a separate actor system for each example actor
-    private static void createClusterRoleChangeListener(List<String> memberIds) {
+    private static void createClusterRoleChangeListener(final List<String> memberIds) {
         System.out.println("memberIds=" + memberIds);
         for (String memberId : memberIds) {
             ActorRef listenerActor = listenerActorSystem.actorOf(
@@ -144,12 +143,12 @@ public class TestDriver {
         }
     }
 
-    public static ActorRef createExampleActor(String name) {
+    public static ActorRef createExampleActor(final String name) {
         return actorSystem.actorOf(ExampleActor.props(name, withoutPeer(name),
             Optional.of(configParams)), name);
     }
 
-    public void createNodes(int num) {
+    public void createNodes(final int num) {
         for (int i = 0; i < num; i++)  {
             nameCounter = nameCounter + 1;
             allPeers.put("example-" + nameCounter, "akka://raft-test/user/example-" + nameCounter);
@@ -165,7 +164,7 @@ public class TestDriver {
     }
 
     // add num clients to all nodes in the system
-    public void addClients(int num) {
+    public void addClients(final int num) {
         for (Map.Entry<String, ActorRef> actorRefEntry : actorRefs.entrySet()) {
             for (int i = 0; i < num; i++) {
                 String clientName = "client-" + i + "-" + actorRefEntry.getKey();
@@ -178,7 +177,7 @@ public class TestDriver {
     }
 
     // add num clients to a node
-    public void addClientsToNode(String actorName, int num) {
+    public void addClientsToNode(final String actorName, final int num) {
         ActorRef actorRef = actorRefs.get(actorName);
         for (int i = 0; i < num; i++) {
             String clientName = "client-" + i + "-" + actorName;
@@ -188,7 +187,7 @@ public class TestDriver {
         }
     }
 
-    public void stopNode(String actorName) {
+    public void stopNode(final String actorName) {
         ActorRef actorRef = actorRefs.get(actorName);
 
         for (Map.Entry<String,ActorRef> entry : clientActorRefs.entrySet()) {
@@ -202,7 +201,7 @@ public class TestDriver {
         allPeers.remove(actorName);
     }
 
-    public void reinstateNode(String actorName) {
+    public void reinstateNode(final String actorName) {
         String address = "akka://default/user/" + actorName;
         allPeers.put(actorName, address);
 
@@ -225,7 +224,7 @@ public class TestDriver {
         }
     }
 
-    public void startLoggingForClient(ActorRef client) {
+    public void startLoggingForClient(final ActorRef client) {
         logGenerator.startLoggingForClient(client);
     }
 
@@ -235,7 +234,7 @@ public class TestDriver {
         }
     }
 
-    public void stopLoggingForClient(ActorRef client) {
+    public void stopLoggingForClient(final ActorRef client) {
         logGenerator.stopLoggingForClient(client);
     }
 
@@ -256,7 +255,7 @@ public class TestDriver {
     }
 
 
-    private static Map<String, String> withoutPeer(String peerId) {
+    private static Map<String, String> withoutPeer(final String peerId) {
         Map<String, String> without = new ConcurrentHashMap<>(allPeers);
         without.remove(peerId);
 

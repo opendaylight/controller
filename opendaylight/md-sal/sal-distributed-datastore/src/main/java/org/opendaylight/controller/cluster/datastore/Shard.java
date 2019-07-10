@@ -19,7 +19,6 @@ import akka.actor.Status.Failure;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
@@ -32,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
@@ -307,7 +307,7 @@ public class Shard extends RaftActor {
     @Override
     protected void handleNonRaftCommand(final Object message) {
         try (MessageTracker.Context context = appendEntriesReplyTracker.received(message)) {
-            final java.util.Optional<Error> maybeError = context.error();
+            final Optional<Error> maybeError = context.error();
             if (maybeError.isPresent()) {
                 LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
                     maybeError.get());

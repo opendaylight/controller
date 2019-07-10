@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
-import com.google.common.base.Optional;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -19,8 +17,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
-import org.opendaylight.controller.cluster.raft.ConfigParams;
 
 public final class Main {
     private static final ActorSystem ACTOR_SYSTEM = ActorSystem.create();
@@ -37,18 +35,18 @@ public final class Main {
     }
 
     @SuppressWarnings("checkstyle:RegexpSingleLineJava")
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         ActorRef example1Actor =
             ACTOR_SYSTEM.actorOf(ExampleActor.props("example-1",
-                withoutPeer("example-1"), Optional.<ConfigParams>absent()), "example-1");
+                withoutPeer("example-1"), Optional.empty()), "example-1");
 
         ActorRef example2Actor =
             ACTOR_SYSTEM.actorOf(ExampleActor.props("example-2",
-                withoutPeer("example-2"), Optional.<ConfigParams>absent()), "example-2");
+                withoutPeer("example-2"), Optional.empty()), "example-2");
 
         ActorRef example3Actor =
             ACTOR_SYSTEM.actorOf(ExampleActor.props("example-3",
-                withoutPeer("example-3"), Optional.<ConfigParams>absent()), "example-3");
+                withoutPeer("example-3"), Optional.empty()), "example-3");
 
 
         List<ActorRef> examples = Arrays.asList(example1Actor, example2Actor, example3Actor);
@@ -82,8 +80,7 @@ public final class Main {
                         String actorName = "example-" + num;
                         examples.add(num - 1,
                             ACTOR_SYSTEM.actorOf(ExampleActor.props(actorName,
-                                withoutPeer(actorName), Optional.<ConfigParams>absent()),
-                                actorName));
+                                withoutPeer(actorName), Optional.empty()), actorName));
                         System.out.println("Created actor : " + actorName);
                         continue;
                     }
@@ -100,7 +97,7 @@ public final class Main {
         }
     }
 
-    private static Map<String, String> withoutPeer(String peerId) {
+    private static Map<String, String> withoutPeer(final String peerId) {
         Map<String, String> without = new HashMap<>(allPeers);
         without.remove(peerId);
         return without;
