@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
@@ -38,8 +37,7 @@ public class ConnectedClientConnectionTest
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
         final long now = context.ticker().read() + ConnectedClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS;
-        final Optional<Long> timeout = connection.checkTimeout(now);
-        Assert.assertNull(timeout);
+        assertNull(connection.checkTimeout(now));
     }
 
     @Override
@@ -47,7 +45,7 @@ public class ConnectedClientConnectionTest
         final BackendInfo backend = new BackendInfo(backendProbe.ref(), "test", 0L, ABIVersion.BORON, 10);
         final ConnectingClientConnection<BackendInfo> connectingConn = new ConnectingClientConnection<>(context, 0L,
                 backend.getName());
-        return  new ConnectedClientConnection<>(connectingConn, backend);
+        return new ConnectedClientConnection<>(connectingConn, backend);
     }
 
     @Override

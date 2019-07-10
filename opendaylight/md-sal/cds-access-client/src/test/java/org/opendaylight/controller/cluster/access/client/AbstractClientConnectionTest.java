@@ -8,7 +8,11 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.mockito.Matchers.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -19,10 +23,9 @@ import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.Iterables;
-import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.Consumer;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -75,7 +78,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
 
     @Test
     public void testLocalActor() {
-        Assert.assertEquals(contextProbe.ref(), connection.localActor());
+        assertEquals(contextProbe.ref(), connection.localActor());
     }
 
     @Test
@@ -97,7 +100,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         final Request<?, ?> request = createRequest(replyToProbe.ref());
         connection.sendRequest(request, callback);
         final RequestEnvelope requestEnvelope = backendProbe.expectMsgClass(RequestEnvelope.class);
-        Assert.assertEquals(request, requestEnvelope.getMessage());
+        assertEquals(request, requestEnvelope.getMessage());
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(CLIENT_ID, 0L);
         final RequestSuccess<?, ?> message = new TransactionAbortSuccess(new TransactionIdentifier(historyId, 0L), 0L);
         final ResponseEnvelope<?> envelope = new SuccessEnvelope(message, 0L, 0L, 0L);
@@ -108,13 +111,12 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     @Test
     public void testRun() {
         final ClientActorBehavior<U> behavior = mock(ClientActorBehavior.class);
-        Assert.assertSame(behavior, connection.runTimer(behavior));
+        assertSame(behavior, connection.runTimer(behavior));
     }
 
     @Test
     public void testCheckTimeoutEmptyQueue() {
-        final Optional<Long> timeout = connection.checkTimeout(context.ticker().read());
-        Assert.assertFalse(timeout.isPresent());
+        assertEquals(OptionalLong.empty(), connection.checkTimeout(context.ticker().read()));
     }
 
     @Test
@@ -122,8 +124,8 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
         final long now = context.ticker().read();
-        final Optional<Long> timeout = connection.checkTimeout(now);
-        Assert.assertTrue(timeout.isPresent());
+        final OptionalLong timeout = connection.checkTimeout(now);
+        assertTrue(timeout.isPresent());
     }
 
     @Test
@@ -134,8 +136,8 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         connection.sendRequest(request1, callback);
         connection.sendRequest(request2, callback);
         final Iterable<ConnectionEntry> entries = connection.startReplay();
-        Assert.assertThat(entries, hasItems(entryWithRequest(request1), entryWithRequest(request2)));
-        Assert.assertEquals(2, Iterables.size(entries));
+        assertThat(entries, hasItems(entryWithRequest(request1), entryWithRequest(request2)));
+        assertEquals(2, Iterables.size(entries));
         Iterables.removeIf(entries, e -> true);
         final ReconnectForwarder forwarder = mock(ReconnectForwarder.class);
         connection.finishReplay(forwarder);
