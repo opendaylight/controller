@@ -39,7 +39,7 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
         } else if (command instanceof SaveSnapshotSuccess) {
             LOG.debug("{}: got command: {}", persistenceId(), command);
             SaveSnapshotSuccess saved = (SaveSnapshotSuccess)command;
-            context().deleteSnapshots(new SnapshotSelectionCriteria(saved.metadata().sequenceNr(),
+            context().deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                     saved.metadata().timestamp() - 1, 0L, 0L));
             return this;
         } else if (command instanceof DeleteSnapshotsSuccess) {
