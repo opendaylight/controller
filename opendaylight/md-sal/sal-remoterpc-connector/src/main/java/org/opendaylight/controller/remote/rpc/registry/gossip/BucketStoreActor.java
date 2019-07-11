@@ -180,7 +180,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         } else if (message instanceof SaveSnapshotSuccess) {
             LOG.debug("{}: got command: {}", persistenceId(), message);
             SaveSnapshotSuccess saved = (SaveSnapshotSuccess)message;
-            deleteSnapshots(new SnapshotSelectionCriteria(saved.metadata().sequenceNr(),
+            deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                     saved.metadata().timestamp() - 1, 0L, 0L));
             persisting = false;
             unstash();
