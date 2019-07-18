@@ -57,7 +57,7 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTran
         final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
         final YangInstanceIdentifier pid =
                 YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
-        final DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
+        final DOMTransactionChain chain = domDataBroker.createMergingTransactionChain(this);
 
         DOMDataTreeWriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
