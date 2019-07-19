@@ -12,10 +12,14 @@ package org.opendaylight.controller.cluster.raft;
  *
  * @author Thomas Pantelis
  */
-public interface RaftVersions {
-    short HELIUM_VERSION = 0;
-    short LITHIUM_VERSION = 1;
-    short BORON_VERSION = 3;
-    short FLUORINE_VERSION = 4;
-    short CURRENT_VERSION = FLUORINE_VERSION;
+public final class RaftVersions {
+    public static final short HELIUM_VERSION = 0;
+    public static final short LITHIUM_VERSION = 1;
+    public static final short BORON_VERSION = 3;
+    public static final short FLUORINE_VERSION = 4;
+    public static final short CURRENT_VERSION = FLUORINE_VERSION;
+
+    private RaftVersions() {
+
+    }
 }
