@@ -22,6 +22,10 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 final class AERv3 implements Externalizable {
     private static final long serialVersionUID = 1L;
 
+    private static final byte FLAG_SUCCESS = 0x01;
+    private static final byte FLAG_FORCE_INSTALL_SNAPSHOT = 0x02;
+    private static final byte FLAG_NEED_LEADER_ADDRESS = 0x04;
+
     private AppendEntriesReply appendEntriesReply;
 
     @SuppressWarnings("checkstyle:RedundantModifier")
@@ -38,13 +42,22 @@ final class AERv3 implements Externalizable {
         out.writeShort(appendEntriesReply.getRaftVersion());
         out.writeLong(appendEntriesReply.getTerm());
         out.writeObject(appendEntriesReply.getFollowerId());
-        out.writeBoolean(appendEntriesReply.isSuccess());
 
         WritableObjects.writeLongs(out, appendEntriesReply.getLogLastIndex(), appendEntriesReply.getLogLastTerm());
 
         out.writeShort(appendEntriesReply.getPayloadVersion());
-        out.writeBoolean(appendEntriesReply.isForceInstallSnapshot());
-        out.writeBoolean(appendEntriesReply.isNeedsLeaderAddress());
+
+        int flags = 0;
+        if (appendEntriesReply.isSuccess()) {
+            flags |= FLAG_SUCCESS;
+        }
+        if (appendEntriesReply.isForceInstallSnapshot()) {
+            flags |= FLAG_FORCE_INSTALL_SNAPSHOT;
+        }
+        if (appendEntriesReply.isNeedsLeaderAddress()) {
+            flags |= FLAG_NEED_LEADER_ADDRESS;
+        }
+        out.writeByte(flags);
     }
 
     @Override
@@ -52,18 +65,16 @@ final class AERv3 implements Externalizable {
         final short raftVersion = in.readShort();
         final long term = in.readLong();
         final String followerId = (String) in.readObject();
-        final boolean success = in.readBoolean();
 
         byte header = WritableObjects.readLongHeader(in);
         final long logLastIndex = WritableObjects.readFirstLong(in, header);
         final long logLastTerm = WritableObjects.readSecondLong(in, header);
         final short payloadVersion = in.readShort();
-        final boolean forceInstallSnapshot = in.readBoolean();
-        final boolean needsLeaderAddress = in.readBoolean();
+        final byte flags = in.readByte();
 
-        appendEntriesReply = new AppendEntriesReply(followerId, term, success, logLastIndex, logLastTerm,
-                payloadVersion, forceInstallSnapshot, needsLeaderAddress, raftVersion,
-                RaftVersions.CURRENT_VERSION);
+        appendEntriesReply = new AppendEntriesReply(followerId, term, (flags & FLAG_SUCCESS) != 0, logLastIndex,
+                logLastTerm, payloadVersion, (flags & FLAG_FORCE_INSTALL_SNAPSHOT) != 0,
+                (flags & FLAG_NEED_LEADER_ADDRESS) != 0, raftVersion, RaftVersions.CURRENT_VERSION);
     }
 
     private Object readResolve() {
