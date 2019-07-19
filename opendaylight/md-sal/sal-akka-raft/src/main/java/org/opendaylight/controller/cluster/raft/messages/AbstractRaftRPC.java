@@ -5,29 +5,23 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.messages;
 
-public class AbstractRaftRPC implements RaftRPC {
+public abstract class AbstractRaftRPC implements RaftRPC {
     private static final long serialVersionUID = -6061342433962854822L;
 
     // term
-    private long term;
+    private final long term;
 
-    protected AbstractRaftRPC(long term) {
+    AbstractRaftRPC(final long term) {
         this.term = term;
-    }
-
-    // added for testing while serialize-messages=on
-    public AbstractRaftRPC() {
     }
 
     @Override
-    public long getTerm() {
+    public final long getTerm() {
         return term;
     }
 
-    protected void setTerm(long term) {
-        this.term = term;
-    }
+    // All implementations must use Externalizable Proxy pattern
+    abstract Object writeReplace();
 }

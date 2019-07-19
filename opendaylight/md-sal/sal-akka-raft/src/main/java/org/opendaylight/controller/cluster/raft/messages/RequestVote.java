@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.messages;
 
 import java.io.Externalizable;
@@ -16,7 +15,7 @@ import java.io.ObjectOutput;
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
-public class RequestVote extends AbstractRaftRPC {
+public final class RequestVote extends AbstractRaftRPC {
     private static final long serialVersionUID = -6967509186297108657L;
 
     // candidate requesting vote
@@ -28,7 +27,7 @@ public class RequestVote extends AbstractRaftRPC {
     // term of candidate’s last log entry (§5.4)
     private final long lastLogTerm;
 
-    public RequestVote(long term, String candidateId, long lastLogIndex, long lastLogTerm) {
+    public RequestVote(final long term, final String candidateId, final long lastLogIndex, final long lastLogTerm) {
         super(term);
         this.candidateId = candidateId;
         this.lastLogIndex = lastLogIndex;
@@ -56,7 +55,8 @@ public class RequestVote extends AbstractRaftRPC {
                 + "]";
     }
 
-    private Object writeReplace() {
+    @Override
+    Object writeReplace() {
         return new Proxy(this);
     }
 
@@ -71,12 +71,12 @@ public class RequestVote extends AbstractRaftRPC {
         public Proxy() {
         }
 
-        Proxy(RequestVote requestVote) {
+        Proxy(final RequestVote requestVote) {
             this.requestVote = requestVote;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(requestVote.getTerm());
             out.writeObject(requestVote.candidateId);
             out.writeLong(requestVote.lastLogIndex);
@@ -84,7 +84,7 @@ public class RequestVote extends AbstractRaftRPC {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             long term = in.readLong();
             String candidateId = (String) in.readObject();
             long lastLogIndex = in.readLong();

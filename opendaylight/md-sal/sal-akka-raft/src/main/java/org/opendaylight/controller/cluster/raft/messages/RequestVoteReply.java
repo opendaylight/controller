@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.messages;
 
 import java.io.Externalizable;
@@ -19,7 +18,7 @@ public final class RequestVoteReply extends AbstractRaftRPC {
     // true means candidate received vote
     private final boolean voteGranted;
 
-    public RequestVoteReply(long term, boolean voteGranted) {
+    public RequestVoteReply(final long term, final boolean voteGranted) {
         super(term);
         this.voteGranted = voteGranted;
     }
@@ -33,7 +32,8 @@ public final class RequestVoteReply extends AbstractRaftRPC {
         return "RequestVoteReply [term=" + getTerm() + ", voteGranted=" + voteGranted + "]";
     }
 
-    private Object writeReplace() {
+    @Override
+    Object writeReplace() {
         return new Proxy(this);
     }
 
@@ -48,18 +48,18 @@ public final class RequestVoteReply extends AbstractRaftRPC {
         public Proxy() {
         }
 
-        Proxy(RequestVoteReply requestVoteReply) {
+        Proxy(final RequestVoteReply requestVoteReply) {
             this.requestVoteReply = requestVoteReply;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(requestVoteReply.getTerm());
             out.writeBoolean(requestVoteReply.voteGranted);
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException {
+        public void readExternal(final ObjectInput in) throws IOException {
             long term = in.readLong();
             boolean voteGranted = in.readBoolean();
 

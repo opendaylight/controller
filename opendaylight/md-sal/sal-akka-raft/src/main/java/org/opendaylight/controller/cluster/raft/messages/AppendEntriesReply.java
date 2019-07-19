@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -18,7 +17,7 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
 /**
  * Reply for the AppendEntries message.
  */
-public class AppendEntriesReply extends AbstractRaftRPC {
+public final class AppendEntriesReply extends AbstractRaftRPC {
     private static final long serialVersionUID = -7487547356392536683L;
 
     // true if follower contained entry matching
@@ -47,23 +46,22 @@ public class AppendEntriesReply extends AbstractRaftRPC {
     private final short recipientRaftVersion;
 
     @VisibleForTesting
-    public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
-            short payloadVersion) {
+    public AppendEntriesReply(final String followerId, final long term, final boolean success, final long logLastIndex,
+            final long logLastTerm, final short payloadVersion) {
         this(followerId, term, success, logLastIndex, logLastTerm, payloadVersion, false, false,
                 RaftVersions.CURRENT_VERSION);
     }
 
-    public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
-            short payloadVersion, boolean forceInstallSnapshot, boolean needsLeaderAddress,
-            short recipientRaftVersion) {
+    public AppendEntriesReply(final String followerId, final long term, final boolean success, final long logLastIndex,
+            final long logLastTerm, final short payloadVersion, final boolean forceInstallSnapshot,
+            final boolean needsLeaderAddress, final short recipientRaftVersion) {
         this(followerId, term, success, logLastIndex, logLastTerm, payloadVersion, forceInstallSnapshot,
                 needsLeaderAddress, RaftVersions.CURRENT_VERSION, recipientRaftVersion);
-
     }
 
-    private AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
-            short payloadVersion, boolean forceInstallSnapshot, boolean needsLeaderAddress, short raftVersion,
-            short recipientRaftVersion) {
+    private AppendEntriesReply(final String followerId, final long term, final boolean success, final long logLastIndex,
+            final long logLastTerm, final short payloadVersion, final boolean forceInstallSnapshot,
+            final boolean needsLeaderAddress, final short raftVersion, final short recipientRaftVersion) {
         super(term);
         this.followerId = followerId;
         this.success = success;
@@ -117,7 +115,8 @@ public class AppendEntriesReply extends AbstractRaftRPC {
                 + ", recipientRaftVersion=" + recipientRaftVersion + "]";
     }
 
-    private Object writeReplace() {
+    @Override
+    Object writeReplace() {
         return recipientRaftVersion >= RaftVersions.FLUORINE_VERSION ? new Proxy2(this) : new Proxy(this);
     }
 
@@ -135,12 +134,12 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         public Proxy2() {
         }
 
-        Proxy2(AppendEntriesReply appendEntriesReply) {
+        Proxy2(final AppendEntriesReply appendEntriesReply) {
             this.appendEntriesReply = appendEntriesReply;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeShort(appendEntriesReply.raftVersion);
             out.writeLong(appendEntriesReply.getTerm());
             out.writeObject(appendEntriesReply.followerId);
@@ -153,7 +152,7 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             short raftVersion = in.readShort();
             long term = in.readLong();
             String followerId = (String) in.readObject();
@@ -189,12 +188,12 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         public Proxy() {
         }
 
-        Proxy(AppendEntriesReply appendEntriesReply) {
+        Proxy(final AppendEntriesReply appendEntriesReply) {
             this.appendEntriesReply = appendEntriesReply;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeShort(appendEntriesReply.raftVersion);
             out.writeLong(appendEntriesReply.getTerm());
             out.writeObject(appendEntriesReply.followerId);
@@ -206,7 +205,7 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             short raftVersion = in.readShort();
             long term = in.readLong();
             String followerId = (String) in.readObject();

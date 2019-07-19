@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 /**
  * Message sent from a leader to install a snapshot chunk on a follower.
  */
-public class InstallSnapshot extends AbstractRaftRPC {
+public final class InstallSnapshot extends AbstractRaftRPC {
     private static final long serialVersionUID = 1L;
 
     private final String leaderId;
@@ -92,7 +92,6 @@ public class InstallSnapshot extends AbstractRaftRPC {
         return serverConfig;
     }
 
-
     public <T> Object toSerializable(final short version) {
         return this;
     }
@@ -105,7 +104,8 @@ public class InstallSnapshot extends AbstractRaftRPC {
                 + ", serverConfig=" + serverConfig.orElse(null) + "]";
     }
 
-    private Object writeReplace() {
+    @Override
+    Object writeReplace() {
         return new Proxy(this);
     }
 
