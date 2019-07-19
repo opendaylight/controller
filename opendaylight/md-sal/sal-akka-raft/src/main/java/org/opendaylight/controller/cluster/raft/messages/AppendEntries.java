@@ -25,14 +25,13 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
- * Invoked by leader to replicate log entries (§5.3); also used as
- * heartbeat (§5.2).
+ * Invoked by leader to replicate log entries (§5.3); also used as heartbeat (§5.2).
  */
-public class AppendEntries extends AbstractRaftRPC {
+public final class AppendEntries extends AbstractRaftRPC {
     private static final long serialVersionUID = 1L;
 
     // So that follower can redirect clients
-    private final String leaderId;
+    private final @NonNull String leaderId;
 
     // Index of log entry immediately preceding new ones
     private final long prevLogIndex;
@@ -41,7 +40,7 @@ public class AppendEntries extends AbstractRaftRPC {
     private final long prevLogTerm;
 
     // log entries to store (empty for heart beat - may send more than one for efficiency)
-    private final List<ReplicatedLogEntry> entries;
+    private final @NonNull List<ReplicatedLogEntry> entries;
 
     // leader's commitIndex
     private final long leaderCommit;
@@ -57,9 +56,10 @@ public class AppendEntries extends AbstractRaftRPC {
 
     private final String leaderAddress;
 
-    private AppendEntries(long term, @NonNull String leaderId, long prevLogIndex, long prevLogTerm,
-            @NonNull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
-            short payloadVersion, short recipientRaftVersion, short leaderRaftVersion, @Nullable String leaderAddress) {
+    private AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
+            final long prevLogTerm, @NonNull final List<ReplicatedLogEntry> entries, final long leaderCommit,
+            final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
+            final short leaderRaftVersion, @Nullable final String leaderAddress) {
         super(term);
         this.leaderId = requireNonNull(leaderId);
         this.prevLogIndex = prevLogIndex;
@@ -73,17 +73,18 @@ public class AppendEntries extends AbstractRaftRPC {
         this.leaderAddress = leaderAddress;
     }
 
-    public AppendEntries(long term, @NonNull String leaderId, long prevLogIndex, long prevLogTerm,
-            @NonNull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
-            short payloadVersion, short recipientRaftVersion, @Nullable String leaderAddress) {
+    public AppendEntries(final long term, final @NonNull String leaderId, final long prevLogIndex,
+            final long prevLogTerm, final @NonNull List<ReplicatedLogEntry> entries, final long leaderCommit,
+            final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
+            final @Nullable String leaderAddress) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
                 recipientRaftVersion, RaftVersions.CURRENT_VERSION, leaderAddress);
     }
 
     @VisibleForTesting
-    public AppendEntries(long term, @NonNull String leaderId, long prevLogIndex, long prevLogTerm,
-            @NonNull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
-            short payloadVersion) {
+    public AppendEntries(final long term, final @NonNull String leaderId, final long prevLogIndex,
+            final long prevLogTerm, final @NonNull List<ReplicatedLogEntry> entries, final long leaderCommit,
+            final long replicatedToAllIndex, final short payloadVersion) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
                 RaftVersions.CURRENT_VERSION, null);
     }
@@ -138,7 +139,8 @@ public class AppendEntries extends AbstractRaftRPC {
                 + ", entries=" + entries + "]";
     }
 
-    private Object writeReplace() {
+    @Override
+    Object writeReplace() {
         return recipientRaftVersion >= RaftVersions.FLUORINE_VERSION ? new ProxyV2(this) : new Proxy(this);
     }
 
@@ -156,12 +158,12 @@ public class AppendEntries extends AbstractRaftRPC {
         public ProxyV2() {
         }
 
-        ProxyV2(AppendEntries appendEntries) {
+        ProxyV2(final AppendEntries appendEntries) {
             this.appendEntries = appendEntries;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeShort(appendEntries.leaderRaftVersion);
             out.writeLong(appendEntries.getTerm());
             out.writeObject(appendEntries.leaderId);
@@ -182,7 +184,7 @@ public class AppendEntries extends AbstractRaftRPC {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             short leaderRaftVersion = in.readShort();
             long term = in.readLong();
             String leaderId = (String) in.readObject();
@@ -225,12 +227,12 @@ public class AppendEntries extends AbstractRaftRPC {
         public Proxy() {
         }
 
-        Proxy(AppendEntries appendEntries) {
+        Proxy(final AppendEntries appendEntries) {
             this.appendEntries = appendEntries;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(appendEntries.getTerm());
             out.writeObject(appendEntries.leaderId);
             out.writeLong(appendEntries.prevLogTerm);
@@ -248,7 +250,7 @@ public class AppendEntries extends AbstractRaftRPC {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             long term = in.readLong();
             String leaderId = (String) in.readObject();
             long prevLogTerm = in.readLong();
