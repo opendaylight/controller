@@ -59,7 +59,7 @@ public final class AppendEntriesReply extends AbstractRaftRPC {
                 needsLeaderAddress, RaftVersions.CURRENT_VERSION, recipientRaftVersion);
     }
 
-    private AppendEntriesReply(final String followerId, final long term, final boolean success, final long logLastIndex,
+    AppendEntriesReply(final String followerId, final long term, final boolean success, final long logLastIndex,
             final long logLastTerm, final short payloadVersion, final boolean forceInstallSnapshot,
             final boolean needsLeaderAddress, final short raftVersion, final short recipientRaftVersion) {
         super(term);
@@ -117,7 +117,13 @@ public final class AppendEntriesReply extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return recipientRaftVersion >= RaftVersions.FLUORINE_VERSION ? new Proxy2(this) : new Proxy(this);
+        if (recipientRaftVersion >= RaftVersions.SODIUM_VERSION) {
+            return new AERv3(this);
+        }
+        if (recipientRaftVersion == RaftVersions.FLUORINE_VERSION) {
+            return new Proxy2(this);
+        }
+        return new Proxy(this);
     }
 
     /**

@@ -106,6 +106,7 @@ public final class InstallSnapshot extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
+        // FIXME: retrofit recipientRaftVersion
         return new Proxy(this);
     }
 
