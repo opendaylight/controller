@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Sodium Externalizable proxy for AppendEntries.
@@ -38,8 +39,9 @@ final class AERv3 implements Externalizable {
         out.writeLong(appendEntriesReply.getTerm());
         out.writeObject(appendEntriesReply.getFollowerId());
         out.writeBoolean(appendEntriesReply.isSuccess());
-        out.writeLong(appendEntriesReply.getLogLastIndex());
-        out.writeLong(appendEntriesReply.getLogLastTerm());
+
+        WritableObjects.writeLongs(out, appendEntriesReply.getLogLastIndex(), appendEntriesReply.getLogLastTerm());
+
         out.writeShort(appendEntriesReply.getPayloadVersion());
         out.writeBoolean(appendEntriesReply.isForceInstallSnapshot());
         out.writeBoolean(appendEntriesReply.isNeedsLeaderAddress());
@@ -47,15 +49,17 @@ final class AERv3 implements Externalizable {
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        short raftVersion = in.readShort();
-        long term = in.readLong();
-        String followerId = (String) in.readObject();
-        boolean success = in.readBoolean();
-        long logLastIndex = in.readLong();
-        long logLastTerm = in.readLong();
-        short payloadVersion = in.readShort();
-        boolean forceInstallSnapshot = in.readBoolean();
-        boolean needsLeaderAddress = in.readBoolean();
+        final short raftVersion = in.readShort();
+        final long term = in.readLong();
+        final String followerId = (String) in.readObject();
+        final boolean success = in.readBoolean();
+
+        byte header = WritableObjects.readLongHeader(in);
+        final long logLastIndex = WritableObjects.readFirstLong(in, header);
+        final long logLastTerm = WritableObjects.readSecondLong(in, header);
+        final short payloadVersion = in.readShort();
+        final boolean forceInstallSnapshot = in.readBoolean();
+        final boolean needsLeaderAddress = in.readBoolean();
 
         appendEntriesReply = new AppendEntriesReply(followerId, term, success, logLastIndex, logLastTerm,
                 payloadVersion, forceInstallSnapshot, needsLeaderAddress, raftVersion,

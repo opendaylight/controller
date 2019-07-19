@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Sodium Externalizable proxy for AppendEntries.
@@ -42,17 +43,16 @@ final class AEv3 implements Externalizable {
         out.writeShort(appendEntries.getLeaderRaftVersion());
         out.writeLong(appendEntries.getTerm());
         out.writeObject(appendEntries.getLeaderId());
-        out.writeLong(appendEntries.getPrevLogTerm());
-        out.writeLong(appendEntries.getPrevLogIndex());
-        out.writeLong(appendEntries.getLeaderCommit());
-        out.writeLong(appendEntries.getReplicatedToAllIndex());
+
+        WritableObjects.writeLongs(out, appendEntries.getPrevLogTerm(), appendEntries.getPrevLogIndex());
+        WritableObjects.writeLongs(out, appendEntries.getLeaderCommit(), appendEntries.getReplicatedToAllIndex());
+
         out.writeShort(appendEntries.getPayloadVersion());
 
         final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
         out.writeInt(entries.size());
         for (ReplicatedLogEntry e: entries) {
-            out.writeLong(e.getIndex());
-            out.writeLong(e.getTerm());
+            WritableObjects.writeLongs(out, e.getIndex(), e.getTerm());
             out.writeObject(e.getData());
         }
 
@@ -61,22 +61,28 @@ final class AEv3 implements Externalizable {
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        short leaderRaftVersion = in.readShort();
-        long term = in.readLong();
-        String leaderId = (String) in.readObject();
-        long prevLogTerm = in.readLong();
-        long prevLogIndex = in.readLong();
-        long leaderCommit = in.readLong();
-        long replicatedToAllIndex = in.readLong();
-        short payloadVersion = in.readShort();
+        final short leaderRaftVersion = in.readShort();
+        final long term = in.readLong();
+        final String leaderId = (String) in.readObject();
 
-        int size = in.readInt();
+        byte header = WritableObjects.readLongHeader(in);
+        final long prevLogTerm = WritableObjects.readFirstLong(in, header);
+        final long prevLogIndex = WritableObjects.readSecondLong(in, header);
+
+        header = WritableObjects.readLongHeader(in);
+        final long leaderCommit = WritableObjects.readFirstLong(in, header);
+        final long replicatedToAllIndex = WritableObjects.readSecondLong(in, header);
+        final short payloadVersion = in.readShort();
+
+        final int size = in.readInt();
         List<ReplicatedLogEntry> entries = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
+            header = WritableObjects.readLongHeader(in);
+            entries.add(new SimpleReplicatedLogEntry(WritableObjects.readFirstLong(in, header),
+                WritableObjects.readSecondLong(in, header), (Payload) in.readObject()));
         }
 
-        String leaderAddress = (String)in.readObject();
+        final String leaderAddress = (String) in.readObject();
 
         appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
                 replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, leaderRaftVersion,
