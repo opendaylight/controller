@@ -44,7 +44,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
-import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
@@ -79,11 +79,11 @@ public class RpcRegistryTest {
     public static void staticSetup() {
         AkkaConfigurationReader reader = ConfigFactory::load;
 
-        RemoteOpsProviderConfig config1 = new RemoteOpsProviderConfig.Builder("memberA").gossipTickInterval("200ms")
+        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").gossipTickInterval("200ms")
                 .withConfigReader(reader).build();
-        RemoteOpsProviderConfig config2 = new RemoteOpsProviderConfig.Builder("memberB").gossipTickInterval("200ms")
+        RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").gossipTickInterval("200ms")
                 .withConfigReader(reader).build();
-        RemoteOpsProviderConfig config3 = new RemoteOpsProviderConfig.Builder("memberC").gossipTickInterval("200ms")
+        RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").gossipTickInterval("200ms")
                 .withConfigReader(reader).build();
         node1 = ActorSystem.create("opendaylight-rpc", config1.get());
         node2 = ActorSystem.create("opendaylight-rpc", config2.get());
@@ -131,8 +131,8 @@ public class RpcRegistryTest {
         registry3 = node3.actorOf(RpcRegistry.props(config(node3), invoker3.getRef(), registrar3.getRef()));
     }
 
-    private static RemoteOpsProviderConfig config(final ActorSystem node) {
-        return new RemoteOpsProviderConfig(node.settings().config());
+    private static RemoteRpcProviderConfig config(final ActorSystem node) {
+        return new RemoteRpcProviderConfig(node.settings().config());
     }
 
     @After
@@ -299,7 +299,7 @@ public class RpcRegistryTest {
     }
 
     private static void assertEndpoints(final UpdateRemoteEndpoints msg, final Address address, final TestKit invoker) {
-        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getRpcEndpoints();
+        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getEndpoints();
         assertEquals(1, endpoints.size());
 
         final Optional<RemoteRpcEndpoint> maybeEndpoint = endpoints.get(address);

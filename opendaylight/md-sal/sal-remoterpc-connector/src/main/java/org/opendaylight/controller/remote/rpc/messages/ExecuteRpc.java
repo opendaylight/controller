@@ -9,37 +9,61 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?, ?>> {
+public final class ExecuteRpc implements Serializable {
     private static final long serialVersionUID = 1128904894827335676L;
 
-    private ExecuteRpc(final @NonNull SchemaPath type, final @Nullable NormalizedNode<?, ?> input) {
-        super(type, input);
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
+            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
+            + "aren't serialized. FindBugs does not recognize this.")
+    private final NormalizedNode<?, ?> inputNormalizedNode;
+    private final QName rpc;
+
+    private ExecuteRpc(final @Nullable NormalizedNode<?, ?> inputNormalizedNode, final @NonNull QName rpc) {
+        this.rpc = requireNonNull(rpc, "rpc Qname should not be null");
+        this.inputNormalizedNode = inputNormalizedNode;
     }
 
-    public static @NonNull ExecuteRpc from(final @NonNull DOMRpcIdentifier rpc,
-            final @Nullable NormalizedNode<?, ?> input) {
-        return new ExecuteRpc(rpc.getType(), input);
+    public static ExecuteRpc from(final @NonNull DOMRpcIdentifier rpc, final @Nullable NormalizedNode<?, ?> input) {
+        return new ExecuteRpc(input, rpc.getType().getLastComponent());
     }
 
-    @Override
-    Object writeReplace() {
+    public @Nullable NormalizedNode<?, ?> getInputNormalizedNode() {
+        return inputNormalizedNode;
+    }
+
+    public @NonNull QName getRpc() {
+        return rpc;
+    }
+
+    private Object writeReplace() {
         return new Proxy(this);
     }
 
-    private static final class Proxy implements Externalizable {
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("rpc", rpc)
+                .add("normalizedNode", inputNormalizedNode)
+                .toString();
+    }
+
+    private static class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
         private ExecuteRpc executeRpc;
@@ -48,27 +72,25 @@ public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
-
         }
 
         Proxy(final ExecuteRpc executeRpc) {
-            this.executeRpc = requireNonNull(executeRpc);
+            this.executeRpc = executeRpc;
         }
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
-                stream.writeQName(executeRpc.getType().getLastComponent());
-                stream.writeOptionalNormalizedNode(executeRpc.getInput());
+                stream.writeQName(executeRpc.getRpc());
+                stream.writeOptionalNormalizedNode(executeRpc.getInputNormalizedNode());
             }
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
-            final SchemaPath type = SchemaPath.ROOT.createChild(stream.readQName());
-            final NormalizedNode<?, ?> input = stream.readOptionalNormalizedNode().orElse(null);
-            executeRpc = new ExecuteRpc(type, input);
+            final QName qname = stream.readQName();
+            executeRpc = new ExecuteRpc(stream.readOptionalNormalizedNode().orElse(null), qname);
         }
 
         private Object readResolve() {

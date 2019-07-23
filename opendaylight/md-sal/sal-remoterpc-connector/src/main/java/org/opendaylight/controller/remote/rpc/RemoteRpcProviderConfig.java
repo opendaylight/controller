@@ -14,28 +14,25 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import scala.concurrent.duration.FiniteDuration;
 
-public class RemoteOpsProviderConfig extends CommonConfig {
+public class RemoteRpcProviderConfig extends CommonConfig {
 
     protected static final String TAG_RPC_BROKER_NAME = "rpc-broker-name";
     protected static final String TAG_RPC_REGISTRAR_NAME = "rpc-registrar-name";
     protected static final String TAG_RPC_REGISTRY_NAME = "registry-name";
-    protected static final String TAG_ACTION_REGISTRY_NAME = "action-registry-name";
     protected static final String TAG_RPC_MGR_NAME = "rpc-manager-name";
     protected static final String TAG_RPC_BROKER_PATH = "rpc-broker-path";
     protected static final String TAG_RPC_REGISTRY_PATH = "rpc-registry-path";
-    protected static final String TAG_ACTION_REGISTRY_PATH = "action-registry-path";
     protected static final String TAG_RPC_MGR_PATH = "rpc-manager-path";
     protected static final String TAG_ASK_DURATION = "ask-duration";
 
     private static final String TAG_GOSSIP_TICK_INTERVAL = "gossip-tick-interval";
     private static final String TAG_RPC_REGISTRY_PERSISTENCE_ID = "rpc-registry-persistence-id";
-    private static final String TAG_ACTION_REGISTRY_PERSISTENCE_ID = "action-registry-persistence-id";
 
     //locally cached values
     private Timeout cachedAskDuration;
     private FiniteDuration cachedGossipTickInterval;
 
-    public RemoteOpsProviderConfig(final Config config) {
+    public RemoteRpcProviderConfig(final Config config) {
         super(config);
     }
 
@@ -49,10 +46,6 @@ public class RemoteOpsProviderConfig extends CommonConfig {
 
     public String getRpcRegistryName() {
         return get().getString(TAG_RPC_REGISTRY_NAME);
-    }
-
-    public String getActionRegistryName() {
-        return get().getString(TAG_ACTION_REGISTRY_NAME);
     }
 
     public String getRpcManagerName() {
@@ -69,14 +62,6 @@ public class RemoteOpsProviderConfig extends CommonConfig {
 
     public String getRpcRegistryPersistenceId() {
         return get().getString(TAG_RPC_REGISTRY_PERSISTENCE_ID);
-    }
-
-    public String getActionRegistryPath() {
-        return get().getString(TAG_ACTION_REGISTRY_PATH);
-    }
-
-    public String getActionRegistryPersistenceId() {
-        return get().getString(TAG_ACTION_REGISTRY_PERSISTENCE_ID);
     }
 
     public String getRpcManagerPath() {
@@ -110,10 +95,10 @@ public class RemoteOpsProviderConfig extends CommonConfig {
      */
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
             justification = "Findbugs flags this as an unconfirmed cast of return value but the build method clearly "
-                + "returns RemoteOpsProviderConfig. Perhaps it's confused b/c the build method is overloaded and "
+                + "returns RemoteRpcProviderConfig. Perhaps it's confused b/c the build method is overloaded and "
                 + "and differs in return type from the base class.")
-    public static RemoteOpsProviderConfig newInstance(final String actorSystemName, final boolean metricCaptureEnabled,
-                                                      final int mailboxCapacity) {
+    public static RemoteRpcProviderConfig newInstance(final String actorSystemName, final boolean metricCaptureEnabled,
+            final int mailboxCapacity) {
         return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled)
                 .mailboxCapacity(mailboxCapacity).build();
     }
@@ -127,13 +112,11 @@ public class RemoteOpsProviderConfig extends CommonConfig {
             configHolder.put(TAG_RPC_BROKER_NAME, "broker");
             configHolder.put(TAG_RPC_REGISTRAR_NAME, "registrar");
             configHolder.put(TAG_RPC_REGISTRY_NAME, "registry");
-            configHolder.put(TAG_ACTION_REGISTRY_NAME, "action-registry");
             configHolder.put(TAG_RPC_MGR_NAME, "rpc");
 
             //Actor paths
             configHolder.put(TAG_RPC_BROKER_PATH, "/user/rpc/broker");
             configHolder.put(TAG_RPC_REGISTRY_PATH, "/user/rpc/registry");
-            configHolder.put(TAG_ACTION_REGISTRY_PATH, "/user/action/registry");
             configHolder.put(TAG_RPC_MGR_PATH, "/user/rpc");
 
             //durations
@@ -142,7 +125,6 @@ public class RemoteOpsProviderConfig extends CommonConfig {
 
             // persistence
             configHolder.put(TAG_RPC_REGISTRY_PERSISTENCE_ID, "remote-rpc-registry");
-            configHolder.put(TAG_ACTION_REGISTRY_PERSISTENCE_ID, "remote-action-registry");
         }
 
         public Builder gossipTickInterval(final String interval) {
@@ -151,8 +133,8 @@ public class RemoteOpsProviderConfig extends CommonConfig {
         }
 
         @Override
-        public RemoteOpsProviderConfig build() {
-            return new RemoteOpsProviderConfig(merge());
+        public RemoteRpcProviderConfig build() {
+            return new RemoteRpcProviderConfig(merge());
         }
     }
 }

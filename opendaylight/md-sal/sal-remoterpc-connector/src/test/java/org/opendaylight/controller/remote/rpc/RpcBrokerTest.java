@@ -25,7 +25,7 @@ import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
-public class OpsBrokerTest extends AbstractOpsTest {
+public class RpcBrokerTest extends AbstractRpcTest {
 
     @Test
     public void testExecuteRpc() {
@@ -33,13 +33,14 @@ public class OpsBrokerTest extends AbstractOpsTest {
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(invokeRpcResult);
         when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(
             FluentFutures.immediateFluentFuture(rpcResult));
-        final ExecuteRpc executeRpc = ExecuteRpc.from(TEST_RPC_ID, null);
 
-        rpcInvoker1.tell(executeRpc, rpcRegistry1Probe.getRef());
+        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
+
+        rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
 
         final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), RpcResponse.class);
 
-        assertEquals(rpcResult.getResult(), rpcResponse.getOutput());
+        assertEquals(rpcResult.getResult(), rpcResponse.getResultNormalizedNode());
     }
 
     @Test

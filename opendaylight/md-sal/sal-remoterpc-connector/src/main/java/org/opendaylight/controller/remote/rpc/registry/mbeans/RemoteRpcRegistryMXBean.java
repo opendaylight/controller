@@ -5,6 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
 import java.util.Map;
@@ -21,7 +22,7 @@ public interface RemoteRpcRegistryMXBean {
 
     Set<String> getLocalRegisteredRoutedRpc();
 
-    Map<String, String> findRpcByName(String name);
+    Map<String,String> findRpcByName(String name);
 
-    Map<String, String> findRpcByRoute(String route);
+    Map<String,String> findRpcByRoute(String route);
 }

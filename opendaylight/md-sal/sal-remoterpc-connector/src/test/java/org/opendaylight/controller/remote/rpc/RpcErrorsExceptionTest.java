@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -38,25 +37,22 @@ public class RpcErrorsExceptionTest {
 
     @Test
     public void testGetMessage() {
-        assertEquals(ERROR_MESSAGE, exception.getMessage());
+        Assert.assertEquals(ERROR_MESSAGE, exception.getMessage());
     }
 
     @Test
     public void testGetRpcErrors() {
         final List<RpcError> actualErrors = (List<RpcError>) exception.getRpcErrors();
-        assertEquals(rpcErrors.size(), actualErrors.size());
+        Assert.assertEquals(rpcErrors.size(), actualErrors.size());
 
         for (int i = 0; i < actualErrors.size(); i++) {
-            final RpcError expected = rpcErrors.get(i);
-            final RpcError actual = actualErrors.get(i);
-
-            assertEquals(expected.getApplicationTag(), actual.getApplicationTag());
-            assertEquals(expected.getSeverity(), actual.getSeverity());
-            assertEquals(expected.getMessage(), actual.getMessage());
-            assertEquals(expected.getErrorType(), actual.getErrorType());
-            assertEquals(expected.getCause(), actual.getCause());
-            assertEquals(expected.getInfo(), actual.getInfo());
-            assertEquals(expected.getTag(), actual.getTag());
+            Assert.assertEquals(rpcErrors.get(i).getApplicationTag(), actualErrors.get(i).getApplicationTag());
+            Assert.assertEquals(rpcErrors.get(i).getSeverity(), actualErrors.get(i).getSeverity());
+            Assert.assertEquals(rpcErrors.get(i).getMessage(), actualErrors.get(i).getMessage());
+            Assert.assertEquals(rpcErrors.get(i).getErrorType(), actualErrors.get(i).getErrorType());
+            Assert.assertEquals(rpcErrors.get(i).getCause(), actualErrors.get(i).getCause());
+            Assert.assertEquals(rpcErrors.get(i).getInfo(), actualErrors.get(i).getInfo());
+            Assert.assertEquals(rpcErrors.get(i).getTag(), actualErrors.get(i).getTag());
         }
     }
 }

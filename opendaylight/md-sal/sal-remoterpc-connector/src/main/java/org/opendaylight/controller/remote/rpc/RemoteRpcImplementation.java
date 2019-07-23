@@ -7,7 +7,11 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
@@ -20,15 +24,24 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @author Robert Varga
  */
-final class RemoteRpcImplementation extends AbstractRemoteImplementation<ExecuteRpc> implements DOMRpcImplementation {
-    RemoteRpcImplementation(final ActorRef remoteInvoker, final RemoteOpsProviderConfig config) {
-        super(remoteInvoker, config);
+final class RemoteRpcImplementation implements DOMRpcImplementation {
+    // 0 for local, 1 for binding, 2 for remote
+    private static final long COST = 2;
+
+    private final ActorRef remoteInvoker;
+    private final Timeout askDuration;
+
+    RemoteRpcImplementation(final ActorRef remoteInvoker, final RemoteRpcProviderConfig config) {
+        this.remoteInvoker = requireNonNull(remoteInvoker);
+        this.askDuration = config.getAskDuration();
     }
 
     @Override
     public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
             final NormalizedNode<?, ?> input) {
-        return new RemoteDOMRpcFuture(rpc.getType(), ask(ExecuteRpc.from(rpc, input)));
+        final RemoteDOMRpcFuture ret = RemoteDOMRpcFuture.create(rpc.getType().getLastComponent());
+        ret.completeWith(Patterns.ask(remoteInvoker, ExecuteRpc.from(rpc, input), askDuration));
+        return ret;
     }
 
     @Override
