@@ -23,6 +23,10 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
+import org.opendaylight.yangtools.yang.common.Uint64;
+import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -487,6 +491,21 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
                 output.writeInt(valueBytes.length);
                 output.write(valueBytes);
                 break;
+
+            // FIXME: retain compatibility
+            case ValueTypes.UINT8_TYPE:
+                output.writeByte(((Uint8) value).byteValue());
+                break;
+            case ValueTypes.UINT16_TYPE:
+                output.writeShort(((Uint16) value).shortValue());
+                break;
+            case ValueTypes.UINT32_TYPE:
+                output.writeInt(((Uint32) value).intValue());
+                break;
+            case ValueTypes.UINT64_TYPE:
+                output.writeLong(((Uint64) value).longValue());
+                break;
+
             default:
                 output.writeUTF(value.toString());
                 break;
