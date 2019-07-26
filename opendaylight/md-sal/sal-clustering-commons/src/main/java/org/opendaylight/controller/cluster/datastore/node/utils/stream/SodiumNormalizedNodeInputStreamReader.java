@@ -48,6 +48,11 @@ final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeI
     }
 
     @Override
+    boolean isUintAvailable() throws IOException {
+        return true;
+    }
+
+    @Override
     AugmentationIdentifier readAugmentationIdentifier() throws IOException {
         final byte valueType = readByte();
         switch (valueType) {

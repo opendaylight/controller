@@ -17,6 +17,10 @@ import java.util.Objects;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
+import org.opendaylight.yangtools.yang.common.Uint64;
+import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 final class ValueTypes {
@@ -42,6 +46,12 @@ final class ValueTypes {
     public static final byte STRING_BYTES_TYPE = 14;
     public static final byte EMPTY_TYPE = 15;
 
+    // These additional types are available in Neon SR2+ streams
+    public static final byte UINT8_TYPE = 16;
+    public static final byte UINT16_TYPE = 17;
+    public static final byte UINT32_TYPE = 18;
+    public static final byte UINT64_TYPE = 19;
+
     private static final Map<Class<?>, Byte> TYPES;
 
     static {
@@ -59,6 +69,11 @@ final class ValueTypes {
         b.put(byte[].class, BINARY_TYPE);
         b.put(Empty.class, EMPTY_TYPE);
 
+        b.put(Uint8.class, UINT8_TYPE);
+        b.put(Uint16.class, UINT16_TYPE);
+        b.put(Uint32.class, UINT32_TYPE);
+        b.put(Uint64.class, UINT64_TYPE);
+
         TYPES = b.build();
     }
 
@@ -66,7 +81,7 @@ final class ValueTypes {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static byte getSerializableType(Object node) {
+    public static byte getSerializableType(final Object node) {
         Objects.requireNonNull(node);
 
         final Byte type = TYPES.get(node.getClass());

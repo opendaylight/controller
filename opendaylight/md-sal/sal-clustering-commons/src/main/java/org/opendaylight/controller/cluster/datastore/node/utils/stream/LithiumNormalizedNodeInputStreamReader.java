@@ -31,6 +31,10 @@ import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.util.ImmutableOffsetMapTemplate;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
+import org.opendaylight.yangtools.yang.common.Uint64;
+import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -376,9 +380,25 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
             case ValueTypes.NULL_TYPE:
                 return Empty.getInstance();
 
+            case ValueTypes.UINT8_TYPE:
+                return isUintAvailable() ? Uint8.fromByteBits(input.readByte()) : null;
+
+            case ValueTypes.UINT16_TYPE:
+                return isUintAvailable() ? Uint16.fromShortBits(input.readShort()) : null;
+
+            case ValueTypes.UINT32_TYPE:
+                return isUintAvailable() ? Uint32.fromIntBits(input.readInt()) : null;
+
+            case ValueTypes.UINT64_TYPE:
+                return isUintAvailable() ? Uint64.fromLongBits(input.readLong()) : null;
+
             default:
                 return null;
         }
+    }
+
+    boolean isUintAvailable() throws IOException {
+        return false;
     }
 
     private String readStringBytes() throws IOException {
