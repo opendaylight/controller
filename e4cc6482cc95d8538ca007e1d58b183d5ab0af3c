@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2591c3e_221063d0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-07-29T14:00:10Z",
+      "side": 1,
+      "message": "I don\u0027t think we should process the message and respond at all if `shouldUpdateTerm` is false, ie treat it as if we never received it.",
+      "revId": "e4cc6482cc95d8538ca007e1d58b183d5ab0af3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "314d3892_260ca576",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-07-29T14:00:10Z",
+      "side": 1,
+      "message": "...same here",
+      "revId": "e4cc6482cc95d8538ca007e1d58b183d5ab0af3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
