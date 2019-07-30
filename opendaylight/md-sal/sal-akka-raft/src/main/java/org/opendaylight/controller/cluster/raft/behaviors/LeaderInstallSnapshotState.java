@@ -30,13 +30,15 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     // The index that the follower should respond with if it needs the install snapshot to be reset
     static final int INVALID_CHUNK_INDEX = -1;
 
+    static final int INITIAL_OFFSET = -1;
+
     // This would be passed as the hash code of the last chunk when sending the first chunk
     static final int INITIAL_LAST_CHUNK_HASH_CODE = -1;
 
     private final int snapshotChunkSize;
     private final String logName;
     private ByteSource snapshotBytes;
-    private int offset = 0;
+    private int offset = INITIAL_OFFSET;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
     private int replyReceivedForOffset = -1;
     // if replyStatus is false, the previous chunk is attempted
@@ -69,17 +71,15 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
         LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, snapshotSize, totalChunks);
 
-        replyReceivedForOffset = -1;
+        replyReceivedForOffset = INITIAL_OFFSET;
         chunkIndex = FIRST_CHUNK_INDEX;
     }
 
     int incrementOffset() {
-        // if first chunk was retried, reset offset back to initial 0
-        if (offset == -1) {
+        // if offset is -1 doesnt matter whether it was the initial value or reset, move the offset to 0 to begin with
+        if (offset == INITIAL_OFFSET) {
             offset = 0;
-        }
-        if (replyStatus) {
-            // if prev chunk failed, we would want to send the same chunk again
+        } else {
             offset = offset + snapshotChunkSize;
         }
         return offset;
@@ -172,9 +172,9 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         closeStream();
         chunkTimer.reset();
 
-        offset = 0;
+        offset = INITIAL_OFFSET;
         replyStatus = false;
-        replyReceivedForOffset = INITIAL_LAST_CHUNK_HASH_CODE;
+        replyReceivedForOffset = INITIAL_OFFSET;
         chunkIndex = FIRST_CHUNK_INDEX;
         currentChunk = null;
         lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
