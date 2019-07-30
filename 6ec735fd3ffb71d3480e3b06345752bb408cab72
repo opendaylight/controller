@@ -22,6 +22,30 @@
       "revId": "6ec735fd3ffb71d3480e3b06345752bb408cab72",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2c7d08f_76e0c3f4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderInstallSnapshotState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2019-07-30T10:29:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "119e2abf_c3da7039",
+      "range": {
+        "startLine": 39,
+        "startChar": 25,
+        "endLine": 39,
+        "endChar": 53
+      },
+      "revId": "6ec735fd3ffb71d3480e3b06345752bb408cab72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
