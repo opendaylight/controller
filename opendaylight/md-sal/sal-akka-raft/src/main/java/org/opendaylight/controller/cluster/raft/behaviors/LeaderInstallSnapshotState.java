@@ -36,7 +36,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private final int snapshotChunkSize;
     private final String logName;
     private ByteSource snapshotBytes;
-    private int offset = 0;
+    private int offset = INITIAL_LAST_CHUNK_HASH_CODE;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
     private int replyReceivedForOffset = -1;
     // if replyStatus is false, the previous chunk is attempted
@@ -74,12 +74,10 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     }
 
     int incrementOffset() {
-        // if first chunk was retried, reset offset back to initial 0
-        if (offset == -1) {
+        // if offset is -1 doesnt matter whether it was the initial value or reset, move the offset to 0 to begin with
+        if (offset == INITIAL_LAST_CHUNK_HASH_CODE) {
             offset = 0;
-        }
-        if (replyStatus) {
-            // if prev chunk failed, we would want to send the same chunk again
+        } else {
             offset = offset + snapshotChunkSize;
         }
         return offset;
@@ -172,7 +170,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         closeStream();
         chunkTimer.reset();
 
-        offset = 0;
+        offset = INITIAL_LAST_CHUNK_HASH_CODE;
         replyStatus = false;
         replyReceivedForOffset = INITIAL_LAST_CHUNK_HASH_CODE;
         chunkIndex = FIRST_CHUNK_INDEX;
