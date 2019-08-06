@@ -194,12 +194,12 @@ public class SnapshotManagerTest extends AbstractActorTest {
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
         // LastIndex and LastTerm are picked up from the lastLogEntry
-        assertEquals(-1L, captureSnapshot.getLastIndex());
-        assertEquals(-1L, captureSnapshot.getLastTerm());
+        assertEquals(0, captureSnapshot.getLastIndex());
+        assertEquals(0, captureSnapshot.getLastTerm());
 
         // Since the actor does not have any followers (no peer addresses) lastApplied will be from lastLogEntry
-        assertEquals(-1L, captureSnapshot.getLastAppliedIndex());
-        assertEquals(-1L, captureSnapshot.getLastAppliedTerm());
+        assertEquals(0, captureSnapshot.getLastAppliedIndex());
+        assertEquals(0, captureSnapshot.getLastAppliedTerm());
 
         //
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
