@@ -170,14 +170,19 @@ public class SnapshotManager implements SnapshotState {
 
         List<ReplicatedLogEntry> unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
 
-        long lastLogEntryIndex = lastAppliedIndex;
-        long lastLogEntryTerm = lastAppliedTerm;
-        if (lastLogEntry != null) {
+        final long lastLogEntryIndex;
+        final long lastLogEntryTerm;
+        if (lastLogEntry == null) {
+            // When we don't have journal present, for example two captureSnapshots executed right after another with no
+            // new journal we still want to preserve the index and term in the snapshot.
+            lastAppliedIndex = lastLogEntryIndex = context.getReplicatedLog().getSnapshotIndex();
+            lastAppliedTerm = lastLogEntryTerm = context.getReplicatedLog().getSnapshotTerm();
+
+            log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
+                    + "lastAppliedTerm {} instead.", persistenceId(), lastAppliedIndex, lastAppliedTerm);
+        } else {
             lastLogEntryIndex = lastLogEntry.getIndex();
             lastLogEntryTerm = lastLogEntry.getTerm();
-        } else {
-            log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and "
-                    + "lastAppliedTerm {} instead.", persistenceId(), lastAppliedIndex, lastAppliedTerm);
         }
 
         return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
