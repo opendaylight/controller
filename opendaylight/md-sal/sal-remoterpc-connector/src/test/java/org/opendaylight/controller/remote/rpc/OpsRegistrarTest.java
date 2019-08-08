@@ -154,6 +154,8 @@ public class OpsRegistrarTest {
         inOrder.verify(rpcService).registerRpcImplementation(any(RemoteRpcImplementation.class),
                 eq(secondEndpoint.getRpcs()));
 
+        // verify first registration is closed
+        inOrder.verify(oldReg).close();
 
         verifyNoMoreInteractions(rpcService, oldReg, newReg);
     }
@@ -175,7 +177,7 @@ public class OpsRegistrarTest {
                 eq(secondActionEndpoint.getActions()));
 
         // verify first registration is closed
-//        inOrder.verify(oldReg).close();
+        inOrder.verify(oldActionReg).close();
 
         verifyNoMoreInteractions(actionService, oldActionReg, newActionReg);
     }
