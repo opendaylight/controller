@@ -64,6 +64,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("shard-initialization-timeout-in-seconds", "82");
         properties.put("shard-leader-election-timeout-in-seconds", "66");
         properties.put("initial-settle-timeout-multiplier", "5");
+        properties.put("last-chunk-timeout-factor", "9");
         properties.put("recovery-snapshot-interval-seconds", "360");
         properties.put("shard-isolated-leader-check-interval-in-millis", "123");
         properties.put("shard-snapshot-data-threshold-percentage", "100");
@@ -90,6 +91,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(82, context.getShardInitializationTimeout().duration().toSeconds());
         assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
         assertEquals(5, context.getInitialSettleTimeoutMultiplier());
+        assertEquals(9, context.getShardRaftConfig().getLastChunkTimeoutFactor());
         assertEquals(360, context.getShardRaftConfig().getRecoverySnapshotIntervalSeconds());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());

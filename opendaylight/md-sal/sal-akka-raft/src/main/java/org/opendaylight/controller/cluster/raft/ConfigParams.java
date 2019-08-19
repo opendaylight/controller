@@ -53,6 +53,14 @@ public interface ConfigParams {
     int getRecoverySnapshotIntervalSeconds();
 
     /**
+     * Returns multiplier for chunk timeout while waiting for last chunk's InstallSnapshotReply during snapshot
+     * installation on follower.
+     *
+     * @return the interval as a FiniteDuration.
+     */
+    int getLastChunkTimeoutFactor();
+
+    /**
      * Returns the interval at which a heart beat message should be sent to remote followers.
      *
      * @return the interval as a FiniteDuration.

@@ -1,4 +1,3 @@
-// vi: set smarttab et sw=4 tabstop=4:
 module distributed-datastore-provider {
 
     yang-version 1;
@@ -150,6 +149,14 @@ module distributed-datastore-provider {
                         batch before sending to the shard transaction actor. Batching improves
                         performance as less modifications messages are sent to the actor and thus
                         lessens the chance that the transaction actor's mailbox queue could get full.";
+        }
+
+        leaf last-chunk-timeout-factor {
+            default 6;
+            type non-zero-uint32-type;
+            description "Multiplier for chunk timeout while waiting for last chunk's InstallSnapshotReply
+                        during snapshot installation on follower. Reason for this is to provide enough time
+                        for followers to deserialize and apply the snapshot.";
         }
 
         leaf enable-metric-capture {
