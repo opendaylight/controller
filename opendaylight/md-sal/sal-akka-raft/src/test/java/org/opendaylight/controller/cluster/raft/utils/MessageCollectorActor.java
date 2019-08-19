@@ -99,7 +99,12 @@ public class MessageCollectorActor extends UntypedAbstractActor {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count,
             final Predicate<T> matcher) {
-        int timeout = 5000;
+        return expectMatching(actor, clazz, count, msg -> true, 5000);
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count,
+            final Predicate<T> matcher, int timeout) {
         Exception lastEx = null;
         List<T> messages = Collections.emptyList();
         for (int i = 0; i < timeout / 50; i++) {

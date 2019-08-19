@@ -464,7 +464,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MessageCollectorActor.clearMessages(follower2CollectorActor);
         setupFollower2();
 
-        MessageCollectorActor.expectMatching(follower2CollectorActor, SaveSnapshotSuccess.class, 1);
+        MessageCollectorActor.expectMatching(follower2CollectorActor, SaveSnapshotSuccess.class, 1, msg -> true, 15000);
     }
 
     /**
