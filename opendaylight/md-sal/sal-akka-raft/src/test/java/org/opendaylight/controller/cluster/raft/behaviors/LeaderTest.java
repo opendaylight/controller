@@ -619,7 +619,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
+                actorContext.getConfigParams().getSnapshotChunkSize(),
+                FiniteDuration.create(10, TimeUnit.SECONDS), leader.logName());
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
@@ -983,7 +984,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
+                actorContext.getConfigParams().getSnapshotChunkSize(),
+                FiniteDuration.create(10, TimeUnit.SECONDS), leader.logName());
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while (!fts.isLastChunk(fts.getChunkIndex())) {
@@ -1227,7 +1229,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
         byte[] barray = bs.toByteArray();
 
-        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(50, "test");
+        LeaderInstallSnapshotState fts =
+                new LeaderInstallSnapshotState(50, FiniteDuration.create(10, TimeUnit.SECONDS), "test");
         fts.setSnapshotBytes(ByteSource.wrap(barray));
 
         assertEquals(bs.size(), barray.length);

@@ -670,11 +670,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 // if install snapshot is in process , then sent next chunk if possible
                 if (isFollowerActive) {
-                    // 30 seconds with default settings, can be modified via heartbeat or election timeout factor
-                    FiniteDuration snapshotReplyTimeout = context.getConfigParams().getHeartBeatInterval()
-                            .$times(context.getConfigParams().getElectionTimeoutFactor() * 3);
 
-                    if (installSnapshotState.isChunkTimedOut(snapshotReplyTimeout)) {
+                    if (installSnapshotState.isChunkTimedOut()) {
                         sendAppendEntries = !resendSnapshotChunk(followerActor, followerLogInformation);
                     } else if (installSnapshotState.canSendNextChunk()) {
                         sendSnapshotChunk(followerActor, followerLogInformation);
@@ -878,7 +875,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             this.getReplicatedToAllIndex(), followerId);
         if (captureInitiated) {
             followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
-                context.getConfigParams().getSnapshotChunkSize(), logName()));
+                context.getConfigParams().getSnapshotChunkSize(), createChunkTimeout(), logName()));
         }
 
         return captureInitiated;
@@ -921,7 +918,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
             if (installSnapshotState == null) {
                 installSnapshotState = new LeaderInstallSnapshotState(context.getConfigParams().getSnapshotChunkSize(),
-                        logName());
+                        createChunkTimeout(), logName());
                 followerLogInfo.setLeaderInstallSnapshotState(installSnapshotState);
             }
 
@@ -1030,6 +1027,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         heartbeatSchedule = context.getActorSystem().scheduler().scheduleOnce(
             interval, context.getActor(), SendHeartBeat.INSTANCE,
             context.getActorSystem().dispatcher(), context.getActor());
+    }
+
+    private FiniteDuration createChunkTimeout() {
+        // 30 seconds with default settings, can be modified via heartbeat or election timeout factor
+        return context.getConfigParams().getHeartBeatInterval()
+                .$times(context.getConfigParams().getElectionTimeoutFactor() * 3);
     }
 
     @Override
