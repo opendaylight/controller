@@ -75,7 +75,7 @@ public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode>
         public void writeExternal(final ObjectOutput out) throws IOException {
             try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
                 stream.writeSchemaPath(executeAction.getType());
-                // FIXME: deal with data store types?
+                executeAction.getPath().getDatastoreType().writeTo(out);
                 stream.writeYangInstanceIdentifier(executeAction.getPath().getRootIdentifier());
                 stream.writeOptionalNormalizedNode(executeAction.getInput());
             }
@@ -85,11 +85,11 @@ public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode>
         public void readExternal(final ObjectInput in) throws IOException {
             final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
             final SchemaPath name = stream.readSchemaPath();
+            final LogicalDatastoreType type = LogicalDatastoreType.readFrom(in);
             final YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
             final ContainerNode input = (ContainerNode) stream.readOptionalNormalizedNode().orElse(null);
 
-            executeAction = new ExecuteAction(name, new DOMDataTreeIdentifier(LogicalDatastoreType.OPERATIONAL, path),
-                input);
+            executeAction = new ExecuteAction(name, new DOMDataTreeIdentifier(type, path), input);
         }
 
         private Object readResolve() {
