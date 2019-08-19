@@ -619,7 +619,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
+                actorContext.getConfigParams().getSnapshotChunkSize(),
+                FiniteDuration.create(10, TimeUnit.SECONDS),
+                actorContext.getConfigParams().getLastChunkTimeoutFactor(), leader.logName());
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
@@ -798,6 +800,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // Sending this AppendEntriesReply forces the Leader to capture a snapshot, which subsequently gets
         // installed with a SendInstallSnapshot
+        //aaaa
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true, false,
                 RaftVersions.CURRENT_VERSION));
 
@@ -814,6 +817,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MessageCollectorActor.clearMessages(followerActor);
 
+        //aaaa
         // Sending Replicate message should not initiate another capture since the first is in progress.
         leader.handleMessage(leaderActor, new Replicate(null, new MockIdentifier("state-id"), entry, true));
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
@@ -833,6 +837,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.
         MessageCollectorActor.clearMessages(followerActor);
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true, false,
+                //aaaa
                 RaftVersions.CURRENT_VERSION));
         MessageCollectorActor.assertNoneMatching(followerActor, InstallSnapshot.class, 200);
     }
@@ -983,7 +988,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
+                actorContext.getConfigParams().getSnapshotChunkSize(),
+                FiniteDuration.create(10, TimeUnit.SECONDS),
+                actorContext.getConfigParams().getLastChunkTimeoutFactor(), leader.logName());
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while (!fts.isLastChunk(fts.getChunkIndex())) {
@@ -1142,7 +1149,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
                 TimeUnit.MILLISECONDS);
-
+        //aaaa
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -1227,7 +1234,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
         byte[] barray = bs.toByteArray();
 
-        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(50, "test");
+        LeaderInstallSnapshotState fts =
+                new LeaderInstallSnapshotState(50, FiniteDuration.create(10, TimeUnit.SECONDS), 6, "test");
         fts.setSnapshotBytes(ByteSource.wrap(barray));
 
         assertEquals(bs.size(), barray.length);
@@ -2021,7 +2029,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader = createBehavior(leaderActorContext);
 
         leaderActor.underlyingActor().setBehavior(leader);
-
+        //aaaa
         for (int i = 1; i < 6; i++) {
             // Each AppendEntriesReply could end up rescheduling the heartbeat (without the fix for bug 2733)
             RaftActorBehavior newBehavior = leader.handleMessage(follower1Actor,

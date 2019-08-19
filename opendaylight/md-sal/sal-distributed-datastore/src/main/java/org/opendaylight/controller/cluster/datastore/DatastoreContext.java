@@ -46,6 +46,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 1;
     public static final int DEFAULT_SNAPSHOT_BATCH_COUNT = 20000;
     public static final int DEFAULT_RECOVERY_SNAPSHOT_INTERVAL_SECONDS = 0;
+    public static final int DEFAULT_LAST_CHUNK_TIMEOUT_FACTOR = 6;
     public static final int DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS = 500;
     public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS =
             DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
@@ -125,6 +126,7 @@ public class DatastoreContext implements ClientActorConfig {
         setCandidateElectionTimeoutDivisor(DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
         setMaximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE);
+        setLastChunkTimeoutFactor(DEFAULT_LAST_CHUNK_TIMEOUT_FACTOR);
     }
 
     private DatastoreContext(final DatastoreContext other) {
@@ -173,6 +175,7 @@ public class DatastoreContext implements ClientActorConfig {
         setTempFileDirectory(other.getTempFileDirectory());
         setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
         setSyncIndexThreshold(other.raftConfig.getSyncIndexThreshold());
+        setLastChunkTimeoutFactor(other.raftConfig.getLastChunkTimeoutFactor());
     }
 
     public static Builder newBuilder() {
@@ -300,6 +303,11 @@ public class DatastoreContext implements ClientActorConfig {
 
     private void setElectionTimeoutFactor(final long shardElectionTimeoutFactor) {
         raftConfig.setElectionTimeoutFactor(shardElectionTimeoutFactor);
+    }
+
+    public void setLastChunkTimeoutFactor(final int lastChunkTimeoutFactor) {
+        checkArgument(lastChunkTimeoutFactor > 0);
+        raftConfig.setLastChunkTimeoutFactor(lastChunkTimeoutFactor);
     }
 
     private void setCandidateElectionTimeoutDivisor(final long candidateElectionTimeoutDivisor) {
@@ -467,6 +475,12 @@ public class DatastoreContext implements ClientActorConfig {
         public Builder recoverySnapshotIntervalSeconds(final int recoverySnapshotIntervalSeconds) {
             checkArgument(recoverySnapshotIntervalSeconds >= 0);
             datastoreContext.setRecoverySnapshotIntervalSeconds(recoverySnapshotIntervalSeconds);
+            return this;
+        }
+
+        public Builder lastChunkTimeoutFactor(final int lastChunkTimeoutFactor) {
+            checkArgument(lastChunkTimeoutFactor > 0);
+            datastoreContext.setLastChunkTimeoutFactor(lastChunkTimeoutFactor);
             return this;
         }
 

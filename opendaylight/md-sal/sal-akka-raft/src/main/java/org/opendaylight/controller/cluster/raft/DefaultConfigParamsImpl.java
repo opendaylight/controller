@@ -33,7 +33,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      * Interval after which a snapshot should be taken during the recovery process. 0 if never.
      */
     private static final int RECOVERY_SNAPSHOT_INTERVAL_SECONDS = 0;
-
+    public static final int LAST_CHUNK_TIMEOUT_FACTOR = 6;
     private static final int JOURNAL_RECOVERY_LOG_BATCH_SIZE = 1000;
 
     /**
@@ -60,6 +60,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
+    private int lastChunkTimeoutFactor = LAST_CHUNK_TIMEOUT_FACTOR;
     private int recoverySnapshotIntervalSeconds = RECOVERY_SNAPSHOT_INTERVAL_SECONDS;
     private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.$times(1000).toMillis();
     private FiniteDuration electionTimeOutInterval;
@@ -98,6 +99,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setRecoverySnapshotIntervalSeconds(final int recoverySnapshotInterval) {
         checkArgument(recoverySnapshotInterval >= 0);
         recoverySnapshotIntervalSeconds = recoverySnapshotInterval;
+    }
+
+    public void setLastChunkTimeoutFactor(final int lastChunkTimeoutFactor) {
+        checkArgument(lastChunkTimeoutFactor > 0);
+        this.lastChunkTimeoutFactor = lastChunkTimeoutFactor;
     }
 
     public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
@@ -164,6 +170,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getRecoverySnapshotIntervalSeconds() {
         return recoverySnapshotIntervalSeconds;
+    }
+
+    @Override
+    public int getLastChunkTimeoutFactor() {
+        return this.lastChunkTimeoutFactor;
     }
 
     @Override

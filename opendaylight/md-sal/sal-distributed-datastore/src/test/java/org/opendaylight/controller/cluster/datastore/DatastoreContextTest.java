@@ -14,6 +14,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_LAST_CHUNK_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_MAX_MESSAGE_SLICE_SIZE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_MS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT;
@@ -98,6 +99,7 @@ public class DatastoreContextTest {
         builder.shardSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE + 1);
         builder.shardSnapshotDataThreshold(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD + 1);
         builder.shardElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1);
+        builder.lastChunkTimeoutFactor(DEFAULT_LAST_CHUNK_TIMEOUT_FACTOR + 1);
         builder.transactionCreationInitialRateLimit(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT + 1);
         builder.shardBatchedModificationCount(DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT + 1);
         builder.maximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE + 1);
@@ -147,6 +149,8 @@ public class DatastoreContextTest {
                 context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD + 1,
                 context.getShardRaftConfig().getSnapshotDataThreshold());
+        assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1,
+                context.getShardRaftConfig().getLastChunkTimeoutFactor());
         assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1,
                 context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT + 1, context.getTransactionCreationInitialRateLimit());

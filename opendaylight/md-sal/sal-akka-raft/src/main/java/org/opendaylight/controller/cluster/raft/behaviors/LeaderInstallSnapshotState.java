@@ -47,13 +47,19 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int totalChunks;
     private int lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
+    // last chunk timeout multiplier to provide enough time for followers to deserialize and apply the snapshot
+    private int lastChunkTimeoutFactor;
     private long snapshotSize;
     private InputStream snapshotInputStream;
     private final Stopwatch chunkTimer = Stopwatch.createUnstarted();
+    private FiniteDuration chunktTimeout;
     private byte[] currentChunk = null;
 
-    LeaderInstallSnapshotState(final int snapshotChunkSize, final String logName) {
+    LeaderInstallSnapshotState(final int snapshotChunkSize, final FiniteDuration chunktTimeout,
+            final int lastChunkTimeoutFactor, final String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
+        this.chunktTimeout = chunktTimeout;
+        this.lastChunkTimeoutFactor = lastChunkTimeoutFactor;
         this.logName = logName;
     }
 
@@ -88,7 +94,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     int incrementChunkIndex() {
         if (replyStatus) {
             // if prev chunk failed, we would want to send the same chunk again
-            chunkIndex =  chunkIndex + 1;
+            chunkIndex = chunkIndex + 1;
         }
         return chunkIndex;
     }
@@ -101,8 +107,14 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         chunkTimer.reset();
     }
 
-    boolean isChunkTimedOut(final FiniteDuration timeout) {
-        return chunkTimer.elapsed(TimeUnit.SECONDS) > timeout.toSeconds();
+    boolean isChunkTimedOut() {
+        long timeout = chunktTimeout.toMillis();
+        if (isLastChunk(getChunkIndex())) {
+            // we need to provide some leeway on the last chunk so the follower has enough time to apply it
+            // and respond back.
+            timeout *= lastChunkTimeoutFactor;
+        }
+        return chunkTimer.elapsed(TimeUnit.MILLISECONDS) > timeout;
     }
 
     int getChunkIndex() {
