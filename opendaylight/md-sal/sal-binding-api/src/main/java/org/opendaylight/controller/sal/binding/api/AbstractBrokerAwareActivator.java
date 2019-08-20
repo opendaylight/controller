@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -18,49 +20,48 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 @Deprecated
 public abstract class AbstractBrokerAwareActivator implements BundleActivator {
+    private final class Customizer implements ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker> {
+        private final BundleContext context;
 
-    private static final ExecutorService MD_ACTIVATION_POOL = Executors.newCachedThreadPool();
-    private BundleContext context;
-    private ServiceTracker<BindingAwareBroker, BindingAwareBroker> tracker;
-    private BindingAwareBroker broker;
-    private final ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker> customizer =
-            new ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker>() {
+        Customizer(final BundleContext context) {
+            this.context = requireNonNull(context);
+        }
 
         @Override
-        public BindingAwareBroker addingService(ServiceReference<BindingAwareBroker> reference) {
-            broker = context.getService(reference);
+        public BindingAwareBroker addingService(final ServiceReference<BindingAwareBroker> reference) {
+            final BindingAwareBroker broker = context.getService(reference);
             MD_ACTIVATION_POOL.execute(() -> onBrokerAvailable(broker, context));
             return broker;
         }
 
         @Override
-        public void modifiedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
+        public void modifiedService(final ServiceReference<BindingAwareBroker> reference,
+                final BindingAwareBroker service) {
             removedService(reference, service);
             addingService(reference);
         }
 
         @Override
-        public void removedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
-            broker = context.getService(reference);
+        public void removedService(final ServiceReference<BindingAwareBroker> reference,
+                final BindingAwareBroker service) {
+            final BindingAwareBroker broker = context.getService(reference);
             MD_ACTIVATION_POOL.execute(() -> onBrokerRemoved(broker, context));
         }
-
-    };
-
-
-    @Override
-    public final void start(BundleContext bundleContext) {
-        this.context = bundleContext;
-        startImpl(bundleContext);
-        tracker = new ServiceTracker<>(bundleContext, BindingAwareBroker.class, customizer);
-        tracker.open();
-
     }
 
+    private static final ExecutorService MD_ACTIVATION_POOL = Executors.newCachedThreadPool();
 
+    private ServiceTracker<BindingAwareBroker, BindingAwareBroker> tracker;
 
     @Override
-    public final  void stop(BundleContext bundleContext) {
+    public final void start(final BundleContext bundleContext) {
+        startImpl(bundleContext);
+        tracker = new ServiceTracker<>(bundleContext, BindingAwareBroker.class, new Customizer(bundleContext));
+        tracker.open();
+    }
+
+    @Override
+    public final void stop(final BundleContext bundleContext) {
         if (tracker != null) {
             tracker.close();
         }
@@ -85,7 +86,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      *             listeners, unregister all services registered by this bundle,
      *             and release all services used by this bundle.
      */
-    protected void startImpl(BundleContext bundleContext) {
+    protected void startImpl(final BundleContext bundleContext) {
         // NOOP
     }
 
@@ -106,13 +107,13 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      *         listeners, unregister all services registered by the bundle, and
      *         release all services used by the bundle.
      */
-    protected void stopImpl(BundleContext bundleContext) {
+    protected void stopImpl(final BundleContext bundleContext) {
         // NOOP
     }
 
     protected abstract void onBrokerAvailable(BindingAwareBroker bindingBroker, BundleContext bundleContext);
 
-    protected void onBrokerRemoved(BindingAwareBroker bindingBroker, BundleContext bundleContext) {
+    protected void onBrokerRemoved(final BindingAwareBroker bindingBroker, final BundleContext bundleContext) {
         stopImpl(bundleContext);
     }
 }
