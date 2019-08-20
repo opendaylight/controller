@@ -242,7 +242,8 @@ class CompositeDataTreeCohort {
 
     // FB issues violation for passing null to CompletableFuture#complete but it is valid and necessary when the
     // generic type is Void.
-    @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
+    @SuppressFBWarnings(value = { "NP_NONNULL_PARAM_VIOLATION", "UPM_UNCALLED_PRIVATE_METHOD" },
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void processResponses(final Throwable failure, final Iterable<Object> results,
             final State currentState, final State afterState, final CompletableFuture<Void> resultFuture) {
         if (failure != null) {
