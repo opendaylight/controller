@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
@@ -158,8 +159,24 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void startAnyxmlNode(final NodeIdentifier name) throws IOException {
-        enter(ReusableImmutableNormalizedNodeStreamWriter::startAnyxmlNode, name);
+    public boolean startAnyxmlNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+        checkNotSealed();
+        if (unknown != 0 || !DOMSource.class.isAssignableFrom(objectModel)) {
+            // Do not emit anything
+            return false;
+        }
+        if (enter(name)) {
+            final boolean ret = delegate.startAnyxmlNode(name, objectModel);
+            verify(ret, "Unexpected failure to stream DOMSource node");
+            return ret;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean startAnydataNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+        // FIXME: we do not support anydata nodes yet
+        return false;
     }
 
     @Override

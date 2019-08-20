@@ -114,9 +114,12 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
     private void streamAnyxml(final NormalizedNodeStreamWriter writer) throws IOException {
         final NodeIdentifier identifier = readNodeIdentifier();
         LOG.trace("Streaming anyxml node {}", identifier);
-        writer.startAnyxmlNode(identifier);
-        writer.domSourceValue(readDOMSource());
-        writer.endNode();
+
+        final DOMSource value = readDOMSource();
+        if (writer.startAnyxmlNode(identifier, DOMSource.class)) {
+            writer.domSourceValue(value);
+            writer.endNode();
+        }
     }
 
     private void streamAugmentation(final NormalizedNodeStreamWriter writer) throws IOException {

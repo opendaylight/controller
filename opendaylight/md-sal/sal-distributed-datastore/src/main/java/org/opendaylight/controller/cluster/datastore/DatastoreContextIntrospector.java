@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.checkerframework.checker.lock.qual.GuardedBy;
@@ -39,6 +40,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStorePropertiesContainer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
+import org.opendaylight.yangtools.yang.common.Uint64;
+import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +63,14 @@ public class DatastoreContextIntrospector {
     private static final Map<Class<?>, Method> YANG_TYPE_GETTERS = new HashMap<>();
 
     private static final Map<String, Method> BUILDER_SETTERS = new HashMap<>();
+
+    private static final ImmutableMap<Class<?>, Function<String, Object>> UINT_FACTORIES =
+            ImmutableMap.<Class<?>, Function<String, Object>>builder()
+            .put(Uint8.class, Uint8::valueOf)
+            .put(Uint16.class, Uint16::valueOf)
+            .put(Uint32.class, Uint32::valueOf)
+            .put(Uint64.class, Uint64::valueOf)
+            .build();
 
     static {
         try {
@@ -393,13 +406,18 @@ public class DatastoreContextIntrospector {
         }
 
         final Constructor<?> ctor = CONSTRUCTORS.get(toType);
-
-        LOG.trace("Found {}", ctor);
-
         if (ctor == null) {
+            if (fromValue instanceof String) {
+                final Function<String, Object> factory = UINT_FACTORIES.get(toType);
+                if (factory != null) {
+                    return factory.apply((String) fromValue);
+                }
+            }
+
             throw new IllegalArgumentException(String.format("Constructor not found for type %s", toType));
         }
 
+        LOG.trace("Found {}", ctor);
         Object value = fromValue;
 
         // Once we find a constructor that takes the original type as an argument, we're done recursing.
