@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -132,12 +133,16 @@ final class DOMDataBrokerTransactionChainImpl extends
         listener.onTransactionChainSuccessful(this);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void transactionCompleted() {
         if (COUNTER_UPDATER.decrementAndGet(this) == 0 && state == State.CLOSING) {
             finishClose();
         }
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void transactionFailed(final DOMDataWriteTransaction tx, final Throwable cause) {
         state = State.FAILED;
         LOG.debug("Transaction chain {} failed.", this, cause);

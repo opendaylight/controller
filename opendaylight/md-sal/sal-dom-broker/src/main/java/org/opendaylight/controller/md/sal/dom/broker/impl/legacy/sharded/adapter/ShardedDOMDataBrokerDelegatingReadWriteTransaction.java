@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -186,8 +187,10 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
                 : DataTreeConfiguration.DEFAULT_OPERATIONAL;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static void applyModificationHistoryToSnapshot(final DataTreeModification dataTreeModification,
-                                                    final Queue<Modification> modificationHistory) {
+                                                           final Queue<Modification> modificationHistory) {
         while (!modificationHistory.isEmpty()) {
             final Modification modification = modificationHistory.poll();
             switch (modification.getOperation()) {
