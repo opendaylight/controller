@@ -653,6 +653,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return ask(shardManager, message, SHARD_MGR_TIMEOUT);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void saveSnapshotsToFile(final DatastoreSnapshotList snapshots, final String fileName,
             final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture) {

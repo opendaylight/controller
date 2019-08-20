@@ -542,6 +542,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
      * otherwise returns a DataNormalizationOperation for child as
      * call for {@link #fromDataSchemaNode(DataSchemaNode)}.
      */
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static DataNormalizationOperation<?> fromAugmentation(final DataNodeContainer parent,
             final AugmentationTarget parentAug, final DataSchemaNode child) {
         AugmentationSchemaNode augmentation = null;
