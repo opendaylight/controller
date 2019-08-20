@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -86,6 +87,8 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
         };
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private FluentFuture<? extends CommitInfo> listenForFailure(
             final WriteTransaction tx, final FluentFuture<? extends CommitInfo> future) {
         future.addCallback(new FutureCallback<CommitInfo>() {
@@ -103,6 +106,8 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
         return future;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void failTransactionChain(final WriteTransaction tx, final Throwable ex) {
         /*
          *  We asume correct state change for underlaying transaction

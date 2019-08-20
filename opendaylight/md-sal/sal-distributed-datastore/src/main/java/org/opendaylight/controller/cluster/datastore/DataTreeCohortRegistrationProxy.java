@@ -13,6 +13,7 @@ import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
@@ -65,6 +66,8 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
         }, actorUtils.getClientDispatcher());
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private synchronized void performRegistration(final ActorRef shard) {
         if (isClosed()) {
             return;

@@ -105,6 +105,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
      */
     private static class FlexibleRejectionHandler implements RejectedExecutionHandler {
         @Override
+        @SuppressWarnings("checkstyle:parameterName")
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
             try {
                 executor.getQueue().put(r);
@@ -118,7 +119,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
             extends com.google.common.util.concurrent.ForwardingBlockingQueue<Runnable> {
         private final BlockingQueue<Runnable> delegate;
 
-        public ForwardingBlockingQueue(final BlockingQueue<Runnable> delegate) {
+        ForwardingBlockingQueue(final BlockingQueue<Runnable> delegate) {
             this.delegate = delegate;
         }
 
@@ -128,7 +129,8 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
         }
 
         @Override
-        public boolean offer(final Runnable r) {
+        @SuppressWarnings("checkstyle:parameterName")
+        public boolean offer(final Runnable o) {
             // ThreadPoolExecutor will spawn a new thread after core size is reached only
             // if the queue.offer returns false.
             return false;

@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.yang.netty.threadgroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import java.util.concurrent.TimeUnit;
 
-public class NioEventLoopGroupCloseable extends NioEventLoopGroup implements AutoCloseable {
+public final class NioEventLoopGroupCloseable extends NioEventLoopGroup implements AutoCloseable {
     private NioEventLoopGroupCloseable(final int threadCount) {
         super(threadCount);
     }
@@ -24,7 +24,7 @@ public class NioEventLoopGroupCloseable extends NioEventLoopGroup implements Aut
     }
 
     public static NioEventLoopGroupCloseable newInstance(final Integer threadCount) {
-        if(threadCount == null || threadCount <= 0) {
+        if (threadCount == null || threadCount <= 0) {
             return new NioEventLoopGroupCloseable();
         }
 
