@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
@@ -44,8 +44,8 @@ final class CommitCoordinationTask<T> implements Callable<T> {
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
             final DurationStatisticsTracker commitStatTracker,
             final Supplier<T> futureValueSupplier) {
-        this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
-        this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
+        this.tx = requireNonNull(transaction, "transaction must not be null");
+        this.cohorts = requireNonNull(cohorts, "cohorts must not be null");
         this.commitStatTracker = commitStatTracker;
         this.futureValueSupplier = futureValueSupplier;
     }

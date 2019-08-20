@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.LinkedHashSet;
@@ -88,7 +88,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         Simple(final DOMDataBroker dataBroker, final YangInstanceIdentifier idListItem,
             final WriteTransactionsInput input) {
             super(idListItem, input);
-            this.dataBroker = Preconditions.checkNotNull(dataBroker);
+            this.dataBroker = requireNonNull(dataBroker);
         }
 
         @Override
@@ -123,7 +123,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     WriteTransactionsHandler(final YangInstanceIdentifier idListItem, final WriteTransactionsInput input) {
         super(input);
-        this.idListItem = Preconditions.checkNotNull(idListItem);
+        this.idListItem = requireNonNull(idListItem);
     }
 
     public static ListenableFuture<RpcResult<WriteTransactionsOutput>> start(final DOMDataBroker domDataBroker,

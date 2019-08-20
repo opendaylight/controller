@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutputBuilder;
@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class YnlListener implements OdlMdsalLowlevelTargetListener {
-
     private static final Logger LOG = LoggerFactory.getLogger(YnlListener.class);
 
     private final String id;
@@ -29,8 +28,7 @@ public class YnlListener implements OdlMdsalLowlevelTargetListener {
     private final AtomicLong errNot = new AtomicLong();
 
     public YnlListener(final String id) {
-        Preconditions.checkNotNull(id);
-        this.id = id;
+        this.id = requireNonNull(id);
     }
 
     @Override

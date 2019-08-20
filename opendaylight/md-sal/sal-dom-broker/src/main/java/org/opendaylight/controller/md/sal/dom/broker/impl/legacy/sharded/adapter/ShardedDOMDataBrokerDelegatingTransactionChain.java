@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapte
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
@@ -26,13 +26,12 @@ import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionChain, DOMTransactionChainListener {
+    private final Map<Object, AsyncTransaction<?, ?>> transactionMap = new HashMap<>();
     private final org.opendaylight.mdsal.dom.api.DOMTransactionChain txChainDelegate;
     private final SchemaContext schemaContext;
     private final TransactionChainListener txChainListener;
     private final Object txChainIdentifier;
     private final AtomicLong txNum = new AtomicLong();
-
-    private final Map<Object, AsyncTransaction<?, ?>> transactionMap;
 
     ShardedDOMDataBrokerDelegatingTransactionChain(final Object txChainIdentifier,
                                                           final SchemaContext schemaContext,
@@ -44,7 +43,6 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
         this.txChainIdentifier = requireNonNull(txChainIdentifier);
         this.txChainListener = requireNonNull(txChainListener);
         this.txChainDelegate = brokerDelegate.createTransactionChain(this);
-        transactionMap = Maps.newHashMap();
     }
 
     @Override
@@ -92,13 +90,13 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
     }
 
     @Override
-    public void onTransactionChainFailed(org.opendaylight.mdsal.dom.api.DOMTransactionChain chain,
-            DOMDataTreeTransaction transaction, Throwable cause) {
+    public void onTransactionChainFailed(final org.opendaylight.mdsal.dom.api.DOMTransactionChain chain,
+            final DOMDataTreeTransaction transaction, final Throwable cause) {
         txChainListener.onTransactionChainFailed(this, transactionFromDelegate(transaction.getIdentifier()), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(org.opendaylight.mdsal.dom.api.DOMTransactionChain chain) {
+    public void onTransactionChainSuccessful(final org.opendaylight.mdsal.dom.api.DOMTransactionChain chain) {
         txChainListener.onTransactionChainSuccessful(this);
     }
 

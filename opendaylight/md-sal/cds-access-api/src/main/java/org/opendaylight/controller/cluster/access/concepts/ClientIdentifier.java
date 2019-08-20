@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
@@ -40,7 +41,7 @@ public final class ClientIdentifier implements WritableIdentifier {
         }
 
         Proxy(final FrontendIdentifier frontendId, final long generation) {
-            this.frontendId = Preconditions.checkNotNull(frontendId);
+            this.frontendId = requireNonNull(frontendId);
             this.generation = generation;
         }
 
@@ -66,7 +67,7 @@ public final class ClientIdentifier implements WritableIdentifier {
     private final long generation;
 
     ClientIdentifier(final FrontendIdentifier frontendId, final long generation) {
-        this.frontendId = Preconditions.checkNotNull(frontendId);
+        this.frontendId = requireNonNull(frontendId);
         this.generation = generation;
     }
 

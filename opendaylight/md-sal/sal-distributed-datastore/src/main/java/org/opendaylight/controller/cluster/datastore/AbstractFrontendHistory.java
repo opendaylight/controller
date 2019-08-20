@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -60,10 +61,10 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     AbstractFrontendHistory(final String persistenceId, final ShardDataTree tree,
         final Map<UnsignedLong, Boolean> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
-        this.persistenceId = Preconditions.checkNotNull(persistenceId);
-        this.tree = Preconditions.checkNotNull(tree);
-        this.closedTransactions = Preconditions.checkNotNull(closedTransactions);
-        this.purgedTransactions = Preconditions.checkNotNull(purgedTransactions);
+        this.persistenceId = requireNonNull(persistenceId);
+        this.tree = requireNonNull(tree);
+        this.closedTransactions = requireNonNull(closedTransactions);
+        this.purgedTransactions = requireNonNull(purgedTransactions);
     }
 
     final String persistenceId() {

@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.util.Optional;
 import java.util.SortedSet;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -36,13 +38,13 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     private boolean closed;
 
     ShardDataTreeTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
-        this.chainId = Preconditions.checkNotNull(localHistoryIdentifier);
-        this.dataTree = Preconditions.checkNotNull(dataTree);
+        this.chainId = requireNonNull(localHistoryIdentifier);
+        this.dataTree = requireNonNull(dataTree);
     }
 
     private DataTreeSnapshot getSnapshot() {
-        Preconditions.checkState(!closed, "TransactionChain %s has been closed", this);
-        Preconditions.checkState(openTransaction == null, "Transaction %s is open", openTransaction);
+        checkState(!closed, "TransactionChain %s has been closed", this);
+        checkState(openTransaction == null, "Transaction %s is open", openTransaction);
 
         if (previousTx == null) {
             LOG.debug("Opening an unchained snapshot in {}", chainId);
@@ -76,8 +78,8 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     @Override
     void abortFromTransactionActor(final AbstractShardDataTreeTransaction<?> transaction) {
         if (transaction instanceof ReadWriteShardDataTreeTransaction) {
-            Preconditions.checkState(openTransaction != null,
-                    "Attempted to abort transaction %s while none is outstanding", transaction);
+            checkState(openTransaction != null, "Attempted to abort transaction %s while none is outstanding",
+                    transaction);
             LOG.debug("Aborted open transaction {}", transaction);
             openTransaction = null;
         }
@@ -92,8 +94,8 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     @Override
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
             final Optional<SortedSet<String>> participatingShardNames) {
-        Preconditions.checkState(openTransaction != null,
-                "Attempted to finish transaction %s while none is outstanding", transaction);
+        checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding",
+                transaction);
 
         // dataTree is finalizing ready the transaction, we just record it for the next
         // transaction in chain

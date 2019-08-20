@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
@@ -71,7 +73,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         super(txContextFactory.nextIdentifier(), txContextFactory.getActorContext().getDatastoreContext()
                 .isTransactionDebugContextEnabled());
         this.txContextFactory = txContextFactory;
-        this.type = Preconditions.checkNotNull(type);
+        this.type = requireNonNull(type);
 
         LOG.debug("New {} Tx - {}", type, getIdentifier());
     }
@@ -82,8 +84,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private <T> FluentFuture<T> executeRead(final String shardName, final AbstractRead<T> readCmd) {
-        Preconditions.checkState(type != TransactionType.WRITE_ONLY,
-                "Reads from write-only transactions are not allowed");
+        checkState(type != TransactionType.WRITE_ONLY, "Reads from write-only transactions are not allowed");
 
         LOG.trace("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
 
@@ -101,9 +102,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
-        Preconditions.checkState(type != TransactionType.WRITE_ONLY,
-                "Reads from write-only transactions are not allowed");
-        Preconditions.checkNotNull(path, "path should not be null");
+        checkState(type != TransactionType.WRITE_ONLY, "Reads from write-only transactions are not allowed");
+        requireNonNull(path, "path should not be null");
 
         LOG.trace("Tx {} read {}", getIdentifier(), path);
         return path.isEmpty() ? readAllData() :  singleShardRead(shardNameFromIdentifier(path), path);
@@ -170,10 +170,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private void checkModificationState() {
-        Preconditions.checkState(type != TransactionType.READ_ONLY,
-                "Modification operation on read-only transaction is not allowed");
-        Preconditions.checkState(state == TransactionState.OPEN,
-                "Transaction is sealed - further modifications are not allowed");
+        checkState(type != TransactionType.READ_ONLY, "Modification operation on read-only transaction is not allowed");
+        checkState(state == TransactionState.OPEN, "Transaction is sealed - further modifications are not allowed");
     }
 
     private boolean seal(final TransactionState newState) {
@@ -188,7 +186,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     @Override
     public final void close() {
         if (!seal(TransactionState.CLOSED)) {
-            Preconditions.checkState(state == TransactionState.CLOSED, "Transaction %s is ready, it cannot be closed",
+            checkState(state == TransactionState.CLOSED, "Transaction %s is ready, it cannot be closed",
                 getIdentifier());
             // Idempotent no-op as per AutoCloseable recommendation
             return;
@@ -209,10 +207,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public final AbstractThreePhaseCommitCohort<?> ready() {
-        Preconditions.checkState(type != TransactionType.READ_ONLY, "Read-only transactions cannot be readied");
+        checkState(type != TransactionType.READ_ONLY, "Read-only transactions cannot be readied");
 
         final boolean success = seal(TransactionState.READY);
-        Preconditions.checkState(success, "Transaction %s is %s, it cannot be readied", getIdentifier(), state);
+        checkState(success, "Transaction %s is %s, it cannot be readied", getIdentifier(), state);
 
         LOG.debug("Tx {} Readying {} components for commit", getIdentifier(), txContextWrappers.size());
 

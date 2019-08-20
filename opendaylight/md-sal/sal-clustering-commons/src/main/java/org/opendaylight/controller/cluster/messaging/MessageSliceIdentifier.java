@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -34,7 +35,7 @@ final class MessageSliceIdentifier implements Identifier {
     }
 
     private MessageSliceIdentifier(final Identifier clientIdentifier, final long slicerId, final long messageId) {
-        this.clientIdentifier = Preconditions.checkNotNull(clientIdentifier);
+        this.clientIdentifier = requireNonNull(clientIdentifier);
         this.messageId = messageId;
         this.slicerId = slicerId;
     }
@@ -58,7 +59,7 @@ final class MessageSliceIdentifier implements Identifier {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -93,18 +94,18 @@ final class MessageSliceIdentifier implements Identifier {
         public Proxy() {
         }
 
-        Proxy(MessageSliceIdentifier messageSliceId) {
+        Proxy(final MessageSliceIdentifier messageSliceId) {
             this.messageSliceId = messageSliceId;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(messageSliceId.clientIdentifier);
             WritableObjects.writeLongs(out, messageSliceId.slicerId, messageSliceId.messageId);
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             final Identifier clientIdentifier = (Identifier) in.readObject();
             final byte header = WritableObjects.readLongHeader(in);
             final long slicerId =  WritableObjects.readFirstLong(in, header);

@@ -5,9 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -22,7 +22,6 @@ import akka.dispatch.Futures;
 import akka.testkit.TestActorRef;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
@@ -383,7 +382,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
             private final TransactionIdentifier transactionId;
 
             Builder(final TransactionIdentifier transactionId) {
-                this.transactionId = Preconditions.checkNotNull(transactionId);
+                this.transactionId = requireNonNull(transactionId);
             }
 
             Builder expectCanCommit(final Class<?> newExpCanCommitType, final Object newCanCommitReply) {

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
@@ -24,7 +25,7 @@ abstract class AbstractNotificationListenerRegistration<T extends Notification>
     protected AbstractNotificationListenerRegistration(final Class<? extends Notification> type,
             final NotificationListener<T> listener) {
         super(listener);
-        this.type = Preconditions.checkNotNull(type);
+        this.type = requireNonNull(type);
     }
 
     @Override

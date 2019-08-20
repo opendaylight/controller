@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Maps;
@@ -32,8 +33,8 @@ abstract class AbstractDOMRpcRoutingTableEntry {
 
     AbstractDOMRpcRoutingTableEntry(final SchemaPath schemaPath,
         final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> implementations) {
-        this.schemaPath = Preconditions.checkNotNull(schemaPath);
-        this.implementations = Preconditions.checkNotNull(implementations);
+        this.schemaPath = requireNonNull(schemaPath);
+        this.implementations = requireNonNull(implementations);
     }
 
     final SchemaPath getSchemaPath() {

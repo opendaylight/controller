@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import java.util.ArrayDeque;
 import java.util.Optional;
@@ -53,8 +54,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     private RequestException previousFailure;
 
     FrontendTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id) {
-        this.history = Preconditions.checkNotNull(history);
-        this.id = Preconditions.checkNotNull(id);
+        this.history = requireNonNull(history);
+        this.id = requireNonNull(id);
     }
 
     @Override

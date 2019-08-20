@@ -55,7 +55,7 @@ public class SnapshotManager implements SnapshotState {
     private CaptureSnapshot captureSnapshot;
     private long lastSequenceNumber = -1;
 
-    private Consumer<Optional<OutputStream>> createSnapshotProcedure;
+    private Consumer<Optional<OutputStream>> createSnapshotProcedure = null;
 
     private ApplySnapshot applySnapshot;
     private RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;

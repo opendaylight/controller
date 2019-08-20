@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Map;
@@ -44,8 +44,8 @@ public class LegacyShardedDOMDataBrokerAdapter implements DOMDataBroker {
 
     public LegacyShardedDOMDataBrokerAdapter(final ShardedDOMDataBrokerAdapter delegateDataBroker,
                                              final DOMSchemaService schemaService) {
-        this.delegateDataBroker = checkNotNull(delegateDataBroker);
-        this.schemaService = checkNotNull(schemaService);
+        this.delegateDataBroker = requireNonNull(delegateDataBroker);
+        this.schemaService = requireNonNull(schemaService);
     }
 
     @Override

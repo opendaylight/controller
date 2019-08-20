@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.List;
@@ -33,14 +34,14 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
     private RoutedDOMRpcRoutingTableEntry(final DOMRpcIdentifier globalRpcId, final YangInstanceIdentifier keyId,
                                           final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(globalRpcId.getType(), impls);
-        this.keyId = Preconditions.checkNotNull(keyId);
-        this.globalRpcId = Preconditions.checkNotNull(globalRpcId);
+        this.keyId = requireNonNull(keyId);
+        this.globalRpcId = requireNonNull(globalRpcId);
     }
 
     RoutedDOMRpcRoutingTableEntry(final RpcDefinition def, final YangInstanceIdentifier keyId,
                                   final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(def.getPath(), impls);
-        this.keyId = Preconditions.checkNotNull(keyId);
+        this.keyId = requireNonNull(keyId);
         this.globalRpcId = DOMRpcIdentifier.create(def.getPath());
     }
 

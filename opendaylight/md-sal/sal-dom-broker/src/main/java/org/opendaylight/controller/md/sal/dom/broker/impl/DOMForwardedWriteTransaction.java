@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
@@ -84,7 +86,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     protected DOMForwardedWriteTransaction(final Object identifier, final Map<LogicalDatastoreType, T> backingTxs,
                                            final AbstractDOMForwardedTransactionFactory<?> commitImpl) {
         super(identifier, backingTxs);
-        this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
+        this.commitImpl = requireNonNull(commitImpl, "commitImpl must not be null.");
     }
 
     @Override
@@ -133,7 +135,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private <V> ListenableFuture<V> doCommit(Supplier<V> futureValueSupplier) {
+    private <V> ListenableFuture<V> doCommit(final Supplier<V> futureValueSupplier) {
         final AbstractDOMForwardedTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
 
@@ -156,6 +158,6 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     private void checkRunning(final AbstractDOMForwardedTransactionFactory<?> impl) {
-        Preconditions.checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
+        checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
     }
 }

@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,14 +40,12 @@ public class PublishNotificationsTask implements Runnable {
 
     public PublishNotificationsTask(final NotificationPublishService notificationPublishService,
                                     final String notificationId, final long secondsToTake, final long maxPerSecond) {
-        Preconditions.checkNotNull(notificationPublishService);
-        Preconditions.checkNotNull(notificationId);
-        Preconditions.checkArgument(secondsToTake > 0);
-        Preconditions.checkArgument(maxPerSecond > 0);
 
-        this.notificationPublishService = notificationPublishService;
-        this.notificationId = notificationId;
+        this.notificationPublishService = requireNonNull(notificationPublishService);
+        this.notificationId = requireNonNull(notificationId);
+        checkArgument(secondsToTake > 0);
         this.timeToTake = secondsToTake * SECOND_AS_NANO;
+        checkArgument(maxPerSecond > 0);
         this.delay = SECOND_AS_NANO / maxPerSecond;
 
         LOG.debug("Delay : {}", delay);
@@ -76,7 +75,7 @@ public class PublishNotificationsTask implements Runnable {
         LOG.debug("current {}, starttime: {}, timetotake: {}, current-start = {}",
                 current, startTime, timeToTake, current - startTime);
 
-        if ((current - startTime) > timeToTake) {
+        if (current - startTime > timeToTake) {
             LOG.debug("Sequence number: {}", sequenceNumber);
             scheduledFuture.cancel(false);
             executor.shutdown();

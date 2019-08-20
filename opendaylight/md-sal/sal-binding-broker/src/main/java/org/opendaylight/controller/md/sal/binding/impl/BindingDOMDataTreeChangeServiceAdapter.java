@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeService;
@@ -17,7 +18,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 
 /**
  * Adapter exposing Binding {@link DataTreeChangeService} and wrapping
@@ -36,8 +36,8 @@ final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeServ
 
     private BindingDOMDataTreeChangeServiceAdapter(final BindingToNormalizedNodeCodec codec,
             final DOMDataTreeChangeService dataTreeChangeService) {
-        this.codec = Preconditions.checkNotNull(codec);
-        this.dataTreeChangeService = Preconditions.checkNotNull(dataTreeChangeService);
+        this.codec = requireNonNull(codec);
+        this.dataTreeChangeService = requireNonNull(dataTreeChangeService);
     }
 
     static DataTreeChangeService create(final BindingToNormalizedNodeCodec codec,

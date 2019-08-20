@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -55,9 +56,9 @@ class RpcServiceAdapter implements InvocationHandler {
 
     RpcServiceAdapter(final Class<? extends RpcService> type, final BindingToNormalizedNodeCodec codec,
             final DOMRpcService domService) {
-        this.type = Preconditions.checkNotNull(type);
-        this.codec = Preconditions.checkNotNull(codec);
-        this.delegate = Preconditions.checkNotNull(domService);
+        this.type = requireNonNull(type);
+        this.codec = requireNonNull(codec);
+        this.delegate = requireNonNull(domService);
         final ImmutableMap.Builder<Method, RpcInvocationStrategy> rpcBuilder = ImmutableMap.builder();
         for (final Entry<Method, RpcDefinition> rpc : codec.getRpcMethodToSchema(type).entrySet()) {
             rpcBuilder.put(rpc.getKey(), createStrategy(rpc.getKey(), rpc.getValue()));

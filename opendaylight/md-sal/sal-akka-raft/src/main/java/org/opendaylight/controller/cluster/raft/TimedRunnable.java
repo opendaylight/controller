@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Cancellable;
-import com.google.common.base.Preconditions;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -26,11 +27,10 @@ abstract class TimedRunnable implements Runnable {
     private final Cancellable cancelTimer;
     private boolean canRun = true;
 
-    TimedRunnable(FiniteDuration timeout, RaftActor actor) {
-        Preconditions.checkNotNull(timeout);
-        Preconditions.checkNotNull(actor);
-        cancelTimer = actor.getContext().system().scheduler().scheduleOnce(timeout, actor.self(),
-                (Runnable) this::cancel, actor.getContext().system().dispatcher(), actor.self());
+    TimedRunnable(final FiniteDuration timeout, final RaftActor actor) {
+        cancelTimer = requireNonNull(actor).getContext().system().scheduler()
+                .scheduleOnce(requireNonNull(timeout), actor.self(), (Runnable) this::cancel,
+                    actor.getContext().system().dispatcher(), actor.self());
     }
 
     @Override

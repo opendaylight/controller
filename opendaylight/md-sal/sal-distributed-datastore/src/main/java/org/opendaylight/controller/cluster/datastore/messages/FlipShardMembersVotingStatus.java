@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A local message sent to the ShardManager to flip the raft voting states for members of a shard.
@@ -17,8 +17,8 @@ import com.google.common.base.Preconditions;
 public class FlipShardMembersVotingStatus {
     private final String shardName;
 
-    public FlipShardMembersVotingStatus(String shardName) {
-        this.shardName = Preconditions.checkNotNull(shardName);
+    public FlipShardMembersVotingStatus(final String shardName) {
+        this.shardName = requireNonNull(shardName);
     }
 
     public String getShardName() {

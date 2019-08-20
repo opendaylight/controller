@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -35,17 +36,17 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
     private final String shardManagerType;
     private final MemberName localMemberName;
 
-    ShardPeerAddressResolver(String shardManagerType, MemberName localMemberName) {
+    ShardPeerAddressResolver(final String shardManagerType, final MemberName localMemberName) {
         this.shardManagerIdentifier = ShardManagerIdentifier.builder().type(shardManagerType).build().toString();
         this.shardManagerType = shardManagerType;
-        this.localMemberName = Preconditions.checkNotNull(localMemberName);
+        this.localMemberName = requireNonNull(localMemberName);
     }
 
-    void addPeerAddress(MemberName memberName, Address address) {
+    void addPeerAddress(final MemberName memberName, final Address address) {
         memberNameToAddress.put(memberName, address);
     }
 
-    void removePeerAddress(MemberName memberName) {
+    void removePeerAddress(final MemberName memberName) {
         memberNameToAddress.remove(memberName);
     }
 
@@ -53,7 +54,7 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
         return this.memberNameToAddress.keySet();
     }
 
-    Address getPeerAddress(MemberName memberName) {
+    Address getPeerAddress(final MemberName memberName) {
         return memberNameToAddress.get(memberName);
     }
 
@@ -68,11 +69,11 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
         return peerAddresses;
     }
 
-    ShardIdentifier getShardIdentifier(MemberName memberName, String shardName) {
+    ShardIdentifier getShardIdentifier(final MemberName memberName, final String shardName) {
         return ShardIdentifier.create(shardName, memberName, shardManagerType);
     }
 
-    String getShardActorAddress(String shardName, MemberName memberName) {
+    String getShardActorAddress(final String shardName, final MemberName memberName) {
         Address memberAddress = memberNameToAddress.get(memberName);
         if (memberAddress != null) {
             return getShardManagerActorPathBuilder(memberAddress).append("/").append(
@@ -82,12 +83,12 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
         return null;
     }
 
-    StringBuilder getShardManagerActorPathBuilder(Address address) {
+    StringBuilder getShardManagerActorPathBuilder(final Address address) {
         return new StringBuilder().append(address.toString()).append("/user/").append(shardManagerIdentifier);
     }
 
     @Override
-    public String resolve(String peerId) {
+    public String resolve(final String peerId) {
         if (peerId == null) {
             return null;
         }
@@ -97,7 +98,7 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
     }
 
     @Override
-    public void setResolved(String peerId, String address) {
+    public void setResolved(final String peerId, final String address) {
         memberNameToAddress.put(ShardIdentifier.fromShardIdString(peerId).getMemberName(),
                 AddressFromURIString.parse(address));
     }

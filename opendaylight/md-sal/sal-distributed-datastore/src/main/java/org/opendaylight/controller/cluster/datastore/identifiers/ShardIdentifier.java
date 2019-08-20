@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -24,9 +25,9 @@ public class ShardIdentifier {
     private final String fullName;
 
     ShardIdentifier(final String shardName, final MemberName memberName, final String type) {
-        this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
-        this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
-        this.type = Preconditions.checkNotNull(type, "type should not be null");
+        this.shardName = requireNonNull(shardName, "shardName should not be null");
+        this.memberName = requireNonNull(memberName, "memberName should not be null");
+        this.type = requireNonNull(type, "type should not be null");
 
         fullName = memberName.getName() + "-shard-" + shardName + "-" + type;
     }
@@ -37,7 +38,7 @@ public class ShardIdentifier {
 
     public static ShardIdentifier fromShardIdString(final String shardIdString) {
         final Matcher matcher = PATTERN.matcher(shardIdString);
-        Preconditions.checkArgument(matcher.matches(), "Invalid shard id \"%s\"", shardIdString);
+        checkArgument(matcher.matches(), "Invalid shard id \"%s\"", shardIdString);
 
         return new ShardIdentifier(matcher.group(2), MemberName.forName(matcher.group(1)), matcher.group(3));
     }

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
@@ -38,12 +39,12 @@ public class DataValidationFailedException extends TransactionCommitFailedExcept
                                                              final String message, final Throwable cause) {
         super(message, cause, RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value", message, null,
                                                         path != null ? path.toString() : null, cause));
-        this.pathType = Preconditions.checkNotNull(pathType, "path type must not be null");
-        this.path = Preconditions.checkNotNull(path,"path must not be null.");
+        this.pathType = requireNonNull(pathType, "path type must not be null");
+        this.path = requireNonNull(path,"path must not be null.");
     }
 
-    public  <P extends Path<P>> DataValidationFailedException(final Class<P> pathType,final P path,
-                                                              final String message) {
+    public <P extends Path<P>> DataValidationFailedException(final Class<P> pathType,final P path,
+                                                             final String message) {
         this(pathType, path, message, null);
     }
 

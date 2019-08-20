@@ -5,16 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import static akka.actor.ActorRef.noSender;
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_PREFIX_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_REPLICAS_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_REPLICA_QNAME;
 
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
@@ -58,8 +57,8 @@ public class PrefixedShardConfigUpdateHandler {
             new EnumMap<>(LogicalDatastoreType.class);
 
     public PrefixedShardConfigUpdateHandler(final ActorRef handlingActor, final MemberName memberName) {
-        this.handlingActor = Preconditions.checkNotNull(handlingActor);
-        this.memberName = Preconditions.checkNotNull(memberName);
+        this.handlingActor = requireNonNull(handlingActor);
+        this.memberName = requireNonNull(memberName);
     }
 
     public void initListener(final AbstractDataStore dataStore, final LogicalDatastoreType type) {

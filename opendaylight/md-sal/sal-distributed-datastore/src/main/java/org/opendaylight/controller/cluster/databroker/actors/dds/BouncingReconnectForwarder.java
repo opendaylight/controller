@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import java.util.Collection;
@@ -46,7 +47,7 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
     private BouncingReconnectForwarder(final ConnectedClientConnection<?> successor,
             final Map<LocalHistoryIdentifier, ProxyReconnectCohort> cohorts) {
         super(successor);
-        this.cohorts = Preconditions.checkNotNull(cohorts);
+        this.cohorts = requireNonNull(cohorts);
     }
 
     static ReconnectForwarder forCohorts(final ConnectedClientConnection<?> successor,

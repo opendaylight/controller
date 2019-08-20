@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.ImmutableRangeSet.Builder;
@@ -33,7 +34,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
 
     public FrontendClientMetadata(final ClientIdentifier identifier, final RangeSet<UnsignedLong> purgedHistories,
             final Collection<FrontendHistoryMetadata> currentHistories) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
         this.purgedHistories = ImmutableRangeSet.copyOf(purgedHistories);
         this.currentHistories = ImmutableList.copyOf(currentHistories);
     }

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -31,10 +33,9 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
     private final BindingToNormalizedNodeCodec codec;
 
     AbstractForwardedTransaction(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
-        this.delegate = Preconditions.checkNotNull(delegateTx, "Delegate must not be null");
-        this.codec = Preconditions.checkNotNull(codec, "Codec must not be null");
+        this.delegate = requireNonNull(delegateTx, "Delegate must not be null");
+        this.codec = requireNonNull(codec, "Codec must not be null");
     }
-
 
     @Override
     public final  Object getIdentifier() {

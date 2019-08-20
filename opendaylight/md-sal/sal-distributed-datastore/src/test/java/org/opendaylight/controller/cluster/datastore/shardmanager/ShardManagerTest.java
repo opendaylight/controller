@@ -43,7 +43,6 @@ import akka.serialization.Serialization;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
-import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -64,6 +63,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -1363,10 +1363,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         assertEquals("getType", shardMrgIDSuffix, datastoreSnapshot.getType());
         assertNull("Expected null ShardManagerSnapshot", datastoreSnapshot.getShardManagerSnapshot());
 
-        Function<ShardSnapshot, String> shardNameTransformer = ShardSnapshot::getName;
-
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2"), Sets.newHashSet(
-            datastoreSnapshot.getShardSnapshots().stream().map(shardNameTransformer).collect(Collectors.toSet())));
+            datastoreSnapshot.getShardSnapshots().stream().map(ShardSnapshot::getName).collect(Collectors.toSet())));
 
         // Add a new replica
 
@@ -1387,7 +1385,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"), Sets.newHashSet(
-                Lists.transform(datastoreSnapshot.getShardSnapshots(), shardNameTransformer)));
+                Lists.transform(datastoreSnapshot.getShardSnapshots(), ShardSnapshot::getName)));
 
         ShardManagerSnapshot snapshot = datastoreSnapshot.getShardManagerSnapshot();
         assertNotNull("Expected ShardManagerSnapshot", snapshot);

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public final class DatastoreSnapshotRestore {
     }
 
     private DatastoreSnapshotRestore(final String restoreDirectoryPath) {
-        this.restoreDirectoryPath = Preconditions.checkNotNull(restoreDirectoryPath);
+        this.restoreDirectoryPath = requireNonNull(restoreDirectoryPath);
     }
 
     // synchronize this method so that, in case of concurrent access to getAndRemove(),

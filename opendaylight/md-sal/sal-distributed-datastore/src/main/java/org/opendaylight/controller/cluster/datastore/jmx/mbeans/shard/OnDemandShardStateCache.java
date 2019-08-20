@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -33,7 +34,7 @@ class OnDemandShardStateCache {
     private volatile String stateRetrievalTime;
 
     OnDemandShardStateCache(final String shardName, final ActorRef shardActor) {
-        this.shardName = Preconditions.checkNotNull(shardName);
+        this.shardName = requireNonNull(shardName);
         this.shardActor = shardActor;
     }
 

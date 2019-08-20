@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
@@ -34,12 +33,12 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePreCommit;
 
 import com.google.common.base.Ticker;
-import com.google.common.collect.Maps;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -199,7 +198,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         shardDataTree.applySnapshot(newDataTree.takeStateSnapshot());
 
-        Map<YangInstanceIdentifier, ModificationType> expChanges = Maps.newHashMap();
+        Map<YangInstanceIdentifier, ModificationType> expChanges = new HashMap<>();
         expChanges.put(CarsModel.newCarPath("optima"), ModificationType.WRITE);
         expChanges.put(CarsModel.newCarPath("murano"), ModificationType.WRITE);
         expChanges.put(CarsModel.newCarPath("sportage"), ModificationType.DELETE);

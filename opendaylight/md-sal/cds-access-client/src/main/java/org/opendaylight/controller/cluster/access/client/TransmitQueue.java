@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -96,8 +97,8 @@ abstract class TransmitQueue {
         Transmitting(final TransmitQueue oldQueue, final int targetDepth, final BackendInfo backend, final long now,
                 final MessageSlicer messageSlicer) {
             super(oldQueue, targetDepth, now);
-            this.backend = Preconditions.checkNotNull(backend);
-            this.messageSlicer = Preconditions.checkNotNull(messageSlicer);
+            this.backend = requireNonNull(backend);
+            this.messageSlicer = requireNonNull(messageSlicer);
         }
 
         @Override
@@ -349,8 +350,8 @@ abstract class TransmitQueue {
     }
 
     final void setForwarder(final ReconnectForwarder forwarder, final long now) {
-        Verify.verify(successor == null, "Successor %s already set on connection %s", successor, this);
-        successor = Preconditions.checkNotNull(forwarder);
+        verify(successor == null, "Successor %s already set on connection %s", successor, this);
+        successor = requireNonNull(forwarder);
         LOG.debug("Connection {} superseded by {}, splicing queue", this, successor);
 
         /*

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
@@ -20,8 +21,8 @@ public class ChangeShardMembersVotingStatus {
     private final String shardName;
     private final Map<String, Boolean> meberVotingStatusMap;
 
-    public ChangeShardMembersVotingStatus(String shardName, Map<String, Boolean> meberVotingStatusMap) {
-        this.shardName = Preconditions.checkNotNull(shardName);
+    public ChangeShardMembersVotingStatus(final String shardName, final Map<String, Boolean> meberVotingStatusMap) {
+        this.shardName = requireNonNull(shardName);
         this.meberVotingStatusMap = ImmutableMap.copyOf(meberVotingStatusMap);
     }
 
