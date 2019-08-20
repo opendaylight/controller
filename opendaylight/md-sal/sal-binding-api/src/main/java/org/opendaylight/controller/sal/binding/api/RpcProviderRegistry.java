@@ -257,8 +257,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.RpcProviderService} instead
  */
 @Deprecated
-public interface RpcProviderRegistry extends //
-        RpcConsumerRegistry, //
+public interface RpcProviderRegistry extends RpcConsumerRegistry,
         RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {
     /**
      * Registers a global implementation of the provided RPC service interface.
@@ -277,9 +276,9 @@ public interface RpcProviderRegistry extends //
 
     /**
      * Registers an implementation of the given routed RPC service interface.
+     *
      * <p>
-     * See the {@link RpcProviderRegistry class} documentation for information and example on
-     * how to use routed RPCs.
+     * See the {@link RpcProviderRegistry class} documentation for information and example on how to use routed RPCs.
      *
      * @param serviceInterface the YANG-generated interface of the RPC Service for which to register.
      * @param implementation the implementation instance to register.
@@ -287,11 +286,8 @@ public interface RpcProviderRegistry extends //
      *         implementation via invoking RoutedRpcRegistration#registerPath(Class, InstanceIdentifer).
      *         {@link RoutedRpcRegistration#close()} should be called to unregister the implementation
      *         and all previously registered paths when no longer needed.
-     *
-     * @throws IllegalStateException
-     *            if the supplied RPC interface is not a routed RPC type.
+     * @throws IllegalStateException if the supplied RPC interface is not a routed RPC type.
      */
     <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> serviceInterface,
-                                                                               T implementation)
-            throws IllegalStateException;
+            T implementation) throws IllegalStateException;
 }

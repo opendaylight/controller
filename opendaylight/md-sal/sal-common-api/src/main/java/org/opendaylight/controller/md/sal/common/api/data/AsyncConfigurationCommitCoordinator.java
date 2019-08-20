@@ -22,17 +22,14 @@ import org.opendaylight.yangtools.concepts.Path;
  */
 @Deprecated
 public interface AsyncConfigurationCommitCoordinator<P extends Path<P>, D> {
-
     /**
-     * Register configuration commit handler for particular subtree.
-     *
-     * Configuration commit handler is invoked for all write transactions
-     * which modifies <code>subtree</code>
+     * Register configuration commit handler for particular subtree. Configuration commit handler is invoked for all
+     * write transactions which modifies <code>subtree</code>
      *
      * @param subtree Subtree which configuration commit handler is interested it
      * @param commitHandler Instance of user-provided commit handler
      * @return Registration object representing this registration. Invoking {@link ObjectRegistration#close()}
-     *   will unregister configuration commit handler.
+     *         will unregister configuration commit handler.
      */
     <C extends AsyncConfigurationCommitCohort<P, D>> ObjectRegistration<C> registerConfigurationCommitHandler(
             P subtree, C commitHandler);
