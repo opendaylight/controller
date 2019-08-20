@@ -160,6 +160,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(preCommitFuture, futureCallback, MoreExecutors.directExecutor());
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void doCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
