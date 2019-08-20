@@ -202,6 +202,24 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             }
             return potential;
         }
+
+        private static DataNormalizationOperation<?> fromSchemaAndQNameChecked(final DataNodeContainer schema,
+                final QName child) throws DataNormalizationException {
+
+            final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
+            if (!potential.isPresent()) {
+                throw new DataNormalizationException(String.format(
+                        "Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child,
+                        schema,schema.getChildNodes()));
+            }
+
+            final DataSchemaNode result = potential.get();
+            // We try to look up if this node was added by augmentation
+            if (schema instanceof DataSchemaNode && result.isAugmenting()) {
+                return fromAugmentation(schema, (AugmentationTarget) schema, result);
+            }
+            return fromDataSchemaNode(result);
+        }
     }
 
     private static final class ListItemNormalization extends
@@ -317,6 +335,15 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             super(augmentationIdentifierFrom(augmentation), augmentationProxy(augmentation,schema),null);
         }
 
+        private static DataNodeContainer augmentationProxy(final AugmentationSchemaNode augmentation,
+                final DataNodeContainer schema) {
+            final Set<DataSchemaNode> children = new HashSet<>();
+            for (final DataSchemaNode augNode : augmentation.getChildNodes()) {
+                children.add(schema.getDataChildByName(augNode.getQName()));
+            }
+            return new EffectiveAugmentationSchema(augmentation, children);
+        }
+
         @Override
         public boolean isMixin() {
             return true;
@@ -347,7 +374,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.augmentationBuilder().withNodeIdentifier(getIdentifier()).build();
         }
-
     }
 
     private static class UnorderedMapMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
@@ -498,24 +524,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return Optional.fromNullable(potential);
     }
 
-    private static DataNormalizationOperation<?> fromSchemaAndQNameChecked(final DataNodeContainer schema,
-            final QName child) throws DataNormalizationException {
-
-        final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
-        if (!potential.isPresent()) {
-            throw new DataNormalizationException(String.format(
-                    "Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child,
-                    schema,schema.getChildNodes()));
-        }
-
-        final DataSchemaNode result = potential.get();
-        // We try to look up if this node was added by augmentation
-        if (schema instanceof DataSchemaNode && result.isAugmenting()) {
-            return fromAugmentation(schema, (AugmentationTarget) schema, result);
-        }
-        return fromDataSchemaNode(result);
-    }
-
     private static ChoiceSchemaNode findChoice(final Iterable<ChoiceSchemaNode> choices, final QName child) {
         ChoiceSchemaNode foundChoice = null;
         choiceLoop: for (final ChoiceSchemaNode choice : choices) {
@@ -535,15 +543,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             potentialChildren.add(child.getQName());
         }
         return new AugmentationIdentifier(potentialChildren.build());
-    }
-
-    private static DataNodeContainer augmentationProxy(final AugmentationSchemaNode augmentation,
-            final DataNodeContainer schema) {
-        final Set<DataSchemaNode> children = new HashSet<>();
-        for (final DataSchemaNode augNode : augmentation.getChildNodes()) {
-            children.add(schema.getDataChildByName(augNode.getQName()));
-        }
-        return new EffectiveAugmentationSchema(augmentation, children);
     }
 
     /**
