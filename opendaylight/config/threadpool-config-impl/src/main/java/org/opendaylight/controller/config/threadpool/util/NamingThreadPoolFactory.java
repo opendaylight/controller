@@ -28,6 +28,7 @@ public class NamingThreadPoolFactory implements ThreadFactory, Closeable {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:parameterName")
     public Thread newThread(final Runnable r) {
         return new Thread(group, r, String.format("%s-%d", group.getName(), threadName.incrementAndGet()));
     }
