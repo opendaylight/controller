@@ -163,6 +163,12 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
+    public boolean startAnydataNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+        // FIXME: we do not support anydata nodes yet
+        return false;
+    }
+
+    @Override
     public void domSourceValue(final DOMSource value) throws IOException {
         checkNotSealed();
         if (unknown == 0) {

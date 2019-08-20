@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
@@ -57,7 +58,8 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     @Test
-    public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException {
+    public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException,
+            DataValidationFailedException {
         try {
             coordinator.appendRecoveredLogEntry(CommitTransactionPayload.create(nextTransactionId(), createCar()));
         } catch (final SchemaValidationFailedException e) {
@@ -68,7 +70,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     @Test
-    public void testApplyRecoverySnapshot() {
+    public void testApplyRecoverySnapshot() throws DataValidationFailedException {
         coordinator.applyRecoverySnapshot(createSnapshot());
 
         assertFalse(readCars(peopleDataTree).isPresent());
@@ -85,7 +87,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         }
     }
 
-    private DataTreeCandidate createCar() {
+    private DataTreeCandidate createCar() throws DataValidationFailedException {
         final DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, carsSchemaContext);
 
@@ -114,7 +116,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return shardDataTree.readNode(PeopleModel.BASE_PATH);
     }
 
-    private static ShardSnapshotState createSnapshot() {
+    private static ShardSnapshotState createSnapshot() throws DataValidationFailedException {
         final DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
                 SchemaContextHelper.PEOPLE_YANG));
