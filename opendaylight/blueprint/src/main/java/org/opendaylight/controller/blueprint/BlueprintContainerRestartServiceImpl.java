@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -226,7 +225,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     private static ServiceRegistration<?> registerEventHandler(final BundleContext bundleContext,
             final BlueprintListener listener) {
-        return bundleContext.registerService(BlueprintListener.class.getName(), listener, new Hashtable<>());
+        return bundleContext.registerService(BlueprintListener.class, listener, null);
     }
 
     @Override
