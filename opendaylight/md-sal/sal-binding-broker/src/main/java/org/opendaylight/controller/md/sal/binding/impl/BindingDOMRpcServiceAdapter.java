@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -31,7 +32,9 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
 
                 @Override
                 public RpcServiceAdapter load(final Class<? extends RpcService> key) {
-                    return createProxy(key);
+                    checkArgument(BindingReflections.isBindingClass(key));
+                    checkArgument(key.isInterface(), "Supplied RPC service type must be interface.");
+                    return new RpcServiceAdapter(key, codec, domService);
                 }
 
             });
@@ -47,14 +50,8 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends RpcService> T getRpcService(final Class<T> rpcService) {
-        Preconditions.checkArgument(rpcService != null, "Rpc Service needs to be specied.");
+        checkArgument(rpcService != null, "Rpc Service needs to be specied.");
         return (T) proxies.getUnchecked(rpcService).getProxy();
-    }
-
-    private RpcServiceAdapter createProxy(final Class<? extends RpcService> key) {
-        Preconditions.checkArgument(BindingReflections.isBindingClass(key));
-        Preconditions.checkArgument(key.isInterface(), "Supplied RPC service type must be interface.");
-        return new RpcServiceAdapter(key, codec, domService);
     }
 
     private static final class Builder extends BindingDOMAdapterBuilder<RpcConsumerRegistry> {
@@ -70,7 +67,5 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
         public Set<? extends Class<? extends DOMService>> getRequiredDelegates() {
             return ImmutableSet.of(DOMRpcService.class);
         }
-
     }
-
 }
