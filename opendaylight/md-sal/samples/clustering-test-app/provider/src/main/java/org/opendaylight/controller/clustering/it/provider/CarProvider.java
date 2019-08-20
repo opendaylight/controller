@@ -138,16 +138,16 @@ public class CarProvider implements CarService {
         final long inputCount;
 
         // If rate is not provided, or given as zero, then just return.
-        if (input.getRate() == null || input.getRate() == 0) {
+        if (input.getRate() == null || input.getRate().toJava() == 0) {
             LOG_PURCHASE_CAR.info("Exiting stress test as no rate is given.");
             return Futures.immediateFuture(RpcResultBuilder.<StressTestOutput>failed()
                     .withError(ErrorType.PROTOCOL, "invalid rate")
                     .build());
         }
 
-        inputRate = input.getRate();
+        inputRate = input.getRate().toJava();
         if (input.getCount() != null) {
-            inputCount = input.getCount();
+            inputCount = input.getCount().toJava();
         } else {
             inputCount = 0;
         }
