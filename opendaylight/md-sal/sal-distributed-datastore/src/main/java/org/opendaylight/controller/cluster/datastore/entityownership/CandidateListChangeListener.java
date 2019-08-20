@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
@@ -29,7 +28,6 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Ca
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -73,7 +71,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
 
             NodeIdentifierWithPredicates candidateKey =
                     (NodeIdentifierWithPredicates) change.getRootPath().getLastPathArgument();
-            String candidate = candidateKey.getKeyValues().get(CANDIDATE_NAME_QNAME).toString();
+            String candidate = candidateKey.getValue(CANDIDATE_NAME_QNAME).toString();
 
             YangInstanceIdentifier entityId = extractEntityPath(change.getRootPath());
 
@@ -114,12 +112,9 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
         List<PathArgument> newPathArgs = new ArrayList<>();
         for (PathArgument pathArg: candidatePath.getPathArguments()) {
             newPathArgs.add(pathArg);
-            if (pathArg instanceof NodeIdentifierWithPredicates) {
-                NodeIdentifierWithPredicates nodeKey = (NodeIdentifierWithPredicates) pathArg;
-                Entry<QName, Object> key = nodeKey.getKeyValues().entrySet().iterator().next();
-                if (ENTITY_ID_QNAME.equals(key.getKey())) {
-                    break;
-                }
+            if (pathArg instanceof NodeIdentifierWithPredicates
+                    && ENTITY_ID_QNAME.equals(((NodeIdentifierWithPredicates) pathArg).keySet().iterator().next())) {
+                break;
             }
         }
 

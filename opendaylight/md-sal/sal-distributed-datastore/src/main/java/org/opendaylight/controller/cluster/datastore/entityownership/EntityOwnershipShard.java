@@ -571,11 +571,10 @@ class EntityOwnershipShard extends Shard {
         final List<Modification> modifications = new ArrayList<>();
         searchForEntities((entityTypeNode, entityNode) -> {
             if (hasCandidate(entityNode, member)) {
-                YangInstanceIdentifier entityId =
-                        (YangInstanceIdentifier) entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
-                YangInstanceIdentifier candidatePath = candidatePath(
-                        entityTypeNode.getIdentifier().getKeyValues().get(ENTITY_TYPE_QNAME).toString(),
-                        entityId, member.getName());
+                YangInstanceIdentifier entityId = (YangInstanceIdentifier) entityNode.getIdentifier()
+                        .getValue(ENTITY_ID_QNAME);
+                YangInstanceIdentifier candidatePath = candidatePath(entityTypeNode.getIdentifier()
+                    .getValue(ENTITY_TYPE_QNAME).toString(), entityId, member.getName());
 
                 LOG.info("{}: Found entity {}, removing candidate {}, path {}", persistenceId(), entityId,
                         member, candidatePath);

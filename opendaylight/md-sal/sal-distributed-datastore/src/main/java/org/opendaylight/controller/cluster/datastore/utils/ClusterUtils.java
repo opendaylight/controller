@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -82,14 +81,12 @@ public final class ClusterUtils {
             builder.append(p.getNodeType().getLocalName());
             if (p instanceof NodeIdentifierWithPredicates) {
                 builder.append("-key_");
-                ((NodeIdentifierWithPredicates) p).getKeyValues().forEach((key, value) -> {
-                    builder.append(key.getLocalName());
-                    builder.append(value);
-                    builder.append("-");
+                ((NodeIdentifierWithPredicates) p).entrySet().forEach(entry -> {
+                    builder.append(entry.getKey().getLocalName()).append(entry.getValue()).append('-');
                 });
-                builder.append("_");
+                builder.append('_');
             }
-            builder.append("!");
+            builder.append('!');
         });
         return builder.toString();
     }
