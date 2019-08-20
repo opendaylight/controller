@@ -11,11 +11,13 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheLoader;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 
 @Deprecated
 public abstract class AdapterLoader<T, D> extends CacheLoader<Class<? extends T>, Optional<T>> {
 
     @Override
+    @SuppressModernizer
     public Optional<T> load(final Class<? extends T> key) {
 
         final AdapterBuilder<? extends T, D> builder = createBuilder(key);
