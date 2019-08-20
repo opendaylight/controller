@@ -127,10 +127,11 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             }
         };
 
-        ListenableFuture<Boolean> canCommitFuture = cohortIterator.next().canCommit();
-        Futures.addCallback(canCommitFuture, futureCallback, MoreExecutors.directExecutor());
+        Futures.addCallback(cohortIterator.next().canCommit(), futureCallback, MoreExecutors.directExecutor());
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void doPreCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
@@ -160,6 +161,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(preCommitFuture, futureCallback, MoreExecutors.directExecutor());
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void doCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
@@ -191,10 +194,11 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(commitFuture, futureCallback, MoreExecutors.directExecutor());
     }
 
-    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
+    @SuppressFBWarnings(value = { "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE", "UPM_UNCALLED_PRIVATE_METHOD" },
             justification = "Pertains to the assignment of the 'clientException' var. FindBugs flags this as an "
                 + "uncomfirmed cast but the generic type in TransactionCommitFailedExceptionMapper is "
-                + "TransactionCommitFailedException and thus should be deemed as confirmed.")
+                + "TransactionCommitFailedException and thus should be deemed as confirmed."
+                + "Also https://github.com/spotbugs/spotbugs/issues/811")
     private static void handleException(final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
