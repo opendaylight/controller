@@ -34,21 +34,20 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOr
  */
 public final class EntityOwnersModel {
     static final QName ENTITY_QNAME = Entity.QNAME;
-    static final QName CANDIDATE_NAME_QNAME = QName.create(Candidate.QNAME, "name");
-    static final QName ENTITY_ID_QNAME = QName.create(ENTITY_QNAME, "id");
-    static final QName ENTITY_OWNER_QNAME = QName.create(ENTITY_QNAME, "owner");
-    static final QName ENTITY_TYPE_QNAME = QName.create(EntityType.QNAME, "type");
+    static final QName CANDIDATE_NAME_QNAME = QName.create(Candidate.QNAME, "name").intern();
+    static final QName ENTITY_ID_QNAME = QName.create(ENTITY_QNAME, "id").intern();
+    static final QName ENTITY_OWNER_QNAME = QName.create(ENTITY_QNAME, "owner").intern();
+    static final QName ENTITY_TYPE_QNAME = QName.create(EntityType.QNAME, "type").intern();
 
-    static final NodeIdentifier ENTITY_OWNERS_NODE_ID = new NodeIdentifier(EntityOwners.QNAME);
-    static final NodeIdentifier ENTITY_OWNER_NODE_ID = new NodeIdentifier(ENTITY_OWNER_QNAME);
-    static final NodeIdentifier ENTITY_NODE_ID = new NodeIdentifier(ENTITY_QNAME);
-    static final NodeIdentifier ENTITY_ID_NODE_ID = new NodeIdentifier(ENTITY_ID_QNAME);
-    static final NodeIdentifier ENTITY_TYPE_NODE_ID = new NodeIdentifier(ENTITY_TYPE_QNAME);
-    static final NodeIdentifier CANDIDATE_NODE_ID = new NodeIdentifier(Candidate.QNAME);
-    static final NodeIdentifier CANDIDATE_NAME_NODE_ID = new NodeIdentifier(CANDIDATE_NAME_QNAME);
-    static final YangInstanceIdentifier ENTITY_OWNERS_PATH = YangInstanceIdentifier.of(EntityOwners.QNAME);
-    static final YangInstanceIdentifier ENTITY_TYPES_PATH =
-            YangInstanceIdentifier.of(EntityOwners.QNAME).node(EntityType.QNAME);
+    static final NodeIdentifier ENTITY_OWNERS_NODE_ID = NodeIdentifier.create(EntityOwners.QNAME);
+    static final NodeIdentifier ENTITY_OWNER_NODE_ID = NodeIdentifier.create(ENTITY_OWNER_QNAME);
+    static final NodeIdentifier ENTITY_NODE_ID = NodeIdentifier.create(ENTITY_QNAME);
+    static final NodeIdentifier ENTITY_ID_NODE_ID = NodeIdentifier.create(ENTITY_ID_QNAME);
+    static final NodeIdentifier ENTITY_TYPE_NODE_ID = NodeIdentifier.create(ENTITY_TYPE_QNAME);
+    static final NodeIdentifier CANDIDATE_NODE_ID = NodeIdentifier.create(Candidate.QNAME);
+    static final NodeIdentifier CANDIDATE_NAME_NODE_ID = NodeIdentifier.create(CANDIDATE_NAME_QNAME);
+    static final YangInstanceIdentifier ENTITY_OWNERS_PATH = YangInstanceIdentifier.create(ENTITY_OWNERS_NODE_ID);
+    static final YangInstanceIdentifier ENTITY_TYPES_PATH = ENTITY_OWNERS_PATH.node(EntityType.QNAME).toOptimized();
 
     private static final SharedSingletonMapTemplate<QName> NODE_KEY_TEMPLATE = SharedSingletonMapTemplate.ordered(
         CANDIDATE_NAME_QNAME);
@@ -125,7 +124,7 @@ public final class EntityOwnersModel {
             if (EntityType.QNAME.equals(parent.getLastPathArgument().getNodeType())) {
                 YangInstanceIdentifier.NodeIdentifierWithPredicates entityTypeLastPathArgument =
                         (YangInstanceIdentifier.NodeIdentifierWithPredicates) parent.getLastPathArgument();
-                return (String) entityTypeLastPathArgument.getKeyValues().get(ENTITY_TYPE_QNAME);
+                return (String) entityTypeLastPathArgument.getValue(ENTITY_TYPE_QNAME);
             }
             parent = parent.getParent();
         }
@@ -138,7 +137,7 @@ public final class EntityOwnersModel {
         for (PathArgument pathArg: entityPath.getPathArguments()) {
             if (pathArg instanceof NodeIdentifierWithPredicates) {
                 NodeIdentifierWithPredicates nodeKey = (NodeIdentifierWithPredicates) pathArg;
-                Entry<QName, Object> key = nodeKey.getKeyValues().entrySet().iterator().next();
+                Entry<QName, Object> key = nodeKey.entrySet().iterator().next();
                 if (ENTITY_TYPE_QNAME.equals(key.getKey())) {
                     entityType = key.getValue().toString();
                 } else if (ENTITY_ID_QNAME.equals(key.getKey())) {
