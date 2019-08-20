@@ -18,11 +18,13 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -215,22 +217,30 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "")
     DataTree getLocalEntityOwnershipShardDataTree() {
-        if (localEntityOwnershipShardDataTree == null) {
-            try {
-                if (localEntityOwnershipShard == null) {
-                    localEntityOwnershipShard = Await.result(context.findLocalShardAsync(
-                            ENTITY_OWNERSHIP_SHARD_NAME), Duration.Inf());
-                }
+        final DataTree local = localEntityOwnershipShardDataTree;
+        if (local != null) {
+            return local;
+        }
 
-                localEntityOwnershipShardDataTree = (DataTree) Await.result(Patterns.ask(localEntityOwnershipShard,
-                        GetShardDataTree.INSTANCE, MESSAGE_TIMEOUT), Duration.Inf());
-            } catch (Exception e) {
+        if (localEntityOwnershipShard == null) {
+            try {
+                localEntityOwnershipShard = Await.result(context.findLocalShardAsync(
+                    ENTITY_OWNERSHIP_SHARD_NAME), Duration.Inf());
+            } catch (TimeoutException | InterruptedException e) {
                 LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, e);
+                return null;
             }
         }
 
-        return localEntityOwnershipShardDataTree;
+        try {
+            return localEntityOwnershipShardDataTree = (DataTree) Await.result(Patterns.ask(localEntityOwnershipShard,
+                GetShardDataTree.INSTANCE, MESSAGE_TIMEOUT), Duration.Inf());
+        } catch (TimeoutException | InterruptedException e) {
+            LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, e);
+            return null;
+        }
     }
 
     void unregisterListener(final String entityType, final DOMEntityOwnershipListener listener) {
