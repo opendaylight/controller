@@ -15,7 +15,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -249,7 +249,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         LOG.trace("Starting a new map entry node");
         startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
 
-        writeKeyValueMap(identifier.getKeyValues());
+        writeKeyValueMap(identifier.entrySet());
     }
 
     @Override
@@ -395,7 +395,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
                     (NodeIdentifierWithPredicates) pathArgument;
                 writeQName(nodeIdentifierWithPredicates.getNodeType());
 
-                writeKeyValueMap(nodeIdentifierWithPredicates.getKeyValues());
+                writeKeyValueMap(nodeIdentifierWithPredicates.entrySet());
                 break;
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
@@ -417,11 +417,10 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    private void writeKeyValueMap(final Map<QName, Object> keyValueMap) throws IOException {
-        if (keyValueMap != null && !keyValueMap.isEmpty()) {
-            output.writeInt(keyValueMap.size());
-
-            for (Map.Entry<QName, Object> entry : keyValueMap.entrySet()) {
+    private void writeKeyValueMap(final Set<Entry<QName, Object>> entrySet) throws IOException {
+        if (!entrySet.isEmpty()) {
+            output.writeInt(entrySet.size());
+            for (Entry<QName, Object> entry : entrySet) {
                 writeQName(entry.getKey());
                 writeObject(entry.getValue());
             }
