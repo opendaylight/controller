@@ -82,7 +82,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     public abstract DataNormalizationOperation<?> getChild(QName child) throws DataNormalizationException;
 
-
     public abstract boolean isLeaf();
 
     public Optional<DataSchemaNode> getDataSchemaNode() {
@@ -92,8 +91,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private abstract static class SimpleTypeNormalization<T extends PathArgument>
             extends DataNormalizationOperation<T> {
-
-        protected SimpleTypeNormalization(final T identifier, final DataSchemaNode potential) {
+        SimpleTypeNormalization(final T identifier, final DataSchemaNode potential) {
             super(identifier,potential);
         }
 
@@ -119,15 +117,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static final class LeafNormalization extends SimpleTypeNormalization<NodeIdentifier> {
-
-        protected LeafNormalization(final LeafSchemaNode potential) {
+        LeafNormalization(final LeafSchemaNode potential) {
             super(new NodeIdentifier(potential.getQName()),potential);
         }
-
     }
 
     private static final class LeafListEntryNormalization extends SimpleTypeNormalization<NodeWithValue> {
-
         LeafListEntryNormalization(final LeafListSchemaNode potential) {
             super(new NodeWithValue(potential.getQName(), null),potential);
         }
@@ -140,8 +135,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private abstract static class CompositeNodeNormalizationOperation<T extends PathArgument>
             extends DataNormalizationOperation<T> {
-
-        protected CompositeNodeNormalizationOperation(final T identifier, final DataSchemaNode schema) {
+        CompositeNodeNormalizationOperation(final T identifier, final DataSchemaNode schema) {
             super(identifier,schema);
         }
 
@@ -149,18 +143,15 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public boolean isLeaf() {
             return false;
         }
-
-
     }
 
     private abstract static class DataContainerNormalizationOperation<T extends PathArgument>
             extends CompositeNodeNormalizationOperation<T> {
-
         private final DataNodeContainer schema;
         private final Map<QName, DataNormalizationOperation<?>> byQName;
         private final Map<PathArgument, DataNormalizationOperation<?>> byArg;
 
-        protected DataContainerNormalizationOperation(final T identifier, final DataNodeContainer schema,
+        DataContainerNormalizationOperation(final T identifier, final DataNodeContainer schema,
                 final DataSchemaNode node) {
             super(identifier,node);
             this.schema = schema;
@@ -211,13 +202,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             }
             return potential;
         }
-
     }
 
     private static final class ListItemNormalization extends
             DataContainerNormalizationOperation<NodeIdentifierWithPredicates> {
-
-        protected ListItemNormalization(final NodeIdentifierWithPredicates identifier, final ListSchemaNode schema) {
+        ListItemNormalization(final NodeIdentifierWithPredicates identifier, final ListSchemaNode schema) {
             super(identifier, schema, schema);
         }
 
@@ -226,8 +215,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
                     .mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) currentArg);
-            for (final Entry<QName, Object> keyValue :
-                    ((NodeIdentifierWithPredicates) currentArg).getKeyValues().entrySet()) {
+            for (final Entry<QName, Object> keyValue : ((NodeIdentifierWithPredicates) currentArg).entrySet()) {
                 builder.addChild(Builders.leafBuilder()
                         //
                         .withNodeIdentifier(new NodeIdentifier(keyValue.getKey())).withValue(keyValue.getValue())
@@ -235,7 +223,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             }
             return builder.build();
         }
-
 
         @Override
         public boolean isKeyedEntry() {
@@ -245,8 +232,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private static final class UnkeyedListItemNormalization
             extends DataContainerNormalizationOperation<NodeIdentifier> {
-
-        protected UnkeyedListItemNormalization(final ListSchemaNode schema) {
+        UnkeyedListItemNormalization(final ListSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()), schema,schema);
         }
 
@@ -255,12 +241,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.unkeyedListEntryBuilder().withNodeIdentifier((NodeIdentifier) currentArg).build();
         }
-
     }
 
     private static final class ContainerNormalization extends DataContainerNormalizationOperation<NodeIdentifier> {
-
-        protected ContainerNormalization(final ContainerSchemaNode schema) {
+        ContainerNormalization(final ContainerSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()),schema, schema);
         }
 
@@ -269,13 +253,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.containerBuilder().withNodeIdentifier((NodeIdentifier) currentArg).build();
         }
-
     }
 
     private abstract static class MixinNormalizationOp<T extends PathArgument>
             extends CompositeNodeNormalizationOperation<T> {
 
-        protected MixinNormalizationOp(final T identifier, final DataSchemaNode schema) {
+        MixinNormalizationOp(final T identifier, final DataSchemaNode schema) {
             super(identifier,schema);
         }
 
@@ -283,9 +266,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public final boolean isMixin() {
             return true;
         }
-
     }
-
 
     private static final class OrderedLeafListMixinNormalization extends UnorderedLeafListMixinNormalization {
         OrderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
@@ -341,8 +322,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return true;
         }
 
-
-
         @Override
         protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema,
                 final QName child) {
@@ -372,7 +351,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static class UnorderedMapMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
-
         private final ListItemNormalization innerNode;
 
         UnorderedMapMixinNormalization(final ListSchemaNode list) {
@@ -401,12 +379,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             }
             return null;
         }
-
     }
 
-
     private static class UnkeyedListMixinNormalization extends MixinNormalizationOp<NodeIdentifier> {
-
         private final UnkeyedListItemNormalization innerNode;
 
         UnkeyedListMixinNormalization(final ListSchemaNode list) {
@@ -434,11 +409,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             }
             return null;
         }
-
     }
 
     private static final class OrderedMapMixinNormalization extends UnorderedMapMixinNormalization {
-
         OrderedMapMixinNormalization(final ListSchemaNode list) {
             super(list);
         }
@@ -447,15 +420,13 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.orderedMapBuilder().withNodeIdentifier(getIdentifier()).build();
         }
-
     }
 
     private static class ChoiceNodeNormalization extends MixinNormalizationOp<NodeIdentifier> {
-
         private final ImmutableMap<QName, DataNormalizationOperation<?>> byQName;
         private final ImmutableMap<PathArgument, DataNormalizationOperation<?>> byArg;
 
-        protected ChoiceNodeNormalization(final ChoiceSchemaNode schema) {
+        ChoiceNodeNormalization(final ChoiceSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()),schema);
             final ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
             final ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder =
@@ -491,8 +462,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static class AnyXmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
-
-        protected AnyXmlNormalization(final AnyXmlSchemaNode schema) {
+        AnyXmlNormalization(final AnyXmlSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()), schema);
         }
 
