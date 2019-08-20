@@ -9,6 +9,7 @@ package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -60,7 +61,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
 
     @Override
     protected void startTracking() {
-        BundleTrackerCustomizer<Bundle> bundleListener = new BundleTrackerCustomizer<Bundle>() {
+        BundleTrackerCustomizer<Bundle> bundleListener = new BundleTrackerCustomizer<>() {
             @Override
             public Bundle addingBundle(final Bundle bundle, final BundleEvent event) {
                 bundleAdded(bundle);
@@ -87,7 +88,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
             return;
         }
 
-        ServiceTrackerCustomizer<Object, Object> serviceListener = new ServiceTrackerCustomizer<Object, Object>() {
+        ServiceTrackerCustomizer<Object, Object> serviceListener = new ServiceTrackerCustomizer<>() {
             @Override
             public Object addingService(final ServiceReference<Object> reference) {
                 return serviceAdded(reference);
@@ -109,6 +110,8 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         serviceTracker.open();
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void bundleAdded(final Bundle bundle) {
         URL resource = bundle.getEntry(serviceResourcePath);
         if (resource == null) {
@@ -139,6 +142,8 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         }
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private Object serviceAdded(final ServiceReference<Object> reference) {
         Object service = container().getBundleContext().getService(reference);
         String serviceType = (String) reference.getProperty(OpendaylightNamespaceHandler.TYPE_ATTR);
