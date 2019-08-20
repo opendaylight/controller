@@ -8,13 +8,16 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -38,14 +41,15 @@ public class BindingDOMMountPointServiceAdapterTest {
     private ClassLoadingStrategy classLoadingStrategy;
 
     @Before
+    @SuppressModernizer
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        codec = Mockito.spy(new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry));
-        Mockito.doAnswer(invocationOnMock -> Optional.of(Mockito.mock(DOMMountPoint.class)))
+        codec = spy(new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry));
+        doReturn(Optional.of(mock(DOMMountPoint.class)))
                 .when(mountService).getMountPoint(any(YangInstanceIdentifier.class));
-        Mockito.doReturn(YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(QName.create("(a)b"))))
+        doReturn(YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(QName.create("(a)b"))))
                 .when(codec).toYangInstanceIdentifierBlocking(any(InstanceIdentifier.class));
-        Mockito.doReturn(InstanceIdentifier.create(DataObject.class))
+        doReturn(InstanceIdentifier.create(DataObject.class))
                 .when(codecRegistry).fromYangInstanceIdentifier(any(YangInstanceIdentifier.class));
     }
 
