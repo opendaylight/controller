@@ -135,7 +135,7 @@ public abstract class BindingContext {
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        private static ListBindingContext newInstance(final Class<? extends DataObject> bindingClass,
+        static ListBindingContext newInstance(final Class<? extends DataObject> bindingClass,
                 final String listKeyValue) throws InstantiationException, IllegalAccessException,
                 IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
