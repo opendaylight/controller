@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +47,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     private static final FiniteDuration SCHEDULER_DURATION = new FiniteDuration(1, TimeUnit.SECONDS);
     private static final String[] SHARDS_TO_MONITOR = new String[] {"example"};
 
-    public ExampleRoleChangeListener(String memberName) {
+    public ExampleRoleChangeListener(final String memberName) {
         scheduleRegistrationListener(SCHEDULER_DURATION);
         populateRegistry(memberName);
     }
@@ -57,7 +57,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     @Override
-    protected void handleReceive(Object message) {
+    protected void handleReceive(final Object message) {
         if (message instanceof RegisterListener) {
             // called by the scheduler at intervals to register any unregistered notifiers
             sendRegistrationRequests();
@@ -79,7 +79,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
         }
     }
 
-    private void scheduleRegistrationListener(FiniteDuration interval) {
+    private void scheduleRegistrationListener(final FiniteDuration interval) {
         LOG.debug("--->scheduleRegistrationListener called.");
         registrationSchedule = getContext().system().scheduler().schedule(
             interval, interval, getSelf(), new RegisterListener(),
@@ -87,7 +87,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
 
     }
 
-    private void populateRegistry(String memberName) {
+    private void populateRegistry(final String memberName) {
         String notifier = new StringBuilder().append(NOTIFIER_AKKA_URL).append(memberName)
                 .append("/").append(memberName).append("-notifier").toString();
 
@@ -101,6 +101,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void sendRegistrationRequests() {
         for (Map.Entry<String, Boolean> entry : notifierRegistrationStatus.entrySet()) {
             if (!entry.getValue()) {
@@ -112,13 +113,13 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
                     notifier.tell(new RegisterRoleChangeListener(), getSelf());
 
                 } catch (Exception e) {
-                    LOG.error("ERROR!! Unable to send registration request to notifier {}", entry.getKey());
+                    LOG.error("ERROR!! Unable to send registration request to notifier {}", entry.getKey(), e);
                 }
             }
         }
     }
 
-    private void handleRegisterRoleChangeListenerReply(String senderId) {
+    private void handleRegisterRoleChangeListenerReply(final String senderId) {
         if (notifierRegistrationStatus.containsKey(senderId)) {
             notifierRegistrationStatus.put(senderId, true);
 
