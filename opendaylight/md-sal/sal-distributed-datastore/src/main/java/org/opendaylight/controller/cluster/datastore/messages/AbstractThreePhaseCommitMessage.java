@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -28,7 +29,7 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
 
     protected AbstractThreePhaseCommitMessage(final TransactionIdentifier transactionId, final short version) {
         super(version);
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionId = requireNonNull(transactionId);
     }
 
     public TransactionIdentifier getTransactionId() {
@@ -36,13 +37,13 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         transactionId = TransactionIdentifier.readFrom(in);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         transactionId.writeTo(out);
     }

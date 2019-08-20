@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
@@ -174,23 +176,23 @@ public final class SliceOptions {
         public SliceOptions build() {
             sealed = true;
 
-            Preconditions.checkNotNull(identifier, "identifier must be set");
-            Preconditions.checkNotNull(replyTo, "replyTo must be set");
-            Preconditions.checkNotNull(onFailureCallback, "onFailureCallback must be set");
-            Preconditions.checkState(fileBackedStream == null || message == null,
+            requireNonNull(identifier, "identifier must be set");
+            requireNonNull(replyTo, "replyTo must be set");
+            requireNonNull(onFailureCallback, "onFailureCallback must be set");
+            checkState(fileBackedStream == null || message == null,
                     "Only one of message and fileBackedStream can be set");
-            Preconditions.checkState(!(fileBackedStream == null && message == null),
+            checkState(!(fileBackedStream == null && message == null),
                     "One of message and fileBackedStream must be set");
-            Preconditions.checkState(sendToRef == null || sendToSelection == null,
+            checkState(sendToRef == null || sendToSelection == null,
                     "Only one of sendToRef and sendToSelection can be set");
-            Preconditions.checkState(!(sendToRef == null && sendToSelection == null),
+            checkState(!(sendToRef == null && sendToSelection == null),
                     "One of sendToRef and sendToSelection must be set");
 
             return new SliceOptions(this);
         }
 
         protected void checkSealed() {
-            Preconditions.checkState(!sealed, "Builder is already sealed - further modifications are not allowed");
+            checkState(!sealed, "Builder is already sealed - further modifications are not allowed");
         }
     }
 }

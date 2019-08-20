@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.messagebus.spi.EventSource;
 import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
@@ -25,7 +26,7 @@ class EventSourceRegistrationImpl<T extends EventSource> extends AbstractObjectR
      */
     EventSourceRegistrationImpl(T instance, EventSourceTopology eventSourceTopology) {
         super(instance);
-        this.eventSourceTopology = Preconditions.checkNotNull(eventSourceTopology);
+        this.eventSourceTopology = requireNonNull(eventSourceTopology);
     }
 
     @Override

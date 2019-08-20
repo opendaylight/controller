@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -39,7 +39,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
             this.replicatedLogEntry = replicatedLogEntry;
         }
 
-        static int estimatedSerializedSize(ReplicatedLogEntry replicatedLogEntry) {
+        static int estimatedSerializedSize(final ReplicatedLogEntry replicatedLogEntry) {
             return 8 /* index */ + 8 /* term */ + replicatedLogEntry.getData().size()
                     + 400 /* estimated extra padding for class info */;
         }
@@ -75,10 +75,10 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
      * @param term the term
      * @param payload the payload
      */
-    public SimpleReplicatedLogEntry(long index, long term, Payload payload) {
+    public SimpleReplicatedLogEntry(final long index, final long term, final Payload payload) {
         this.index = index;
         this.term = term;
-        this.payload = Preconditions.checkNotNull(payload);
+        this.payload = requireNonNull(payload);
     }
 
     @Override
@@ -107,7 +107,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public void setPersistencePending(boolean pending) {
+    public void setPersistencePending(final boolean pending) {
         persistencePending = pending;
     }
 
@@ -130,7 +130,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

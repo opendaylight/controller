@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public final class ReconnectingClientConnection<T extends BackendInfo> extends A
 
     ReconnectingClientConnection(final ConnectedClientConnection<T> oldConnection, final RequestException cause) {
         super(oldConnection);
-        this.cause = Preconditions.checkNotNull(cause);
+        this.cause = requireNonNull(cause);
     }
 
     @Override
@@ -38,7 +39,7 @@ public final class ReconnectingClientConnection<T extends BackendInfo> extends A
     @Override
     @SuppressWarnings("checkstyle:hiddenField")
     ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
-        this.cause = Preconditions.checkNotNull(cause);
+        this.cause = requireNonNull(cause);
         LOG.warn("Skipping reconnect of already-reconnecting connection {}", this);
         return current;
     }

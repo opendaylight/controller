@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.blueprint;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayDeque;
@@ -84,8 +85,8 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartContainerAndDependentsInternal(final Bundle forBundle) {
-        Preconditions.checkNotNull(blueprintExtenderService);
-        Preconditions.checkNotNull(quiesceParticipant);
+        requireNonNull(blueprintExtenderService);
+        requireNonNull(quiesceParticipant);
 
         // We use a LinkedHashSet to preserve insertion order as we walk the service usage hierarchy.
         Set<Bundle> containerBundlesSet = new LinkedHashSet<>();
@@ -223,7 +224,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         }
     }
 
-    private ServiceRegistration<?> registerEventHandler(final BundleContext bundleContext,
+    private static ServiceRegistration<?> registerEventHandler(final BundleContext bundleContext,
             final BlueprintListener listener) {
         return bundleContext.registerService(BlueprintListener.class.getName(), listener, new Hashtable<>());
     }

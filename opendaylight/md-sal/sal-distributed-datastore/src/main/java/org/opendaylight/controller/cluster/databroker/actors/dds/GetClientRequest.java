@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 
 /**
  * Request the ClientIdentifier from a particular actor. Response is an instance of {@link DataStoreClient}.
@@ -19,7 +20,7 @@ final class GetClientRequest {
     private final ActorRef replyTo;
 
     GetClientRequest(final ActorRef replyTo) {
-        this.replyTo = Preconditions.checkNotNull(replyTo);
+        this.replyTo = requireNonNull(replyTo);
     }
 
     ActorRef getReplyTo() {

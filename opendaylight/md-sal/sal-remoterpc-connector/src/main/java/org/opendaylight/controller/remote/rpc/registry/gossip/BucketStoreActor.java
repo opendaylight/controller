@@ -5,9 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
 
@@ -25,8 +27,6 @@ import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
@@ -89,9 +89,9 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private boolean persisting;
 
     protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
-        this.config = Preconditions.checkNotNull(config);
-        this.initialData = Preconditions.checkNotNull(initialData);
-        this.persistenceId = Preconditions.checkNotNull(persistenceId);
+        this.config = requireNonNull(config);
+        this.initialData = requireNonNull(initialData);
+        this.persistenceId = requireNonNull(persistenceId);
     }
 
     static ExecuteInActor getBucketsByMembersMessage(final Collection<Address> members) {
@@ -224,7 +224,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         if (bumpIncarnation) {
             LOG.debug("Version wrapped. incrementing incarnation");
 
-            Verify.verify(incarnation < Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
+            verify(incarnation < Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
             incarnation = incarnation + 1;
 
             persisting = true;
@@ -389,7 +389,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     private LocalBucket<T> getLocalBucket() {
-        Preconditions.checkState(localBucket != null, "Attempted to access local bucket before recovery completed");
+        checkState(localBucket != null, "Attempted to access local bucket before recovery completed");
         return localBucket;
     }
 }

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Local bucket implementation. Unlike a full-blown {@link Bucket}, this class is mutable and tracks when it has been
@@ -30,9 +31,9 @@ final class LocalBucket<T extends BucketData<T>> {
     private boolean bumpVersion;
 
     LocalBucket(final int incarnation, final T data) {
-        Preconditions.checkArgument(incarnation >= 0);
-        this.version = ((long)incarnation) << Integer.SIZE;
-        this.data = Preconditions.checkNotNull(data);
+        checkArgument(incarnation >= 0);
+        this.version = (long)incarnation << Integer.SIZE;
+        this.data = requireNonNull(data);
     }
 
     T getData() {
@@ -49,7 +50,7 @@ final class LocalBucket<T extends BucketData<T>> {
     }
 
     boolean setData(final T newData) {
-        this.data = Preconditions.checkNotNull(newData);
+        this.data = requireNonNull(newData);
         if (!bumpVersion) {
             return false;
         }

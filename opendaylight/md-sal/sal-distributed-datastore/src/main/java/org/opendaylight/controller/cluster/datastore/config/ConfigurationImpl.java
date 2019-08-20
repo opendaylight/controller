@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.config;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.AbstractMap.SimpleEntry;
@@ -56,7 +57,7 @@ public class ConfigurationImpl implements Configuration {
         this.namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
     }
 
-    private static Set<String> createAllShardNames(Iterable<ModuleConfig> moduleConfigs) {
+    private static Set<String> createAllShardNames(final Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         for (ModuleConfig moduleConfig : moduleConfigs) {
             builder.addAll(moduleConfig.getShardNames());
@@ -65,7 +66,7 @@ public class ConfigurationImpl implements Configuration {
         return builder.build();
     }
 
-    private static Map<String, String> createNamespaceToModuleName(Iterable<ModuleConfig> moduleConfigs) {
+    private static Map<String, String> createNamespaceToModuleName(final Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         for (ModuleConfig moduleConfig : moduleConfigs) {
             if (moduleConfig.getNamespace() != null) {
@@ -78,7 +79,7 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public Collection<String> getMemberShardNames(final MemberName memberName) {
-        Preconditions.checkNotNull(memberName, "memberName should not be null");
+        requireNonNull(memberName, "memberName should not be null");
 
         List<String> shards = new ArrayList<>();
         for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
@@ -94,14 +95,14 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public String getModuleNameFromNameSpace(final String nameSpace) {
-        Preconditions.checkNotNull(nameSpace, "nameSpace should not be null");
+        requireNonNull(nameSpace, "nameSpace should not be null");
 
         return namespaceToModuleName.get(nameSpace);
     }
 
     @Override
-    public ShardStrategy getStrategyForModule(String moduleName) {
-        Preconditions.checkNotNull(moduleName, "moduleName should not be null");
+    public ShardStrategy getStrategyForModule(final String moduleName) {
+        requireNonNull(moduleName, "moduleName should not be null");
 
         ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
         return moduleConfig != null ? moduleConfig.getShardStrategy() : null;
@@ -109,7 +110,7 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public String getShardNameForModule(final String moduleName) {
-        Preconditions.checkNotNull(moduleName, "moduleName should not be null");
+        requireNonNull(moduleName, "moduleName should not be null");
 
         ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
         Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
@@ -119,11 +120,10 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public String getShardNameForPrefix(final DOMDataTreeIdentifier prefix) {
-        Preconditions.checkNotNull(prefix, "prefix should not be null");
+        requireNonNull(prefix, "prefix should not be null");
 
-        Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry =
-                new SimpleEntry<>(
-                        new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
+        Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry = new SimpleEntry<>(
+                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
 
         for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
             if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()
@@ -157,7 +157,7 @@ public class ConfigurationImpl implements Configuration {
     }
 
     private static void checkNotNullShardName(final String shardName) {
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        requireNonNull(shardName, "shardName should not be null");
     }
 
     @Override
@@ -176,8 +176,8 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public synchronized void addModuleShardConfiguration(ModuleShardConfiguration config) {
-        Preconditions.checkNotNull(config, "ModuleShardConfiguration should not be null");
+    public synchronized void addModuleShardConfiguration(final ModuleShardConfiguration config) {
+        requireNonNull(config, "ModuleShardConfiguration should not be null");
 
         ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName())
                 .nameSpace(config.getNamespace().toASCIIString())
@@ -193,17 +193,14 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public void addPrefixShardConfiguration(final PrefixShardConfiguration config) {
-        Preconditions.checkNotNull(config, "PrefixShardConfiguration cannot be null");
-        addPrefixConfig(config);
+        addPrefixConfig(requireNonNull(config, "PrefixShardConfiguration cannot be null"));
         allShardNames = ImmutableSet.<String>builder().addAll(allShardNames)
                 .add(ClusterUtils.getCleanShardName(config.getPrefix().getRootIdentifier())).build();
     }
 
     @Override
     public void removePrefixShardConfiguration(final DOMDataTreeIdentifier prefix) {
-        Preconditions.checkNotNull(prefix, "Prefix cannot be null");
-
-        removePrefixConfig(prefix);
+        removePrefixConfig(requireNonNull(prefix, "Prefix cannot be null"));
 
         final HashSet<String> temp = new HashSet<>(allShardNames);
         temp.remove(ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
@@ -228,20 +225,20 @@ public class ConfigurationImpl implements Configuration {
         prefixConfigMap = ImmutableMap.copyOf(newPrefixConfigMap);
     }
 
-    private ShardStrategy createShardStrategy(String moduleName, String shardStrategyName) {
+    private ShardStrategy createShardStrategy(final String moduleName, final String shardStrategyName) {
         return ShardStrategyFactory.newShardStrategyInstance(moduleName, shardStrategyName, this);
     }
 
     @Override
-    public boolean isShardConfigured(String shardName) {
+    public boolean isShardConfigured(final String shardName) {
         checkNotNullShardName(shardName);
         return allShardNames.contains(shardName);
     }
 
     @Override
-    public void addMemberReplicaForShard(String shardName, MemberName newMemberName) {
+    public void addMemberReplicaForShard(final String shardName, final MemberName newMemberName) {
         checkNotNullShardName(shardName);
-        Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
+        requireNonNull(newMemberName, "MemberName should not be null");
 
         for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
@@ -255,9 +252,9 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void removeMemberReplicaForShard(String shardName, MemberName newMemberName) {
+    public void removeMemberReplicaForShard(final String shardName, final MemberName newMemberName) {
         checkNotNullShardName(shardName);
-        Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
+        requireNonNull(newMemberName, "MemberName should not be null");
 
         for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
@@ -272,11 +269,10 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public ShardStrategy getStrategyForPrefix(final DOMDataTreeIdentifier prefix) {
-        Preconditions.checkNotNull(prefix, "Prefix cannot be null");
+        requireNonNull(prefix, "Prefix cannot be null");
         // FIXME using prefix tables like in mdsal will be better
-        Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry =
-                new SimpleEntry<>(
-                        new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
+        Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry = new SimpleEntry<>(
+                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
 
         for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
             if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()

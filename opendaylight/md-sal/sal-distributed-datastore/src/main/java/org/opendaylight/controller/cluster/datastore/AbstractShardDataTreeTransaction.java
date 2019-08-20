@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -29,9 +31,9 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
 
     AbstractShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
         final T snapshot) {
-        this.parent = Preconditions.checkNotNull(parent);
-        this.snapshot = Preconditions.checkNotNull(snapshot);
-        this.id = Preconditions.checkNotNull(id);
+        this.parent = requireNonNull(parent);
+        this.snapshot = requireNonNull(snapshot);
+        this.id = requireNonNull(id);
     }
 
     @Override
@@ -66,7 +68,7 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
     }
 
     final void abort(final Runnable callback) {
-        Preconditions.checkState(close(), "Transaction is already closed");
+        checkState(close(), "Transaction is already closed");
         parent.abortTransaction(this, callback);
     }
 

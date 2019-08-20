@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.List;
@@ -35,13 +37,13 @@ final class CohortEntry {
 
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
         this.cohort = null;
-        this.transaction = Preconditions.checkNotNull(transaction);
+        this.transaction = requireNonNull(transaction);
         this.transactionId = transaction.getIdentifier();
         this.clientVersion = clientVersion;
     }
 
     private CohortEntry(final ShardDataTreeCohort cohort, final short clientVersion) {
-        this.cohort = Preconditions.checkNotNull(cohort);
+        this.cohort = requireNonNull(cohort);
         this.transactionId = cohort.getIdentifier();
         this.transaction = null;
         this.clientVersion = clientVersion;
@@ -120,7 +122,7 @@ final class CohortEntry {
     }
 
     void ready(final Optional<SortedSet<String>> participatingShardNames, final CohortDecorator cohortDecorator) {
-        Preconditions.checkState(cohort == null, "cohort was already set");
+        checkState(cohort == null, "cohort was already set");
 
         cohort = transaction.ready(participatingShardNames);
 

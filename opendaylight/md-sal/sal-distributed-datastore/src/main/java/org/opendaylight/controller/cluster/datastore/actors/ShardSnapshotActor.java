@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -34,9 +35,9 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
 
         SerializeSnapshot(final ShardDataTreeSnapshot snapshot, final Optional<OutputStream> installSnapshotStream,
                 final ActorRef replyTo) {
-            this.snapshot = Preconditions.checkNotNull(snapshot);
-            this.installSnapshotStream = Preconditions.checkNotNull(installSnapshotStream);
-            this.replyTo = Preconditions.checkNotNull(replyTo);
+            this.snapshot = requireNonNull(snapshot);
+            this.installSnapshotStream = requireNonNull(installSnapshotStream);
+            this.replyTo = requireNonNull(replyTo);
         }
 
         ShardDataTreeSnapshot getSnapshot() {

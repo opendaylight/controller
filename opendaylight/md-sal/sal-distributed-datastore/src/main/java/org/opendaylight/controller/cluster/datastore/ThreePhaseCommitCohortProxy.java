@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -213,7 +212,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     }
 
     private Future<Iterable<Object>> invokeCohorts(final MessageSupplier messageSupplier) {
-        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(cohorts.size());
+        List<Future<Object>> futureList = new ArrayList<>(cohorts.size());
         for (CohortInfo cohort : cohorts) {
             Object message = messageSupplier.newMessage(transactionId, cohort.getActorVersion());
 

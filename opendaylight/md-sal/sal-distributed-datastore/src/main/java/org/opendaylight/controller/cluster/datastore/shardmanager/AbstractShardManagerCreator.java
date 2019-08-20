@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Props;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.CountDownLatch;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -37,14 +39,14 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     }
 
     protected final void checkSealed() {
-        Preconditions.checkState(!sealed, "Builder is already sealed - further modifications are not allowed");
+        checkState(!sealed, "Builder is already sealed - further modifications are not allowed");
     }
 
     ClusterWrapper getCluster() {
         return cluster;
     }
 
-    public T cluster(ClusterWrapper newCluster) {
+    public T cluster(final ClusterWrapper newCluster) {
         checkSealed();
         this.cluster = newCluster;
         return self();
@@ -54,7 +56,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return configuration;
     }
 
-    public T configuration(Configuration newConfiguration) {
+    public T configuration(final Configuration newConfiguration) {
         checkSealed();
         this.configuration = newConfiguration;
         return self();
@@ -66,7 +68,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T datastoreContextFactory(final DatastoreContextFactory newDatastoreContextFactory) {
         checkSealed();
-        this.datastoreContextFactory = Preconditions.checkNotNull(newDatastoreContextFactory);
+        this.datastoreContextFactory = requireNonNull(newDatastoreContextFactory);
         return self();
     }
 
@@ -84,7 +86,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return waitTillReadyCountDownLatch;
     }
 
-    public T waitTillReadyCountDownLatch(CountDownLatch newWaitTillReadyCountDownLatch) {
+    public T waitTillReadyCountDownLatch(final CountDownLatch newWaitTillReadyCountDownLatch) {
         checkSealed();
         this.waitTillReadyCountDownLatch = newWaitTillReadyCountDownLatch;
         return self();
@@ -94,7 +96,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return primaryShardInfoCache;
     }
 
-    public T primaryShardInfoCache(PrimaryShardInfoFutureCache newPrimaryShardInfoCache) {
+    public T primaryShardInfoCache(final PrimaryShardInfoFutureCache newPrimaryShardInfoCache) {
         checkSealed();
         this.primaryShardInfoCache = newPrimaryShardInfoCache;
         return self();
@@ -104,7 +106,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return restoreFromSnapshot;
     }
 
-    public T restoreFromSnapshot(DatastoreSnapshot newRestoreFromSnapshot) {
+    public T restoreFromSnapshot(final DatastoreSnapshot newRestoreFromSnapshot) {
         checkSealed();
         this.restoreFromSnapshot = newRestoreFromSnapshot;
         return self();
@@ -112,12 +114,12 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     protected void verify() {
         sealed = true;
-        Preconditions.checkNotNull(cluster, "cluster should not be null");
-        Preconditions.checkNotNull(configuration, "configuration should not be null");
-        Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
-        Preconditions.checkNotNull(distributedDataStore, "distributedDataStore should not be null");
-        Preconditions.checkNotNull(waitTillReadyCountDownLatch, "waitTillReadyCountdownLatch should not be null");
-        Preconditions.checkNotNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
+        requireNonNull(cluster, "cluster should not be null");
+        requireNonNull(configuration, "configuration should not be null");
+        requireNonNull(datastoreContextFactory, "datastoreContextFactory should not be null");
+        requireNonNull(distributedDataStore, "distributedDataStore should not be null");
+        requireNonNull(waitTillReadyCountDownLatch, "waitTillReadyCountdownLatch should not be null");
+        requireNonNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
 
     public Props props() {

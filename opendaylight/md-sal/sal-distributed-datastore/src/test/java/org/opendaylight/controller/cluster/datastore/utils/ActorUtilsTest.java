@@ -29,11 +29,11 @@ import akka.japi.Creator;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.typesafe.config.ConfigFactory;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -74,10 +74,9 @@ public class ActorUtilsTest extends AbstractActorTest {
     }
 
     private static final class MockShardManager extends UntypedAbstractActor {
-
+        private final Map<String,Object> findPrimaryResponses = new HashMap<>();
         private final boolean found;
         private final ActorRef actorRef;
-        private final Map<String,Object> findPrimaryResponses = Maps.newHashMap();
 
         private MockShardManager(final boolean found, final ActorRef actorRef) {
 

@@ -5,8 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
@@ -17,7 +19,6 @@ import akka.dispatch.OnComplete;
 import akka.dispatch.Recover;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -109,11 +110,11 @@ class CompositeDataTreeCohort {
 
     CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
         final SchemaContext schema, final Executor callbackExecutor, final Timeout timeout) {
-        this.registry = Preconditions.checkNotNull(registry);
-        this.txId = Preconditions.checkNotNull(transactionID);
-        this.schema = Preconditions.checkNotNull(schema);
-        this.callbackExecutor = Preconditions.checkNotNull(callbackExecutor);
-        this.timeout = Preconditions.checkNotNull(timeout);
+        this.registry = requireNonNull(registry);
+        this.txId = requireNonNull(transactionID);
+        this.schema = requireNonNull(schema);
+        this.callbackExecutor = requireNonNull(callbackExecutor);
+        this.timeout = requireNonNull(timeout);
     }
 
     void reset() {
@@ -282,7 +283,7 @@ class CompositeDataTreeCohort {
     }
 
     void changeStateFrom(final State expected, final State followup) {
-        Preconditions.checkState(state == expected);
+        checkState(state == expected);
         state = followup;
     }
 }

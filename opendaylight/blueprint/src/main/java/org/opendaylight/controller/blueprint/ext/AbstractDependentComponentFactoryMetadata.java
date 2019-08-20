@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +51,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     private boolean stoppedServiceRecipes;
 
     protected AbstractDependentComponentFactoryMetadata(final String id) {
-        this.id = Preconditions.checkNotNull(id);
+        this.id = requireNonNull(id);
     }
 
     @Override

@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -64,8 +64,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     private long replicatedToAllIndex = -1;
 
     AbstractRaftActorBehavior(final RaftActorContext context, final RaftState state) {
-        this.context = Preconditions.checkNotNull(context);
-        this.state = Preconditions.checkNotNull(state);
+        this.context = requireNonNull(context);
+        this.state = requireNonNull(state);
         this.log = context.getLogger();
 
         logName = String.format("%s (%s)", context.getId(), state);

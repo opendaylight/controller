@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -26,12 +28,12 @@ public class OperationLimiter  {
     private final int maxPermits;
 
     OperationLimiter(final TransactionIdentifier identifier, final int maxPermits, final long acquireTimeoutSeconds) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
 
-        Preconditions.checkArgument(acquireTimeoutSeconds >= 0);
+        checkArgument(acquireTimeoutSeconds >= 0);
         this.acquireTimeout = TimeUnit.SECONDS.toNanos(acquireTimeoutSeconds);
 
-        Preconditions.checkArgument(maxPermits >= 0);
+        checkArgument(maxPermits >= 0);
         this.maxPermits = maxPermits;
         this.semaphore = new Semaphore(maxPermits);
     }
@@ -60,7 +62,7 @@ public class OperationLimiter  {
         release(1);
     }
 
-    void release(int permits) {
+    void release(final int permits) {
         this.semaphore.release(permits);
     }
 

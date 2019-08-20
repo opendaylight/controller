@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Status.Failure;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -56,13 +56,13 @@ class EntityOwnershipShardCommitCoordinator {
     private Cancellable retryCommitSchedule;
     private long transactionIDCounter = 0;
 
-    EntityOwnershipShardCommitCoordinator(MemberName localMemberName, Logger log) {
-        this.log = Preconditions.checkNotNull(log);
+    EntityOwnershipShardCommitCoordinator(final MemberName localMemberName, final Logger log) {
+        this.log = requireNonNull(log);
         historyId = new LocalHistoryIdentifier(
                 ClientIdentifier.create(FrontendIdentifier.create(localMemberName, FRONTEND_TYPE), 0), 0);
     }
 
-    boolean handleMessage(Object message, EntityOwnershipShard shard) {
+    boolean handleMessage(final Object message, final EntityOwnershipShard shard) {
         boolean handled = true;
         if (CommitTransactionReply.isSerializedType(message)) {
             // Successful reply from a local commit.
@@ -79,7 +79,7 @@ class EntityOwnershipShardCommitCoordinator {
         return handled;
     }
 
-    private void retryInflightCommit(EntityOwnershipShard shard) {
+    private void retryInflightCommit(final EntityOwnershipShard shard) {
         // Shouldn't be null happen but verify anyway
         if (inflightCommit == null) {
             return;
@@ -94,7 +94,7 @@ class EntityOwnershipShardCommitCoordinator {
         }
     }
 
-    void inflightCommitFailure(Throwable cause, EntityOwnershipShard shard) {
+    void inflightCommitFailure(final Throwable cause, final EntityOwnershipShard shard) {
         // This should've originated from a failed inflight commit but verify anyway
         if (inflightCommit == null) {
             return;
@@ -111,7 +111,7 @@ class EntityOwnershipShardCommitCoordinator {
         scheduleInflightCommitRetry(shard);
     }
 
-    private void scheduleInflightCommitRetry(EntityOwnershipShard shard) {
+    private void scheduleInflightCommitRetry(final EntityOwnershipShard shard) {
         FiniteDuration duration = shard.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval();
 
         log.debug("Scheduling retry for BatchedModifications commit {} in {}",
@@ -121,7 +121,7 @@ class EntityOwnershipShardCommitCoordinator {
                 COMMIT_RETRY_MESSAGE, shard.getContext().dispatcher(), ActorRef.noSender());
     }
 
-    void inflightCommitSucceeded(EntityOwnershipShard shard) {
+    void inflightCommitSucceeded(final EntityOwnershipShard shard) {
         // Shouldn't be null but verify anyway
         if (inflightCommit == null) {
             return;
@@ -137,7 +137,7 @@ class EntityOwnershipShardCommitCoordinator {
         commitNextBatch(shard);
     }
 
-    void commitNextBatch(EntityOwnershipShard shard) {
+    void commitNextBatch(final EntityOwnershipShard shard) {
         if (inflightCommit != null || pendingModifications.isEmpty() || !shard.hasLeader()) {
             return;
         }
@@ -159,11 +159,11 @@ class EntityOwnershipShardCommitCoordinator {
         shard.tryCommitModifications(inflightCommit);
     }
 
-    void commitModification(Modification modification, EntityOwnershipShard shard) {
+    void commitModification(final Modification modification, final EntityOwnershipShard shard) {
         commitModifications(ImmutableList.of(modification), shard);
     }
 
-    void commitModifications(List<Modification> modifications, EntityOwnershipShard shard) {
+    void commitModifications(final List<Modification> modifications, final EntityOwnershipShard shard) {
         if (modifications.isEmpty()) {
             return;
         }
@@ -183,7 +183,7 @@ class EntityOwnershipShardCommitCoordinator {
         }
     }
 
-    void onStateChanged(EntityOwnershipShard shard, boolean isLeader) {
+    void onStateChanged(final EntityOwnershipShard shard, final boolean isLeader) {
         shard.possiblyRemoveAllInitialCandidates(shard.getLeader());
 
         possiblyPrunePendingCommits(shard, isLeader);
@@ -204,7 +204,7 @@ class EntityOwnershipShardCommitCoordinator {
         }
     }
 
-    private void possiblyPrunePendingCommits(EntityOwnershipShard shard, boolean isLeader) {
+    private void possiblyPrunePendingCommits(final EntityOwnershipShard shard, final boolean isLeader) {
         // If we were the leader and transitioned to follower, we'll try to forward pending commits to the new leader.
         // However certain commits, e.g. entity owner changes, should only be committed by a valid leader as the
         // criteria used to determine the commit may be stale. Since we're no longer a valid leader, we should not
@@ -226,7 +226,7 @@ class EntityOwnershipShardCommitCoordinator {
         }
     }
 
-    private @Nullable BatchedModifications pruneModifications(BatchedModifications toPrune) {
+    private @Nullable BatchedModifications pruneModifications(final BatchedModifications toPrune) {
         BatchedModifications prunedModifications = new BatchedModifications(toPrune.getTransactionId(),
                 toPrune.getVersion());
         prunedModifications.setDoCommitOnReady(toPrune.isDoCommitOnReady());
@@ -243,7 +243,7 @@ class EntityOwnershipShardCommitCoordinator {
         return !prunedModifications.getModifications().isEmpty() ? prunedModifications : null;
     }
 
-    private boolean canForwardModificationToNewLeader(Modification mod) {
+    private boolean canForwardModificationToNewLeader(final Modification mod) {
         // If this is a WRITE of entity owner we don't want to forward it to a new leader since the criteria used
         // to determine the new owner might be stale.
         if (mod instanceof WriteModification) {

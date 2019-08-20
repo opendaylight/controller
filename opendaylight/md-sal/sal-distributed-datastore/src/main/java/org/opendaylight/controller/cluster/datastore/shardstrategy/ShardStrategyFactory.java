@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -21,16 +22,14 @@ public class ShardStrategyFactory {
     private final LogicalDatastoreType logicalStoreType;
 
     public ShardStrategyFactory(final Configuration configuration, final LogicalDatastoreType logicalStoreType) {
-        Preconditions.checkState(configuration != null, "configuration should not be missing");
+        checkState(configuration != null, "configuration should not be missing");
         this.configuration = configuration;
-        this.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
+        this.logicalStoreType = requireNonNull(logicalStoreType);
     }
 
     public ShardStrategy getStrategy(final YangInstanceIdentifier path) {
-        Preconditions.checkNotNull(path, "path should not be null");
-
         // try with the legacy module based shard mapping
-        final String moduleName = getModuleName(path);
+        final String moduleName = getModuleName(requireNonNull(path, "path should not be null"));
         final ShardStrategy shardStrategy = configuration.getStrategyForModule(moduleName);
         if (shardStrategy == null) {
             // retry with prefix based sharding

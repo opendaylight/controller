@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.lmax.disruptor.EventFactory;
@@ -40,8 +41,8 @@ final class DOMNotificationRouterEvent {
     ListenableFuture<Void> initialize(final DOMNotification notification,
                                       final Collection<ListenerRegistration<? extends DOMNotificationListener>>
                                               subscribers) {
-        this.notification = Preconditions.checkNotNull(notification);
-        this.subscribers = Preconditions.checkNotNull(subscribers);
+        this.notification = requireNonNull(notification);
+        this.subscribers = requireNonNull(subscribers);
         this.future = SettableFuture.create();
         return this.future;
     }

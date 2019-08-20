@@ -16,7 +16,7 @@ import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.actor.Status;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -480,7 +480,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (getCurrentBehavior() instanceof AbstractLeader) {
             AbstractLeader leader = (AbstractLeader)getCurrentBehavior();
             Collection<String> followerIds = leader.getFollowerIds();
-            List<FollowerInfo> followerInfoList = Lists.newArrayListWithCapacity(followerIds.size());
+            List<FollowerInfo> followerInfoList = new ArrayList<>(followerIds.size());
             for (String id: followerIds) {
                 final FollowerLogInformation info = leader.getFollower(id);
                 followerInfoList.add(new FollowerInfo(id, info.getNextIndex(), info.getMatchIndex(),

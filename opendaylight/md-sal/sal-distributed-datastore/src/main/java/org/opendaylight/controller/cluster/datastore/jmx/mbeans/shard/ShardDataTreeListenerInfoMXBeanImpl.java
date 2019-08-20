@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +40,7 @@ public class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implemen
     public ShardDataTreeListenerInfoMXBeanImpl(final String shardName, final String mxBeanType,
             final ActorRef shardActor) {
         super(shardName, mxBeanType, JMX_CATEGORY);
-        stateCache = new OnDemandShardStateCache(shardName, Preconditions.checkNotNull(shardActor));
+        stateCache = new OnDemandShardStateCache(shardName, requireNonNull(shardActor));
     }
 
     @Override

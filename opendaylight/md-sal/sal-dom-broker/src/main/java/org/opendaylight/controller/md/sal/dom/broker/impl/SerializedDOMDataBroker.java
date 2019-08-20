@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -55,7 +56,7 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
     public SerializedDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores,
                                    final ListeningExecutorService executor) {
         super(datastores);
-        this.executor = Preconditions.checkNotNull(executor, "executor must not be null.");
+        this.executor = requireNonNull(executor, "executor must not be null.");
     }
 
     public DurationStatisticsTracker getCommitStatsTracker() {
@@ -65,8 +66,8 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
     @Override
     protected <T> ListenableFuture<T> commit(final DOMDataWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts, final Supplier<T> futureValueSupplier) {
-        Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
-        Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
+        checkArgument(transaction != null, "Transaction must not be null.");
+        checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
         ListenableFuture<T> commitFuture;

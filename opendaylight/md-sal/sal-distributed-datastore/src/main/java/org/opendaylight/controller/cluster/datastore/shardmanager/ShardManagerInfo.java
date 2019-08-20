@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.shardmanager;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
-import com.google.common.base.Preconditions;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -37,8 +37,8 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
     ShardManagerInfo(final ActorRef shardManager, final MemberName memberName, final String name,
         final String mxBeanType) {
         super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
-        this.shardManager = Preconditions.checkNotNull(shardManager);
-        this.memberName = Preconditions.checkNotNull(memberName);
+        this.shardManager = requireNonNull(shardManager);
+        this.memberName = requireNonNull(memberName);
     }
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})

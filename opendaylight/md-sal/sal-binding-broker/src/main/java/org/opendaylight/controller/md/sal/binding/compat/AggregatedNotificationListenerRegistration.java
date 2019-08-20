@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
@@ -31,7 +32,7 @@ abstract class AggregatedNotificationListenerRegistration<N extends Notification
     protected AggregatedNotificationListenerRegistration(final Class<? extends Notification> type,
             final NotificationListener<N> listener, final A aggregator) {
         super(type, listener);
-        this.aggregator = Preconditions.checkNotNull(aggregator);
+        this.aggregator = requireNonNull(aggregator);
     }
 
     protected A getAggregator() {

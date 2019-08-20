@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_NODE_ID;
@@ -30,7 +31,6 @@ import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.pattern.Patterns;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -705,8 +705,8 @@ class EntityOwnershipShard extends Shard {
         @Override
         protected void verify() {
             super.verify();
-            Preconditions.checkNotNull(localMemberName, "localMemberName should not be null");
-            Preconditions.checkNotNull(ownerSelectionStrategyConfig, "ownerSelectionStrategyConfig should not be null");
+            requireNonNull(localMemberName, "localMemberName should not be null");
+            requireNonNull(ownerSelectionStrategyConfig, "ownerSelectionStrategyConfig should not be null");
         }
     }
 }

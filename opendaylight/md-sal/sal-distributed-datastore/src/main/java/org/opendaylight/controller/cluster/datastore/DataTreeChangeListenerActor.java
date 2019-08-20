@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Props;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
@@ -32,8 +33,8 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
 
     private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
             final YangInstanceIdentifier registeredPath) {
-        this.listener = Preconditions.checkNotNull(listener);
-        this.registeredPath = Preconditions.checkNotNull(registeredPath);
+        this.listener = requireNonNull(listener);
+        this.registeredPath = requireNonNull(registeredPath);
     }
 
     @Override
