@@ -25,11 +25,10 @@ public interface RpcConsumerRegistry extends BindingAwareService, BindingService
      * Returns an implementation of a requested RPC service.
      *
      * <p>
-     * The returned instance is not an actual implementation of the RPC service
-     * interface, but a proxy implementation of the interface that forwards to
-     * an actual implementation, if any.
-     * <p>
+     * The returned instance is not an actual implementation of the RPC service interface, but a proxy implementation
+     * of the interface that forwards to an actual implementation, if any.
      *
+     * <p>
      * The following describes the behavior of the proxy when invoking RPC methods:
      * <ul>
      * <li>If an actual implementation is registered with the MD-SAL, all invocations are
@@ -40,9 +39,8 @@ public interface RpcConsumerRegistry extends BindingAwareService, BindingService
      * If any are invalid, an {@link IllegalArgumentException} is thrown.
      * </ul>
      *
-     * The returned proxy is automatically updated with the most recent
-     * registered implementation.
-     *
+     * <p>
+     * The returned proxy is automatically updated with the most recent registered implementation.
      * {@code
      *   final Future<RpcResult<SomeRpcOutput>> future = someRpcService.someRpc( ... );
      *   Futures.addCallback(future,

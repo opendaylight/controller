@@ -31,7 +31,9 @@ public final class SchemaContextSingleton {
         return staticSchemaContext;
     }
 
-    private SchemaContextSingleton() { }
+    private SchemaContextSingleton() {
+
+    }
 
     @FunctionalInterface
     public interface Supplier<T> {
