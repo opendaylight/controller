@@ -8,9 +8,9 @@
 package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.eclipse.jdt.annotation.Nullable;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
@@ -49,7 +51,7 @@ import org.opendaylight.yangtools.yang.model.util.EffectiveAugmentationSchema;
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
     private final T identifier;
-    private final Optional<DataSchemaNode> dataSchemaNode;
+    private final DataSchemaNode dataSchemaNode;
 
     @Override
     public T getIdentifier() {
@@ -58,11 +60,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     protected DataNormalizationOperation(final T identifier, final SchemaNode schema) {
         this.identifier = identifier;
-        if (schema instanceof DataSchemaNode) {
-            this.dataSchemaNode = Optional.of((DataSchemaNode) schema);
-        } else {
-            this.dataSchemaNode = Optional.absent();
-        }
+        dataSchemaNode = schema instanceof DataSchemaNode ? (DataSchemaNode)schema : null;
     }
 
     public boolean isMixin() {
@@ -84,9 +82,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     public abstract boolean isLeaf();
 
+    @SuppressModernizer
     public Optional<DataSchemaNode> getDataSchemaNode() {
-        // FIXME
-        return dataSchemaNode;
+        return Optional.fromNullable(dataSchemaNode);
     }
 
     private abstract static class SimpleTypeNormalization<T extends PathArgument>
@@ -206,14 +204,13 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         private static DataNormalizationOperation<?> fromSchemaAndQNameChecked(final DataNodeContainer schema,
                 final QName child) throws DataNormalizationException {
 
-            final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
-            if (!potential.isPresent()) {
+            final DataSchemaNode result = findChildSchemaNode(schema, child);
+            if (result == null) {
                 throw new DataNormalizationException(String.format(
                         "Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child,
                         schema,schema.getChildNodes()));
             }
 
-            final DataSchemaNode result = potential.get();
             // We try to look up if this node was added by augmentation
             if (schema instanceof DataSchemaNode && result.isAugmenting()) {
                 return fromAugmentation(schema, (AugmentationTarget) schema, result);
@@ -352,12 +349,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         @Override
         protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema,
                 final QName child) {
-            final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
-            if (!potential.isPresent()) {
+            final DataSchemaNode result = findChildSchemaNode(schema, child);
+            if (result == null) {
                 return null;
             }
 
-            final DataSchemaNode result = potential.get();
             // We try to look up if this node was added by augmentation
             if (schema instanceof DataSchemaNode && result.isAugmenting()) {
                 return fromAugmentation(schema, (AugmentationTarget) schema, result);
@@ -513,28 +509,20 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,
-            final QName child) {
-        DataSchemaNode potential = parent.getDataChildByName(child);
-        if (potential == null) {
-            final Iterable<ChoiceSchemaNode> choices = FluentIterable.from(parent.getChildNodes())
-                    .filter(ChoiceSchemaNode.class);
-            potential = findChoice(choices, child);
-        }
-        return Optional.fromNullable(potential);
+    private static @Nullable DataSchemaNode findChildSchemaNode(final DataNodeContainer parent, final QName child) {
+        final DataSchemaNode potential = parent.getDataChildByName(child);
+        return potential != null ? potential : findChoice(parent, child);
     }
 
-    private static ChoiceSchemaNode findChoice(final Iterable<ChoiceSchemaNode> choices, final QName child) {
-        ChoiceSchemaNode foundChoice = null;
-        choiceLoop: for (final ChoiceSchemaNode choice : choices) {
+    private static @Nullable ChoiceSchemaNode findChoice(final DataNodeContainer parent, final QName child) {
+        for (final ChoiceSchemaNode choice : Iterables.filter(parent.getChildNodes(), ChoiceSchemaNode.class)) {
             for (final CaseSchemaNode caze : choice.getCases().values()) {
-                if (findChildSchemaNode(caze, child).isPresent()) {
-                    foundChoice = choice;
-                    break choiceLoop;
+                if (findChildSchemaNode(caze, child) != null) {
+                    return choice;
                 }
             }
         }
-        return foundChoice;
+        return null;
     }
 
     public static AugmentationIdentifier augmentationIdentifierFrom(final AugmentationSchemaNode augmentation) {
