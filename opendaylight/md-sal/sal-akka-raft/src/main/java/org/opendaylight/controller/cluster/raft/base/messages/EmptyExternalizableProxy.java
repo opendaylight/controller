@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Externalizable;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -23,16 +24,16 @@ public abstract class EmptyExternalizableProxy implements Externalizable {
 
     private final Object readResolveTo;
 
-    protected EmptyExternalizableProxy(Object readResolveTo) {
-        this.readResolveTo = Preconditions.checkNotNull(readResolveTo);
+    protected EmptyExternalizableProxy(final Object readResolveTo) {
+        this.readResolveTo = requireNonNull(readResolveTo);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) {
+    public void writeExternal(final ObjectOutput out) {
     }
 
     @Override
-    public void readExternal(ObjectInput in) {
+    public void readExternal(final ObjectInput in) {
     }
 
     protected Object readResolve() {

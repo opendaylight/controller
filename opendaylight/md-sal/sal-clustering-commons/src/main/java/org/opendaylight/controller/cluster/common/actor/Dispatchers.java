@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import scala.concurrent.ExecutionContext;
 
 public class Dispatchers {
@@ -50,8 +50,7 @@ public class Dispatchers {
     }
 
     public Dispatchers(final akka.dispatch.Dispatchers dispatchers) {
-        Preconditions.checkNotNull(dispatchers, "dispatchers should not be null");
-        this.dispatchers = dispatchers;
+        this.dispatchers = requireNonNull(dispatchers, "dispatchers should not be null");
     }
 
     public ExecutionContext getDispatcher(final DispatcherType dispatcherType) {

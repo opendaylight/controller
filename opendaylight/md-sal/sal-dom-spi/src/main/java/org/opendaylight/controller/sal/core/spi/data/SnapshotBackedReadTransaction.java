@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -58,7 +57,7 @@ public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTran
     SnapshotBackedReadTransaction(final T identifier, final boolean debug, final DataTreeSnapshot snapshot,
             final TransactionClosePrototype<T> closeImpl) {
         super(identifier, debug);
-        this.stableSnapshot = Preconditions.checkNotNull(snapshot);
+        this.stableSnapshot = requireNonNull(snapshot);
         this.closeImpl = closeImpl;
         LOG.debug("ReadOnly Tx: {} allocated with snapshot {}", identifier, snapshot);
     }
@@ -82,7 +81,7 @@ public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTran
     @SuppressWarnings("checkstyle:IllegalCatch")
     public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
-        checkNotNull(path, "Path must not be null.");
+        requireNonNull(path, "Path must not be null.");
 
         final DataTreeSnapshot snapshot = stableSnapshot;
         if (snapshot == null) {
@@ -100,7 +99,7 @@ public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTran
     @Override
     public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Exists: {}", getIdentifier(), path);
-        checkNotNull(path, "Path must not be null.");
+        requireNonNull(path, "Path must not be null.");
 
         try {
             return Futures.immediateCheckedFuture(read(path).checkedGet().isPresent());

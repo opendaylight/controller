@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.LinkedListMultimap;
@@ -47,7 +48,7 @@ final class DOMRpcRoutingTable {
 
     private DOMRpcRoutingTable(final Map<SchemaPath, AbstractDOMRpcRoutingTableEntry> rpcs,
                                final SchemaContext schemaContext) {
-        this.rpcs = Preconditions.checkNotNull(rpcs);
+        this.rpcs = requireNonNull(rpcs);
         this.schemaContext = schemaContext;
     }
 
