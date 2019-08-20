@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -67,6 +68,7 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
     }
 
     @Test
+    @SuppressModernizer
     public void testReadWriteOperations() throws Exception {
         doReturn(Futures.immediateCheckedFuture(Optional.absent())).when(readTx).read(any(), any());
         rwTx.put(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH, testNodeWithOuter(1, 2, 3));
@@ -88,7 +90,7 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
         assertEquals(Optional.absent(), rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet());
     }
 
-    private static DataContainerChild<?, ?> outerNode(int... ids) {
+    private static DataContainerChild<?, ?> outerNode(final int... ids) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME);
         for (int id : ids) {
             outer.addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, id));
@@ -97,11 +99,11 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
         return outer.build();
     }
 
-    private static NormalizedNode<?, ?> testNodeWithOuter(int... ids) {
+    private static NormalizedNode<?, ?> testNodeWithOuter(final int... ids) {
         return testNodeWithOuter(outerNode(ids));
     }
 
-    private static NormalizedNode<?, ?> testNodeWithOuter(DataContainerChild<?, ?> outer) {
+    private static NormalizedNode<?, ?> testNodeWithOuter(final DataContainerChild<?, ?> outer) {
         return ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(outer)
                 .build();

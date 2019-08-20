@@ -14,10 +14,13 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
@@ -58,20 +61,21 @@ public class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implemen
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static List<DataTreeListenerInfo> getListenerActorsInfo(Collection<ActorSelection> actors) {
+    private static List<DataTreeListenerInfo> getListenerActorsInfo(final Collection<ActorSelection> actors) {
         final Timeout timeout = new Timeout(20, TimeUnit.SECONDS);
         final List<Future<Object>> futureList = new ArrayList<>(actors.size());
         for (ActorSelection actor: actors) {
             futureList.add(Patterns.ask(actor, GetInfo.INSTANCE, timeout));
         }
 
+        final Iterable<Object> listenerInfos;
         try {
-            final List<DataTreeListenerInfo> listenerInfoList = new ArrayList<>();
-            Await.result(Futures.sequence(futureList, ExecutionContext.Implicits$.MODULE$.global()),
-                    timeout.duration()).forEach(obj -> listenerInfoList.add((DataTreeListenerInfo) obj));
-            return listenerInfoList;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            listenerInfos = Await.result(Futures.sequence(futureList, ExecutionContext.Implicits$.MODULE$.global()),
+                timeout.duration());
+        } catch (TimeoutException | InterruptedException e) {
+            throw new IllegalStateException("Failed to acquire listeners", e);
         }
+
+        return Streams.stream(listenerInfos).map(DataTreeListenerInfo.class::cast).collect(Collectors.toList());
     }
 }
