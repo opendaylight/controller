@@ -9,7 +9,7 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
     <feature name="odl-mdsal-distributed-datastore" version="${project.version}">
         <feature version="[6,7)">odl-apache-commons-text</feature>
-        <feature version="[3,4)">odl-yangtools-codec</feature>
+        <feature version="[4,5)">odl-yangtools-codec</feature>
         <feature version="[4,5)">odl-mdsal-eos-dom</feature>
         <feature version="[4,5)">odl-mdsal-dom-broker</feature>
         <feature version="[4.0.1,5)">odl-mdsal-binding-dom-adapter</feature>

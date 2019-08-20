@@ -32,7 +32,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.AnyxmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.CaseSchemaNode;
@@ -483,8 +483,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static class AnyXmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
-        AnyXmlNormalization(final AnyXmlSchemaNode schema) {
+    private static class AnyxmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
+        AnyxmlNormalization(final AnyxmlSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()), schema);
         }
 
@@ -574,8 +574,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return new ChoiceNodeNormalization((ChoiceSchemaNode) potential);
         } else if (potential instanceof LeafListSchemaNode) {
             return fromLeafListSchemaNode((LeafListSchemaNode) potential);
-        } else if (potential instanceof AnyXmlSchemaNode) {
-            return new AnyXmlNormalization((AnyXmlSchemaNode) potential);
+        } else if (potential instanceof AnyxmlSchemaNode) {
+            return new AnyxmlNormalization((AnyxmlSchemaNode) potential);
         }
         return null;
     }
