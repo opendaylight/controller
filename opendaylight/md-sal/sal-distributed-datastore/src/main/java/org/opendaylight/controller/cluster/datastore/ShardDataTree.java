@@ -7,13 +7,16 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -99,7 +102,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         long lastAccess;
 
         CommitEntry(final SimpleShardDataTreeCohort cohort, final long now) {
-            this.cohort = Preconditions.checkNotNull(cohort);
+            this.cohort = requireNonNull(cohort);
             lastAccess = now;
         }
 
@@ -155,12 +158,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
             final String logContext,
             final ShardDataTreeMetadata<?>... metadata) {
-        this.dataTree = Preconditions.checkNotNull(dataTree);
+        this.dataTree = requireNonNull(dataTree);
         updateSchemaContext(schemaContext);
 
-        this.shard = Preconditions.checkNotNull(shard);
-        this.treeChangeListenerPublisher = Preconditions.checkNotNull(treeChangeListenerPublisher);
-        this.logContext = Preconditions.checkNotNull(logContext);
+        this.shard = requireNonNull(shard);
+        this.treeChangeListenerPublisher = requireNonNull(treeChangeListenerPublisher);
+        this.logContext = requireNonNull(logContext);
         this.metadata = ImmutableList.copyOf(metadata);
         tip = dataTree;
     }
@@ -206,7 +209,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     void updateSchemaContext(final SchemaContext newSchemaContext) {
         dataTree.setSchemaContext(newSchemaContext);
-        this.schemaContext = Preconditions.checkNotNull(newSchemaContext);
+        this.schemaContext = requireNonNull(newSchemaContext);
         this.dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
     }
 
@@ -411,7 +414,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                         ((CommitTransactionPayload) payload).getCandidate();
                 applyReplicatedCandidate(e.getKey(), e.getValue());
             } else {
-                Verify.verify(identifier instanceof TransactionIdentifier);
+                verify(identifier instanceof TransactionIdentifier);
                 payloadReplicationComplete((TransactionIdentifier) identifier);
             }
         } else if (payload instanceof AbortTransactionPayload) {
@@ -527,8 +530,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final boolean closed) {
         final ShardDataTreeTransactionChain ret = new ShardDataTreeTransactionChain(historyId, this);
         final ShardDataTreeTransactionChain existing = transactionChains.putIfAbsent(historyId, ret);
-        Preconditions.checkState(existing == null, "Attempted to recreate chain %s, but %s already exists", historyId,
-                existing);
+        checkState(existing == null, "Attempted to recreate chain %s, but %s already exists", historyId, existing);
         return ret;
     }
 
@@ -930,10 +932,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @SuppressWarnings("checkstyle:IllegalCatch")
     void startPreCommit(final SimpleShardDataTreeCohort cohort) {
         final CommitEntry entry = pendingTransactions.peek();
-        Preconditions.checkState(entry != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
+        checkState(entry != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
 
         final SimpleShardDataTreeCohort current = entry.cohort;
-        Verify.verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
+        verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
 
         final TransactionIdentifier currentId = current.getIdentifier();
         LOG.debug("{}: Preparing transaction {}", logContext, currentId);
@@ -951,7 +953,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             @Override
             public void onSuccess(final Void noop) {
                 // Set the tip of the data tree.
-                tip = Verify.verifyNotNull(candidate);
+                tip = verifyNotNull(candidate);
 
                 entry.lastAccess = readTime();
 
@@ -1013,7 +1015,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     void startCommit(final SimpleShardDataTreeCohort cohort, final DataTreeCandidate candidate) {
         final CommitEntry entry = pendingCommits.peek();
-        Preconditions.checkState(entry != null, "Attempted to start commit of %s when no transactions pending", cohort);
+        checkState(entry != null, "Attempted to start commit of %s when no transactions pending", cohort);
 
         final SimpleShardDataTreeCohort current = entry.cohort;
         if (!cohort.equals(current)) {
@@ -1253,7 +1255,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void rebaseTransactions(final Iterator<CommitEntry> iter, final @NonNull DataTreeTip newTip) {
-        tip = Preconditions.checkNotNull(newTip);
+        tip = requireNonNull(newTip);
         while (iter.hasNext()) {
             final SimpleShardDataTreeCohort cohort = iter.next().cohort;
             if (cohort.getState() == State.CAN_COMMIT_COMPLETE) {

@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -19,7 +21,6 @@ import akka.actor.Status.Failure;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
@@ -1101,7 +1102,7 @@ public class Shard extends RaftActor {
         }
 
         protected void checkSealed() {
-            Preconditions.checkState(!sealed, "Builder isalready sealed - further modifications are not allowed");
+            checkState(!sealed, "Builder isalready sealed - further modifications are not allowed");
         }
 
         @SuppressWarnings("unchecked")
@@ -1129,7 +1130,7 @@ public class Shard extends RaftActor {
 
         public T schemaContextProvider(final SchemaContextProvider newSchemaContextProvider) {
             checkSealed();
-            this.schemaContextProvider = Preconditions.checkNotNull(newSchemaContextProvider);
+            this.schemaContextProvider = requireNonNull(newSchemaContextProvider);
             return self();
         }
 
@@ -1182,10 +1183,10 @@ public class Shard extends RaftActor {
         }
 
         protected void verify() {
-            Preconditions.checkNotNull(id, "id should not be null");
-            Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
-            Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
-            Preconditions.checkNotNull(schemaContextProvider, "schemaContextProvider should not be null");
+            requireNonNull(id, "id should not be null");
+            requireNonNull(peerAddresses, "peerAddresses should not be null");
+            requireNonNull(datastoreContext, "dataStoreContext should not be null");
+            requireNonNull(schemaContextProvider, "schemaContextProvider should not be null");
         }
 
         public Props props() {

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -25,7 +26,7 @@ public abstract class TransactionDataModification extends TransactionModificatio
 
     TransactionDataModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         super(path);
-        this.data = Preconditions.checkNotNull(data);
+        this.data = requireNonNull(data);
     }
 
     public final NormalizedNode<?, ?> getData() {

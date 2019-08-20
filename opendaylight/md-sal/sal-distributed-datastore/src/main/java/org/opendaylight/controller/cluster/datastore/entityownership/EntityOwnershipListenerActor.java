@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Props;
 import akka.japi.Creator;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
@@ -59,7 +60,7 @@ final class EntityOwnershipListenerActor extends AbstractUntypedActor {
         private final DOMEntityOwnershipListener listener;
 
         EntityOwnershipListenerCreator(final DOMEntityOwnershipListener listener) {
-            this.listener = Preconditions.checkNotNull(listener);
+            this.listener = requireNonNull(listener);
         }
 
         @Override

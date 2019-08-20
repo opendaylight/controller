@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.sharding;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -25,7 +27,6 @@ import akka.cluster.Member;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -812,11 +813,11 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         private void verify() {
-            Preconditions.checkNotNull(shardingService);
-            Preconditions.checkNotNull(actorSystem);
-            Preconditions.checkNotNull(cluster);
-            Preconditions.checkNotNull(distributedConfigDatastore);
-            Preconditions.checkNotNull(distributedOperDatastore);
+            requireNonNull(shardingService);
+            requireNonNull(actorSystem);
+            requireNonNull(cluster);
+            requireNonNull(distributedConfigDatastore);
+            requireNonNull(distributedOperDatastore);
         }
 
         public Props props() {

@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
@@ -44,7 +46,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
         WithSnapshot(final ShardDataTree store, final String shardName, final Logger log, final Snapshot snapshot) {
             super(store, shardName, log);
-            this.restoreFromSnapshot = Preconditions.checkNotNull(snapshot);
+            this.restoreFromSnapshot = requireNonNull(snapshot);
         }
 
         @Override
@@ -60,9 +62,9 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private boolean open;
 
     ShardRecoveryCoordinator(final ShardDataTree store, final String shardName, final Logger log) {
-        this.store = Preconditions.checkNotNull(store);
-        this.shardName = Preconditions.checkNotNull(shardName);
-        this.log = Preconditions.checkNotNull(log);
+        this.store = requireNonNull(store);
+        this.shardName = requireNonNull(shardName);
+        this.log = requireNonNull(log);
     }
 
     static ShardRecoveryCoordinator create(final ShardDataTree store, final String shardName, final Logger log) {
@@ -83,7 +85,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void appendRecoveredLogEntry(final Payload payload) {
-        Preconditions.checkState(open, "call startLogRecovery before calling appendRecoveredLogEntry");
+        checkState(open, "call startLogRecovery before calling appendRecoveredLogEntry");
 
         try {
             store.applyRecoveryPayload(payload);
@@ -99,7 +101,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
      */
     @Override
     public void applyCurrentLogRecoveryBatch() {
-        Preconditions.checkState(open, "call startLogRecovery before calling applyCurrentLogRecoveryBatch");
+        checkState(open, "call startLogRecovery before calling applyCurrentLogRecoveryBatch");
         open = false;
     }
 

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -38,7 +39,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     LocalTransactionContext(final DOMStoreTransaction txDelegate, final TransactionIdentifier identifier,
             final LocalTransactionReadySupport readySupport) {
         super(identifier);
-        this.txDelegate = Preconditions.checkNotNull(txDelegate);
+        this.txDelegate = requireNonNull(txDelegate);
         this.readySupport = readySupport;
     }
 

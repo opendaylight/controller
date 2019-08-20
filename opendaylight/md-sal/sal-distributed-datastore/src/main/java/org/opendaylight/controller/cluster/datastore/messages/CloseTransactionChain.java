@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -26,7 +27,7 @@ public class CloseTransactionChain extends VersionedExternalizableMessage
 
     public CloseTransactionChain(final LocalHistoryIdentifier transactionChainId, final short version) {
         super(version);
-        this.transactionChainId = Preconditions.checkNotNull(transactionChainId);
+        this.transactionChainId = requireNonNull(transactionChainId);
     }
 
     @Override
@@ -35,23 +36,23 @@ public class CloseTransactionChain extends VersionedExternalizableMessage
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         transactionChainId = LocalHistoryIdentifier.readFrom(in);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         transactionChainId.writeTo(out);
     }
 
     public static CloseTransactionChain fromSerializable(final Object serializable) {
-        Preconditions.checkArgument(serializable instanceof CloseTransactionChain);
+        checkArgument(serializable instanceof CloseTransactionChain);
         return (CloseTransactionChain)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof CloseTransactionChain;
     }
 }

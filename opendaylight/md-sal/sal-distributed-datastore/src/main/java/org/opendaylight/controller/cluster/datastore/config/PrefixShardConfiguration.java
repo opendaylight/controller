@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.config;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableSet;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -79,8 +79,8 @@ public class PrefixShardConfiguration implements Serializable {
     public PrefixShardConfiguration(final DOMDataTreeIdentifier prefix,
                                     final String shardStrategyName,
                                     final Collection<MemberName> shardMemberNames) {
-        this.prefix = Preconditions.checkNotNull(prefix);
-        this.shardStrategyName = Preconditions.checkNotNull(shardStrategyName);
+        this.prefix = requireNonNull(prefix);
+        this.shardStrategyName = requireNonNull(shardStrategyName);
         this.shardMemberNames = ImmutableSet.copyOf(shardMemberNames);
     }
 

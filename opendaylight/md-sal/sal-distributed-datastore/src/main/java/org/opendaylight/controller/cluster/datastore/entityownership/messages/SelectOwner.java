@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategy;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -21,13 +21,12 @@ public class SelectOwner {
     private final Collection<String> allCandidates;
     private final EntityOwnerSelectionStrategy ownerSelectionStrategy;
 
-    public SelectOwner(YangInstanceIdentifier entityPath, Collection<String> allCandidates,
-                       EntityOwnerSelectionStrategy ownerSelectionStrategy) {
-
-        this.entityPath = Preconditions.checkNotNull(entityPath, "entityPath should not be null");
-        this.allCandidates = Preconditions.checkNotNull(allCandidates, "allCandidates should not be null");
-        this.ownerSelectionStrategy = Preconditions.checkNotNull(ownerSelectionStrategy,
-                "ownerSelectionStrategy should not be null");
+    public SelectOwner(final YangInstanceIdentifier entityPath, final Collection<String> allCandidates,
+                       final EntityOwnerSelectionStrategy ownerSelectionStrategy) {
+        this.entityPath = requireNonNull(entityPath, "entityPath should not be null");
+        this.allCandidates = requireNonNull(allCandidates, "allCandidates should not be null");
+        this.ownerSelectionStrategy = requireNonNull(ownerSelectionStrategy,
+            "ownerSelectionStrategy should not be null");
     }
 
     public YangInstanceIdentifier getEntityPath() {

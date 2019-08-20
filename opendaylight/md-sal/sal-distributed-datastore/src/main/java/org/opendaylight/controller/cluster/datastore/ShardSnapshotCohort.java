@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -43,8 +44,8 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     private ShardSnapshotCohort(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor,
             final ShardDataTree store, final Logger log, final String logId) {
-        this.snapshotActor = Preconditions.checkNotNull(snapshotActor);
-        this.store = Preconditions.checkNotNull(store);
+        this.snapshotActor = requireNonNull(snapshotActor);
+        this.store = requireNonNull(store);
         this.log = log;
         this.logId = logId;
     }

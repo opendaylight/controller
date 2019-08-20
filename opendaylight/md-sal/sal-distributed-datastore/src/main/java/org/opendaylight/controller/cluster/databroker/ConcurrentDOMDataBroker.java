@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER;
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER;
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -68,8 +69,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores,
             final Executor listenableFutureExecutor, final DurationStatisticsTracker commitStatsTracker) {
         super(datastores);
-        this.clientFutureCallbackExecutor = Preconditions.checkNotNull(listenableFutureExecutor);
-        this.commitStatsTracker = Preconditions.checkNotNull(commitStatsTracker);
+        this.clientFutureCallbackExecutor = requireNonNull(listenableFutureExecutor);
+        this.commitStatsTracker = requireNonNull(commitStatsTracker);
     }
 
     public DurationStatisticsTracker getCommitStatsTracker() {
@@ -77,11 +78,11 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     @Override
-    protected FluentFuture<? extends CommitInfo> commit(
-            final DOMDataTreeWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+    protected FluentFuture<? extends CommitInfo> commit(final DOMDataTreeWriteTransaction transaction,
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
-        Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
-        Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
+        checkArgument(transaction != null, "Transaction must not be null.");
+        checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
         if (cohorts.isEmpty()) {
@@ -262,7 +263,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         private final Executor listenerExecutor;
 
         AsyncNotifyingSettableFuture(final Executor listenerExecutor) {
-            this.listenerExecutor = Preconditions.checkNotNull(listenerExecutor);
+            this.listenerExecutor = requireNonNull(listenerExecutor);
         }
 
         @Override
@@ -303,8 +304,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             private final Executor executor;
 
             DelegatingRunnable(final Runnable delegate, final Executor executor) {
-                this.delegate = Preconditions.checkNotNull(delegate);
-                this.executor = Preconditions.checkNotNull(executor);
+                this.delegate = requireNonNull(delegate);
+                this.executor = requireNonNull(executor);
             }
 
             @Override

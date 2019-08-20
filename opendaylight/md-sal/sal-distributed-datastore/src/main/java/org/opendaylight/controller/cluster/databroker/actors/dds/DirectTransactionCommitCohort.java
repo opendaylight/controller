@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -23,7 +24,7 @@ final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohor
     DirectTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId,
         final AbstractProxyTransaction proxy) {
         super(parent, txId);
-        this.proxy = Preconditions.checkNotNull(proxy);
+        this.proxy = requireNonNull(proxy);
     }
 
     @Override

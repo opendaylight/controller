@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -28,8 +29,8 @@ abstract class AbstractTransactionCommitCohort implements DOMStoreThreePhaseComm
     private final TransactionIdentifier txId;
 
     AbstractTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId) {
-        this.parent = Preconditions.checkNotNull(parent);
-        this.txId = Preconditions.checkNotNull(txId);
+        this.parent = requireNonNull(parent);
+        this.txId = requireNonNull(txId);
     }
 
     final void complete() {

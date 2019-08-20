@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -34,7 +35,7 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
     private Cancellable killSchedule;
 
     @Override
-    protected void handleReceive(Object message) {
+    protected void handleReceive(final Object message) {
         if (message instanceof CloseDataTreeNotificationListenerRegistration) {
             closeListenerRegistration();
             if (isValidSender(getSender())) {
@@ -75,8 +76,8 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
         private final Runnable onClose;
 
         public SetRegistration(final ListenerRegistration<?> registration, final Runnable onClose) {
-            this.registration = Preconditions.checkNotNull(registration);
-            this.onClose = Preconditions.checkNotNull(onClose);
+            this.registration = requireNonNull(registration);
+            this.onClose = requireNonNull(onClose);
         }
     }
 }

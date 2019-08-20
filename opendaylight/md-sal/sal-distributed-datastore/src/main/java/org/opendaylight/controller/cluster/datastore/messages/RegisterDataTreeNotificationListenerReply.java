@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
 /**
@@ -23,7 +24,7 @@ public class RegisterDataTreeNotificationListenerReply implements Serializable {
     private final ActorRef listenerRegistrationPath;
 
     public RegisterDataTreeNotificationListenerReply(final ActorRef listenerRegistrationPath) {
-        this.listenerRegistrationPath = Preconditions.checkNotNull(listenerRegistrationPath);
+        this.listenerRegistrationPath = requireNonNull(listenerRegistrationPath);
     }
 
     public ActorPath getListenerRegistrationPath() {

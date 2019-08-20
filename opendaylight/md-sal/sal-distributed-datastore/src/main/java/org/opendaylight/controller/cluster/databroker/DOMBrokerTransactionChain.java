@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.databroker;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -65,12 +67,12 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
             final AbstractDOMBroker broker, final DOMTransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
-        this.broker = Preconditions.checkNotNull(broker);
-        this.listener = Preconditions.checkNotNull(listener);
+        this.broker = requireNonNull(broker);
+        this.listener = requireNonNull(listener);
     }
 
     private void checkNotFailed() {
-        Preconditions.checkState(state != State.FAILED, "Transaction chain has failed");
+        checkState(state != State.FAILED, "Transaction chain has failed");
     }
 
     @Override

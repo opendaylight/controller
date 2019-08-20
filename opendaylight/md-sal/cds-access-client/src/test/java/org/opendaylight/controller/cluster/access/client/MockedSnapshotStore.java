@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
@@ -14,7 +16,6 @@ import akka.persistence.SelectedSnapshot;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.snapshot.japi.SnapshotStore;
-import com.google.common.base.Preconditions;
 import java.util.Optional;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
@@ -67,9 +68,7 @@ class MockedSnapshotStore extends SnapshotStore {
     }
 
     private <T> Future<T> askDelegate(final MockedSnapshotStoreMessage message) {
-        Preconditions.checkNotNull(delegate, "Delegate ref wasn't sent");
-        final Future<Object> ask = Patterns.ask(delegate, message, TIMEOUT);
-        return transform(ask);
+        return transform(Patterns.ask(requireNonNull(delegate, "Delegate ref was not sent"), message, TIMEOUT));
     }
 
     private <T> Future<T> transform(final Future<Object> future) {

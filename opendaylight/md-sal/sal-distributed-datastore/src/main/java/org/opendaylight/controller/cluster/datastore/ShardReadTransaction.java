@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -22,14 +22,14 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 public class ShardReadTransaction extends ShardTransaction {
     private final AbstractShardDataTreeTransaction<?> transaction;
 
-    public ShardReadTransaction(AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-            ShardStats shardStats) {
+    public ShardReadTransaction(final AbstractShardDataTreeTransaction<?> transaction, final ActorRef shardActor,
+            final ShardStats shardStats) {
         super(shardActor, shardStats, transaction.getIdentifier());
-        this.transaction = Preconditions.checkNotNull(transaction);
+        this.transaction = requireNonNull(transaction);
     }
 
     @Override
-    public void handleReceive(Object message) {
+    public void handleReceive(final Object message) {
         if (ReadData.isSerializedType(message)) {
             readData(transaction, ReadData.fromSerializable(message));
         } else if (DataExists.isSerializedType(message)) {
