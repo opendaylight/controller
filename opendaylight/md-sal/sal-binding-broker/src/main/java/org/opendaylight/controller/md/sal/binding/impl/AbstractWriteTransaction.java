@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Map.Entry;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
@@ -33,7 +35,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
 
     public final <U extends DataObject> void put(final LogicalDatastoreType store,
             final InstanceIdentifier<U> path, final U data, final boolean createParents) {
-        Preconditions.checkArgument(!path.isWildcarded(), "Cannot put data into wildcarded path %s", path);
+        checkArgument(!path.isWildcarded(), "Cannot put data into wildcarded path %s", path);
 
         final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec().toNormalizedNode(path, data);
         if (createParents) {
@@ -47,7 +49,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
 
     public final <U extends DataObject> void merge(final LogicalDatastoreType store,
             final InstanceIdentifier<U> path, final U data,final boolean createParents) {
-        Preconditions.checkArgument(!path.isWildcarded(), "Cannot merge data into wildcarded path %s", path);
+        checkArgument(!path.isWildcarded(), "Cannot merge data into wildcarded path %s", path);
 
         final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec().toNormalizedNode(path, data);
         if (createParents) {
@@ -94,7 +96,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
             final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized) {
         if (Identifiable.class.isAssignableFrom(path.getTargetType())) {
             YangInstanceIdentifier parentMapPath = normalized.getKey().getParent();
-            Preconditions.checkArgument(parentMapPath != null, "Map path %s does not have a parent", path);
+            checkArgument(parentMapPath != null, "Map path %s does not have a parent", path);
 
             NormalizedNode<?, ?> emptyParent = getCodec().getDefaultNodeFor(parentMapPath);
             getDelegate().merge(store, parentMapPath, emptyParent);
@@ -107,6 +109,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
      * @deprecated Use {@link YangInstanceIdentifier#getParent()} instead.
      */
     @Deprecated
+    @SuppressModernizer
     protected static Optional<YangInstanceIdentifier> getParent(final YangInstanceIdentifier child) {
         return Optional.fromNullable(child.getParent());
     }
@@ -120,7 +123,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
 
     protected final void doDelete(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path) {
-        Preconditions.checkArgument(!path.isWildcarded(), "Cannot delete wildcarded path %s", path);
+        checkArgument(!path.isWildcarded(), "Cannot delete wildcarded path %s", path);
 
         final YangInstanceIdentifier normalized = getCodec().toYangInstanceIdentifierBlocking(path);
         getDelegate().delete(store, normalized);

@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -44,6 +45,7 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
     }
 
     @Override
+    @SuppressModernizer
     public Optional<MountPoint> getMountPoint(final InstanceIdentifier<?> mountPoint) {
 
         YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(mountPoint);

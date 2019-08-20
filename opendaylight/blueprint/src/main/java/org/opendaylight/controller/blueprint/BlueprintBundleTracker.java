@@ -21,6 +21,7 @@ import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.eclipse.jdt.annotation.Nullable;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.framework.Bundle;
@@ -151,20 +152,25 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         restartService.setBlueprintExtenderService(blueprintExtenderService);
 
         blueprintContainerRestartReg = bundleContext.registerService(
-                BlueprintContainerRestartService.class.getName(), restartService, new Hashtable<>());
+                BlueprintContainerRestartService.class.getName(), restartService, emptyDict());
 
         return blueprintExtenderService;
     }
 
     private void registerNamespaceHandler(final BundleContext context) {
-        Dictionary<String, Object> props = new Hashtable<>();
+        Dictionary<String, Object> props = emptyDict();
         props.put("osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0);
         namespaceReg = context.registerService(NamespaceHandler.class.getName(),
                 new OpendaylightNamespaceHandler(), props);
     }
 
     private void registerBlueprintEventHandler(final BundleContext context) {
-        eventHandlerReg = context.registerService(BlueprintListener.class.getName(), this, new Hashtable<>());
+        eventHandlerReg = context.registerService(BlueprintListener.class.getName(), this, emptyDict());
+    }
+
+    @SuppressModernizer
+    private static Dictionary<String, Object> emptyDict() {
+        return new Hashtable<>();
     }
 
     /**

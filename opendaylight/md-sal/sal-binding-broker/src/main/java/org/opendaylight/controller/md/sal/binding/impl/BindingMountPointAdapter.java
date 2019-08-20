@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.md.sal.binding.api.BindingService;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -27,7 +28,7 @@ public class BindingMountPointAdapter implements MountPoint {
         services = CacheBuilder.newBuilder().build(new BindingDOMAdapterLoader(codec) {
 
             @Override
-            protected DOMService getDelegate(Class<? extends DOMService> reqDeleg) {
+            protected DOMService getDelegate(final Class<? extends DOMService> reqDeleg) {
                 return domMountPoint.getService(reqDeleg).orNull();
             }
         });
@@ -39,7 +40,8 @@ public class BindingMountPointAdapter implements MountPoint {
     }
 
     @Override
-    public <T extends BindingService> Optional<T> getService(Class<T> service) {
+    @SuppressModernizer
+    public <T extends BindingService> Optional<T> getService(final Class<T> service) {
         Optional<BindingService> potential = services.getUnchecked(service);
         if (potential.isPresent()) {
             return Optional.of(service.cast(potential.get()));

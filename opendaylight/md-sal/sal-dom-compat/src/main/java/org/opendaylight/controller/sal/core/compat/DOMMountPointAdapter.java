@@ -14,6 +14,7 @@ import com.google.common.collect.ForwardingObject;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.eclipse.jdt.annotation.Nullable;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMActionService;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -87,6 +88,7 @@ public class DOMMountPointAdapter extends ForwardingObject implements DOMMountPo
     }
 
     @Override
+    @SuppressModernizer
     public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
         final java.util.Optional<T> found = delegate.getService(cls);
         if (found.isPresent()) {

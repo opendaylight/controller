@@ -12,6 +12,7 @@ import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -47,6 +48,7 @@ public final class SimpleDOMMountPoint implements DOMMountPoint {
     }
 
     @Override
+    @SuppressModernizer
     public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
         return Optional.fromNullable(services.getInstance(cls));
     }

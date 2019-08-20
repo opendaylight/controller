@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -138,6 +139,7 @@ public class CrossBrokerMountPointTest {
                     return  new DOMDataReadWriteTransaction() {
 
                         @Override
+                        @SuppressModernizer
                         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
                                 final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                             if (store == LogicalDatastoreType.OPERATIONAL && path.getLastPathArgument()

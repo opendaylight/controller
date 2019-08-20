@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -224,6 +225,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         }
     }
 
+    @SuppressModernizer
     private static ServiceRegistration<?> registerEventHandler(final BundleContext bundleContext,
             final BlueprintListener listener) {
         return bundleContext.registerService(BlueprintListener.class.getName(), listener, new Hashtable<>());
