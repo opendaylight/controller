@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.blueprint;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -130,6 +131,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         quiesceParticipantTracker.open();
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private QuiesceParticipant onQuiesceParticipantAdded(final ServiceReference<QuiesceParticipant> reference) {
         quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
 
@@ -140,6 +143,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         return quiesceParticipant;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private BlueprintExtenderService onBlueprintExtenderServiceAdded(
             final ServiceReference<BlueprintExtenderService> reference) {
         blueprintExtenderService = reference.getBundle().getBundleContext().getService(reference);
