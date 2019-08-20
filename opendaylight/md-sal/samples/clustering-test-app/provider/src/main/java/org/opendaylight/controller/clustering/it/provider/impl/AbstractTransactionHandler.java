@@ -81,8 +81,8 @@ abstract class AbstractTransactionHandler {
     private volatile State state;
 
     AbstractTransactionHandler(final TransactionsParams params) {
-        runtimeNanos = TimeUnit.SECONDS.toNanos(params.getSeconds());
-        delayNanos = SECOND_AS_NANO / params.getTransactionsPerSecond();
+        runtimeNanos = TimeUnit.SECONDS.toNanos(params.getSeconds().toJava());
+        delayNanos = SECOND_AS_NANO / params.getTransactionsPerSecond().toJava();
     }
 
     final synchronized void doStart() {
