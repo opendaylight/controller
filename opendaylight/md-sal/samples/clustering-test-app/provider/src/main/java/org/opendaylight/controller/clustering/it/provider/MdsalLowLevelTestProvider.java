@@ -258,7 +258,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         LOG.info("In startPublishNotifications - input: {}", input);
 
         final PublishNotificationsTask task = new PublishNotificationsTask(notificationPublishService, input.getId(),
-                input.getSeconds(), input.getNotificationsPerSecond());
+                input.getSeconds().toJava(), input.getNotificationsPerSecond().toJava());
 
         publishNotificationsTasks.put(input.getId(), task);
 
