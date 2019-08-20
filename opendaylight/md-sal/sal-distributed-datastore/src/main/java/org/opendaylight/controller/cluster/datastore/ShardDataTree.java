@@ -945,7 +945,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         try {
             candidate = tip.prepare(cohort.getDataTreeModification());
             LOG.debug("{}: Transaction {} candidate ready", logContext, currentId);
-        } catch (RuntimeException e) {
+        } catch (DataValidationFailedException | RuntimeException e) {
             failPreCommit(e);
             return;
         }

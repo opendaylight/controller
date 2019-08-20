@@ -179,10 +179,14 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     }
 
     @Override
-    public final void startAnyxmlNode(final NodeIdentifier name) throws IOException {
-        LOG.trace("Starting any xml node");
-        startNode(name, LithiumNode.ANY_XML_NODE);
-        inSimple = true;
+    public final boolean startAnyxmlNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+        if (DOMSource.class.isAssignableFrom(objectModel)) {
+            LOG.trace("Starting anyxml node");
+            startNode(name, LithiumNode.ANY_XML_NODE);
+            inSimple = true;
+            return true;
+        }
+        return false;
     }
 
     @Override

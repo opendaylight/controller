@@ -137,9 +137,12 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
     private void streamAnyxml(final NormalizedNodeStreamWriter writer, final byte nodeHeader) throws IOException {
         final NodeIdentifier identifier = decodeNodeIdentifier(nodeHeader);
         LOG.trace("Streaming anyxml node {}", identifier);
-        writer.startAnyxmlNode(identifier);
-        writer.domSourceValue(readDOMSource());
-        writer.endNode();
+
+        final DOMSource value = readDOMSource();
+        if (writer.startAnyxmlNode(identifier, DOMSource.class)) {
+            writer.domSourceValue(value);
+            writer.endNode();
+        }
     }
 
     private void streamAnyxmlModeled(final NormalizedNodeStreamWriter writer, final byte nodeHeader)
