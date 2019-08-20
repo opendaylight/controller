@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.sharding;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -91,7 +92,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     private YangInstanceIdentifier toRelative(final YangInstanceIdentifier path) {
         final Optional<YangInstanceIdentifier> relative =
                 path.relativeTo(modification.getPrefix().getRootIdentifier());
-        Preconditions.checkArgument(relative.isPresent());
+        checkArgument(relative.isPresent());
         return relative.get();
     }
 
@@ -99,7 +100,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     public void ready() {
         LOG.debug("Readying transaction for shard {}", shardRoot);
 
-        Preconditions.checkNotNull(modification, "Attempting to ready an empty transaction.");
+        requireNonNull(modification, "Attempting to ready an empty transaction.");
 
         cohorts.add(modification.seal());
         for (Entry<DOMDataTreeIdentifier, ForeignShardModificationContext> entry
@@ -136,7 +137,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     }
 
     private void checkTransactionReadied() {
-        Preconditions.checkState(!cohorts.isEmpty(), "Transaction not readied yet");
+        checkState(!cohorts.isEmpty(), "Transaction not readied yet");
     }
 
     @Override

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Forwarder class responsible for routing requests from the previous connection incarnation back to the originator,
@@ -20,7 +20,7 @@ public abstract class ReconnectForwarder {
     private final AbstractReceivingClientConnection<?> successor;
 
     protected ReconnectForwarder(final AbstractReceivingClientConnection<?> successor) {
-        this.successor = Preconditions.checkNotNull(successor);
+        this.successor = requireNonNull(successor);
     }
 
     protected final void sendToSuccessor(final ConnectionEntry entry) {

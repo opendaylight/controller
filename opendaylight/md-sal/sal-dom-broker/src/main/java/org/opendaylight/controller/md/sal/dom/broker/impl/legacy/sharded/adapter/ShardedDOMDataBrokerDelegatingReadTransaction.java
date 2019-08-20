@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -37,8 +37,8 @@ class ShardedDOMDataBrokerDelegatingReadTransaction implements DOMDataReadOnlyTr
 
     ShardedDOMDataBrokerDelegatingReadTransaction(final Object txIdentifier,
                                                          final DOMDataTreeReadTransaction delegateTx) {
-        this.delegateTx = checkNotNull(delegateTx);
-        this.txIdentifier = checkNotNull(txIdentifier);
+        this.delegateTx = requireNonNull(delegateTx);
+        this.txIdentifier = requireNonNull(txIdentifier);
     }
 
     @Override

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
@@ -27,9 +28,9 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
 
     ChainedCommitCohort(final ShardDataTreeTransactionChain chain, final ReadWriteShardDataTreeTransaction transaction,
             final ShardDataTreeCohort delegate) {
-        this.transaction = Preconditions.checkNotNull(transaction);
-        this.delegate = Preconditions.checkNotNull(delegate);
-        this.chain = Preconditions.checkNotNull(chain);
+        this.transaction = requireNonNull(transaction);
+        this.delegate = requireNonNull(delegate);
+        this.chain = requireNonNull(chain);
     }
 
     @Override

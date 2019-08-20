@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     private final String shardName;
 
     FrontendMetadata(final String shardName) {
-        this.shardName = Preconditions.checkNotNull(shardName);
+        this.shardName = requireNonNull(shardName);
     }
 
     @Override

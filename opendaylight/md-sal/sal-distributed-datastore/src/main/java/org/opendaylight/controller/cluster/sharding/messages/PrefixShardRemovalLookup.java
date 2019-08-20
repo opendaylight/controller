@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
@@ -17,12 +17,10 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * the system entirely the actor responds with a success.
  */
 public class PrefixShardRemovalLookup {
-
     private final DOMDataTreeIdentifier prefix;
 
     public PrefixShardRemovalLookup(final DOMDataTreeIdentifier prefix) {
-
-        this.prefix = Preconditions.checkNotNull(prefix);
+        this.prefix = requireNonNull(prefix);
     }
 
     public DOMDataTreeIdentifier getPrefix() {
@@ -31,8 +29,6 @@ public class PrefixShardRemovalLookup {
 
     @Override
     public String toString() {
-        return "PrefixShardRemovalLookup{"
-                + "prefix=" + prefix
-                + '}';
+        return "PrefixShardRemovalLookup{" + "prefix=" + prefix + '}';
     }
 }

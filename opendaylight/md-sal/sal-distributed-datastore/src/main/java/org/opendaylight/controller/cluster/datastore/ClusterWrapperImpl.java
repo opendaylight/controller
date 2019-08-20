@@ -5,15 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ClusterWrapperImpl implements ClusterWrapper {
@@ -21,12 +22,10 @@ public class ClusterWrapperImpl implements ClusterWrapper {
     private final MemberName currentMemberName;
     private final Address selfAddress;
 
-    public ClusterWrapperImpl(ActorSystem actorSystem) {
-        Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
+    public ClusterWrapperImpl(final ActorSystem actorSystem) {
+        cluster = Cluster.get(requireNonNull(actorSystem, "actorSystem should not be null"));
 
-        cluster = Cluster.get(actorSystem);
-
-        Preconditions.checkState(cluster.getSelfRoles().size() > 0,
+        checkState(cluster.getSelfRoles().size() > 0,
             "No akka roles were specified.\n"
             + "One way to specify the member name is to pass a property on the command line like so\n"
             + "   -Dakka.cluster.roles.0=member-3\n"
@@ -37,10 +36,8 @@ public class ClusterWrapperImpl implements ClusterWrapper {
     }
 
     @Override
-    public void subscribeToMemberEvents(ActorRef actorRef) {
-        Preconditions.checkNotNull(actorRef, "actorRef should not be null");
-
-        cluster.subscribe(actorRef, ClusterEvent.initialStateAsEvents(),
+    public void subscribeToMemberEvents(final ActorRef actorRef) {
+        cluster.subscribe(requireNonNull(actorRef, "actorRef should not be null"), ClusterEvent.initialStateAsEvents(),
             ClusterEvent.MemberEvent.class,
             ClusterEvent.UnreachableMember.class,
             ClusterEvent.ReachableMember.class);

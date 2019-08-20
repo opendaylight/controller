@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSystem;
 import akka.persistence.SnapshotSelectionCriteria;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
 /**
@@ -22,7 +23,7 @@ final class InitialClientActorContext extends AbstractClientActorContext {
 
     InitialClientActorContext(final AbstractClientActor actor, final String persistenceId) {
         super(actor.self(), persistenceId);
-        this.actor = Preconditions.checkNotNull(actor);
+        this.actor = requireNonNull(actor);
     }
 
     void saveSnapshot(final ClientIdentifier snapshot) {

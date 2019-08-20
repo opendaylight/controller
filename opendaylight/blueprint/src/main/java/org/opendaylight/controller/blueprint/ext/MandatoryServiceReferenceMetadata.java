@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +25,7 @@ class MandatoryServiceReferenceMetadata implements ServiceReferenceMetadata {
     private final String id;
 
     MandatoryServiceReferenceMetadata(final String id, final String interfaceClass) {
-        this.id = Preconditions.checkNotNull(id);
+        this.id = requireNonNull(id);
         this.interfaceClass = interfaceClass;
     }
 

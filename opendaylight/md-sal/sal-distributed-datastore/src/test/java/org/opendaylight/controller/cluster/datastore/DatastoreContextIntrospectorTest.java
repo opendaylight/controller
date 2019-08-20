@@ -23,7 +23,6 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
@@ -157,7 +156,7 @@ public class DatastoreContextIntrospectorTest {
         updated = introspector.update(null);
         assertFalse("updated", updated);
 
-        updated = introspector.update(new Hashtable<>());
+        updated = introspector.update(new HashMap<>());
         assertFalse("updated", updated);
     }
 

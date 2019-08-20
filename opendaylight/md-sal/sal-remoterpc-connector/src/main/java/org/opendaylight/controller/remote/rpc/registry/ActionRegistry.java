@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.remote.rpc.registry;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,7 +42,7 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     public ActionRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
                           final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new ActionRoutingTable(rpcInvoker, ImmutableSet.of()));
-        this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
+        this.rpcRegistrar = requireNonNull(rpcRegistrar);
         this.mxBean = new RemoteActionRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
                 config.getAskDuration()), config.getAskDuration());
     }
@@ -111,7 +112,7 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
 
         @VisibleForTesting
         public RemoteActionEndpoint(final ActorRef router, final Collection<DOMActionInstance> actions) {
-            this.router = Preconditions.checkNotNull(router);
+            this.router = requireNonNull(router);
             this.actions = ImmutableSet.copyOf(actions);
         }
 

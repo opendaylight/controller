@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -280,8 +282,7 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private void setSnapshotDataThresholdPercentage(final int shardSnapshotDataThresholdPercentage) {
-        Preconditions.checkArgument(shardSnapshotDataThresholdPercentage >= 0
-                && shardSnapshotDataThresholdPercentage <= 100);
+        checkArgument(shardSnapshotDataThresholdPercentage >= 0 && shardSnapshotDataThresholdPercentage <= 100);
         raftConfig.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
     }
 
@@ -491,7 +492,7 @@ public class DatastoreContext implements ClientActorConfig {
         }
 
         public Builder logicalStoreType(final LogicalDatastoreType logicalStoreType) {
-            datastoreContext.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
+            datastoreContext.logicalStoreType = requireNonNull(logicalStoreType);
 
             // Retain compatible naming
             switch (logicalStoreType) {
@@ -514,7 +515,7 @@ public class DatastoreContext implements ClientActorConfig {
         }
 
         public Builder dataStoreName(final String dataStoreName) {
-            datastoreContext.dataStoreName = Preconditions.checkNotNull(dataStoreName);
+            datastoreContext.dataStoreName = requireNonNull(dataStoreName);
             datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreName) + "Datastore";
             return this;
         }

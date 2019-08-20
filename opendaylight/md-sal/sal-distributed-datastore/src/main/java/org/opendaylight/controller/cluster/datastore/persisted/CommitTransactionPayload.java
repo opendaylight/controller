@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
@@ -49,7 +50,7 @@ public final class CommitTransactionPayload extends Payload implements Serializa
         }
 
         Proxy(final byte[] serialized) {
-            this.serialized = Preconditions.checkNotNull(serialized);
+            this.serialized = requireNonNull(serialized);
         }
 
         @Override
@@ -75,7 +76,7 @@ public final class CommitTransactionPayload extends Payload implements Serializa
     private final byte[] serialized;
 
     CommitTransactionPayload(final byte[] serialized) {
-        this.serialized = Preconditions.checkNotNull(serialized);
+        this.serialized = requireNonNull(serialized);
     }
 
     public static CommitTransactionPayload create(final TransactionIdentifier transactionId,

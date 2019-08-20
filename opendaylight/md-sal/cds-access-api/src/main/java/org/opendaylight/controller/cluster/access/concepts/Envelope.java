@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import org.opendaylight.yangtools.concepts.Immutable;
 
@@ -20,7 +21,7 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
     private final long sessionId;
 
     Envelope(final T message, final long sessionId, final long txSequence) {
-        this.message = Preconditions.checkNotNull(message);
+        this.message = requireNonNull(message);
         this.sessionId = sessionId;
         this.txSequence = txSequence;
     }

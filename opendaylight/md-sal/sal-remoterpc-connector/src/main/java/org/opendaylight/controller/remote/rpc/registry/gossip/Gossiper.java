@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorRefProvider;
 import akka.actor.ActorSelection;
@@ -18,8 +21,6 @@ import akka.cluster.ClusterActorRefProvider;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +86,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     private BucketStoreAccess bucketStore;
 
     Gossiper(final RemoteOpsProviderConfig config, final Boolean autoStartGossipTicks) {
-        this.config = Preconditions.checkNotNull(config);
+        this.config = requireNonNull(config);
         this.autoStartGossipTicks = autoStartGossipTicks.booleanValue();
     }
 
@@ -243,7 +244,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         LOG.trace("Gossiping to [{}]", address);
-        getLocalStatusAndSendTo(Verify.verifyNotNull(peers.get(address)));
+        getLocalStatusAndSendTo(verifyNotNull(peers.get(address)));
     }
 
     /**

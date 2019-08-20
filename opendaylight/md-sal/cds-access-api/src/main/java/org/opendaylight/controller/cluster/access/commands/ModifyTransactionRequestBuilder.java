@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -35,8 +37,8 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     private long sequence;
 
     public ModifyTransactionRequestBuilder(final TransactionIdentifier identifier, final ActorRef replyTo) {
-        this.identifier = Preconditions.checkNotNull(identifier);
-        this.replyTo = Preconditions.checkNotNull(replyTo);
+        this.identifier = requireNonNull(identifier);
+        this.replyTo = requireNonNull(replyTo);
     }
 
     @Override
@@ -45,16 +47,16 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     }
 
     private void checkNotFinished() {
-        Preconditions.checkState(protocol == null, "Batch has already been finished");
+        checkState(protocol == null, "Batch has already been finished");
     }
 
     public void addModification(final TransactionModification modification) {
         checkNotFinished();
-        modifications.add(Preconditions.checkNotNull(modification));
+        modifications.add(requireNonNull(modification));
     }
 
     public void setSequence(final long sequence) {
-        Preconditions.checkState(!haveSequence, "Sequence has already been set");
+        checkState(!haveSequence, "Sequence has already been set");
         this.sequence = sequence;
         haveSequence = true;
     }
@@ -82,7 +84,7 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
 
     @Override
     public ModifyTransactionRequest build() {
-        Preconditions.checkState(haveSequence, "Request sequence has not been set");
+        checkState(haveSequence, "Request sequence has not been set");
 
         final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, replyTo, modifications,
             protocol);

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Optional;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -26,7 +27,7 @@ abstract class AbstractDataTreeCandidateNode implements DataTreeCandidateNode {
     private final ModificationType type;
 
     protected AbstractDataTreeCandidateNode(final ModificationType type) {
-        this.type = Preconditions.checkNotNull(type);
+        this.type = requireNonNull(type);
     }
 
     @Override

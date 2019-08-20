@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.beans.ConstructorProperties;
 
 /**
@@ -24,8 +25,8 @@ public class DataTreeListenerInfo {
     @ConstructorProperties({"listener","registeredPath", "isEnabled", "notificationCount"})
     public DataTreeListenerInfo(final String listener, final String registeredPath, final boolean isEnabled,
             final long notificationCount) {
-        this.listener = Preconditions.checkNotNull(listener);
-        this.registeredPath = Preconditions.checkNotNull(registeredPath);
+        this.listener = requireNonNull(listener);
+        this.registeredPath = requireNonNull(registeredPath);
         this.isEnabled = isEnabled;
         this.notificationCount = notificationCount;
     }

@@ -5,14 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Status;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -97,11 +97,10 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     }
 
     abstract static class CohortRegistryCommand {
-
         private final ActorRef cohort;
 
         CohortRegistryCommand(final ActorRef cohort) {
-            this.cohort = Preconditions.checkNotNull(cohort);
+            this.cohort = requireNonNull(cohort);
         }
 
         ActorRef getCohort() {
@@ -110,40 +109,34 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     }
 
     static class RegisterCohort extends CohortRegistryCommand {
-
         private final DOMDataTreeIdentifier path;
 
         RegisterCohort(final DOMDataTreeIdentifier path, final ActorRef cohort) {
             super(cohort);
             this.path = path;
-
         }
 
         public DOMDataTreeIdentifier getPath() {
             return path;
         }
-
     }
 
     static class RemoveCohort extends CohortRegistryCommand {
-
         RemoveCohort(final ActorRef cohort) {
             super(cohort);
         }
-
     }
 
     private static class CanCommitMessageBuilder {
-
+        private final Multimap<ActorRef, DOMDataTreeCandidate> actorToCandidates = ArrayListMultimap.create();
         private final TransactionIdentifier txId;
         private final DataTreeCandidate candidate;
         private final SchemaContext schema;
-        private final Multimap<ActorRef, DOMDataTreeCandidate> actorToCandidates = ArrayListMultimap.create();
 
         CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate,
                 final SchemaContext schema) {
-            this.txId = Preconditions.checkNotNull(txId);
-            this.candidate = Preconditions.checkNotNull(candidate);
+            this.txId = requireNonNull(txId);
+            this.candidate = requireNonNull(candidate);
             this.schema = schema;
         }
 

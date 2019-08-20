@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.remote.rpc.registry;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -44,7 +46,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     public RpcRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
-        this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
+        this.rpcRegistrar = requireNonNull(rpcRegistrar);
         this.mxBean = new RemoteRpcRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
                 config.getAskDuration()), config.getAskDuration());
     }
@@ -123,7 +125,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
         @VisibleForTesting
         public RemoteRpcEndpoint(final ActorRef router, final Collection<DOMRpcIdentifier> rpcs) {
-            this.router = Preconditions.checkNotNull(router);
+            this.router = requireNonNull(router);
             this.rpcs = ImmutableSet.copyOf(rpcs);
         }
 
@@ -144,7 +146,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
             final List<DOMRpcIdentifier> rpcRouteIdentifiers;
 
             AbstractRouteMessage(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
-                Preconditions.checkArgument(rpcRouteIdentifiers != null && !rpcRouteIdentifiers.isEmpty(),
+                checkArgument(rpcRouteIdentifiers != null && !rpcRouteIdentifiers.isEmpty(),
                         "Route Identifiers must be supplied");
                 this.rpcRouteIdentifiers = ImmutableList.copyOf(rpcRouteIdentifiers);
             }

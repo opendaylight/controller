@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -109,7 +108,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);
             if (callback != null) {
                 // XXX: FB does not see that callback is final, on stack and has be check for non-null.
-                final Consumer<Response<?, ?>> fbIsStupid = Preconditions.checkNotNull(callback);
+                final Consumer<Response<?, ?>> fbIsStupid = requireNonNull(callback);
                 executeInActor(() -> fbIsStupid.accept(new ReadTransactionSuccess(request.getTarget(),
                     request.getSequence(), result)));
             }
@@ -119,7 +118,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final boolean result = readOnlyView().readNode(path).isPresent();
             if (callback != null) {
                 // XXX: FB does not see that callback is final, on stack and has be check for non-null.
-                final Consumer<Response<?, ?>> fbIsStupid = Preconditions.checkNotNull(callback);
+                final Consumer<Response<?, ?>> fbIsStupid = requireNonNull(callback);
                 executeInActor(() -> fbIsStupid.accept(new ExistsTransactionSuccess(request.getTarget(),
                     request.getSequence(), result)));
             }

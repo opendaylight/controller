@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -24,7 +26,7 @@ final class ClientTransactionCursor implements DOMDataTreeWriteCursor {
     private final ClientTransaction parent;
 
     ClientTransactionCursor(final ClientTransaction parent) {
-        this.parent = Preconditions.checkNotNull(parent);
+        this.parent = requireNonNull(parent);
     }
 
     @Override
@@ -45,7 +47,7 @@ final class ClientTransactionCursor implements DOMDataTreeWriteCursor {
     @Override
     public void exit() {
         final YangInstanceIdentifier currentParent = current.getParent();
-        Preconditions.checkState(currentParent != null);
+        checkState(currentParent != null);
         current = currentParent;
     }
 

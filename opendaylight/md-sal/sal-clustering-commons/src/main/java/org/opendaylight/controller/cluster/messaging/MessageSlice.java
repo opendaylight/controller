@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -34,14 +35,14 @@ public class MessageSlice implements Serializable {
     private final int lastSliceHashCode;
     private final ActorRef replyTo;
 
-    MessageSlice(Identifier identifier, byte[] data, int sliceIndex, int totalSlices, int lastSliceHashCode,
-            final ActorRef replyTo) {
-        this.identifier = Preconditions.checkNotNull(identifier);
-        this.data = Preconditions.checkNotNull(data);
+    MessageSlice(final Identifier identifier, final byte[] data, final int sliceIndex, final int totalSlices,
+            final int lastSliceHashCode, final ActorRef replyTo) {
+        this.identifier = requireNonNull(identifier);
+        this.data = requireNonNull(data);
         this.sliceIndex = sliceIndex;
         this.totalSlices = totalSlices;
         this.lastSliceHashCode = lastSliceHashCode;
-        this.replyTo = Preconditions.checkNotNull(replyTo);
+        this.replyTo = requireNonNull(replyTo);
     }
 
     public Identifier getIdentifier() {
@@ -93,12 +94,12 @@ public class MessageSlice implements Serializable {
         public Proxy() {
         }
 
-        Proxy(MessageSlice messageSlice) {
+        Proxy(final MessageSlice messageSlice) {
             this.messageSlice = messageSlice;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(messageSlice.identifier);
             out.writeInt(messageSlice.sliceIndex);
             out.writeInt(messageSlice.totalSlices);
@@ -108,7 +109,7 @@ public class MessageSlice implements Serializable {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             Identifier identifier = (Identifier) in.readObject();
             int sliceIndex = in.readInt();
             int totalSlices = in.readInt();

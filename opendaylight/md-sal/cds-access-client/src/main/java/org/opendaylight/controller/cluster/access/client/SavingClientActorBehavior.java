@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.persistence.DeleteSnapshotsFailure;
 import akka.persistence.DeleteSnapshotsSuccess;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotSelectionCriteria;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
 
     SavingClientActorBehavior(final InitialClientActorContext context, final ClientIdentifier nextId) {
         super(context);
-        this.myId = Preconditions.checkNotNull(nextId);
+        this.myId = requireNonNull(nextId);
     }
 
     @Override

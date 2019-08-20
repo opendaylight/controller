@@ -13,7 +13,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -278,7 +277,7 @@ final class ShardInformation {
     }
 
     void setSchemaContext(final SchemaContext schemaContext) {
-        schemaContextProvider.set(Preconditions.checkNotNull(schemaContext));
+        schemaContextProvider.set(requireNonNull(schemaContext));
     }
 
     @VisibleForTesting

@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -21,6 +20,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.EnumMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -70,7 +71,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
         this.readTxDelegate = requireNonNull(readTxDelegate);
         this.writeTxDelegate = requireNonNull(writeTxDelegate);
         this.txIdentifier = requireNonNull(readWriteTxId);
-        this.initialReadMap = Maps.newEnumMap(LogicalDatastoreType.class);
+        this.initialReadMap = new EnumMap<>(LogicalDatastoreType.class);
 
         final InMemoryDataTreeFactory treeFactory = new InMemoryDataTreeFactory();
         final ImmutableMap.Builder<LogicalDatastoreType, DataTreeSnapshot> snapshotMapBuilder = ImmutableMap.builder();
@@ -81,7 +82,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
             tree.setSchemaContext(ctx);
             snapshotMapBuilder.put(store, tree.takeSnapshot());
 
-            modificationHistoryMapBuilder.put(store, Lists.newLinkedList());
+            modificationHistoryMapBuilder.put(store, new LinkedList<>());
         }
 
         modificationHistoryMap = modificationHistoryMapBuilder.build();

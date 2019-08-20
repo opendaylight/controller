@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -71,12 +72,12 @@ final class DOMDataBrokerTransactionChainImpl extends
                                              final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
-        this.broker = Preconditions.checkNotNull(broker);
-        this.listener = Preconditions.checkNotNull(listener);
+        this.broker = requireNonNull(broker);
+        this.listener = requireNonNull(listener);
     }
 
     private void checkNotFailed() {
-        Preconditions.checkState(state != State.FAILED, "Transaction chain has failed");
+        checkState(state != State.FAILED, "Transaction chain has failed");
     }
 
     @Override

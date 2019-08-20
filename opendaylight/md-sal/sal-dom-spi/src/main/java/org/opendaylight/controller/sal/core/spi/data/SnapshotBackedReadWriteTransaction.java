@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
@@ -42,7 +42,7 @@ public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedW
     @SuppressWarnings("checkstyle:IllegalCatch")
     public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
-        checkNotNull(path, "Path must not be null.");
+        requireNonNull(path, "Path must not be null.");
 
         final Optional<NormalizedNode<?, ?>> result;
         try {

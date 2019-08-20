@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Set;
@@ -36,7 +37,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
 
     AbstractInvokableServiceMetadata(final String id, final String interfaceName) {
         super(id);
-        this.interfaceName = Preconditions.checkNotNull(interfaceName);
+        this.interfaceName = requireNonNull(interfaceName);
     }
 
     Class<RpcService> rpcInterface() {

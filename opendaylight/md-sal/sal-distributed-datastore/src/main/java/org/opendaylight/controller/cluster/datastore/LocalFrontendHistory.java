@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -19,7 +20,6 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-
 
 /**
  * Chained transaction specialization of {@link AbstractFrontendHistory}. It prevents concurrent open transactions.
@@ -33,7 +33,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
             final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
             final RangeSet<UnsignedLong> purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
-        this.chain = Preconditions.checkNotNull(chain);
+        this.chain = requireNonNull(chain);
     }
 
     static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
