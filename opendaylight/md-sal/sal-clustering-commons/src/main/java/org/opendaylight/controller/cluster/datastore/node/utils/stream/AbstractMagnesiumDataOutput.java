@@ -180,8 +180,12 @@ abstract class AbstractMagnesiumDataOutput extends AbstractNormalizedNodeDataOut
     }
 
     @Override
-    public final void startAnyxmlNode(final NodeIdentifier name) throws IOException {
-        startSimpleNode(MagnesiumNode.NODE_ANYXML, name);
+    public final boolean startAnyxmlNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+        if (DOMSource.class.isAssignableFrom(objectModel)) {
+            startSimpleNode(MagnesiumNode.NODE_ANYXML, name);
+            return true;
+        }
+        return false;
     }
 
     @Override
