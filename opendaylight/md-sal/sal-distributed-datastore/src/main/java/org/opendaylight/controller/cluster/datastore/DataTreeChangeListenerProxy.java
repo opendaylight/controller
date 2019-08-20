@@ -86,6 +86,8 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         }, actorUtils.getClientDispatcher());
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void setListenerRegistrationActor(final ActorSelection actor) {
         if (actor == null) {
             LOG.debug("{}: Ignoring null actor on {}", logContext(), this);
