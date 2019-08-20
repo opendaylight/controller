@@ -25,18 +25,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * For more information on usage and examples, please see the documentation in {@link AsyncReadTransaction}.
  */
 public interface ReadTransaction extends AsyncReadTransaction<InstanceIdentifier<?>, DataObject> {
-
     /**
      * Reads data from the provided logical data store located at the provided path.
-     *<p>
-     * If the target is a subtree, then the whole subtree is read (and will be
-     * accessible from the returned data object).
      *
-     * @param store
-     *            Logical data store from which read should occur.
-     * @param path
-     *            Path which uniquely identifies subtree which client want to
-     *            read
+     * <p>
+     * If the target is a subtree, then the whole subtree is read (and will be accessible from the returned data
+     * object).
+     *
+     * @param store Logical data store from which read should occur.
+     * @param path Path which uniquely identifies subtree which client want to read
      * @return a CheckFuture containing the result of the read. The Future blocks until the
      *         commit operation is complete. Once complete:
      *         <ul>
@@ -64,11 +61,8 @@ public interface ReadTransaction extends AsyncReadTransaction<InstanceIdentifier
      * Default implementation delegates to {@link #read(LogicalDatastoreType, InstanceIdentifier)}, implementations
      * are advised to provide a more efficient override.
      *
-     * @param store
-     *            Logical data store from which read should occur.
-     * @param path
-     *            Path which uniquely identifies subtree which client want to
-     *            check existence of
+     * @param store Logical data store from which read should occur.
+     * @param path Path which uniquely identifies subtree which client want to check existence of
      * @return a CheckFuture containing the result of the check.
      *         <ul>
      *         <li>If the data at the supplied path exists, the Future returns a Boolean
