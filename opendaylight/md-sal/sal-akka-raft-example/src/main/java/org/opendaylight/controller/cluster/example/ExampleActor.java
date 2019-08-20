@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -204,7 +202,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         try {
             return new MapState((Map<String, String>) SerializationUtils.deserialize(snapshotBytes.read()));
         } catch (IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
