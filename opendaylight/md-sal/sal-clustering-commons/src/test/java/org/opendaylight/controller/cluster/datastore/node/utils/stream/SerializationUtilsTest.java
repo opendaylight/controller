@@ -30,9 +30,9 @@ import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DOMSourceAnyxmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
@@ -63,7 +63,7 @@ public class SerializationUtilsTest {
         final ByteArrayInputStream is =
                 new ByteArrayInputStream("<xml><data/></xml>".getBytes(Charset.defaultCharset()));
         final Document parse = UntrustedXML.newDocumentBuilder().parse(is);
-        final AnyXmlNode anyXmlNode = Builders.anyXmlBuilder()
+        final DOMSourceAnyxmlNode anyXmlNode = Builders.anyXmlBuilder()
                 .withNodeIdentifier(id("anyXmlNode"))
                 .withValue(new DOMSource(parse))
                 .build();
