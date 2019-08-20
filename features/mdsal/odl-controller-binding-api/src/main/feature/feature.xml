@@ -8,6 +8,6 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-controller-binding-api-${project.version}">
     <feature name="odl-controller-binding-api" version="${project.version}">
-        <feature version="[4,5)">odl-mdsal-binding-api</feature>
+        <feature version="[5,6)">odl-mdsal-binding-api</feature>
     </feature>
 </features>
