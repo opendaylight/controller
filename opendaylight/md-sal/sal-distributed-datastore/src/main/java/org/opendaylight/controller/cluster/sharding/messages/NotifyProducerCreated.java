@@ -5,11 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding.messages;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.Serializable;
 import java.util.Collection;
@@ -27,7 +25,7 @@ public class NotifyProducerCreated implements Serializable {
     private final Collection<DOMDataTreeIdentifier> subtrees;
 
     public NotifyProducerCreated(final Collection<DOMDataTreeIdentifier> subtrees) {
-        this.subtrees = ImmutableList.copyOf(Preconditions.checkNotNull(subtrees));
+        this.subtrees = ImmutableList.copyOf(subtrees);
     }
 
     public Collection<DOMDataTreeIdentifier> getSubtrees() {

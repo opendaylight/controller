@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 
@@ -22,7 +23,7 @@ abstract class AbstractShardedTransaction implements DOMStoreTransaction {
     private final ClientTransaction tx;
 
     AbstractShardedTransaction(final ClientTransaction tx) {
-        this.tx = Preconditions.checkNotNull(tx);
+        this.tx = requireNonNull(tx);
     }
 
     @Override

@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocation;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocationListener;
@@ -30,8 +30,8 @@ public final class RoleChangeListenerActor extends AbstractUntypedActor {
     private final ActorRef roleChangeNotifier;
 
     private RoleChangeListenerActor(final ActorRef roleChangeNotifier, final LeaderLocationListener listener) {
-        this.roleChangeNotifier = Preconditions.checkNotNull(roleChangeNotifier);
-        this.leaderLocationListener = Preconditions.checkNotNull(listener);
+        this.roleChangeNotifier = requireNonNull(roleChangeNotifier);
+        this.leaderLocationListener = requireNonNull(listener);
     }
 
     @Override

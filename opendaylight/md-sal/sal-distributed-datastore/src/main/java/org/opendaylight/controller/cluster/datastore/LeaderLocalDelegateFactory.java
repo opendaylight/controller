@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import com.google.common.base.Preconditions;
 
 /**
  * Base class for factories instantiating delegates which are local to the
@@ -24,7 +25,7 @@ abstract class LeaderLocalDelegateFactory<M> {
     private final Shard shard;
 
     protected LeaderLocalDelegateFactory(final Shard shard) {
-        this.shard = Preconditions.checkNotNull(shard);
+        this.shard = requireNonNull(shard);
     }
 
     protected final ActorRef getSelf() {
@@ -47,11 +48,11 @@ abstract class LeaderLocalDelegateFactory<M> {
         return shard.getContext().actorOf(props);
     }
 
-    protected final ActorSelection selectActor(ActorRef ref) {
+    protected final ActorSelection selectActor(final ActorRef ref) {
         return shard.getContext().system().actorSelection(ref.path());
     }
 
-    protected final ActorSelection selectActor(ActorPath path) {
+    protected final ActorSelection selectActor(final ActorPath path) {
         return shard.getContext().system().actorSelection(path);
     }
 

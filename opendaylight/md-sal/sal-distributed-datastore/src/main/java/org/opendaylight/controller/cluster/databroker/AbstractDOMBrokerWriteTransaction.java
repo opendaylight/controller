@@ -5,11 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.databroker;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.ArrayList;
@@ -67,7 +69,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
             final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories,
             final AbstractDOMTransactionFactory<?> commitImpl) {
         super(identifier, storeTxFactories);
-        this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
+        this.commitImpl = requireNonNull(commitImpl, "commitImpl must not be null.");
     }
 
     @Override
@@ -80,10 +82,9 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
 
     private static void checkInstanceIdentifierReferencesData(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
-        Preconditions.checkArgument(data != null, "Attempted to store null data at %s", path);
+        checkArgument(data != null, "Attempted to store null data at %s", path);
         final PathArgument lastArg = path.getLastPathArgument();
-        Preconditions.checkArgument(
-                lastArg == data.getIdentifier() || lastArg != null && lastArg.equals(data.getIdentifier()),
+        checkArgument(lastArg == data.getIdentifier() || lastArg != null && lastArg.equals(data.getIdentifier()),
                 "Instance identifier references %s but data identifier is %s", lastArg, data);
     }
 
@@ -147,7 +148,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     }
 
     private void checkRunning(final AbstractDOMTransactionFactory<?> impl) {
-        Preconditions.checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
+        checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
     }
 
     @Override

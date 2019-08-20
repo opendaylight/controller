@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ExtendedActorSystem;
 import akka.serialization.JSerializer;
 import akka.util.ClassLoaderObjectInputStream;
-import com.google.common.base.Preconditions;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
@@ -27,7 +29,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
     private final ExtendedActorSystem system;
 
     public ReadyLocalTransactionSerializer(final ExtendedActorSystem system) {
-        this.system = Preconditions.checkNotNull(system);
+        this.system = requireNonNull(system);
     }
 
     @Override
@@ -42,7 +44,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
 
     @Override
     public byte[] toBinary(final Object obj) {
-        Preconditions.checkArgument(obj instanceof ReadyLocalTransaction, "Unsupported object type %s", obj.getClass());
+        checkArgument(obj instanceof ReadyLocalTransaction, "Unsupported object type %s", obj.getClass());
         final ReadyLocalTransaction readyLocal = (ReadyLocalTransaction) obj;
         final BatchedModifications batched = new BatchedModifications(readyLocal.getTransactionId(),
                 readyLocal.getRemoteVersion());
@@ -69,7 +71,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
         private final BatchedModifications message;
 
         BatchedCursor(final BatchedModifications message) {
-            this.message = Preconditions.checkNotNull(message);
+            this.message = requireNonNull(message);
         }
 
         @Override

@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.function.Consumer;
 import org.apache.aries.blueprint.container.AbstractServiceReferenceRecipe;
@@ -106,15 +108,12 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
             return trackedService;
         }
 
-        Preconditions.checkNotNull(localTrackedServiceReference, "trackedServiceReference is null");
-
-        trackedService = getServiceSecurely(localTrackedServiceReference);
+        trackedService = getServiceSecurely(requireNonNull(localTrackedServiceReference,
+            "trackedServiceReference is null"));
 
         LOG.debug("{}: Returning service instance: {}", getName(), trackedService);
 
-        Preconditions.checkNotNull(trackedService, "getService() returned null for %s", localTrackedServiceReference);
-
-        return trackedService;
+        return checkNotNull(trackedService, "getService() returned null for %s", localTrackedServiceReference);
     }
 
     @Override

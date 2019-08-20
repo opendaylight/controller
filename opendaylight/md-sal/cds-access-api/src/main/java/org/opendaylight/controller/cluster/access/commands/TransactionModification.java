@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
@@ -34,7 +35,7 @@ public abstract class TransactionModification {
     private final YangInstanceIdentifier path;
 
     TransactionModification(final YangInstanceIdentifier path) {
-        this.path = Preconditions.checkNotNull(path);
+        this.path = requireNonNull(path);
     }
 
     public final YangInstanceIdentifier getPath() {

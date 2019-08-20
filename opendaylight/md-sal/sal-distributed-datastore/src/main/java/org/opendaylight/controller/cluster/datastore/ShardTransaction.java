@@ -5,15 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
@@ -41,7 +41,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         super("shard-tx");
         this.shardActor = shardActor;
         this.shardStats = shardStats;
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionId = requireNonNull(transactionId);
     }
 
     public static Props props(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction,
@@ -130,7 +130,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
         ShardTransactionCreator(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction,
                 final ActorRef shardActor, final DatastoreContext datastoreContext, final ShardStats shardStats) {
-            this.transaction = Preconditions.checkNotNull(transaction);
+            this.transaction = requireNonNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.datastoreContext = datastoreContext;

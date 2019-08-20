@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -24,9 +23,9 @@ class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTran
     private final Object txIdentifier;
 
     ShardedDOMDataBrokerDelegatingWriteTransaction(final Object txIdentifier,
-                                                          final DOMDataTreeWriteTransaction delegateTx) {
-        this.delegateTx = checkNotNull(delegateTx);
-        this.txIdentifier = checkNotNull(txIdentifier);
+                                                   final DOMDataTreeWriteTransaction delegateTx) {
+        this.delegateTx = requireNonNull(delegateTx);
+        this.txIdentifier = requireNonNull(txIdentifier);
     }
 
     @Override

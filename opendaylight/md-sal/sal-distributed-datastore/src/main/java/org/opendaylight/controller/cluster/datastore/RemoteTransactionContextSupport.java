@@ -8,11 +8,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -61,7 +62,7 @@ final class RemoteTransactionContextSupport {
 
     RemoteTransactionContextSupport(final TransactionContextWrapper transactionContextWrapper,
             final TransactionProxy parent, final String shardName) {
-        this.parent = Preconditions.checkNotNull(parent);
+        this.parent = requireNonNull(parent);
         this.shardName = shardName;
         this.transactionContextWrapper = transactionContextWrapper;
 

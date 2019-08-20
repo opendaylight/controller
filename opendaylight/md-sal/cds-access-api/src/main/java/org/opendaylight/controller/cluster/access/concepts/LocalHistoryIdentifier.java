@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
@@ -50,7 +51,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         }
 
         Proxy(final ClientIdentifier frontendId, final long historyId, final long cookie) {
-            this.clientId = Preconditions.checkNotNull(frontendId);
+            this.clientId = requireNonNull(frontendId);
             this.historyId = historyId;
             this.cookie = cookie;
         }
@@ -85,7 +86,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
     }
 
     public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId, final long cookie) {
-        this.clientId = Preconditions.checkNotNull(frontendId);
+        this.clientId = requireNonNull(frontendId);
         this.historyId = historyId;
         this.cookie = cookie;
     }

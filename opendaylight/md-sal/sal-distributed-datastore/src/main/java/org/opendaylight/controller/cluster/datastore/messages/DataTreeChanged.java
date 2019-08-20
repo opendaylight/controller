@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
@@ -21,7 +22,7 @@ public final class DataTreeChanged {
     private final Collection<DataTreeCandidate> changes;
 
     public DataTreeChanged(final Collection<DataTreeCandidate> changes) {
-        this.changes = Preconditions.checkNotNull(changes);
+        this.changes = requireNonNull(changes);
     }
 
     /**

@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Serializable;
 
 /**
@@ -20,11 +20,8 @@ public class FindPrimary implements Serializable {
     private final String shardName;
     private final boolean waitUntilReady;
 
-    public FindPrimary(String shardName, boolean waitUntilReady) {
-
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
-
-        this.shardName = shardName;
+    public FindPrimary(final String shardName, final boolean waitUntilReady) {
+        this.shardName = requireNonNull(shardName, "shardName should not be null");
         this.waitUntilReady = waitUntilReady;
     }
 

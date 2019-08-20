@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
@@ -40,7 +39,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier>
         }
 
         protected AbstractProxy(final byte[] serialized) {
-            this.serialized = Preconditions.checkNotNull(serialized);
+            this.serialized = requireNonNull(serialized);
         }
 
         @Override

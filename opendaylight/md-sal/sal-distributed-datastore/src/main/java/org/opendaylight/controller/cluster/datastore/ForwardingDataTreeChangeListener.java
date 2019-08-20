@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
@@ -29,11 +30,11 @@ final class ForwardingDataTreeChangeListener implements DOMDataTreeChangeListene
     private final ActorSelection actor;
 
     ForwardingDataTreeChangeListener(final ActorSelection actor) {
-        this.actor = Preconditions.checkNotNull(actor, "actor should not be null");
+        this.actor = requireNonNull(actor, "actor should not be null");
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
         LOG.debug("Sending DataTreeChanged to {}", actor);
         actor.tell(new DataTreeChanged(changes), ActorRef.noSender());
     }

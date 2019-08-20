@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sample.toaster.provider;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.DELETE;
 import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.WRITE;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
@@ -14,7 +15,6 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL
 import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICATION;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -120,9 +120,8 @@ public class OpendaylightToaster extends AbstractMXBean
     public void init() {
         LOG.info("Initializing...");
 
-        Preconditions.checkNotNull(dataBroker, "dataBroker must be set");
-        dataTreeChangeListenerRegistration = dataBroker.registerDataTreeChangeListener(
-                DataTreeIdentifier.create(CONFIGURATION, TOASTER_IID), this);
+        dataTreeChangeListenerRegistration = requireNonNull(dataBroker, "dataBroker must be set")
+            .registerDataTreeChangeListener(DataTreeIdentifier.create(CONFIGURATION, TOASTER_IID), this);
         setToasterStatusUp(null);
 
         // Register our MXBean.
