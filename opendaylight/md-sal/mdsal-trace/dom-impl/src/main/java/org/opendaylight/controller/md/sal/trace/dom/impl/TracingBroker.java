@@ -225,6 +225,8 @@ public class TracingBroker implements TracingDOMDataBroker {
         writeWatches.add(watch);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private boolean isRegistrationWatched(YangInstanceIdentifier iid, LogicalDatastoreType store) {
         if (registrationWatches.isEmpty()) {
             return true;
@@ -275,7 +277,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         }
     }
 
-    private void reconstructIidPathString(YangInstanceIdentifier yiid, StringBuilder sb) {
+    private static void reconstructIidPathString(YangInstanceIdentifier yiid, StringBuilder sb) {
         sb.append("<RECONSTRUCTED FROM: \"").append(yiid.toString()).append("\">");
         for (YangInstanceIdentifier.PathArgument pathArg : yiid.getPathArguments()) {
             if (pathArg instanceof YangInstanceIdentifier.AugmentationIdentifier) {

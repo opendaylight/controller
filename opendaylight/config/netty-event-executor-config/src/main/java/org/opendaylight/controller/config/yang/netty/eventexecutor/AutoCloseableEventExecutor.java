@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.ImmediateEventExecutor;
@@ -34,12 +35,12 @@ public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable
         }
 
         @Override
-        public void close() throws Exception {
+        @SuppressFBWarnings(value = "UC_USELESS_VOID_METHOD", justification = "False positive")
+        public void close() {
             eventExecutor.shutdownGracefully(0, DEFAULT_SHUTDOWN_SECONDS, TimeUnit.SECONDS);
         }
 
-
-        private static AutoCloseableEventExecutor createCloseableProxy(final EventExecutor eventExecutor) {
+        static AutoCloseableEventExecutor createCloseableProxy(final EventExecutor eventExecutor) {
             final CloseableEventExecutorMixin closeableEventExecutor = new CloseableEventExecutorMixin(eventExecutor);
             return Reflection.newProxy(AutoCloseableEventExecutor.class, new AbstractInvocationHandler() {
                 @Override

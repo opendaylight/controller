@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.compat;
 
 import com.google.common.collect.Sets;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -59,6 +60,8 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
         return codec.getNotificationClasses(added);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void notifyAllListeners(final Set<SchemaPath> added) {
         final Iterator<? extends ListenerRegistration<? extends NotificationInterestListener>> listeners =
