@@ -133,6 +133,8 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
         }
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void transactionFailed(final DOMDataTreeWriteTransaction tx, final Throwable cause) {
         state = State.FAILED;
         LOG.debug("Transaction chain {} failed.", this, cause);
