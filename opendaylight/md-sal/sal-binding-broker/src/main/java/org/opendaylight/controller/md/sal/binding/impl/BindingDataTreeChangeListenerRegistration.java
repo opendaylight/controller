@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -20,7 +21,7 @@ class BindingDataTreeChangeListenerRegistration<L extends DataTreeChangeListener
 
     BindingDataTreeChangeListenerRegistration(final L listener, final ListenerRegistration<?> domReg) {
         super(listener);
-        this.domReg = Preconditions.checkNotNull(domReg);
+        this.domReg = requireNonNull(domReg);
     }
 
     @Override

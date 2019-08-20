@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 /**
@@ -21,8 +23,8 @@ public final class RuntimeRequestException extends RequestException {
     private static final long serialVersionUID = 1L;
 
     public RuntimeRequestException(final String message, final Throwable cause) {
-        super(message, Preconditions.checkNotNull(cause));
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(message), "Exception message is mandatory");
+        super(message, requireNonNull(cause));
+        checkArgument(!Strings.isNullOrEmpty(message), "Exception message is mandatory");
     }
 
     @Override

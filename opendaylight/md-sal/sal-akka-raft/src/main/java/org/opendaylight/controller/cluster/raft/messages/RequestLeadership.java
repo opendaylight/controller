@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
 /**
@@ -22,8 +22,8 @@ public final class RequestLeadership implements Serializable {
     private final ActorRef replyTo;
 
     public RequestLeadership(final String requestedFollowerId, final ActorRef replyTo) {
-        this.requestedFollowerId = Preconditions.checkNotNull(requestedFollowerId);
-        this.replyTo = Preconditions.checkNotNull(replyTo);
+        this.requestedFollowerId = requireNonNull(requestedFollowerId);
+        this.replyTo = requireNonNull(replyTo);
     }
 
     public String getRequestedFollowerId() {

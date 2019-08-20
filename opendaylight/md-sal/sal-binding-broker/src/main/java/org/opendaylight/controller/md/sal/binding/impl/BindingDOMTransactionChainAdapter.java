@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -40,10 +42,10 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
 
     BindingDOMTransactionChainAdapter(final DOMDataBroker chainFactory,
             final BindingToNormalizedNodeCodec codec, final TransactionChainListener listener) {
-        Preconditions.checkNotNull(chainFactory, "DOM Transaction chain factory must not be null");
         this.domListener = new DelegateChainListener();
         this.bindingListener = listener;
-        this.delegate = chainFactory.createTransactionChain(domListener);
+        this.delegate = requireNonNull(chainFactory, "DOM Transaction chain factory must not be null")
+                .createTransactionChain(domListener);
         this.codec = codec;
     }
 
@@ -117,12 +119,10 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
     }
 
     private final class DelegateChainListener implements TransactionChainListener {
-
         @Override
         public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
                 final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-            Preconditions.checkState(delegate.equals(chain),
-                    "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
+            checkChain(chain);
             /*
              * Intentionally NOOP, callback for failure, since we
              * are also listening on each transaction future for failure,
@@ -130,16 +130,19 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
              * of this transaction chain), instead of DOM transaction
              * which is known only to this chain, binding transaction implementation
              * and underlying transaction chain.
-             *
              */
             LOG.debug("Transaction chain {} failed. Failed DOM Transaction {}",this,transaction,cause);
         }
 
         @Override
         public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-            Preconditions.checkState(delegate.equals(chain),
-                    "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
+            checkChain(chain);
             bindingListener.onTransactionChainSuccessful(BindingDOMTransactionChainAdapter.this);
+        }
+
+        private void checkChain(final TransactionChain<?, ?> chain) {
+            checkState(delegate.equals(chain), "Illegal state - listener for %s was invoked for incorrect chain %s.",
+                delegate, chain);
         }
     }
 

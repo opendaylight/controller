@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -47,7 +50,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     private boolean inSimple;
 
     AbstractNormalizedNodeDataOutput(final DataOutput output) {
-        this.output = Preconditions.checkNotNull(output);
+        this.output = requireNonNull(output);
     }
 
     private void ensureHeaderWritten() throws IOException {
@@ -162,7 +165,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startLeafNode(final NodeIdentifier name) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new leaf node");
         startNode(name.getNodeType(), NodeTypes.LEAF_NODE);
         inSimple = true;
@@ -170,7 +173,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new leaf set");
 
         lastLeafSetQName = name.getNodeType();
@@ -179,7 +182,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new ordered leaf set");
 
         lastLeafSetQName = name.getNodeType();
@@ -202,7 +205,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
 
         LOG.trace("Starting a new container node");
 
@@ -211,7 +214,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startYangModeledAnyXmlNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
 
         LOG.trace("Starting a new yang modeled anyXml node");
 
@@ -220,7 +223,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new unkeyed list");
 
         startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST);
@@ -228,7 +231,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new unkeyed list item");
 
         startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST_ITEM);
@@ -236,7 +239,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new map node");
 
         startNode(name.getNodeType(), NodeTypes.MAP_NODE);
@@ -245,7 +248,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     @Override
     public void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
             throws IOException {
-        Preconditions.checkNotNull(identifier, "Node identifier should not be null");
+        requireNonNull(identifier, "Node identifier should not be null");
         LOG.trace("Starting a new map entry node");
         startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
 
@@ -254,7 +257,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new ordered map node");
 
         startNode(name.getNodeType(), NodeTypes.ORDERED_MAP_NODE);
@@ -262,7 +265,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new choice node");
 
         startNode(name.getNodeType(), NodeTypes.CHOICE_NODE);
@@ -270,7 +273,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
-        Preconditions.checkNotNull(identifier, "Node identifier should not be null");
+        requireNonNull(identifier, "Node identifier should not be null");
         LOG.trace("Starting a new augmentation node");
 
         output.writeByte(NodeTypes.AUGMENTATION_NODE);
@@ -279,7 +282,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startAnyxmlNode(final NodeIdentifier name) throws IOException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
+        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting any xml node");
         startNode(name.getNodeType(), NodeTypes.ANY_XML_NODE);
         inSimple = true;
@@ -324,8 +327,8 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     private void startNode(final QName qname, final byte nodeType) throws IOException {
-        Preconditions.checkNotNull(qname, "QName of node identifier should not be null.");
-        Preconditions.checkState(!inSimple, "Attempted to start a child in a simple node");
+        requireNonNull(qname, "QName of node identifier should not be null.");
+        checkState(!inSimple, "Attempted to start a child in a simple node");
 
         ensureHeaderWritten();
 
@@ -338,9 +341,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     private void writeObjSet(final Set<?> set) throws IOException {
         output.writeInt(set.size());
         for (Object o : set) {
-            Preconditions.checkArgument(o instanceof String, "Expected value type to be String but was %s (%s)",
-                o.getClass(), o);
-
+            checkArgument(o instanceof String, "Expected value type to be String but was %s (%s)", o.getClass(), o);
             writeString((String) o);
         }
     }

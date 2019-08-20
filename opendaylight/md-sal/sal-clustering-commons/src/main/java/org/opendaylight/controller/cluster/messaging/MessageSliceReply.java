@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
-import com.google.common.base.Preconditions;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -34,9 +35,9 @@ public final class MessageSliceReply implements Serializable {
 
     private MessageSliceReply(final Identifier identifier, final int sliceIndex, final MessageSliceException failure,
             final ActorRef sendTo) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
         this.sliceIndex = sliceIndex;
-        this.sendTo = Preconditions.checkNotNull(sendTo);
+        this.sendTo = requireNonNull(sendTo);
         this.failure = failure;
     }
 

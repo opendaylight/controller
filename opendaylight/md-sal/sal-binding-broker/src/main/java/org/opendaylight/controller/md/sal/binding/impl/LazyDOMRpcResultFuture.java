@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -33,8 +34,8 @@ final class LazyDOMRpcResultFuture implements CheckedFuture<DOMRpcResult, DOMRpc
 
     private LazyDOMRpcResultFuture(final ListenableFuture<RpcResult<?>> delegate,
             final BindingNormalizedNodeSerializer codec) {
-        this.bindingFuture = Preconditions.checkNotNull(delegate, "delegate");
-        this.codec = Preconditions.checkNotNull(codec, "codec");
+        this.bindingFuture = requireNonNull(delegate, "delegate");
+        this.codec = requireNonNull(codec, "codec");
     }
 
     static CheckedFuture<DOMRpcResult, DOMRpcException> create(final BindingNormalizedNodeSerializer codec,
