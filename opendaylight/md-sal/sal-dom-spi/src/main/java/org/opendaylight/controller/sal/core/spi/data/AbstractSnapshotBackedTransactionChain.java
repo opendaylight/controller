@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -43,11 +45,11 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         private final AbstractSnapshotBackedTransactionChain<?> chain;
 
         Idle(final AbstractSnapshotBackedTransactionChain<?> chain) {
-            this.chain = Preconditions.checkNotNull(chain);
+            this.chain = requireNonNull(chain);
         }
 
         @Override
-        protected DataTreeSnapshot getSnapshot(Object transactionId) {
+        protected DataTreeSnapshot getSnapshot(final Object transactionId) {
             return chain.takeSnapshot();
         }
     }
@@ -62,7 +64,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         private volatile DataTreeSnapshot snapshot;
 
         Allocated(final DOMStoreWriteTransaction transaction) {
-            this.transaction = Preconditions.checkNotNull(transaction);
+            this.transaction = requireNonNull(transaction);
         }
 
         public DOMStoreWriteTransaction getTransaction() {
@@ -70,9 +72,9 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         }
 
         @Override
-        protected DataTreeSnapshot getSnapshot(Object transactionId) {
+        protected DataTreeSnapshot getSnapshot(final Object transactionId) {
             final DataTreeSnapshot ret = snapshot;
-            Preconditions.checkState(ret != null,
+            checkState(ret != null,
                     "Could not get snapshot for transaction %s - previous transaction %s is not ready yet",
                     transactionId, transaction.getIdentifier());
             return ret;
@@ -80,8 +82,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
 
         void setSnapshot(final DataTreeSnapshot snapshot) {
             final boolean success = SNAPSHOT_UPDATER.compareAndSet(this, null, snapshot);
-            Preconditions.checkState(success, "Transaction %s has already been marked as ready",
-                    transaction.getIdentifier());
+            checkState(success, "Transaction %s has already been marked as ready", transaction.getIdentifier());
         }
     }
 
@@ -92,11 +93,11 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         private final String message;
 
         Shutdown(final String message) {
-            this.message = Preconditions.checkNotNull(message);
+            this.message = requireNonNull(message);
         }
 
         @Override
-        protected DataTreeSnapshot getSnapshot(Object transactionId) {
+        protected DataTreeSnapshot getSnapshot(final Object transactionId) {
             throw new IllegalStateException(message);
         }
     }
@@ -115,7 +116,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         state = idleState;
     }
 
-    private Entry<State, DataTreeSnapshot> getSnapshot(T transactionId) {
+    private Entry<State, DataTreeSnapshot> getSnapshot(final T transactionId) {
         final State localState = state;
         return new SimpleEntry<>(localState, localState.getSnapshot(transactionId));
     }
@@ -130,7 +131,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         return newReadOnlyTransaction(nextTransactionIdentifier());
     }
 
-    protected DOMStoreReadTransaction newReadOnlyTransaction(T transactionId) {
+    protected DOMStoreReadTransaction newReadOnlyTransaction(final T transactionId) {
         final Entry<State, DataTreeSnapshot> entry = getSnapshot(transactionId);
         return SnapshotBackedTransactions.newReadTransaction(transactionId, getDebugTransactions(), entry.getValue(),
             this);
@@ -146,7 +147,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         return newReadWriteTransaction(nextTransactionIdentifier());
     }
 
-    protected DOMStoreReadWriteTransaction newReadWriteTransaction(T transactionId) {
+    protected DOMStoreReadWriteTransaction newReadWriteTransaction(final T transactionId) {
         Entry<State, DataTreeSnapshot> entry;
         DOMStoreReadWriteTransaction ret;
 
@@ -164,7 +165,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         return newWriteOnlyTransaction(nextTransactionIdentifier());
     }
 
-    protected DOMStoreWriteTransaction newWriteOnlyTransaction(T transactionId) {
+    protected DOMStoreWriteTransaction newWriteOnlyTransaction(final T transactionId) {
         Entry<State, DataTreeSnapshot> entry;
         DOMStoreWriteTransaction ret;
 
@@ -203,8 +204,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         if (localState instanceof Allocated) {
             final Allocated allocated = (Allocated)localState;
             final DOMStoreWriteTransaction transaction = allocated.getTransaction();
-            Preconditions.checkState(tx.equals(transaction), "Mis-ordered ready transaction %s last allocated was %s",
-                    tx, transaction);
+            checkState(tx.equals(transaction), "Mis-ordered ready transaction %s last allocated was %s", tx,
+                transaction);
             allocated.setSnapshot(tree);
         } else {
             LOG.debug("Ignoring transaction {} readiness due to state {}", tx, localState);
@@ -218,8 +219,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         final State localState = state;
 
         do {
-            Preconditions.checkState(!CLOSED.equals(localState), "Transaction chain %s has been closed", this);
-
+            checkState(!CLOSED.equals(localState), "Transaction chain %s has been closed", this);
             if (FAILED.equals(localState)) {
                 LOG.debug("Ignoring user close in failed state");
                 return;
