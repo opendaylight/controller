@@ -448,12 +448,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender,
-        final RequestVoteReply requestVoteReply) {
+    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
         return this;
     }
 
-    protected void beforeSendHeartbeat(){}
+    protected void beforeSendHeartbeat() {
+        // No-op
+    }
 
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
