@@ -12,16 +12,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutorService;
-import javassist.ClassPool;
 
 @Beta
 @Deprecated
 public class BindingBrokerTestFactory {
-
-    private static final ClassPool CLASS_POOL = ClassPool.getDefault();
     private boolean startWithParsedSchema = true;
     private ExecutorService executor;
-    private ClassPool classPool;
 
 
     public boolean isStartWithParsedSchema() {
@@ -44,19 +40,5 @@ public class BindingBrokerTestFactory {
         Preconditions.checkState(executor != null, "Executor is not set.");
         ListeningExecutorService listenableExecutor = MoreExecutors.listeningDecorator(executor);
         return new BindingTestContext(listenableExecutor, startWithParsedSchema);
-    }
-
-    @Deprecated
-    public ClassPool getClassPool() {
-        if (classPool == null) {
-            return CLASS_POOL;
-        }
-
-        return classPool;
-    }
-
-    @Deprecated
-    public void setClassPool(final ClassPool classPool) {
-        this.classPool = classPool;
     }
 }
