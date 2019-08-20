@@ -279,7 +279,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws Exception {
         LOG.info("Stopping Shard {}", persistenceId());
 
         super.postStop();
@@ -1201,7 +1201,7 @@ public class Shard extends RaftActor {
             this(Shard.class);
         }
 
-        Builder(Class<? extends Shard> shardClass) {
+        Builder(final Class<? extends Shard> shardClass) {
             super(shardClass);
         }
     }

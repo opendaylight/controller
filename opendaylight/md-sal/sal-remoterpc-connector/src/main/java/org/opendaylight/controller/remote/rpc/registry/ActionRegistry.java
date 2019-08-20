@@ -61,7 +61,7 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws Exception {
         super.postStop();
         this.mxBean.unregister();
     }
