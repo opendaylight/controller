@@ -13,6 +13,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -91,9 +92,10 @@ final class ListenerMapGeneration {
         return typeToListeners.keySet();
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static Iterable<Class<?>> getNotificationTypes(final Class<?> cls) {
-        final Class<?>[] ifaces = cls.getInterfaces();
-        return Arrays.stream(ifaces)
+        return Arrays.stream(cls.getInterfaces())
                 .filter(input -> !Notification.class.equals(input) && Notification.class.isAssignableFrom(input))
                 .collect(Collectors.toList());
     }
