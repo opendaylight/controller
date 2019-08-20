@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -26,7 +27,7 @@ class AbortSlicing implements Serializable {
     private final Identifier identifier;
 
     AbortSlicing(final Identifier identifier) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
     }
 
     Identifier getIdentifier() {
@@ -53,17 +54,17 @@ class AbortSlicing implements Serializable {
         public Proxy() {
         }
 
-        Proxy(AbortSlicing abortSlicing) {
+        Proxy(final AbortSlicing abortSlicing) {
             this.abortSlicing = abortSlicing;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(abortSlicing.identifier);
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             abortSlicing = new AbortSlicing((Identifier) in.readObject());
         }
 

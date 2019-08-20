@@ -5,11 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class SyncStatusTracker {
         final String leaderId;
 
         LeaderInfo(final String leaderId, final long minimumCommitIndex) {
-            this.leaderId = Preconditions.checkNotNull(leaderId);
+            this.leaderId = requireNonNull(leaderId);
             this.minimumCommitIndex = minimumCommitIndex;
         }
     }
@@ -46,14 +47,14 @@ public class SyncStatusTracker {
     private boolean syncStatus;
 
     public SyncStatusTracker(final ActorRef actor, final String id, final long syncThreshold) {
-        this.actor = Preconditions.checkNotNull(actor, "actor should not be null");
-        this.id = Preconditions.checkNotNull(id, "id should not be null");
-        Preconditions.checkArgument(syncThreshold >= 0, "syncThreshold should be greater than or equal to 0");
+        this.actor = requireNonNull(actor, "actor should not be null");
+        this.id = requireNonNull(id, "id should not be null");
+        checkArgument(syncThreshold >= 0, "syncThreshold should be greater than or equal to 0");
         this.syncThreshold = syncThreshold;
     }
 
     public void update(final String leaderId, final long leaderCommit, final long commitIndex) {
-        Preconditions.checkNotNull(leaderId, "leaderId should not be null");
+        requireNonNull(leaderId, "leaderId should not be null");
 
         if (syncTarget == null || !leaderId.equals(syncTarget.leaderId)) {
             LOG.debug("{}: Last sync leader does not match current leader {}, need to catch up to {}", id,

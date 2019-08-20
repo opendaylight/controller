@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -23,9 +24,10 @@ public class CreateTransaction extends VersionedExternalizableMessage {
     public CreateTransaction() {
     }
 
-    public CreateTransaction(TransactionIdentifier transactionId, int transactionType, short version) {
+    public CreateTransaction(final TransactionIdentifier transactionId, final int transactionType,
+            final short version) {
         super(version);
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionId = requireNonNull(transactionId);
         this.transactionType = transactionType;
     }
 
@@ -38,14 +40,14 @@ public class CreateTransaction extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         transactionId = TransactionIdentifier.readFrom(in);
         transactionType = in.readInt();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         transactionId.writeTo(out);
         out.writeInt(transactionType);
@@ -56,12 +58,12 @@ public class CreateTransaction extends VersionedExternalizableMessage {
         return "CreateTransaction [transactionId=" + transactionId + ", transactionType=" + transactionType + "]";
     }
 
-    public static CreateTransaction fromSerializable(Object message) {
-        Preconditions.checkArgument(message instanceof CreateTransaction);
+    public static CreateTransaction fromSerializable(final Object message) {
+        checkArgument(message instanceof CreateTransaction);
         return (CreateTransaction)message;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof CreateTransaction;
     }
 }

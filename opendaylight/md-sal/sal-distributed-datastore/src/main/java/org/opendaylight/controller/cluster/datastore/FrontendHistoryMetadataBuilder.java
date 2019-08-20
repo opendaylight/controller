@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -32,7 +34,7 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     private boolean closed;
 
     FrontendHistoryMetadataBuilder(final LocalHistoryIdentifier identifier) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
         this.purgedTransactions = TreeRangeSet.create();
         this.closedTransactions = new HashMap<>(2);
     }
@@ -56,7 +58,7 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     }
 
     void onHistoryClosed() {
-        Preconditions.checkState(identifier.getHistoryId() != 0);
+        checkState(identifier.getHistoryId() != 0);
         closed = true;
     }
 

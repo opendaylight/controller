@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
     private GlobalDOMRpcRoutingTableEntry(final DOMRpcIdentifier rpcId,
                                           final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(rpcId.getType(), impls);
-        this.rpcId = Preconditions.checkNotNull(rpcId);
+        this.rpcId = requireNonNull(rpcId);
     }
 
     // We do not need the RpcDefinition, but this makes sure we do not

@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
@@ -33,8 +33,8 @@ public class DistributedShardModification extends WriteableNodeWithSubshard {
                                         final Map<PathArgument, WriteableModificationNode> subshards,
                                         final Map<DOMDataTreeIdentifier, ForeignShardModificationContext> childShards) {
         super(subshards);
-        this.context = Preconditions.checkNotNull(context);
-        this.childShards = Preconditions.checkNotNull(childShards);
+        this.context = requireNonNull(context);
+        this.childShards = requireNonNull(childShards);
     }
 
     @Override

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -29,7 +30,7 @@ public final class UnsignedLongRangeSet implements Mutable {
     private final RangeSet<UnsignedLong> rangeset;
 
     private UnsignedLongRangeSet(final RangeSet<UnsignedLong> rangeset) {
-        this.rangeset = Preconditions.checkNotNull(rangeset);
+        this.rangeset = requireNonNull(rangeset);
     }
 
     public static UnsignedLongRangeSet create() {

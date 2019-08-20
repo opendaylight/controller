@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Address;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.util.Map;
@@ -21,7 +22,7 @@ final class GossipEnvelope implements Serializable {
     private final Address to;
 
     GossipEnvelope(final Address from, final Address to, final Map<Address, ? extends Bucket<?>> buckets) {
-        this.to = Preconditions.checkNotNull(to);
+        this.to = requireNonNull(to);
         this.buckets = ImmutableMap.copyOf(buckets);
         this.from = from;
     }

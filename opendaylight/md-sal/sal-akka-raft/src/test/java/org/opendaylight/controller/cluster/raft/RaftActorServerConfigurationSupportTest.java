@@ -23,8 +23,7 @@ import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
@@ -32,6 +31,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -203,9 +204,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Verify new server config was applied in both followers
 
-        assertEquals("Follower peers", Sets.newHashSet(LEADER_ID, NEW_SERVER_ID), followerActorContext.getPeerIds());
+        assertEquals("Follower peers", ImmutableSet.of(LEADER_ID, NEW_SERVER_ID), followerActorContext.getPeerIds());
 
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID, FOLLOWER_ID),
+        assertEquals("New follower peers", ImmutableSet.of(LEADER_ID, FOLLOWER_ID),
                 newFollowerActorContext.getPeerIds());
 
         assertEquals("Follower commit index", 3, followerActorContext.getCommitIndex());
@@ -277,7 +278,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Verify new server config was applied in the new follower
 
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID), newFollowerActorContext.getPeerIds());
+        assertEquals("New follower peers", ImmutableSet.of(LEADER_ID), newFollowerActorContext.getPeerIds());
 
         LOG.info("testAddServerWithNoExistingFollower ending");
     }
@@ -324,7 +325,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Verify new server config was applied in the new follower
 
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID), newFollowerActorContext.getPeerIds());
+        assertEquals("New follower peers", ImmutableSet.of(LEADER_ID), newFollowerActorContext.getPeerIds());
 
         assertNoneMatching(newFollowerCollectorActor, InstallSnapshot.class, 500);
 
@@ -409,7 +410,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Verify ServerConfigurationPayload entry in the new follower
 
         expectMatching(newFollowerCollectorActor, ApplyState.class, 2);
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID, NEW_SERVER_ID2),
+        assertEquals("New follower peers", ImmutableSet.of(LEADER_ID, NEW_SERVER_ID2),
                newFollowerActorContext.getPeerIds());
 
         LOG.info("testAddServerWithOperationInProgress ending");
@@ -1283,8 +1284,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
 
-        assertEquals("Server config", Sets.newHashSet(nonVotingServer(node1ID), votingServer(node2ID)),
-                Sets.newHashSet(node1RaftActor.getRaftActorContext().getPeerServerInfo(true).getServerConfig()));
+        assertEquals("Server config", ImmutableSet.of(nonVotingServer(node1ID), votingServer(node2ID)),
+            ImmutableSet.of(node1RaftActor.getRaftActorContext().getPeerServerInfo(true).getServerConfig()));
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeaderAndElectionTimeout ending");
@@ -1463,7 +1464,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ReplicatedLogEntry logEntry = log.get(log.lastIndex());
         assertEquals("Last log entry payload class", ServerConfigurationPayload.class, logEntry.getData().getClass());
         ServerConfigurationPayload payload = (ServerConfigurationPayload)logEntry.getData();
-        assertEquals("Server config", Sets.newHashSet(expected), Sets.newHashSet(payload.getServerConfig()));
+        assertEquals("Server config", ImmutableSet.copyOf(expected), new HashSet<>(payload.getServerConfig()));
     }
 
     private static RaftActorContextImpl newFollowerContext(final String id,
@@ -1590,8 +1591,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     public static class MockNewFollowerRaftActor extends AbstractMockRaftActor {
         public MockNewFollowerRaftActor(final ConfigParams config, final ActorRef collectorActor) {
-            super(NEW_SERVER_ID, Maps.<String, String>newHashMap(), Optional.of(config), NO_PERSISTENCE,
-                    collectorActor);
+            super(NEW_SERVER_ID, new HashMap<>(), Optional.of(config), NO_PERSISTENCE, collectorActor);
             setPersistence(false);
         }
 

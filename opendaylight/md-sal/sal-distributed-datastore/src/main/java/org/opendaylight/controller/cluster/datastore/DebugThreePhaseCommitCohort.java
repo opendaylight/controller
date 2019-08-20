@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -38,9 +39,9 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
 
     DebugThreePhaseCommitCohort(final TransactionIdentifier transactionId,
             final AbstractThreePhaseCommitCohort<?> delegate, final Throwable debugContext) {
-        this.delegate = Preconditions.checkNotNull(delegate);
-        this.debugContext = Preconditions.checkNotNull(debugContext);
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.delegate = requireNonNull(delegate);
+        this.debugContext = requireNonNull(debugContext);
+        this.transactionId = requireNonNull(transactionId);
     }
 
     private <V> ListenableFuture<V> addFutureCallback(final ListenableFuture<V> future) {

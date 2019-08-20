@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,8 +51,8 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
 
     // Hidden to prevent outside instantiation
     AbstractClientHandle(final AbstractClientHistory parent, final TransactionIdentifier transactionId) {
-        this.transactionId = Preconditions.checkNotNull(transactionId);
-        this.parent = Preconditions.checkNotNull(parent);
+        this.transactionId = requireNonNull(transactionId);
+        this.parent = requireNonNull(parent);
     }
 
     @Override
@@ -114,7 +116,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
 
     private State<T> getState() {
         final State<T> local = state;
-        Preconditions.checkState(local != null, "Transaction %s is closed", transactionId);
+        checkState(local != null, "Transaction %s is closed", transactionId);
         return local;
     }
 

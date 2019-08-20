@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
@@ -29,7 +29,7 @@ public final class DistributedShardModificationFactory {
     DistributedShardModificationFactory(final DOMDataTreeIdentifier root,
                                         final Map<PathArgument, WriteableModificationNode> children,
                                         final Map<DOMDataTreeIdentifier, ForeignShardModificationContext> childShards) {
-        this.root = Preconditions.checkNotNull(root);
+        this.root = requireNonNull(root);
         this.children = ImmutableMap.copyOf(children);
         this.childShards = ImmutableMap.copyOf(childShards);
     }

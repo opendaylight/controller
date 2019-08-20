@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 /**
@@ -33,10 +35,10 @@ public class BackendInfo {
 
     protected BackendInfo(final ActorRef actor, final String name, final long sessionId, final ABIVersion version,
             final int maxMessages) {
-        this.version = Preconditions.checkNotNull(version);
-        this.actor = Preconditions.checkNotNull(actor);
-        this.name = Preconditions.checkNotNull(name);
-        Preconditions.checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
+        this.version = requireNonNull(version);
+        this.actor = requireNonNull(actor);
+        this.name = requireNonNull(name);
+        checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
         this.maxMessages = maxMessages;
         this.sessionId = sessionId;
     }

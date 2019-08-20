@@ -5,11 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Address;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -60,11 +61,8 @@ public class ShardingServiceAddressResolver {
     }
 
     public String resolve(final MemberName memberName) {
-        Preconditions.checkNotNull(memberName);
-        final Address address = memberNameToAddress.get(memberName);
-        Preconditions.checkNotNull(address, "Requested member[%s] is not present in the resolver ",
-                memberName.toString());
-
+        final Address address = memberNameToAddress.get(requireNonNull(memberName));
+        checkNotNull(address, "Requested member[%s] is not present in the resolver", memberName);
         return getActorPathBuilder(address).toString();
     }
 }

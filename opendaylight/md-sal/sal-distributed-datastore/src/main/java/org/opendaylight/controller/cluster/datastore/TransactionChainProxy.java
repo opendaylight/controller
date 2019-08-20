@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -61,7 +63,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
         Pending(final TransactionIdentifier transaction, final Future<?> previousFuture) {
             this.previousFuture = previousFuture;
-            this.transaction = Preconditions.checkNotNull(transaction);
+            this.transaction = requireNonNull(transaction);
         }
 
         @Override
@@ -292,11 +294,11 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     protected <T> void onTransactionReady(final TransactionIdentifier transaction,
             final Collection<Future<T>> cohortFutures) {
         final State localState = currentState;
-        Preconditions.checkState(localState instanceof Allocated, "Readying transaction %s while state is %s",
-                transaction, localState);
+        checkState(localState instanceof Allocated, "Readying transaction %s while state is %s", transaction,
+            localState);
         final TransactionIdentifier currentTx = ((Allocated)localState).getIdentifier();
-        Preconditions.checkState(transaction.equals(currentTx), "Readying transaction %s while %s is allocated",
-                transaction, currentTx);
+        checkState(transaction.equals(currentTx), "Readying transaction %s while %s is allocated", transaction,
+            currentTx);
 
         // Transaction ready and we are not waiting for futures -- go to idle
         if (cohortFutures.isEmpty()) {
@@ -322,7 +324,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     }
 
     @Override
-    protected void onTransactionContextCreated(TransactionIdentifier transactionId) {
+    protected void onTransactionContextCreated(final TransactionIdentifier transactionId) {
         Promise<Object> promise = priorReadOnlyTxPromises.remove(transactionId);
         if (promise != null) {
             promise.success(null);

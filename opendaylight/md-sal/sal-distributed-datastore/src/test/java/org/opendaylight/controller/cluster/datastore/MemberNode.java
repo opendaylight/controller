@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -17,12 +18,11 @@ import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -157,7 +157,7 @@ public class MemberNode {
 
     public static void verifyRaftPeersPresent(final AbstractDataStore datastore, final String shardName,
             final String... peerMemberNames) throws Exception {
-        final Set<String> peerIds = Sets.newHashSet();
+        final Set<String> peerIds = new HashSet<>();
         for (String p: peerMemberNames) {
             peerIds.add(ShardIdentifier.create(shardName, MemberName.forName(p),
                 datastore.getActorUtils().getDataStoreName()).toString());
@@ -278,9 +278,9 @@ public class MemberNode {
         }
 
         public MemberNode build() throws Exception {
-            Preconditions.checkNotNull(moduleShardsConfig, "moduleShardsConfig must be specified");
-            Preconditions.checkNotNull(akkaConfig, "akkaConfig must be specified");
-            Preconditions.checkNotNull(testName, "testName must be specified");
+            requireNonNull(moduleShardsConfig, "moduleShardsConfig must be specified");
+            requireNonNull(akkaConfig, "akkaConfig must be specified");
+            requireNonNull(testName, "testName must be specified");
 
             if (schemaContext == null) {
                 schemaContext = SchemaContextHelper.full();

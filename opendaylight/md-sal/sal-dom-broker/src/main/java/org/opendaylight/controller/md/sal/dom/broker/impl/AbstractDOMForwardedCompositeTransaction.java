@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
@@ -45,8 +46,8 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
      *            Key,value map of backing transactions.
      */
     protected AbstractDOMForwardedCompositeTransaction(final Object identifier, final Map<K, T> backingTxs) {
-        this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
-        this.backingTxs = Preconditions.checkNotNull(backingTxs, "Backing transactions should not be null");
+        this.identifier = requireNonNull(identifier, "Identifier should not be null");
+        this.backingTxs = requireNonNull(backingTxs, "Backing transactions should not be null");
     }
 
     /**
@@ -60,10 +61,8 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
      *             if no subtransaction is associated with key.
      */
     protected final T getSubtransaction(final K key) {
-        Preconditions.checkNotNull(key, "key must not be null.");
-
-        final T ret = backingTxs.get(key);
-        Preconditions.checkArgument(ret != null, "No subtransaction associated with %s", key);
+        final T ret = backingTxs.get(requireNonNull(key, "key must not be null."));
+        checkArgument(ret != null, "No subtransaction associated with %s", key);
         return ret;
     }
 

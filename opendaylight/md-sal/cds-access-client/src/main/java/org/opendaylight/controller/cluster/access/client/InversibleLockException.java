@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -24,7 +25,7 @@ public final class InversibleLockException extends RuntimeException {
     private final transient CountDownLatch latch;
 
     InversibleLockException(final CountDownLatch latch) {
-        this.latch = Preconditions.checkNotNull(latch);
+        this.latch = requireNonNull(latch);
     }
 
     public void awaitResolution() {

@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.actor.UntypedAbstractActor;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -82,11 +83,11 @@ class GetSnapshotReplyActor extends UntypedAbstractActor {
 
         Params(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm, final ActorRef replyToActor,
                 final FiniteDuration receiveTimeout, final String id, final ServerConfigurationPayload peerInfo) {
-            this.captureSnapshot = Preconditions.checkNotNull(captureSnapshot);
-            this.electionTerm = Preconditions.checkNotNull(electionTerm);
-            this.replyToActor = Preconditions.checkNotNull(replyToActor);
-            this.receiveTimeout = Preconditions.checkNotNull(receiveTimeout);
-            this.id = Preconditions.checkNotNull(id);
+            this.captureSnapshot = requireNonNull(captureSnapshot);
+            this.electionTerm = requireNonNull(electionTerm);
+            this.replyToActor = requireNonNull(replyToActor);
+            this.receiveTimeout = requireNonNull(receiveTimeout);
+            this.id = requireNonNull(id);
             this.peerInformation = peerInfo;
         }
     }

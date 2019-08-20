@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -23,7 +24,7 @@ final class DOMStoreThreePhaseCommitCohortAdaptor extends ForwardingObject imple
 
     DOMStoreThreePhaseCommitCohortAdaptor(
         final org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate);
+        this.delegate = requireNonNull(delegate);
     }
 
     @Override
