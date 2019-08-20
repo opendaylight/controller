@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
@@ -184,6 +185,12 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         if (output instanceof OutputStream) {
             ((OutputStream)output).flush();
         }
+    }
+
+    @Override
+    public final boolean startAnydataNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+        // FIXME: We do not support anydata nodes of any kind, yet
+        return false;
     }
 
     abstract short streamVersion();
