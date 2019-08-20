@@ -5,14 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.notifications;
 
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.serialization.Serialization;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 
@@ -26,11 +25,11 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 public class RoleChangeNotifier extends AbstractUntypedActor implements AutoCloseable {
 
     private final String memberId;
-    private final Map<ActorPath, ActorRef> registeredListeners = Maps.newHashMap();
+    private final Map<ActorPath, ActorRef> registeredListeners = new HashMap<>();
     private RoleChangeNotification latestRoleChangeNotification = null;
     private LeaderStateChanged latestLeaderStateChanged;
 
-    public RoleChangeNotifier(String memberId) {
+    public RoleChangeNotifier(final String memberId) {
         this.memberId = memberId;
     }
 
@@ -46,7 +45,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     }
 
     @Override
-    protected void handleReceive(Object message) {
+    protected void handleReceive(final Object message) {
         if (message instanceof RegisterRoleChangeListener) {
             // register listeners for this shard
 

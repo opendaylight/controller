@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -41,7 +43,7 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         }
 
         Proxy(final byte[] serialized) {
-            this.serialized = Preconditions.checkNotNull(serialized);
+            this.serialized = requireNonNull(serialized);
         }
 
         @Override
@@ -70,16 +72,16 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
     private volatile byte[] serialized;
 
     private MemberName(final String name) {
-        this.name = Preconditions.checkNotNull(name);
+        this.name = requireNonNull(name);
     }
 
     MemberName(final String name, final byte[] serialized) {
         this(name);
-        this.serialized = Verify.verifyNotNull(serialized);
+        this.serialized = verifyNotNull(serialized);
     }
 
     public static MemberName forName(final String name) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+        checkArgument(!Strings.isNullOrEmpty(name));
         // TODO: consider caching instances here
         return new MemberName(name);
     }

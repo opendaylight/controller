@@ -20,7 +20,6 @@ import static org.mockito.Mockito.verify;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,7 +84,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "test", new ElectionTermImpl(createProvider(), "test", LOG), -1, -1,
-                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")), configParams,
+                new HashMap<>(ImmutableMap.of("peer1", "peerAddress1")), configParams,
                 createProvider(), applyState -> { }, LOG,  MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
@@ -99,7 +98,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "self", new ElectionTermImpl(createProvider(), "test", LOG), -1, -1,
-                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")),
+                new HashMap<>(ImmutableMap.of("peer1", "peerAddress1")),
                 new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG,
                 MoreExecutors.directExecutor());
 

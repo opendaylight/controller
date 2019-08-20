@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.japi.Procedure;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
@@ -24,10 +25,10 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Persis
 class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentDataProvider {
     private final PersistentDataProvider persistentProvider;
 
-    RaftActorDelegatingPersistentDataProvider(DataPersistenceProvider delegate,
-            PersistentDataProvider persistentProvider) {
+    RaftActorDelegatingPersistentDataProvider(final DataPersistenceProvider delegate,
+            final PersistentDataProvider persistentProvider) {
         super(delegate);
-        this.persistentProvider = Preconditions.checkNotNull(persistentProvider);
+        this.persistentProvider = requireNonNull(persistentProvider);
     }
 
     @Override
@@ -36,7 +37,7 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
     }
 
     @Override
-    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
         doPersist(entry, procedure, true);
     }
 

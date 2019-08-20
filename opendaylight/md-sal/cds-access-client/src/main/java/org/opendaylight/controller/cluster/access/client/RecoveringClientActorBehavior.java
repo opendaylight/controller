@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
 
     RecoveringClientActorBehavior(final InitialClientActorContext context, final FrontendIdentifier frontendId) {
         super(context);
-        currentFrontend = Preconditions.checkNotNull(frontendId);
+        currentFrontend = requireNonNull(frontendId);
     }
 
     @Override

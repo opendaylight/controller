@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -29,8 +30,8 @@ public class ConnectionEntry implements Immutable {
     private final long enqueuedTicks;
 
     ConnectionEntry(final Request<?, ?> request, final Consumer<Response<?, ?>> callback, final long now) {
-        this.request = Preconditions.checkNotNull(request);
-        this.callback = Preconditions.checkNotNull(callback);
+        this.request = requireNonNull(request);
+        this.callback = requireNonNull(callback);
         this.enqueuedTicks = now;
     }
 

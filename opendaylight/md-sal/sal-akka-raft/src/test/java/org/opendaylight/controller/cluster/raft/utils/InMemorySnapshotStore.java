@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.dispatch.Futures;
@@ -13,7 +12,6 @@ import akka.persistence.SelectedSnapshot;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.snapshot.japi.SnapshotStore;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +57,7 @@ public class InMemorySnapshotStore extends SnapshotStore {
 
         List<T> retList;
         synchronized (stored) {
-            retList = Lists.newArrayListWithCapacity(stored.size());
+            retList = new ArrayList<>(stored.size());
             for (StoredSnapshot s: stored) {
                 if (type.isInstance(s.data)) {
                     retList.add((T) s.data);

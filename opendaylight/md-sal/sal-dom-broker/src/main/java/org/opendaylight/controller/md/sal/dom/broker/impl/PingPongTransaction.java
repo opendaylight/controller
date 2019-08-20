@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -28,7 +29,7 @@ final class PingPongTransaction implements FutureCallback<CommitInfo> {
     private DOMDataReadWriteTransaction frontendTransaction;
 
     PingPongTransaction(final DOMDataReadWriteTransaction delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate);
+        this.delegate = requireNonNull(delegate);
         future = SettableFuture.create();
     }
 

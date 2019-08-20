@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.spi.rpc;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -18,13 +19,13 @@ import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 @Deprecated
 public abstract class RpcRoutingStrategy implements Identifiable<QName> {
-
     private static final QName CONTEXT_REFERENCE = QName.create("urn:opendaylight:yang:extension:yang-ext",
             "2013-07-09", "context-reference").intern();
+
     private final QName identifier;
 
     private RpcRoutingStrategy(final QName identifier) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
     }
 
     /**
@@ -85,8 +86,8 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
 
         private RoutedRpcStrategy(final QName identifier, final QName ctx, final QName leaf) {
             super(identifier);
-            this.context = Preconditions.checkNotNull(ctx);
-            this.leaf = Preconditions.checkNotNull(leaf);
+            this.context = requireNonNull(ctx);
+            this.leaf = requireNonNull(leaf);
         }
 
         @Override
