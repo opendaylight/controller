@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.dom.broker.spi.rpc;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Optional;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -71,6 +72,7 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
         return new GlobalRpcStrategy(rpc.getQName());
     }
 
+    @SuppressModernizer
     public static Optional<QName> getRoutingContext(final DataSchemaNode schemaNode) {
         for (UnknownSchemaNode extension : schemaNode.getUnknownSchemaNodes()) {
             if (CONTEXT_REFERENCE.equals(extension.getNodeType())) {
@@ -107,7 +109,6 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
     }
 
     private static final class GlobalRpcStrategy extends RpcRoutingStrategy {
-
         GlobalRpcStrategy(final QName identifier) {
             super(identifier);
         }
