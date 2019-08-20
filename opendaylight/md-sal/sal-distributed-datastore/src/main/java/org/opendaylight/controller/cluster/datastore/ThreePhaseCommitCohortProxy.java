@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -142,6 +143,8 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         return returnFuture;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void finishCanCommit(final SettableFuture<Boolean> returnFuture) {
         LOG.debug("Tx {} finishCanCommit", transactionId);
 
