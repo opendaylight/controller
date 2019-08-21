@@ -12,8 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSelection;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
@@ -125,8 +123,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         final ListenableFuture<List<Optional<NormalizedNode<?, ?>>>> listFuture = Futures.allAsList(futures);
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> aggregateFuture;
 
-        aggregateFuture = Futures.transform(listFuture,
-            (Function<List<Optional<NormalizedNode<?, ?>>>, Optional<NormalizedNode<?, ?>>>) input -> {
+        aggregateFuture = Futures.transform(listFuture, input -> {
                 try {
                     return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY, input,
                             txContextFactory.getActorUtils().getSchemaContext(),
@@ -285,10 +282,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             // The remote tx version is obtained the via TransactionContext which may not be available yet so
             // we pass a Supplier to dynamically obtain it. Once the ready Future is resolved the
             // TransactionContext is available.
-            Supplier<Short> txVersionSupplier = () -> wrapper.getTransactionContext().getTransactionVersion();
-
             cohorts.add(new ThreePhaseCommitCohortProxy.CohortInfo(wrapper.readyTransaction(shardNames),
-                    txVersionSupplier));
+                () -> wrapper.getTransactionContext().getTransactionVersion()));
         }
 
         return new ThreePhaseCommitCohortProxy(txContextFactory.getActorUtils(), cohorts, getIdentifier());

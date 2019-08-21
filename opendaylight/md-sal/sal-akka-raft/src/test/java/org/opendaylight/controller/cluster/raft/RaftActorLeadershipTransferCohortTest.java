@@ -13,7 +13,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import akka.dispatch.Dispatchers;
-import com.google.common.base.Function;
+import java.util.function.Function;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
@@ -38,7 +38,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
         factory.close();
     }
 
-    private void setup(String testName) {
+    private void setup(final String testName) {
         String persistenceId = factory.generateActorId(testName + "-leader-");
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(config)
@@ -95,7 +95,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
         Leader leader = new Leader(mockRaftActor.getRaftActorContext()) {
             @Override
-            public void transferLeadership(RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+            public void transferLeadership(final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
                 leadershipTransferCohort.transferComplete();
             }
         };
