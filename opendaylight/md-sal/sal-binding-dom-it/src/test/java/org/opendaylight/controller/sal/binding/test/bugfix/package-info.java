@@ -6,10 +6,8 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 /**
- * This testsuite test Hydrogen-level API and regression for most of it,
- *
- * FIXME: this testsuite needs to be refactored to use new DataBroker API,
- * moved to sal-binding-broker-impl and uses models only from sal-test-model.
- *
+ * This testsuite test Hydrogen-level API and regression for most of it.
  */
+// FIXME: this testsuite needs to be refactored to use new DataBroker API,  moved to sal-binding-broker-impl
+// and uses models only from sal-test-model.
 package org.opendaylight.controller.sal.binding.test.bugfix;

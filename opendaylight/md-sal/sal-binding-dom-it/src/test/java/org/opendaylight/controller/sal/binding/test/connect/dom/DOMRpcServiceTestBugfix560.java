@@ -52,7 +52,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
- * Test case for reported bug 560
+ * Test case for reported bug 560.
  *
  * @author Lukas Sedlak
  * @see <a
@@ -60,25 +60,23 @@ import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
  */
 public class DOMRpcServiceTestBugfix560 {
 
-    private final static String RPC_SERVICE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:bi:ba:rpcservice";
-    private final static String REVISION_DATE = "2014-07-01";
-    private final static QName RPC_NAME = QName.create(RPC_SERVICE_NAMESPACE,
-            REVISION_DATE, "rock-the-house");
+    private static final String RPC_SERVICE_NAMESPACE =
+            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:bi:ba:rpcservice";
+    private static final String REVISION_DATE = "2014-07-01";
+    private static final QName RPC_NAME = QName.create(RPC_SERVICE_NAMESPACE, REVISION_DATE, "rock-the-house");
 
     private static final String TLL_NAME = "id";
     private static final QName TLL_NAME_QNAME = QName.create(TopLevelList.QNAME, "name");
 
     private static final InstanceIdentifier<TopLevelList> BA_MOUNT_ID = createBATllIdentifier(TLL_NAME);
-    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_MOUNT_ID = createBITllIdentifier(TLL_NAME);
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_MOUNT_ID =
+            createBITllIdentifier(TLL_NAME);
 
     private BindingTestContext testContext;
     private DOMMountPointService domMountPointService;
     private MountPointService bindingMountPointService;
     private SchemaContext schemaContext;
 
-    /**
-     * @throws java.lang.Exception
-     */
     @Before
     public void setUp() throws Exception {
         final BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
@@ -118,21 +116,19 @@ public class DOMRpcServiceTestBugfix560 {
     @Test
     public void test() throws ExecutionException, InterruptedException {
         // FIXME: This is made to only make sure instance identifier codec for path is instantiated.
-        domMountPointService
-                .createMountPoint(BI_MOUNT_ID).addService(DOMRpcService.class, new DOMRpcService() {
+        domMountPointService.createMountPoint(BI_MOUNT_ID).addService(DOMRpcService.class, new DOMRpcService() {
+            @Override
+            public <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(final T arg0) {
+                // TODO Auto-generated method stub
+                return null;
+            }
 
-                    @Override
-                    public <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(final T arg0) {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-
-                    @Override
-                    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath arg0, final NormalizedNode<?, ?> arg1) {
-                        final DOMRpcResult result = new DefaultDOMRpcResult((NormalizedNode<?, ?>) null);
-                        return Futures.immediateCheckedFuture(result);
-                    }
-                }).register();
+            @Override
+            public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath arg0,
+                    final NormalizedNode<?, ?> arg1) {
+                return Futures.immediateCheckedFuture(new DefaultDOMRpcResult((NormalizedNode<?, ?>) null));
+            }
+        }).register();
 
         final Optional<MountPoint> mountInstance = bindingMountPointService.getMountPoint(BA_MOUNT_ID);
         assertTrue(mountInstance.isPresent());
@@ -152,9 +148,6 @@ public class DOMRpcServiceTestBugfix560 {
         }
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
     @After
     public void teardown() {
         testContext.close();
