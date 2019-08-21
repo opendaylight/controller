@@ -12,7 +12,6 @@ import akka.actor.Status.Success;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
@@ -31,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
@@ -342,10 +342,9 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.info("Adding replicas for all shards");
 
         final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
-        Function<String, Object> messageSupplier = AddShardReplica::new;
 
-        sendMessageToManagerForConfiguredShards(DataStoreType.Config, shardResultData, messageSupplier);
-        sendMessageToManagerForConfiguredShards(DataStoreType.Operational, shardResultData, messageSupplier);
+        sendMessageToManagerForConfiguredShards(DataStoreType.Config, shardResultData, AddShardReplica::new);
+        sendMessageToManagerForConfiguredShards(DataStoreType.Operational, shardResultData, AddShardReplica::new);
 
         return waitForShardResults(shardResultData, shardResults ->
                 new AddReplicasForAllShardsOutputBuilder().setShardResult(shardResults).build(),
