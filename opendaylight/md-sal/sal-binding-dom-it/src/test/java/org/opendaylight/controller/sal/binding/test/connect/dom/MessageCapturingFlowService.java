@@ -32,7 +32,8 @@ public class MessageCapturingFlowService implements OpendaylightOfMigrationTestM
         return knockKnockResult;
     }
 
-    public MessageCapturingFlowService setKnockKnockResult(final ListenableFuture<RpcResult<KnockKnockOutput>> kkOutput) {
+    public MessageCapturingFlowService setKnockKnockResult(
+            final ListenableFuture<RpcResult<KnockKnockOutput>> kkOutput) {
         this.knockKnockResult = kkOutput;
         return this;
     }
@@ -52,12 +53,14 @@ public class MessageCapturingFlowService implements OpendaylightOfMigrationTestM
         registration.close();
     }
 
-    public MessageCapturingFlowService registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+    public MessageCapturingFlowService registerPath(final Class<? extends BaseIdentity> context,
+            final InstanceIdentifier<?> path) {
         registration.registerPath(context, path);
         return this;
     }
 
-    public MessageCapturingFlowService unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+    public MessageCapturingFlowService unregisterPath(final Class<? extends BaseIdentity> context,
+            final InstanceIdentifier<?> path) {
         registration.unregisterPath(context, path);
         return this;
     }
@@ -77,6 +80,4 @@ public class MessageCapturingFlowService implements OpendaylightOfMigrationTestM
         receivedKnocks.put(input.getKnockerId(), input);
         return knockKnockResult;
     }
-
-
 }

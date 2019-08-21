@@ -47,24 +47,24 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
     public static HashedWheelTimerCloseable newInstance(final @Nullable ThreadFactory threadFactory,
             final @Nullable Long duration, final @Nullable Integer ticksPerWheel) {
         TimeUnit unit = TimeUnit.MILLISECONDS;
-        if(!nullOrNonPositive(duration) && threadFactory == null && nullOrNonPositive(ticksPerWheel)) {
+        if (!nullOrNonPositive(duration) && threadFactory == null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(duration, unit));
         }
 
-        if(!nullOrNonPositive(duration) && threadFactory == null && !nullOrNonPositive(ticksPerWheel)) {
+        if (!nullOrNonPositive(duration) && threadFactory == null && !nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(duration, unit, ticksPerWheel));
         }
 
-        if(nullOrNonPositive(duration) && threadFactory != null && nullOrNonPositive(ticksPerWheel)) {
+        if (nullOrNonPositive(duration) && threadFactory != null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(threadFactory));
         }
 
-        if(!nullOrNonPositive(duration) && threadFactory != null && nullOrNonPositive(ticksPerWheel)) {
+        if (!nullOrNonPositive(duration) && threadFactory != null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(
                     new HashedWheelTimer(threadFactory, duration, unit));
         }
 
-        if(!nullOrNonPositive(duration) && threadFactory != null && !nullOrNonPositive(ticksPerWheel)) {
+        if (!nullOrNonPositive(duration) && threadFactory != null && !nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(
                     new HashedWheelTimer(threadFactory, duration, unit, ticksPerWheel));
         }
@@ -72,7 +72,7 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
         return new HashedWheelTimerCloseable(new HashedWheelTimer());
     }
 
-    private static boolean nullOrNonPositive(final Number n) {
-        return n == null || n.longValue() <= 0;
+    private static boolean nullOrNonPositive(final Number num) {
+        return num == null || num.longValue() <= 0;
     }
 }

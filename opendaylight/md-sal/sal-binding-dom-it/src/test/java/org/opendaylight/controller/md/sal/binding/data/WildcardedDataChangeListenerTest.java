@@ -35,9 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 
-/**
- * FIXME: THis test should be moved to compat test-suite
- */
+// FIXME: This test should be moved to compat test-suite
 public class WildcardedDataChangeListenerTest extends AbstractDataTreeChangeListenerTest {
 
     private static final TopLevelListKey TOP_LEVEL_LIST_0_KEY = new TopLevelListKey("test:0");

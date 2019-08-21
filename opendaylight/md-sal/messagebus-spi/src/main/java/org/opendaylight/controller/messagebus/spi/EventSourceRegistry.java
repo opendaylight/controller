@@ -18,7 +18,7 @@ public interface EventSourceRegistry extends AutoCloseable {
      *
      * @param eventSource the EventSource instance to register
      * @return an EventSourceRegistration instance that is used to unregister the EventSource
-     * via {@link EventSourceRegistration#close()}.
+     *         via {@link EventSourceRegistration#close()}.
      */
     <T extends EventSource> EventSourceRegistration<T> registerEventSource(T eventSource);
 }
