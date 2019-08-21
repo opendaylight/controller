@@ -21,9 +21,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-/**
- * FIXME: THis test should be moved to sal-binding-broker and rewritten to use new DataBroker API
- */
+// FIXME: THis test should be moved to sal-binding-broker and rewritten to use new DataBroker API
 public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
 
     private static final TopLevelListKey FOO_KEY = new TopLevelListKey("foo");
