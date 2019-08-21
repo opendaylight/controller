@@ -44,6 +44,8 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int offset = INITIAL_OFFSET;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
     private int replyReceivedForOffset = -1;
+    // pre-calculate the last offset to make sure we aren't increasing the current offset beyond it
+    private int lastOffset = INITIAL_OFFSET;
     // if replyStatus is false, the previous chunk is attempted
     private boolean replyStatus = false;
     private int chunkIndex = FIRST_CHUNK_INDEX;
@@ -78,6 +80,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
         replyReceivedForOffset = INITIAL_OFFSET;
         chunkIndex = FIRST_CHUNK_INDEX;
+        lastOffset = (totalChunks - 1) * snapshotChunkSize;
     }
 
     int incrementOffset() {
@@ -127,7 +130,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     boolean canSendNextChunk() {
         // we only send a false if a chunk is sent but we have not received a reply yet
         return snapshotBytes != null && (nextChunkHashCode == INITIAL_LAST_CHUNK_HASH_CODE
-                || replyReceivedForOffset == offset);
+                || (replyReceivedForOffset == offset && replyReceivedForOffset < lastOffset));
     }
 
     boolean isLastChunk(final int index) {
