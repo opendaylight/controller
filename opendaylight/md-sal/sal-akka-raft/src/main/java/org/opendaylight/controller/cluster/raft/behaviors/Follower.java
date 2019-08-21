@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotFinished;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
@@ -607,15 +608,16 @@ public class Follower extends AbstractRaftActorBehavior {
                     public void onSuccess() {
                         log.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
 
-                        sender.tell(reply, actor());
+                        sender.tell(new InstallSnapshotFinished(currentTerm(), context.getId(), true), actor());
                     }
 
                     @Override
                     public void onFailure() {
-                        sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+                        sender.tell(new InstallSnapshotFinished(currentTerm(), context.getId(), false), actor());
                     }
                 };
 
+                sender.tell(reply, actor());
                 actor().tell(new ApplySnapshot(snapshot, applySnapshotCallback), actor());
 
                 closeSnapshotTracker();

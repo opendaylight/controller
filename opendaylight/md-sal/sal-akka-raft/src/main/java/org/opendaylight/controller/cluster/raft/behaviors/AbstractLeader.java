@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapsho
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotFinished;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
@@ -505,6 +506,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             replicate((Replicate) message);
         } else if (message instanceof InstallSnapshotReply) {
             handleInstallSnapshotReply((InstallSnapshotReply) message);
+        } else if (message instanceof InstallSnapshotFinished) {
+            handleInstallSnapshotFinished((InstallSnapshotFinished) message);
         } else if (message instanceof CheckConsensusReached) {
             possiblyUpdateCommitIndex();
         } else {
@@ -539,48 +542,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         followerLogInformation.markFollowerActive();
 
         if (installSnapshotState.getChunkIndex() == reply.getChunkIndex()) {
-            boolean wasLastChunk = false;
             if (reply.isSuccess()) {
-                if (installSnapshotState.isLastChunk(reply.getChunkIndex())) {
-                    //this was the last chunk reply
-
-                    long followerMatchIndex = snapshotHolder.get().getLastIncludedIndex();
-                    followerLogInformation.setMatchIndex(followerMatchIndex);
-                    followerLogInformation.setNextIndex(followerMatchIndex + 1);
-                    followerLogInformation.clearLeaderInstallSnapshotState();
-
-                    log.info("{}: Snapshot successfully installed on follower {} (last chunk {}) - "
-                        + "matchIndex set to {}, nextIndex set to {}", logName(), followerId, reply.getChunkIndex(),
-                        followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
-
-                    if (!anyFollowersInstallingSnapshot()) {
-                        // once there are no pending followers receiving snapshots
-                        // we can remove snapshot from the memory
-                        setSnapshotHolder(null);
-                    }
-
-                    wasLastChunk = true;
-                    if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
-                        UnInitializedFollowerSnapshotReply unInitFollowerSnapshotSuccess =
-                                             new UnInitializedFollowerSnapshotReply(followerId);
-                        context.getActor().tell(unInitFollowerSnapshotSuccess, context.getActor());
-                        log.debug("Sent message UnInitializedFollowerSnapshotReply to self");
-                    }
-                } else {
-                    installSnapshotState.markSendStatus(true);
-                }
+                installSnapshotState.markSendStatus(true);
             } else {
                 log.warn("{}: Received failed InstallSnapshotReply - will retry: {}", logName(), reply);
 
                 installSnapshotState.markSendStatus(false);
             }
 
-            if (wasLastChunk) {
-                if (!context.getSnapshotManager().isCapturing()) {
-                    // Since the follower is now caught up try to purge the log.
-                    purgeInMemoryLog();
-                }
-            } else {
+            if (!installSnapshotState.isLastChunk(reply.getChunkIndex())) {
                 ActorSelection followerActor = context.getPeerActorSelection(followerId);
                 if (followerActor != null) {
                     sendSnapshotChunk(followerActor, followerLogInformation);
@@ -597,6 +567,66 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // so that Installing the snapshot can resume from the beginning
                 installSnapshotState.reset();
             }
+        }
+    }
+
+    private void handleInstallSnapshotFinished(final InstallSnapshotFinished reply) {
+        log.debug("{}: handleInstallSnapshotReply: {}", logName(), reply);
+
+        String followerId = reply.getFollowerId();
+        FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
+        if (followerLogInformation == null) {
+            // This can happen during AddServer if it times out.
+            log.error("{}: FollowerLogInformation not found for follower {} in InstallSnapshotReply",
+                    logName(), followerId);
+            return;
+        }
+
+        LeaderInstallSnapshotState installSnapshotState = followerLogInformation.getInstallSnapshotState();
+        if (installSnapshotState == null) {
+            log.error("{}: LeaderInstallSnapshotState not found for follower {} in InstallSnapshotReply",
+                    logName(), followerId);
+            return;
+        }
+
+        if (!reply.isSuccess()) {
+            log.warn("{}: Snapshot installation failed, resetting and retrying. {}", logName(), reply);
+
+            installSnapshotState.reset();
+
+            ActorSelection followerActor = context.getPeerActorSelection(followerId);
+            if (followerActor != null) {
+                sendSnapshotChunk(followerActor, followerLogInformation);
+            }
+            return;
+        }
+
+        long followerMatchIndex = snapshotHolder.get().getLastIncludedIndex();
+        followerLogInformation.setMatchIndex(followerMatchIndex);
+        followerLogInformation.setNextIndex(followerMatchIndex + 1);
+        followerLogInformation.clearLeaderInstallSnapshotState();
+
+        log.info("{}: Snapshot successfully installed on follower {} (last chunk {}) - "
+                        + "matchIndex set to {}, nextIndex set to {}", logName(), followerId,
+                installSnapshotState.getChunkIndex(), followerLogInformation.getMatchIndex(),
+                followerLogInformation.getNextIndex());
+
+        if (!anyFollowersInstallingSnapshot()) {
+            // once there are no pending followers receiving snapshots
+            // we can remove snapshot from the memory
+            setSnapshotHolder(null);
+        }
+
+        if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
+            UnInitializedFollowerSnapshotReply unInitFollowerSnapshotSuccess =
+                    new UnInitializedFollowerSnapshotReply(followerId);
+            context.getActor().tell(unInitFollowerSnapshotSuccess, context.getActor());
+            log.debug("Sent message UnInitializedFollowerSnapshotReply to self");
+        }
+
+        if (!context.getSnapshotManager().isCapturing()) {
+            // Since the follower is now caught up try to purge the log.
+            purgeInMemoryLog();
         }
     }
 
