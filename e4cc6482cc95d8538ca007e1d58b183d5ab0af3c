@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "71efed01_8a5dbda0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-08-22T17:35:27Z",
+      "side": 1,
+      "message": "We could, but we really want to process some of them -- for example an AppendEntries which is deposing us.",
+      "parentUuid": "c2591c3e_221063d0",
+      "revId": "e4cc6482cc95d8538ca007e1d58b183d5ab0af3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "314d3892_260ca576",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2019-07-29T14:00:10Z",
       "side": 1,
       "message": "...same here",
+      "revId": "e4cc6482cc95d8538ca007e1d58b183d5ab0af3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "74316bfa_62f0683f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-08-22T17:35:27Z",
+      "side": 1,
+      "message": "and here we definitely want to process AppendEntries, even if the leader does not hear our response, we *must not* ignore the leader.",
+      "parentUuid": "314d3892_260ca576",
       "revId": "e4cc6482cc95d8538ca007e1d58b183d5ab0af3c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
