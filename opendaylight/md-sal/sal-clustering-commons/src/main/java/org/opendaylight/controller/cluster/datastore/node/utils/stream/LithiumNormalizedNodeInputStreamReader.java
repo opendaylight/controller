@@ -79,7 +79,7 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         streamNormalizedNode(requireNonNull(writer), input.readByte());
     }
 
-    private void streamNormalizedNode(final NormalizedNodeStreamWriter writer, final byte nodeType) throws IOException {
+    final void streamNormalizedNode(final NormalizedNodeStreamWriter writer, final byte nodeType) throws IOException {
         switch (nodeType) {
             case NodeTypes.ANY_XML_NODE:
                 streamAnyxml(writer);
@@ -168,14 +168,14 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
         endLeaf(writer, entryValue == null ? value : entryValue);
     }
 
-    private NodeIdentifier startLeaf(final NormalizedNodeStreamWriter writer) throws IOException {
+    final NodeIdentifier startLeaf(final NormalizedNodeStreamWriter writer) throws IOException {
         final NodeIdentifier identifier = readNodeIdentifier();
         LOG.trace("Streaming leaf node {}", identifier);
         writer.startLeafNode(identifier);
         return identifier;
     }
 
-    private static void endLeaf(final NormalizedNodeStreamWriter writer, final Object value) throws IOException {
+    static final void endLeaf(final NormalizedNodeStreamWriter writer, final Object value) throws IOException {
         writer.scalarValue(value);
         writer.endNode();
     }
@@ -236,14 +236,19 @@ class LithiumNormalizedNodeInputStreamReader extends ForwardingDataInput impleme
 
         // Same loop as commonStreamContainer(), but ...
         for (byte nodeType = input.readByte(); nodeType != NodeTypes.END_NODE; nodeType = input.readByte()) {
-            if (nodeType == NodeTypes.LEAF_NODE) {
-                // ... leaf nodes may need de-duplication
-                streamLeaf(writer, entryIdentifier);
-            } else {
-                streamNormalizedNode(writer, nodeType);
-            }
+            streamMapChild(writer, entryIdentifier, nodeType);
         }
         writer.endNode();
+    }
+
+    void streamMapChild(final NormalizedNodeStreamWriter writer, final NodeIdentifierWithPredicates entryIid,
+            final byte nodeType) throws IOException {
+        if (nodeType == NodeTypes.LEAF_NODE) {
+            // ... leaf nodes may need de-duplication
+            streamLeaf(writer, entryIid);
+        } else {
+            streamNormalizedNode(writer, nodeType);
+        }
     }
 
     private void streamUnkeyedList(final NormalizedNodeStreamWriter writer) throws IOException {
