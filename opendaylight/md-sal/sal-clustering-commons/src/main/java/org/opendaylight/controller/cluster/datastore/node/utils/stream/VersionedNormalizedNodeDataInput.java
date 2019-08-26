@@ -38,7 +38,7 @@ final class VersionedNormalizedNodeDataInput extends ForwardingNormalizedNodeDat
                 ret = new LithiumNormalizedNodeInputStreamReader(input);
                 break;
             case TokenTypes.NEON_SR2_VERSION:
-                ret = new SodiumNormalizedNodeInputStreamReader(input);
+                ret = new NeonSR2NormalizedNodeInputStreamReader(input);
                 break;
             default:
                 throw defunct("Unhandled stream version %s", version);
