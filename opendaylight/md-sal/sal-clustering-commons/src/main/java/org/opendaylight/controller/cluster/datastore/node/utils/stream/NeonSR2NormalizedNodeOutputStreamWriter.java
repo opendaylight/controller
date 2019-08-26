@@ -29,12 +29,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.Augmentat
  * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-class SodiumNormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
+class NeonSR2NormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
     private final Map<AugmentationIdentifier, Integer> aidCodeMap = new HashMap<>();
     private final Map<QNameModule, Integer> moduleCodeMap = new HashMap<>();
     private final Map<QName, Integer> qnameCodeMap = new HashMap<>();
 
-    SodiumNormalizedNodeOutputStreamWriter(final DataOutput output) {
+    NeonSR2NormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
     }
 
