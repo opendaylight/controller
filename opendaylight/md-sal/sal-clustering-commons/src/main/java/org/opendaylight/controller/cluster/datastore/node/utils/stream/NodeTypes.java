@@ -24,6 +24,9 @@ final class NodeTypes {
     static final byte ORDERED_LEAF_SET = 14;
     static final byte YANG_MODELED_ANY_XML_NODE = 15;
 
+    // Only valid within a MapEntryNode
+    static final byte KEY_LEAF = 16;
+
     private NodeTypes() {
         throw new UnsupportedOperationException("utility class");
     }
