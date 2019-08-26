@@ -165,6 +165,10 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startLeafNode(final NodeIdentifier name) throws IOException {
+        startLeafNode(name, NodeTypes.LEAF_NODE);
+    }
+
+    final void startLeafNode(final NodeIdentifier name, final byte nodeType) throws IOException {
         LOG.trace("Starting a new leaf node");
         startNode(name, NodeTypes.LEAF_NODE);
         inSimple = true;
@@ -305,7 +309,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    private void startNode(final PathArgument arg, final byte nodeType) throws IOException {
+    void startNode(final PathArgument arg, final byte nodeType) throws IOException {
         requireNonNull(arg, "Node identifier should not be null");
         checkState(!inSimple, "Attempted to start a child in a simple node");
 
