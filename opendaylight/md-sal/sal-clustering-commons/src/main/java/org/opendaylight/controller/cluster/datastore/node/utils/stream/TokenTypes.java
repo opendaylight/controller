@@ -23,6 +23,10 @@ final class TokenTypes {
      * dictionary, too.
      */
     static final short NEON_SR2_VERSION = 2;
+    /**
+     * Further refinement shipping in Neon SR3: LeafNode corresponding to a list's key does not emit its value.
+     */
+    static final short NEON_SR3_VERSION = 3;
 
     // Tokens supported in LITHIUM_VERSION
     static final byte IS_CODE_VALUE = 1;

@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
-final class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeInputStreamReader {
+class SodiumNormalizedNodeInputStreamReader extends LithiumNormalizedNodeInputStreamReader {
     private final ArrayList<NodeIdentifier> codedNodeIdentifiers = new ArrayList<>();
     private final List<AugmentationIdentifier> codedAugments = new ArrayList<>();
     private final List<QNameModule> codedModules = new ArrayList<>();
