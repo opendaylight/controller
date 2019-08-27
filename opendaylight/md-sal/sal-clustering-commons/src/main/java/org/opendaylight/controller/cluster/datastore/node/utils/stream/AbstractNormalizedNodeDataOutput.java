@@ -165,28 +165,26 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startLeafNode(final NodeIdentifier name) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new leaf node");
-        startNode(name.getNodeType(), NodeTypes.LEAF_NODE);
+        startNode(name, NodeTypes.LEAF_NODE);
         inSimple = true;
     }
 
     @Override
     public void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new leaf set");
-
-        lastLeafSetQName = name.getNodeType();
-        startNode(name.getNodeType(), NodeTypes.LEAF_SET);
+        commonStartLeafSet(name, NodeTypes.LEAF_SET);
     }
 
     @Override
     public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new ordered leaf set");
+        commonStartLeafSet(name, NodeTypes.ORDERED_LEAF_SET);
+    }
 
+    private void commonStartLeafSet(final NodeIdentifier name, final byte nodeType) throws IOException {
+        startNode(name, nodeType);
         lastLeafSetQName = name.getNodeType();
-        startNode(name.getNodeType(), NodeTypes.ORDERED_LEAF_SET);
     }
 
     @Override
@@ -205,70 +203,52 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
-
         LOG.trace("Starting a new container node");
-
-        startNode(name.getNodeType(), NodeTypes.CONTAINER_NODE);
+        startNode(name, NodeTypes.CONTAINER_NODE);
     }
 
     @Override
     public void startYangModeledAnyXmlNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
-
         LOG.trace("Starting a new yang modeled anyXml node");
-
-        startNode(name.getNodeType(), NodeTypes.YANG_MODELED_ANY_XML_NODE);
+        startNode(name, NodeTypes.YANG_MODELED_ANY_XML_NODE);
     }
 
     @Override
     public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new unkeyed list");
-
-        startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST);
+        startNode(name, NodeTypes.UNKEYED_LIST);
     }
 
     @Override
     public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new unkeyed list item");
-
-        startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST_ITEM);
+        startNode(name, NodeTypes.UNKEYED_LIST_ITEM);
     }
 
     @Override
     public void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new map node");
-
-        startNode(name.getNodeType(), NodeTypes.MAP_NODE);
+        startNode(name, NodeTypes.MAP_NODE);
     }
 
     @Override
     public void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
             throws IOException {
-        requireNonNull(identifier, "Node identifier should not be null");
         LOG.trace("Starting a new map entry node");
-        startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
-
+        startNode(identifier, NodeTypes.MAP_ENTRY_NODE);
         writeKeyValueMap(identifier.entrySet());
     }
 
     @Override
     public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new ordered map node");
-
-        startNode(name.getNodeType(), NodeTypes.ORDERED_MAP_NODE);
+        startNode(name, NodeTypes.ORDERED_MAP_NODE);
     }
 
     @Override
     public void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting a new choice node");
-
-        startNode(name.getNodeType(), NodeTypes.CHOICE_NODE);
+        startNode(name, NodeTypes.CHOICE_NODE);
     }
 
     @Override
@@ -282,9 +262,8 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void startAnyxmlNode(final NodeIdentifier name) throws IOException {
-        requireNonNull(name, "Node identifier should not be null");
         LOG.trace("Starting any xml node");
-        startNode(name.getNodeType(), NodeTypes.ANY_XML_NODE);
+        startNode(name, NodeTypes.ANY_XML_NODE);
         inSimple = true;
     }
 
@@ -326,8 +305,8 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    private void startNode(final QName qname, final byte nodeType) throws IOException {
-        requireNonNull(qname, "QName of node identifier should not be null.");
+    private void startNode(final PathArgument arg, final byte nodeType) throws IOException {
+        requireNonNull(arg, "Node identifier should not be null");
         checkState(!inSimple, "Attempted to start a child in a simple node");
 
         ensureHeaderWritten();
@@ -335,7 +314,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         // First write the type of node
         output.writeByte(nodeType);
         // Write Start Tag
-        writeQName(qname);
+        writeQName(arg.getNodeType());
     }
 
     private void writeObjSet(final Set<?> set) throws IOException {
