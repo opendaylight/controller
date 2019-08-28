@@ -5,15 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -42,34 +40,26 @@ final class ValueTypes {
     public static final byte STRING_BYTES_TYPE = 14;
     public static final byte EMPTY_TYPE = 15;
 
-    private static final Map<Class<?>, Byte> TYPES;
-
-    static {
-        final Builder<Class<?>, Byte> b = ImmutableMap.builder();
-
-        b.put(String.class, STRING_TYPE);
-        b.put(Byte.class, BYTE_TYPE);
-        b.put(Integer.class, INT_TYPE);
-        b.put(Long.class, LONG_TYPE);
-        b.put(Boolean.class, BOOL_TYPE);
-        b.put(QName.class, QNAME_TYPE);
-        b.put(Short.class, SHORT_TYPE);
-        b.put(BigInteger.class, BIG_INTEGER_TYPE);
-        b.put(BigDecimal.class, BIG_DECIMAL_TYPE);
-        b.put(byte[].class, BINARY_TYPE);
-        b.put(Empty.class, EMPTY_TYPE);
-
-        TYPES = b.build();
-    }
+    private static final ImmutableMap<Class<?>, Byte> TYPES = ImmutableMap.<Class<?>, Byte>builder()
+            .put(String.class, STRING_TYPE)
+            .put(Byte.class, BYTE_TYPE)
+            .put(Integer.class, INT_TYPE)
+            .put(Long.class, LONG_TYPE)
+            .put(Boolean.class, BOOL_TYPE)
+            .put(QName.class, QNAME_TYPE)
+            .put(Short.class, SHORT_TYPE)
+            .put(BigInteger.class, BIG_INTEGER_TYPE)
+            .put(BigDecimal.class, BIG_DECIMAL_TYPE)
+            .put(byte[].class, BINARY_TYPE)
+            .put(Empty.class, EMPTY_TYPE)
+            .build();
 
     private ValueTypes() {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static byte getSerializableType(Object node) {
-        Objects.requireNonNull(node);
-
-        final Byte type = TYPES.get(node.getClass());
+    static byte getSerializableType(final Object node) {
+        final Byte type = TYPES.get(requireNonNull(node).getClass());
         if (type != null) {
             if (type == STRING_TYPE && ((String) node).length() >= STRING_BYTES_LENGTH_THRESHOLD) {
                 return STRING_BYTES_TYPE;
