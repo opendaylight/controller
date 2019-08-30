@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ClientSnapshotTest extends AbstractClientHandleTest<ClientSnapshot> {
 
-    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.EMPTY;
+    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
 
     @Before
     @Override
