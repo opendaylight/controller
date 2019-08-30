@@ -145,7 +145,7 @@ public class SerializationUtilsTest {
         final LeafNode<String> stringLeaf = createLeaf("stringLeaf", "stringValue");
         final LeafNode<String> longStringLeaf = createLeaf("longStringLeaf", getLongString());
         final LeafNode<QName> qNameLeaf = createLeaf("stringLeaf", QName.create("base", "qName"));
-        final LeafNode<YangInstanceIdentifier> idLeaf = createLeaf("stringLeaf", YangInstanceIdentifier.EMPTY);
+        final LeafNode<YangInstanceIdentifier> idLeaf = createLeaf("stringLeaf", YangInstanceIdentifier.empty());
         final MapEntryNode entry1 = Builders.mapEntryBuilder()
                 .withNodeIdentifier(listId("mapNode", "key", "key1"))
                 .withChild(stringLeaf)
