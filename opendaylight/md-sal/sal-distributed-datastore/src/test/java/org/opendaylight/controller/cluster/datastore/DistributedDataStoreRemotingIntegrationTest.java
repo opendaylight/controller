@@ -1266,7 +1266,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000))));
         AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
 
-        final NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.EMPTY);
+        final NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.empty());
         final Snapshot initialSnapshot = Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
                 Collections.emptyList(), 5, 1, 5, 1, 1, null, null);

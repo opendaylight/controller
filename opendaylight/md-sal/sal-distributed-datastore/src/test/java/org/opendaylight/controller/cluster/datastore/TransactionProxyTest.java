@@ -1478,7 +1478,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
         Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
-                YangInstanceIdentifier.EMPTY).get(5, TimeUnit.SECONDS);
+                YangInstanceIdentifier.empty()).get(5, TimeUnit.SECONDS);
 
         assertTrue("NormalizedNode isPresent", readOptional.isPresent());
 
@@ -1525,6 +1525,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                         eqCreateTransaction(memberName, TransactionType.READ_ONLY), any(Timeout.class));
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(txActorRef)), eqReadData(YangInstanceIdentifier.EMPTY), any(Timeout.class));
+                eq(actorSelection(txActorRef)), eqReadData(YangInstanceIdentifier.empty()), any(Timeout.class));
     }
 }

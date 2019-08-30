@@ -177,13 +177,13 @@ public class PrefixShardHandler {
                 .build();
 
         final DOMDataTreeProducer producer = domDataTreeService.createProducer(Collections.singleton(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY)));
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty())));
 
         final DOMDataTreeCursorAwareTransaction tx = producer.createTransaction(false);
 
         final DOMDataTreeWriteCursor cursor =
                 tx.createCursor(new DOMDataTreeIdentifier(
-                        LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY));
+                        LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty()));
 
         cursor.merge(containerNode.getIdentifier(), containerNode);
         cursor.close();
