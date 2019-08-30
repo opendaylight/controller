@@ -504,12 +504,13 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                         ? distributedConfigDatastore.getActorUtils() : distributedOperDatastore.getActorUtils();
 
                 final Optional<ActorRef> defaultLocalShardOptional =
-                        actorUtils.findLocalShard(ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
+                        actorUtils.findLocalShard(ClusterUtils.getCleanShardName(YangInstanceIdentifier.empty()));
 
                 if (defaultLocalShardOptional.isPresent()) {
                     LOG.debug("{}: Default shard for {} is already started, creating just frontend", memberName,
                             logicalDatastoreType);
-                    createShardFrontend(new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY));
+                    createShardFrontend(new DOMDataTreeIdentifier(logicalDatastoreType,
+                                YangInstanceIdentifier.empty()));
                 }
 
                 // The local shard isn't present - we assume that means the local member isn't in the replica list
@@ -521,7 +522,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 //                final Collection<MemberName> names = distributedConfigDatastore.getActorUtils().getConfiguration()
 //                        .getUniqueMemberNamesForAllShards();
 //                Await.result(FutureConverters.toScala(createDistributedShard(
-//                        new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY), names)),
+//                        new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.empty()), names)),
 //                        SHARD_FUTURE_TIMEOUT_DURATION);
 //            } catch (DOMDataTreeShardingConflictException e) {
 //                LOG.debug("{}: Default shard for {} already registered, possibly due to other node doing it faster",
