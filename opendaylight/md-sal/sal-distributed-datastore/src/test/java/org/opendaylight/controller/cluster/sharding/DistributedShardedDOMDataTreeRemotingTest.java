@@ -171,10 +171,10 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         leaderShardFactory.init();
 
         leaderTestKit.waitUntilLeader(leaderConfigDatastore.getActorUtils(),
-                ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
+                ClusterUtils.getCleanShardName(YangInstanceIdentifier.empty()));
 
         leaderTestKit.waitUntilLeader(leaderOperDatastore.getActorUtils(),
-                ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
+                ClusterUtils.getCleanShardName(YangInstanceIdentifier.empty()));
 
         LOG.info("Initializing follower DistributedShardedDOMDataTree");
         followerShardFactory.init();
