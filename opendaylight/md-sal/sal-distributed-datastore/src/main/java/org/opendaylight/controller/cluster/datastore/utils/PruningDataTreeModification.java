@@ -79,7 +79,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     @Override
     public void merge(final YangInstanceIdentifier yangInstanceIdentifier, final NormalizedNode<?, ?> normalizedNode) {
         try {
-            if (YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)) {
+            if (YangInstanceIdentifier.empty().equals(yangInstanceIdentifier)) {
                 pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
             } else {
                 delegate.merge(yangInstanceIdentifier, normalizedNode);
@@ -105,7 +105,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     @Override
     public void write(final YangInstanceIdentifier yangInstanceIdentifier, final NormalizedNode<?, ?> normalizedNode) {
         try {
-            if (YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)) {
+            if (YangInstanceIdentifier.empty().equals(yangInstanceIdentifier)) {
                 pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
             } else {
                 delegate.write(yangInstanceIdentifier, normalizedNode);
