@@ -34,7 +34,7 @@ public abstract class DOMRpcIdentifier {
 
         @Override
         public YangInstanceIdentifier getContextReference() {
-            return YangInstanceIdentifier.EMPTY;
+            return YangInstanceIdentifier.empty();
         }
     }
 
