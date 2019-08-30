@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 @Deprecated
 public class BindingDOMRpcProviderServiceAdapter {
 
-    private static final Set<YangInstanceIdentifier> GLOBAL = ImmutableSet.of(YangInstanceIdentifier.EMPTY);
+    private static final Set<YangInstanceIdentifier> GLOBAL = ImmutableSet.of(YangInstanceIdentifier.empty());
     private final BindingToNormalizedNodeCodec codec;
     private final DOMRpcProviderService domRpcRegistry;
 

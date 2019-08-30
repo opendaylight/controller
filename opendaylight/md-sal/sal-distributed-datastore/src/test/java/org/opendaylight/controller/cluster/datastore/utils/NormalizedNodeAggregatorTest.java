@@ -43,7 +43,7 @@ public class NormalizedNodeAggregatorTest {
         NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
-        Optional<NormalizedNode<?, ?>> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY,
+        Optional<NormalizedNode<?, ?>> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(),
                 ImmutableList.of(
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode1, schemaContext)),
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode2, schemaContext))),
@@ -90,7 +90,7 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
-            FluentFuture<Optional<NormalizedNode<?, ?>>> read = readTransaction.read(YangInstanceIdentifier.EMPTY);
+            FluentFuture<Optional<NormalizedNode<?, ?>>> read = readTransaction.read(YangInstanceIdentifier.empty());
 
             Optional<NormalizedNode<?, ?>> nodeOptional = read.get();
 
