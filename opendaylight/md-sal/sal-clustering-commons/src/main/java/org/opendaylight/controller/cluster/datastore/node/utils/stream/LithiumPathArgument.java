@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.collect.ImmutableMap;
-import java.util.Map;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -27,15 +23,17 @@ final class LithiumPathArgument {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    private static final Map<Class<?>, Byte> CLASS_TO_ENUM_MAP = ImmutableMap.<Class<?>, Byte>builder()
-            .put(AugmentationIdentifier.class, AUGMENTATION_IDENTIFIER)
-            .put(NodeIdentifier.class, NODE_IDENTIFIER)
-            .put(NodeIdentifierWithPredicates.class, NODE_IDENTIFIER_WITH_PREDICATES)
-            .put(NodeWithValue.class, NODE_IDENTIFIER_WITH_VALUE).build();
-
     static byte getSerializablePathArgumentType(final PathArgument pathArgument) {
-        final Byte type = CLASS_TO_ENUM_MAP.get(pathArgument.getClass());
-        checkArgument(type != null, "Unknown type of PathArgument = %s", pathArgument);
-        return type;
+        if (pathArgument instanceof NodeIdentifier) {
+            return NODE_IDENTIFIER;
+        } else if (pathArgument instanceof NodeIdentifierWithPredicates) {
+            return NODE_IDENTIFIER_WITH_PREDICATES;
+        } else if (pathArgument instanceof AugmentationIdentifier) {
+            return AUGMENTATION_IDENTIFIER;
+        } else if (pathArgument instanceof NodeWithValue) {
+            return NODE_IDENTIFIER_WITH_VALUE;
+        } else {
+            throw new IllegalArgumentException("Unknown type of PathArgument = " + pathArgument);
+        }
     }
 }
