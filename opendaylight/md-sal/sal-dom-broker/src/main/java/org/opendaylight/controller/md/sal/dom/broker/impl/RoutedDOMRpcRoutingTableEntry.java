@@ -67,7 +67,7 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
 
                 // Find a DOMRpcImplementation for a wild card. Usually remote-rpc-connector would register an
                 // implementation this way
-                final List<DOMRpcImplementation> mayBeRemoteImpls = getImplementations(YangInstanceIdentifier.EMPTY);
+                final List<DOMRpcImplementation> mayBeRemoteImpls = getImplementations(YangInstanceIdentifier.empty());
 
                 if (mayBeRemoteImpls != null) {
                     return mayBeRemoteImpls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);

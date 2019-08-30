@@ -108,7 +108,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
                     @Override
                     public YangInstanceIdentifier getPrefixForPath(final YangInstanceIdentifier path) {
-                        return YangInstanceIdentifier.EMPTY;
+                        return YangInstanceIdentifier.empty();
                     }
                 }).put(
                 CarsModel.BASE_QNAME.getLocalName(), new ShardStrategy() {
@@ -119,7 +119,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
                     @Override
                     public YangInstanceIdentifier getPrefixForPath(final YangInstanceIdentifier path) {
-                        return YangInstanceIdentifier.EMPTY;
+                        return YangInstanceIdentifier.empty();
                     }
                 }).build();
 

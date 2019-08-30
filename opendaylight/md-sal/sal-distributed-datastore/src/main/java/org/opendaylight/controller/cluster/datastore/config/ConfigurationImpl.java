@@ -123,7 +123,7 @@ public class ConfigurationImpl implements Configuration {
         requireNonNull(prefix, "prefix should not be null");
 
         Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry = new SimpleEntry<>(
-                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
+                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.empty()), null);
 
         for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
             if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()
@@ -272,7 +272,7 @@ public class ConfigurationImpl implements Configuration {
         requireNonNull(prefix, "Prefix cannot be null");
         // FIXME using prefix tables like in mdsal will be better
         Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry = new SimpleEntry<>(
-                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
+                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.empty()), null);
 
         for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
             if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()

@@ -187,7 +187,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType) {
-        this(shard, schemaContext, treeType, YangInstanceIdentifier.EMPTY,
+        this(shard, schemaContext, treeType, YangInstanceIdentifier.empty(),
                 new DefaultShardDataTreeChangeListenerPublisher(""), "");
     }
 
@@ -223,7 +223,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @return A state snapshot
      */
     @NonNull ShardDataTreeSnapshot takeStateSnapshot() {
-        final NormalizedNode<?, ?> rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get();
+        final NormalizedNode<?, ?> rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
         final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                 ImmutableMap.builder();
 
@@ -267,12 +267,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         final DataTreeModification mod = wrapper.apply(dataTree.takeSnapshot().newModification());
         // delete everything first
-        mod.delete(YangInstanceIdentifier.EMPTY);
+        mod.delete(YangInstanceIdentifier.empty());
 
         final Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
         if (maybeNode.isPresent()) {
             // Add everything from the remote node back
-            mod.write(YangInstanceIdentifier.EMPTY, maybeNode.get());
+            mod.write(YangInstanceIdentifier.empty(), maybeNode.get());
         }
         mod.ready();
 
@@ -645,8 +645,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     Optional<DataTreeCandidate> readCurrentData() {
-        return dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY)
-                .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.EMPTY, state));
+        return dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty())
+                .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), state));
     }
 
     public void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,

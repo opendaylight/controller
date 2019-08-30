@@ -108,7 +108,7 @@ class PrefixedShardConfigWriter {
     boolean checkDefaultIsPresent() {
         final NodeIdentifierWithPredicates pag =
                 NodeIdentifierWithPredicates.of(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
-                YangInstanceIdentifier.EMPTY);
+                YangInstanceIdentifier.empty());
 
         final YangInstanceIdentifier defaultId = ClusterUtils.SHARD_LIST_PATH.node(pag);
 

@@ -576,7 +576,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 return false;
             }
 
-            if (YangInstanceIdentifier.EMPTY.equals(prefix.getRootIdentifier())) {
+            if (YangInstanceIdentifier.empty().equals(prefix.getRootIdentifier())) {
                 return true;
             }
 

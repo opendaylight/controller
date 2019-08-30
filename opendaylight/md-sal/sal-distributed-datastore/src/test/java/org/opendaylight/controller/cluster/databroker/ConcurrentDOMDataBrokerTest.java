@@ -361,14 +361,14 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor)) {
             DOMDataTreeReadWriteTransaction dataTxn = dataBroker.newReadWriteTransaction();
 
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
-            dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
+            dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
 
             verify(configDomStore, never()).newReadWriteTransaction();
             verify(operationalDomStore, times(1)).newReadWriteTransaction();
 
-            dataTxn.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
 
             verify(configDomStore, times(1)).newReadWriteTransaction();
             verify(operationalDomStore, times(1)).newReadWriteTransaction();
@@ -390,13 +390,13 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor)) {
             DOMDataTreeWriteTransaction dataTxn = dataBroker.newWriteOnlyTransaction();
 
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
 
             verify(configDomStore, never()).newWriteOnlyTransaction();
             verify(operationalDomStore, times(1)).newWriteOnlyTransaction();
 
-            dataTxn.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
 
             verify(configDomStore, times(1)).newWriteOnlyTransaction();
             verify(operationalDomStore, times(1)).newWriteOnlyTransaction();
@@ -417,13 +417,13 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor)) {
             DOMDataTreeReadTransaction dataTxn = dataBroker.newReadOnlyTransaction();
 
-            dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
-            dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
+            dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
+            dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
 
             verify(configDomStore, never()).newReadOnlyTransaction();
             verify(operationalDomStore, times(1)).newReadOnlyTransaction();
 
-            dataTxn.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+            dataTxn.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty());
 
             verify(configDomStore, times(1)).newReadOnlyTransaction();
             verify(operationalDomStore, times(1)).newReadOnlyTransaction();
@@ -458,7 +458,7 @@ public class ConcurrentDOMDataBrokerTest {
         }) {
             DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
 
-            domDataReadWriteTransaction.delete(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
+            domDataReadWriteTransaction.delete(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
 
             domDataReadWriteTransaction.commit();
 
@@ -505,9 +505,9 @@ public class ConcurrentDOMDataBrokerTest {
         }) {
             DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
 
-            domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY,
+            domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(),
                     mock(NormalizedNode.class));
-            domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY,
+            domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty(),
                     mock(NormalizedNode.class));
 
             domDataReadWriteTransaction.commit();
@@ -552,7 +552,7 @@ public class ConcurrentDOMDataBrokerTest {
 
             verify(mockChain, never()).newWriteOnlyTransaction();
 
-            domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY,
+            domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(),
                     mock(NormalizedNode.class));
         }
     }
@@ -596,7 +596,7 @@ public class ConcurrentDOMDataBrokerTest {
             DOMDataTreeCommitCohort mockCohort = mock(DOMDataTreeCommitCohort.class);
             DOMDataTreeIdentifier path = new DOMDataTreeIdentifier(
                     org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
-                    YangInstanceIdentifier.EMPTY);
+                    YangInstanceIdentifier.empty());
             cohortRegistry.registerCommitCohort(path, mockCohort);
 
             verify(mockConfigStore).registerCommitCohort(path, mockCohort);

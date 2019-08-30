@@ -53,7 +53,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 public class DistributedShardFrontendTest {
 
     private static final DOMDataTreeIdentifier ROOT =
-            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty());
     private static final ListenableFuture<Object> SUCCESS_FUTURE = Futures.immediateFuture(null);
 
     private ShardedDOMDataTree shardedDOMDataTree;

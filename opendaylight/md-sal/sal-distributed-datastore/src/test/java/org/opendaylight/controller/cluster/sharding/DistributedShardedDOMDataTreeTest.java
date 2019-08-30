@@ -187,14 +187,14 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         initEmptyDatastores();
 
         final DOMDataTreeIdentifier configRoot =
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty());
 
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(configRoot));
 
         final DOMDataTreeCursorAwareTransaction tx = producer.createTransaction(true);
         final DOMDataTreeWriteCursor cursor =
                 tx.createCursor(new DOMDataTreeIdentifier(
-                        LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY));
+                        LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty()));
         Assert.assertNotNull(cursor);
 
         final ContainerNode test =
@@ -269,7 +269,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
         final ClientLocalHistory localHistory = distributedDataStoreClient.createLocalHistory();
         final ClientTransaction tx2 = localHistory.createTransaction();
-        final FluentFuture<Optional<NormalizedNode<?, ?>>> read = tx2.read(YangInstanceIdentifier.EMPTY);
+        final FluentFuture<Optional<NormalizedNode<?, ?>>> read = tx2.read(YangInstanceIdentifier.empty());
 
         final Optional<NormalizedNode<?, ?>> optional = read.get();
         tx2.abort();
@@ -384,7 +384,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         }
 
         final DOMDataTreeIdentifier rootId =
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty());
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singletonList(
                 rootId));
 
@@ -492,7 +492,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
 
         final DOMDataTreeIdentifier configRoot =
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty());
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(configRoot));
 
         assertTrue(producer instanceof CDSDataTreeProducer);

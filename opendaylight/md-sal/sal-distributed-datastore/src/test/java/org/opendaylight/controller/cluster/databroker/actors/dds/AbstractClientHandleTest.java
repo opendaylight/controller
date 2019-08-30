@@ -54,7 +54,7 @@ import scala.concurrent.Promise;
 public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<AbstractProxyTransaction>> {
 
     private static final String PERSISTENCE_ID = "per-1";
-    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.EMPTY;
+    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
 
     @Mock
     private DataTree dataTree;

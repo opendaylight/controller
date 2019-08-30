@@ -112,7 +112,7 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
 
     @Test
     public void testResolveShardForPath() {
-        final Long shardForPath = object().resolveShardForPath(YangInstanceIdentifier.EMPTY);
+        final Long shardForPath = object().resolveShardForPath(YangInstanceIdentifier.empty());
         Assert.assertEquals(0L, shardForPath.longValue());
     }
 

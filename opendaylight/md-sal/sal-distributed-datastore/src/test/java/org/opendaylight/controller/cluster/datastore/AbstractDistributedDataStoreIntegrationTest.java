@@ -869,7 +869,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
-        NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
+        NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
 
         final Snapshot carsSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -881,7 +881,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         final NormalizedNode<?, ?> peopleNode = PeopleModel.create();
         AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
 
-        root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
+        root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
 
         final Snapshot peopleSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),

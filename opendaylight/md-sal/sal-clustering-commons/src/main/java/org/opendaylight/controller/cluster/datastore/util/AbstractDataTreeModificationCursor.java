@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  */
 @Beta
 public abstract class AbstractDataTreeModificationCursor implements DataTreeModificationCursor {
-    private YangInstanceIdentifier current = YangInstanceIdentifier.EMPTY;
+    private YangInstanceIdentifier current = YangInstanceIdentifier.empty();
 
     protected final YangInstanceIdentifier current() {
         return current;

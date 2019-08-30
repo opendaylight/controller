@@ -71,7 +71,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @Test
     public void testResolveShardForPath() {
-        Assert.assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.EMPTY).longValue());
+        Assert.assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.empty()).longValue());
     }
 
     @Test
@@ -136,7 +136,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     public void testGetConnection() {
         //set up data tree mock
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
-        when(modification.readNode(YangInstanceIdentifier.EMPTY)).thenReturn(Optional.empty());
+        when(modification.readNode(YangInstanceIdentifier.empty())).thenReturn(Optional.empty());
         final DataTreeSnapshot snapshot = mock(DataTreeSnapshot.class);
         when(snapshot.newModification()).thenReturn(modification);
         final DataTree dataTree = mock(DataTree.class);
@@ -144,7 +144,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
         final TestProbe backendProbe = new TestProbe(system, "backend");
         final long shard = 0L;
-        behavior.createTransaction().read(YangInstanceIdentifier.EMPTY);
+        behavior.createTransaction().read(YangInstanceIdentifier.empty());
         final AbstractClientConnection<ShardBackendInfo> connection = behavior.getConnection(shard);
         //check cached connection for same shard
         Assert.assertSame(connection, behavior.getConnection(shard));
@@ -160,7 +160,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final InternalCommand<ShardBackendInfo> command = clientActorProbe.expectMsgClass(InternalCommand.class);
         command.execute(behavior);
         //check, whether command was reaplayed
-        verify(modification).readNode(YangInstanceIdentifier.EMPTY);
+        verify(modification).readNode(YangInstanceIdentifier.empty());
     }
 
     private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {

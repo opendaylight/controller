@@ -46,15 +46,15 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
         doReturn(CLIENT_ID).when(clientContext).getIdentifier();
         doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
 
-        doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.EMPTY);
-        doReturn(immediateFluentFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.EMPTY);
+        doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.empty());
+        doReturn(immediateFluentFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.empty());
 
         object = new ClientBackedReadTransaction(delegate, null, null);
     }
 
     @Test
     public void testRead() throws Exception {
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.EMPTY);
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.empty());
         final Optional<NormalizedNode<?, ?>> resultData = result.get();
         assertTrue(resultData.isPresent());
         assertEquals(data, resultData.get());
@@ -62,7 +62,7 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
 
     @Test
     public void testExists() throws Exception {
-        final ListenableFuture<Boolean> result = object().exists(YangInstanceIdentifier.EMPTY);
+        final ListenableFuture<Boolean> result = object().exists(YangInstanceIdentifier.empty());
         assertEquals(Boolean.TRUE, result.get());
     }
 }
