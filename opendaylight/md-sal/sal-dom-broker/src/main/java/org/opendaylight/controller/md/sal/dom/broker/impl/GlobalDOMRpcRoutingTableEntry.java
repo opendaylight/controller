@@ -40,7 +40,7 @@ final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
 
     @Override
     protected CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final NormalizedNode<?, ?> input) {
-        return getImplementations(YangInstanceIdentifier.EMPTY).get(0).invokeRpc(rpcId, input);
+        return getImplementations(YangInstanceIdentifier.empty()).get(0).invokeRpc(rpcId, input);
     }
 
     @Override
