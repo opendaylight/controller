@@ -26,7 +26,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
             YangInstanceIdentifier.NodeIdentifier.create(QName.create("namespace", "localName"))).build();
 
     private static final List<TransactionModification> MODIFICATIONS = Lists.newArrayList(
-            new TransactionWrite(YangInstanceIdentifier.EMPTY, NODE));
+            new TransactionWrite(YangInstanceIdentifier.empty(), NODE));
 
     private static final PersistenceProtocol PROTOCOL = PersistenceProtocol.ABORT;
 
@@ -76,7 +76,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
         Assert.assertNotNull(casted.getModifications());
         Assert.assertEquals(1, casted.getModifications().size());
         final TransactionModification modification = casted.getModifications().get(0);
-        Assert.assertEquals(YangInstanceIdentifier.EMPTY, modification.getPath());
+        Assert.assertEquals(YangInstanceIdentifier.empty(), modification.getPath());
         Assert.assertEquals(TYPE_WRITE, modification.getType());
     }
 }

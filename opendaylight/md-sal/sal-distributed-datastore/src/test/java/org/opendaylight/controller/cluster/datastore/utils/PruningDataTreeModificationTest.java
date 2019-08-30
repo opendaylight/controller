@@ -190,11 +190,11 @@ public class PruningDataTreeModificationTest {
         localDataTree.validate(mod);
         localDataTree.commit(localDataTree.prepare(mod));
 
-        NormalizedNode<?, ?> normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get();
-        pruningDataTreeModification.write(YangInstanceIdentifier.EMPTY, normalizedNode);
+        NormalizedNode<?, ?> normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
+        pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
         dataTree.commit(getCandidate());
 
-        Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
+        Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty());
         assertTrue("Root present", actual.isPresent());
         assertEquals("Root node", normalizedNode, actual.get());
     }
@@ -204,15 +204,15 @@ public class PruningDataTreeModificationTest {
         final Shard mockShard = Mockito.mock(Shard.class);
 
         ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
-        NormalizedNode<?, ?> root = shardDataTree.readNode(YangInstanceIdentifier.EMPTY).get();
+        NormalizedNode<?, ?> root = shardDataTree.readNode(YangInstanceIdentifier.empty()).get();
 
         NormalizedNode<?, ?> normalizedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(root.getNodeType())).withChild(
                         ImmutableNodes.containerNode(AUG_CONTAINER)).build();
-        pruningDataTreeModification.write(YangInstanceIdentifier.EMPTY, normalizedNode);
+        pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
         dataTree.commit(getCandidate());
 
-        Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
+        Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty());
         assertEquals("Root present", true, actual.isPresent());
         assertEquals("Root node", root, actual.get());
 

@@ -299,7 +299,7 @@ public class ShardTest extends AbstractShardTest {
 
         writeToStore(store, TestModel.TEST_PATH, container);
 
-        final YangInstanceIdentifier root = YangInstanceIdentifier.EMPTY;
+        final YangInstanceIdentifier root = YangInstanceIdentifier.empty();
         final NormalizedNode<?,?> expected = readStore(store, root);
 
         final Snapshot snapshot = Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)),
@@ -1182,7 +1182,7 @@ public class ShardTest extends AbstractShardTest {
         final Duration duration = Duration.ofSeconds(5);
         final TransactionIdentifier transactionID1 = nextTransactionId();
 
-        doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock canCommit failure"))
+        doThrow(new DataValidationFailedException(YangInstanceIdentifier.empty(), "mock canCommit failure"))
         .doNothing().when(dataTree).validate(any(DataTreeModification.class));
 
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
@@ -1223,7 +1223,7 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock canCommit failure"))
+        doThrow(new DataValidationFailedException(YangInstanceIdentifier.empty(), "mock canCommit failure"))
         .doNothing().when(dataTree).validate(any(DataTreeModification.class));
 
         final Duration duration = Duration.ofSeconds(5);
@@ -1737,7 +1737,7 @@ public class ShardTest extends AbstractShardTest {
         ShardTestKit.waitUntilLeader(shard);
         writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        final NormalizedNode<?, ?> expectedRoot = readStore(shard, YangInstanceIdentifier.EMPTY);
+        final NormalizedNode<?, ?> expectedRoot = readStore(shard, YangInstanceIdentifier.empty());
 
         // Trigger creation of a snapshot by ensuring
         final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
@@ -1780,16 +1780,16 @@ public class ShardTest extends AbstractShardTest {
         commitTransaction(store, putTransaction);
 
 
-        final NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.EMPTY);
+        final NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.empty());
 
         final DataTreeModification writeTransaction = store.takeSnapshot().newModification();
 
-        writeTransaction.delete(YangInstanceIdentifier.EMPTY);
-        writeTransaction.write(YangInstanceIdentifier.EMPTY, expected);
+        writeTransaction.delete(YangInstanceIdentifier.empty());
+        writeTransaction.write(YangInstanceIdentifier.empty(), expected);
 
         commitTransaction(store, writeTransaction);
 
-        final NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.EMPTY);
+        final NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.empty());
 
         assertEquals(expected, actual);
     }

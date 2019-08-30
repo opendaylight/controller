@@ -117,7 +117,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         final Collection<FluentFuture<Optional<NormalizedNode<?, ?>>>> futures = new ArrayList<>(allShardNames.size());
 
         for (String shardName : allShardNames) {
-            futures.add(singleShardRead(shardName, YangInstanceIdentifier.EMPTY));
+            futures.add(singleShardRead(shardName, YangInstanceIdentifier.empty()));
         }
 
         final ListenableFuture<List<Optional<NormalizedNode<?, ?>>>> listFuture = Futures.allAsList(futures);
@@ -125,7 +125,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
         aggregateFuture = Futures.transform(listFuture, input -> {
             try {
-                return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY, input,
+                return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(), input,
                         txContextFactory.getActorUtils().getSchemaContext(),
                         txContextFactory.getActorUtils().getDatastoreContext().getLogicalStoreType());
             } catch (DataValidationFailedException e) {
