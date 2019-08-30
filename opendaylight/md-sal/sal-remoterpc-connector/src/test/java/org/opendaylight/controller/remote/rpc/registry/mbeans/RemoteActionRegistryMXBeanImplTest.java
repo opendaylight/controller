@@ -49,7 +49,7 @@ public class RemoteActionRegistryMXBeanImplTest {
         system = ActorSystem.create("test");
 
         final DOMActionInstance emptyActionIdentifier = DOMActionInstance.of(
-                EMPTY_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
+                EMPTY_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
         final DOMActionInstance localActionIdentifier = DOMActionInstance.of(
                 LOCAL_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(LOCAL_QNAME));
 

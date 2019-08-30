@@ -151,7 +151,7 @@ public class NormalizedNodePrunerTest {
                     count.incrementAndGet();
                 }
             }
-        }).navigate(YangInstanceIdentifier.EMPTY.toString(), normalizedNode);
+        }).navigate(YangInstanceIdentifier.empty().toString(), normalizedNode);
 
         return count.get();
     }
