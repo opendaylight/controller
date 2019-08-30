@@ -51,7 +51,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
         system = ActorSystem.create("test");
 
         final DOMRpcIdentifier emptyRpcIdentifier = DOMRpcIdentifier.create(
-                EMPTY_SCHEMA_PATH, YangInstanceIdentifier.EMPTY);
+                EMPTY_SCHEMA_PATH, YangInstanceIdentifier.empty());
         final DOMRpcIdentifier localRpcIdentifier = DOMRpcIdentifier.create(
                 LOCAL_SCHEMA_PATH, YangInstanceIdentifier.of(LOCAL_QNAME));
 
