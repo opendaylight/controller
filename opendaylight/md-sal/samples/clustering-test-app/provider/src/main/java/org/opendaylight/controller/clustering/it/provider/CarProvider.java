@@ -68,6 +68,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,25 +136,19 @@ public class CarProvider implements CarService {
 
     @Override
     public ListenableFuture<RpcResult<StressTestOutput>> stressTest(final StressTestInput input) {
-        final int inputRate;
-        final long inputCount;
-
         // If rate is not provided, or given as zero, then just return.
-        if (input.getRate() == null || input.getRate() == 0) {
+        final Uint16 rateLeaf = input.getRate();
+        if (rateLeaf == null || rateLeaf.intValue() == 0) {
             LOG_PURCHASE_CAR.info("Exiting stress test as no rate is given.");
             return Futures.immediateFuture(RpcResultBuilder.<StressTestOutput>failed()
                     .withError(ErrorType.PROTOCOL, "invalid rate")
                     .build());
         }
 
-        inputRate = input.getRate();
-        if (input.getCount() != null) {
-            inputCount = input.getCount();
-        } else {
-            inputCount = 0;
-        }
+        final Uint32 countLeaf = input.getCount();
+        final long inputCount = countLeaf == null ? 0 : countLeaf.longValue();
 
-        LOG_PURCHASE_CAR.info("Stress test starting : rate: {} count: {}", inputRate, inputCount);
+        LOG_PURCHASE_CAR.info("Stress test starting : rate: {} count: {}", rateLeaf, inputCount);
 
         stopThread();
         // clear counters
@@ -170,7 +166,7 @@ public class CarProvider implements CarService {
         }
 
         stopThread = false;
-        final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / inputRate;
+        final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / rateLeaf.intValue();
         final Stopwatch sw = Stopwatch.createUnstarted();
         testThread = new Thread(() -> {
             sw.start();
@@ -224,8 +220,8 @@ public class CarProvider implements CarService {
         stopThread();
         StopStressTestOutputBuilder stopStressTestOutput;
         stopStressTestOutput = new StopStressTestOutputBuilder()
-                .setSuccessCount(succcessCounter.longValue())
-                .setFailureCount(failureCounter.longValue());
+                .setSuccessCount(Uint32.valueOf(succcessCounter.longValue()))
+                .setFailureCount(Uint32.valueOf(failureCounter.longValue()));
 
         final StopStressTestOutput result = stopStressTestOutput.build();
         LOG_PURCHASE_CAR.info("Executed Stop Stress test; No. of cars created {}; "

@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +107,7 @@ public class KitchenServiceImpl extends AbstractMXBean
 
         // Access the ToasterService to make the toast.
 
-        MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness((long) toastDoneness)
+        MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness(Uint32.valueOf(toastDoneness))
                 .setToasterToastType(toastType).build();
 
         return toaster.makeToast(toastInput);
