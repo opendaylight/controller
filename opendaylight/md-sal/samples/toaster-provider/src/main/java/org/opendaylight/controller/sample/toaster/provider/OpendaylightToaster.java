@@ -66,6 +66,8 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +102,7 @@ public class OpendaylightToaster extends AbstractMXBean
 
     public OpendaylightToaster() {
         this(new ToasterAppConfigBuilder().setManufacturer(TOASTER_MANUFACTURER).setModelNumber(TOASTER_MODEL_NUMBER)
-                .setMaxMakeToastTries(2).build());
+                .setMaxMakeToastTries(Uint16.valueOf(2)).build());
     }
 
     public OpendaylightToaster(final ToasterAppConfig toasterAppConfig) {
@@ -184,9 +186,9 @@ public class OpendaylightToaster extends AbstractMXBean
                         + "old Toaster: {}, new Toaster: {}", change.getRootPath().getRootIdentifier(),
                         oldToaster, newToaster);
 
-                Long darkness = newToaster.getDarknessFactor();
+                Uint32 darkness = newToaster.getDarknessFactor();
                 if (darkness != null) {
-                    darknessFactor.set(darkness);
+                    darknessFactor.set(darkness.longValue());
                 }
             } else if (rootNode.getModificationType() == DELETE) {
                 LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
