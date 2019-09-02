@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.listener.rev150825.listener.test.ListItemBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 /**
  * Regression test suite for https://bugs.opendaylight.org/show_bug.cgi?id=4513 - Change event is empty when
@@ -60,7 +61,7 @@ public class Bug4513Test extends AbstractDataBrokerTest {
 
     private ListItem writeListItem() {
         WriteTransaction writeTransaction = getDataBroker().newWriteOnlyTransaction();
-        final ListItem item = new ListItemBuilder().setSip("name").setOp(43L).build();
+        final ListItem item = new ListItemBuilder().setSip("name").setOp(Uint32.valueOf(43)).build();
         ListenerTestBuilder builder = new ListenerTestBuilder().setListItem(Arrays.asList(item));
         writeTransaction.put(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier.builder(
                 ListenerTest.class).build(), builder.build());
