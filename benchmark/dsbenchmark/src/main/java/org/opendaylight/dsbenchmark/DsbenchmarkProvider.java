@@ -77,7 +77,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
             setTestOperData(this.execStatus.get(), testsCompleted);
         } catch (final Exception e) {
             // TODO: Use a singleton service to make sure the initial write is performed only once.
-            LOG.warn("Working around Bugs 8829 and 6793 by ignoring exception from setTestOperData: {}", e);
+            LOG.warn("Working around Bugs 8829 and 6793 by ignoring exception from setTestOperData", e);
         }
 
         LOG.info("DsbenchmarkProvider initiated");

@@ -8,14 +8,13 @@
 package ntfbenchmark.impl;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NtfbenchNonblockingProducer extends AbstractNtfbenchProducer {
-
-    private final SettableFuture<?> lastDeliveryFuture = SettableFuture.create();
-
+    private static final Logger LOG = LoggerFactory.getLogger(NtfbenchNonblockingProducer.class);
 
     public NtfbenchNonblockingProducer(final NotificationPublishService publishService, final int iterations,
             final int payloadSize) {
@@ -39,6 +38,7 @@ public class NtfbenchNonblockingProducer extends AbstractNtfbenchProducer {
                     lastOkFuture = result;
                 }
             } catch (final Exception e) {
+                LOG.debug("Failed to publish notification", e);
                 ntfError++;
             }
         }
