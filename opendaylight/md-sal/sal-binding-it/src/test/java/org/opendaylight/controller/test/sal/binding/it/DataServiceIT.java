@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.util.Filter;
 
 /**
- * covers creating, reading and deleting of an item in dataStore
+ * Covers creating, reading and deleting of an item in dataStore.
  */
 public class DataServiceIT extends AbstractIT {
     @Inject
@@ -36,12 +36,8 @@ public class DataServiceIT extends AbstractIT {
     DataBroker dataBroker;
 
     /**
-     *
-     * Ignored this, because classes here are constructed from
-     * very different class loader as MD-SAL is run into,
+     * Ignored this, because classes here are constructed from very different class loader as MD-SAL is run into,
      * this is code is run from different classloader.
-     *
-     * @throws Exception
      */
     @Test
     public void test() throws Exception {
@@ -73,7 +69,6 @@ public class DataServiceIT extends AbstractIT {
                 node1).get(5, TimeUnit.SECONDS);
         assertFalse(readedData2.isPresent());
     }
-
 
     private static InstanceIdentifier<UnorderedList> createNodeRef(final String string) {
         UnorderedListKey key = new UnorderedListKey(string);

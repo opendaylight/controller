@@ -29,7 +29,7 @@ import org.ops4j.pax.exam.util.Filter;
 @RunWith(PaxExam.class)
 public class ToasterTest extends AbstractMdsalTestBase {
     @Inject
-    @Filter(timeout = 60*1000)
+    @Filter(timeout = 60 * 1000)
     KitchenService kitchenService;
 
     @Override
@@ -56,7 +56,7 @@ public class ToasterTest extends AbstractMdsalTestBase {
 
         // Make toasts using OSGi service
         success &= kitchenService.makeBreakfast(EggsType.SCRAMBLED, HashBrown.class, 4).get().isSuccessful();
-        success &= kitchenService.makeBreakfast(EggsType.POACHED, WhiteBread.class, 8 ).get().isSuccessful();
+        success &= kitchenService.makeBreakfast(EggsType.POACHED, WhiteBread.class, 8).get().isSuccessful();
 
         assertTrue("Not all breakfasts succeeded", success);
 

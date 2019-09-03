@@ -91,7 +91,7 @@ public abstract class AbstractMdsalTestBase {
      * @return An array of additional config options
      */
     protected Option[] getAdditionalOptions() {
-        return null;
+        return new Option[0];
     }
 
     /**

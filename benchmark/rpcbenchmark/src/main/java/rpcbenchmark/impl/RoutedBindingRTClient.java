@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInputBuilder;
@@ -28,22 +27,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RoutedBindingRTClient implements RTCClient {
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalBindingRTCClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RoutedBindingRTClient.class);
     private final RpcbenchPayloadService service;
     private final AtomicLong rpcOk = new AtomicLong(0);
     private final AtomicLong rpcError = new AtomicLong(0);
     private final List<RoutedRpcBenchInput> inVal;
     private final int inSize;
 
+    @Override
     public long getRpcOk() {
         return rpcOk.get();
     }
 
+    @Override
     public long getRpcError() {
         return rpcError.get();
     }
 
-    public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize, final List<InstanceIdentifier<?>> routeIid) {
+    public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize,
+            final List<InstanceIdentifier<?>> routeIid) {
         if (registry != null) {
             this.service = registry.getRpcService(RpcbenchPayloadService.class);
         } else {
@@ -63,9 +65,10 @@ public class RoutedBindingRTClient implements RTCClient {
 
     }
 
+    @Override
     public void runTest(final int iterations) {
-        int rpcOk = 0;
-        int rpcError = 0;
+        int ok = 0;
+        int error = 0;
 
         int rpcServerCnt = inVal.size();
         for (int i = 0; i < iterations; i++) {
@@ -77,20 +80,20 @@ public class RoutedBindingRTClient implements RTCClient {
                 if (rpcResult.isSuccessful()) {
                     List<Payload> retVal = rpcResult.getResult().getPayload();
                     if (retVal.size() == inSize) {
-                        rpcOk++;
+                        ok++;
                     }
                     else {
-                        rpcError++;
+                        error++;
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
-                rpcError++;
+                error++;
                 LOG.error("Execution failed: ", e);
             }
         }
 
-        this.rpcOk.addAndGet(rpcOk);
-        this.rpcError.addAndGet(rpcError);
+        rpcOk.addAndGet(ok);
+        rpcError.addAndGet(error);
     }
 
     @Override
@@ -98,5 +101,4 @@ public class RoutedBindingRTClient implements RTCClient {
         // TODO Auto-generated method stub
 
     }
-
 }

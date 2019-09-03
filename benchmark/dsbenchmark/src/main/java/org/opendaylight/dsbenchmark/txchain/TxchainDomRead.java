@@ -79,8 +79,7 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements DOMTransa
     @Override
     public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
             final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}, cause {}", chain, transaction.getIdentifier(),
-            cause);
+        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}", chain, transaction.getIdentifier(), cause);
     }
 
     @Override

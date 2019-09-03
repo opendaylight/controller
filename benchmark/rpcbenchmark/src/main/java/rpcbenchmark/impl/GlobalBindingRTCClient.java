@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInputBuilder;
@@ -25,18 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GlobalBindingRTCClient implements RTCClient {
-
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBindingRTCClient.class);
+
     private final RpcbenchPayloadService service;
     private final AtomicLong rpcOk = new AtomicLong(0);
     private final AtomicLong rpcError = new AtomicLong(0);
     private final GlobalRpcBenchInput inVal;
     private final int inSize;
 
+    @Override
     public long getRpcOk() {
         return rpcOk.get();
     }
 
+    @Override
     public long getRpcError() {
         return rpcError.get();
     }
@@ -56,9 +57,10 @@ public class GlobalBindingRTCClient implements RTCClient {
         inVal = new GlobalRpcBenchInputBuilder().setPayload(listVals).build();
     }
 
+    @Override
     public void runTest(final int iterations) {
-        int rpcOk = 0;
-        int rpcError = 0;
+        int ok = 0;
+        int error = 0;
 
         for (int i = 0; i < iterations; i++) {
             Future<RpcResult<GlobalRpcBenchOutput>> output = service.globalRpcBench(inVal);
@@ -68,20 +70,20 @@ public class GlobalBindingRTCClient implements RTCClient {
                 if (rpcResult.isSuccessful()) {
                     List<Payload> retVal = rpcResult.getResult().getPayload();
                     if (retVal.size() == inSize) {
-                        rpcOk++;
+                        ok++;
                     }
                     else {
-                        rpcError++;
+                        error++;
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
-                rpcError++;
+                error++;
                 LOG.error("Execution failed: ", e);
             }
         }
 
-        this.rpcOk.addAndGet(rpcOk);
-        this.rpcError.addAndGet(rpcError);
+        rpcOk.addAndGet(ok);
+        rpcError.addAndGet(error);
     }
 
     @Override

@@ -108,8 +108,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     @Override
     public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
             final Throwable cause) {
-        LOG.error("Broken chain {} in DatastoreBaAbstractWrite, transaction {}, cause {}", chain,
-            transaction.getIdentifier(), cause);
+        LOG.error("Broken chain {} in DatastoreBaAbstractWrite, transaction {}", chain, transaction.getIdentifier(),
+            cause);
     }
 
     @Override

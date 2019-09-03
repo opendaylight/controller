@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTransactionChainListener {
-    private static final Logger LOG = LoggerFactory.getLogger(TxchainBaWrite.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TxchainDomDelete.class);
     private final DOMDataBroker domDataBroker;
 
     public TxchainDomDelete(final DOMDataBroker domDataBroker, final int outerListElem, final int innerListElem,
@@ -110,8 +110,7 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTran
     @Override
     public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
             final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}, cause {}", chain, transaction.getIdentifier(),
-            cause);
+        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}", chain, transaction.getIdentifier(), cause);
     }
 
     @Override
