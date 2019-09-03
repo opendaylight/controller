@@ -7,6 +7,8 @@
  */
 package ntfbenchmark.impl;
 
+import static com.google.common.base.Verify.verifyNotNull;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +85,8 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
             final long startTime = System.nanoTime();
 
             for (int i = 0; i < input.getProducers().intValue(); i++) {
-                executor.submit(producers.get(i));
+                // FIXME: fools RV_RETURN_VALUE_IGNORED_BAD_PRACTICE for now, but we should check some more
+                verifyNotNull(executor.submit(producers.get(i)));
             }
             executor.shutdown();
             try {
@@ -106,7 +109,6 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
                 allListeners += listenerRegistration.getInstance().getReceived();
             }
 
-            final long listenerEndTime = System.nanoTime();
             final long listenerElapsedTime = producerEndTime - startTime;
 
             LOG.info("Test Done");

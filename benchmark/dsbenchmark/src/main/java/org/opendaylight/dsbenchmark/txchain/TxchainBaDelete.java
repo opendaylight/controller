@@ -98,7 +98,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
         try {
             chain.close();
         } catch (final IllegalStateException e) {
-            LOG.error("Transaction close failed,", e);
+            LOG.error("Transaction close failed", e);
         }
         LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, txOk + txError);
     }
@@ -106,8 +106,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     @Override
     public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
             final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}", chain, transaction.getIdentifier(),
-            cause);
+        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}", chain, transaction.getIdentifier(), cause);
     }
 
     @Override

@@ -7,6 +7,8 @@
  */
 package rpcbenchmark.impl;
 
+import static com.google.common.base.Verify.verifyNotNull;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpcbenchmarkProvider.class);
-    private static final int testTimeout = 5;
+    private static final int TEST_TIMEOUT = 5;
 
     private final GlobalBindingRTCServer globalServer;
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
@@ -67,32 +69,32 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
         final List<RoutedRpcRegistration<?>> rpcRegs = new ArrayList<>();
 
         switch (input.getOperation()) {
-        case ROUTEDRTC:
-            List<InstanceIdentifier<?>> routeIid = new ArrayList<>();
-            for (int i = 0; i < input.getNumServers().intValue(); i++) {
-                GlobalBindingRTCServer server = new GlobalBindingRTCServer();
-                RoutedRpcRegistration<RpcbenchPayloadService> routedReg =
-                        providerRegistry.addRoutedRpcImplementation(RpcbenchPayloadService.class, server);
+            case ROUTEDRTC:
+                List<InstanceIdentifier<?>> routeIid = new ArrayList<>();
+                for (int i = 0; i < input.getNumServers().intValue(); i++) {
+                    GlobalBindingRTCServer server = new GlobalBindingRTCServer();
+                    RoutedRpcRegistration<RpcbenchPayloadService> routedReg =
+                            providerRegistry.addRoutedRpcImplementation(RpcbenchPayloadService.class, server);
 
-                KeyedInstanceIdentifier<RpcRoute, RpcRouteKey> iid =
-                        InstanceIdentifier
+                    KeyedInstanceIdentifier<RpcRoute, RpcRouteKey> iid =
+                            InstanceIdentifier
                             .create(RpcbenchRpcRoutes.class)
                             .child(RpcRoute.class, new RpcRouteKey(Integer.toString(i)));
-                routeIid.add(iid);
-                routedReg.registerPath(NodeContext.class, iid);
-                rpcRegs.add(routedReg);
-            }
+                    routeIid.add(iid);
+                    routedReg.registerPath(NodeContext.class, iid);
+                    rpcRegs.add(routedReg);
+                }
 
-            client = new RoutedBindingRTClient(providerRegistry, input.getPayloadSize().intValue(), routeIid);
-            break;
+                client = new RoutedBindingRTClient(providerRegistry, input.getPayloadSize().intValue(), routeIid);
+                break;
 
-        case GLOBALRTC:
-            client = new GlobalBindingRTCClient(providerRegistry, input.getPayloadSize().intValue());
-            break;
+            case GLOBALRTC:
+                client = new GlobalBindingRTCClient(providerRegistry, input.getPayloadSize().intValue());
+                break;
 
-        default:
-            LOG.error("Unsupported server/client type {}", input.getOperation());
-            throw new IllegalArgumentException("Unsupported server/client type" + input.getOperation());
+            default:
+                LOG.error("Unsupported server/client type {}", input.getOperation());
+                throw new IllegalArgumentException("Unsupported server/client type" + input.getOperation());
         }
 
         try {
@@ -101,17 +103,18 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
             final Runnable testRun = () -> client.runTest(input.getIterations().intValue());
 
             LOG.info("Test Started");
-            long startTime = System.nanoTime();
+            final long startTime = System.nanoTime();
 
-            for (int i = 0; i < input.getNumClients().intValue(); i++ ) {
-                executor.submit(testRun);
+            for (int i = 0; i < input.getNumClients().intValue(); i++) {
+                // FIXME: fools RV_RETURN_VALUE_IGNORED_BAD_PRACTICE, but we should check more
+                verifyNotNull(executor.submit(testRun));
             }
 
             executor.shutdown();
             try {
-                executor.awaitTermination(testTimeout, TimeUnit.MINUTES);
+                executor.awaitTermination(TEST_TIMEOUT, TimeUnit.MINUTES);
             } catch (final InterruptedException e) {
-                LOG.error("Out of time: test did not finish within the {} min deadline ", testTimeout);
+                LOG.error("Out of time: test did not finish within the {} min deadline ", TEST_TIMEOUT);
             }
 
             long endTime = System.nanoTime();
@@ -124,7 +127,8 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
                                             .setGlobalRtcClientError(client.getRpcError())
                                             .setGlobalRtcClientOk(client.getRpcOk())
                                             .setExecTime(TimeUnit.NANOSECONDS.toMillis(elapsedTime))
-                                            .setRate((client.getRpcOk() + client.getRpcError()) * 1000000000 / elapsedTime)
+                                            .setRate(
+                                                (client.getRpcOk() + client.getRpcError()) * 1000000000 / elapsedTime)
                                             .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {

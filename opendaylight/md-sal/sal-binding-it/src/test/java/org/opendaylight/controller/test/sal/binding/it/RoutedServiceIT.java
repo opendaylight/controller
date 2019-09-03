@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * covers routed rpc creation, registration, invocation, unregistration
+ * Covers routed rpc creation, registration, invocation, unregistration.
  */
 public class RoutedServiceIT extends AbstractIT {
 
@@ -52,7 +52,7 @@ public class RoutedServiceIT extends AbstractIT {
     RpcProviderRegistry rpcProviderRegistry;
 
     /**
-     * prepare mocks
+     * Prepare mocks.
      */
     @Before
     public void setUp() {
@@ -93,15 +93,13 @@ public class RoutedServiceIT extends AbstractIT {
         firstReg.registerPath(TestContext.class, nodeOnePath);
 
         /**
-         * Consumer creates addFlow message for node one and sends it to the
-         * MD-SAL
+         * Consumer creates addFlow message for node one and sends it to the MD-SAL.
          */
         final RoutedSimpleRouteInput simpleRouteFirstFoo = createSimpleRouteInput(nodeOnePath);
         consumerService.routedSimpleRoute(simpleRouteFirstFoo);
 
         /**
-         * Verifies that implementation of the first provider received the same
-         * message from MD-SAL.
+         * Verifies that implementation of the first provider received the same message from MD-SAL.
          */
         verify(odlRoutedService1).routedSimpleRoute(simpleRouteFirstFoo);
         /**
@@ -114,8 +112,7 @@ public class RoutedServiceIT extends AbstractIT {
         secondReg.registerPath(TestContext.class, nodeTwo);
 
         /**
-         * Consumer sends message to nodeTwo for three times. Should be
-         * processed by second instance.
+         * Consumer sends message to nodeTwo for three times. Should be processed by second instance.
          */
         final RoutedSimpleRouteInput simpleRouteSecondFoo = createSimpleRouteInput(nodeTwo);
         consumerService.routedSimpleRoute(simpleRouteSecondFoo);
@@ -123,9 +120,7 @@ public class RoutedServiceIT extends AbstractIT {
         consumerService.routedSimpleRoute(simpleRouteSecondFoo);
 
         /**
-         * Verifies that second instance was invoked 3 times with second message
-         * and first instance wasn't invoked.
-         *
+         * Verifies that second instance was invoked 3 times with second message and first instance wasn't invoked.
          */
         verify(odlRoutedService2, times(3)).routedSimpleRoute(simpleRouteSecondFoo);
         verify(odlRoutedService1, times(0)).routedSimpleRoute(simpleRouteSecondFoo);
@@ -137,43 +132,36 @@ public class RoutedServiceIT extends AbstractIT {
         secondReg.registerPath(TestContext.class, nodeOnePath);
 
         /**
-         * A consumer sends third message to node 1
+         * A consumer sends third message to node 1.
          */
         final RoutedSimpleRouteInput simpleRouteThirdFoo = createSimpleRouteInput(nodeOnePath);
         consumerService.routedSimpleRoute(simpleRouteThirdFoo);
 
         /**
-         * Verifies that provider 1 wasn't invoked and provider 2 was invoked 1
-         * time.
+         * Verifies that provider 1 wasn't invoked and provider 2 was invoked 1 time.
          * TODO: fix unregister path
          */
         //verify(odlRoutedService1, times(0)).routedSimpleRoute(simpleRouteThirdFoo);
         verify(odlRoutedService2).routedSimpleRoute(simpleRouteThirdFoo);
-
     }
 
     /**
-     * Returns node reference from string which represents path
+     * Returns node reference from string which represents path.
      *
-     * @param string
-     *            string with key(path)
+     * @param string string with key(path)
      * @return instance identifier to {@link UnorderedList}
      */
     private static InstanceIdentifier<UnorderedList> createNodeRef(final String string) {
-        final UnorderedListKey key = new UnorderedListKey(string);
-        final InstanceIdentifier<UnorderedList> path = InstanceIdentifier.builder(Lists.class)
+        return InstanceIdentifier.builder(Lists.class)
                 .child(UnorderedContainer.class)
-                .child(UnorderedList.class, key)
+                .child(UnorderedList.class, new UnorderedListKey(string))
                 .build();
-
-        return path;
     }
 
     /**
-     * Creates flow AddFlowInput for which only node and cookie are set
+     * Creates flow AddFlowInput for which only node and cookie are set.
      *
-     * @param node
-     *            NodeRef value
+     * @param node NodeRef value
      * @return simpleRouteInput instance
      */
     static RoutedSimpleRouteInput createSimpleRouteInput(final InstanceIdentifier<UnorderedList> node) {

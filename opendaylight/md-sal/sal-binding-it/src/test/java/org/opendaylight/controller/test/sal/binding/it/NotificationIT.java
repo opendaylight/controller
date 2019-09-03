@@ -36,8 +36,7 @@ public class NotificationIT extends AbstractIT {
     NotificationProviderService notificationService;
 
     /**
-     * test of delivering of notification
-     * @throws Exception
+     * Test of delivering of notification.
      */
     @Test
     public void notificationTest() throws Exception {
@@ -53,7 +52,6 @@ public class NotificationIT extends AbstractIT {
 
         /**
          * Check that one notification was delivered and has correct cookie.
-         *
          */
         assertEquals(1, listener1.notificationBag.size());
         assertEquals("rainy day", listener1.notificationBag.get(0).getReason());
@@ -80,7 +78,6 @@ public class NotificationIT extends AbstractIT {
         /**
          * Check that 3 notification was delivered to both listeners (first one
          * received 4 in total, second 3 in total).
-         *
          */
         assertEquals(4, listener1.notificationBag.size());
         assertEquals(3, listener2.notificationBag.size());
@@ -108,18 +105,14 @@ public class NotificationIT extends AbstractIT {
          */
         assertEquals(5, listener1.notificationBag.size());
         assertEquals(3, listener2.notificationBag.size());
-
     }
 
     /**
-     * Creates instance of the type OutOfPixieDustNotification. It is
-     * used only for testing purpose.
+     * Creates instance of the type OutOfPixieDustNotification. It is used only for testing purpose.
      *
-     * @param reason
-     * @param days
      * @return instance of the type OutOfPixieDustNotification
      */
-    public static OutOfPixieDustNotification noDustNotification(String reason, int days) {
+    public static OutOfPixieDustNotification noDustNotification(final String reason, final int days) {
         OutOfPixieDustNotificationBuilder ret = new OutOfPixieDustNotificationBuilder();
         ret.setReason(reason).setDaysTillNewDust(days);
         return ret.build();
@@ -131,13 +124,11 @@ public class NotificationIT extends AbstractIT {
      * the type {@link OutOfFairyDustNotification}.
      */
     public static class NotificationTestListener implements OpendaylightTestNotificationListener {
-
         List<OutOfPixieDustNotification> notificationBag = new ArrayList<>();
 
         @Override
-        public void onOutOfPixieDustNotification(OutOfPixieDustNotification arg0) {
+        public void onOutOfPixieDustNotification(final OutOfPixieDustNotification arg0) {
             notificationBag.add(arg0);
         }
-
     }
 }

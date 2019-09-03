@@ -63,7 +63,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
                     tx.commit().get();
                     txOk++;
                 } catch (final InterruptedException | ExecutionException e) {
-                    LOG.error("Transaction failed: {}", e);
+                    LOG.error("Transaction failed", e);
                     txError++;
                 }
                 tx = dataBroker.newWriteOnlyTransaction();
@@ -76,7 +76,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
             try {
                 tx.commit().get();
             } catch (final InterruptedException | ExecutionException e) {
-                LOG.error("Transaction failed: {}", e);
+                LOG.error("Transaction failed", e);
             }
         }
     }
