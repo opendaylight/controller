@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_8f51d810",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-09-05T14:47:39Z",
+      "side": 1,
+      "message": "Supplier should be fine, lambdas not yet.",
+      "parentUuid": "9a3d3df0_42885e1f",
+      "revId": "821de257a21dbecec8bc94a0627409701413bc32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_8bd1d559",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 2
