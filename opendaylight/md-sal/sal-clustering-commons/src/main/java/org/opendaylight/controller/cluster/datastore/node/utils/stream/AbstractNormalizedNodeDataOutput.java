@@ -39,6 +39,20 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
+ * a stream.
+ * A stream writer wrapper around this class will write node objects to stream in recursive manner.
+ * for example - If you have a ContainerNode which has a two LeafNode as children, then
+ * you will first call
+ * {@link #startContainerNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, int)},
+ * then will call
+ * {@link #leafNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, Object)} twice
+ * and then, {@link #endNode()} to end container node.
+ *
+ * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
+ * while reading.
+ */
 abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNormalizedNodeDataOutput.class);
 

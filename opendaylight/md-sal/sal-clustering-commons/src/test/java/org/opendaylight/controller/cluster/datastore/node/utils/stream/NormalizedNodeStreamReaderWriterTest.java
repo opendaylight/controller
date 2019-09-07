@@ -122,7 +122,7 @@ public class NormalizedNodeStreamReaderWriterTest {
     public void testNormalizedNodeAndYangInstanceIdentifierStreaming() throws IOException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(
+        NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(
             ByteStreams.newDataOutput(byteArrayOutputStream));
 
         NormalizedNode<?, ?> testContainer = TestModel.createBaseTestContainerBuilder().build();
