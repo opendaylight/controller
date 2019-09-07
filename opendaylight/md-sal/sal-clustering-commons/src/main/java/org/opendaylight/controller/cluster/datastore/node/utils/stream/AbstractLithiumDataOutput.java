@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -18,7 +19,9 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
@@ -112,23 +115,24 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
 
     final void defaultWriteModule(final QNameModule module) throws IOException {
         writeString(module.getNamespace().toString());
-        writeString(module.getRevision().map(Revision::toString).orElse(null));
+        final Optional<Revision> revision = module.getRevision();
+        if (revision.isPresent()) {
+            writeString(revision.get().toString());
+        } else {
+            writeByte(TokenTypes.IS_NULL_VALUE);
+        }
     }
 
     @Override
-    protected final void writeString(final String string) throws IOException {
-        if (string != null) {
-            final Integer value = stringCodeMap.get(string);
-            if (value == null) {
-                stringCodeMap.put(string, stringCodeMap.size());
-                writeByte(TokenTypes.IS_STRING_VALUE);
-                writeUTF(string);
-            } else {
-                writeByte(TokenTypes.IS_CODE_VALUE);
-                writeInt(value);
-            }
+    protected final void writeString(final @NonNull String string) throws IOException {
+        final Integer value = stringCodeMap.get(verifyNotNull(string));
+        if (value == null) {
+            stringCodeMap.put(string, stringCodeMap.size());
+            writeByte(TokenTypes.IS_STRING_VALUE);
+            writeUTF(string);
         } else {
-            writeByte(TokenTypes.IS_NULL_VALUE);
+            writeByte(TokenTypes.IS_CODE_VALUE);
+            writeInt(value);
         }
     }
 
