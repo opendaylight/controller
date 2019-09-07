@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.Augmentat
  * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-class NeonSR2NormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutputStreamWriter {
+class NeonSR2NormalizedNodeOutputStreamWriter extends AbstractLithiumDataOutput {
     private final Map<AugmentationIdentifier, Integer> aidCodeMap = new HashMap<>();
     private final Map<QNameModule, Integer> moduleCodeMap = new HashMap<>();
     private final Map<QName, Integer> qnameCodeMap = new HashMap<>();
@@ -50,7 +50,7 @@ class NeonSR2NormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutpu
             // Fresh QName, remember it and emit as three strings
             qnameCodeMap.put(qname, qnameCodeMap.size());
             writeByte(TokenTypes.IS_QNAME_VALUE);
-            super.writeQName(qname);
+            defaultWriteQName(qname);
         } else {
             // We have already seen this QName: write its code
             writeByte(TokenTypes.IS_QNAME_CODE);
@@ -80,7 +80,7 @@ class NeonSR2NormalizedNodeOutputStreamWriter extends LithiumNormalizedNodeOutpu
             // Fresh QNameModule, remember it and emit as three strings
             moduleCodeMap.put(module, moduleCodeMap.size());
             writeByte(TokenTypes.IS_MODULE_VALUE);
-            super.writeModule(module);
+            defaultWriteModule(module);
         } else {
             // We have already seen this QNameModule: write its code
             writeByte(TokenTypes.IS_MODULE_CODE);
