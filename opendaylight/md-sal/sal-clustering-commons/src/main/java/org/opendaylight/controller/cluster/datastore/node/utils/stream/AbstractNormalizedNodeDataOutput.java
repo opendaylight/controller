@@ -16,7 +16,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,6 +24,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
@@ -317,7 +317,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         writeQName(arg.getNodeType());
     }
 
-    private void writeObjSet(final Set<?> set) throws IOException {
+    final void writeObjSet(final Set<?> set) throws IOException {
         output.writeInt(set.size());
         for (Object o : set) {
             checkArgument(o instanceof String, "Expected value type to be String but was %s (%s)", o.getClass(), o);
@@ -343,7 +343,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         writeYangInstanceIdentifierInternal(identifier);
     }
 
-    private void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
+    final void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
         Collection<PathArgument> pathArguments = identifier.getPathArguments();
         output.writeInt(pathArguments.size());
 
@@ -423,52 +423,9 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
+    abstract void writeObject(@NonNull DataOutput output, @NonNull Object value) throws IOException;
+
     private void writeObject(final Object value) throws IOException {
-
-        byte type = ValueTypes.getSerializableType(value);
-        // Write object type first
-        output.writeByte(type);
-
-        switch (type) {
-            case ValueTypes.BOOL_TYPE:
-                output.writeBoolean((Boolean) value);
-                break;
-            case ValueTypes.QNAME_TYPE:
-                writeQName((QName) value);
-                break;
-            case ValueTypes.INT_TYPE:
-                output.writeInt((Integer) value);
-                break;
-            case ValueTypes.BYTE_TYPE:
-                output.writeByte((Byte) value);
-                break;
-            case ValueTypes.LONG_TYPE:
-                output.writeLong((Long) value);
-                break;
-            case ValueTypes.SHORT_TYPE:
-                output.writeShort((Short) value);
-                break;
-            case ValueTypes.BITS_TYPE:
-                writeObjSet((Set<?>) value);
-                break;
-            case ValueTypes.BINARY_TYPE:
-                byte[] bytes = (byte[]) value;
-                output.writeInt(bytes.length);
-                output.write(bytes);
-                break;
-            case ValueTypes.YANG_IDENTIFIER_TYPE:
-                writeYangInstanceIdentifierInternal((YangInstanceIdentifier) value);
-                break;
-            case ValueTypes.EMPTY_TYPE:
-                break;
-            case ValueTypes.STRING_BYTES_TYPE:
-                final byte[] valueBytes = value.toString().getBytes(StandardCharsets.UTF_8);
-                output.writeInt(valueBytes.length);
-                output.write(valueBytes);
-                break;
-            default:
-                output.writeUTF(value.toString());
-                break;
-        }
+        writeObject(output, value);
     }
 }
