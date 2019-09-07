@@ -19,26 +19,26 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 final class ValueTypes {
     // The String length threshold beyond which a String should be encoded as bytes
-    public static final int STRING_BYTES_LENGTH_THRESHOLD = Short.MAX_VALUE / 4;
+    static final int STRING_BYTES_LENGTH_THRESHOLD = Short.MAX_VALUE / 4;
 
-    public static final byte SHORT_TYPE = 1;
-    public static final byte BYTE_TYPE = 2;
-    public static final byte INT_TYPE = 3;
-    public static final byte LONG_TYPE = 4;
-    public static final byte BOOL_TYPE = 5;
-    public static final byte QNAME_TYPE = 6;
-    public static final byte BITS_TYPE = 7;
-    public static final byte YANG_IDENTIFIER_TYPE = 8;
-    public static final byte STRING_TYPE = 9;
-    public static final byte BIG_INTEGER_TYPE = 10;
-    public static final byte BIG_DECIMAL_TYPE = 11;
-    public static final byte BINARY_TYPE = 12;
+    static final byte SHORT_TYPE = 1;
+    static final byte BYTE_TYPE = 2;
+    static final byte INT_TYPE = 3;
+    static final byte LONG_TYPE = 4;
+    static final byte BOOL_TYPE = 5;
+    static final byte QNAME_TYPE = 6;
+    static final byte BITS_TYPE = 7;
+    static final byte YANG_IDENTIFIER_TYPE = 8;
+    static final byte STRING_TYPE = 9;
+    static final byte BIG_INTEGER_TYPE = 10;
+    static final byte BIG_DECIMAL_TYPE = 11;
+    static final byte BINARY_TYPE = 12;
     // Leaf nodes no longer allow null values. The "empty" type is now represented as
     // org.opendaylight.yangtools.yang.common.Empty. This is kept for backwards compatibility.
     @Deprecated
-    public static final byte NULL_TYPE = 13;
-    public static final byte STRING_BYTES_TYPE = 14;
-    public static final byte EMPTY_TYPE = 15;
+    static final byte NULL_TYPE = 13;
+    static final byte STRING_BYTES_TYPE = 14;
+    static final byte EMPTY_TYPE = 15;
 
     private static final ImmutableMap<Class<?>, Byte> TYPES = ImmutableMap.<Class<?>, Byte>builder()
             .put(String.class, STRING_TYPE)
