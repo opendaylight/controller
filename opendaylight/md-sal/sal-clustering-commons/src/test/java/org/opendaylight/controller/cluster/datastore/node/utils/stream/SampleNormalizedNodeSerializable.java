@@ -13,15 +13,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 
 public class SampleNormalizedNodeSerializable implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private NormalizedNode<?, ?> input;
 
-    public SampleNormalizedNodeSerializable(NormalizedNode<?, ?> input) {
+    public SampleNormalizedNodeSerializable(final NormalizedNode<?, ?> input) {
         this.input = input;
     }
 
@@ -29,17 +27,12 @@ public class SampleNormalizedNodeSerializable implements Serializable {
         return input;
     }
 
-    private void readObject(final ObjectInputStream stream)
-            throws IOException {
-        NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(stream);
-        this.input = reader.readNormalizedNode();
+    private void readObject(final ObjectInputStream stream) throws IOException {
+        this.input = NormalizedNodeInputOutput.newDataInput(stream).readNormalizedNode();
     }
 
     private void writeObject(final ObjectOutputStream stream) throws IOException {
-        NormalizedNodeStreamWriter writer = new NormalizedNodeOutputStreamWriter(stream);
-        NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(writer);
-
-        normalizedNodeWriter.write(this.input);
+        NormalizedNodeInputOutput.newDataOutput(stream).writeNormalizedNode(input);
     }
 
 }

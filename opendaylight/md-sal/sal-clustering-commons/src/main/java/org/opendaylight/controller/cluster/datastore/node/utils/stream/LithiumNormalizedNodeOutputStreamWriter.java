@@ -26,23 +26,23 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
  * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-class LithiumNormalizedNodeOutputStreamWriter extends AbstractLithiumDataOutput {
+final class LithiumNormalizedNodeOutputStreamWriter extends AbstractLithiumDataOutput {
     LithiumNormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
     }
 
     @Override
-    protected final short streamVersion() {
+    protected short streamVersion() {
         return TokenTypes.LITHIUM_VERSION;
     }
 
     @Override
-    protected final void writeQName(final QName qname) throws IOException {
+    protected void writeQName(final QName qname) throws IOException {
         defaultWriteQName(qname);
     }
 
     @Override
-    final void writeModule(final QNameModule module) throws IOException {
+    void writeModule(final QNameModule module) throws IOException {
         defaultWriteModule(module);
     }
 }
