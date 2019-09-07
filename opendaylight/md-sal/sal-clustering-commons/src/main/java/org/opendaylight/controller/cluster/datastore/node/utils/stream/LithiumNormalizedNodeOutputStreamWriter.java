@@ -9,11 +9,8 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
-import org.opendaylight.yangtools.yang.common.Revision;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -29,9 +26,7 @@ import org.opendaylight.yangtools.yang.common.Revision;
  * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-class LithiumNormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput {
-    private final Map<String, Integer> stringCodeMap = new HashMap<>();
-
+final class LithiumNormalizedNodeOutputStreamWriter extends AbstractLithiumDataOutput {
     LithiumNormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
     }
@@ -43,29 +38,11 @@ class LithiumNormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeData
 
     @Override
     public void writeQName(final QName qname) throws IOException {
-        writeString(qname.getLocalName());
-        writeModule(qname.getModule());
-    }
-
-    void writeModule(final QNameModule module) throws IOException {
-        writeString(module.getNamespace().toString());
-        writeString(module.getRevision().map(Revision::toString).orElse(null));
+        defaultWriteQName(qname);
     }
 
     @Override
-    protected final void writeString(final String string) throws IOException {
-        if (string != null) {
-            final Integer value = stringCodeMap.get(string);
-            if (value == null) {
-                stringCodeMap.put(string, stringCodeMap.size());
-                writeByte(TokenTypes.IS_STRING_VALUE);
-                writeUTF(string);
-            } else {
-                writeByte(TokenTypes.IS_CODE_VALUE);
-                writeInt(value);
-            }
-        } else {
-            writeByte(TokenTypes.IS_NULL_VALUE);
-        }
+    void writeModule(final QNameModule module) throws IOException {
+        defaultWriteModule(module);
     }
 }
