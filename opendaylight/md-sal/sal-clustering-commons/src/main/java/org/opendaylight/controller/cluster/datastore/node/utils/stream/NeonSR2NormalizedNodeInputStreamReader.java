@@ -19,7 +19,11 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
-final class NeonSR2NormalizedNodeInputStreamReader extends LithiumNormalizedNodeInputStreamReader {
+/**
+ * Neon SR2 specialization of AbstractLithiumDataInput. Unlike its Lithium counterpart, this format uses coding for
+ * QNameModules, QNames, NodeIdentifiers and AugmentationIdentifiers, thus reducing stream duplication.
+ */
+final class NeonSR2NormalizedNodeInputStreamReader extends AbstractLithiumDataInput {
     private final ArrayList<NodeIdentifier> codedNodeIdentifiers = new ArrayList<>();
     private final List<AugmentationIdentifier> codedAugments = new ArrayList<>();
     private final List<QNameModule> codedModules = new ArrayList<>();
@@ -30,7 +34,7 @@ final class NeonSR2NormalizedNodeInputStreamReader extends LithiumNormalizedNode
     }
 
     @Override
-    public NormalizedNodeStreamVersion getVersion() throws IOException {
+    public NormalizedNodeStreamVersion getVersion() {
         return NormalizedNodeStreamVersion.NEON_SR2;
     }
 
@@ -143,7 +147,7 @@ final class NeonSR2NormalizedNodeInputStreamReader extends LithiumNormalizedNode
     }
 
     private AugmentationIdentifier rawAugmentId() throws IOException {
-        final AugmentationIdentifier aid = super.readAugmentationIdentifier();
+        final AugmentationIdentifier aid = defaultReadAugmentationIdentifier();
         codedAugments.add(aid);
         return aid;
     }
