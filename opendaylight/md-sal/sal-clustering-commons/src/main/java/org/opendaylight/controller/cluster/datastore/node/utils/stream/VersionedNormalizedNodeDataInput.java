@@ -40,6 +40,9 @@ final class VersionedNormalizedNodeDataInput extends ForwardingNormalizedNodeDat
             case TokenTypes.NEON_SR2_VERSION:
                 ret = new NeonSR2NormalizedNodeInputStreamReader(input);
                 break;
+            case TokenTypes.MAGNESIUM_VERSION:
+                ret = new MagnesiumDataInput(input);
+                break;
             default:
                 throw defunct("Unhandled stream version %s", version);
         }
