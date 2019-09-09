@@ -24,6 +24,8 @@ final class TokenTypes {
      */
     static final short NEON_SR2_VERSION = 2;
 
+    static final short MAGNESIUM_VERSION = 3;
+
     // Tokens supported in LITHIUM_VERSION
     static final byte IS_CODE_VALUE = 1;
     static final byte IS_STRING_VALUE = 2;
