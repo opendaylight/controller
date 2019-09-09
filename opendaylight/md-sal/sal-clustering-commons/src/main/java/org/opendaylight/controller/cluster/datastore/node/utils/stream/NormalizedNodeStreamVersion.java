@@ -17,5 +17,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public enum NormalizedNodeStreamVersion {
     LITHIUM,
-    NEON_SR2;
+    NEON_SR2,
+    SODIUM_SR1;
 }
