@@ -90,26 +90,41 @@ final class MagnesiumValue {
      */
     static final byte STRING_CHARS   = 0x0E;
     /**
+     * Utility 'reference coding' codepoint with {@code unsigned byte} offset. This is not a value type, but is used in
+     * context of various schema-related encodings like constant strings, QNameModule and similar.
+     */
+    static final byte STRING_REF_1B  = 0x0F;
+    /**
+     * Utility 'reference coding' codepoint with {@code unsigned short} offset. This is not a value type, but is used in
+     * context of various schema-related encodings like constant strings, QNameModule and similar.
+     */
+    static final byte STRING_REF_2B  = 0x10;
+    /**
+     * Utility 'reference coding' codepoint with {@code int} offset. This is not a value type, but is used in context of
+     * various schema-related encodings like constant strings, QNameModule and similar.
+     */
+    static final byte STRING_REF_4B  = 0x11;
+    /**
      * A {@code byte[])}, encoded as a single {@code unsigned byte} followed by 128-383 bytes. Note that smaller
      * arrays are encoded via {@link #BINARY_0} - {@link #BINARY_127} range.
      */
-    static final byte BINARY_1B      = 0x0F;
+    static final byte BINARY_1B      = 0x12;
     /**
      * A {@code byte[])}, encoded as a single {@code unsigned short} followed by 384-65919 bytes. See also
      * {@link #BINARY_1B}.
      */
-    static final byte BINARY_2B      = 0x10;
+    static final byte BINARY_2B      = 0x13;
     /**
      * A {@code byte[])}, encoded as a single {@code int} followed by that many bytes bytes. See also
      * {@link #BINARY_2B}.
      */
-    static final byte BINARY_4B      = 0x11;
+    static final byte BINARY_4B      = 0x14;
     /**
      * A {@link YangInstanceIdentifier}, encoded as a single {@code int}, followed by that many components. See
      * also {@link #YIID_0}, which offers optimized encoding for up to 31 components. Components are encoded using
      * {@link MagnesiumPathArgument} coding.
      */
-    static final byte YIID           = 0x12;
+    static final byte YIID           = 0x15;
     /**
      * A QName literal. Encoded as QNameModule + String. This literal is expected to be memoized on receiver side, which
      * assigns the next linear integer identifier. The sender will memoize it too and further references to this QName
@@ -126,57 +141,53 @@ final class MagnesiumValue {
      * <pre>
      *   QNAME                (define QName, assign shorthand Q0)
      *   STRING_UTF   "foo"   ("foo", assign shorthand S0, implies define QNameModule, assign shorthand M0)
-     *   STRING_EMPTY         (foo's non-existent revision, assign shorthand S1)
-     *   STRING_UTF   "abc"   ("abc", assign shorthand S2)
+     *   STRING_EMPTY         (foo's non-existent revision)
+     *   STRING_UTF   "abc"   ("abc", assign shorthand S1)
      *   QNAME                (define QName, assign shorthand Q1)
      *   REF_1B       (byte)0 (reference M0, domain dictated by context)
-     *   STRING_UTF   "def"   ("def", assign shorthand S3)
+     *   STRING_UTF   "def"   ("def", assign shorthand S2)
      *   QNAME_REF_1B (byte)0 (reference Q0)
      * </pre>
      */
-    // Design note: the above shows that even empty String gets a slot assigned even when we will not end up using it.
-    //              This only happens with models which do not have a revision, which is extremely rare.
-    static final byte QNAME          = 0x13;
+    // Design note: STRING_EMPTY is required to *NOT* establish a shortcut, as that is less efficient (and hence does
+    //              not make sense from the sender, the receiver or the serialization protocol itself.
+    static final byte QNAME          = 0x16;
     /**
      * Reference a QName previously defined via {@link #QNAME}. Reference number is encoded as {@code unsigned byte}.
      */
-    static final byte QNAME_REF_1B   = 0x14;
+    static final byte QNAME_REF_1B   = 0x17;
     /**
      * Reference a QName previously defined via {@link #QNAME}. Reference number is encoded as {@code unsigned short}.
      */
-    static final byte QNAME_REF_2B   = 0x15;
+    static final byte QNAME_REF_2B   = 0x18;
     /**
      * Reference a QName previously defined via {@link #QNAME}. Reference number is encoded as {@code int}.
      */
-    static final byte QNAME_REF_4B   = 0x16;
+    static final byte QNAME_REF_4B   = 0x19;
     /**
-     * Utility 'reference coding' codepoint with {@code unsigned byte} offset. This is not a value type, but is used in
-     * context of various schema-related encodings like constant strings, QNameModule and similar.
+     * Reference a previously defined QNameModule. Reference number is encoded as {@code unsigned byte}.
      */
-    static final byte REF_1B         = 0x17;
+    static final byte MODREF_1B      = 0x1A;
     /**
-     * Utility 'reference coding' codepoint with {@code unsigned short} offset. This is not a value type, but is used in
-     * context of various schema-related encodings like constant strings, QNameModule and similar.
+     * Reference a previously defined QNameModule. Reference number is encoded as {@code unsigned short}.
      */
-    static final byte REF_2B         = 0x18;
+    static final byte MODREF_2B      = 0x1B;
     /**
-     * Utility 'reference coding' codepoint with {@code int} offset. This is not a value type, but is used in context of
-     * various schema-related encodings like constant strings, QNameModule and similar.
+     * Reference a previously defined QNameModule. Reference number is encoded as {@code int}.
      */
-    static final byte REF_4B         = 0x19;
+    static final byte MODREF_4B      = 0x1C;
+
     /**
      * A {@link BigDecimal}, encoded through {@link DataOutput#writeUTF(String)}.
      */
-    static final byte BIGDECIMAL     = 0x1A;
+    // This is legacy compatibility. At some point we will remove support for writing these.
+    static final byte BIGDECIMAL     = 0x1D;
     /**
      * A {@link BigInteger}, encoded through {@link DataOutput#writeUTF(String)}.
      */
-    // FIXME: we should remove this before shipping, as its for compatibility only
-    static final byte BIGINTEGER     = 0x1B;
+    // This is legacy compatibility. At some point we will remove support for writing these.
+    static final byte BIGINTEGER     = 0x1E;
 
-    // 0x1C reserved
-    // 0x1D reserved
-    // 0x1E reserved
     // 0x1F reserved
 
     /**
