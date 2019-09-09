@@ -14,12 +14,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.net.URI;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
 public final class QNameFactory {
     private static final class StringQName implements Immutable {
@@ -151,6 +153,13 @@ public final class QNameFactory {
                     return key.toQNameModule().intern();
                 }
             });
+    private static final LoadingCache<ModuleQName, NodeIdentifier> NODEID_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(MAX_QNAME_CACHE_SIZE).weakValues().build(new CacheLoader<ModuleQName, NodeIdentifier>() {
+                @Override
+                public NodeIdentifier load(final ModuleQName key) throws ExecutionException {
+                    return NodeIdentifier.create(QNAME_CACHE.get(key));
+                }
+            });
 
     private QNameFactory() {
 
@@ -171,5 +180,10 @@ public final class QNameFactory {
 
     public static QNameModule createModule(final String namespace, final @Nullable String revision) {
         return MODULE_CACHE.getUnchecked(new StringModule(namespace, revision));
+    }
+
+    public static @NonNull NodeIdentifier getNodeIdentifier(final QNameModule module, final String localName)
+            throws ExecutionException {
+        return NODEID_CACHE.get(new ModuleQName(module, localName));
     }
 }
