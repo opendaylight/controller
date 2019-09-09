@@ -50,7 +50,7 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataOutput} instance
      */
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output) {
-        return new NeonSR2NormalizedNodeOutputStreamWriter(output);
+        return new MagnesiumDataOutput(output);
     }
 
     /**
@@ -67,6 +67,8 @@ public final class NormalizedNodeInputOutput {
                 return new LithiumNormalizedNodeOutputStreamWriter(output);
             case NEON_SR2:
                 return new NeonSR2NormalizedNodeOutputStreamWriter(output);
+            case MAGNESIUM:
+                return new MagnesiumDataOutput(output);
             default:
                 throw new IllegalStateException("Unhandled version " + version);
         }
