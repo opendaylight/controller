@@ -164,14 +164,16 @@ final class MagnesiumValue {
      * various schema-related encodings like constant strings, QNameModule and similar.
      */
     static final byte REF_4B         = 0x19;
+
     /**
      * A {@link BigDecimal}, encoded through {@link DataOutput#writeUTF(String)}.
      */
+    // This is legacy compatibility. At some point we will remove support for writing these.
     static final byte BIGDECIMAL     = 0x1A;
     /**
      * A {@link BigInteger}, encoded through {@link DataOutput#writeUTF(String)}.
      */
-    // FIXME: we should remove this before shipping, as its for compatibility only
+    // This is legacy compatibility. At some point we will remove support for writing these.
     static final byte BIGINTEGER     = 0x1B;
 
     // 0x1C reserved
