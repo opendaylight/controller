@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import com.google.common.annotations.Beta;
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import java.io.DataOutput;
 
-/**
- * Enumeration of all stream versions this implementation supports on both input and output.
- */
-@Beta
-@NonNullByDefault
-public enum NormalizedNodeStreamVersion {
-    LITHIUM,
-    NEON_SR2,
-    MAGNESIUM;
+final class MagnesiumDataOutput extends AbstractMagnesiumDataOutput {
+    MagnesiumDataOutput(final DataOutput output) {
+        super(output);
+    }
+
+    @Override
+    short streamVersion() {
+        return TokenTypes.MAGNESIUM_VERSION;
+    }
 }
