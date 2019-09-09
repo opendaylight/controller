@@ -23,4 +23,8 @@ final class TokenTypes {
      * dictionary, too.
      */
     static final short NEON_SR2_VERSION = 2;
+    /**
+     * From-scratch designed version shipping in Sodium SR1.
+     */
+    static final short SODIUM_SR1_VERSION = 3;
 }
