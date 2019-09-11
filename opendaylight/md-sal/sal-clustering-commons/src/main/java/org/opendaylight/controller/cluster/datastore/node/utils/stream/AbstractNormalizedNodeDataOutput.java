@@ -38,18 +38,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
- * a stream.
- * A stream writer wrapper around this class will write node objects to stream in recursive manner.
- * for example - If you have a ContainerNode which has a two LeafNode as children, then
- * you will first call
- * {@link #startContainerNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, int)},
- * then will call
- * {@link #leafNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, Object)} twice
- * and then, {@link #endNode()} to end container node.
+ * Abstract base class for implementing {@link NormalizedNodeDataOutput} contract. This class uses
+ * {@link NormalizedNodeStreamWriter} as an internal interface for performing the actual NormalizedNode writeout,
+ * i.e. it will defer to a {@link NormalizedNodeWriter} instance.
  *
- * <p>Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
- * while reading.
+ * <p>
+ * As such, this is an implementation detail not exposed from this package, hence implementations can rely on the
+ * stream being initialized with a header and version.
  */
 abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNormalizedNodeDataOutput.class);
@@ -62,6 +57,10 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     AbstractNormalizedNodeDataOutput(final DataOutput output) {
         this.output = Preconditions.checkNotNull(output);
+    }
+
+    final DataOutput output() {
+        return output;
     }
 
     private void ensureHeaderWritten() throws IOException {
@@ -357,8 +356,6 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     private void startNode(final QName qname, final byte nodeType) throws IOException {
         Preconditions.checkNotNull(qname, "QName of node identifier should not be null.");
-
-        ensureHeaderWritten();
 
         // First write the type of node
         output.writeByte(nodeType);
