@@ -7,37 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Map.Entry;
-import java.util.Set;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for implementing {@link NormalizedNodeDataOutput} contract. This class uses
@@ -49,22 +32,16 @@ import org.slf4j.LoggerFactory;
  * stream being initialized with a header and version.
  */
 abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractNormalizedNodeDataOutput.class);
-
-    private final DataOutput output;
+    // Visible for subclasses
+    final DataOutput output;
 
     private NormalizedNodeWriter normalizedNodeWriter;
     private boolean headerWritten;
-    private QName lastLeafSetQName;
-    private boolean inSimple;
 
     AbstractNormalizedNodeDataOutput(final DataOutput output) {
         this.output = requireNonNull(output);
     }
 
-    final DataOutput output() {
-        return output;
-    }
 
     private void ensureHeaderWritten() throws IOException {
         if (!headerWritten) {
@@ -188,9 +165,9 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     @Override
     public final void writeSchemaPath(final SchemaPath path) throws IOException {
         ensureHeaderWritten();
-        output.writeBoolean(path.isAbsolute());
 
-        final Collection<QName> qnames = path.getPath();
+        output.writeBoolean(path.isAbsolute());
+        final List<QName> qnames = path.getPath();
         output.writeInt(qnames.size());
         for (QName qname : qnames) {
             writeQNameInternal(qname);
@@ -203,162 +180,14 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void startLeafNode(final NodeIdentifier name) throws IOException {
-        LOG.trace("Starting a new leaf node");
-        startNode(name, NodeTypes.LEAF_NODE);
-        inSimple = true;
-    }
-
-    @Override
-    public void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new leaf set");
-        commonStartLeafSet(name, NodeTypes.LEAF_SET);
-    }
-
-    @Override
-    public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new ordered leaf set");
-        commonStartLeafSet(name, NodeTypes.ORDERED_LEAF_SET);
-    }
-
-    private void commonStartLeafSet(final NodeIdentifier name, final byte nodeType) throws IOException {
-        startNode(name, nodeType);
-        lastLeafSetQName = name.getNodeType();
-    }
-
-    @Override
-    public void startLeafSetEntryNode(final NodeWithValue<?> name) throws IOException {
-        LOG.trace("Starting a new leaf set entry node");
-
-        output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
-
-        // lastLeafSetQName is set if the parent LeafSetNode was previously written. Otherwise this is a
-        // stand alone LeafSetEntryNode so write out it's name here.
-        if (lastLeafSetQName == null) {
-            writeQNameInternal(name.getNodeType());
-        }
-        inSimple = true;
-    }
-
-    @Override
-    public void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new container node");
-        startNode(name, NodeTypes.CONTAINER_NODE);
-    }
-
-    @Override
-    public void startYangModeledAnyXmlNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new yang modeled anyXml node");
-        startNode(name, NodeTypes.YANG_MODELED_ANY_XML_NODE);
-    }
-
-    @Override
-    public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new unkeyed list");
-        startNode(name, NodeTypes.UNKEYED_LIST);
-    }
-
-    @Override
-    public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new unkeyed list item");
-        startNode(name, NodeTypes.UNKEYED_LIST_ITEM);
-    }
-
-    @Override
-    public void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new map node");
-        startNode(name, NodeTypes.MAP_NODE);
-    }
-
-    @Override
-    public void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
-            throws IOException {
-        LOG.trace("Starting a new map entry node");
-        startNode(identifier, NodeTypes.MAP_ENTRY_NODE);
-        writeKeyValueMap(identifier.entrySet());
-    }
-
-    @Override
-    public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new ordered map node");
-        startNode(name, NodeTypes.ORDERED_MAP_NODE);
-    }
-
-    @Override
-    public void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
-        LOG.trace("Starting a new choice node");
-        startNode(name, NodeTypes.CHOICE_NODE);
-    }
-
-    @Override
-    public void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
-        requireNonNull(identifier, "Node identifier should not be null");
-        LOG.trace("Starting a new augmentation node");
-
-        output.writeByte(NodeTypes.AUGMENTATION_NODE);
-        writeAugmentationIdentifier(identifier);
-    }
-
-    @Override
-    public void startAnyxmlNode(final NodeIdentifier name) throws IOException {
-        LOG.trace("Starting any xml node");
-        startNode(name, NodeTypes.ANY_XML_NODE);
-        inSimple = true;
-    }
-
-    @Override
-    public void scalarValue(final Object value) throws IOException {
-        writeObject(value);
-    }
-
-    @Override
-    public void domSourceValue(final DOMSource value) throws IOException {
-        try {
-            StreamResult xmlOutput = new StreamResult(new StringWriter());
-            TransformerFactory.newInstance().newTransformer().transform(value, xmlOutput);
-            writeObject(xmlOutput.getWriter().toString());
-        } catch (TransformerException | TransformerFactoryConfigurationError e) {
-            throw new IOException("Error writing anyXml", e);
-        }
-    }
-
-    @Override
-    public void endNode() throws IOException {
-        LOG.trace("Ending the node");
-        if (!inSimple) {
-            lastLeafSetQName = null;
-            output.writeByte(NodeTypes.END_NODE);
-        }
-        inSimple = false;
-    }
-
-    @Override
     public void flush() throws IOException {
         if (output instanceof OutputStream) {
             ((OutputStream)output).flush();
         }
     }
 
-    private void startNode(final PathArgument arg, final byte nodeType) throws IOException {
-        requireNonNull(arg, "Node identifier should not be null");
-        checkState(!inSimple, "Attempted to start a child in a simple node");
-
-        // First write the type of node
-        output.writeByte(nodeType);
-        // Write Start Tag
-        writeQNameInternal(arg.getNodeType());
-    }
-
-    final void writeObjSet(final Set<?> set) throws IOException {
-        output.writeInt(set.size());
-        for (Object o : set) {
-            checkArgument(o instanceof String, "Expected value type to be String but was %s (%s)", o.getClass(), o);
-            writeString((String) o);
-        }
-    }
-
     final void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
-        Collection<PathArgument> pathArguments = identifier.getPathArguments();
+        List<PathArgument> pathArguments = identifier.getPathArguments();
         output.writeInt(pathArguments.size());
 
         for (PathArgument pathArgument : pathArguments) {
@@ -366,75 +195,9 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST",
-            justification = "The casts in the switch clauses are indirectly confirmed via the determination of 'type'.")
-    final void writePathArgumentInternal(final PathArgument pathArgument) throws IOException {
-        final byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
-        output.writeByte(type);
-
-        switch (type) {
-            case PathArgumentTypes.NODE_IDENTIFIER:
-                NodeIdentifier nodeIdentifier = (NodeIdentifier) pathArgument;
-                writeQNameInternal(nodeIdentifier.getNodeType());
-                break;
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES:
-                NodeIdentifierWithPredicates nodeIdentifierWithPredicates =
-                    (NodeIdentifierWithPredicates) pathArgument;
-                writeQNameInternal(nodeIdentifierWithPredicates.getNodeType());
-                writeKeyValueMap(nodeIdentifierWithPredicates.entrySet());
-                break;
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE:
-                NodeWithValue<?> nodeWithValue = (NodeWithValue<?>) pathArgument;
-                writeQNameInternal(nodeWithValue.getNodeType());
-                writeObject(nodeWithValue.getValue());
-                break;
-            case PathArgumentTypes.AUGMENTATION_IDENTIFIER:
-                // No Qname in augmentation identifier
-                writeAugmentationIdentifier((AugmentationIdentifier) pathArgument);
-                break;
-            default:
-                throw new IllegalStateException("Unknown node identifier type is found : "
-                        + pathArgument.getClass().toString());
-        }
-    }
-
-    private void writeKeyValueMap(final Set<Entry<QName, Object>> entrySet) throws IOException {
-        if (!entrySet.isEmpty()) {
-            output.writeInt(entrySet.size());
-            for (Entry<QName, Object> entry : entrySet) {
-                writeQNameInternal(entry.getKey());
-                writeObject(entry.getValue());
-            }
-        } else {
-            output.writeInt(0);
-        }
-    }
-
-    final void defaultWriteAugmentationIdentifier(final @NonNull AugmentationIdentifier aid) throws IOException {
-        final Set<QName> qnames = aid.getPossibleChildNames();
-        // Write each child's qname separately, if list is empty send count as 0
-        if (!qnames.isEmpty()) {
-            output.writeInt(qnames.size());
-            for (QName qname : qnames) {
-                writeQNameInternal(qname);
-            }
-        } else {
-            LOG.debug("augmentation node does not have any child");
-            output.writeInt(0);
-        }
-    }
-
     abstract short streamVersion();
-
-    abstract void writeString(@NonNull String string) throws IOException;
 
     abstract void writeQNameInternal(@NonNull QName qname) throws IOException;
 
-    abstract void writeAugmentationIdentifier(@NonNull AugmentationIdentifier aid) throws IOException;
-
-    abstract void writeObject(@NonNull DataOutput output, @NonNull Object value) throws IOException;
-
-    private void writeObject(final Object value) throws IOException {
-        writeObject(output, value);
-    }
+    abstract void writePathArgumentInternal(PathArgument pathArgument) throws IOException;
 }
