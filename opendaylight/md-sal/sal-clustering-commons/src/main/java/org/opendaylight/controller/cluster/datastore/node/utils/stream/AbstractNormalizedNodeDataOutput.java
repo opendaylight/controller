@@ -75,10 +75,6 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    protected abstract short streamVersion();
-
-    abstract void writeString(@NonNull String string) throws IOException;
-
     @Override
     public final void write(final int value) throws IOException {
         ensureHeaderWritten();
@@ -163,18 +159,48 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         output.writeUTF(str);
     }
 
-    private NormalizedNodeWriter normalizedNodeWriter() {
-        if (normalizedNodeWriter == null) {
-            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(this);
-        }
-
-        return normalizedNodeWriter;
+    @Override
+    public final void writeQName(final QName qname) throws IOException {
+        ensureHeaderWritten();
+        writeQNameInternal(qname);
     }
 
     @Override
-    public void writeNormalizedNode(final NormalizedNode<?, ?> node) throws IOException {
+    public final void writeNormalizedNode(final NormalizedNode<?, ?> node) throws IOException {
         ensureHeaderWritten();
-        normalizedNodeWriter().write(node);
+        if (normalizedNodeWriter == null) {
+            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(this);
+        }
+        normalizedNodeWriter.write(node);
+    }
+
+    @Override
+    public final void writePathArgument(final PathArgument pathArgument) throws IOException {
+        ensureHeaderWritten();
+        writePathArgumentInternal(pathArgument);
+    }
+
+    @Override
+    public final void writeYangInstanceIdentifier(final YangInstanceIdentifier identifier) throws IOException {
+        ensureHeaderWritten();
+        writeYangInstanceIdentifierInternal(identifier);
+    }
+
+    @Override
+    public final void writeSchemaPath(final SchemaPath path) throws IOException {
+        ensureHeaderWritten();
+        output.writeBoolean(path.isAbsolute());
+
+        final Collection<QName> qnames = path.getPath();
+        output.writeInt(qnames.size());
+        for (QName qname : qnames) {
+            writeQNameInternal(qname);
+        }
+    }
+
+    @Override
+    public final void close() throws IOException {
+        flush();
     }
 
     @Override
@@ -210,7 +236,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         // lastLeafSetQName is set if the parent LeafSetNode was previously written. Otherwise this is a
         // stand alone LeafSetEntryNode so write out it's name here.
         if (lastLeafSetQName == null) {
-            writeQName(name.getNodeType());
+            writeQNameInternal(name.getNodeType());
         }
         inSimple = true;
     }
@@ -308,11 +334,6 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void close() throws IOException {
-        flush();
-    }
-
-    @Override
     public void flush() throws IOException {
         if (output instanceof OutputStream) {
             ((OutputStream)output).flush();
@@ -328,7 +349,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         // First write the type of node
         output.writeByte(nodeType);
         // Write Start Tag
-        writeQName(arg.getNodeType());
+        writeQNameInternal(arg.getNodeType());
     }
 
     final void writeObjSet(final Set<?> set) throws IOException {
@@ -337,24 +358,6 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
             checkArgument(o instanceof String, "Expected value type to be String but was %s (%s)", o.getClass(), o);
             writeString((String) o);
         }
-    }
-
-    @Override
-    public void writeSchemaPath(final SchemaPath path) throws IOException {
-        ensureHeaderWritten();
-        output.writeBoolean(path.isAbsolute());
-
-        final Collection<QName> qnames = path.getPath();
-        output.writeInt(qnames.size());
-        for (QName qname : qnames) {
-            writeQName(qname);
-        }
-    }
-
-    @Override
-    public void writeYangInstanceIdentifier(final YangInstanceIdentifier identifier) throws IOException {
-        ensureHeaderWritten();
-        writeYangInstanceIdentifierInternal(identifier);
     }
 
     final void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
@@ -366,51 +369,33 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    @Override
-    public void writePathArgument(final PathArgument pathArgument) throws IOException {
-        ensureHeaderWritten();
-        writePathArgumentInternal(pathArgument);
-    }
-
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST",
             justification = "The casts in the switch clauses are indirectly confirmed via the determination of 'type'.")
     final void writePathArgumentInternal(final PathArgument pathArgument) throws IOException {
-
-        byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
-
+        final byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
         output.writeByte(type);
 
         switch (type) {
             case PathArgumentTypes.NODE_IDENTIFIER:
-
                 NodeIdentifier nodeIdentifier = (NodeIdentifier) pathArgument;
-
-                writeQName(nodeIdentifier.getNodeType());
+                writeQNameInternal(nodeIdentifier.getNodeType());
                 break;
-
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES:
-
                 NodeIdentifierWithPredicates nodeIdentifierWithPredicates =
                     (NodeIdentifierWithPredicates) pathArgument;
-                writeQName(nodeIdentifierWithPredicates.getNodeType());
-
+                writeQNameInternal(nodeIdentifierWithPredicates.getNodeType());
                 writeKeyValueMap(nodeIdentifierWithPredicates.entrySet());
                 break;
-
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
-
+            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE:
                 NodeWithValue<?> nodeWithValue = (NodeWithValue<?>) pathArgument;
-
-                writeQName(nodeWithValue.getNodeType());
+                writeQNameInternal(nodeWithValue.getNodeType());
                 writeObject(nodeWithValue.getValue());
                 break;
-
-            case PathArgumentTypes.AUGMENTATION_IDENTIFIER :
-
+            case PathArgumentTypes.AUGMENTATION_IDENTIFIER:
                 // No Qname in augmentation identifier
                 writeAugmentationIdentifier((AugmentationIdentifier) pathArgument);
                 break;
-            default :
+            default:
                 throw new IllegalStateException("Unknown node identifier type is found : "
                         + pathArgument.getClass().toString());
         }
@@ -420,7 +405,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         if (!entrySet.isEmpty()) {
             output.writeInt(entrySet.size());
             for (Entry<QName, Object> entry : entrySet) {
-                writeQName(entry.getKey());
+                writeQNameInternal(entry.getKey());
                 writeObject(entry.getValue());
             }
         } else {
@@ -428,19 +413,27 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    void writeAugmentationIdentifier(final AugmentationIdentifier aid) throws IOException {
+    final void defaultWriteAugmentationIdentifier(final @NonNull AugmentationIdentifier aid) throws IOException {
         final Set<QName> qnames = aid.getPossibleChildNames();
         // Write each child's qname separately, if list is empty send count as 0
         if (!qnames.isEmpty()) {
             output.writeInt(qnames.size());
             for (QName qname : qnames) {
-                writeQName(qname);
+                writeQNameInternal(qname);
             }
         } else {
             LOG.debug("augmentation node does not have any child");
             output.writeInt(0);
         }
     }
+
+    abstract short streamVersion();
+
+    abstract void writeString(@NonNull String string) throws IOException;
+
+    abstract void writeQNameInternal(@NonNull QName qname) throws IOException;
+
+    abstract void writeAugmentationIdentifier(@NonNull AugmentationIdentifier aid) throws IOException;
 
     abstract void writeObject(@NonNull DataOutput output, @NonNull Object value) throws IOException;
 
