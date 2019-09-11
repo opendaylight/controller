@@ -70,7 +70,7 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
                 rawOuput.writeBoolean((Boolean) value);
                 break;
             case ValueTypes.QNAME_TYPE:
-                writeQName((QName) value);
+                writeQNameInternal((QName) value);
                 break;
             case ValueTypes.INT_TYPE:
                 rawOuput.writeInt((Integer) value);

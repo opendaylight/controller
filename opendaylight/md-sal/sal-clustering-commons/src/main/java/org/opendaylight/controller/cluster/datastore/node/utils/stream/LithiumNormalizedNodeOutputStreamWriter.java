@@ -11,6 +11,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -32,17 +33,22 @@ final class LithiumNormalizedNodeOutputStreamWriter extends AbstractLithiumDataO
     }
 
     @Override
-    protected short streamVersion() {
+    short streamVersion() {
         return TokenTypes.LITHIUM_VERSION;
     }
 
     @Override
-    public void writeQName(final QName qname) throws IOException {
+    void writeQNameInternal(final QName qname) throws IOException {
         defaultWriteQName(qname);
     }
 
     @Override
     void writeModule(final QNameModule module) throws IOException {
         defaultWriteModule(module);
+    }
+
+    @Override
+    void writeAugmentationIdentifier(final AugmentationIdentifier aid) throws IOException {
+        defaultWriteAugmentationIdentifier(aid);
     }
 }
