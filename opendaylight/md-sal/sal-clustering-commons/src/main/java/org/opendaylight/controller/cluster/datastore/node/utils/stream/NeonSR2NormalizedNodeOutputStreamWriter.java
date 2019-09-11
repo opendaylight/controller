@@ -39,12 +39,12 @@ final class NeonSR2NormalizedNodeOutputStreamWriter extends AbstractLithiumDataO
     }
 
     @Override
-    protected short streamVersion() {
+    short streamVersion() {
         return TokenTypes.NEON_SR2_VERSION;
     }
 
     @Override
-    public void writeQName(final QName qname) throws IOException {
+    void writeQNameInternal(final QName qname) throws IOException {
         final Integer value = qnameCodeMap.get(qname);
         if (value == null) {
             // Fresh QName, remember it and emit as three strings
@@ -65,7 +65,7 @@ final class NeonSR2NormalizedNodeOutputStreamWriter extends AbstractLithiumDataO
             // Fresh AugmentationIdentifier, remember it and emit as three strings
             aidCodeMap.put(aid, aidCodeMap.size());
             writeByte(TokenTypes.IS_AUGMENT_VALUE);
-            super.writeAugmentationIdentifier(aid);
+            defaultWriteAugmentationIdentifier(aid);
         } else {
             // We have already seen this AugmentationIdentifier: write its code
             writeByte(TokenTypes.IS_AUGMENT_CODE);
