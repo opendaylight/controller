@@ -214,17 +214,32 @@ public class NormalizedNodeStreamReaderWriterTest {
     }
 
     @Test
-    public void testSchemaPathSerialization() throws Exception {
+    public void testSchemaPathSerialization() throws IOException {
         final SchemaPath expected = SchemaPath.create(true, TestModel.ANY_XML_QNAME);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos));
-        nnout.writeSchemaPath(expected);
+        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos))) {
+            nnout.writeSchemaPath(expected);
+        }
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(
             bos.toByteArray()));
-        SchemaPath actual = nnin.readSchemaPath();
-        assertEquals(expected, actual);
+        assertEquals(expected, nnin.readSchemaPath());
+    }
+
+    @Test
+    public void testWritePathArgument() throws IOException {
+        final NodeIdentifier expected = new NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos))) {
+            nnout.writePathArgument(expected);
+        }
+
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(
+            bos.toByteArray()));
+        assertEquals(expected, nnin.readPathArgument());
     }
 
     private static String largeString(final int pow) {

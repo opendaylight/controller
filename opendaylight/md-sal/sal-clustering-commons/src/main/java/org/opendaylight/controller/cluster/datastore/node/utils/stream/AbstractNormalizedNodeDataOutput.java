@@ -362,14 +362,19 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         output.writeInt(pathArguments.size());
 
         for (PathArgument pathArgument : pathArguments) {
-            writePathArgument(pathArgument);
+            writePathArgumentInternal(pathArgument);
         }
+    }
+
+    @Override
+    public void writePathArgument(final PathArgument pathArgument) throws IOException {
+        ensureHeaderWritten();
+        writePathArgumentInternal(pathArgument);
     }
 
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST",
             justification = "The casts in the switch clauses are indirectly confirmed via the determination of 'type'.")
-    @Override
-    public void writePathArgument(final PathArgument pathArgument) throws IOException {
+    final void writePathArgumentInternal(final PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
 
