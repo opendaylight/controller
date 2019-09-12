@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.eclipse.jdt.annotation.NonNull;
@@ -56,6 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutput {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLithiumDataOutput.class);
+    private static final TransformerFactory TF = TransformerFactory.newInstance();
     private static final ImmutableMap<Class<?>, Byte> KNOWN_TYPES = ImmutableMap.<Class<?>, Byte>builder()
             .put(String.class, ValueTypes.STRING_TYPE)
             .put(Byte.class, ValueTypes.BYTE_TYPE)
@@ -191,13 +191,13 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
 
     @Override
     public final void domSourceValue(final DOMSource value) throws IOException {
+        final StringWriter writer = new StringWriter();
         try {
-            StreamResult xmlOutput = new StreamResult(new StringWriter());
-            TransformerFactory.newInstance().newTransformer().transform(value, xmlOutput);
-            writeObject(xmlOutput.getWriter().toString());
-        } catch (TransformerException | TransformerFactoryConfigurationError e) {
+            TF.newTransformer().transform(value, new StreamResult(writer));
+        } catch (TransformerException e) {
             throw new IOException("Error writing anyXml", e);
         }
+        writeObject(writer.toString());
     }
 
     @Override
