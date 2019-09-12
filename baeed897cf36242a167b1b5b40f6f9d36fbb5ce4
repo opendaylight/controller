@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6879dd98_40306207",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-09-12T14:56:32Z",
+      "side": 1,
+      "message": "we probably want a place where we explicitly initialize lz4, see:\nhttps://github.com/apache/spark/pull/24905\nhttps://github.com/lz4/lz4-java/issues/80",
+      "range": {
+        "startLine": 54,
+        "startChar": 66,
+        "endLine": 54,
+        "endChar": 85
+      },
+      "revId": "baeed897cf36242a167b1b5b40f6f9d36fbb5ce4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
