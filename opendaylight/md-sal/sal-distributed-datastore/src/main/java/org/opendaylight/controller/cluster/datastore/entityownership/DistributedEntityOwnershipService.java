@@ -18,6 +18,7 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -216,6 +217,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "Akka's Await.result() API contract")
     DataTree getLocalEntityOwnershipShardDataTree() {
         if (localEntityOwnershipShardDataTree == null) {
             try {
