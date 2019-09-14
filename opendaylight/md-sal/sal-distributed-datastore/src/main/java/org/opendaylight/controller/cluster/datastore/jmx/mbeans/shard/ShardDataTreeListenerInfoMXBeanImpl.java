@@ -15,6 +15,7 @@ import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Throwables;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -59,7 +60,8 @@ public class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implemen
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private List<DataTreeListenerInfo> getListenerActorsInfo(Collection<ActorSelection> actors) {
+    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "Akka's Await.result() API contract")
+    private static List<DataTreeListenerInfo> getListenerActorsInfo(final Collection<ActorSelection> actors) {
         final Timeout timeout = new Timeout(20, TimeUnit.SECONDS);
         final List<Future<Object>> futureList = new ArrayList<>(actors.size());
         for (ActorSelection actor: actors) {
