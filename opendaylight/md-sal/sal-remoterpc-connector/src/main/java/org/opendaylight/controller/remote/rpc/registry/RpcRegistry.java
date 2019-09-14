@@ -64,9 +64,12 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     }
 
     @Override
-    public void postStop() {
-        super.postStop();
-        this.mxBean.unregister();
+    public void postStop() throws Exception {
+        try {
+            super.postStop();
+        } finally {
+            this.mxBean.unregister();
+        }
     }
 
     @Override
