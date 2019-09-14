@@ -18,6 +18,7 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,7 +89,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                         newShardBuilder(context, strategyConfig), null);
 
         Future<Object> createFuture = context.executeOperationAsync(shardManagerActor, createShard, MESSAGE_TIMEOUT);
-        createFuture.onComplete(new OnComplete<Object>() {
+        createFuture.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -104,7 +105,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     private void executeEntityOwnershipShardOperation(final ActorRef shardActor, final Object message) {
         Future<Object> future = context.executeOperationAsync(shardActor, message, MESSAGE_TIMEOUT);
-        future.onComplete(new OnComplete<Object>() {
+        future.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -215,6 +216,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "Akka's Await.result() API contract")
     DataTree getLocalEntityOwnershipShardDataTree() {
         if (localEntityOwnershipShardDataTree == null) {
             try {
