@@ -186,18 +186,11 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         }
     }
 
-    final void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
-        List<PathArgument> pathArguments = identifier.getPathArguments();
-        output.writeInt(pathArguments.size());
-
-        for (PathArgument pathArgument : pathArguments) {
-            writePathArgumentInternal(pathArgument);
-        }
-    }
-
     abstract short streamVersion();
 
     abstract void writeQNameInternal(@NonNull QName qname) throws IOException;
 
     abstract void writePathArgumentInternal(PathArgument pathArgument) throws IOException;
+
+    abstract void writeYangInstanceIdentifierInternal(YangInstanceIdentifier identifier) throws IOException;
 }

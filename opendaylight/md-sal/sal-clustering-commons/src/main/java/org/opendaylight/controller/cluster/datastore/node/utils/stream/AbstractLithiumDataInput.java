@@ -26,7 +26,6 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
-import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.util.ImmutableOffsetMapTemplate;
 import org.opendaylight.yangtools.yang.common.Empty;
@@ -38,7 +37,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -50,23 +48,16 @@ import org.xml.sax.SAXException;
  * nodes. This process goes in recursive manner, where each NodeTypes object signifies the start of the object, except
  * END_NODE. If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  */
-abstract class AbstractLithiumDataInput extends ForwardingDataInput implements NormalizedNodeDataInput {
+abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLithiumDataInput.class);
-
-    private final @NonNull DataInput input;
 
     private final List<String> codedStringMap = new ArrayList<>();
 
     private QName lastLeafSetQName;
 
     AbstractLithiumDataInput(final DataInput input) {
-        this.input = requireNonNull(input);
-    }
-
-    @Override
-    final DataInput delegate() {
-        return input;
+        super(input);
     }
 
     @Override
@@ -407,18 +398,6 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
         byte[] bytes = new byte[input.readInt()];
         input.readFully(bytes);
         return new String(bytes, StandardCharsets.UTF_8);
-    }
-
-    @Override
-    public final SchemaPath readSchemaPath() throws IOException {
-        final boolean absolute = input.readBoolean();
-        final int size = input.readInt();
-
-        final Builder<QName> qnames = ImmutableList.builderWithExpectedSize(size);
-        for (int i = 0; i < size; ++i) {
-            qnames.add(readQName());
-        }
-        return SchemaPath.create(qnames.build(), absolute);
     }
 
     @Override
