@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -240,6 +241,16 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
             default:
                 throw new IllegalStateException("Unknown node identifier type is found : "
                         + pathArgument.getClass().toString());
+        }
+    }
+
+    @Override
+    final void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
+        List<PathArgument> pathArguments = identifier.getPathArguments();
+        output.writeInt(pathArguments.size());
+
+        for (PathArgument pathArgument : pathArguments) {
+            writePathArgumentInternal(pathArgument);
         }
     }
 
