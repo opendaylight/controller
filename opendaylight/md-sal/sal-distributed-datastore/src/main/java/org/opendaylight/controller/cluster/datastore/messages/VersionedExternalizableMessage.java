@@ -53,9 +53,10 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
 
     @Override
     public final Object toSerializable() {
-        if (getVersion() < DataStoreVersions.BORON_VERSION) {
-            throw new UnsupportedOperationException("Versions prior to " + DataStoreVersions.BORON_VERSION
-                    + " are not supported");
+        final short ver = getVersion();
+        if (ver < DataStoreVersions.BORON_VERSION) {
+            throw new UnsupportedOperationException("Version " + ver
+                + " is older than the oldest version supported version " + DataStoreVersions.BORON_VERSION);
         }
 
         return this;
