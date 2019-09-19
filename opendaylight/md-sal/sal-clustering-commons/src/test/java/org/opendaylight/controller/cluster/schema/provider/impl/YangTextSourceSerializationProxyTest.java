@@ -38,14 +38,17 @@ public class YangTextSourceSerializationProxyTest {
 
 
     @Test
-    public void serializeAndDesrializeProxy() throws ClassNotFoundException, IOException {
+    public void serializeAndDeserializeProxy() throws ClassNotFoundException, IOException {
         YangTextSchemaSourceSerializationProxy proxy = new YangTextSchemaSourceSerializationProxy(schemaSource);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
 
         oos.writeObject(proxy);
 
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(353, bytes.length);
+
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
 
         YangTextSchemaSourceSerializationProxy deserializedProxy =
                 (YangTextSchemaSourceSerializationProxy) ois.readObject();

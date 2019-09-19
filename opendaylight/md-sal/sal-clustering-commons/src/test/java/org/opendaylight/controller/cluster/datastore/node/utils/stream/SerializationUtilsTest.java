@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,7 +25,6 @@ import java.util.stream.Collectors;
 import javax.xml.transform.dom.DOMSource;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -51,7 +53,8 @@ public class SerializationUtilsTest {
     public void testSerializeDeserializeNodes() throws IOException {
         final NormalizedNode<?, ?> normalizedNode = createNormalizedNode();
         final byte[] bytes = serializeNormalizedNode(normalizedNode);
-        Assert.assertEquals(normalizedNode, deserializeNormalizedNode(bytes));
+        assertEquals(10774, bytes.length);
+        assertEquals(normalizedNode, deserializeNormalizedNode(bytes));
     }
 
     @Test
@@ -64,11 +67,12 @@ public class SerializationUtilsTest {
                 .withValue(new DOMSource(parse))
                 .build();
         final byte[] bytes = serializeNormalizedNode(anyXmlNode);
+        assertEquals(115, bytes.length);
         final NormalizedNode<?, ?> deserialized = deserializeNormalizedNode(bytes);
         final DOMSource value = (DOMSource) deserialized.getValue();
         final Diff diff = XMLUnit.compareXML((Document) anyXmlNode.getValue().getNode(),
                 value.getNode().getOwnerDocument());
-        Assert.assertTrue(diff.toString(), diff.similar());
+        assertTrue(diff.toString(), diff.similar());
     }
 
     @Test
@@ -82,9 +86,13 @@ public class SerializationUtilsTest {
                 .node(leafSetId("leafSer1", "leafSetValue1"))
                 .build();
         SerializationUtils.writePath(out, path);
+
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(150, bytes.length);
+
         final YangInstanceIdentifier deserialized =
-                SerializationUtils.readPath(new DataInputStream(new ByteArrayInputStream(bos.toByteArray())));
-        Assert.assertEquals(path, deserialized);
+                SerializationUtils.readPath(new DataInputStream(new ByteArrayInputStream(bytes)));
+        assertEquals(path, deserialized);
     }
 
     @Test
@@ -94,17 +102,21 @@ public class SerializationUtilsTest {
         final NormalizedNode<?, ?> node = createNormalizedNode();
         final YangInstanceIdentifier path = YangInstanceIdentifier.create(id("container1"));
         SerializationUtils.writeNodeAndPath(out, path, node);
-        final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
+
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(10783, bytes.length);
+
+        final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
         final AtomicBoolean applierCalled = new AtomicBoolean(false);
         SerializationUtils.readNodeAndPath(in, applierCalled, (instance, deserializedPath, deserializedNode) -> {
-            Assert.assertEquals(path, deserializedPath);
-            Assert.assertEquals(node, deserializedNode);
+            assertEquals(path, deserializedPath);
+            assertEquals(node, deserializedNode);
             applierCalled.set(true);
         });
-        Assert.assertTrue(applierCalled.get());
+        assertTrue(applierCalled.get());
     }
 
-    private static NormalizedNode<?, ?> deserializeNormalizedNode(final byte [] bytes) throws IOException {
+    private static NormalizedNode<?, ?> deserializeNormalizedNode(final byte[] bytes) throws IOException {
         return SerializationUtils.readNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes))).get();
     }
 
