@@ -30,15 +30,20 @@ import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
@@ -252,6 +257,40 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
         assertEquals(expected, nnin.readPathArgument());
+    }
+
+    /*
+     * This tests the encoding of a MapNode with a lot of entries, each of them having the key leaf (a string)
+     * and an integer.
+     */
+    @Test
+    public void testHugeEntries() throws IOException {
+        final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = Builders.mapBuilder()
+                .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME));
+        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode> entryBuilder =
+                Builders.mapEntryBuilder().withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, (byte) 42));
+
+        for (int i = 0; i < 100_000; ++i) {
+            final String key = "xyzzy" + i;
+            mapBuilder.addChild(entryBuilder
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.TEST_QNAME,
+                    TestModel.CHILD_NAME_QNAME, key))
+                .withChild(ImmutableNodes.leafNode(TestModel.CHILD_NAME_QNAME, key))
+                .build());
+        }
+
+        final MapNode expected = mapBuilder.build();
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos))) {
+            nnout.writeNormalizedNode(expected);
+        }
+
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(5_577_993, bytes.length);
+
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
+        assertEquals(expected, nnin.readNormalizedNode());
     }
 
     private static String largeString(final int pow) {
