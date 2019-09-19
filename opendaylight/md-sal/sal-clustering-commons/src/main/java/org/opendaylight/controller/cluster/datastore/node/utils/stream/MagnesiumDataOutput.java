@@ -13,6 +13,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -366,6 +367,9 @@ final class MagnesiumDataOutput extends AbstractNormalizedNodeDataOutput {
             output.writeByte(MagnesiumValue.EMPTY);
         } else if (value instanceof Set) {
             writeValue((Set<?>) value);
+        } else if (value instanceof BigInteger) {
+            // FIXME: remove this
+            writeValue(Uint64.valueOf((BigInteger) value));
         } else {
             throw new IOException("Unhandled value type " + value.getClass());
         }
