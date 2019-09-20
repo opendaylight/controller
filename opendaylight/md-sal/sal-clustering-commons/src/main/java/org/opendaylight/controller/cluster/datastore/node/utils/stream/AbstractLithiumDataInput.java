@@ -278,16 +278,16 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
     final String readCodedString() throws IOException {
         final byte valueType = input.readByte();
         switch (valueType) {
-            case TokenTypes.IS_NULL_VALUE:
+            case LithiumTokens.IS_NULL_VALUE:
                 return null;
-            case TokenTypes.IS_CODE_VALUE:
+            case LithiumTokens.IS_CODE_VALUE:
                 final int code = input.readInt();
                 try {
                     return codedStringMap.get(code);
                 } catch (IndexOutOfBoundsException e) {
                     throw new IOException("String code " + code + " was not found", e);
                 }
-            case TokenTypes.IS_STRING_VALUE:
+            case LithiumTokens.IS_STRING_VALUE:
                 final String value = input.readUTF().intern();
                 codedStringMap.add(value);
                 return value;

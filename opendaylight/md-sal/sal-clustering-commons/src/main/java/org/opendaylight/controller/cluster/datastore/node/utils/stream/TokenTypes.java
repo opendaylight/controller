@@ -24,11 +24,6 @@ final class TokenTypes {
      */
     static final short NEON_SR2_VERSION = 2;
 
-    // Tokens supported in LITHIUM_VERSION
-    static final byte IS_CODE_VALUE = 1;
-    static final byte IS_STRING_VALUE = 2;
-    static final byte IS_NULL_VALUE = 3;
-
     // Tokens supported in NEON_SR2_VERSION
     static final byte IS_QNAME_CODE = 4;
     static final byte IS_QNAME_VALUE = 5;
