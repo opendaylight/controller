@@ -17,13 +17,13 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
-final class PathArgumentTypes {
+final class LithiumPathArgument {
     static final byte AUGMENTATION_IDENTIFIER = 1;
     static final byte NODE_IDENTIFIER = 2;
     static final byte NODE_IDENTIFIER_WITH_VALUE = 3;
     static final byte NODE_IDENTIFIER_WITH_PREDICATES = 4;
 
-    private PathArgumentTypes() {
+    private LithiumPathArgument() {
         throw new UnsupportedOperationException("Utility class");
     }
 
