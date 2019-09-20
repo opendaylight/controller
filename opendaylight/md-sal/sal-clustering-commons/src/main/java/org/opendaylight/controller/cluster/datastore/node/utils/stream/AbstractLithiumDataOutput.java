@@ -279,7 +279,7 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
         if (revision.isPresent()) {
             writeString(revision.get().toString());
         } else {
-            writeByte(TokenTypes.IS_NULL_VALUE);
+            writeByte(LithiumTokens.IS_NULL_VALUE);
         }
     }
 
@@ -369,10 +369,10 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
         final Integer value = stringCodeMap.get(verifyNotNull(string));
         if (value == null) {
             stringCodeMap.put(string, stringCodeMap.size());
-            writeByte(TokenTypes.IS_STRING_VALUE);
+            writeByte(LithiumTokens.IS_STRING_VALUE);
             writeUTF(string);
         } else {
-            writeByte(TokenTypes.IS_CODE_VALUE);
+            writeByte(LithiumTokens.IS_CODE_VALUE);
             writeInt(value);
         }
     }
