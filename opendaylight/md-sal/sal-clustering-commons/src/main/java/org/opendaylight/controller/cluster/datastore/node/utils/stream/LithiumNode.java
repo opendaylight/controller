@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-final class NodeTypes {
+/**
+ * Stream constants identifying individual node types.
+ */
+final class LithiumNode {
     static final byte LEAF_NODE = 1;
     static final byte LEAF_SET = 2;
     static final byte LEAF_SET_ENTRY_NODE = 3;
@@ -24,7 +27,7 @@ final class NodeTypes {
     static final byte ORDERED_LEAF_SET = 14;
     static final byte YANG_MODELED_ANY_XML_NODE = 15;
 
-    private NodeTypes() {
+    private LithiumNode() {
         throw new UnsupportedOperationException("utility class");
     }
 }

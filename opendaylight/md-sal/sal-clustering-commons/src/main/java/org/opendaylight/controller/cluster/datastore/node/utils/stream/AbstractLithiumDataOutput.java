@@ -83,20 +83,20 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     @Override
     public final void startLeafNode(final NodeIdentifier name) throws IOException {
         LOG.trace("Starting a new leaf node");
-        startNode(name, NodeTypes.LEAF_NODE);
+        startNode(name, LithiumNode.LEAF_NODE);
         inSimple = true;
     }
 
     @Override
     public final void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new leaf set");
-        commonStartLeafSet(name, NodeTypes.LEAF_SET);
+        commonStartLeafSet(name, LithiumNode.LEAF_SET);
     }
 
     @Override
     public final void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new ordered leaf set");
-        commonStartLeafSet(name, NodeTypes.ORDERED_LEAF_SET);
+        commonStartLeafSet(name, LithiumNode.ORDERED_LEAF_SET);
     }
 
     private void commonStartLeafSet(final NodeIdentifier name, final byte nodeType) throws IOException {
@@ -108,7 +108,7 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     public final void startLeafSetEntryNode(final NodeWithValue<?> name) throws IOException {
         LOG.trace("Starting a new leaf set entry node");
 
-        output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
+        output.writeByte(LithiumNode.LEAF_SET_ENTRY_NODE);
 
         // lastLeafSetQName is set if the parent LeafSetNode was previously written. Otherwise this is a
         // stand alone LeafSetEntryNode so write out it's name here.
@@ -121,52 +121,52 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     @Override
     public final void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new container node");
-        startNode(name, NodeTypes.CONTAINER_NODE);
+        startNode(name, LithiumNode.CONTAINER_NODE);
     }
 
     @Override
     public final void startYangModeledAnyXmlNode(final NodeIdentifier name, final int childSizeHint)
             throws IOException {
         LOG.trace("Starting a new yang modeled anyXml node");
-        startNode(name, NodeTypes.YANG_MODELED_ANY_XML_NODE);
+        startNode(name, LithiumNode.YANG_MODELED_ANY_XML_NODE);
     }
 
     @Override
     public final void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new unkeyed list");
-        startNode(name, NodeTypes.UNKEYED_LIST);
+        startNode(name, LithiumNode.UNKEYED_LIST);
     }
 
     @Override
     public final void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new unkeyed list item");
-        startNode(name, NodeTypes.UNKEYED_LIST_ITEM);
+        startNode(name, LithiumNode.UNKEYED_LIST_ITEM);
     }
 
     @Override
     public final void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new map node");
-        startNode(name, NodeTypes.MAP_NODE);
+        startNode(name, LithiumNode.MAP_NODE);
     }
 
     @Override
     public final void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
             throws IOException {
         LOG.trace("Starting a new map entry node");
-        startNode(identifier, NodeTypes.MAP_ENTRY_NODE);
+        startNode(identifier, LithiumNode.MAP_ENTRY_NODE);
         writeKeyValueMap(identifier.entrySet());
     }
 
     @Override
     public final void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new ordered map node");
-        startNode(name, NodeTypes.ORDERED_MAP_NODE);
+        startNode(name, LithiumNode.ORDERED_MAP_NODE);
     }
 
     @Override
     public final void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         LOG.trace("Starting a new choice node");
-        startNode(name, NodeTypes.CHOICE_NODE);
+        startNode(name, LithiumNode.CHOICE_NODE);
     }
 
     @Override
@@ -174,14 +174,14 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
         requireNonNull(identifier, "Node identifier should not be null");
         LOG.trace("Starting a new augmentation node");
 
-        output.writeByte(NodeTypes.AUGMENTATION_NODE);
+        output.writeByte(LithiumNode.AUGMENTATION_NODE);
         writeAugmentationIdentifier(identifier);
     }
 
     @Override
     public final void startAnyxmlNode(final NodeIdentifier name) throws IOException {
         LOG.trace("Starting any xml node");
-        startNode(name, NodeTypes.ANY_XML_NODE);
+        startNode(name, LithiumNode.ANY_XML_NODE);
         inSimple = true;
     }
 
@@ -206,7 +206,7 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
         LOG.trace("Ending the node");
         if (!inSimple) {
             lastLeafSetQName = null;
-            output.writeByte(NodeTypes.END_NODE);
+            output.writeByte(LithiumNode.END_NODE);
         }
         inSimple = false;
     }

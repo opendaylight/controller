@@ -67,43 +67,43 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
 
     private void streamNormalizedNode(final NormalizedNodeStreamWriter writer, final byte nodeType) throws IOException {
         switch (nodeType) {
-            case NodeTypes.ANY_XML_NODE:
+            case LithiumNode.ANY_XML_NODE:
                 streamAnyxml(writer);
                 break;
-            case NodeTypes.AUGMENTATION_NODE:
+            case LithiumNode.AUGMENTATION_NODE:
                 streamAugmentation(writer);
                 break;
-            case NodeTypes.CHOICE_NODE:
+            case LithiumNode.CHOICE_NODE:
                 streamChoice(writer);
                 break;
-            case NodeTypes.CONTAINER_NODE:
+            case LithiumNode.CONTAINER_NODE:
                 streamContainer(writer);
                 break;
-            case NodeTypes.LEAF_NODE:
+            case LithiumNode.LEAF_NODE:
                 streamLeaf(writer);
                 break;
-            case NodeTypes.LEAF_SET:
+            case LithiumNode.LEAF_SET:
                 streamLeafSet(writer);
                 break;
-            case NodeTypes.ORDERED_LEAF_SET:
+            case LithiumNode.ORDERED_LEAF_SET:
                 streamOrderedLeafSet(writer);
                 break;
-            case NodeTypes.LEAF_SET_ENTRY_NODE:
+            case LithiumNode.LEAF_SET_ENTRY_NODE:
                 streamLeafSetEntry(writer);
                 break;
-            case NodeTypes.MAP_ENTRY_NODE:
+            case LithiumNode.MAP_ENTRY_NODE:
                 streamMapEntry(writer);
                 break;
-            case NodeTypes.MAP_NODE:
+            case LithiumNode.MAP_NODE:
                 streamMap(writer);
                 break;
-            case NodeTypes.ORDERED_MAP_NODE:
+            case LithiumNode.ORDERED_MAP_NODE:
                 streamOrderedMap(writer);
                 break;
-            case NodeTypes.UNKEYED_LIST:
+            case LithiumNode.UNKEYED_LIST:
                 streamUnkeyedList(writer);
                 break;
-            case NodeTypes.UNKEYED_LIST_ITEM:
+            case LithiumNode.UNKEYED_LIST_ITEM:
                 streamUnkeyedListItem(writer);
                 break;
             default:
@@ -221,8 +221,8 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
         writer.startMapEntryNode(entryIdentifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
 
         // Same loop as commonStreamContainer(), but ...
-        for (byte nodeType = input.readByte(); nodeType != NodeTypes.END_NODE; nodeType = input.readByte()) {
-            if (nodeType == NodeTypes.LEAF_NODE) {
+        for (byte nodeType = input.readByte(); nodeType != LithiumNode.END_NODE; nodeType = input.readByte()) {
+            if (nodeType == LithiumNode.LEAF_NODE) {
                 // ... leaf nodes may need de-duplication
                 streamLeaf(writer, entryIdentifier);
             } else {
@@ -247,7 +247,7 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
     }
 
     private void commonStreamContainer(final NormalizedNodeStreamWriter writer) throws IOException {
-        for (byte nodeType = input.readByte(); nodeType != NodeTypes.END_NODE; nodeType = input.readByte()) {
+        for (byte nodeType = input.readByte(); nodeType != LithiumNode.END_NODE; nodeType = input.readByte()) {
             streamNormalizedNode(writer, nodeType);
         }
         writer.endNode();
