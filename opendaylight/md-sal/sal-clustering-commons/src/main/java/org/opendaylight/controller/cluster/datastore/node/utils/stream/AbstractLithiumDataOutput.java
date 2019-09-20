@@ -215,26 +215,26 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST",
             justification = "The casts in the switch clauses are indirectly confirmed via the determination of 'type'.")
     final void writePathArgumentInternal(final PathArgument pathArgument) throws IOException {
-        final byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
+        final byte type = LithiumPathArgument.getSerializablePathArgumentType(pathArgument);
         output.writeByte(type);
 
         switch (type) {
-            case PathArgumentTypes.NODE_IDENTIFIER:
+            case LithiumPathArgument.NODE_IDENTIFIER:
                 NodeIdentifier nodeIdentifier = (NodeIdentifier) pathArgument;
                 writeQNameInternal(nodeIdentifier.getNodeType());
                 break;
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES:
+            case LithiumPathArgument.NODE_IDENTIFIER_WITH_PREDICATES:
                 NodeIdentifierWithPredicates nodeIdentifierWithPredicates =
                     (NodeIdentifierWithPredicates) pathArgument;
                 writeQNameInternal(nodeIdentifierWithPredicates.getNodeType());
                 writeKeyValueMap(nodeIdentifierWithPredicates.entrySet());
                 break;
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE:
+            case LithiumPathArgument.NODE_IDENTIFIER_WITH_VALUE:
                 NodeWithValue<?> nodeWithValue = (NodeWithValue<?>) pathArgument;
                 writeQNameInternal(nodeWithValue.getNodeType());
                 writeObject(nodeWithValue.getValue());
                 break;
-            case PathArgumentTypes.AUGMENTATION_IDENTIFIER:
+            case LithiumPathArgument.AUGMENTATION_IDENTIFIER:
                 // No Qname in augmentation identifier
                 writeAugmentationIdentifier((AugmentationIdentifier) pathArgument);
                 break;
