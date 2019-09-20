@@ -14,9 +14,9 @@ import org.junit.Test;
 public class LithiumWriteObjectMappingTest {
     @Test
     public void testStringType() {
-        assertEquals(ValueTypes.STRING_TYPE, AbstractLithiumDataOutput.getSerializableType("foobar"));
-        final String largeString = largeString(ValueTypes.STRING_BYTES_LENGTH_THRESHOLD);
-        assertEquals(ValueTypes.STRING_BYTES_TYPE, AbstractLithiumDataOutput.getSerializableType(largeString));
+        assertEquals(LithiumValue.STRING_TYPE, AbstractLithiumDataOutput.getSerializableType("foobar"));
+        final String largeString = largeString(LithiumValue.STRING_BYTES_LENGTH_THRESHOLD);
+        assertEquals(LithiumValue.STRING_BYTES_TYPE, AbstractLithiumDataOutput.getSerializableType(largeString));
     }
 
     private static String largeString(final int minSize) {
