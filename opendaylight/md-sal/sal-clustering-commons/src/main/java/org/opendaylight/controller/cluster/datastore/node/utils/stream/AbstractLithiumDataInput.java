@@ -429,13 +429,13 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
         int type = input.readByte();
 
         switch (type) {
-            case PathArgumentTypes.AUGMENTATION_IDENTIFIER:
+            case LithiumPathArgument.AUGMENTATION_IDENTIFIER:
                 return readAugmentationIdentifier();
-            case PathArgumentTypes.NODE_IDENTIFIER:
+            case LithiumPathArgument.NODE_IDENTIFIER:
                 return readNodeIdentifier();
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES:
+            case LithiumPathArgument.NODE_IDENTIFIER_WITH_PREDICATES:
                 return readNormalizedNodeWithPredicates();
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE:
+            case LithiumPathArgument.NODE_IDENTIFIER_WITH_VALUE:
                 return new NodeWithValue<>(readQName(), readObject());
             default:
                 // FIXME: throw hard error
