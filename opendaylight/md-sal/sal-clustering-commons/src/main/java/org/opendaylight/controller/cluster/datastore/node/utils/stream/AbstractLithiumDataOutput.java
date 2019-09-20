@@ -58,17 +58,17 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLithiumDataOutput.class);
     private static final TransformerFactory TF = TransformerFactory.newInstance();
     private static final ImmutableMap<Class<?>, Byte> KNOWN_TYPES = ImmutableMap.<Class<?>, Byte>builder()
-            .put(String.class, ValueTypes.STRING_TYPE)
-            .put(Byte.class, ValueTypes.BYTE_TYPE)
-            .put(Integer.class, ValueTypes.INT_TYPE)
-            .put(Long.class, ValueTypes.LONG_TYPE)
-            .put(Boolean.class, ValueTypes.BOOL_TYPE)
-            .put(QName.class, ValueTypes.QNAME_TYPE)
-            .put(Short.class, ValueTypes.SHORT_TYPE)
-            .put(BigInteger.class, ValueTypes.BIG_INTEGER_TYPE)
-            .put(BigDecimal.class, ValueTypes.BIG_DECIMAL_TYPE)
-            .put(byte[].class, ValueTypes.BINARY_TYPE)
-            .put(Empty.class, ValueTypes.EMPTY_TYPE)
+            .put(String.class, LithiumValue.STRING_TYPE)
+            .put(Byte.class, LithiumValue.BYTE_TYPE)
+            .put(Integer.class, LithiumValue.INT_TYPE)
+            .put(Long.class, LithiumValue.LONG_TYPE)
+            .put(Boolean.class, LithiumValue.BOOL_TYPE)
+            .put(QName.class, LithiumValue.QNAME_TYPE)
+            .put(Short.class, LithiumValue.SHORT_TYPE)
+            .put(BigInteger.class, LithiumValue.BIG_INTEGER_TYPE)
+            .put(BigDecimal.class, LithiumValue.BIG_DECIMAL_TYPE)
+            .put(byte[].class, LithiumValue.BINARY_TYPE)
+            .put(Empty.class, LithiumValue.EMPTY_TYPE)
             .build();
 
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
@@ -311,38 +311,38 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
         output.writeByte(type);
 
         switch (type) {
-            case ValueTypes.BOOL_TYPE:
+            case LithiumValue.BOOL_TYPE:
                 output.writeBoolean((Boolean) value);
                 break;
-            case ValueTypes.QNAME_TYPE:
+            case LithiumValue.QNAME_TYPE:
                 writeQNameInternal((QName) value);
                 break;
-            case ValueTypes.INT_TYPE:
+            case LithiumValue.INT_TYPE:
                 output.writeInt((Integer) value);
                 break;
-            case ValueTypes.BYTE_TYPE:
+            case LithiumValue.BYTE_TYPE:
                 output.writeByte((Byte) value);
                 break;
-            case ValueTypes.LONG_TYPE:
+            case LithiumValue.LONG_TYPE:
                 output.writeLong((Long) value);
                 break;
-            case ValueTypes.SHORT_TYPE:
+            case LithiumValue.SHORT_TYPE:
                 output.writeShort((Short) value);
                 break;
-            case ValueTypes.BITS_TYPE:
+            case LithiumValue.BITS_TYPE:
                 writeObjSet((Set<?>) value);
                 break;
-            case ValueTypes.BINARY_TYPE:
+            case LithiumValue.BINARY_TYPE:
                 byte[] bytes = (byte[]) value;
                 output.writeInt(bytes.length);
                 output.write(bytes);
                 break;
-            case ValueTypes.YANG_IDENTIFIER_TYPE:
+            case LithiumValue.YANG_IDENTIFIER_TYPE:
                 writeYangInstanceIdentifierInternal((YangInstanceIdentifier) value);
                 break;
-            case ValueTypes.EMPTY_TYPE:
+            case LithiumValue.EMPTY_TYPE:
                 break;
-            case ValueTypes.STRING_BYTES_TYPE:
+            case LithiumValue.STRING_BYTES_TYPE:
                 final byte[] valueBytes = value.toString().getBytes(StandardCharsets.UTF_8);
                 output.writeInt(valueBytes.length);
                 output.write(valueBytes);
@@ -381,19 +381,19 @@ abstract class AbstractLithiumDataOutput extends AbstractNormalizedNodeDataOutpu
     static final byte getSerializableType(final Object node) {
         final Byte type = KNOWN_TYPES.get(requireNonNull(node).getClass());
         if (type != null) {
-            if (type == ValueTypes.STRING_TYPE
-                    && ((String) node).length() >= ValueTypes.STRING_BYTES_LENGTH_THRESHOLD) {
-                return ValueTypes.STRING_BYTES_TYPE;
+            if (type == LithiumValue.STRING_TYPE
+                    && ((String) node).length() >= LithiumValue.STRING_BYTES_LENGTH_THRESHOLD) {
+                return LithiumValue.STRING_BYTES_TYPE;
             }
             return type;
         }
 
         if (node instanceof Set) {
-            return ValueTypes.BITS_TYPE;
+            return LithiumValue.BITS_TYPE;
         }
 
         if (node instanceof YangInstanceIdentifier) {
-            return ValueTypes.YANG_IDENTIFIER_TYPE;
+            return LithiumValue.YANG_IDENTIFIER_TYPE;
         }
 
         throw new IllegalArgumentException("Unknown value type " + node.getClass().getSimpleName());
