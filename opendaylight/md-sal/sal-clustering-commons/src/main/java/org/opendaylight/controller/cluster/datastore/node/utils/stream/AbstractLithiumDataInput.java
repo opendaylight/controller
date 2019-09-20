@@ -339,54 +339,54 @@ abstract class AbstractLithiumDataInput extends AbstractNormalizedNodeDataInput 
     private Object readObject() throws IOException {
         byte objectType = input.readByte();
         switch (objectType) {
-            case ValueTypes.BITS_TYPE:
+            case LithiumValue.BITS_TYPE:
                 return readObjSet();
 
-            case ValueTypes.BOOL_TYPE:
+            case LithiumValue.BOOL_TYPE:
                 return input.readBoolean();
 
-            case ValueTypes.BYTE_TYPE:
+            case LithiumValue.BYTE_TYPE:
                 return input.readByte();
 
-            case ValueTypes.INT_TYPE:
+            case LithiumValue.INT_TYPE:
                 return input.readInt();
 
-            case ValueTypes.LONG_TYPE:
+            case LithiumValue.LONG_TYPE:
                 return input.readLong();
 
-            case ValueTypes.QNAME_TYPE:
+            case LithiumValue.QNAME_TYPE:
                 return readQName();
 
-            case ValueTypes.SHORT_TYPE:
+            case LithiumValue.SHORT_TYPE:
                 return input.readShort();
 
-            case ValueTypes.STRING_TYPE:
+            case LithiumValue.STRING_TYPE:
                 return input.readUTF();
 
-            case ValueTypes.STRING_BYTES_TYPE:
+            case LithiumValue.STRING_BYTES_TYPE:
                 return readStringBytes();
 
-            case ValueTypes.BIG_DECIMAL_TYPE:
+            case LithiumValue.BIG_DECIMAL_TYPE:
                 return new BigDecimal(input.readUTF());
 
-            case ValueTypes.BIG_INTEGER_TYPE:
+            case LithiumValue.BIG_INTEGER_TYPE:
                 return new BigInteger(input.readUTF());
 
-            case ValueTypes.BINARY_TYPE:
+            case LithiumValue.BINARY_TYPE:
                 byte[] bytes = new byte[input.readInt()];
                 input.readFully(bytes);
                 return bytes;
 
-            case ValueTypes.YANG_IDENTIFIER_TYPE:
+            case LithiumValue.YANG_IDENTIFIER_TYPE:
                 return readYangInstanceIdentifierInternal();
 
-            case ValueTypes.EMPTY_TYPE:
+            case LithiumValue.EMPTY_TYPE:
             // Leaf nodes no longer allow null values and thus we no longer emit null values. Previously, the "empty"
             // yang type was represented as null so we translate an incoming null value to Empty. It was possible for
             // a BI user to set a string leaf to null and we're rolling the dice here but the chances for that are
             // very low. We'd have to know the yang type but, even if we did, we can't let a null value pass upstream
             // so we'd have to drop the leaf which might cause other issues.
-            case ValueTypes.NULL_TYPE:
+            case LithiumValue.NULL_TYPE:
                 return Empty.getInstance();
 
             default:

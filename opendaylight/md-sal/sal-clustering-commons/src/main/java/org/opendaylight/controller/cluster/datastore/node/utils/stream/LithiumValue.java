@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-final class ValueTypes {
+final class LithiumValue {
     // The String length threshold beyond which a String should be encoded as bytes
     static final int STRING_BYTES_LENGTH_THRESHOLD = Short.MAX_VALUE / 4;
 
@@ -30,7 +30,7 @@ final class ValueTypes {
     static final byte STRING_BYTES_TYPE = 14;
     static final byte EMPTY_TYPE = 15;
 
-    private ValueTypes() {
+    private LithiumValue() {
         throw new UnsupportedOperationException("Utility class");
     }
 }
