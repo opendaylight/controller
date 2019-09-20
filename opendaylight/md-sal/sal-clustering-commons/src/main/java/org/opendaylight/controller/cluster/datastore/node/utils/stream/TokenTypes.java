@@ -23,12 +23,4 @@ final class TokenTypes {
      * dictionary, too.
      */
     static final short NEON_SR2_VERSION = 2;
-
-    // Tokens supported in NEON_SR2_VERSION
-    static final byte IS_QNAME_CODE = 4;
-    static final byte IS_QNAME_VALUE = 5;
-    static final byte IS_AUGMENT_CODE = 6;
-    static final byte IS_AUGMENT_VALUE = 7;
-    static final byte IS_MODULE_CODE = 8;
-    static final byte IS_MODULE_VALUE = 9;
 }
