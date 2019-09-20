@@ -42,9 +42,9 @@ final class NeonSR2NormalizedNodeInputStreamReader extends AbstractLithiumDataIn
     public QName readQName() throws IOException {
         final byte valueType = readByte();
         switch (valueType) {
-            case TokenTypes.IS_QNAME_CODE:
+            case NeonSR2Tokens.IS_QNAME_CODE:
                 return codedQName(readInt());
-            case TokenTypes.IS_QNAME_VALUE:
+            case NeonSR2Tokens.IS_QNAME_VALUE:
                 return rawQName();
             default:
                 throw new IOException("Unhandled QName value type " + valueType);
@@ -55,9 +55,9 @@ final class NeonSR2NormalizedNodeInputStreamReader extends AbstractLithiumDataIn
     AugmentationIdentifier readAugmentationIdentifier() throws IOException {
         final byte valueType = readByte();
         switch (valueType) {
-            case TokenTypes.IS_AUGMENT_CODE:
+            case NeonSR2Tokens.IS_AUGMENT_CODE:
                 return codedAugmentId(readInt());
-            case TokenTypes.IS_AUGMENT_VALUE:
+            case NeonSR2Tokens.IS_AUGMENT_VALUE:
                 return rawAugmentId();
             default:
                 throw new IOException("Unhandled QName value type " + valueType);
@@ -70,9 +70,9 @@ final class NeonSR2NormalizedNodeInputStreamReader extends AbstractLithiumDataIn
         // to do that we inter-mingle with readQName()
         final byte valueType = readByte();
         switch (valueType) {
-            case TokenTypes.IS_QNAME_CODE:
+            case NeonSR2Tokens.IS_QNAME_CODE:
                 return codedNodeIdentifier(readInt());
-            case TokenTypes.IS_QNAME_VALUE:
+            case NeonSR2Tokens.IS_QNAME_VALUE:
                 return rawNodeIdentifier();
             default:
                 throw new IOException("Unhandled QName value type " + valueType);
@@ -82,9 +82,9 @@ final class NeonSR2NormalizedNodeInputStreamReader extends AbstractLithiumDataIn
     private QNameModule readModule() throws IOException {
         final byte valueType = readByte();
         switch (valueType) {
-            case TokenTypes.IS_MODULE_CODE:
+            case NeonSR2Tokens.IS_MODULE_CODE:
                 return codedModule(readInt());
-            case TokenTypes.IS_MODULE_VALUE:
+            case NeonSR2Tokens.IS_MODULE_VALUE:
                 return rawModule();
             default:
                 throw new IOException("Unhandled QName value type " + valueType);

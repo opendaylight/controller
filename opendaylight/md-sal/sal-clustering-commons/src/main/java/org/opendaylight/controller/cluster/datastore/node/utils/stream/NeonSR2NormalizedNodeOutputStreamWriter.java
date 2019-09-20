@@ -49,11 +49,11 @@ final class NeonSR2NormalizedNodeOutputStreamWriter extends AbstractLithiumDataO
         if (value == null) {
             // Fresh QName, remember it and emit as three strings
             qnameCodeMap.put(qname, qnameCodeMap.size());
-            writeByte(TokenTypes.IS_QNAME_VALUE);
+            writeByte(NeonSR2Tokens.IS_QNAME_VALUE);
             defaultWriteQName(qname);
         } else {
             // We have already seen this QName: write its code
-            writeByte(TokenTypes.IS_QNAME_CODE);
+            writeByte(NeonSR2Tokens.IS_QNAME_CODE);
             writeInt(value);
         }
     }
@@ -64,11 +64,11 @@ final class NeonSR2NormalizedNodeOutputStreamWriter extends AbstractLithiumDataO
         if (value == null) {
             // Fresh AugmentationIdentifier, remember it and emit as three strings
             aidCodeMap.put(aid, aidCodeMap.size());
-            writeByte(TokenTypes.IS_AUGMENT_VALUE);
+            writeByte(NeonSR2Tokens.IS_AUGMENT_VALUE);
             defaultWriteAugmentationIdentifier(aid);
         } else {
             // We have already seen this AugmentationIdentifier: write its code
-            writeByte(TokenTypes.IS_AUGMENT_CODE);
+            writeByte(NeonSR2Tokens.IS_AUGMENT_CODE);
             writeInt(value);
         }
     }
@@ -79,11 +79,11 @@ final class NeonSR2NormalizedNodeOutputStreamWriter extends AbstractLithiumDataO
         if (value == null) {
             // Fresh QNameModule, remember it and emit as three strings
             moduleCodeMap.put(module, moduleCodeMap.size());
-            writeByte(TokenTypes.IS_MODULE_VALUE);
+            writeByte(NeonSR2Tokens.IS_MODULE_VALUE);
             defaultWriteModule(module);
         } else {
             // We have already seen this QNameModule: write its code
-            writeByte(TokenTypes.IS_MODULE_CODE);
+            writeByte(NeonSR2Tokens.IS_MODULE_CODE);
             writeInt(value);
         }
     }
