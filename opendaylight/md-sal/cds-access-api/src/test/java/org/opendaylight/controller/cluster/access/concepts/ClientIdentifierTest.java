@@ -29,4 +29,9 @@ public class ClientIdentifierTest extends AbstractIdentifierTest<ClientIdentifie
     ClientIdentifier equalObject() {
         return EQUAL_OBJECT;
     }
+
+    @Override
+    int expectedSize() {
+        return 114;
+    }
 }
