@@ -26,6 +26,8 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
 
     abstract T equalObject();
 
+    abstract int expectedSize();
+
     @Test
     public final void testEquals() {
         assertTrue(object().equals(object()));
@@ -40,22 +42,26 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
         assertEquals(object().hashCode(), equalObject().hashCode());
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T copy(T obj) throws IOException, ClassNotFoundException {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(obj);
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            return (T) ois.readObject();
-        }
-    }
 
     @Test
     public final void testSerialization() throws Exception {
         assertTrue(object().equals(copy(object())));
         assertTrue(object().equals(copy(equalObject())));
         assertFalse(differentObject().equals(copy(object())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private T copy(final T obj) throws IOException, ClassNotFoundException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(obj);
+        }
+
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(expectedSize(), bytes.length);
+
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (T) ois.readObject();
+        }
     }
 }

@@ -47,8 +47,11 @@ public class ShardDataTreeSnapshotTest {
             snapshot.serialize(out);
         }
 
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(242, bytes.length);
+
         ShardDataTreeSnapshot deserialized;
-        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
@@ -73,8 +76,11 @@ public class ShardDataTreeSnapshotTest {
             snapshot.serialize(out);
         }
 
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(390, bytes.length);
+
         ShardDataTreeSnapshot deserialized;
-        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
