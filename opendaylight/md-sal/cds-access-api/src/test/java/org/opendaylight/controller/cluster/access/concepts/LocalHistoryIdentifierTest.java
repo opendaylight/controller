@@ -30,4 +30,9 @@ public class LocalHistoryIdentifierTest extends AbstractIdentifierTest<LocalHist
     LocalHistoryIdentifier equalObject() {
         return EQUAL_OBJECT;
     }
+
+    @Override
+    int expectedSize() {
+        return 121;
+    }
 }
