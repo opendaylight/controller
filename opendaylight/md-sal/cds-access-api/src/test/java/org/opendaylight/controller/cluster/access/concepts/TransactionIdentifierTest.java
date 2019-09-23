@@ -31,4 +31,9 @@ public class TransactionIdentifierTest extends AbstractIdentifierTest<Transactio
     TransactionIdentifier equalObject() {
         return EQUAL_OBJECT;
     }
+
+    @Override
+    int expectedSize() {
+        return 121;
+    }
 }
