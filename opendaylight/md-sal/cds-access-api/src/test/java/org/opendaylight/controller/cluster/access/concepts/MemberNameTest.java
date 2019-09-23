@@ -32,6 +32,10 @@ public class MemberNameTest extends AbstractIdentifierTest<MemberName> {
         return EQUAL_OBJECT;
     }
 
+    @Override
+    int expectedSize() {
+        return 101;
+    }
 
     @Test
     public void testCompareTo() {

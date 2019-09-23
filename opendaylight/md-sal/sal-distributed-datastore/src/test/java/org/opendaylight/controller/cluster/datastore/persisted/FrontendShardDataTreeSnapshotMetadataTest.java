@@ -44,21 +44,21 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     @Test
     public final void testCreateMetadataSnapshotEmptyInput() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata emptyOrigSnapshot = createEmptyMetadataSnapshot();
-        final FrontendShardDataTreeSnapshotMetadata emptyCopySnapshot = copy(emptyOrigSnapshot);
+        final FrontendShardDataTreeSnapshotMetadata emptyCopySnapshot = copy(emptyOrigSnapshot, 127);
         testMetadataSnapshotEqual(emptyOrigSnapshot, emptyCopySnapshot);
     }
 
     @Test
     public final void testSerializeMetadataSnapshotWithOneClient() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(1);
-        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot);
+        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 162);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
     @Test
     public final void testSerializeMetadataSnapshotWithMoreClients() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(5);
-        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot);
+        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 314);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
@@ -124,13 +124,16 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T copy(final T obj) throws IOException, ClassNotFoundException {
+    private static <T> T copy(final T obj, final int expectedSize) throws IOException, ClassNotFoundException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(obj);
         }
 
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(expectedSize, bytes.length);
+
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             return (T) ois.readObject();
         }
     }
