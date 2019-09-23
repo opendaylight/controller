@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -31,14 +33,21 @@ public class FrontendTypeTest extends AbstractIdentifierTest<FrontendType> {
         return FrontendType.forName("type-1");
     }
 
+    @Override
+    int expectedSize() {
+        return 104;
+    }
+
     @Test
     public void testWriteToReadFrom() throws Exception {
         final FrontendType type = FrontendType.forName("type");
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final DataOutputStream dos = new DataOutputStream(baos);
         type.writeTo(dos);
-        final FrontendType read =
-                FrontendType.readFrom(new DataInputStream(new ByteArrayInputStream(baos.toByteArray())));
+
+        final byte[] bytes = baos.toByteArray();
+        assertEquals(8, bytes.length);
+        final FrontendType read = FrontendType.readFrom(new DataInputStream(new ByteArrayInputStream(bytes)));
         Assert.assertEquals(type, read);
     }
 

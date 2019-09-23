@@ -30,4 +30,9 @@ public class FrontendIdentifierTest extends AbstractIdentifierTest<FrontendIdent
     FrontendIdentifier equalObject() {
         return EQUAL_OBJECT;
     }
+
+    @Override
+    int expectedSize() {
+        return 115;
+    }
 }
