@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
@@ -101,7 +102,40 @@ public class SerializationUtilsTest {
             Assert.assertEquals(node, deserializedNode);
             applierCalled.set(true);
         });
+<<<<<<< HEAD   (e4f794 Add more serialization assertions)
         Assert.assertTrue(applierCalled.get());
+=======
+        assertTrue(applierCalled.get());
+    }
+
+    @Test
+    public void testSerializeDeserializeAugmentNoref() throws IOException {
+        final YangInstanceIdentifier expected = YangInstanceIdentifier.create(
+            AugmentationIdentifier.create(ImmutableSet.of(
+                QName.create("foo", "leaf1"),
+                QName.create("bar", "leaf2"))));
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final DataOutput out = new DataOutputStream(bos);
+        SerializationUtils.writePath(out, expected);
+
+        final byte[] bytes = bos.toByteArray();
+        assertEquals(47, bytes.length);
+
+        final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
+        final YangInstanceIdentifier read = SerializationUtils.readPath(in);
+        assertEquals(expected, read);
+    }
+
+    private static NormalizedNode<?, ?> deserializeNormalizedNode(final byte[] bytes) throws IOException {
+        return SerializationUtils.readNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes))).get();
+    }
+
+    private static byte[] serializeNormalizedNode(final NormalizedNode<?, ?> node) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        SerializationUtils.writeNormalizedNode(new DataOutputStream(bos), node);
+        return bos.toByteArray();
+>>>>>>> CHANGE (548d17 Add an explicit namespace sharing test)
     }
 
     private static NormalizedNode<?, ?> createNormalizedNode() {
