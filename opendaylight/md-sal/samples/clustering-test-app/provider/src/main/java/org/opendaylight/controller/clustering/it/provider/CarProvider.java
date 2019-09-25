@@ -68,6 +68,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,8 +225,8 @@ public class CarProvider implements CarService {
         stopThread();
         StopStressTestOutputBuilder stopStressTestOutput;
         stopStressTestOutput = new StopStressTestOutputBuilder()
-                .setSuccessCount(succcessCounter.longValue())
-                .setFailureCount(failureCounter.longValue());
+                .setSuccessCount(Uint32.valueOf(succcessCounter.longValue()))
+                .setFailureCount(Uint32.valueOf(failureCounter.longValue()));
 
         final StopStressTestOutput result = stopStressTestOutput.build();
         LOG_PURCHASE_CAR.info("Executed Stop Stress test; No. of cars created {}; "

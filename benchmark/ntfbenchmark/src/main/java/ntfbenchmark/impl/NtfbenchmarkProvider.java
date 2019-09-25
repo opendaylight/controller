@@ -28,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,13 +121,13 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
 
             final StartTestOutput output =
                     new StartTestOutputBuilder()
-                            .setProducerElapsedTime(producerElapsedTime / 1000000)
-                            .setListenerElapsedTime(listenerElapsedTime / 1000000)
-                            .setListenerOk(allListeners)
-                            .setProducerOk(allProducersOk)
-                            .setProducerError(allProducersError)
-                            .setProducerRate((allProducersOk + allProducersError) * 1000000000 / producerElapsedTime)
-                            .setListenerRate(allListeners * 1000000000 / listenerElapsedTime)
+                            .setProducerElapsedTime(Uint32.valueOf(producerElapsedTime / 1000000))
+                            .setListenerElapsedTime(Uint32.valueOf(listenerElapsedTime / 1000000))
+                            .setListenerOk(Uint32.valueOf(allListeners))
+                            .setProducerOk(Uint32.valueOf(allProducersOk))
+                            .setProducerError(Uint32.valueOf(allProducersError))
+                            .setProducerRate(Uint32.valueOf((allProducersOk + allProducersError) * 1000000000 / producerElapsedTime))
+                            .setListenerRate(Uint32.valueOf(allListeners * 1000000000 / listenerElapsedTime))
                            .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {

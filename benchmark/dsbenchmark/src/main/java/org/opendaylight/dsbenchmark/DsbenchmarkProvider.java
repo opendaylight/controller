@@ -45,6 +45,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,10 +154,10 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
                 .setStatus(StartTestOutput.Status.OK)
                 .setListBuildTime(listCreateTime)
                 .setExecTime(execTime)
-                .setTxOk((long)dsWriter.getTxOk())
-                .setNtfOk(numEvents)
-                .setDataChangeEventsOk(numDataChanges)
-                .setTxError((long)dsWriter.getTxError())
+                .setTxOk(Uint32.valueOf(dsWriter.getTxOk()))
+                .setNtfOk(Uint32.valueOf(numEvents))
+                .setDataChangeEventsOk(Uint32.valueOf(numDataChanges))
+                .setTxError(Uint32.valueOf(dsWriter.getTxError()))
                 .build();
 
         return RpcResultBuilder.success(output).buildFuture();
@@ -165,7 +166,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
     private void setTestOperData(final ExecStatus sts, final long tstCompl) {
         TestStatus status = new TestStatusBuilder()
                 .setExecStatus(sts)
-                .setTestsCompleted(tstCompl)
+                .setTestsCompleted(Uint32.valueOf(tstCompl))
                 .build();
 
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
