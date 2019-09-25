@@ -75,7 +75,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         nnout.writeNormalizedNode(toasterContainer);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(1049950, bytes.length);
+        assertEquals(1049619, bytes.length);
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
 
@@ -119,7 +119,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         nnout.writeYangInstanceIdentifier(path);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(161, bytes.length);
+        assertEquals(139, bytes.length);
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
 
@@ -144,7 +144,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeYangInstanceIdentifier(path);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(1163, bytes.length);
+        assertEquals(826, bytes.length);
 
         NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
 
@@ -207,7 +207,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         nnout.writeNormalizedNode(anyXmlContainer);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(235, bytes.length);
+        assertEquals(229, bytes.length);
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
 
@@ -236,7 +236,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         }
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(100, bytes.length);
+        assertEquals(99, bytes.length);
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
         assertEquals(expected, nnin.readSchemaPath());
@@ -253,7 +253,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         }
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(105, bytes.length);
+        assertEquals(103, bytes.length);
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
         assertEquals(expected, nnin.readPathArgument());
@@ -287,7 +287,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         }
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(5_577_993, bytes.length);
+        assertEquals(2_289_103, bytes.length);
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
         assertEquals(expected, nnin.readNormalizedNode());
