@@ -50,7 +50,6 @@ public enum ABIVersion implements WritableObject {
             return NormalizedNodeStreamVersion.LITHIUM;
         }
     },
-
     /**
      * Revised ABI version. The messages remain the same as {@link #BORON}, but messages bearing QNames in any shape
      * are using {@link NormalizedNodeStreamVersion#NEON_SR2}, which improves encoding.
@@ -59,6 +58,16 @@ public enum ABIVersion implements WritableObject {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
             return NormalizedNodeStreamVersion.NEON_SR2;
+        }
+    },
+    /**
+     * Revised ABI version. The messages remain the same as {@link #BORON}, but messages bearing QNames in any shape
+     * are using {@link NormalizedNodeStreamVersion#SODIUM_SR1}, which improves encoding.
+     */
+    SODIUM_SR1(7) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.SODIUM_SR1;
         }
     },
 
@@ -98,7 +107,7 @@ public enum ABIVersion implements WritableObject {
      * @return Current {@link ABIVersion}
      */
     public static @NonNull ABIVersion current() {
-        return NEON_SR2;
+        return SODIUM_SR1;
     }
 
     /**
@@ -122,8 +131,10 @@ public enum ABIVersion implements WritableObject {
                 return BORON;
             case 6:
                 return NEON_SR2;
+            case 7:
+                return SODIUM_SR1;
             default:
-                throw new FutureVersionException(value, NEON_SR2);
+                throw new FutureVersionException(value, SODIUM_SR1);
         }
     }
 
