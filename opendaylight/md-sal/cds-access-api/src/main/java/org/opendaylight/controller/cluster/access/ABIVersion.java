@@ -70,6 +70,16 @@ public enum ABIVersion implements WritableObject {
             return NormalizedNodeStreamVersion.SODIUM_SR1;
         }
     },
+    /**
+     * Revised ABI version. The messages remain the same as {@link #BORON}, but messages bearing QNames in any shape
+     * are using {@link NormalizedNodeStreamVersion#MAGNESIUM}, which improves encoding.
+     */
+    MAGNESIUM(8) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    },
 
     /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
@@ -107,7 +117,7 @@ public enum ABIVersion implements WritableObject {
      * @return Current {@link ABIVersion}
      */
     public static @NonNull ABIVersion current() {
-        return SODIUM_SR1;
+        return MAGNESIUM;
     }
 
     /**
@@ -133,8 +143,10 @@ public enum ABIVersion implements WritableObject {
                 return NEON_SR2;
             case 7:
                 return SODIUM_SR1;
+            case 8:
+                return MAGNESIUM;
             default:
-                throw new FutureVersionException(value, SODIUM_SR1);
+                throw new FutureVersionException(value, MAGNESIUM);
         }
     }
 
