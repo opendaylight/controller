@@ -26,7 +26,6 @@ import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.ConfigFactory;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -50,6 +49,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -192,7 +192,7 @@ public class DataTreeCohortIntegrationTest {
 
             writeTx = dataStore.newWriteOnlyTransaction();
             final YangInstanceIdentifier optimaPath = CarsModel.newCarPath("optima");
-            final MapEntryNode optimaNode = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final MapEntryNode optimaNode = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             writeTx.write(optimaPath, optimaNode);
             kit.doCommit(writeTx.ready());
 
@@ -212,9 +212,9 @@ public class DataTreeCohortIntegrationTest {
 
             writeTx = dataStore.newWriteOnlyTransaction();
             final YangInstanceIdentifier sportagePath = CarsModel.newCarPath("sportage");
-            final MapEntryNode sportageNode = CarsModel.newCarEntry("sportage", BigInteger.valueOf(20000));
+            final MapEntryNode sportageNode = CarsModel.newCarEntry("sportage", Uint64.valueOf(20000));
             final YangInstanceIdentifier soulPath = CarsModel.newCarPath("soul");
-            final MapEntryNode soulNode = CarsModel.newCarEntry("soul", BigInteger.valueOf(20000));
+            final MapEntryNode soulNode = CarsModel.newCarEntry("soul", Uint64.valueOf(20000));
             writeTx.write(CarsModel.BASE_PATH, CarsModel.newCarsNode(CarsModel.newCarsMapNode(sportageNode,soulNode)));
             kit.doCommit(writeTx.ready());
 

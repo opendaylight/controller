@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.runners.Parameterized.Parameters;
 import static org.opendaylight.controller.md.cluster.datastore.model.CarsModel.CAR_QNAME;
 
 import akka.actor.ActorSystem;
@@ -22,7 +21,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -34,12 +32,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -110,7 +110,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
                 DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
                 YangInstanceIdentifier path = CarsModel.newCarPath("car" + i);
-                MapEntryNode data = CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000));
+                MapEntryNode data = CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000));
 
                 rwTx.merge(path, data);
                 carMapBuilder.withChild(data);

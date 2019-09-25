@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.lang3.SerializationUtils;
@@ -32,6 +31,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -63,8 +63,7 @@ public class DatastoreSnapshotRestoreTest {
                 newShardManagerSnapshot("config-one", "config-two"),
                 Arrays.asList(new DatastoreSnapshot.ShardSnapshot("config-one", newSnapshot(CarsModel.BASE_PATH,
                         CarsModel.newCarsNode(CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima",
-                            BigInteger.valueOf(20000L)),CarsModel.newCarEntry("sportage",
-                                BigInteger.valueOf(30000L)))))),
+                            Uint64.valueOf(20000)),CarsModel.newCarEntry("sportage", Uint64.valueOf(30000)))))),
                         new DatastoreSnapshot.ShardSnapshot("config-two", newSnapshot(PeopleModel.BASE_PATH,
                             PeopleModel.emptyContainer()))));
 

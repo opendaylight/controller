@@ -27,7 +27,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,6 +73,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -138,7 +138,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             writeTx = dataStore.newWriteOnlyTransaction();
 
-            final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             final YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
             writeTx.write(carPath, car);
 
@@ -222,7 +222,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             readWriteTx = dataStore.newReadWriteTransaction();
 
-            final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             final YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
             readWriteTx.write(carPath, car);
 
@@ -270,7 +270,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             for (int i = 0; i < numCars; i++) {
                 writeTx = txChain.newWriteOnlyTransaction();
                 writeTx.write(CarsModel.newCarPath("car" + i),
-                    CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
+                    CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000)));
 
                 testKit.doCommit(writeTx.ready());
 
@@ -533,7 +533,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             final DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
 
-            final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             final YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
             readWriteTx.write(carPath, car);
 
@@ -603,7 +603,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 final DOMDataTreeReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
                 rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.newCarPath("car" + i),
-                    CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
+                    CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000)));
 
                 futures.add(rwTx.commit());
             }
@@ -863,8 +863,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         final String name = "transactionIntegrationTest";
 
         final ContainerNode carsNode = CarsModel.newCarsNode(
-            CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
-                CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
+            CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", Uint64.valueOf(20000)),
+                CarsModel.newCarEntry("sportage", Uint64.valueOf(30000))));
 
         DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
