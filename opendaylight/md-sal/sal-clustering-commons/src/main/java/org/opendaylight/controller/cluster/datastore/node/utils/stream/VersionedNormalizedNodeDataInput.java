@@ -43,6 +43,9 @@ final class VersionedNormalizedNodeDataInput extends ForwardingNormalizedNodeDat
             case TokenTypes.SODIUM_SR1_VERSION:
                 ret = new SodiumSR1DataInput(input);
                 break;
+            case TokenTypes.MAGNESIUM_VERSION:
+                ret = new MagnesiumDataInput(input);
+                break;
             default:
                 throw defunct("Unhandled stream version %s", version);
         }
