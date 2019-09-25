@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "caccfdff_1e2dcfe4",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/AbstractDataBrokerTestTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-09-25T15:10:01Z",
+      "side": 1,
+      "message": "this boils down to a no-op. The mandatory leaf is always mandatory (i.e. it would have to be introduced when the datastore is instantiated) and hence has special handling when the DataTree is instantiated the way CDS/IMDS are instantiating (i.e. without specifying initial data)",
+      "range": {
+        "startLine": 89,
+        "startChar": 15,
+        "endLine": 89,
+        "endChar": 48
+      },
+      "revId": "0ba23ca1f19366d0ad3d7ae70cc2822fc790e973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
