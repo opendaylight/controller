@@ -135,7 +135,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     @Override
     PayloadVersion version() {
-        return PayloadVersion.SODIUM_SR1;
+        return PayloadVersion.MAGNESIUM;
     }
 
     private Object writeReplace() {
