@@ -32,8 +32,9 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
         switch (version) {
             case BORON:
             case NEON_SR2:
-                return new ShardSnapshotState(readSnapshot(in), true);
             case SODIUM_SR1:
+                return new ShardSnapshotState(readSnapshot(in), true);
+            case MAGNESIUM:
                 return new ShardSnapshotState(readSnapshot(in), false);
             case TEST_FUTURE_VERSION:
             case TEST_PAST_VERSION:
@@ -78,7 +79,8 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
             case BORON:
             case NEON_SR2:
             case SODIUM_SR1:
-                // Boron, NeonSR2 and Sodium snapshots use Java Serialization, but differ in stream format
+            case MAGNESIUM:
+                // Boron, NeonSR2, Sodium and Magnesium snapshots use Java Serialization, but differ in stream format
                 out.writeObject(this);
                 return;
             case TEST_FUTURE_VERSION:
