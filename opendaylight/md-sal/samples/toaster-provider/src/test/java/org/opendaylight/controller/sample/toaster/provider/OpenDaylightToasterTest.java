@@ -32,10 +32,11 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
 
-    private static InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
+    private static final InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
     private OpendaylightToaster toaster;
 
     @Before
@@ -71,7 +72,7 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
     @Test
     @Ignore //ignored because it is not a test right now. Illustrative purposes only.
     public void testSomething() throws Exception {
-        MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness(1L)
+        MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness(Uint32.valueOf(1))
                 .setToasterToastType(WheatBread.class).build();
 
         // NOTE: In a real test we would want to override the Thread.sleep() to
