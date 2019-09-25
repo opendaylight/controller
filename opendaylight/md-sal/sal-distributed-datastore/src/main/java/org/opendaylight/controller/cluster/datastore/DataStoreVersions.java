@@ -13,9 +13,13 @@ package org.opendaylight.controller.cluster.datastore;
  * @author Thomas Pantelis
  */
 public final class DataStoreVersions {
+    @Deprecated
     public static final short BASE_HELIUM_VERSION = 0;
+    @Deprecated
     public static final short HELIUM_1_VERSION = 1;
+    @Deprecated
     public static final short HELIUM_2_VERSION = 2;
+    @Deprecated
     public static final short LITHIUM_VERSION = 3;
     public static final short BORON_VERSION = 5;
     public static final short FLUORINE_VERSION = 9;
