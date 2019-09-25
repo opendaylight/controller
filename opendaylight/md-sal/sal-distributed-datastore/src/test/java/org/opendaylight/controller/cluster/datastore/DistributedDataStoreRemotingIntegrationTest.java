@@ -37,7 +37,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -105,6 +104,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -269,11 +269,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
         final YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
         writeTx.merge(car1Path, car1);
 
-        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(25000));
         final YangInstanceIdentifier car2Path = CarsModel.newCarPath("sportage");
         writeTx.merge(car2Path, car2);
 
@@ -358,7 +358,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         for (int i = 0; i < numCars; i++) {
             writeTx = txChain.newWriteOnlyTransaction();
             writeTx.write(CarsModel.newCarPath("car" + i),
-                    CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
+                    CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000)));
 
             followerTestKit.doCommit(writeTx.ready());
 
@@ -477,12 +477,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         rwTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
         rwTx.merge(CarsModel.newCarPath("optima"), car1);
 
         verifyCars(rwTx, car1);
 
-        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(25000));
         final YangInstanceIdentifier car2Path = CarsModel.newCarPath("sportage");
         rwTx.merge(car2Path, car2);
 
@@ -566,7 +566,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         rwTx.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
         final YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
         rwTx.write(car1Path, car1);
 
@@ -574,7 +574,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         verifyCars(rwTx, car1);
 
-        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(25000));
         rwTx.merge(CarsModel.newCarPath("sportage"), car2);
 
         rwTx.delete(car1Path);
@@ -607,7 +607,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
 
-        final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
         final YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         readWriteTx.write(carPath, car);
 
@@ -760,7 +760,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
 
-            MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
             writeTx.merge(car1Path, car1);
 
@@ -789,7 +789,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
         new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
         modification.ready();
 
@@ -808,7 +808,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Send another tx without immediate commit.
 
         modification = dataTree.takeSnapshot().newModification();
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
         modification.ready();
 
@@ -856,7 +856,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
         new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
 
         ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1,
@@ -877,7 +877,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Send another tx without immediate commit.
 
         modification = dataTree.takeSnapshot().newModification();
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
 
         forwardedReady = new ForwardedReadyTransaction(tx2,
@@ -947,7 +947,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final DOMStoreWriteTransaction writeTx2 = followerDistributedDataStore.newWriteOnlyTransaction();
         final LinkedList<MapEntryNode> cars = new LinkedList<>();
         int carIndex = 1;
-        cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
+        cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         writeTx2.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
         NormalizedNode<?, ?> people = ImmutableNodes.mapNodeBuilder(PeopleModel.PERSON_QNAME)
@@ -962,7 +962,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DOMStoreWriteTransaction writeTx3 = followerDistributedDataStore.newWriteOnlyTransaction();
         for (int i = 1; i <= 5; i++, carIndex++) {
-            cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
+            cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
             writeTx3.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         }
 
@@ -970,7 +970,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // message on ready.
 
         final DOMStoreWriteTransaction writeTx4 = followerDistributedDataStore.newWriteOnlyTransaction();
-        cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
+        cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         writeTx4.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
 
@@ -978,7 +978,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // leader shard on ready.
 
         final DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
-        cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
+        cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         readWriteTx.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
 
         IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
@@ -1050,7 +1050,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 stats -> assertEquals("getTxCohortCacheSize", 1, stats.getTxCohortCacheSize()));
 
             writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
-            final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             writeTx.write(CarsModel.newCarPath("optima"), car);
             final DOMStoreThreePhaseCommitCohort cohort2 = writeTx.ready();
 
@@ -1321,7 +1321,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             SchemaContextHelper.full());
 
         final ContainerNode carsNode = CarsModel.newCarsNode(
-                CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000))));
+                CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", Uint64.valueOf(20000))));
         AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
 
         final NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.empty());

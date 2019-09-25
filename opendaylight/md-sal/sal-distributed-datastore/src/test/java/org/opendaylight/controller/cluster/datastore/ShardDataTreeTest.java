@@ -35,7 +35,6 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import com.google.common.base.Ticker;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,6 +53,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -226,7 +226,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, peopleNode));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-        MapEntryNode carNode = CarsModel.newCarEntry("optima", new BigInteger("100"));
+        MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
         final ShardDataTreeCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         immediateCanCommit(cohort1);
@@ -317,7 +317,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-        MapEntryNode carNode = CarsModel.newCarEntry("optima", new BigInteger("100"));
+        MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
         final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
@@ -362,7 +362,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-        MapEntryNode carNode = CarsModel.newCarEntry("optima", new BigInteger("100"));
+        MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
         final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
@@ -392,7 +392,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-        MapEntryNode carNode = CarsModel.newCarEntry("optima", new BigInteger("100"));
+        MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
         final ShardDataTreeCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         coordinatedCanCommit(cohort2);
@@ -518,7 +518,7 @@ public class ShardDataTreeTest extends AbstractTest {
         return doTransaction(shardDataTree, snapshot -> {
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
             snapshot.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            snapshot.write(CarsModel.newCarPath(name), CarsModel.newCarEntry(name, new BigInteger("100")));
+            snapshot.write(CarsModel.newCarPath(name), CarsModel.newCarEntry(name, Uint64.valueOf(100)));
         });
     }
 
