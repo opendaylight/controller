@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,12 +124,12 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
             long elapsedTime = endTime - startTime;
 
             StartTestOutput output = new StartTestOutputBuilder()
-                                            .setRate((long)0)
-                                            .setGlobalRtcClientError(client.getRpcError())
-                                            .setGlobalRtcClientOk(client.getRpcOk())
-                                            .setExecTime(TimeUnit.NANOSECONDS.toMillis(elapsedTime))
-                                            .setRate(
-                                                (client.getRpcOk() + client.getRpcError()) * 1000000000 / elapsedTime)
+                                            .setRate(Uint32.ZERO)
+                                            .setGlobalRtcClientError(Uint32.valueOf(client.getRpcError()))
+                                            .setGlobalRtcClientOk(Uint32.valueOf(client.getRpcOk()))
+                                            .setExecTime(Uint32.valueOf(TimeUnit.NANOSECONDS.toMillis(elapsedTime)))
+                                            .setRate(Uint32.valueOf(
+                                                (client.getRpcOk() + client.getRpcError()) * 1000000000 / elapsedTime))
                                             .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {
@@ -142,7 +143,7 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
     public ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
         LOG.info("testStatus");
         TestStatusOutput output = new TestStatusOutputBuilder()
-                                        .setGlobalServerCnt((long)globalServer.getNumRpcs())
+                                        .setGlobalServerCnt(Uint32.valueOf(globalServer.getNumRpcs()))
                                         .setExecStatus(execStatus.get())
                                         .build();
         return RpcResultBuilder.success(output).buildFuture();
