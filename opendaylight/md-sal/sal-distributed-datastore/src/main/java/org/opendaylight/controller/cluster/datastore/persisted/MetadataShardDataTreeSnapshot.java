@@ -20,8 +20,12 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.util.Map;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +43,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         private static final Logger LOG = LoggerFactory.getLogger(MetadataShardDataTreeSnapshot.class);
 
         private Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
+        private NormalizedNodeStreamVersion version;
         private NormalizedNode<?, ?> rootNode;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
@@ -51,6 +56,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         Proxy(final MetadataShardDataTreeSnapshot snapshot) {
             this.rootNode = snapshot.getRootNode().get();
             this.metadata = snapshot.getMetadata();
+            this.version = snapshot.version().getStreamVersion();
         }
 
         @Override
@@ -59,8 +65,10 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
             for (ShardDataTreeSnapshotMetadata<?> m : metadata.values()) {
                 out.writeObject(m);
             }
-
-            SerializationUtils.writeNormalizedNode(out, rootNode);
+            out.writeBoolean(true);
+            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
+                stream.writeNormalizedNode(rootNode);
+            }
         }
 
         @Override
@@ -81,7 +89,14 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
             }
 
             metadata = metaBuilder.build();
-            rootNode = SerializationUtils.readNormalizedNode(in).get();
+            final boolean present = in.readBoolean();
+            if (!present) {
+                throw new StreamCorruptedException("Unexpected missing root node");
+            }
+
+            final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
+            version = stream.getVersion();
+            rootNode = stream.readNormalizedNode();
         }
 
         private Object readResolve() {
