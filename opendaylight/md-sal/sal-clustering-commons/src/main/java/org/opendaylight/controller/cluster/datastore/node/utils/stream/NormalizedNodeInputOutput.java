@@ -69,6 +69,8 @@ public final class NormalizedNodeInputOutput {
                 return new NeonSR2NormalizedNodeOutputStreamWriter(output);
             case SODIUM_SR1:
                 return new SodiumSR1DataOutput(output);
+            case MAGNESIUM:
+                return new MagnesiumDataOutput(output);
             default:
                 throw new IllegalStateException("Unhandled version " + version);
         }
