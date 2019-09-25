@@ -27,4 +27,9 @@ final class TokenTypes {
      * From-scratch designed version shipping in Sodium SR1.
      */
     static final short SODIUM_SR1_VERSION = 3;
+    /**
+     * Magnesium version. Structurally matches {@link #SODIUM_SR1_VERSION}, but does not allow BigIntegers to be
+     * present.
+     */
+    static final short MAGNESIUM_VERSION = 4;
 }
