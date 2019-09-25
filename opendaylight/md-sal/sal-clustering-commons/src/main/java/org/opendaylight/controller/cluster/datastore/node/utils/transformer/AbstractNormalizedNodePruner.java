@@ -174,8 +174,13 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     public void scalarValue(final Object value) throws IOException {
         checkNotSealed();
         if (unknown == 0) {
-            delegate.scalarValue(value);
+            delegate.scalarValue(translateScalar(stack.peek(), value));
         }
+    }
+
+    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) throws IOException {
+        // Default is pass-through
+        return value;
     }
 
     @Override
