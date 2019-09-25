@@ -19,6 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotificationBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.ops4j.pax.exam.util.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,7 @@ import org.slf4j.LoggerFactory;
  * covers registering of notification listener, publishing of notification and receiving of notification.
  */
 public class NotificationIT extends AbstractIT {
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(NotificationIT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationIT.class);
 
     @Inject
     @Filter(timeout = 120 * 1000)
@@ -114,7 +113,7 @@ public class NotificationIT extends AbstractIT {
      */
     public static OutOfPixieDustNotification noDustNotification(final String reason, final int days) {
         OutOfPixieDustNotificationBuilder ret = new OutOfPixieDustNotificationBuilder();
-        ret.setReason(reason).setDaysTillNewDust(days);
+        ret.setReason(reason).setDaysTillNewDust(Uint16.valueOf(days));
         return ret.build();
     }
 
