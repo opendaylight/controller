@@ -379,7 +379,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
             }
             return YangInstanceIdentifier.create(builder.build());
         } else if (size == 0) {
-            return YangInstanceIdentifier.EMPTY;
+            return YangInstanceIdentifier.empty();
         } else {
             throw new InvalidNormalizedNodeStreamException("Invalid YangInstanceIdentifier size " + size);
         }
@@ -781,7 +781,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
             case MagnesiumValue.BINARY_4B:
                 return readBinary(input.readInt());
             case MagnesiumValue.YIID_0:
-                return YangInstanceIdentifier.EMPTY;
+                return YangInstanceIdentifier.empty();
             case MagnesiumValue.YIID:
                 return readYangInstanceIdentifier(input.readInt());
             case MagnesiumValue.QNAME:
