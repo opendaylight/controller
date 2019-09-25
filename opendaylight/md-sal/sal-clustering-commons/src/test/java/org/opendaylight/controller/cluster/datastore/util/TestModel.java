@@ -16,12 +16,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -305,7 +305,7 @@ public final class TestModel {
                 .withChild(ImmutableNodes.leafNode(BOOLEAN_LEAF_QNAME, ENABLED))
                 .withChild(ImmutableNodes.leafNode(SHORT_LEAF_QNAME, SHORT_ID))
                 .withChild(ImmutableNodes.leafNode(BYTE_LEAF_QNAME, BYTE_ID))
-                .withChild(ImmutableNodes.leafNode(TestModel.BIGINTEGER_LEAF_QNAME, BigInteger.valueOf(100)))
+                .withChild(ImmutableNodes.leafNode(TestModel.BIGINTEGER_LEAF_QNAME, Uint64.valueOf(100)))
                 .withChild(ImmutableNodes.leafNode(TestModel.BIGDECIMAL_LEAF_QNAME, BigDecimal.valueOf(1.2)))
                 .withChild(ImmutableNodes.leafNode(SOME_REF_QNAME, instanceID))
                 .withChild(ImmutableNodes.leafNode(MYIDENTITY_QNAME, DESC_QNAME))
