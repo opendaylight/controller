@@ -107,7 +107,7 @@ public enum ABIVersion implements WritableObject {
      * @return Current {@link ABIVersion}
      */
     public static @NonNull ABIVersion current() {
-        return SODIUM_SR1;
+        return NEON_SR2;
     }
 
     /**
