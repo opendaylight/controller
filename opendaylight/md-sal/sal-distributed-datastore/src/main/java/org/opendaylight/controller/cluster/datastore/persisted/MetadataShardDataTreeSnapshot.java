@@ -120,7 +120,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     @Override
     PayloadVersion version() {
-        return PayloadVersion.NEON_SR2;
+        return PayloadVersion.SODIUM_SR1;
     }
 
     private Object writeReplace() {
