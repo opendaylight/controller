@@ -50,7 +50,7 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataOutput} instance
      */
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output) {
-        return new SodiumSR1DataOutput(output);
+        return new MagnesiumDataOutput(output);
     }
 
     /**
