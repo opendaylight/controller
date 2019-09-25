@@ -54,7 +54,7 @@ public class SerializationUtilsTest {
     public void testSerializeDeserializeNodes() throws IOException {
         final NormalizedNode<?, ?> normalizedNode = createNormalizedNode();
         final byte[] bytes = serializeNormalizedNode(normalizedNode);
-        assertEquals(10774, bytes.length);
+        assertEquals(10564, bytes.length);
         assertEquals(normalizedNode, deserializeNormalizedNode(bytes));
     }
 
@@ -68,7 +68,7 @@ public class SerializationUtilsTest {
                 .withValue(new DOMSource(parse))
                 .build();
         final byte[] bytes = serializeNormalizedNode(anyXmlNode);
-        assertEquals(115, bytes.length);
+        assertEquals(113, bytes.length);
         final NormalizedNode<?, ?> deserialized = deserializeNormalizedNode(bytes);
         final DOMSource value = (DOMSource) deserialized.getValue();
         final Diff diff = XMLUnit.compareXML((Document) anyXmlNode.getValue().getNode(),
@@ -89,7 +89,7 @@ public class SerializationUtilsTest {
         SerializationUtils.writePath(out, path);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(150, bytes.length);
+        assertEquals(119, bytes.length);
 
         final YangInstanceIdentifier deserialized =
                 SerializationUtils.readPath(new DataInputStream(new ByteArrayInputStream(bytes)));
@@ -105,7 +105,7 @@ public class SerializationUtilsTest {
         SerializationUtils.writeNodeAndPath(out, path, node);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(10783, bytes.length);
+        assertEquals(10566, bytes.length);
 
         final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
         final AtomicBoolean applierCalled = new AtomicBoolean(false);
@@ -129,7 +129,7 @@ public class SerializationUtilsTest {
         SerializationUtils.writePath(out, expected);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(47, bytes.length);
+        assertEquals(37, bytes.length);
 
         final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
         final YangInstanceIdentifier read = SerializationUtils.readPath(in);
