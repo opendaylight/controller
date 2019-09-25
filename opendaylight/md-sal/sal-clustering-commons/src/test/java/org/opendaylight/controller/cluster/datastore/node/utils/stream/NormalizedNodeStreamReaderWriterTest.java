@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import static org.junit.Assert.assertEquals;
@@ -33,8 +32,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DOMSourceAnyxmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -220,10 +219,11 @@ public class NormalizedNodeStreamReaderWriterTest {
         StreamResult xmlOutput = new StreamResult(new StringWriter());
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        transformer.transform(((AnyXmlNode)child.get()).getValue(), xmlOutput);
+        transformer.transform(((DOMSourceAnyxmlNode)child.get()).getValue(), xmlOutput);
 
         assertEquals("XML", xml, xmlOutput.getWriter().toString());
-        assertEquals("http://www.w3.org/TR/html4/", ((AnyXmlNode)child.get()).getValue().getNode().getNamespaceURI());
+        assertEquals("http://www.w3.org/TR/html4/",
+            ((DOMSourceAnyxmlNode)child.get()).getValue().getNode().getNamespaceURI());
     }
 
     @Test
