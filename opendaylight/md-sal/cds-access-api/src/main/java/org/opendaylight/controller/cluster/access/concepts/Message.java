@@ -113,15 +113,13 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         switch (toVersion) {
             case BORON:
             case NEON_SR2:
+            case SODIUM_SR1:
                 return verifyNotNull(cloneAsVersion(toVersion));
             case TEST_PAST_VERSION:
             case TEST_FUTURE_VERSION:
             default:
-                // Fall-through to throw
-                break;
+                throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
         }
-
-        throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
     }
 
     /**
