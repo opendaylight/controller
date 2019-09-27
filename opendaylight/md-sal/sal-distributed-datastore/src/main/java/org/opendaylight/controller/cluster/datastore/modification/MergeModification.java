@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import java.io.IOException;
@@ -14,8 +13,8 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
 /**
  * MergeModification stores all the parameters required to merge data into the specified path.
@@ -55,8 +54,8 @@ public class MergeModification extends WriteModification {
     }
 
     public static MergeModification fromStream(final NormalizedNodeDataInput in, final short version,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
-        final NormalizedNode<?, ?> node = in.readNormalizedNode(writer);
+            final ReusableStreamReceiver receiver) throws IOException {
+        final NormalizedNode<?, ?> node = in.readNormalizedNode(receiver);
         final YangInstanceIdentifier path = in.readYangInstanceIdentifier();
         return new MergeModification(version, path, node);
     }
