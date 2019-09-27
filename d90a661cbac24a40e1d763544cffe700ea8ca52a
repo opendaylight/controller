@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de247334_2d71f20c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MergeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": "Shouldn’t this be\n\n    final ReusableStreamReceiver receiver\n\n?",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "427553a5_98bd3554",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": "I think this should be\n\n    ... receiver \u003d ...\n\nhere too.",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb6df0cc_54e63e7c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/WriteModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": "Here too.",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "226a2b3b_1477b264",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": "Here too.",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04f344c1_6d6365a0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": ";-)",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "741dd06c_17cd461b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": "...",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5459afe_1e08f28d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-09-27T18:35:12Z",
+      "side": 1,
+      "message": "...",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
