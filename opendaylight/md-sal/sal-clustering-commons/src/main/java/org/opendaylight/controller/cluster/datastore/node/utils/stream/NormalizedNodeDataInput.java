@@ -17,8 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
@@ -46,28 +45,23 @@ public interface NormalizedNodeDataInput extends DataInput {
      * @throws IllegalStateException if the dictionary has been detached
      */
     default NormalizedNode<?, ?> readNormalizedNode() throws IOException {
-        final NormalizedNodeResult result = new NormalizedNodeResult();
-        try (NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(result)) {
-            streamNormalizedNode(writer);
-        }
-        return result.getResult();
+        return readNormalizedNode(ReusableImmutableNormalizedNodeStreamWriter.create());
     }
 
     /**
      * Read a normalized node from the reader, using specified writer to construct the result.
      *
-     * @param writer Reusable writer to
+     * @param receiver Reusable receiver to, expected to be reset
      * @return Next node from the stream, or null if end of stream has been reached.
      * @throws IOException if an error occurs
      * @throws IllegalStateException if the dictionary has been detached
      */
-    default NormalizedNode<?, ?> readNormalizedNode(final ReusableImmutableNormalizedNodeStreamWriter writer)
-            throws IOException {
+    default NormalizedNode<?, ?> readNormalizedNode(final ReusableStreamReceiver receiver) throws IOException {
         try {
-            streamNormalizedNode(writer);
-            return writer.getResult();
+            streamNormalizedNode(receiver);
+            return receiver.getResult();
         } finally {
-            writer.reset();
+            receiver.reset();
         }
     }
 

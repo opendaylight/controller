@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 abstract class ForwardingNormalizedNodeDataInput extends ForwardingDataInput implements NormalizedNodeDataInput {
@@ -33,9 +33,8 @@ abstract class ForwardingNormalizedNodeDataInput extends ForwardingDataInput imp
     }
 
     @Override
-    public final NormalizedNode<?, ?> readNormalizedNode(final ReusableImmutableNormalizedNodeStreamWriter writer)
-            throws IOException {
-        return delegate().readNormalizedNode(writer);
+    public final NormalizedNode<?, ?> readNormalizedNode(final ReusableStreamReceiver receiver) throws IOException {
+        return delegate().readNormalizedNode(receiver);
     }
 
     @Override

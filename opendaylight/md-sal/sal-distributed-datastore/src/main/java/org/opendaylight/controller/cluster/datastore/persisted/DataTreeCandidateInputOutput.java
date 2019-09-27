@@ -19,12 +19,12 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
-import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +48,8 @@ public final class DataTreeCandidateInputOutput {
         throw new UnsupportedOperationException();
     }
 
-    private static DataTreeCandidateNode readModifiedNode(final ModificationType type,
-            final NormalizedNodeDataInput in, final ReusableImmutableNormalizedNodeStreamWriter writer)
-                    throws IOException {
-
+    private static DataTreeCandidateNode readModifiedNode(final ModificationType type, final NormalizedNodeDataInput in,
+            final ReusableStreamReceiver writer) throws IOException {
         final PathArgument identifier = in.readPathArgument();
         final Collection<DataTreeCandidateNode> children = readChildren(in, writer);
         if (children.isEmpty()) {
@@ -63,7 +61,7 @@ public final class DataTreeCandidateInputOutput {
     }
 
     private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+            final ReusableStreamReceiver writer) throws IOException {
         final int size = in.readInt();
         if (size == 0) {
             return ImmutableList.of();
@@ -80,7 +78,7 @@ public final class DataTreeCandidateInputOutput {
     }
 
     private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+            final ReusableStreamReceiver writer) throws IOException {
         final byte type = in.readByte();
         switch (type) {
             case APPEARED:
@@ -100,8 +98,8 @@ public final class DataTreeCandidateInputOutput {
         }
     }
 
-    public static DataTreeCandidate readDataTreeCandidate(final DataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+    public static DataTreeCandidate readDataTreeCandidate(final DataInput in, final ReusableStreamReceiver writer)
+            throws IOException {
         final NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(in);
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
