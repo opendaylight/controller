@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
@@ -92,8 +93,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         int size = in.readInt();
         if (size > 0) {
             final NormalizedNodeDataInput input = NormalizedNodeInputOutput.newDataInputWithoutValidation(in);
-            final ReusableImmutableNormalizedNodeStreamWriter writer =
-                    ReusableImmutableNormalizedNodeStreamWriter.create();
+            final ReusableStreamReceiver writer = ReusableImmutableNormalizedNodeStreamWriter.create();
 
             for (int i = 0; i < size; i++) {
                 byte type = in.readByte();
