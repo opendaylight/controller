@@ -23,6 +23,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
@@ -102,11 +103,11 @@ public final class CommitTransactionPayload extends Payload implements Serializa
         return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
     }
 
-    public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+    public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(final ReusableStreamReceiver receiver)
+            throws IOException {
         final DataInput in = ByteStreams.newDataInput(serialized);
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
-                DataTreeCandidateInputOutput.readDataTreeCandidate(in, writer));
+                DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver));
     }
 
     @Override

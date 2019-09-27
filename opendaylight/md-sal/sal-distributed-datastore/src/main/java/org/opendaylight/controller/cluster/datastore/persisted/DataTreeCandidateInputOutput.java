@@ -19,12 +19,12 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
-import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +48,10 @@ public final class DataTreeCandidateInputOutput {
         throw new UnsupportedOperationException();
     }
 
-    private static DataTreeCandidateNode readModifiedNode(final ModificationType type,
-            final NormalizedNodeDataInput in, final ReusableImmutableNormalizedNodeStreamWriter writer)
-                    throws IOException {
-
+    private static DataTreeCandidateNode readModifiedNode(final ModificationType type, final NormalizedNodeDataInput in,
+            final ReusableStreamReceiver receiver) throws IOException {
         final PathArgument identifier = in.readPathArgument();
-        final Collection<DataTreeCandidateNode> children = readChildren(in, writer);
+        final Collection<DataTreeCandidateNode> children = readChildren(in, receiver);
         if (children.isEmpty()) {
             LOG.debug("Modified node {} does not have any children, not instantiating it", identifier);
             return null;
@@ -63,7 +61,7 @@ public final class DataTreeCandidateInputOutput {
     }
 
     private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+            final ReusableStreamReceiver receiver) throws IOException {
         final int size = in.readInt();
         if (size == 0) {
             return ImmutableList.of();
@@ -71,7 +69,7 @@ public final class DataTreeCandidateInputOutput {
 
         final Collection<DataTreeCandidateNode> ret = new ArrayList<>(size);
         for (int i = 0; i < size; ++i) {
-            final DataTreeCandidateNode child = readNode(in, writer);
+            final DataTreeCandidateNode child = readNode(in, receiver);
             if (child != null) {
                 ret.add(child);
             }
@@ -80,28 +78,28 @@ public final class DataTreeCandidateInputOutput {
     }
 
     private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+            final ReusableStreamReceiver receiver) throws IOException {
         final byte type = in.readByte();
         switch (type) {
             case APPEARED:
-                return readModifiedNode(ModificationType.APPEARED, in, writer);
+                return readModifiedNode(ModificationType.APPEARED, in, receiver);
             case DELETE:
                 return DeletedDataTreeCandidateNode.create(in.readPathArgument());
             case DISAPPEARED:
-                return readModifiedNode(ModificationType.DISAPPEARED, in, writer);
+                return readModifiedNode(ModificationType.DISAPPEARED, in, receiver);
             case SUBTREE_MODIFIED:
-                return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in, writer);
+                return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in, receiver);
             case UNMODIFIED:
                 return null;
             case WRITE:
-                return DataTreeCandidateNodes.written(in.readNormalizedNode(writer));
+                return DataTreeCandidateNodes.written(in.readNormalizedNode(receiver));
             default:
                 throw new IllegalArgumentException("Unhandled node type " + type);
         }
     }
 
-    public static DataTreeCandidate readDataTreeCandidate(final DataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+    public static DataTreeCandidate readDataTreeCandidate(final DataInput in, final ReusableStreamReceiver receiver)
+            throws IOException {
         final NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(in);
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
@@ -110,21 +108,21 @@ public final class DataTreeCandidateInputOutput {
         switch (type) {
             case APPEARED:
                 rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED,
-                    readChildren(reader, writer));
+                    readChildren(reader, receiver));
                 break;
             case DELETE:
                 rootNode = DeletedDataTreeCandidateNode.create();
                 break;
             case DISAPPEARED:
                 rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED,
-                    readChildren(reader, writer));
+                    readChildren(reader, receiver));
                 break;
             case SUBTREE_MODIFIED:
                 rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.SUBTREE_MODIFIED,
-                        readChildren(reader, writer));
+                        readChildren(reader, receiver));
                 break;
             case WRITE:
-                rootNode = DataTreeCandidateNodes.written(reader.readNormalizedNode(writer));
+                rootNode = DataTreeCandidateNodes.written(reader.readNormalizedNode(receiver));
                 break;
             case UNMODIFIED:
                 rootNode = AbstractDataTreeCandidateNode.createUnmodified();

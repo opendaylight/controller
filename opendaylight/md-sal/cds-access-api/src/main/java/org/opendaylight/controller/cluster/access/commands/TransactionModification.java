@@ -15,13 +15,13 @@ import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 
 /**
  * An individual modification of a transaction's state. This class and its subclasses are not serializable, but rather
  * expose {@link #writeTo(NormalizedNodeDataOutput)} and
- * {@link #readFrom(NormalizedNodeDataInput, ReusableImmutableNormalizedNodeStreamWriter)} methods for explicit
- * serialization. The reason for this is that they are usually transmitted in bulk, hence it is advantageous to reuse
+ * {@link #readFrom(NormalizedNodeDataInput, ReusableStreamReceiver)} methods for explicit serialization. The reason for
+ * this is that they are usually transmitted in bulk, hence it is advantageous to reuse
  * a {@link NormalizedNodeDataOutput} instance to achieve better compression.
  *
  * @author Robert Varga
@@ -54,8 +54,8 @@ public abstract class TransactionModification {
         out.writeYangInstanceIdentifier(path);
     }
 
-    static TransactionModification readFrom(final NormalizedNodeDataInput in,
-            final ReusableImmutableNormalizedNodeStreamWriter writer) throws IOException {
+    static TransactionModification readFrom(final NormalizedNodeDataInput in, final ReusableStreamReceiver writer)
+            throws IOException {
         final byte type = in.readByte();
         switch (type) {
             case TYPE_DELETE:
