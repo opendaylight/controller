@@ -26,7 +26,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMTransactionChainAdapter extends ForwardingObject
         implements org.opendaylight.mdsal.dom.api.DOMTransactionChain, TransactionChainListener {
     private final Cache<AsyncTransaction<?, ?>, DOMDataTreeTransaction> transactions = CacheBuilder.newBuilder()

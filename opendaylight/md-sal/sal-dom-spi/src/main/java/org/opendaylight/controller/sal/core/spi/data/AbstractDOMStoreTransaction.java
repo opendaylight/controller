@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @param <T> identifier type
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransaction {
     private final Throwable debugContext;

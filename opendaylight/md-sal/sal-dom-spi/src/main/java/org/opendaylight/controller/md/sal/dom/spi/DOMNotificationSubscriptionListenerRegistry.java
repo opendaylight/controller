@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public interface DOMNotificationSubscriptionListenerRegistry  {
 

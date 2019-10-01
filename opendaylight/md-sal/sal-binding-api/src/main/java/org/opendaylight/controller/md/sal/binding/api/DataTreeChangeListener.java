@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeChangeListener} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DataTreeChangeListener<T extends DataObject> extends EventListener {
     /**
      * Invoked when there was data change for the supplied path, which was used

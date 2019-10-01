@@ -12,7 +12,7 @@ package org.opendaylight.controller.md.sal.dom.api;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMDataBrokerExtension extends DOMServiceExtension<DOMDataBroker, DOMDataBrokerExtension> {
 
 }

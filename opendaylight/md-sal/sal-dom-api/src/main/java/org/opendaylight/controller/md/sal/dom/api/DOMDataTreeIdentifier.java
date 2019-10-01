@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class DOMDataTreeIdentifier implements Immutable,
         Path<DOMDataTreeIdentifier>, Serializable, Comparable<DOMDataTreeIdentifier> {
     private static final long serialVersionUID = 1L;

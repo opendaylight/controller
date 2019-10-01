@@ -15,7 +15,7 @@ package org.opendaylight.controller.sal.core.spi.data;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStoreTransactionChain extends DOMStoreTransactionFactory, AutoCloseable {
 
     /**

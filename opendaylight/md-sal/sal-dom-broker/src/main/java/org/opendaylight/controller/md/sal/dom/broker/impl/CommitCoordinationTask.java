@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Implementation of blocking three-phase commit-coordination tasks without
  * support of cancellation.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 final class CommitCoordinationTask<T> implements Callable<T> {
     private enum Phase {
         canCommit,

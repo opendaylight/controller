@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @param <T> Subtype of {@link DOMStoreWriteTransaction} which is used as
  *            subtransaction.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, T> implements DOMDataWriteTransaction {
     @SuppressWarnings("rawtypes")

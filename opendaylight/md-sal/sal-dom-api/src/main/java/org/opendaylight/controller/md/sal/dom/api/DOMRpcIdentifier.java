@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcIdentifier} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class DOMRpcIdentifier {
 
     private static final class Global extends DOMRpcIdentifier {

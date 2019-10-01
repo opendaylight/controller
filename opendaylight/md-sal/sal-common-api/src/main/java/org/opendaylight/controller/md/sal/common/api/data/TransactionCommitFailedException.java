@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.common.api.TransactionCommitFailedException} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class TransactionCommitFailedException extends OperationFailedException {
 
     private static final long serialVersionUID = 1L;

@@ -32,7 +32,7 @@ import java.util.function.Function;
  * @param <V> The result type returned by this Future's get method
  * @param <X> The checked exception type
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class MappingCheckedFuture<V, X extends Exception> extends AbstractCheckedFuture<V, X> {
     private final Function<Exception, X> mapper;
 

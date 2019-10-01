@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface ClusteredDataTreeChangeListener<T extends DataObject> extends DataTreeChangeListener<T> {
 
 }

@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * counts as an outstanding transaction and the user may not allocate multiple
  * read-only transactions at the same time.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class PingPongTransactionChain implements DOMTransactionChain {
     private static final Logger LOG = LoggerFactory.getLogger(PingPongTransactionChain.class);
     private final TransactionChainListener listener;

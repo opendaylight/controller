@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use org.opendaylight.mdsal.binding.spi.ForwardingReadTransaction instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class ForwardingReadOnlyTransaction extends ForwardingObject implements ReadOnlyTransaction {
 
     private final ReadOnlyTransaction delegate;

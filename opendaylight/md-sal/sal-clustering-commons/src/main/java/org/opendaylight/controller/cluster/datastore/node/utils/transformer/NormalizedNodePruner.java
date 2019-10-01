@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  *
  * @deprecated Use {@link AbstractNormalizedNodePruner} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class NormalizedNodePruner extends AbstractNormalizedNodePruner {
     public static final URI BASE_NAMESPACE = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
 

@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.binding.Action;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class ControllerActionProviderServiceAdapter implements ActionProviderService {
     private static final class Builder extends BindingDOMAdapterBuilder<ActionProviderService> {
         @Override
