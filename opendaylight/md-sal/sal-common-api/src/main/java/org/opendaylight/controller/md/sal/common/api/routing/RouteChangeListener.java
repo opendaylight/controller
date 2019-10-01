@@ -18,7 +18,7 @@ import java.util.EventListener;
  * @param <C> Type, which is used to represent Routing context.
  * @param <P> Type of data tree path, which is used to identify route.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface RouteChangeListener<C, P> extends EventListener {
 
     /**

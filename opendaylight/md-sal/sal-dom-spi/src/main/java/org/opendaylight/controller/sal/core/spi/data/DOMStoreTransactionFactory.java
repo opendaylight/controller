@@ -25,7 +25,7 @@ package org.opendaylight.controller.sal.core.spi.data;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStoreTransactionFactory {
 
     /**

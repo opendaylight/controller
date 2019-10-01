@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMDataTreeChangeServiceAdapter extends ForwardingObject
         implements org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService {
 

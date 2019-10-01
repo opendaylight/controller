@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMTransactionChain} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMTransactionChain extends TransactionChain<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
     @Override

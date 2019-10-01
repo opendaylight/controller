@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class BindingDOMTransactionChainAdapter implements BindingTransactionChain, Delegator<DOMTransactionChain> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BindingDOMTransactionChainAdapter.class);

@@ -22,7 +22,7 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
  * We never leak this class to the user and have it implement the {@link FutureCallback}
  * interface so we have a simple way of propagating the result.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 final class PingPongTransaction implements FutureCallback<CommitInfo> {
     private final DOMDataReadWriteTransaction delegate;
     private final SettableFuture<CommitInfo> future;

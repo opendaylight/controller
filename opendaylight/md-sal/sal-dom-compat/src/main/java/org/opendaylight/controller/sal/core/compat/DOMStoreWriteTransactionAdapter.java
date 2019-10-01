@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMStoreWriteTransactionAdapter extends ForwardingObject implements DOMStoreWriteTransaction {
     private final org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction delegate;
 

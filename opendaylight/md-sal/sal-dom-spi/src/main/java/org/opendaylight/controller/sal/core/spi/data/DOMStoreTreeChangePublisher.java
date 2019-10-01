@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStoreTreeChangePublisher {
     /**
      * Registers a {@link DOMDataTreeChangeListener} to receive

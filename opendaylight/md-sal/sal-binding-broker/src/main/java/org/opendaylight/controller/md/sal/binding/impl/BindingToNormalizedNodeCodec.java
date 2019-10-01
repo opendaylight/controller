@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS", justification = "Migration path")
 public class BindingToNormalizedNodeCodec
         extends org.opendaylight.mdsal.binding.dom.adapter.BindingToNormalizedNodeCodec {

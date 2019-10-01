@@ -25,7 +25,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionChain, DOMTransactionChainListener {
     private final Map<Object, AsyncTransaction<?, ?>> transactionMap = new HashMap<>();
     private final org.opendaylight.mdsal.dom.api.DOMTransactionChain txChainDelegate;

@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Abstract Base Transaction for transactions which are backed by {@link DOMDataWriteTransaction}.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         AbstractForwardedTransaction<T> {
 

@@ -32,7 +32,7 @@ import org.opendaylight.controller.md.sal.binding.api.BindingService;
  *
  * @deprecated Use {@link BindingService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface BindingAwareService {
 
 }

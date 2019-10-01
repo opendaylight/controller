@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMRpcImplementationNotAvailableException extends DOMRpcException {
     private static final long serialVersionUID = 1L;
 

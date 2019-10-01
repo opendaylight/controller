@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @author Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @SuppressWarnings("checkstyle:ClassTypeParameterName")
 public abstract class AbstractDOMRpcResultFutureAdapter<T extends DOMRpcResult, F extends DOMRpcResult,
         D extends ListenableFuture<F>, E extends DOMRpcException> extends AbstractFuture<T> {

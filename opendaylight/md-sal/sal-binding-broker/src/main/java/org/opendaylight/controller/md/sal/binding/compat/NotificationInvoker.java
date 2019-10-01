@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.common.QName;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class NotificationInvoker
         implements org.opendaylight.controller.sal.binding.api.NotificationListener<Notification> {
 

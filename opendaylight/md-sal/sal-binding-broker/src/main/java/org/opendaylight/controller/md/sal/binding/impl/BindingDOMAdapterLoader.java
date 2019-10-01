@@ -22,7 +22,7 @@ import org.opendaylight.controller.md.sal.binding.spi.AdapterLoader;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class BindingDOMAdapterLoader extends AdapterLoader<BindingService, DOMService> {
     private static final Map<Class<?>, BindingDOMAdapterBuilder.Factory<?>> FACTORIES =
         ImmutableMap.<Class<?>, BindingDOMAdapterBuilder.Factory<?>>builder()

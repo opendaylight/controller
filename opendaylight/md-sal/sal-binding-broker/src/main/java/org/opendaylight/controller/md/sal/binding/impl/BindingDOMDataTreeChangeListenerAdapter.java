@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * to their Binding equivalent.
  *
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implements DOMDataTreeChangeListener {
     private final BindingToNormalizedNodeCodec codec;
     private final DataTreeChangeListener<T> listener;

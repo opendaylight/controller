@@ -99,7 +99,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class TracingBroker implements TracingDOMDataBroker {
     @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     static final Logger LOG = LoggerFactory.getLogger(TracingBroker.class);

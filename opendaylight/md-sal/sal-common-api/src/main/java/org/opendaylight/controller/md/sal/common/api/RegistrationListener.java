@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.common.api;
 import java.util.EventListener;
 import org.opendaylight.yangtools.concepts.Registration;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface RegistrationListener<T extends Registration> extends EventListener {
 
     void onRegister(T registration);
