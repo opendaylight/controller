@@ -35,7 +35,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  * Besides this the DataBrokerImpl and it's collaborators also cache data that
  * is already transformed from the binding independent to binding aware format
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker
         implements DataBroker, DataTreeChangeService {
     static final Factory<DataBroker> BUILDER_FACTORY = Builder::new;

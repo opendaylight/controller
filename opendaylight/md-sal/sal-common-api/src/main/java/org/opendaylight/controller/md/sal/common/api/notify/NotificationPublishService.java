@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
  *
  * @param <N> the type of notifications
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface NotificationPublishService<N> {
 
     /**

@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMRpcService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMRpcService extends ForwardingObject implements DOMRpcService {
     @Override
     protected abstract @NonNull DOMRpcService delegate();

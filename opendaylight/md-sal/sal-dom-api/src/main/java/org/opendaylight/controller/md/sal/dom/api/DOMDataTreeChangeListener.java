@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMDataTreeChangeListener extends EventListener {
     /**
      * Invoked when there was data change for the supplied path, which was used

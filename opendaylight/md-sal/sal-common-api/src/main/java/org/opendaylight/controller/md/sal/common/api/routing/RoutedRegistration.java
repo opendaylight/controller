@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.concepts.Registration;
  * @param <P> the path identifier type
  * @param <S> the RPC implementation type
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface RoutedRegistration<C, P extends Path<P>, S> extends Registration {
 
     /**

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * @param <T> identifier type
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadWriteTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedWriteTransaction<T>
         implements DOMStoreReadWriteTransaction {

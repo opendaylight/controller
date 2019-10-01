@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransactionFactory<DOMStore>
        implements DOMDataBroker {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMDataBroker.class);

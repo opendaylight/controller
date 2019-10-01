@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
  * @param <T> type of listener
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractDOMDataTreeChangeListenerRegistration<T extends DOMDataTreeChangeListener>
         extends AbstractListenerRegistration<T> {
     protected AbstractDOMDataTreeChangeListenerRegistration(final T listener) {

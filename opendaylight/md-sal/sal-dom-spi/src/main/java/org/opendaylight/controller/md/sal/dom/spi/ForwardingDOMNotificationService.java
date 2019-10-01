@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMNotificationService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMNotificationService extends ForwardingObject implements DOMNotificationService {
     @Override
     protected abstract DOMNotificationService delegate();

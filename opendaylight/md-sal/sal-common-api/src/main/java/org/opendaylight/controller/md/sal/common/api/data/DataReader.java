@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * @param <D> Data Type
  * @deprecated Replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore contract.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DataReader<P extends Path<P>, D> {
 
     /**

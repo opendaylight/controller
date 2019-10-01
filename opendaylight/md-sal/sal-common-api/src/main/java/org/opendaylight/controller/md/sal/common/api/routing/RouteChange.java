@@ -17,7 +17,7 @@ import java.util.Set;
  * @param <C> Type, which is used to represent Routing context.
  * @param <P> Type of data tree path, which is used to identify route.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface RouteChange<C, P> {
 
     /**

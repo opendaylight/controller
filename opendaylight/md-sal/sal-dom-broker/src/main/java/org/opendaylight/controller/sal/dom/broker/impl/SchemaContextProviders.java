@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class SchemaContextProviders {
 
     private SchemaContextProviders() {

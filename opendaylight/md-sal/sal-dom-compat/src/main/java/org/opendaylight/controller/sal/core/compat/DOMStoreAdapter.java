@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class DOMStoreAdapter<T extends org.opendaylight.mdsal.dom.spi.store.DOMStore
         & org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher> extends ForwardingObject
         implements DOMStore, DOMStoreTreeChangePublisher {

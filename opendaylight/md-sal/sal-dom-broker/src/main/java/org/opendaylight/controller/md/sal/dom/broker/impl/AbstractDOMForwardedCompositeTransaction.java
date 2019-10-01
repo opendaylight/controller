@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @param <T>
  *            Subtransaction type
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTransaction> implements
         AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 

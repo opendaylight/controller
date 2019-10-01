@@ -14,7 +14,7 @@ import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
  * Adapter between the legacy controller API-based DOMDataBroker and the mdsal API-based DOMDataBroker, equivalent
  * to PingPongDOMDataBroker.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class LegacyPingPongDOMDataBrokerAdapter extends AbstractLegacyDOMDataBrokerAdapter {
     public LegacyPingPongDOMDataBrokerAdapter(final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
         super(delegate);

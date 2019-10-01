@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * @param <T> the interested notification type
  * @deprecated Deprecated unused API.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface NotificationListener<T extends Notification> extends EventListener {
     /**
      * Invoked to deliver a notification.
