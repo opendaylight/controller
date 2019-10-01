@@ -256,7 +256,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.RpcProviderService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface RpcProviderRegistry extends RpcConsumerRegistry,
         RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {
     /**

@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
  *
  * @deprecated Please use {@link org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class InMemoryDOMDataStore
         extends DOMStoreAdapter<org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore>
         implements Identifiable<String>, SchemaContextListener, AutoCloseable {

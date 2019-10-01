@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  *
  * @deprecated Please use {@link org.opendaylight.mdsal.binding.api.NotificationPublishService}.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {
 
     @Override

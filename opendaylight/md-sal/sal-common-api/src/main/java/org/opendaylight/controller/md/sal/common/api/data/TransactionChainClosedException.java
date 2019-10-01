@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
 /**
  * Exception thrown when an attempt is made to open a new transaction in a closed chain.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class TransactionChainClosedException extends IllegalStateException {
     private static final long serialVersionUID = 1L;
 

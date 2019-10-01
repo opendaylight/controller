@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class BindingDataTreeChangeListenerRegistration<L extends DataTreeChangeListener<?>>
         extends AbstractListenerRegistration<L> {
 

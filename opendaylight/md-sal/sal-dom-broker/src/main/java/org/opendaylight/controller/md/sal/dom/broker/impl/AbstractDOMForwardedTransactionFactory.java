@@ -45,7 +45,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @param <T>
  *            Type of {@link DOMStoreTransactionFactory} factory.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransactionFactory> implements AutoCloseable {
     @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractDOMForwardedTransactionFactory> UPDATER =

@@ -15,7 +15,7 @@ import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
  *
  * @author Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class LegacyDOMDataBrokerAdapter extends AbstractLegacyDOMDataBrokerAdapter {
     public LegacyDOMDataBrokerAdapter(final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
         super(delegate);

@@ -15,7 +15,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.AbstractCloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionChain> implements DOMTransactionChain {
 
     private final DOMTransactionChain delegate;

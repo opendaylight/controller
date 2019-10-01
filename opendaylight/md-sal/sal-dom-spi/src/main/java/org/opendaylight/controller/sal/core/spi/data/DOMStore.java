@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStore} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStore extends DOMStoreTransactionFactory {
     /**
      * Creates new transaction chain.

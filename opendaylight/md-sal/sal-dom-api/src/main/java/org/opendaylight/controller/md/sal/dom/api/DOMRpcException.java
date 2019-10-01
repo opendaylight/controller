@@ -15,7 +15,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcException} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS", justification = "Migration")
 public abstract class DOMRpcException extends org.opendaylight.mdsal.dom.api.DOMRpcException {
     private static final long serialVersionUID = 1L;

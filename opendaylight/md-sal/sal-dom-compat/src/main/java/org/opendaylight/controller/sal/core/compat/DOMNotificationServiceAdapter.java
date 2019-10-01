@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMNotificationServiceAdapter extends ForwardingObject
         implements org.opendaylight.mdsal.dom.api.DOMNotificationService {
 

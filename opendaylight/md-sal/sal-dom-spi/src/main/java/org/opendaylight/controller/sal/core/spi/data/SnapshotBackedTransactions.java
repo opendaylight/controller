@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public final class SnapshotBackedTransactions {
     private SnapshotBackedTransactions() {

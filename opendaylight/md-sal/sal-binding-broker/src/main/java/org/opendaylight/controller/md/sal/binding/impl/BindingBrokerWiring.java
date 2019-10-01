@@ -39,7 +39,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
  *
  * @author Michael Vorburger.ch, partially based on refactored code originally by Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class BindingBrokerWiring implements AutoCloseable {
 
     private final BindingToNormalizedNodeCodec bindingToNormalizedNodeCodec;
