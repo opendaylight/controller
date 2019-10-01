@@ -17,7 +17,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStoreThreePhaseCommitCohort {
 
     /**

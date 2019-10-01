@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class BindingDOMNotificationServiceAdapter implements NotificationService, AutoCloseable {
 
     public static final Factory<NotificationService> BUILDER_FACTORY = Builder::new;

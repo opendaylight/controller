@@ -35,7 +35,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcProviderService, SchemaContextListener {
     // This mapping is used to translate mdsal DOMRpcImplementations to their corresponding legacy
     // DOMRpcImplementations registered thru this interface when invoking a DOMRpcAvailabilityListener.

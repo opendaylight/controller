@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class BindingMountPointAdapter implements MountPoint {
 
     private final InstanceIdentifier<?> identifier;

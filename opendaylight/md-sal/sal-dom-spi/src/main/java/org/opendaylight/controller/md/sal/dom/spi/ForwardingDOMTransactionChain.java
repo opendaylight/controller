@@ -20,7 +20,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMTransactionChain} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMTransactionChain extends ForwardingObject implements DOMTransactionChain {
     @Override
     protected abstract @NonNull DOMTransactionChain delegate();

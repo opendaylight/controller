@@ -22,7 +22,7 @@ import org.ops4j.pax.exam.util.PathUtils;
  *
  * @deprecated Use config-it and/or mdsal-it instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class TestHelper {
 
     public static final String CONTROLLER = "org.opendaylight.controller";

@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * Each registered {@link DataTreeChangeListener} is wrapped using
  * adapter and registered directly to DOM service.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeService {
 
     private final BindingToNormalizedNodeCodec codec;

@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @author Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class ReadFailedExceptionAdapter extends ExceptionMapper<ReadFailedException> {
     public static final ReadFailedExceptionAdapter INSTANCE = new ReadFailedExceptionAdapter();
 

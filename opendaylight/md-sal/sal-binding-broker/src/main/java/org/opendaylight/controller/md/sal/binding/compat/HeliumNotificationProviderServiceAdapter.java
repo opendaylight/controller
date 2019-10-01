@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class HeliumNotificationProviderServiceAdapter extends HeliumNotificationServiceAdapter
         implements NotificationProviderService {
     private static final Logger LOG = LoggerFactory.getLogger(HeliumNotificationProviderServiceAdapter.class);

@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.ReadTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface ReadOnlyTransaction extends ReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>,
         DataObject> {
 }

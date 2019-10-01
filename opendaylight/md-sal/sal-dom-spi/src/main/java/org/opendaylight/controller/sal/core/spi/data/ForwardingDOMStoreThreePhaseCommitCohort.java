@@ -17,7 +17,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.ForwardingDOMStoreThreePhaseCommitCohort} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public abstract class ForwardingDOMStoreThreePhaseCommitCohort extends ForwardingObject
         implements DOMStoreThreePhaseCommitCohort {

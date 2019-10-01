@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class RpcAvailabilityListenerAdapter<T extends DOMRpcAvailabilityListener> extends ForwardingObject
         implements org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener {
     private final @NonNull T delegate;

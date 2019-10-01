@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.binding.api.BindingService;
 import org.opendaylight.controller.md.sal.binding.spi.AdapterBuilder;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class BindingDOMAdapterBuilder<T extends BindingService> extends AdapterBuilder<T, DOMService> {
 
     interface Factory<T extends BindingService> {

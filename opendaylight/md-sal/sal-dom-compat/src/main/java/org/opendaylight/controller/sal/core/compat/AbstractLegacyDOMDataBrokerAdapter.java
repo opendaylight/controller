@@ -63,7 +63,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  *
  * @author Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractLegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMDataBroker {
     private static final ExceptionMapper<TransactionCommitFailedException> COMMIT_EX_MAPPER =
             new ExceptionMapper<TransactionCommitFailedException>("commit", TransactionCommitFailedException.class) {

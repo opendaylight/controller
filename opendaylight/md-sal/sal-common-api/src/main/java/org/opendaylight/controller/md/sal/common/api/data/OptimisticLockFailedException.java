@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 *
  * @deprecated Use {@link org.opendaylight.mdsal.common.api.OptimisticLockFailedException} instead.
 */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class OptimisticLockFailedException extends TransactionCommitFailedException {
 
     private static final long serialVersionUID = 1L;
