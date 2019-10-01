@@ -35,7 +35,7 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter;
  * and {@link ShardedDOMDataBrokerDelegatingReadTransaction} respectively.
  */
 // FIXME try to refactor some of the implementation to abstract class for better reusability
-@Deprecated
+@Deprecated(forRemoval = true)
 public class LegacyShardedDOMDataBrokerAdapter implements DOMDataBroker {
 
     private final org.opendaylight.mdsal.dom.api.DOMDataBroker delegateDataBroker;

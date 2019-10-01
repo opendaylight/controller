@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * return all relevant data, we cannot guarantee it neither. Best effort is to
  * return all data we get from first initial data change event received.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 class ShardedDOMDataBrokerDelegatingReadTransaction implements DOMDataReadOnlyTransaction {
     private final DOMDataTreeReadTransaction delegateTx;
     private final Object txIdentifier;

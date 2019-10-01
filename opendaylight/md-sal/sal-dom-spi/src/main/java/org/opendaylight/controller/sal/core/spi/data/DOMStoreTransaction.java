@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * @see DOMStoreReadWriteTransaction
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStoreTransaction extends AutoCloseable, Identifiable<Object> {
     /**
      * Unique identifier of the transaction.

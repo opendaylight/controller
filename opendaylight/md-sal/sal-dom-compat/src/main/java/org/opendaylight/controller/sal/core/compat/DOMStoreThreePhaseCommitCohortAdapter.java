@@ -13,7 +13,7 @@ import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMStoreThreePhaseCommitCohortAdapter extends ForwardingObject implements DOMStoreThreePhaseCommitCohort {
     private final org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort delegate;
 

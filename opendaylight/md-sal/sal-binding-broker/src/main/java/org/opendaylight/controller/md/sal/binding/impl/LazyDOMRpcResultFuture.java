@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class LazyDOMRpcResultFuture implements CheckedFuture<DOMRpcResult, DOMRpcException>, BindingRpcFutureAware {
 
     private final ListenableFuture<RpcResult<?>> bindingFuture;

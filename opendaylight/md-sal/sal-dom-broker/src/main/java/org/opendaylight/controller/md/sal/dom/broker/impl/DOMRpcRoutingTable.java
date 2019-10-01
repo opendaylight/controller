@@ -38,7 +38,7 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class DOMRpcRoutingTable {
 
     static final DOMRpcRoutingTable EMPTY = new DOMRpcRoutingTable(ImmutableMap.of(), null);

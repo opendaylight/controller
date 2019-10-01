@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * guarantee transaction ordering between transactions allocated directly from the broker
  * and its transaction chains.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class PingPongDataBroker extends ForwardingDOMDataBroker implements AutoCloseable,
         DOMDataTreeChangeService {
     private final DOMDataBroker delegate;

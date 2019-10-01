@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.WriteTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface WriteTransaction extends AsyncWriteTransaction<InstanceIdentifier<?>, DataObject> {
     /**
      * Stores a piece of data at the specified path. This acts as an add / replace operation, which is to say that whole

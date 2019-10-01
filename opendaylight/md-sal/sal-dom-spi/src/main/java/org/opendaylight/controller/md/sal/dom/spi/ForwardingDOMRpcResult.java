@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMRpcResult} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMRpcResult extends ForwardingObject implements DOMRpcResult {
     @Override
     protected abstract @NonNull DOMRpcResult delegate();

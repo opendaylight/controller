@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractBindingSalConsumerInstance<N extends NotificationService, R extends RpcConsumerRegistry>
         implements RpcConsumerRegistry, NotificationService {
 

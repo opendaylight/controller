@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeIdentifier} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class DataTreeIdentifier<T extends DataObject> implements Immutable,
         Path<DataTreeIdentifier<?>>, Serializable {
     private static final long serialVersionUID = 1L;

@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataObjectModification} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DataObjectModification<T extends DataObject>
         extends org.opendaylight.yangtools.concepts.Identifiable<PathArgument> {
 

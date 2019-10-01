@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class LegacyDOMRpcServiceAdapter extends ForwardingObject implements DOMRpcService {
     private final org.opendaylight.mdsal.dom.api.DOMRpcService delegate;
 

@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class AbstractDOMRpcRoutingTableEntry {
     private final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> implementations;
     private final SchemaPath schemaPath;

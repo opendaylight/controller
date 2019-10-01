@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * looked up in the delegate first. If a lookup is unsuccessful, this class attempts to transparently proxy well-known
  * Controller DOMServices on top of their MD-SAL counterparts available from delegate.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMMountPointAdapter extends ForwardingObject implements DOMMountPoint {
     private abstract static class CompatFactory<M extends org.opendaylight.mdsal.dom.api.DOMService,
             C extends DOMService> {

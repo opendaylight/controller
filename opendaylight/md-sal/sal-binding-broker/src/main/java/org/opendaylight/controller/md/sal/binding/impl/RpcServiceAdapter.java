@@ -46,7 +46,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class RpcServiceAdapter implements InvocationHandler {
 
     private final ImmutableMap<Method, RpcInvocationStrategy> rpcNames;

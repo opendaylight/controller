@@ -16,7 +16,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigProperties} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class InMemoryDOMDataStoreConfigProperties {
 
     public static final int DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE = 1000;

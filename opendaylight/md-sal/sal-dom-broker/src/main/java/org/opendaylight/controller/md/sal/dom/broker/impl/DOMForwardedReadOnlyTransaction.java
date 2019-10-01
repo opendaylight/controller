@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * {@link LogicalDatastoreType} type parameter in
  * {@link #read(LogicalDatastoreType, YangInstanceIdentifier)}.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 class DOMForwardedReadOnlyTransaction extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, DOMStoreReadTransaction> implements
         DOMDataReadOnlyTransaction {
