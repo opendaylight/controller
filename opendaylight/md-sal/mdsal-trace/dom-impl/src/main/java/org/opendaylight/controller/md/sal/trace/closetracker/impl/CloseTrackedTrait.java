@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Michael Vorburger.ch
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracked<T> {
 
     // NB: It's important that we keep a Throwable here, and not directly the StackTraceElement[] !

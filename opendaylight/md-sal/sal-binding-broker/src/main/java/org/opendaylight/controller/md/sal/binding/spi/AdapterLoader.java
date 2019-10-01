@@ -13,7 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AdapterLoader<T, D> extends CacheLoader<Class<? extends T>, Optional<T>> {
 
     @Override

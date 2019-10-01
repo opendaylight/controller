@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Michael Vorburger.ch
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractCloseTracked<T extends AbstractCloseTracked<T>> implements CloseTracked<T> {
 
     private final CloseTrackedTrait<T> closeTracker;

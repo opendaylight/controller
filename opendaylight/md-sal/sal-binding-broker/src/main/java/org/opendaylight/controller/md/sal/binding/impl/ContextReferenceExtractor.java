@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class ContextReferenceExtractor {
     private static final Logger LOG = LoggerFactory.getLogger(ContextReferenceExtractor.class);
     private static final ContextReferenceExtractor NULL_EXTRACTOR = new ContextReferenceExtractor() {

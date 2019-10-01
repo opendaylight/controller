@@ -18,7 +18,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractBrokerAwareActivator implements BundleActivator {
     private final class Customizer implements ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker> {
         private final BundleContext context;

@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  *
  * @author Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class LegacyDOMRpcResultFutureAdapter extends AbstractDOMRpcResultFutureAdapter<DOMRpcResult,
         org.opendaylight.mdsal.dom.api.DOMRpcResult, ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult>,
         DOMRpcException> implements CheckedFuture<DOMRpcResult, DOMRpcException> {

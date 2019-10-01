@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class BindingDOMMountPointServiceAdapter implements MountPointService {
     private static final Logger LOG = LoggerFactory.getLogger(BindingDOMMountPointServiceAdapter.class);
 

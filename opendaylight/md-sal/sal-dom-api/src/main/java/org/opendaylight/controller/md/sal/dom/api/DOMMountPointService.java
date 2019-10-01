@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMMountPointService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMMountPointService extends DOMService {
 
     Optional<DOMMountPoint> getMountPoint(YangInstanceIdentifier path);

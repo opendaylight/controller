@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMStoreTransactionChainAdapter extends ForwardingObject implements DOMStoreTransactionChain {
     private final org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain delegate;
 

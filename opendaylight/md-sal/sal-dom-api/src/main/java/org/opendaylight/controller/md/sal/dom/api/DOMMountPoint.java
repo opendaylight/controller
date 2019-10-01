@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMMountPoint extends Identifiable<YangInstanceIdentifier> {
 
     <T extends DOMService> Optional<T> getService(Class<T> cls);

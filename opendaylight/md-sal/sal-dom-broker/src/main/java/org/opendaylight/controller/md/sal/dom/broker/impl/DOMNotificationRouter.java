@@ -38,7 +38,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * {@link #offerNotification(DOMNotification, long, TimeUnit)}
  * is realized by arming a background wakeup interrupt.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "Void is the only allowed value")
 public final class DOMNotificationRouter extends LegacyDOMNotificationServiceAdapter implements AutoCloseable,
         DOMNotificationPublishService, DOMNotificationSubscriptionListenerRegistry {

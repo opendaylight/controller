@@ -33,7 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @author Thomas Pantelis
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class LegacyDOMStoreAdapter extends ForwardingObject implements DOMStore, AutoCloseable {
     private final DistributedDataStoreInterface delegate;
 

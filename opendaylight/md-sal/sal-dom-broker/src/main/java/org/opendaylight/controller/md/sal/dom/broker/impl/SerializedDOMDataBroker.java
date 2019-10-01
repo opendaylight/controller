@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This executor does not have an upper bound on subtask timeout.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
     private static final Logger LOG = LoggerFactory.getLogger(SerializedDOMDataBroker.class);
     private final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();

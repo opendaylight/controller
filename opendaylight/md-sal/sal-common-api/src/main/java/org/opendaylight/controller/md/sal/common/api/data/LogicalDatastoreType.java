@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 @NonNullByDefault
 public enum LogicalDatastoreType {
     /**
