@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataBroker} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DataBroker extends  AsyncDataBroker<InstanceIdentifier<?>, DataObject>,
         TransactionChainFactory<InstanceIdentifier<?>, DataObject>, TransactionFactory, BindingService,
         DataTreeChangeService {

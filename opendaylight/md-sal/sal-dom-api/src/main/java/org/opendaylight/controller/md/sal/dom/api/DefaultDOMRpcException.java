@@ -13,7 +13,7 @@ package org.opendaylight.controller.md.sal.dom.api;
  * @author Thomas Pantelis
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DefaultDOMRpcException} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DefaultDOMRpcException extends DOMRpcException {
     private static final long serialVersionUID = 1L;
 

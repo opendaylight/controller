@@ -11,7 +11,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class RpcContextIdentifier implements Immutable {
 
     public final Class<? extends RpcService> rpcService;

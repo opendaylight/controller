@@ -12,7 +12,7 @@ package org.opendaylight.controller.sal.core.spi.data;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMStoreReadWriteTransaction extends DOMStoreReadTransaction, DOMStoreWriteTransaction {
 
 }

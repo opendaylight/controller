@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * @deprecated This class provides compatibility between XML semantics
  *     and {@link org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree}
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DataNormalizer {
 
     private final DataNormalizationOperation<?> operation;

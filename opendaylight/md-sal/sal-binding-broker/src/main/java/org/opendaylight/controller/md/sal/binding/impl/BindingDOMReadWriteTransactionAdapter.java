@@ -16,7 +16,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class BindingDOMReadWriteTransactionAdapter extends
         BindingDOMWriteTransactionAdapter<DOMDataReadWriteTransaction> implements ReadWriteTransaction {
 

@@ -31,7 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcProviderService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMRpcProviderService extends DOMService {
     /**
      * Register an {@link DOMRpcImplementation} object with this service.

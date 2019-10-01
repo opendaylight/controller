@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
  *
  * @author Michael Vorburger.ch
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class CloseTrackedRegistry<T extends CloseTracked<T>> {
 
     private final Object anchor;

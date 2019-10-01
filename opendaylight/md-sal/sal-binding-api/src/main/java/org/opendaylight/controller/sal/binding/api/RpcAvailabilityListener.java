@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface RpcAvailabilityListener {
 
 }

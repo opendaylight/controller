@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreFactory} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class InMemoryDOMDataStoreFactory {
 
     private InMemoryDOMDataStoreFactory() {

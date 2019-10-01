@@ -62,7 +62,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * @param <D>
  *            Type of data (payload), which represents data payload
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
 
     /**

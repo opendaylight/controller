@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
  * Convenience abstract base class for {@link DOMRpcProviderService} implementations.
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.AbstractDOMRpcProviderService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractDOMRpcProviderService implements DOMRpcProviderService {
     @Override
     public final <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(

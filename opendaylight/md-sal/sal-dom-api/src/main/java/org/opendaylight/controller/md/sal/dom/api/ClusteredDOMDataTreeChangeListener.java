@@ -19,7 +19,7 @@ package org.opendaylight.controller.md.sal.dom.api;
  * @author Thomas Pantelis
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface ClusteredDOMDataTreeChangeListener extends DOMDataTreeChangeListener {
 
 }

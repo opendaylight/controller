@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMNotificationPublishService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMNotificationPublishService extends DOMService {
     /**
      * Well-known value indicating that the implementation is currently not

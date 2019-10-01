@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntry {
     private static final Logger LOG = LoggerFactory.getLogger(RoutedDOMRpcRoutingTableEntry.class);
     private final DOMRpcIdentifier globalRpcId;

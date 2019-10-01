@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 // FIXME: Should be this moved to binding-data-codec?
-@Deprecated
+@Deprecated(forRemoval = true)
 class LazySerializedContainerNode implements ContainerNode, BindingDataAware {
 
     private final NodeIdentifier identifier;

@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  *
  * @deprecated Use org.opendaylight.mdsal.binding.spi.ForwardingDataBroker instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDataBroker extends ForwardingObject implements DataBroker {
 
     @Override

@@ -14,7 +14,7 @@ import com.google.common.collect.MutableClassToInstanceMap;
 import java.util.Set;
 import org.opendaylight.yangtools.concepts.Builder;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AdapterBuilder<T,D> implements Builder<T> {
 
     private final ClassToInstanceMap<D> delegates = MutableClassToInstanceMap.create();

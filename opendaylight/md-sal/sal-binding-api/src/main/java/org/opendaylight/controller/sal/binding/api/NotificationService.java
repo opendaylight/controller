@@ -101,7 +101,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  *
  * @deprecated Please use {@link org.opendaylight.mdsal.binding.api.NotificationService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface NotificationService extends BindingAwareService {
     /**
      * Registers a generic listener implementation for a specified notification type.

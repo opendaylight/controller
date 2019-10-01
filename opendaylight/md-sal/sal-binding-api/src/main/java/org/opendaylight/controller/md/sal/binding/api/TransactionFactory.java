@@ -11,7 +11,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataTransactionFa
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface TransactionFactory extends AsyncDataTransactionFactory<InstanceIdentifier<?>, DataObject> {
     @Override
     ReadOnlyTransaction newReadOnlyTransaction();
