@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMDataWriteTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMDataWriteTransaction extends ForwardingObject implements DOMDataWriteTransaction {
     @Override
     protected abstract @NonNull DOMDataWriteTransaction delegate();

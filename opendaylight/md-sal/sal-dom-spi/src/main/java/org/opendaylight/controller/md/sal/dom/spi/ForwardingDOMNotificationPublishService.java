@@ -19,7 +19,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMNotificationPublishService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMNotificationPublishService extends ForwardingObject
         implements DOMNotificationPublishService {
     @Override

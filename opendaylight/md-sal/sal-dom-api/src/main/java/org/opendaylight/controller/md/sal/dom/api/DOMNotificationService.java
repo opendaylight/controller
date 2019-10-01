@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMNotificationService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMNotificationService extends DOMService {
     /**
      * Register a {@link DOMNotificationListener} to receive a set of notifications. As with

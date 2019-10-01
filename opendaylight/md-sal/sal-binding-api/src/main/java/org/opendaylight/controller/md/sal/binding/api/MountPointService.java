@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.MountPointService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface MountPointService extends BindingService {
 
     Optional<MountPoint> getMountPoint(InstanceIdentifier<?> mountPoint);

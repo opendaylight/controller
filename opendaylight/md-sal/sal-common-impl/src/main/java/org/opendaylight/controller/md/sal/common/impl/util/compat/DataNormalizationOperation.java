@@ -47,7 +47,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.util.EffectiveAugmentationSchema;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
     private final T identifier;

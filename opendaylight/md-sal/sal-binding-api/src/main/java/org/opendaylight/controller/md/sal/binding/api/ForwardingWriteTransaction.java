@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use org.opendaylight.mdsal.binding.spi.ForwardingWriteTransaction instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class ForwardingWriteTransaction extends ForwardingObject implements WriteTransaction {
 
     private final WriteTransaction delegate;

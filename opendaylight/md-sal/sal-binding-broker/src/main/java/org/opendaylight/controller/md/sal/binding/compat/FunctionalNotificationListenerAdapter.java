@@ -14,7 +14,7 @@ import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class FunctionalNotificationListenerAdapter<N extends Notification> implements DOMNotificationListener {
 
     private final BindingNormalizedNodeSerializer codec;

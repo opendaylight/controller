@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  *
  * @param <T> Notification type
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class AbstractNotificationListenerRegistration<T extends Notification>
         extends AbstractListenerRegistration<NotificationListener<T>> implements NotificationListenerRegistration<T> {
     private final Class<? extends Notification> type;

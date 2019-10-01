@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * @param <N> Notification type
  * @param <A> Aggregator type
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class AggregatedNotificationListenerRegistration<N extends Notification, A>
         extends AbstractNotificationListenerRegistration<N> {
     private final A aggregator;

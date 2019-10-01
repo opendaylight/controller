@@ -25,7 +25,7 @@ import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.PingPongMergingDOMDataBroker;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMDataBrokerAdapter extends ForwardingObject implements PingPongMergingDOMDataBroker {
     private final ClassToInstanceMap<org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension> extensions;
     private final DOMDataBroker delegate;

@@ -18,7 +18,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class SimpleDOMMountPoint implements DOMMountPoint {
 
     private final YangInstanceIdentifier identifier;

@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class DirectGetterRouteContextExtractor extends ContextReferenceExtractor {
 
     private static final Lookup PUBLIC_LOOKUP = MethodHandles.publicLookup();

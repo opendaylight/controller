@@ -18,7 +18,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DOMDataTreeWriteTransactionAdapter extends ForwardingObject
         implements DOMDataTreeWriteTransaction {
     private final DOMDataWriteTransaction delegate;

@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
     /**
      * Registers a {@link DOMDataTreeChangeListener} to receive

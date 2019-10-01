@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Utility class implementing {@link DefaultDOMRpcResult}.
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Serializable {
     private static final long serialVersionUID = 1L;

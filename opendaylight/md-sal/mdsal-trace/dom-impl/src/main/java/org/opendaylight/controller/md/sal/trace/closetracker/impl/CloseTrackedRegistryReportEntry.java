@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Michael Vorburger.ch
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class CloseTrackedRegistryReportEntry<T extends CloseTracked<T>> {
 
     private final CloseTracked<T> exampleCloseTracked;

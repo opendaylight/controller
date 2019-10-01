@@ -22,7 +22,7 @@ import org.opendaylight.mdsal.binding.dom.adapter.ActionServiceAdapter;
 import org.opendaylight.yangtools.yang.binding.Action;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 final class ControllerActionServiceAdapter implements ActionService {
     private static final class Builder extends BindingDOMAdapterBuilder<ActionService> {
         @Override

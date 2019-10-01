@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.TransactionChain} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface BindingTransactionChain extends TransactionFactory,
         TransactionChain<InstanceIdentifier<?>, DataObject> {
     @Override
