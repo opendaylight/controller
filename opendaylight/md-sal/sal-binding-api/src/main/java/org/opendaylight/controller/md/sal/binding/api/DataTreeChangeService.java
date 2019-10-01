@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataTreeChangeService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DataTreeChangeService extends BindingService {
     /**
      * Registers a {@link DataTreeChangeListener} to receive

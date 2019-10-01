@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractForwardedDataBroker.class);

@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMRpcService extends DOMService {
     /**
      * Initiate invocation of an RPC. This method is guaranteed to not block on any external

@@ -20,7 +20,7 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransaction {
 
     private final DOMDataWriteTransaction delegate;

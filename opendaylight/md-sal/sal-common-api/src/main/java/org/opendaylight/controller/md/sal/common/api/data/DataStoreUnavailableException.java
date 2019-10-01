@@ -13,7 +13,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.common.api.DataStoreUnavailableException} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class DataStoreUnavailableException extends Exception {
     private static final long serialVersionUID = 1L;
 

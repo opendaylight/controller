@@ -21,7 +21,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.ForwardingDOMRpcProviderService} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public abstract class ForwardingDOMRpcProviderService extends ForwardingObject implements DOMRpcProviderService {
     @Override
     protected abstract @NonNull DOMRpcProviderService delegate();

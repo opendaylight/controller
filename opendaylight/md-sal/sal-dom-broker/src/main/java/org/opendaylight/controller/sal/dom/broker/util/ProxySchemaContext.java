@@ -34,7 +34,7 @@ import org.opendaylight.yangtools.yang.model.api.UsesNode;
 /**
  * ProxySchema Context for SchemaContextProviders.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class ProxySchemaContext implements SchemaContext {
 
     private final SchemaContextProvider schemaProvider;

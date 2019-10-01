@@ -14,7 +14,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.binding.api.ActionProviderService} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
 public interface ActionProviderService
         extends BindingService, org.opendaylight.mdsal.binding.api.ActionProviderService {

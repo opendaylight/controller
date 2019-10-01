@@ -13,7 +13,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * A single YANG notification.
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMNotification} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
 public interface DOMNotification extends org.opendaylight.mdsal.dom.api.DOMNotification {
 }

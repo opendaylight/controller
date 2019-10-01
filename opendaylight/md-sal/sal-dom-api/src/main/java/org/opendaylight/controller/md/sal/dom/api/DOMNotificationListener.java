@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * Interface implemented by listeners interested in {@link DOMNotification}s.
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMNotificationListener} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMNotificationListener extends EventListener {
     /**
      * Invoked whenever a {@link DOMNotification} matching the subscription

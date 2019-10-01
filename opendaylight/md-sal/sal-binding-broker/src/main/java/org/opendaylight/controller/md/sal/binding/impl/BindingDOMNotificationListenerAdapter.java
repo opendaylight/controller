@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
 
     private final BindingNormalizedNodeSerializer codec;

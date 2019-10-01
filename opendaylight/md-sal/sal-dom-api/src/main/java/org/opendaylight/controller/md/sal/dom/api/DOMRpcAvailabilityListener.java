@@ -50,7 +50,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMRpcAvailabilityListener extends EventListener {
     /**
      * Method invoked whenever an RPC type becomes available.

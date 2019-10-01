@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.store.SnapshotBackedReadTransaction} instead.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Beta
 public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTransaction<T>
         implements DOMStoreReadTransaction {

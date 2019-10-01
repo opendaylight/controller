@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 class DataSchemaContainerProxy implements DataNodeContainer {
 
     private final Set<DataSchemaNode> realChildSchemas;

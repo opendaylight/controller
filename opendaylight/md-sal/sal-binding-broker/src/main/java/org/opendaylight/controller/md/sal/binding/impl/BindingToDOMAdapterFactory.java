@@ -16,7 +16,7 @@ import org.opendaylight.controller.md.sal.binding.spi.AdapterFactory;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 @Beta
-@Deprecated
+@Deprecated(forRemoval = true)
 @NonNullByDefault
 public final class BindingToDOMAdapterFactory implements AdapterFactory {
     private final BindingToNormalizedNodeCodec codec;

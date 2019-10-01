@@ -15,7 +15,7 @@ import com.google.common.annotations.Beta;
  * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMServiceExtension} instead.
  */
 @Beta
-@Deprecated
+@Deprecated(forRemoval = true)
 public interface DOMServiceExtension<T extends DOMExtensibleService<T, E>, E extends DOMServiceExtension<T, E>> {
 
 }
