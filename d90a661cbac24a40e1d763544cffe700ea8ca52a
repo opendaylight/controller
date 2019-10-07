@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "590b38b3_f1e8f7af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MergeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de247334_2d71f20c",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "427553a5_98bd3554",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b912930_97d5760a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "427553a5_98bd3554",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "b1eec76a_5c6334f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/WriteModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb6df0cc_54e63e7c",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "226a2b3b_1477b264",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
         "patchSetId": 2
@@ -67,6 +121,24 @@
       "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "568c6474_2c11c3f8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "226a2b3b_1477b264",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "8f14d8f5_0e5a0a65",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04f344c1_6d6365a0",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "741dd06c_17cd461b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "5cebda98_3362572a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "741dd06c_17cd461b",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5459afe_1e08f28d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
         "patchSetId": 2
@@ -118,6 +226,24 @@
       "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "589b7f4c_2b53677b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DataTreeCandidateInputOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-10-07T10:19:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5459afe_1e08f28d",
+      "revId": "d90a661cbac24a40e1d763544cffe700ea8ca52a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
