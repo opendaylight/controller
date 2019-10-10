@@ -286,6 +286,32 @@ module cluster-admin {
         description "Returns the current role for the requested module shard.";
     }
 
+    rpc locate-shard {
+        description "Return the transport-level information about where a shard has a home.";
+        input {
+            uses datastore-shard-id;
+        }
+
+        output {
+            choice member-node {
+                description "Location of the hypothetical cluster member node. Relationship to the input parameters
+                             and the transport protocol.";
+
+                leaf local {
+                    description "Local node is the best node to talk to when it comes from efficiency perspective
+                                 of underlying implementation. The requester of this RPC is advised to contact
+                                 any services to the specified shard via the channel on which this RPC was invoked.";
+                    type empty;
+                }
+
+                leaf leader-actor-ref {
+                    description "Actor reference to the actor which is currently acting as the leader.";
+                    type string;
+                }
+            }
+        }
+    }
+
     rpc get-prefix-shard-role {
         input {
             leaf shard-prefix {
