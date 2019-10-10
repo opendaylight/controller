@@ -38,6 +38,9 @@
     <!-- Samples -->
     <module>samples</module>
 
+    <!-- Akka/Guava converter library -->
+    <module>akka-guava-converters</module>
+
     <module>sal-akka-raft</module>
     <module>sal-akka-raft-example</module>
 
