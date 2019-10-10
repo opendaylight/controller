@@ -21,14 +21,28 @@ module cluster-admin {
         }
     }
 
-    grouping shard-operation-result {
+    grouping datastore-shard-id {
+        description "Grouping holding combined identifiers of a shard -- its name and datastore type";
+
         leaf shard-name {
+            description "The name of the shard.";
+            mandatory true;
             type string;
+            length "1..max";
+
+            error-app-tag "odl-named-shards";
+            error-message "Shard name must not be empty";
         }
 
         leaf data-store-type {
+            mandatory true;
             type data-store-type;
+            description "The type of the data store to which the shard belongs";
         }
+    }
+
+    grouping shard-operation-result {
+        uses datastore-shard-id'
 
         leaf succeeded {
             type boolean;
@@ -64,72 +78,42 @@ module cluster-admin {
 
     rpc add-shard-replica {
         input {
-            leaf shard-name {
-                mandatory true;
-                type string;
-                description "The name of the shard for which to create a replica.";
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the replica belongs";
-            }
+            uses datastore-shard-id'
         }
 
         description "Adds a replica of a shard to this node and joins it to an existing cluster. The shard must
-            already have a module configuration defined for it and there must already be a shard existing on
-            another node with a leader. This RPC first contacts peer member seed nodes searching for a shard.
-            When found, an AddServer message is sent to the shard leader and applied as described in the Raft
-            paper.";
+                     already have a module configuration defined for it and there must already be a shard existing on
+                     another node with a leader. This RPC first contacts peer member seed nodes searching for a shard.
+                     When found, an AddServer message is sent to the shard leader and applied as described in the Raft
+                     paper.";
     }
 
     rpc remove-shard-replica {
         input {
-            leaf shard-name {
-                mandatory true;
-                type string;
-                description "The name of the shard for which to remove the replica.";
-            }
+            uses datastore-shard-id'
 
             leaf member-name {
                 mandatory true;
                 type string;
                 description "The cluster member from which the shard replica should be removed";
             }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the replica belongs";
-            }
         }
 
         description "Removes an existing replica of a shard from this node via the RemoveServer mechanism as
-            described in the Raft paper.";
+                     described in the Raft paper.";
     }
 
     rpc make-leader-local {
         input {
-            leaf shard-name {
-                mandatory true;
-                type string;
-                description "The name of the shard for which to move the leader to the local node";
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the shard belongs";
-            }
+            uses datastore-shard-id'
         }
 
         description "Attempts to move the shard leader of the given module based shard to the local node.
-                The rpc returns a response after handling of the underlying MakeLeaderLocal message completes.
-                This operation fails if there is no current shard leader due to lack of network connectivity or
-                a cluster majority. In addition, if the local node is not up to date with the current leader,
-                an attempt is made to first sync the local node with the leader. If this cannot be achieved
-                within two election timeout periods the operation fails.";
+                     The rpc returns a response after handling of the underlying MakeLeaderLocal message completes.
+                     This operation fails if there is no current shard leader due to lack of network connectivity or
+                     a cluster majority. In addition, if the local node is not up to date with the current leader,
+                     an attempt is made to first sync the local node with the leader. If this cannot be achieved
+                     within two election timeout periods the operation fails.";
     }
 
     rpc add-prefix-shard-replica {
@@ -147,9 +131,9 @@ module cluster-admin {
         }
 
         description "Adds a replica of a shard to this node and joins it to an existing cluster. There must already be
-                    a shard existing on another node with a leader. This RPC first contacts peer member seed nodes
-                    searching for a shard. When found, an AddServer message is sent to the shard leader and applied as
-                    described in the Raft paper.";
+                     a shard existing on another node with a leader. This RPC first contacts peer member seed nodes
+                     searching for a shard. When found, an AddServer message is sent to the shard leader and applied as
+                     described in the Raft paper.";
     }
 
     rpc remove-prefix-shard-replica {
@@ -172,7 +156,7 @@ module cluster-admin {
         }
 
         description "Removes an existing replica of a prefix shard from this node via the RemoveServer mechanism as
-                    described in the Raft paper.";
+                     described in the Raft paper.";
     }
 
     rpc add-replicas-for-all-shards {
@@ -181,7 +165,7 @@ module cluster-admin {
         }
 
         description "Adds replicas on this node for all currently defined shards. This is equivalent to issuing
-            an add-shard-replica RPC for all shards.";
+                     an add-shard-replica RPC for all shards.";
     }
 
     rpc remove-all-shard-replicas {
@@ -198,31 +182,20 @@ module cluster-admin {
         }
 
         description "Removes replicas for all shards on this node. This is equivalent to issuing
-            a remove-shard-replica for all shards and essentially removes this node from a cluster.";
+                     a remove-shard-replica for all shards and essentially removes this node from a cluster.";
     }
 
     rpc change-member-voting-states-for-shard {
         input {
-            leaf shard-name {
-                mandatory true;
-                type string;
-                description "The name of the shard for which to change voting state.";
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the shard belongs";
-            }
-
+            uses datastore-shard-id'
             uses member-voting-states-input;
         }
 
         description "Changes the voting states, either voting or non-voting, of cluster members for a shard.
-            Non-voting members will no longer participate in leader elections and consensus but will be
-            replicated. This is useful for having a set of members serve as a backup cluster in case the
-            primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
-            and will be forwarded to the leader.";
+                     Non-voting members will no longer participate in leader elections and consensus but will be
+                     replicated. This is useful for having a set of members serve as a backup cluster in case the
+                     primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
+                     and will be forwarded to the leader.";
     }
 
     rpc change-member-voting-states-for-all-shards {
@@ -235,10 +208,10 @@ module cluster-admin {
         }
 
         description "Changes the voting states, either voting or non-voting, of cluster members for all shards.
-            Non-voting members will no longer participate in leader elections and consensus but will be
-            replicated. This is useful for having a set of members serve as a backup cluster in case the
-            primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
-            and will be forwarded to the leader.";
+                     Non-voting members will no longer participate in leader elections and consensus but will be
+                     replicated. This is useful for having a set of members serve as a backup cluster in case the
+                     primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
+                     and will be forwarded to the leader.";
     }
 
     rpc flip-member-voting-states-for-all-shards {
@@ -247,7 +220,7 @@ module cluster-admin {
         }
 
         description "Flips the voting states of all cluster members for all shards, such that if a member
-            was voting it becomes non-voting and vice versa.";
+                     was voting it becomes non-voting and vice versa.";
     }
 
     rpc backup-datastore {
@@ -263,17 +236,7 @@ module cluster-admin {
 
     rpc get-shard-role {
         input {
-            leaf shard-name {
-                mandatory true;
-                type string;
-                description "The name of the shard for which to create a replica.";
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the replica belongs";
-            }
+            uses datastore-shard-id;
         }
 
         output {
