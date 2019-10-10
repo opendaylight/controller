@@ -10,12 +10,9 @@ package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import akka.dispatch.OnComplete;
 import com.google.common.annotations.Beta;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
-import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
-import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
@@ -29,27 +26,19 @@ import scala.concurrent.Future;
  */
 @Beta
 public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchemaSource> {
-
     private static final Logger LOG = LoggerFactory.getLogger(RemoteSchemaProvider.class);
 
     private final RemoteYangTextSourceProvider remoteRepo;
     private final ExecutionContext executionContext;
 
-    private static final ExceptionMapper<SchemaSourceException> MAPPER = new ExceptionMapper<SchemaSourceException>(
-            "schemaDownload", SchemaSourceException.class) {
-        @Override
-        protected SchemaSourceException newWithCause(final String message, final Throwable throwable) {
-            return new SchemaSourceException(message, throwable);
-        }
-    };
-
-    public RemoteSchemaProvider(RemoteYangTextSourceProvider remoteRepo, ExecutionContext executionContext) {
+    public RemoteSchemaProvider(final RemoteYangTextSourceProvider remoteRepo,
+            final ExecutionContext executionContext) {
         this.remoteRepo = remoteRepo;
         this.executionContext = executionContext;
     }
 
     @Override
-    public CheckedFuture<YangTextSchemaSource, SchemaSourceException> getSource(SourceIdentifier sourceIdentifier) {
+    public ListenableFuture<YangTextSchemaSource> getSource(final SourceIdentifier sourceIdentifier) {
         LOG.trace("Getting yang schema source for {}", sourceIdentifier.getName());
 
         Future<YangTextSchemaSourceSerializationProxy> result = remoteRepo.getYangTextSchemaSource(sourceIdentifier);
@@ -57,8 +46,8 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchema
         final SettableFuture<YangTextSchemaSource> res = SettableFuture.create();
         result.onComplete(new OnComplete<YangTextSchemaSourceSerializationProxy>() {
             @Override
-            public void onComplete(Throwable throwable,
-                    YangTextSchemaSourceSerializationProxy yangTextSchemaSourceSerializationProxy) {
+            public void onComplete(final Throwable throwable,
+                    final YangTextSchemaSourceSerializationProxy yangTextSchemaSourceSerializationProxy) {
                 if (yangTextSchemaSourceSerializationProxy != null) {
                     res.set(yangTextSchemaSourceSerializationProxy.getRepresentation());
                 }
@@ -66,9 +55,8 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchema
                     res.setException(throwable);
                 }
             }
-
         }, executionContext);
 
-        return Futures.makeChecked(res, MAPPER);
+        return res;
     }
 }
