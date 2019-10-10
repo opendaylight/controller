@@ -291,7 +291,7 @@
                         <link>https://junit.org/junit4/javadoc/4.11/</link>
                         <link>http://hamcrest.org/JavaHamcrest/javadoc/1.3/</link>
                         <link>http://google.github.io/truth/api/0.42/</link>
-                        <link>https://www.slf4j.org/apidocs/</link>
+                        <link>http://www.slf4j.org/apidocs/</link>
                         <link>https://google.github.io/guava/releases/25.1-jre/api/docs/</link>
                         <link>http://doc.akka.io/japi/akka/2.5.25/</link>
                         <link>http://netty.io/4.1/api/</link>
