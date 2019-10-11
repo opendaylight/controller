@@ -27,7 +27,7 @@
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-binding-runtime</artifactId>
-            <version>5.0.2</version>
+            <version>5.0.3</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
