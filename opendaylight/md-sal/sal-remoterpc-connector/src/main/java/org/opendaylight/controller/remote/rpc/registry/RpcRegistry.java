@@ -42,13 +42,12 @@ import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
  */
 public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private final ActorRef rpcRegistrar;
-    private final RemoteRpcRegistryMXBeanImpl mxBean;
+    private RemoteRpcRegistryMXBeanImpl mxBean;
 
     public RpcRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = requireNonNull(rpcRegistrar);
-        this.mxBean = new RemoteRpcRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
-                config.getAskDuration()), config.getAskDuration());
+
     }
 
     /**
@@ -65,9 +64,19 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     }
 
     @Override
+    public void preStart() {
+        super.preStart();
+        mxBean = new RemoteRpcRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
+            getConfig().getAskDuration()), getConfig().getAskDuration());
+    }
+
+    @Override
     public void postStop() throws Exception {
+        if (mxBean != null) {
+            mxBean.unregister();
+            mxBean = null;
+        }
         super.postStop();
-        this.mxBean.unregister();
     }
 
     @Override
