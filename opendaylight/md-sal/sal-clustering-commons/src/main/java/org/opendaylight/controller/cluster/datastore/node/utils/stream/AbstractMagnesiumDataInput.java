@@ -255,7 +255,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
         final NodeIdentifier nodeId = decodeNodeIdentifier(nodeHeader, parent);
 
         final int size;
-        switch (nodeHeader & MagnesiumNode.PREDICATE_MASK) {
+        switch (mask(nodeHeader, MagnesiumNode.PREDICATE_MASK)) {
             case MagnesiumNode.PREDICATE_ZERO:
                 size = 0;
                 break;
@@ -431,7 +431,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
     }
 
     private AugmentationIdentifier readAugmentationIdentifier(final byte header) throws IOException {
-        final int count = header & MagnesiumPathArgument.AID_COUNT_MASK;
+        final byte count = mask(header, MagnesiumPathArgument.AID_COUNT_MASK);
         switch (count) {
             case MagnesiumPathArgument.AID_COUNT_1B:
                 return readAugmentationIdentifier(input.readUnsignedByte());
@@ -440,7 +440,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
             case MagnesiumPathArgument.AID_COUNT_4B:
                 return readAugmentationIdentifier(input.readInt());
             default:
-                return readAugmentationIdentifier(count >>> MagnesiumPathArgument.AID_COUNT_SHIFT);
+                return readAugmentationIdentifier(rshift(count, MagnesiumPathArgument.AID_COUNT_SHIFT));
         }
     }
 
@@ -479,7 +479,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
 
     private NodeIdentifierWithPredicates readNodeIdentifierWithPredicates(final byte header) throws IOException {
         final QName qname = readNodeIdentifier(header).getNodeType();
-        switch (header & MagnesiumPathArgument.SIZE_MASK) {
+        switch (mask(header, MagnesiumPathArgument.SIZE_MASK)) {
             case MagnesiumPathArgument.SIZE_1B:
                 return readNodeIdentifierWithPredicates(qname, input.readUnsignedByte());
             case MagnesiumPathArgument.SIZE_2B:
@@ -487,7 +487,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
             case MagnesiumPathArgument.SIZE_4B:
                 return readNodeIdentifierWithPredicates(qname, input.readInt());
             default:
-                return readNodeIdentifierWithPredicates(qname, header >>> MagnesiumPathArgument.SIZE_SHIFT);
+                return readNodeIdentifierWithPredicates(qname, rshift(header, MagnesiumPathArgument.SIZE_SHIFT));
         }
     }
 
@@ -514,7 +514,7 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
     }
 
     private static void verifyPathIdentifierOnly(final byte header) throws InvalidNormalizedNodeStreamException {
-        if ((header & MagnesiumPathArgument.SIZE_MASK) != 0) {
+        if (mask(header, MagnesiumPathArgument.SIZE_MASK) != 0) {
             throw new InvalidNormalizedNodeStreamException("Invalid path argument header " + header);
         }
     }
@@ -841,5 +841,13 @@ abstract class AbstractMagnesiumDataInput extends AbstractNormalizedNodeDataInpu
         } else {
             throw new InvalidNormalizedNodeStreamException("Invalid bits length " + size);
         }
+    }
+
+    private static byte mask(final byte header, final byte mask) {
+        return (byte) (header & mask);
+    }
+
+    private static int rshift(final byte header, final byte shift) {
+        return (header & 0xFF) >>> shift;
     }
 }

@@ -10,11 +10,14 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -29,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
@@ -291,6 +295,33 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
         assertEquals(expected, nnin.readNormalizedNode());
+    }
+
+    @Test
+    public void testAugmentationIdentifier() throws IOException {
+        final List<QName> qnames = new ArrayList<>();
+        for (int i = 0; i < 257; ++i) {
+            qnames.add(QName.create(TestModel.TEST_QNAME, "a" + i));
+        }
+
+        for (int i = 0; i < qnames.size(); ++i) {
+            final AugmentationIdentifier expected = AugmentationIdentifier.create(
+                ImmutableSet.copyOf(qnames.subList(0, i)));
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            try (NormalizedNodeDataOutput nnout =
+                    NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos),
+                        NormalizedNodeStreamVersion.SODIUM_SR1)) {
+                nnout.writePathArgument(expected);
+            }
+
+            final byte[] bytes = bos.toByteArray();
+
+            NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(bytes));
+            PathArgument arg = nnin.readPathArgument();
+            assertEquals(expected, arg);
+        }
     }
 
     private static String largeString(final int pow) {
