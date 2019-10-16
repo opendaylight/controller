@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import com.google.common.annotations.Beta;
@@ -22,7 +21,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
  */
 @Beta
 public interface DistributedShardFactory {
-
     /**
      * Register a new shard that is rooted at the desired prefix with replicas on the provided members.
      * Note to register a shard without replicas you still need to provide at least one Member for the shard.
@@ -38,17 +36,4 @@ public interface DistributedShardFactory {
     CompletionStage<DistributedShardRegistration>
         createDistributedShard(DOMDataTreeIdentifier prefix, Collection<MemberName> replicaMembers)
             throws DOMDataTreeShardingConflictException;
-
-    /**
-     * Registration of the CDS shard that allows you to remove the shard from the system by closing the registration.
-     * This removal is done asynchronously.
-     */
-    interface DistributedShardRegistration {
-
-        /**
-         *  Removes the shard from the system, this removal is done asynchronously, the future completes once the
-         *  backend shard is no longer present.
-         */
-        CompletionStage<Void> close();
-    }
 }
