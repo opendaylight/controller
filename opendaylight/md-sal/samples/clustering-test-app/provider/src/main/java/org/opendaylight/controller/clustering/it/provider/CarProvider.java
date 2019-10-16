@@ -8,13 +8,13 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,10 +98,9 @@ public class CarProvider implements CarService {
     private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
     private final AtomicBoolean registeredListener = new AtomicBoolean();
 
-    private final Collection<ListenerRegistration<?>> carsDclRegistrations =
-            Sets.newConcurrentHashSet();
-    private final Collection<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
-            Sets.newConcurrentHashSet();
+    private final Set<ListenerRegistration<?>> carsDclRegistrations = ConcurrentHashMap.newKeySet();
+    private final Set<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
+            ConcurrentHashMap.newKeySet();
 
     private volatile Thread testThread;
     private volatile boolean stopThread;
