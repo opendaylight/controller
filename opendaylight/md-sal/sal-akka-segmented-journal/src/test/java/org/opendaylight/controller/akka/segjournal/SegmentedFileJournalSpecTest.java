@@ -12,7 +12,7 @@ import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.junit.runner.RunWith;
-import org.scalatest.junit.JUnitRunner;
+import org.scalatestplus.junit.JUnitRunner;
 
 @RunWith(JUnitRunner.class)
 public class SegmentedFileJournalSpecTest extends JavaJournalSpec {
