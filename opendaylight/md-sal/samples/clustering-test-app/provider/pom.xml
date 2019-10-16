@@ -25,7 +25,6 @@
         <dependency>
             <groupId>org.opendaylight.controller.samples</groupId>
             <artifactId>clustering-it-model</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
