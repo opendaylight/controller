@@ -37,14 +37,13 @@ import org.opendaylight.mdsal.dom.api.DOMActionInstance;
  */
 public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     private final ActorRef rpcRegistrar;
-    private final RemoteActionRegistryMXBeanImpl mxBean;
+
+    private RemoteActionRegistryMXBeanImpl mxBean;
 
     public ActionRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
                           final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new ActionRoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = requireNonNull(rpcRegistrar);
-        this.mxBean = new RemoteActionRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
-                config.getAskDuration()), config.getAskDuration());
     }
 
     /**
@@ -61,9 +60,19 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     }
 
     @Override
+    public void preStart() {
+        super.preStart();
+        mxBean = new RemoteActionRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
+            getConfig().getAskDuration()), getConfig().getAskDuration());
+    }
+
+    @Override
     public void postStop() throws Exception {
+        if (mxBean != null) {
+            mxBean.unregister();
+            mxBean = null;
+        }
         super.postStop();
-        this.mxBean.unregister();
     }
 
     @Override
