@@ -151,7 +151,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws Exception {
         context.close();
         super.postStop();
     }
