@@ -36,7 +36,7 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws Exception {
         if (currentBehavior != null) {
             currentBehavior.close();
         }
