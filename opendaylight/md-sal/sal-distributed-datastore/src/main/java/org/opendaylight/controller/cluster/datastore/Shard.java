@@ -275,7 +275,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws Exception {
         LOG.info("Stopping Shard {}", persistenceId());
 
         super.postStop();

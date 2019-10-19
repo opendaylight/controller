@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +102,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void sendRegistrationRequests() {
         for (Map.Entry<String, Boolean> entry : notifierRegistrationStatus.entrySet()) {
             if (!entry.getValue()) {
