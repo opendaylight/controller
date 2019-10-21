@@ -53,16 +53,4 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>yang-data-impl</artifactId>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <propertyExpansion>checkstyle.violationseverity=error</propertyExpansion>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
