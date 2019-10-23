@@ -5,9 +5,7 @@ module opendaylight-topology-inventory {
     prefix "nt";
 
     import yang-ext { prefix "ext"; }
-    import ietf-inet-types { prefix "inet"; }
     import opendaylight-inventory {prefix "inv";}
-    import opendaylight-topology {prefix "odt";}
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
 
     organization "TBD";

@@ -6,7 +6,6 @@ module opendaylight-topology {
 
     import yang-ext { prefix "ext"; }
     import ietf-inet-types { prefix "inet"; }
-    import opendaylight-inventory {prefix "inv";}
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
 
     organization "TBD";
