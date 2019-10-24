@@ -23,6 +23,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -71,7 +72,8 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
     private static final String SIMPLE_STRING_REGEX = "^[a-zA-Z0-9-_.*+:=,!~';]+$";
     private static final Pattern SIMPLE_STRING_PATTERN = Pattern.compile(SIMPLE_STRING_REGEX);
     private static final long serialVersionUID = 1L;
-    private final String name;
+
+    private final @NonNull String name;
 
     @SuppressFBWarnings(value = "VO_VOLATILE_REFERENCE_TO_ARRAY",
             justification = "The array elements are non-volatile but we don't access them.")
@@ -96,14 +98,14 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
      * @return A {@link FrontendType} instance
      * @throws IllegalArgumentException if the string is null, empty or contains invalid characters
      */
-    public static FrontendType forName(final String name) {
+    public static @NonNull FrontendType forName(final String name) {
         checkArgument(!Strings.isNullOrEmpty(name));
         checkArgument(SIMPLE_STRING_PATTERN.matcher(name).matches(),
             "Supplied name %s does not patch pattern %s", name, SIMPLE_STRING_REGEX);
         return new FrontendType(name);
     }
 
-    public static FrontendType readFrom(final DataInput in) throws IOException {
+    public static @NonNull FrontendType readFrom(final DataInput in) throws IOException {
         final byte[] serialized = new byte[in.readInt()];
         in.readFully(serialized);
         return new FrontendType(new String(serialized, StandardCharsets.UTF_8));
@@ -116,8 +118,14 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         out.write(local);
     }
 
-    public String getName() {
+    public @NonNull String getName() {
         return name;
+    }
+
+    public org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
+        . @NonNull FrontendType toYang() {
+        return new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
+                .FrontendType(name);
     }
 
     @Override
