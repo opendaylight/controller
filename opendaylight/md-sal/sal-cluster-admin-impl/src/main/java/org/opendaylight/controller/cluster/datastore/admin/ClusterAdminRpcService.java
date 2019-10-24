@@ -75,6 +75,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutputBuilder;
@@ -295,7 +297,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         }, actorUtils.getClientDispatcher());
 
         final SettableFuture<RpcResult<MakeLeaderLocalOutput>> future = SettableFuture.create();
-        makeLeaderLocalAsk.future().onComplete(new OnComplete<Object>() {
+        makeLeaderLocalAsk.future().onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 if (failure != null) {
@@ -624,6 +626,17 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         }, MoreExecutors.directExecutor());
 
         return returnFuture;
+    }
+
+
+    @Override
+    public ListenableFuture<RpcResult<GetKnownClientsForAllShardsOutput>> getKnownClientsForAllShards(
+            final GetKnownClientsForAllShardsInput input) {
+        final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
+
+
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private static ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final String shardName,
