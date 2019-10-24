@@ -103,6 +103,12 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         return name;
     }
 
+    public org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
+        .MemberName toYang() {
+        return new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
+                .MemberName(name);
+    }
+
     @Override
     public int hashCode() {
         return name.hashCode();
