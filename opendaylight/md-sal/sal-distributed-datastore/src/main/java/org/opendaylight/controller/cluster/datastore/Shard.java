@@ -25,6 +25,7 @@ import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import java.io.IOException;
 import java.util.Arrays;
@@ -76,6 +77,8 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.GetKnownClients;
+import org.opendaylight.controller.cluster.datastore.messages.GetKnownClientsReply;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
@@ -371,6 +374,8 @@ public class Shard extends RaftActor {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
                 store.resumeNextPendingTransaction();
+            } else if (GetKnownClients.INSTANCE.equals(message)) {
+                handleGetKnownClients();
             } else if (!responseMessageSlicer.handleMessage(message)) {
                 super.handleNonRaftCommand(message);
             }
@@ -595,6 +600,18 @@ public class Shard extends RaftActor {
             LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
             throw new UnsupportedRequestException(request);
         }
+    }
+
+    private void handleGetKnownClients() {
+        final ImmutableSet<ClientIdentifier> clients;
+        if (isLeader()) {
+            clients = knownFrontends.values().stream()
+                    .map(LeaderFrontendState::getIdentifier)
+                    .collect(ImmutableSet.toImmutableSet());
+        } else {
+            clients = frontendMetadata.getClients();
+        }
+        sender().tell(new GetKnownClientsReply(clients), self());
     }
 
     private boolean hasLeader() {
