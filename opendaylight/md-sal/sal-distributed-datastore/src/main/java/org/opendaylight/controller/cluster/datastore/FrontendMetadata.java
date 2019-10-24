@@ -11,6 +11,7 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
@@ -148,5 +149,11 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
         }
 
         verify(clients.replace(frontendId, client, new FrontendClientMetadataBuilder.Disabled(shardName, clientId)));
+    }
+
+    ImmutableSet<ClientIdentifier> getClients() {
+        return clients.values().stream()
+                .map(FrontendClientMetadataBuilder::getIdentifier)
+                .collect(ImmutableSet.toImmutableSet());
     }
 }
