@@ -109,11 +109,11 @@ public class ActorUtilsTest extends AbstractActorTest {
         }
 
         private static Props props(final boolean found, final ActorRef actorRef) {
-            return Props.create(new MockShardManagerCreator(found, actorRef));
+            return Props.create(MockShardManager.class, new MockShardManagerCreator(found, actorRef));
         }
 
         private static Props props() {
-            return Props.create(new MockShardManagerCreator());
+            return Props.create(MockShardManager.class, new MockShardManagerCreator());
         }
 
         @SuppressWarnings("serial")

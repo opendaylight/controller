@@ -298,7 +298,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             }
         }
 
-        final Creator<ShardManager> creator = new Creator<ShardManager>() {
+        final Creator<ShardManager> creator = new Creator<>() {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() {
@@ -310,7 +310,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         final TestKit kit = new TestKit(getSystem());
 
-        final ActorRef shardManager = actorFactory.createActor(Props.create(
+        final ActorRef shardManager = actorFactory.createActor(Props.create(ShardManager.class,
                 new DelegatingShardManagerCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
