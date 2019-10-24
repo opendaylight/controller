@@ -109,6 +109,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
 
 /**
  * Implements the yang RPCs defined in the generated ClusterAdminService interface.
@@ -275,8 +276,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.info("Moving leader to local node {} for shard {}, datastoreType {}",
                 actorUtils.getCurrentMemberName().getName(), shardName, dataStoreType);
 
-        final scala.concurrent.Future<ActorRef> localShardReply =
-                actorUtils.findLocalShardAsync(shardName);
+        final Future<ActorRef> localShardReply = actorUtils.findLocalShardAsync(shardName);
 
         final scala.concurrent.Promise<Object> makeLeaderLocalAsk = akka.dispatch.Futures.promise();
         localShardReply.onComplete(new OnComplete<ActorRef>() {
@@ -741,7 +741,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         final SettableFuture<T> returnFuture = SettableFuture.create();
 
         @SuppressWarnings("unchecked")
-        scala.concurrent.Future<T> askFuture = (scala.concurrent.Future<T>) Patterns.ask(actor, message, timeout);
+        Future<T> askFuture = (Future<T>) Patterns.ask(actor, message, timeout);
         askFuture.onComplete(new OnComplete<T>() {
             @Override
             public void onComplete(final Throwable failure, final T resp) {
