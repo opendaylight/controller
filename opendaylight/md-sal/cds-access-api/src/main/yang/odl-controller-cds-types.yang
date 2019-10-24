@@ -1,0 +1,53 @@
+module odl-controller-cds-types {
+  yang-version 1;
+  namespace "urn:opendaylight:params:xml:ns:yang:controller:cds:types";
+  prefix "cdst";
+
+  organization "The OpenDaylight Project";
+
+  description "Common type definitions related to clustered data store.";
+
+  revision 2019-10-24 {
+    description "Initial revision.";
+  }
+
+  typedef member-name {
+    description "Cluster member name.";
+    type string;
+  }
+
+  typedef frontend-type {
+    description "Frontend type.";
+    type string {
+      pattern "";
+    }
+  }
+
+  typedef client-generation {
+    description "Client generation.";
+    type uint64;
+  }
+
+  grouping frontend-identifier {
+    description "Identifier of a particular frontend.";
+    leaf member {
+      type member-name;
+      mandatory true;
+    }
+
+    leaf type {
+      type frontend-type;
+      mandatory true;
+    }
+  }
+
+  grouping client-identifier {
+    description "Identifier of a particular client.";
+    uses frontend-identifier;
+    leaf generation {
+      type client-generation;
+      mandatory true;
+    }
+  }
+}
+

@@ -10,6 +10,8 @@ module cluster-admin {
         description "Initial revision.";
     }
 
+    import odl-controller-cds-types { prefix cds; }
+
     typedef data-store-type {
         type enumeration {
             enum config {
@@ -298,5 +300,23 @@ module cluster-admin {
         }
 
         description "Returns the current role for the requested module shard.";
+    }
+
+    rpc get-known-clients-for-all-shards {
+        description "Request all shards to report their known frontend clients. This is useful for determining what
+                     generation should a resurrected member node should use.";
+
+        output {
+            uses shard-result-output {
+                augment shard-result {
+                    list known-clients {
+                        when "../succeeded = true";
+
+                        uses cds:client-identifier;
+                        key "member type";
+                    }
+                }
+            }
+        }
     }
 }
