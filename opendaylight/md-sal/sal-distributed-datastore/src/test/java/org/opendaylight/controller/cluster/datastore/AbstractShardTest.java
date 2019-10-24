@@ -151,9 +151,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             }
         };
 
-        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
-                "testRecovery");
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), Props.create(Shard.class,
+                new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()), "testRecovery");
 
         assertTrue("Recovery complete", recoveryComplete.await(5, TimeUnit.SECONDS));
 

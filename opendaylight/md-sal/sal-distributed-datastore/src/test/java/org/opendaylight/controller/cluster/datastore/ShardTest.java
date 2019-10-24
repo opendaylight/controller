@@ -169,7 +169,7 @@ public class ShardTest extends AbstractShardTest {
     public void testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration() throws Exception {
         final CountDownLatch onFirstElectionTimeout = new CountDownLatch(1);
         final CountDownLatch onChangeListenerRegistered = new CountDownLatch(1);
-        final Creator<Shard> creator = new Creator<Shard>() {
+        final Creator<Shard> creator = new Creator<>() {
             boolean firstElectionTimeout = true;
 
             @Override
@@ -202,8 +202,8 @@ public class ShardTest extends AbstractShardTest {
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, path),
                 "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration-DataChangeListener");
 
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(
-                Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
+        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
+                new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration");
 
         final ShardTestKit testKit = new ShardTestKit(getSystem());
@@ -757,7 +757,7 @@ public class ShardTest extends AbstractShardTest {
     public void testOnBatchedModificationsWhenNotLeader() {
         final AtomicBoolean overrideLeaderCalls = new AtomicBoolean();
         final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final Creator<Shard> creator = new Creator<Shard>() {
+        final Creator<Shard> creator = new Creator<>() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -777,8 +777,8 @@ public class ShardTest extends AbstractShardTest {
             }
         };
 
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props
-            .create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
+        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
+            new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testOnBatchedModificationsWhenNotLeader");
 
         ShardTestKit.waitUntilLeader(shard);
@@ -1084,7 +1084,7 @@ public class ShardTest extends AbstractShardTest {
         // Wait for the 2nd Tx to complete the canCommit phase.
 
         final CountDownLatch latch = new CountDownLatch(1);
-        canCommitFuture.onComplete(new OnComplete<Object>() {
+        canCommitFuture.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object resp) {
                 latch.countDown();
@@ -1154,7 +1154,7 @@ public class ShardTest extends AbstractShardTest {
         // Wait for the 2nd Tx to complete the canCommit phase.
 
         final CountDownLatch latch = new CountDownLatch(1);
-        canCommitFuture.onComplete(new OnComplete<Object>() {
+        canCommitFuture.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object resp) {
                 latch.countDown();
@@ -1272,8 +1272,8 @@ public class ShardTest extends AbstractShardTest {
             }
         };
 
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props
-            .create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
+        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
+            new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testAbortWithCommitPending");
 
         ShardTestKit.waitUntilLeader(shard);
@@ -1730,9 +1730,8 @@ public class ShardTest extends AbstractShardTest {
 
         final Creator<Shard> creator = () -> new TestShard(newShardBuilder());
 
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props
-            .create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
-            shardActorName);
+        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
+            new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()), shardActorName);
 
         ShardTestKit.waitUntilLeader(shard);
         writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));

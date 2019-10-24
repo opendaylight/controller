@@ -46,7 +46,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     public static Props props(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction,
             final ActorRef shardActor, final DatastoreContext datastoreContext, final ShardStats shardStats) {
-        return Props.create(new ShardTransactionCreator(type, transaction, shardActor, datastoreContext, shardStats));
+        return Props.create(ShardTransaction.class,
+            new ShardTransactionCreator(type, transaction, shardActor, datastoreContext, shardStats));
     }
 
     protected abstract AbstractShardDataTreeTransaction<?> getDOMStoreTransaction();

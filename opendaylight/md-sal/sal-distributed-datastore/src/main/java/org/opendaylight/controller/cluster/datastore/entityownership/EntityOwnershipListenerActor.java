@@ -49,7 +49,7 @@ final class EntityOwnershipListenerActor extends AbstractUntypedActor {
     }
 
     static Props props(final DOMEntityOwnershipListener listener) {
-        return Props.create(new EntityOwnershipListenerCreator(listener));
+        return Props.create(EntityOwnershipListenerActor.class, new EntityOwnershipListenerCreator(listener));
     }
 
     private static final class EntityOwnershipListenerCreator implements Creator<EntityOwnershipListenerActor> {
