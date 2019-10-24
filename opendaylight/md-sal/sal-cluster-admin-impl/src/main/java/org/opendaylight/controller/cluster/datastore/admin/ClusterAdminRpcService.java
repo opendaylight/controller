@@ -15,6 +15,7 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -30,8 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -40,6 +43,8 @@ import org.opendaylight.controller.cluster.datastore.messages.AddPrefixShardRepl
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.FlipShardMembersVotingStatus;
+import org.opendaylight.controller.cluster.datastore.messages.GetKnownClients;
+import org.opendaylight.controller.cluster.datastore.messages.GetKnownClientsReply;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardRole;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
@@ -75,6 +80,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutputBuilder;
@@ -96,6 +104,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.get.known.clients._for.all.shards.output.ShardResult1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.get.known.clients._for.all.shards.output.ShardResult1Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.get.known.clients._for.all.shards.output.shard.result.KnownClientsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.locate.shard.output.member.node.LeaderActorRefBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.locate.shard.output.member.node.LocalBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingState;
@@ -626,6 +637,52 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
+
+    @Override
+    public ListenableFuture<RpcResult<GetKnownClientsForAllShardsOutput>> getKnownClientsForAllShards(
+            final GetKnownClientsForAllShardsInput input) {
+        final ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> allShardReplies =
+                getAllShardLeadersClients();
+        return Futures.whenAllComplete(allShardReplies.values()).call(() -> processReplies(allShardReplies),
+            MoreExecutors.directExecutor());
+    }
+
+    private static RpcResult<GetKnownClientsForAllShardsOutput> processReplies(
+            final ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> allShardReplies) {
+        final List<ShardResult> result = new ArrayList<>(allShardReplies.size());
+        for (Entry<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> entry : allShardReplies.entrySet()) {
+            final ListenableFuture<GetKnownClientsReply> future = entry.getValue();
+            final ShardResultBuilder builder = new ShardResultBuilder()
+                    .setDataStoreType(entry.getKey().getDataStoreType())
+                    .setShardName(entry.getKey().getShardName());
+
+            final GetKnownClientsReply reply;
+            try {
+                reply = Futures.getDone(future);
+            } catch (ExecutionException e) {
+                LOG.debug("Shard {} failed to answer", entry.getKey(), e);
+                result.add(builder.setSucceeded(Boolean.FALSE).setErrorMessage(e.getCause().getMessage()).build());
+                continue;
+            }
+
+            result.add(builder
+                .setSucceeded(Boolean.TRUE)
+                .addAugmentation(ShardResult1.class, new ShardResult1Builder()
+                    .setKnownClients(reply.getClients().stream()
+                        .map(client -> new KnownClientsBuilder()
+                            .setMember(client.getFrontendId().getMemberName().toYang())
+                            .setType(client.getFrontendId().getClientType().toYang())
+                            .setGeneration(client.getYangGeneration())
+                            .build())
+                        .collect(Collectors.toList()))
+                    .build())
+                .build());
+        }
+
+        return RpcResultBuilder.success(new GetKnownClientsForAllShardsOutputBuilder().setShardResult(result).build())
+                .build();
+    }
+
     private static ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final String shardName,
             final List<MemberVotingState> memberVotingStatus) {
         Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
@@ -752,6 +809,38 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         }, configDataStore.getActorContext().getClientDispatcher());
 
         return returnFuture;
+    }
+
+    private ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> getAllShardLeadersClients() {
+        final ImmutableMap.Builder<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> builder =
+                ImmutableMap.builder();
+
+        addAllShardsClients(builder, DataStoreType.Config, configDataStore.getActorUtils());
+        addAllShardsClients(builder, DataStoreType.Operational, operDataStore.getActorUtils());
+
+        return builder.build();
+    }
+
+    private static void addAllShardsClients(
+            final ImmutableMap.Builder<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> builder,
+            final DataStoreType type, final ActorUtils utils) {
+        for (String shardName : utils.getConfiguration().getAllShardNames()) {
+            final SettableFuture<GetKnownClientsReply> future = SettableFuture.create();
+            builder.put(new ShardIdentifier(type, shardName), future);
+
+            utils.findPrimaryShardAsync(shardName).flatMap(
+                info -> Patterns.ask(info.getPrimaryShardActor(), GetKnownClients.INSTANCE, SHARD_MGR_TIMEOUT),
+                utils.getClientDispatcher()).onComplete(new OnComplete<Object>() {
+                    @Override
+                    public void onComplete(final Throwable failure, final Object success) {
+                        if (failure == null) {
+                            future.set((GetKnownClientsReply) success);
+                        } else {
+                            future.setException(failure);
+                        }
+                    }
+                }, utils.getClientDispatcher());
+        }
     }
 
     private static <T> ListenableFuture<RpcResult<T>> newFailedRpcResultFuture(final String message) {

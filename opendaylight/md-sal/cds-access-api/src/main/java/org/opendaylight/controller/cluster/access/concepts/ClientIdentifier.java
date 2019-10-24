@@ -11,12 +11,15 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024.ClientGeneration;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -63,7 +66,8 @@ public final class ClientIdentifier implements WritableIdentifier {
     }
 
     private static final long serialVersionUID = 1L;
-    private final FrontendIdentifier frontendId;
+
+    private final @NonNull FrontendIdentifier frontendId;
     private final long generation;
 
     ClientIdentifier(final FrontendIdentifier frontendId, final long generation) {
@@ -71,12 +75,12 @@ public final class ClientIdentifier implements WritableIdentifier {
         this.generation = generation;
     }
 
-    public static ClientIdentifier create(final FrontendIdentifier frontendId,
+    public static @NonNull ClientIdentifier create(final FrontendIdentifier frontendId,
             final long generation) {
         return new ClientIdentifier(frontendId, generation);
     }
 
-    public static ClientIdentifier readFrom(final DataInput in) throws IOException {
+    public static @NonNull ClientIdentifier readFrom(final DataInput in) throws IOException {
         final FrontendIdentifier frontendId = FrontendIdentifier.readFrom(in);
         return new ClientIdentifier(frontendId, WritableObjects.readLong(in));
     }
@@ -87,12 +91,16 @@ public final class ClientIdentifier implements WritableIdentifier {
         WritableObjects.writeLong(out, generation);
     }
 
-    public FrontendIdentifier getFrontendId() {
+    public @NonNull FrontendIdentifier getFrontendId() {
         return frontendId;
     }
 
     public long getGeneration() {
         return generation;
+    }
+
+    public @NonNull ClientGeneration getYangGeneration() {
+        return new ClientGeneration(UnsignedLong.fromLongBits(generation).bigIntegerValue());
     }
 
     @Override
