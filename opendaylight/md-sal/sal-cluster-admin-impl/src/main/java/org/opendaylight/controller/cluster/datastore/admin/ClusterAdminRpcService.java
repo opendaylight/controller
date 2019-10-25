@@ -815,15 +815,15 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         final ImmutableMap.Builder<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> builder =
                 ImmutableMap.builder();
 
-        addAllShardsClients(builder, DataStoreType.Config, configDataStore.getActorUtils());
-        addAllShardsClients(builder, DataStoreType.Operational, operDataStore.getActorUtils());
+        addAllShardsClients(builder, DataStoreType.Config, configDataStore.getActorContext());
+        addAllShardsClients(builder, DataStoreType.Operational, operDataStore.getActorContext());
 
         return builder.build();
     }
 
     private static void addAllShardsClients(
             final ImmutableMap.Builder<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> builder,
-            final DataStoreType type, final ActorUtils utils) {
+            final DataStoreType type, final ActorContext utils) {
         for (String shardName : utils.getConfiguration().getAllShardNames()) {
             final SettableFuture<GetKnownClientsReply> future = SettableFuture.create();
             builder.put(new ShardIdentifier(type, shardName), future);

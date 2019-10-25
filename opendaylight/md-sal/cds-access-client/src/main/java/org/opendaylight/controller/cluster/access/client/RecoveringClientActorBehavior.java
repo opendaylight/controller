@@ -23,6 +23,14 @@ import org.slf4j.LoggerFactory;
  */
 final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<InitialClientActorContext> {
     private static final Logger LOG = LoggerFactory.getLogger(RecoveringClientActorBehavior.class);
+
+    /*
+     * Base for the property name which overrides the initial generation when we fail to find anything from persistence.
+     * The actual property name has the frontend type name appended.
+     */
+    private static final String GENERATION_OVERRIDE_PROP_BASE =
+            "org.opendaylight.controller.cluster.access.client.initial.generation.";
+
     private final FrontendIdentifier currentFrontend;
     private ClientIdentifier lastId = null;
 
@@ -49,7 +57,7 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
 
                 nextId = ClientIdentifier.create(currentFrontend, lastId.getGeneration() + 1);
             } else {
-                nextId = ClientIdentifier.create(currentFrontend, 0);
+                nextId = ClientIdentifier.create(currentFrontend, initialGeneration());
             }
 
             LOG.debug("{}: persisting new identifier {}", persistenceId(), nextId);
@@ -63,5 +71,26 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
         }
 
         return this;
+    }
+
+    private long initialGeneration() {
+        final String propName = GENERATION_OVERRIDE_PROP_BASE + currentFrontend.getClientType().getName();
+        final String propValue = System.getProperty(propName);
+        if (propValue == null) {
+            LOG.debug("{}: no initial generation override, starting from 0", persistenceId());
+            return 0;
+        }
+
+        final long ret;
+        try {
+            ret = Long.parseUnsignedLong(propValue);
+        } catch (NumberFormatException e) {
+            LOG.warn("{}: failed to parse initial generation override '{}', starting from 0", persistenceId(),
+                propValue, e);
+            return 0;
+        }
+
+        LOG.info("{}: initial generation set to {}", persistenceId(), ret);
+        return ret;
     }
 }
