@@ -148,9 +148,22 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
     }
 
     private void streamLeaf(final NormalizedNodeStreamWriter writer) throws IOException {
+        writer.leafNode(startLeaf(writer), readObject());
+    }
+
+    // Leaf inside a MapEntryNode, it can potentially be a key leaf, in which case we want to de-duplicate values.
+    private void streamLeaf(final NormalizedNodeStreamWriter writer, final NodeIdentifierWithPredicates entryId)
+            throws IOException {
+        final NodeIdentifier identifier = startLeaf(writer);
+        final Object value = readObject();
+        final Object entryValue = entryId.getKeyValues().get(identifier.getNodeType());
+        writer.leafNode(identifier, entryValue == null ? value : entryValue);
+    }
+
+    private NodeIdentifier startLeaf(final NormalizedNodeStreamWriter writer) throws IOException {
         final NodeIdentifier identifier = readNodeIdentifier();
         LOG.trace("Streaming leaf node {}", identifier);
-        writer.leafNode(identifier, readObject());
+        return identifier;
     }
 
     private void streamLeafSet(final NormalizedNodeStreamWriter writer) throws IOException {
@@ -203,7 +216,17 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
         final NodeIdentifierWithPredicates entryIdentifier = readNormalizedNodeWithPredicates();
         LOG.trace("Streaming map entry node {}", entryIdentifier);
         writer.startMapEntryNode(entryIdentifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
-        commonStreamContainer(writer);
+
+        // Same loop as commonStreamContainer(), but ...
+        for (byte nodeType = input.readByte(); nodeType != NodeTypes.END_NODE; nodeType = input.readByte()) {
+            if (nodeType == NodeTypes.LEAF_NODE) {
+                // ... leaf nodes may need de-duplication
+                streamLeaf(writer, entryIdentifier);
+            } else {
+                streamNormalizedNode(writer, nodeType);
+            }
+        }
+        writer.endNode();
     }
 
     private void streamUnkeyedList(final NormalizedNodeStreamWriter writer) throws IOException {
