@@ -37,13 +37,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,11 +60,6 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
 
     private QName lastLeafSetQName;
 
-    private NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>> leafBuilder;
-
-    @SuppressWarnings("rawtypes")
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
-
     AbstractLithiumDataInput(final DataInput input) {
         this.input = requireNonNull(input);
     }
@@ -81,114 +70,161 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
     }
 
     @Override
-    public final NormalizedNode<?, ?> readNormalizedNode() throws IOException {
-        return readNormalizedNodeInternal();
+    public final void streamNormalizedNode(final NormalizedNodeStreamWriter writer) throws IOException {
+        streamNormalizedNode(requireNonNull(writer), input.readByte());
     }
 
-    private NormalizedNode<?, ?> readNormalizedNodeInternal() throws IOException {
-        // each node should start with a byte
-        byte nodeType = input.readByte();
-
-        if (nodeType == NodeTypes.END_NODE) {
-            LOG.trace("End node reached. return");
-            lastLeafSetQName = null;
-            return null;
-        }
-
+    private void streamNormalizedNode(final NormalizedNodeStreamWriter writer, final byte nodeType) throws IOException {
         switch (nodeType) {
-            case NodeTypes.AUGMENTATION_NODE:
-                AugmentationIdentifier augIdentifier = readAugmentationIdentifier();
-                LOG.trace("Reading augmentation node {} ", augIdentifier);
-                return addDataContainerChildren(Builders.augmentationBuilder().withNodeIdentifier(augIdentifier))
-                        .build();
-
-            case NodeTypes.LEAF_SET_ENTRY_NODE:
-                final QName name = lastLeafSetQName != null ? lastLeafSetQName : readQName();
-                final Object value = readObject();
-                final NodeWithValue<Object> leafIdentifier = new NodeWithValue<>(name, value);
-                LOG.trace("Reading leaf set entry node {}, value {}", leafIdentifier, value);
-                return leafSetEntryBuilder().withNodeIdentifier(leafIdentifier).withValue(value).build();
-
-            case NodeTypes.MAP_ENTRY_NODE:
-                final NodeIdentifierWithPredicates entryIdentifier = readNormalizedNodeWithPredicates();
-                LOG.trace("Reading map entry node {} ", entryIdentifier);
-                return addDataContainerChildren(Builders.mapEntryBuilder().withNodeIdentifier(entryIdentifier))
-                        .build();
-
-            default:
-                return readNodeIdentifierDependentNode(nodeType, readNodeIdentifier());
-        }
-    }
-
-    private NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>> leafBuilder() {
-        if (leafBuilder == null) {
-            leafBuilder = Builders.leafBuilder();
-        }
-
-        return leafBuilder;
-    }
-
-    @SuppressWarnings("rawtypes")
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
-                                      LeafSetEntryNode<Object>> leafSetEntryBuilder() {
-        if (leafSetEntryBuilder == null) {
-            leafSetEntryBuilder = Builders.leafSetEntryBuilder();
-        }
-
-        return leafSetEntryBuilder;
-    }
-
-    private NormalizedNode<?, ?> readNodeIdentifierDependentNode(final byte nodeType, final NodeIdentifier identifier)
-        throws IOException {
-
-        switch (nodeType) {
-            case NodeTypes.LEAF_NODE:
-                LOG.trace("Read leaf node {}", identifier);
-                // Read the object value
-                return leafBuilder().withNodeIdentifier(identifier).withValue(readObject()).build();
-
             case NodeTypes.ANY_XML_NODE:
-                LOG.trace("Read xml node");
-                return Builders.anyXmlBuilder().withNodeIdentifier(identifier).withValue(readDOMSource()).build();
-
-            case NodeTypes.MAP_NODE:
-                LOG.trace("Read map node {}", identifier);
-                return addDataContainerChildren(Builders.mapBuilder().withNodeIdentifier(identifier)).build();
-
+                streamAnyxml(writer);
+                break;
+            case NodeTypes.AUGMENTATION_NODE:
+                streamAugmentation(writer);
+                break;
             case NodeTypes.CHOICE_NODE:
-                LOG.trace("Read choice node {}", identifier);
-                return addDataContainerChildren(Builders.choiceBuilder().withNodeIdentifier(identifier)).build();
-
-            case NodeTypes.ORDERED_MAP_NODE:
-                LOG.trace("Reading ordered map node {}", identifier);
-                return addDataContainerChildren(Builders.orderedMapBuilder().withNodeIdentifier(identifier)).build();
-
-            case NodeTypes.UNKEYED_LIST:
-                LOG.trace("Read unkeyed list node {}", identifier);
-                return addDataContainerChildren(Builders.unkeyedListBuilder().withNodeIdentifier(identifier)).build();
-
-            case NodeTypes.UNKEYED_LIST_ITEM:
-                LOG.trace("Read unkeyed list item node {}", identifier);
-                return addDataContainerChildren(Builders.unkeyedListEntryBuilder()
-                        .withNodeIdentifier(identifier)).build();
-
+                streamChoice(writer);
+                break;
             case NodeTypes.CONTAINER_NODE:
-                LOG.trace("Read container node {}", identifier);
-                return addDataContainerChildren(Builders.containerBuilder().withNodeIdentifier(identifier)).build();
-
+                streamContainer(writer);
+                break;
+            case NodeTypes.LEAF_NODE:
+                streamLeaf(writer);
+                break;
             case NodeTypes.LEAF_SET:
-                LOG.trace("Read leaf set node {}", identifier);
-                return addLeafSetChildren(identifier.getNodeType(),
-                        Builders.leafSetBuilder().withNodeIdentifier(identifier)).build();
-
+                streamLeafSet(writer);
+                break;
             case NodeTypes.ORDERED_LEAF_SET:
-                LOG.trace("Read ordered leaf set node {}", identifier);
-                return addLeafSetChildren(identifier.getNodeType(),
-                        Builders.orderedLeafSetBuilder().withNodeIdentifier(identifier)).build();
-
+                streamOrderedLeafSet(writer);
+                break;
+            case NodeTypes.LEAF_SET_ENTRY_NODE:
+                streamLeafSetEntry(writer);
+                break;
+            case NodeTypes.MAP_ENTRY_NODE:
+                streamMapEntry(writer);
+                break;
+            case NodeTypes.MAP_NODE:
+                streamMap(writer);
+                break;
+            case NodeTypes.ORDERED_MAP_NODE:
+                streamOrderedMap(writer);
+                break;
+            case NodeTypes.UNKEYED_LIST:
+                streamUnkeyedList(writer);
+                break;
+            case NodeTypes.UNKEYED_LIST_ITEM:
+                streamUnkeyedListItem(writer);
+                break;
             default:
-                return null;
+                throw new InvalidNormalizedNodeStreamException("Unexpected node " + nodeType);
         }
+    }
+
+    private void streamAnyxml(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming anyxml node {}", identifier);
+        writer.anyxmlNode(identifier, readDOMSource());
+    }
+
+    private void streamAugmentation(final NormalizedNodeStreamWriter writer) throws IOException {
+        final AugmentationIdentifier augIdentifier = readAugmentationIdentifier();
+        LOG.trace("Streaming augmentation node {}", augIdentifier);
+        writer.startAugmentationNode(augIdentifier);
+        commonStreamContainer(writer);
+    }
+
+    private void streamChoice(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming choice node {}", identifier);
+        writer.startChoiceNode(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void streamContainer(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming container node {}", identifier);
+        writer.startContainerNode(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void streamLeaf(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming leaf node {}", identifier);
+        writer.leafNode(identifier, readObject());
+    }
+
+    private void streamLeafSet(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming leaf set node {}", identifier);
+        writer.startLeafSet(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamLeafSet(writer, identifier);
+    }
+
+    private void streamOrderedLeafSet(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming ordered leaf set node {}", identifier);
+        writer.startOrderedLeafSet(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamLeafSet(writer, identifier);
+    }
+
+    private void commonStreamLeafSet(final NormalizedNodeStreamWriter writer, final NodeIdentifier identifier)
+            throws IOException {
+        lastLeafSetQName = identifier.getNodeType();
+        try {
+            commonStreamContainer(writer);
+        } finally {
+            // Make sure we never leak this
+            lastLeafSetQName = null;
+        }
+    }
+
+    private void streamLeafSetEntry(final NormalizedNodeStreamWriter writer) throws IOException {
+        final QName name = lastLeafSetQName != null ? lastLeafSetQName : readQName();
+        final Object value = readObject();
+        LOG.trace("Streaming leaf set entry node {}, value {}", name, value);
+        writer.leafSetEntryNode(name, value);
+    }
+
+    private void streamMap(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming map node {}", identifier);
+        writer.startMapNode(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void streamOrderedMap(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming ordered map node {}", identifier);
+        writer.startOrderedMapNode(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void streamMapEntry(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifierWithPredicates entryIdentifier = readNormalizedNodeWithPredicates();
+        LOG.trace("Streaming map entry node {}", entryIdentifier);
+        writer.startMapEntryNode(entryIdentifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void streamUnkeyedList(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming unkeyed list node {}", identifier);
+        writer.startUnkeyedList(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void streamUnkeyedListItem(final NormalizedNodeStreamWriter writer) throws IOException {
+        final NodeIdentifier identifier = readNodeIdentifier();
+        LOG.trace("Streaming unkeyed list item node {}", identifier);
+        writer.startUnkeyedListItem(identifier, NormalizedNodeStreamWriter.UNKNOWN_SIZE);
+        commonStreamContainer(writer);
+    }
+
+    private void commonStreamContainer(final NormalizedNodeStreamWriter writer) throws IOException {
+        for (byte nodeType = input.readByte(); nodeType != NodeTypes.END_NODE; nodeType = input.readByte()) {
+            streamNormalizedNode(writer, nodeType);
+        }
+        writer.endNode();
     }
 
     private DOMSource readDOMSource() throws IOException {
@@ -243,7 +279,6 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
         }
         return children;
     }
-
 
     abstract AugmentationIdentifier readAugmentationIdentifier() throws IOException;
 
@@ -394,36 +429,5 @@ abstract class AbstractLithiumDataInput extends ForwardingDataInput implements N
                 // FIXME: throw hard error
                 return null;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private ListNodeBuilder<Object, LeafSetEntryNode<Object>> addLeafSetChildren(final QName nodeType,
-            final ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder) throws IOException {
-
-        LOG.trace("Reading children of leaf set");
-
-        lastLeafSetQName = nodeType;
-
-        LeafSetEntryNode<Object> child = (LeafSetEntryNode<Object>)readNormalizedNodeInternal();
-
-        while (child != null) {
-            builder.withChild(child);
-            child = (LeafSetEntryNode<Object>)readNormalizedNodeInternal();
-        }
-        return builder;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private NormalizedNodeContainerBuilder addDataContainerChildren(
-            final NormalizedNodeContainerBuilder builder) throws IOException {
-        LOG.trace("Reading data container (leaf nodes) nodes");
-
-        NormalizedNode<?, ?> child = readNormalizedNodeInternal();
-
-        while (child != null) {
-            builder.addChild(child);
-            child = readNormalizedNodeInternal();
-        }
-        return builder;
     }
 }
