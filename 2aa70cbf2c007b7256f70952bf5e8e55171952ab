@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa57193c_0de30c34",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/shard-raft-behavior.adoc",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-05-17T15:12:33Z",
+      "side": 1,
+      "message": "I do not believe Shard needs to be a PersistentActor, as all its persistence should be handled by RaftActor.",
+      "range": {
+        "startLine": 41,
+        "startChar": 64,
+        "endLine": 41,
+        "endChar": 86
+      },
+      "revId": "2aa70cbf2c007b7256f70952bf5e8e55171952ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_2edbb81c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/shard-raft-behavior.adoc",
         "patchSetId": 4
