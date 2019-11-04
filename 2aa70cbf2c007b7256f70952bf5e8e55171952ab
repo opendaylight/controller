@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_cfc5763d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/shard-raft-behavior.adoc",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 4930
+      },
+      "writtenOn": "2016-05-22T05:23:28Z",
+      "side": 1,
+      "message": "Yeah that can be done. But I feel the snapshotting of the state and persisting it should be the state machine\u0027s (shard) responsibility. Maybe a snapshot init-finish window can help raft know about it. So maybe we will need shard actor to be persistent.",
+      "parentUuid": "fa57193c_0de30c34",
+      "range": {
+        "startLine": 41,
+        "startChar": 64,
+        "endLine": 41,
+        "endChar": 86
+      },
+      "revId": "2aa70cbf2c007b7256f70952bf5e8e55171952ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_1bd55f43",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/shard-raft-behavior.adoc",
         "patchSetId": 4
