@@ -70,6 +70,30 @@
       "revId": "2aa70cbf2c007b7256f70952bf5e8e55171952ab",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_0a685db9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/shard-raft-behavior.adoc",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-17T00:41:57Z",
+      "side": 1,
+      "message": "\"Actually RaftActor needs to request a snapshot and Shard should reply with a complete snapshot.\" - correct, that\u0027s what it does now, although the Shard snapshot data currently only contains the serialized data tree. RaftActor also adds its point-in-time state to the resulting snapshot, i.e. election term info and server config (peers and voting states).\n\nSnapshotting is a raft concept, an optional part of raft. Also snapshots go hand in hand with the journal both in memory and with akka persistence.",
+      "parentUuid": "ba51214e_2edbb81c",
+      "range": {
+        "startLine": 41,
+        "startChar": 64,
+        "endLine": 41,
+        "endChar": 86
+      },
+      "revId": "2aa70cbf2c007b7256f70952bf5e8e55171952ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
