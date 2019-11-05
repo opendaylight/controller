@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_007fcb15",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/AveragingProgressTrackerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "final",
+      "revId": "33c19f492810e23310d0704cf3c9dbfa383062ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e079e72f",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/AveragingProgressTrackerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "make constant?",
+      "range": {
+        "startLine": 35,
+        "startChar": 21,
+        "endLine": 35,
+        "endChar": 30
+      },
+      "revId": "33c19f492810e23310d0704cf3c9dbfa383062ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_40755330",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/AveragingProgressTrackerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "final?",
+      "revId": "33c19f492810e23310d0704cf3c9dbfa383062ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
