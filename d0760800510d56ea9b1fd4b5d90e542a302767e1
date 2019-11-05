@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_781fc708",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-04-28T10:16:08Z",
+      "side": 1,
+      "message": "Are you sure no downstream project depends on this?\nIf yes, just delete this parent.",
+      "range": {
+        "startLine": 19,
+        "startChar": 14,
+        "endLine": 19,
+        "endChar": 26
+      },
+      "revId": "d0760800510d56ea9b1fd4b5d90e542a302767e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
