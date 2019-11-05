@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_39233abe",
+        "filename": "opendaylight/md-sal/cds-access-api/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-07T12:21:17Z",
+      "side": 1,
+      "message": "I would revert this, since only formatting is changed.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 99,
+        "endChar": 10
+      },
+      "revId": "1d3cec6dbf678f1c3fef42e6d1446479a38b5c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
