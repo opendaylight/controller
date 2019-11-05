@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_10538717",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "assert",
+      "revId": "9c9c09d182cac3c0eaf4f84d99d3b34d11a7f91d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_70565307",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "assert",
+      "revId": "9c9c09d182cac3c0eaf4f84d99d3b34d11a7f91d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_50598f33",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "you can remove this test\n\nproxy is tested by serialization",
+      "revId": "9c9c09d182cac3c0eaf4f84d99d3b34d11a7f91d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_903e57b6",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "you can compare also values",
+      "revId": "9c9c09d182cac3c0eaf4f84d99d3b34d11a7f91d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b0439b40",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/LocalHistorySuccessTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "you can remove this test",
+      "revId": "9c9c09d182cac3c0eaf4f84d99d3b34d11a7f91d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
