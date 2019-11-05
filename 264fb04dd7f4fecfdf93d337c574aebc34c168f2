@@ -45,6 +45,30 @@
       "revId": "264fb04dd7f4fecfdf93d337c574aebc34c168f2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ae74e2ce",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/AveragingProgressTrackerTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-10T17:11:25Z",
+      "side": 1,
+      "message": "Oh, half or less, right.\nFor some reason I forgot line 40 does not open a task.",
+      "parentUuid": "fafc7978_ae10624e",
+      "range": {
+        "startLine": 45,
+        "startChar": 63,
+        "endLine": 45,
+        "endChar": 66
+      },
+      "revId": "264fb04dd7f4fecfdf93d337c574aebc34c168f2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
