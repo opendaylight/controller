@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_ab74d4ce",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/AbstractRequestSuccessTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "abstract",
+      "revId": "d473d4b42780c0e5dc16aa660353682d79f41897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_0b808089",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "use PT copyright and correct year",
+      "revId": "d473d4b42780c0e5dc16aa660353682d79f41897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_eb7a5cb8",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "remove this line",
+      "revId": "d473d4b42780c0e5dc16aa660353682d79f41897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
