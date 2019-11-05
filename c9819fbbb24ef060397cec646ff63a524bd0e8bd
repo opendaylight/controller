@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_6441ab0a",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/EnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "in ither places they do not use blank line here",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_04f53f56",
         "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/EnvelopeTest.java",
         "patchSetId": 5
@@ -32,6 +49,23 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "fafc7978_043edf8b",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_043edf8b",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/EnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "maybe you can call this class abstract in name",
       "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -56,6 +90,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_c4ecd7bd",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/FailureEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "remove line",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_a4055347",
         "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/FailureEnvelopeTest.java",
         "patchSetId": 5
@@ -68,6 +119,23 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "fafc7978_843daf2d",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_843daf2d",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/FailureEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "remove line",
       "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -92,6 +160,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_04bd3fb7",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/RequestEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "final",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c4f6975c",
         "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/RequestEnvelopeTest.java",
         "patchSetId": 5
@@ -104,6 +189,23 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "fafc7978_64fecb6c",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_64fecb6c",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/RequestEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "final",
       "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -128,6 +230,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_449c675d",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/RequestEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "this method is deprecated",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_649feb03",
         "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/SuccessEnvelopeTest.java",
         "patchSetId": 5
@@ -146,6 +265,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_847acf21",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/SuccessEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "final",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_44a2a74b",
         "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/SuccessEnvelopeTest.java",
         "patchSetId": 5
@@ -158,6 +294,23 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "fafc7978_84f64f8d",
+      "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_84f64f8d",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/SuccessEnvelopeTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2019-11-05T21:57:10Z",
+      "side": 1,
+      "message": "final",
       "revId": "c9819fbbb24ef060397cec646ff63a524bd0e8bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
