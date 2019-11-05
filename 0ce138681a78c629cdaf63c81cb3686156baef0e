@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_53d9af55",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/ActorBehaviorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:46:10Z",
+      "side": 1,
+      "message": "Please move this up after @Before",
+      "revId": "0ce138681a78c629cdaf63c81cb3686156baef0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_93115706",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/InversibleLockTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:46:10Z",
+      "side": 1,
+      "message": "This should be shutdown via @After",
+      "revId": "0ce138681a78c629cdaf63c81cb3686156baef0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b3aa9b82",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/MockedSnapshotStore.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:46:10Z",
+      "side": 1,
+      "message": "Instead of looking up a probe actor via expected path, you can use:\n\n   system.registerExtension(Persistence.lookup()).snapshotStoreFor(null);\n\nto obtain the SnapshotStore ActorRef and send a message to set the probe actor. You would do this before creating any persistent actors. I think this would be cleaner and would avoid a dependency on hard-coded actor paths.",
+      "revId": "0ce138681a78c629cdaf63c81cb3686156baef0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_732f933f",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/resources/application.conf",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:46:10Z",
+      "side": 1,
+      "message": "You don\u0027t need this",
+      "revId": "0ce138681a78c629cdaf63c81cb3686156baef0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
