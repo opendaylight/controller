@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_86e738e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/ClientBackedReadTransactionTest.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-04-03T13:48:41Z",
+      "side": 1,
+      "message": "add empty line above",
+      "range": {
+        "startLine": 32,
+        "startChar": 3,
+        "endLine": 32,
+        "endChar": 47
+      },
+      "revId": "1424f8c10ba99f48d3e4f7c70c21ea19f3f25e1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_46dd5014",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/ClientBackedReadTransactionTest.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-04-03T13:48:41Z",
+      "side": 1,
+      "message": "Please try to avoid using of reflection",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 56,
+        "endChar": 118
+      },
+      "revId": "1424f8c10ba99f48d3e4f7c70c21ea19f3f25e1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
