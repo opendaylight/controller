@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_32e85016",
+        "filename": "opendaylight/md-sal/cds-access-api/src/test/java/org/opendaylight/controller/cluster/access/concepts/AbstractRequestTest.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-13T13:16:02Z",
+      "side": 1,
+      "message": "This verifies the fields in the base class but the fields in the derived classes are not verified. You can add an abstract method for derived classes to do so.",
+      "revId": "972abb8d7d9a06153fec54c62c3f3f18fb7dcbfe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
