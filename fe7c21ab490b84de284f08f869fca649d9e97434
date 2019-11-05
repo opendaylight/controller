@@ -22,6 +22,30 @@
       "revId": "fe7c21ab490b84de284f08f869fca649d9e97434",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_44cd6030",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/AveragingProgressTrackerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 8125
+      },
+      "writtenOn": "2019-11-05T22:01:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_53324fa7",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 20,
+        "endChar": 23
+      },
+      "revId": "fe7c21ab490b84de284f08f869fca649d9e97434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
