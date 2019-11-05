@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_e6ee04b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractClientHistoryTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-04-03T13:59:36Z",
+      "side": 1,
+      "message": "Since nextTx() returns long, this assert is always successful, regardless of implementation. Better assert would be something like this:\n\nlong tx \u003d object().nextTx();\nAssert.assertEquals(tx + 1, object.nextTx();",
+      "range": {
+        "startLine": 73,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 48
+      },
+      "revId": "0d2d16f3a6567ba8b0b3d3f5c1d7152fc24a2bae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
