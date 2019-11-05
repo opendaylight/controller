@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_c4f5d083",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/MockedSnapshotStore.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-09T11:37:24Z",
+      "side": 1,
+      "message": "I was thinking not to fail fast if the delegate is not set b/c the MockedSnapshotStore could be instantiated for future tests where we don\u0027t set one but I guess we can handle that if/when the time comes.",
+      "revId": "c5c101bd5763fa162624bc2817b52318ed21a93c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
