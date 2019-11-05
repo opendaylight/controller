@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_53324fa7",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/AveragingProgressTrackerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-08T15:37:50Z",
+      "side": 1,
+      "message": "I would make this local variable in methods as it is not needed to keep state between tests",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 20,
+        "endChar": 23
+      },
+      "revId": "fe7c21ab490b84de284f08f869fca649d9e97434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
