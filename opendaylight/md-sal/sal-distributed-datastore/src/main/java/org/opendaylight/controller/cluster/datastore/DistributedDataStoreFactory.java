@@ -34,6 +34,7 @@ public final class DistributedDataStoreFactory {
                 introspector, updater, null);
     }
 
+    // TODO: separate out settle wait so it is better controlled
     public static AbstractDataStore createInstance(final DOMSchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final DatastoreContextIntrospector introspector,
