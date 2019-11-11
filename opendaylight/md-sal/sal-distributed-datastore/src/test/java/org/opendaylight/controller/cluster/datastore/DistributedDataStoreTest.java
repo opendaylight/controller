@@ -101,6 +101,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     public void testWaitTillReadyBlocking() {
         doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
         doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
+        doReturn(1).when(datastoreContext).getInitialSettleTimeoutMultiplier();
         doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
         try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorUtils, UNKNOWN_ID)) {
 
