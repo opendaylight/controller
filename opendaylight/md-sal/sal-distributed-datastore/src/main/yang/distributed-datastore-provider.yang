@@ -274,6 +274,12 @@ module distributed-datastore-provider {
             type non-zero-uint32-type;
             description "The initial buffer capacity, in bytes, to use when serializing message payloads.";
         }
+
+        leaf use-lz4-compression {
+            default false;
+            type boolean;
+            description "Use lz4 compression for snapshots.";
+        }
     }
 
     container data-store-properties-container {

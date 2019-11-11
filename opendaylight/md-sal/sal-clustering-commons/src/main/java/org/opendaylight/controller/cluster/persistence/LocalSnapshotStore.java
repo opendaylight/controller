@@ -21,6 +21,8 @@ import akka.serialization.JavaSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
+import com.typesafe.config.ConfigFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -47,6 +49,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,19 +69,30 @@ public class LocalSnapshotStore extends SnapshotStore {
     private static final Logger LOG = LoggerFactory.getLogger(LocalSnapshotStore.class);
 
     private static final int PERSISTENCE_ID_START_INDEX = "snapshot-".length();
+    private static final String lz4ConfigPath = "odl-cluster-data.akka.persistence.use-lz4-compression";
+    private static final String akkaConfigPath = "configuration/initial/akka.conf";
 
     private final ExecutionContext executionContext;
     private final int maxLoadAttempts;
     private final File snapshotDir;
+    private boolean useLz4Compression = false;
 
     public LocalSnapshotStore(final Config config) {
+        Config akkaConf = ConfigFactory.parseFileAnySyntax(new File(akkaConfigPath));
         this.executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
         snapshotDir = new File(config.getString("dir"));
 
         int localMaxLoadAttempts = config.getInt("max-load-attempts");
         maxLoadAttempts = localMaxLoadAttempts > 0 ? localMaxLoadAttempts : 1;
 
-        LOG.debug("LocalSnapshotStore ctor: snapshotDir: {}, maxLoadAttempts: {}", snapshotDir, maxLoadAttempts);
+        try {
+            useLz4Compression = akkaConf.getBoolean(lz4ConfigPath);
+        } catch (ConfigException.Missing e) {
+            LOG.debug("Configuration for lz4 not found");
+        }
+
+        LOG.debug("LocalSnapshotStore ctor: snapshotDir: {}, maxLoadAttempts: {}, useLz4Compression : {}",
+                snapshotDir, maxLoadAttempts, useLz4Compression);
     }
 
     @Override
@@ -140,7 +155,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     private Object deserialize(final File file) throws IOException {
         return JavaSerializer.currentSystem().withValue((ExtendedActorSystem) context().system(),
             (Callable<Object>) () -> {
-                try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+                try (ObjectInputStream in = getInputStream(file)) {
                     return in.readObject();
                 } catch (ClassNotFoundException e) {
                     throw new IOException("Error loading snapshot file " + file, e);
@@ -149,6 +164,19 @@ public class LocalSnapshotStore extends SnapshotStore {
                     return tryDeserializeAkkaSnapshot(file);
                 }
             });
+    }
+
+    private ObjectInputStream getInputStream(File file) throws IOException {
+        try {
+            if (useLz4Compression) {
+                return new ObjectInputStream(new LZ4FrameInputStream(new FileInputStream(file)));
+            } else {
+                return new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+            }
+        } catch (IOException e) {
+            LOG.debug("Error loading snapshot file with lz4 decompression, using default one");
+            return new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+        }
     }
 
     private Object tryDeserializeAkkaSnapshot(final File file) throws IOException {
@@ -178,7 +206,7 @@ public class LocalSnapshotStore extends SnapshotStore {
 
         LOG.debug("Saving to temp file: {}", temp);
 
-        try (ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(temp)))) {
+        try (ObjectOutputStream out = getOutputStream(temp)) {
             out.writeObject(snapshot);
         } catch (IOException e) {
             LOG.error("Error saving snapshot file {}. Deleting file..", temp, e);
@@ -200,6 +228,14 @@ public class LocalSnapshotStore extends SnapshotStore {
         }
 
         return null;
+    }
+
+    private ObjectOutputStream getOutputStream(File file) throws IOException {
+        if (useLz4Compression) {
+            return new ObjectOutputStream(new LZ4FrameOutputStream(new FileOutputStream(file)));
+        } else {
+            return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+        }
     }
 
     @Override
