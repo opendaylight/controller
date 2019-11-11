@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_85368402",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/infinispan/interceptors/distribution/BaseDistributionInterceptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-08T13:26:20Z",
+      "side": 1,
+      "message": "Please remove this file, in the end this was not needed, and i do see you imported mint.",
+      "revId": "d246c30445890b4f161c5efcdb0339c16d874534",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_253bf8ec",
+        "filename": "opendaylight/clustering/services_implementation/src/main/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusterManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2014-04-08T13:26:20Z",
+      "side": 1,
+      "message": "Why is this needed?",
+      "revId": "d246c30445890b4f161c5efcdb0339c16d874534",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
