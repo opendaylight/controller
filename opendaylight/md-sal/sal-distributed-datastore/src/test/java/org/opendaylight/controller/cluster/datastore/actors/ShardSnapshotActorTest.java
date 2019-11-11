@@ -15,9 +15,12 @@ import akka.actor.ActorRef;
 import akka.testkit.javadsl.TestKit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.time.Duration;
 import java.util.Optional;
+
+import net.jpountz.lz4.LZ4FrameInputStream;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
@@ -29,12 +32,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 public class ShardSnapshotActorTest extends AbstractActorTest {
+    private static boolean USE_LZ4_COMPRESSION = false;
+
     private static final NormalizedNode<?, ?> DATA = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
     private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
             final boolean withInstallSnapshot) throws Exception {
         final TestKit kit = new TestKit(getSystem());
-        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(), testName);
+        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(USE_LZ4_COMPRESSION), testName);
         kit.watch(snapshotActor);
 
         final NormalizedNode<?, ?> expectedRoot = snapshot.getRootNode().get();
@@ -50,8 +55,8 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
         if (installSnapshotStream != null) {
             final ShardDataTreeSnapshot deserialized;
-            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
-                installSnapshotStream.toByteArray()))) {
+            try (ObjectInputStream in = getInputStream(new ByteArrayInputStream(
+                    installSnapshotStream.toByteArray()))) {
                 deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
             }
 
@@ -69,5 +74,13 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
                 new MetadataShardDataTreeSnapshot(DATA), true);
         testSerializeSnapshot("testSerializeBoronSnapshotWithoutInstallSnapshot",
                 new MetadataShardDataTreeSnapshot(DATA), false);
+    }
+
+    private static ObjectInputStream getInputStream(ByteArrayInputStream byteArrayInputStream) throws IOException {
+        if (USE_LZ4_COMPRESSION) {
+            return new ObjectInputStream(new LZ4FrameInputStream(byteArrayInputStream));
+        } else {
+            return new ObjectInputStream(byteArrayInputStream);
+        }
     }
 }
