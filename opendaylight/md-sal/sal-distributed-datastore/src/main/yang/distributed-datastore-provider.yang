@@ -144,6 +144,13 @@ module distributed-datastore-provider {
                           an operation (eg transaction create).";
         }
 
+        leaf shard-leader-election-timeout-multiplier {
+            default 3;
+            type uint32;
+            description "Multiplier for the maximum amount of time to wait for a shard to elect a leader.
+                         Zero value means wait indefinitely (as long as it takes).";
+        }
+
         leaf shard-batched-modification-count {
             default 1000;
             type non-zero-uint32-type;

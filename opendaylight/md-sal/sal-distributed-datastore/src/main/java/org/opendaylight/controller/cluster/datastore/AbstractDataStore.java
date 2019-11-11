@@ -55,8 +55,6 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStore.class);
 
-    private static final long READY_WAIT_FACTOR = 3;
-
     private final ActorUtils actorUtils;
     private final long waitTillReadyTimeInMillis;
 
@@ -117,7 +115,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         LOG.debug("Distributed data store client {} started", identifier);
 
         this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
-                .duration().toMillis() * READY_WAIT_FACTOR;
+                .duration().toMillis() * actorUtils.getDatastoreContext().getShardLeaderElectionTimeoutMultiplier();
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
@@ -135,7 +133,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         this.client = null;
         this.identifier = requireNonNull(identifier);
         this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
-                .duration().toMillis() * READY_WAIT_FACTOR;
+                .duration().toMillis() * actorUtils.getDatastoreContext().getShardLeaderElectionTimeoutMultiplier();
     }
 
     @VisibleForTesting
@@ -145,7 +143,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         this.client = clientActor;
         this.identifier = requireNonNull(identifier);
         this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
-                .duration().toMillis() * READY_WAIT_FACTOR;
+                .duration().toMillis() * actorUtils.getDatastoreContext().getShardLeaderElectionTimeoutMultiplier();
     }
 
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
@@ -246,11 +244,16 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         LOG.info("Beginning to wait for data store to become ready : {}", identifier);
 
         try {
-            if (waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS)) {
+            if (actorUtils.getDatastoreContext().getShardLeaderElectionTimeoutMultiplier() == 0) {
+                waitTillReadyCountDownLatch.await();
                 LOG.debug("Data store {} is now ready", identifier);
             } else {
-                LOG.error("Shard leaders failed to settle in {} seconds, giving up",
-                        TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
+                if (waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS)) {
+                    LOG.debug("Data store {} is now ready", identifier);
+                } else {
+                    LOG.error("Shard leaders failed to settle in {} seconds, giving up",
+                            TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
+                }
             }
         } catch (InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
