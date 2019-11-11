@@ -85,6 +85,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("shard-transaction-commit-queue-capacity", "567");
         properties.put("shard-initialization-timeout-in-seconds", "82");
         properties.put("shard-leader-election-timeout-in-seconds", "66");
+        properties.put("initial-settle-timeout-multiplier", "5");
         properties.put("shard-isolated-leader-check-interval-in-millis", "123");
         properties.put("shard-snapshot-data-threshold-percentage", "100");
         properties.put("shard-election-timeout-factor", "21");
@@ -110,6 +111,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(82, context.getShardInitializationTimeout().duration().toSeconds());
         assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
+        assertEquals(5, context.getInitialSettleTimeoutMultiplier());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(21, context.getShardRaftConfig().getElectionTimeoutFactor());
@@ -126,6 +128,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("operation-timeout-in-seconds", "27");
         properties.put("shard-heartbeat-interval-in-millis", "102");
         properties.put("shard-election-timeout-factor", "22");
+        properties.put("initial-settle-timeout-multiplier", "6");
         properties.put("max-shard-data-change-executor-pool-size", "42");
         properties.put("max-shard-data-store-executor-queue-size", "4444");
         properties.put("persistent", "true");
@@ -143,6 +146,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(82, context.getShardInitializationTimeout().duration().toSeconds());
         assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
+        assertEquals(6, context.getInitialSettleTimeoutMultiplier());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(22, context.getShardRaftConfig().getElectionTimeoutFactor());
