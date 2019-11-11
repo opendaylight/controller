@@ -47,6 +47,13 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream;
+import net.jpountz.lz4.LZ4SafeDecompressor;
+import net.jpountz.xxhash.XXHash32;
+import net.jpountz.xxhash.XXHashFactory;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +76,10 @@ public class LocalSnapshotStore extends SnapshotStore {
     private final ExecutionContext executionContext;
     private final int maxLoadAttempts;
     private final File snapshotDir;
+    private boolean useLz4Compression;
+    private LZ4Compressor lz4Compressor;
+    private LZ4SafeDecompressor lz4Decompressor;
+    private XXHash32 hash32;
 
     public LocalSnapshotStore(final Config config) {
         this.executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
@@ -77,7 +88,17 @@ public class LocalSnapshotStore extends SnapshotStore {
         int localMaxLoadAttempts = config.getInt("max-load-attempts");
         maxLoadAttempts = localMaxLoadAttempts > 0 ? localMaxLoadAttempts : 1;
 
-        LOG.debug("LocalSnapshotStore ctor: snapshotDir: {}, maxLoadAttempts: {}", snapshotDir, maxLoadAttempts);
+        useLz4Compression = config.getBoolean("use-lz4-compression");
+
+        if (useLz4Compression) {
+            LZ4Factory lz4Factory = LZ4Factory.fastestInstance();
+            lz4Compressor = lz4Factory.fastCompressor();
+            lz4Decompressor = lz4Factory.safeDecompressor();
+            hash32 = XXHashFactory.fastestInstance().hash32();
+        }
+
+        LOG.debug("LocalSnapshotStore ctor: snapshotDir: {}, maxLoadAttempts: {}, useLz4Compression : {}",
+                snapshotDir, maxLoadAttempts, useLz4Compression);
     }
 
     @Override
@@ -140,7 +161,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     private Object deserialize(final File file) throws IOException {
         return JavaSerializer.currentSystem().withValue((ExtendedActorSystem) context().system(),
             (Callable<Object>) () -> {
-                try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+                try (ObjectInputStream in = getInputStream(file)) {
                     return in.readObject();
                 } catch (ClassNotFoundException e) {
                     throw new IOException("Error loading snapshot file " + file, e);
@@ -149,6 +170,22 @@ public class LocalSnapshotStore extends SnapshotStore {
                     return tryDeserializeAkkaSnapshot(file);
                 }
             });
+    }
+
+    private ObjectInputStream getInputStream(File file) throws IOException {
+        try {
+            if (useLz4Compression) {
+                return new ObjectInputStream(new LZ4FrameInputStream(
+                        new FileInputStream(file),
+                        lz4Decompressor,
+                        hash32));
+            } else {
+                return new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+            }
+        } catch (IOException e) {
+            LOG.warn("Error loading snapshot file with lz4 decompression: {}, using default one", e.getMessage());
+            return new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+        }
     }
 
     private Object tryDeserializeAkkaSnapshot(final File file) throws IOException {
@@ -178,7 +215,7 @@ public class LocalSnapshotStore extends SnapshotStore {
 
         LOG.debug("Saving to temp file: {}", temp);
 
-        try (ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(temp)))) {
+        try (ObjectOutputStream out = getOutputStream(temp)) {
             out.writeObject(snapshot);
         } catch (IOException e) {
             LOG.error("Error saving snapshot file {}. Deleting file..", temp, e);
@@ -200,6 +237,19 @@ public class LocalSnapshotStore extends SnapshotStore {
         }
 
         return null;
+    }
+
+    private ObjectOutputStream getOutputStream(File file) throws IOException {
+        if (useLz4Compression) {
+            return new ObjectOutputStream(new LZ4FrameOutputStream(
+                    new FileOutputStream(file),
+                    LZ4FrameOutputStream.BLOCKSIZE.SIZE_256KB,
+                    -1,
+                    lz4Compressor,
+                    hash32));
+        } else {
+            return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+        }
     }
 
     @Override
