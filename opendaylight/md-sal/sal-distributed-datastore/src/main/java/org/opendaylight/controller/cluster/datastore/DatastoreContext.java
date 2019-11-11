@@ -51,6 +51,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 50000;
     public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
+    public static final int DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT_MULTIPLIER = 3;
     public static final boolean DEFAULT_PERSISTENT = true;
     public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
@@ -80,6 +81,7 @@ public class DatastoreContext implements ClientActorConfig {
     private int shardTransactionCommitQueueCapacity = DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
     private Timeout shardInitializationTimeout = DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
     private Timeout shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
+    private int shardLeaderElectionTimeoutMultiplier = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
     private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
@@ -123,6 +125,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.shardTransactionCommitQueueCapacity = other.shardTransactionCommitQueueCapacity;
         this.shardInitializationTimeout = other.shardInitializationTimeout;
         this.shardLeaderElectionTimeout = other.shardLeaderElectionTimeout;
+        this.shardLeaderElectionTimeoutMultiplier = other.shardLeaderElectionTimeoutMultiplier;
         this.persistent = other.persistent;
         this.configurationReader = other.configurationReader;
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
@@ -198,6 +201,10 @@ public class DatastoreContext implements ClientActorConfig {
 
     public Timeout getShardLeaderElectionTimeout() {
         return shardLeaderElectionTimeout;
+    }
+
+    public int getShardLeaderElectionTimeoutMultiplier() {
+        return shardLeaderElectionTimeoutMultiplier;
     }
 
     public boolean isPersistent() {
@@ -454,6 +461,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder shardLeaderElectionTimeout(final long timeout, final TimeUnit unit) {
             datastoreContext.shardLeaderElectionTimeout = new Timeout(timeout, unit);
+            return this;
+        }
+
+        public Builder shardLeaderElectionTimeoutMultiplier(final int multiplier) {
+            datastoreContext.shardLeaderElectionTimeoutMultiplier = multiplier;
             return this;
         }
 

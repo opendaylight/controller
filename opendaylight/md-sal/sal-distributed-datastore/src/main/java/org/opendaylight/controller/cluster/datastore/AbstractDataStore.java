@@ -55,8 +55,6 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStore.class);
 
-    private static final long READY_WAIT_FACTOR = 3;
-
     private final ActorUtils actorUtils;
     private final long waitTillReadyTimeInMillis;
 
@@ -116,8 +114,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         identifier = client.getIdentifier();
         LOG.debug("Distributed data store client {} started", identifier);
 
-        this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
-                .duration().toMillis() * READY_WAIT_FACTOR;
+        this.waitTillReadyTimeInMillis = computeWaitTillReadyTimeInMillis(actorUtils.getDatastoreContext());
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
@@ -134,8 +131,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
         this.client = null;
         this.identifier = requireNonNull(identifier);
-        this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
-                .duration().toMillis() * READY_WAIT_FACTOR;
+        this.waitTillReadyTimeInMillis = computeWaitTillReadyTimeInMillis(actorUtils.getDatastoreContext());
     }
 
     @VisibleForTesting
@@ -144,8 +140,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
         this.client = clientActor;
         this.identifier = requireNonNull(identifier);
-        this.waitTillReadyTimeInMillis = actorUtils.getDatastoreContext().getShardLeaderElectionTimeout()
-                .duration().toMillis() * READY_WAIT_FACTOR;
+        this.waitTillReadyTimeInMillis = computeWaitTillReadyTimeInMillis(actorUtils.getDatastoreContext());
     }
 
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
@@ -245,16 +240,29 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     public void waitTillReady() {
         LOG.info("Beginning to wait for data store to become ready : {}", identifier);
 
+        final boolean success;
         try {
-            if (waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS)) {
-                LOG.debug("Data store {} is now ready", identifier);
-            } else {
-                LOG.error("Shard leaders failed to settle in {} seconds, giving up",
-                        TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
-            }
+            success = awaitReady();
         } catch (InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
+            return;
         }
+
+        if (success) {
+            LOG.debug("Data store {} is now ready", identifier);
+        } else {
+            LOG.error("Shard leaders failed to settle in {} seconds, giving up",
+                TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
+        }
+    }
+
+    private boolean awaitReady() throws InterruptedException {
+        if (waitTillReadyTimeInMillis == 0) {
+            waitTillReadyCountDownLatch.await();
+            return true;
+        }
+
+        return waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -321,4 +329,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         return (ListenerRegistration<L>) proxy;
     }
 
+    private static long computeWaitTillReadyTimeInMillis(final DatastoreContext context) {
+        return context.getShardLeaderElectionTimeout().duration().toMillis()
+                * context.getShardLeaderElectionTimeoutMultiplier();
+    }
 }

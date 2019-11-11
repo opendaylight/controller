@@ -20,6 +20,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT_MULTIPLIER;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
@@ -51,6 +52,8 @@ public class DatastoreContextTest {
                 context.getShardInitializationTimeout().duration().toMillis());
         assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis(),
                 context.getShardLeaderElectionTimeout().duration().toMillis());
+        assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT_MULTIPLIER,
+                context.getShardLeaderElectionTimeoutMultiplier());
         assertEquals(DEFAULT_PERSISTENT, context.isPersistent());
         assertEquals(DEFAULT_CONFIGURATION_READER, context.getConfigurationReader());
         assertEquals(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS,
@@ -90,6 +93,7 @@ public class DatastoreContextTest {
                 TimeUnit.MILLISECONDS);
         builder.shardLeaderElectionTimeout(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis() + 1,
                 TimeUnit.MILLISECONDS);
+        builder.shardLeaderElectionTimeoutMultiplier(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT_MULTIPLIER + 1);
         builder.persistent(!DEFAULT_PERSISTENT);
         builder.shardIsolatedLeaderCheckIntervalInMillis(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS + 1);
         builder.shardSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE + 1);
@@ -137,6 +141,8 @@ public class DatastoreContextTest {
                 context.getShardInitializationTimeout().duration().toMillis());
         assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis() + 1,
                 context.getShardLeaderElectionTimeout().duration().toMillis());
+        assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT_MULTIPLIER + 1,
+                context.getShardLeaderElectionTimeoutMultiplier());
         assertEquals(!DEFAULT_PERSISTENT, context.isPersistent());
         assertEquals(DEFAULT_CONFIGURATION_READER, context.getConfigurationReader());
         assertEquals(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS + 1,
