@@ -165,7 +165,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      *
      * <p>
      * Note that unlike {@link #sendRequest(Request, Consumer)}, this method does not exert backpressure, hence it
-     * should never be called from an application thread.
+     * should never be called from an application thread and serves mostly for moving requests between queues.
      *
      * @param request Request to send
      * @param callback Callback to invoke
@@ -174,6 +174,22 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     public final void enqueueRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         enqueueEntry(new ConnectionEntry(request, callback, enqueuedTicks), currentTime());
+    }
+
+    /**
+     * Send a request to the backend and invoke a specified callback when it finishes. This method is safe to invoke
+     * from any thread.
+     *
+     * <p>
+     * Note that unlike {@link #sendRequest(Request, Consumer)}, this method does not exert backpressure. This is a
+     * complementary method for mostly meant for house-cleaning tasks in a front-end implementation.
+     *
+     * @param request Request to send
+     * @param callback Callback to invoke
+     */
+    public final void enqueueRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback) {
+        final long now = currentTime();
+        enqueueEntry(new ConnectionEntry(request, callback, now), now);
     }
 
     private long enqueueOrForward(final ConnectionEntry entry, final long now) {
