@@ -13,16 +13,20 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
+import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,6 +38,7 @@ import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryReq
 import org.opendaylight.controller.cluster.access.commands.DestroyLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.PurgeLocalHistoryRequest;
+import org.opendaylight.controller.cluster.access.commands.SkipTransactionsRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -244,6 +249,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 t.replayMessages(successor, previousEntries);
             }
 
+            // Forward any skipped transactions
+            if (!skippedTransactions.isEmpty()) {
+                successor.skippedTransactions.addAll(skippedTransactions);
+                skippedTransactions.clear();
+            }
+
             // Now look for any finalizing messages
             it = previousEntries.iterator();
             while (it.hasNext()) {
@@ -330,6 +341,23 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     @GuardedBy("lock")
     private ProxyHistory successor;
 
+    // List of transaction identifiers which were allocated by our parent history, but did not touch our shard. Each of
+    // these represents a hole in otherwise-contiguous allocation of transactionIds. These holes are problematic, as
+    // each of them prevents LeaderFrontendState.purgedHistories from coalescing, leading to a gradual heap exhaustion.
+    //
+    // <p>
+    // We keep these in an ArrayList for fast insertion, as that happens when we are otherwise idle. We translate these
+    // into purge requests when:
+    // - we are about to allocate a new transaction
+    // - we get a successor proxy
+    // - the list grows unreasonably long
+    //
+    // TODO: we are tracking entire TransactionIdentifiers, but really only need to track the longs. Do that once we
+    //       have a {@code List<long>}.
+    private static final int PURGE_SKIPPED_TXID_THRESHOLD = 20;
+    @GuardedBy("lock")
+    private final List<TransactionIdentifier> skippedTransactions = new ArrayList<>();
+
     private ProxyHistory(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
         this.parent = requireNonNull(parent);
@@ -396,6 +424,46 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         } finally {
             lock.unlock();
         }
+    }
+
+    final void skipTransaction(final TransactionIdentifier txId) {
+        lock.lock();
+        try {
+            if (successor != null) {
+                successor.skipTransaction(txId);
+                return;
+            }
+
+            skippedTransactions.add(txId);
+            LOG.debug("Recorded skipped transaction {}", txId);
+            if (skippedTransactions.size() >= PURGE_SKIPPED_TXID_THRESHOLD) {
+                skipTransactions();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Holding("lock")
+    private void skipTransactions() {
+        if (skippedTransactions.isEmpty()) {
+            return;
+        }
+
+        final var txIds = skippedTransactions.stream()
+            .mapToLong(TransactionIdentifier::getTransactionId)
+            .distinct()
+            .sorted()
+            .mapToObj(UnsignedLong::fromLongBits)
+            .collect(Collectors.toList());
+        skippedTransactions.clear();
+
+        LOG.debug("Proxy {} skipping transactions {}", this, txIds);
+        final var txId = new TransactionIdentifier(identifier, txIds.remove(0).longValue());
+
+        connection.enqueueRequest(new SkipTransactionsRequest(txId, 0, localActor(), txIds), resp -> {
+            LOG.debug("Proxy {} confirmed transaction skip", this);
+        });
     }
 
     final void abortTransaction(final AbstractProxyTransaction tx) {

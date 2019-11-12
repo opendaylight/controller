@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import org.opendaylight.controller.cluster.access.commands.DeadTransactionExcept
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
+import org.opendaylight.controller.cluster.access.commands.SkipTransactionsRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
@@ -78,6 +80,8 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             final RequestEnvelope envelope, final long now) throws RequestException {
         if (request instanceof TransactionPurgeRequest) {
             return handleTransactionPurgeRequest((TransactionPurgeRequest) request, envelope, now);
+        } else if (request instanceof SkipTransactionsRequest) {
+            return handleSkipTransactionsRequest((SkipTransactionsRequest) request, envelope, now);
         }
 
         final TransactionIdentifier id = request.getTarget();
@@ -161,6 +165,45 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
         });
 
+        return null;
+    }
+
+    private TransactionPurgeResponse handleSkipTransactionsRequest(final SkipTransactionsRequest request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
+        final var first = request.getTarget();
+        final var others = request.getOthers();
+        final var ids = new ArrayList<UnsignedLong>(others.size() + 1);
+        ids.add(UnsignedLong.fromLongBits(first.getTransactionId()));
+        ids.addAll(others);
+
+        final var it = ids.iterator();
+        while (it.hasNext()) {
+            final var id = it.next();
+            final long bits = id.longValue();
+            if (purgedTransactions.contains(bits)) {
+                LOG.warn("{}: history {} tracks {} as purged", persistenceId(), getIdentifier(), id);
+                it.remove();
+            } else if (transactions.containsKey(new TransactionIdentifier(getIdentifier(), bits))) {
+                LOG.warn("{}: history {} tracks {} as open", persistenceId(), getIdentifier(), id);
+                it.remove();
+            }
+        }
+
+        if (ids.isEmpty()) {
+            LOG.debug("{}: history {} completing empty skip request", persistenceId(), getIdentifier());
+            LOG.debug("{}: history {} completing skip of no transactions", persistenceId(), getIdentifier());
+            return new TransactionPurgeResponse(first, now);
+        }
+
+        final var mutable = MutableUnsignedLongSet.of();
+        ids.stream().mapToLong(UnsignedLong::longValue).forEach(mutable::add);
+        LOG.debug("{}: history {} skipping transactions {}", persistenceId(), getIdentifier(), ids);
+        final var transactionIds = mutable.immutableCopy();
+
+        tree.skipTransactions(getIdentifier(), transactionIds, () -> {
+            purgedTransactions.addAll(transactionIds);
+            envelope.sendSuccess(new TransactionPurgeResponse(first, request.getSequence()), readTime() - now);
+        });
         return null;
     }
 
