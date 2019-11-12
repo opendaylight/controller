@@ -13,7 +13,9 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -118,6 +120,11 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     @Override
     void onTransactionPurged(final TransactionIdentifier txId) {
         ensureClient(txId.getHistoryId().getClientId()).onTransactionPurged(txId);
+    }
+
+    @Override
+    void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final List<UnsignedLong> txIds) {
+        ensureClient(historyId.getClientId()).onTransactionsSkipped(historyId, txIds);
     }
 
     /**

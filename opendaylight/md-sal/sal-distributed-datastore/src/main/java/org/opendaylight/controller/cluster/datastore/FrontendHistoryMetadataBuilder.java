@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -73,6 +74,12 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
         final long txidBits = txId.getTransactionId();
         closedTransactions.remove(UnsignedLong.fromLongBits(txidBits));
         purgedTransactions.add(txidBits);
+    }
+
+    void onTransactionsSkipped(final List<UnsignedLong> txIds) {
+        for (var txId : txIds) {
+            purgedTransactions.add(txId.longValue());
+        }
     }
 
     /**

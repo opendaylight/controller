@@ -14,7 +14,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -71,6 +73,11 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
 
         @Override
         void onTransactionPurged(final TransactionIdentifier txId) {
+            // No-op
+        }
+
+        @Override
+        void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final List<UnsignedLong> txIds) {
             // No-op
         }
 
@@ -193,6 +200,17 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         }
 
         @Override
+        void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final List<UnsignedLong> txIds) {
+            final FrontendHistoryMetadataBuilder history = getHistory(historyId);
+            if (history != null) {
+                history.onTransactionsSkipped(txIds);
+                LOG.debug("{}: History {} skipped transactions {}", shardName(), historyId, txIds);
+            } else {
+                LOG.warn("{}: Unknown history {} for skipped transactions, ignoring", shardName(), historyId);
+            }
+        }
+
+        @Override
         LeaderFrontendState toLeaderState(final Shard shard) {
             // Note: we have to make sure to *copy* all current state and not leak any views, otherwise leader/follower
             //       interactions would get intertwined leading to inconsistencies.
@@ -225,15 +243,21 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         }
 
         private FrontendHistoryMetadataBuilder getHistory(final TransactionIdentifier txId) {
-            LocalHistoryIdentifier historyId = txId.getHistoryId();
+            return getHistory(txId.getHistoryId());
+        }
+
+        private FrontendHistoryMetadataBuilder getHistory(final LocalHistoryIdentifier historyId) {
+            final LocalHistoryIdentifier local;
             if (historyId.getHistoryId() == 0 && historyId.getCookie() != 0) {
                 // We are pre-creating the history for free-standing transactions with a zero cookie, hence our lookup
                 // needs to account for that.
                 LOG.debug("{}: looking up {} instead of {}", shardName(), standaloneId, historyId);
-                historyId = standaloneId;
+                local = standaloneId;
+            } else {
+                local = historyId;
             }
 
-            return currentHistories.get(historyId);
+            return currentHistories.get(local);
         }
 
         private LocalHistoryIdentifier standaloneHistoryId() {
@@ -278,6 +302,8 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
     abstract void onTransactionCommitted(TransactionIdentifier txId);
 
     abstract void onTransactionPurged(TransactionIdentifier txId);
+
+    abstract void onTransactionsSkipped(LocalHistoryIdentifier historyId, List<UnsignedLong> txIds);
 
     /**
      * Transform frontend metadata for a particular client into its {@link LeaderFrontendState} counterpart.

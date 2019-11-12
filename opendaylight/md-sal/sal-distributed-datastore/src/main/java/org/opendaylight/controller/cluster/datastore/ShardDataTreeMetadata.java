@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Verify;
+import com.google.common.primitives.UnsignedLong;
+import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -60,6 +62,8 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
     abstract void onTransactionCommitted(TransactionIdentifier txId);
 
     abstract void onTransactionPurged(TransactionIdentifier txId);
+
+    abstract void onTransactionsSkipped(LocalHistoryIdentifier historyId, List<UnsignedLong> txIds);
 
     abstract void onHistoryCreated(LocalHistoryIdentifier historyId);
 
