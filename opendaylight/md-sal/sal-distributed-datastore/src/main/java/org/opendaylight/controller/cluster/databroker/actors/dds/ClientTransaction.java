@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -79,24 +80,30 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
     }
 
     public DOMStoreThreePhaseCommitCohort ready() {
-        final Collection<AbstractProxyTransaction> toReady = ensureClosed();
-        checkState(toReady != null, "Attempted to submit a closed transaction %s", this);
+        final Map<Long, AbstractProxyTransaction> participants = ensureClosed();
+        checkState(participants != null, "Attempted to submit a closed transaction %s", this);
 
+        final TransactionIdentifier txId = getIdentifier();
+        final AbstractClientHistory parent = parent();
+        parent.onTransactionShardsBound(txId, participants.keySet());
+
+        final Collection<AbstractProxyTransaction> toReady = participants.values();
         toReady.forEach(AbstractProxyTransaction::seal);
+
         final AbstractTransactionCommitCohort cohort;
         switch (toReady.size()) {
             case 0:
-                cohort = new EmptyTransactionCommitCohort(parent(), getIdentifier());
+                cohort = new EmptyTransactionCommitCohort(parent, txId);
                 break;
             case 1:
-                cohort = new DirectTransactionCommitCohort(parent(), getIdentifier(), toReady.iterator().next());
+                cohort = new DirectTransactionCommitCohort(parent, txId, toReady.iterator().next());
                 break;
             default:
-                cohort = new ClientTransactionCommitCohort(parent(), getIdentifier(), toReady);
+                cohort = new ClientTransactionCommitCohort(parent, txId, toReady);
                 break;
         }
 
-        return parent().onTransactionReady(this, cohort);
+        return parent.onTransactionReady(this, cohort);
     }
 
     @Override
