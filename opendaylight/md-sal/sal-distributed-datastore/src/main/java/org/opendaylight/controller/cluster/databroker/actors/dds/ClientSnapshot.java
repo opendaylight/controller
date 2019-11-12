@@ -27,19 +27,20 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
         super(parent, transactionId);
     }
 
-    private AbstractProxyTransaction createProxy(final Long shard) {
-        return parent().createSnapshotProxy(getIdentifier(), shard);
-    }
-
-    private AbstractProxyTransaction ensureSnapshotProxy(final YangInstanceIdentifier path) {
-        return ensureProxy(path, this::createProxy);
-    }
-
     public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).exists(path);
     }
 
     public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).read(path);
+    }
+
+    @Override
+    final AbstractProxyTransaction createProxy(final Long shard) {
+        return parent().createSnapshotProxy(getIdentifier(), shard);
+    }
+
+    private AbstractProxyTransaction ensureSnapshotProxy(final YangInstanceIdentifier path) {
+        return ensureProxy(path);
     }
 }
