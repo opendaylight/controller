@@ -412,9 +412,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             metadata = iterator.next();
         }
 
-        // FIXME: CONTROLLER-1991: remove this assumption
-        assumeTrue(false);
-
         assertEquals(UnsignedLongBitmap.of(), metadata.getClosedTransactions());
         assertEquals("[[0.." + numCars * 2 + "]]", metadata.getPurgedTransactions().toString());
     }
