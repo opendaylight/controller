@@ -13,15 +13,19 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -259,7 +263,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             }
         }
 
-        @GuardedBy("lock")
+        @Holding("lock")
         @Override
         ProxyHistory finishReconnect() {
             final ProxyHistory ret = Verify.verifyNotNull(successor);
@@ -329,6 +333,23 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     @GuardedBy("lock")
     private ProxyHistory successor;
 
+    // List of transaction identifiers which were allocated by our parent history, but did not touch our shard. Each of
+    // these represents a hole in otherwise-contiguous allocation of transactionIds. These holes are problematic, as
+    // each of them prevents LeaderFrontendState.purgedHistories from coalescing, leading to a gradual heap exhaustion.
+    //
+    // <p>
+    // We keep these in an ArrayList for fast insertion, as that happens when we are otherwise idle. We translate these
+    // into purge requests when:
+    // - we are about to allocate a new transaction
+    // - we get a successor proxy
+    // - the list grows unreasonably long
+    //
+    // TODO: we are tracking entire TransactionIdentifiers, but really only need to track the longs. Do that once we
+    //       have a {@code List<long>}.
+    private static final int PURGE_SKIPPED_TXID_THRESHOLD = 20;
+    @GuardedBy("lock")
+    private final List<TransactionIdentifier> skippedTransactions = new ArrayList<>();
+
     private ProxyHistory(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
         this.parent = requireNonNull(parent);
@@ -352,7 +373,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     @Override
-    public LocalHistoryIdentifier getIdentifier() {
+    public final LocalHistoryIdentifier getIdentifier() {
         return identifier;
     }
 
@@ -377,7 +398,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         return createTransactionProxy(txId, snapshotOnly, false);
     }
 
-    AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId, final boolean snapshotOnly,
+    final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId, final boolean snapshotOnly,
             final boolean isDone) {
         lock.lock();
         try {
@@ -393,6 +414,36 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         } finally {
             lock.unlock();
         }
+    }
+
+    final void skipTransaction(final TransactionIdentifier txId) {
+        lock.lock();
+        try {
+            if (successor != null) {
+                successor.skipTransaction(txId);
+                return;
+            }
+
+            skippedTransactions.add(txId);
+            LOG.debug("Recorded skipped transaction {}", txId);
+            if (skippedTransactions.size() >= PURGE_SKIPPED_TXID_THRESHOLD) {
+                purgeSkippedTransactions();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Holding("lock")
+    private void purgeSkippedTransactions() {
+        final var txIds = skippedTransactions.stream()
+            .map(TransactionIdentifier::getTransactionId)
+            .collect(Collectors.toCollection(TreeSet::new));
+        skippedTransactions.clear();
+
+        LOG.debug("Proxy {} purging skipped transactions {}", this, txIds);
+
+        // FIXME: CONTROLLER-1991: send a mass purge message
     }
 
     final void abortTransaction(final AbstractProxyTransaction tx) {
@@ -417,7 +468,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
     }
 
-    void purgeTransaction(final AbstractProxyTransaction tx) {
+    final void purgeTransaction(final AbstractProxyTransaction tx) {
         lock.lock();
         try {
             proxies.remove(tx.getIdentifier());
@@ -462,7 +513,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     abstract ProxyHistory createSuccessor(AbstractClientConnection<ShardBackendInfo> connection);
 
     @SuppressFBWarnings(value = "UL_UNRELEASED_LOCK", justification = "Lock is released asynchronously via the cohort")
-    ProxyReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConnection) {
+    final ProxyReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConnection) {
         lock.lock();
         if (successor != null) {
             lock.unlock();
