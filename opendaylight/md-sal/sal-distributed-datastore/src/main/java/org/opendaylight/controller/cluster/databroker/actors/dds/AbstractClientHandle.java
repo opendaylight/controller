@@ -13,10 +13,10 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -103,16 +103,18 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
         return local == null ? null : local.values();
     }
 
-    final T ensureProxy(final YangInstanceIdentifier path, final Function<Long, T> createProxy) {
-        final Map<Long, T> local = getState();
+    final T ensureProxy(final YangInstanceIdentifier path) {
+        final State<T> local = getState();
         final Long shard = parent.resolveShardForPath(path);
 
-        return local.computeIfAbsent(shard, createProxy);
+        return local.computeIfAbsent(shard, this::createProxy);
     }
 
     final AbstractClientHistory parent() {
         return parent;
     }
+
+    abstract @NonNull T createProxy(@NonNull Long shard);
 
     private State<T> getState() {
         final State<T> local = state;
