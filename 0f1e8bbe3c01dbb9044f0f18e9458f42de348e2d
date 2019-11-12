@@ -17,6 +17,23 @@
       "revId": "0f1e8bbe3c01dbb9044f0f18e9458f42de348e2d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3dce375b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/PreLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 7865
+      },
+      "writtenOn": "2019-11-12T23:22:49Z",
+      "side": 1,
+      "message": "1. Can the difference become arbitrarily large in any case (for example, can the lag between commit index and log index become huge for cases like transaction-chain)?\n2. I assume that since pre-leader is a leader in all aspects, there would be no possibility that followers do not get into a state where they voted for a candidate but have not heard any heart-beats during pre-leader state. Is this correct ?",
+      "revId": "0f1e8bbe3c01dbb9044f0f18e9458f42de348e2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
