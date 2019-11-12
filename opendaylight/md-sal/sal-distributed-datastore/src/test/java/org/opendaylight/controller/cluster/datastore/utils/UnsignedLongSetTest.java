@@ -37,37 +37,46 @@ public class UnsignedLongSetTest {
 
         set.add(0);
         assertTrue(set.contains(0));
-        assertEquals("MutableUnsignedLongSet{span=[0..0], size=1}", set.toString());
+        assertRanges("[[0..0]]", set);
 
         set.add(1);
         assertTrue(set.contains(1));
-        assertEquals("MutableUnsignedLongSet{span=[0..1], size=1}", set.toString());
+        assertRanges("[[0..1]]", set);
         set.add(1);
-        assertEquals("MutableUnsignedLongSet{span=[0..1], size=1}", set.toString());
+        assertRanges("[[0..1]]", set);
 
         set.add(4);
-        assertEquals("MutableUnsignedLongSet{span=[0..4], size=2}", set.toString());
+        assertRanges("[[0..1], [4..4]]", set);
 
         set.add(3);
-        assertEquals("MutableUnsignedLongSet{span=[0..4], size=2}", set.toString());
+        assertRanges("[[0..1], [3..4]]", set);
 
         set.add(2);
-        assertEquals("MutableUnsignedLongSet{span=[0..4], size=1}", set.toString());
+        assertRanges("[[0..4]]", set);
 
         assertTrue(set.contains(2));
         assertTrue(set.contains(3));
         assertTrue(set.contains(4));
+
+        set.add(8);
+        assertRanges("[[0..4], [8..8]]", set);
+        set.add(6);
+        assertRanges("[[0..4], [6..6], [8..8]]", set);
+        set.add(7);
+        assertRanges("[[0..4], [6..8]]", set);
+        set.add(5);
+        assertRanges("[[0..8]]", set);
+
+        set.add(11);
+        assertRanges("[[0..8], [11..11]]", set);
+        set.add(9);
+        assertRanges("[[0..9], [11..11]]", set);
     }
 
     @Test
     public void testSerialization() throws IOException {
-        final var tmp = MutableUnsignedLongSet.of();
-        tmp.add(0);
-        tmp.add(1);
-        tmp.add(4);
-        tmp.add(3);
 
-        final var set = tmp.immutableCopy();
+        final var set = MutableUnsignedLongSet.of(0, 1, 4, 3).immutableCopy();
 
         final var bos = new ByteArrayOutputStream();
         try (var out = new DataOutputStream(bos)) {
@@ -88,11 +97,7 @@ public class UnsignedLongSetTest {
 
     @Test
     public void testToRangeSet() {
-        final var set = MutableUnsignedLongSet.of();
-        set.add(0);
-        set.add(1);
-        set.add(4);
-        set.add(3);
+        final var set = MutableUnsignedLongSet.of(0, 1, 4, 3);
         assertEquals("[[0..2), [3..5)]", set.toRangeSet().toString());
     }
 
@@ -132,5 +137,44 @@ public class UnsignedLongSetTest {
         final var ex = assertThrows(IOException.class,
             () -> ImmutableUnsignedLongSet.of().writeRangesTo(mock(DataOutput.class), 1));
         assertEquals("Mismatched size: expected 0, got 1", ex.getMessage());
+    }
+
+    @Test
+    public void testAddRange() {
+        var set = sparseSet();
+        set.addAll(MutableUnsignedLongSet.of(1, 2));
+        assertRanges("[[1..2], [5..6], [9..10], [13..14]]", set);
+        set.addAll(MutableUnsignedLongSet.of(3, 4));
+        assertRanges("[[1..6], [9..10], [13..14]]", set);
+        set.addAll(MutableUnsignedLongSet.of(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
+        assertRanges("[[1..15]]", set);
+
+        set = sparseSet();
+        set.addAll(MutableUnsignedLongSet.of(2, 3, 4, 5));
+        assertRanges("[[1..6], [9..10], [13..14]]", set);
+
+        set.addAll(MutableUnsignedLongSet.of(6, 7));
+        assertRanges("[[1..7], [9..10], [13..14]]", set);
+
+        set.addAll(MutableUnsignedLongSet.of(8));
+        assertRanges("[[1..10], [13..14]]", set);
+
+        set = MutableUnsignedLongSet.of();
+        set.addAll(MutableUnsignedLongSet.of(1, 2));
+        assertRanges("[[1..2]]", set);
+
+        set = sparseSet();
+        set.addAll(MutableUnsignedLongSet.of(4, 5));
+        assertRanges("[[1..2], [4..6], [9..10], [13..14]]", set);
+    }
+
+    private static MutableUnsignedLongSet sparseSet() {
+        final var ret = MutableUnsignedLongSet.of(1, 2, 5, 6, 9, 10, 13, 14);
+        assertRanges("[[1..2], [5..6], [9..10], [13..14]]", ret);
+        return ret;
+    }
+
+    private static void assertRanges(final String expected, final UnsignedLongSet set) {
+        assertEquals(expected, set.ranges().toString());
     }
 }
