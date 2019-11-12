@@ -62,6 +62,33 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     private final Map<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
     private final StampedLock lock = new StampedLock();
 
+    /*
+     *  FIXME: CONTROLLER-1896: track shard -> last purged transaction. The idea here is that we need to soft-track
+     *                         when we have purged a transaction (across all shards) and cross-reference it with
+     *                         outstanding transactions for a particular shard (i.e. openTransactions->state and
+     *                         readyTransactions.
+     *
+     *                         The idea is that we need to keep an upper bound on the number of backlogged transactions
+     *                         which each shard has not received a purged on in an efficient manner -- i.e. tell all
+     *                         backends that transactions up to a specific identifier will not be seen in the future.
+     *
+     *                         Softness in tracking here means we do not keep a completely-uptodate view, but rather
+     *                         allow for some configurable skew (say. 100 transactions) to be indeterminite, before
+     *                         deciding to tell the backends (on individual basis?) about this at the moment we allocate
+     *                         a new transaction towards that shard.
+     *
+     *                         This means that while under 'normal' conditions we do not need to issue these explicit
+     *                         messages (because we have 1:1 shard/history mapping), we place an upper bound on how much
+     *                         backend transaction tracking can fragment (in terms of RaneSet).
+     *
+     *                         Marking the transaction needs to be (reasonably) fast, as it needs to execute from when
+     *                         the transaction is purged (either committed, aborted or GC'd) and the actual propagation
+     *                         may take a a special-case path from createSnapshot()/createTransaction(). Those look like
+     *                         they'll end up doing more than just returning a snapshot.
+     *
+     *                         Note: the above needs to be reconciled with actual request lifecycle.
+     */
+
     private final AbstractDataStoreClientBehavior client;
     private final LocalHistoryIdentifier identifier;
 
