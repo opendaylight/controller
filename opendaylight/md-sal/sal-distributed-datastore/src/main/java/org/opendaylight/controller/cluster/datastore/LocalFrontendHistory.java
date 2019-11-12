@@ -14,6 +14,7 @@ import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -78,5 +79,13 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
             final Optional<SortedSet<String>> participatingShardNames) {
         return chain.createReadyCohort(id, mod, participatingShardNames);
+    }
+
+    /**
+     * @param transactionIds
+     */
+    public void skipTransactions(final List<Long> transactionIds) {
+        // TODO Auto-generated method stub
+
     }
 }
