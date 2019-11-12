@@ -417,9 +417,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final var purgedRanges = metadata.getPurgedTransactions().ranges();
 
-        // FIXME: CONTROLLER-1991: remove this assumption
-        assumeTrue(false);
-
         assertEquals(1, purgedRanges.size());
         final var purgedRange = purgedRanges.first();
         assertEquals(UnsignedLong.ZERO, purgedRange.lower());
