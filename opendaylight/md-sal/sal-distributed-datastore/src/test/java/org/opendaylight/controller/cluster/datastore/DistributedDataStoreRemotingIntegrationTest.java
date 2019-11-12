@@ -54,7 +54,6 @@ import java.util.function.Supplier;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -259,8 +258,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static void verifyNode(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path,
             final NormalizedNode expNode) throws Exception {
         final Optional<NormalizedNode> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
-        assertTrue("isPresent", optional.isPresent());
-        assertEquals("Data node", expNode, optional.get());
+        assertEquals(Optional.of(expNode), optional);
     }
 
     private static void verifyExists(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path)
@@ -419,7 +417,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     @Test
-    @Ignore("Flushes out tell based leak needs to be handled separately")
     public void testCloseTransactionMetadataLeak() throws Exception {
         // Ask based frontend seems to have some issues with back to back close
         Assume.assumeTrue(testParameter.isAssignableFrom(TestClientBackedDataStore.class));
@@ -434,7 +431,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
         followerTestKit.doCommit(writeTx.ready());
 
-        int numCars = 5;
+        int numCars = 20;
         for (int i = 0; i < numCars; i++) {
             writeTx = txChain.newWriteOnlyTransaction();
             writeTx.close();
@@ -472,7 +469,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                         assertEquals(1, metadata.getPurgedTransactions().size());
                     } else {
                         // ask based should track no metadata
-                        assertTrue(frontendMetadata.getClients().get(0).getCurrentHistories().isEmpty());
+                        assertEquals(List.of(), frontendMetadata.getClients().get(0).getCurrentHistories());
                     }
                 });
 

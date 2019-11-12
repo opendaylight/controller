@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
 import org.opendaylight.yangtools.concepts.Builder;
@@ -73,6 +74,10 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
         final long txidBits = txId.getTransactionId();
         closedTransactions.remove(UnsignedLong.fromLongBits(txidBits));
         purgedTransactions.add(txidBits);
+    }
+
+    void onTransactionsSkipped(final ImmutableUnsignedLongSet txIds) {
+        purgedTransactions.addAll(txIds);
     }
 
     /**
