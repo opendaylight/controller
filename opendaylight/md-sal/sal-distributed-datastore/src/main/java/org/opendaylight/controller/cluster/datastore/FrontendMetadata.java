@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,6 +119,11 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     @Override
     void onTransactionPurged(final TransactionIdentifier txId) {
         ensureClient(txId.getHistoryId().getClientId()).onTransactionPurged(txId);
+    }
+
+    @Override
+    void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final ImmutableUnsignedLongSet txIds) {
+        ensureClient(historyId.getClientId()).onTransactionsSkipped(historyId, txIds);
     }
 
     /**
