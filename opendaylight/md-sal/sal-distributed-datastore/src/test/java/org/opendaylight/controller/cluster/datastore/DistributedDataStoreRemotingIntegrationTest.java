@@ -401,20 +401,17 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
     }
 
-    private void assertAskClientMetadata(final FrontendClientMetadata clientMeta) {
+    private static void assertAskClientMetadata(final FrontendClientMetadata clientMeta) {
         // ask based should track no metadata
         assertEquals(List.of(), clientMeta.getCurrentHistories());
     }
 
-    private void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
+    private static void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
         final var iterator = clientMeta.getCurrentHistories().iterator();
         var metadata = iterator.next();
         while (iterator.hasNext() && metadata.getHistoryId() != 1) {
             metadata = iterator.next();
         }
-
-        // FIXME: CONTROLLER-1991: remove this assumption
-        assumeTrue(false);
 
         assertEquals(UnsignedLongBitmap.of(), metadata.getClosedTransactions());
         assertEquals("[[0.." + lastPurged + "]]", metadata.getPurgedTransactions().ranges().toString());
@@ -436,18 +433,14 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         int numCars = 5;
         for (int i = 0; i < numCars; i++) {
-            writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.close();
+            try (var tx = txChain.newWriteOnlyTransaction()) {
+                // Empty on purpose
+            }
 
             try (var tx = txChain.newReadOnlyTransaction()) {
                 tx.read(CarsModel.BASE_PATH).get();
             }
         }
-
-        writeTx = txChain.newWriteOnlyTransaction();
-        writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-        writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-        followerTestKit.doCommit(writeTx.ready());
 
         // wait to let the shard catch up with purged
         await("Close transaction purge leak test.").atMost(5, TimeUnit.SECONDS)
@@ -461,7 +454,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
                     if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2 + 1);
+                        assertTellClientMetadata(clientMeta, numCars * 2);
                     } else {
                         assertAskClientMetadata(clientMeta);
                     }
