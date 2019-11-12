@@ -15,6 +15,8 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -236,6 +238,30 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     @Holding("this")
     abstract ClientTransaction doCreateTransaction();
+
+    /**
+     * Callback invoked from {@link AbstractClientHandle}'s lifecycle to inform that a particular transaction is
+     * completing with a set of participating shards.
+     *
+     * @param txId Transaction identifier
+     * @param participatingShards Participating shard cookies
+     */
+    final void onTransactionShardsBound(final TransactionIdentifier txId, final Set<Long> participatingShards) {
+        // Guard against startReconnect() kicking in. It is okay to connect new participants concurrently, as those
+        // will not see the holes caused by this.
+        final long stamp = lock.readLock();
+        try {
+            if (!histories.keySet().equals(participatingShards)) {
+                for (Entry<Long, ProxyHistory> entry : histories.entrySet()) {
+                    if (!participatingShards.contains(entry.getKey())) {
+                        entry.getValue().skipTransaction(txId);
+                    }
+                }
+            }
+        } finally {
+            lock.unlockRead(stamp);
+        }
+    }
 
     /**
      * Callback invoked from {@link ClientTransaction} when a child transaction readied for submission.
