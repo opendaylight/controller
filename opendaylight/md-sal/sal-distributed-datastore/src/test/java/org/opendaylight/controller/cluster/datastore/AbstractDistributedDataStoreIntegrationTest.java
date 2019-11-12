@@ -37,7 +37,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameter;
 import org.mockito.Mockito;
@@ -253,7 +252,6 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     }
 
     @Test
-    @Ignore("Flushes a closed tx leak in single node, needs to be handled separately")
     public void testSingleTransactionsWritesInQuickSuccession() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
@@ -296,7 +294,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 assertEquals(1, metadata.getPurgedTransactions().size());
             } else {
                 // ask based should track no metadata
-                assertTrue(frontendMetadata.getClients().get(0).getCurrentHistories().isEmpty());
+                assertEquals(List.of(), frontendMetadata.getClients().get(0).getCurrentHistories());
             }
 
             final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
