@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.commands.OutOfSequenceEnvelopeException;
 import org.opendaylight.controller.cluster.access.commands.PurgeLocalHistoryRequest;
+import org.opendaylight.controller.cluster.access.commands.SkipTransactionsLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.UnknownHistoryException;
@@ -101,6 +102,8 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
                     return handleDestroyHistory((DestroyLocalHistoryRequest) request, envelope, now);
                 } else if (request instanceof PurgeLocalHistoryRequest) {
                     return handlePurgeHistory((PurgeLocalHistoryRequest) request, envelope, now);
+                } else if (request instanceof SkipTransactionsLocalHistoryRequest) {
+                    return handleSkipTransactions((SkipTransactionsLocalHistoryRequest) request, envelope, now);
                 } else {
                     LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
                     throw new UnsupportedRequestException(request);
@@ -221,6 +224,20 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             LOG.debug("{}: purging history {}", persistenceId(), id);
             purgedHistories.add(id.getHistoryId());
             existing.purge(request.getSequence(), envelope, now);
+            return null;
+        }
+
+        private LocalHistorySuccess handleSkipTransactions(final SkipTransactionsLocalHistoryRequest request,
+                final RequestEnvelope envelope, final long now) {
+            final LocalHistoryIdentifier id = request.getTarget();
+            final LocalFrontendHistory existing = localHistories.get(id);
+            if (existing == null) {
+                // History does not exist: report success
+                LOG.debug("{}: history {} does not exist, nothing to skip", persistenceId(), id);
+                return new LocalHistorySuccess(id, request.getSequence());
+            }
+
+            existing.skipTransactions(request.getSequence(), envelope, now, request.getTransactionIds());
             return null;
         }
 

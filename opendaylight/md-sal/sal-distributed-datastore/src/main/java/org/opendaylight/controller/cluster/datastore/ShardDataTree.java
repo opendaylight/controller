@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -65,6 +66,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionP
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
+import org.opendaylight.controller.cluster.datastore.persisted.SkipTransactionsLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -220,8 +222,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     final void updateSchemaContext(final @NonNull EffectiveModelContext newSchemaContext) {
         dataTree.setEffectiveModelContext(newSchemaContext);
-        this.schemaContext = newSchemaContext;
-        this.dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
+        schemaContext = newSchemaContext;
+        dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
     }
 
     final void resetTransactionBatch() {
@@ -385,6 +387,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
         } else if (payload instanceof PurgeLocalHistoryPayload) {
             allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
+        } else if (payload instanceof SkipTransactionsLocalHistoryPayload) {
+            skipTransactions((SkipTransactionsLocalHistoryPayload) payload);
         } else {
             LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
         }
@@ -473,6 +477,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 payloadReplicationComplete((PurgeLocalHistoryPayload)payload);
             }
             allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
+        } else if (payload instanceof SkipTransactionsLocalHistoryPayload) {
+            if (identifier != null) {
+                payloadReplicationComplete((SkipTransactionsLocalHistoryPayload)payload);
+            }
+            skipTransactions((SkipTransactionsLocalHistoryPayload) payload);
         } else {
             LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
         }
@@ -566,6 +575,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private void allMetadataPurgedLocalHistory(final LocalHistoryIdentifier historyId) {
         for (ShardDataTreeMetadata<?> m : metadata) {
             m.onHistoryPurged(historyId);
+        }
+    }
+
+    private void skipTransactions(final SkipTransactionsLocalHistoryPayload payload) {
+        final var historyId = payload.getIdentifier();
+        final var txIds = payload.getTransactionIds();
+        for (ShardDataTreeMetadata<?> m : metadata) {
+            m.onTransactionsSkipped(historyId, txIds);
         }
     }
 
@@ -693,6 +710,29 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         replicatePayload(id, PurgeLocalHistoryPayload.create(
                 id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+    }
+
+    final void skipTransactions(final LocalHistoryIdentifier id, final List<UnsignedLong> transactionIds,
+            final Runnable callback) {
+        if (transactionIds.isEmpty()) {
+            LOG.debug("{}: Suppressing empty skip in transaction chain {}", logContext, id);
+            if (callback != null) {
+                callback.run();
+            }
+            return;
+        }
+
+        final ShardDataTreeTransactionChain chain = transactionChains.remove(id);
+        if (chain == null) {
+            LOG.debug("{}: Skipping on non-existent transaction chain {}", logContext, id);
+            if (callback != null) {
+                callback.run();
+            }
+            return;
+        }
+
+        replicatePayload(id, SkipTransactionsLocalHistoryPayload.create(
+            id, transactionIds, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     final Optional<DataTreeCandidate> readCurrentData() {
