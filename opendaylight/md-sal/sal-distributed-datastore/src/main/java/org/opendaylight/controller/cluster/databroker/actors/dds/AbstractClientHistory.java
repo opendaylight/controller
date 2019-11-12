@@ -15,6 +15,8 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -104,7 +106,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     @Override
-    public LocalHistoryIdentifier getIdentifier() {
+    public final LocalHistoryIdentifier getIdentifier() {
         return identifier;
     }
 
@@ -237,9 +239,33 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     abstract ClientTransaction doCreateTransaction();
 
     /**
-     * Callback invoked from {@link ClientTransaction} when a child transaction readied for submission.
+     * Callback invoked from {@link AbstractClientHandle}'s lifecycle to inform that a particular transaction is
+     * completing with a set of participating shards.
      *
      * @param txId Transaction identifier
+     * @param participatingShards Participating shard cookies
+     */
+    final void onTransactionShardsBound(final TransactionIdentifier txId, final Set<Long> participatingShards) {
+        // Guard against startReconnect() kicking in. It is okay to connect new participants concurrently, as those
+        // will not see the holes caused by this.
+        final long stamp = lock.readLock();
+        try {
+            if (!histories.keySet().equals(participatingShards)) {
+                for (Entry<Long, ProxyHistory> entry : histories.entrySet()) {
+                    if (!participatingShards.contains(entry.getKey())) {
+                        entry.getValue().skipTransaction(txId);
+                    }
+                }
+            }
+        } finally {
+            lock.unlockRead(stamp);
+        }
+    }
+
+    /**
+     * Callback invoked from {@link ClientTransaction} when a child transaction readied for submission.
+     *
+     * @param tx Client transaction
      * @param cohort Transaction commit cohort
      */
     synchronized AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
@@ -274,13 +300,13 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      *
      * @param txId transaction identifier
      */
-    synchronized void onTransactionComplete(final TransactionIdentifier txId) {
+    final synchronized void onTransactionComplete(final TransactionIdentifier txId) {
         if (readyTransactions.remove(txId) == null) {
             LOG.warn("Could not find completed transaction {}", txId);
         }
     }
 
-    HistoryReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn) {
+    final HistoryReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn) {
         /*
          * This looks ugly and unusual and there is a reason for that, as the locking involved is in multiple places.
          *
@@ -328,5 +354,4 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
             }
         };
     }
-
 }
