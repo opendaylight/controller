@@ -401,20 +401,17 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
     }
 
-    private void assertAskClientMetadata(final FrontendClientMetadata clientMeta) {
+    private static void assertAskClientMetadata(final FrontendClientMetadata clientMeta) {
         // ask based should track no metadata
         assertEquals(List.of(), clientMeta.getCurrentHistories());
     }
 
-    private void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
+    private static void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
         final var iterator = clientMeta.getCurrentHistories().iterator();
         var metadata = iterator.next();
         while (iterator.hasNext() && metadata.getHistoryId() != 1) {
             metadata = iterator.next();
         }
-
-        // FIXME: CONTROLLER-1991: remove this assumption
-        assumeTrue(false);
 
         assertEquals(UnsignedLongBitmap.of(), metadata.getClosedTransactions());
         assertEquals("[[0.." + lastPurged + "]]", metadata.getPurgedTransactions().ranges().toString());
