@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -220,8 +221,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     final void updateSchemaContext(final @NonNull EffectiveModelContext newSchemaContext) {
         dataTree.setEffectiveModelContext(newSchemaContext);
-        this.schemaContext = newSchemaContext;
-        this.dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
+        schemaContext = newSchemaContext;
+        dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
     }
 
     final void resetTransactionBatch() {
@@ -693,6 +694,29 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         replicatePayload(id, PurgeLocalHistoryPayload.create(
                 id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+    }
+
+    final void skipTransactions(final LocalHistoryIdentifier id, final RangeSet<UnsignedLong> transactionIds,
+            final Runnable callback) {
+        if (transactionIds.isEmpty()) {
+            LOG.debug("{}: Suppressing empty skip in transaction chain {}", logContext, id);
+            if (callback != null) {
+                callback.run();
+            }
+            return;
+        }
+
+        final ShardDataTreeTransactionChain chain = transactionChains.remove(id);
+        if (chain == null) {
+            LOG.debug("{}: Skipping on non-existent transaction chain {}", logContext, id);
+            if (callback != null) {
+                callback.run();
+            }
+            return;
+        }
+
+        replicatePayload(id, SkipTransactionsLocalHistoryPayload.create(
+            id, transactionIds, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     final Optional<DataTreeCandidate> readCurrentData() {
