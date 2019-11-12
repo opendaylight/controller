@@ -19,8 +19,8 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -137,7 +137,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     @Test
     public void testEnsureClosed() {
         doHandleOperation(handle);
-        final Collection<AbstractProxyTransaction> transactions = handle.ensureClosed();
+        final Map<Long, AbstractProxyTransaction> transactions = handle.ensureClosed();
         Assert.assertNotNull(transactions);
         Assert.assertEquals(1, transactions.size());
     }

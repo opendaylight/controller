@@ -11,8 +11,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -77,7 +82,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         if (request instanceof TransactionPurgeRequest) {
-            return handleTransactionPurgeRequest(request, envelope, now);
+            return handleTransactionPurgeRequest((TransactionPurgeRequest) request, envelope, now);
         }
 
         final TransactionIdentifier id = request.getTarget();
@@ -117,7 +122,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         return tx.handleRequest(request, envelope, now);
     }
 
-    private TransactionSuccess<?> handleTransactionPurgeRequest(final TransactionRequest<?> request,
+    private TransactionPurgeResponse handleTransactionPurgeRequest(final TransactionPurgeRequest request,
             final RequestEnvelope envelope, final long now) {
         final TransactionIdentifier id = request.getTarget();
         final long txidBits = id.getTransactionId();
@@ -173,6 +178,17 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     final void purge(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
         tree.purgeTransactionChain(getIdentifier(),
+            () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
+    }
+
+    void skipTransactions(final long sequence, final RequestEnvelope envelope, final long now,
+            final List<UnsignedLong> transactionIds) {
+        // Coalesce all IDs into ranges to be more expressive
+        final RangeSet<UnsignedLong> ranges = TreeRangeSet.create(Lists.transform(transactionIds,
+            txId -> Range.closedOpen(txId, UnsignedLong.ONE.plus(txId))));
+        LOG.debug("{}: history {} skipping transactions {}", persistenceId(), getIdentifier(), ranges);
+
+        tree.skipTransactions(getIdentifier(), ranges,
             () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
     }
 

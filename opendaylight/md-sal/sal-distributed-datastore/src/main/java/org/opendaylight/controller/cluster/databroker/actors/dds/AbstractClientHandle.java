@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.eclipse.jdt.annotation.NonNull;
@@ -55,7 +55,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     @Override
-    public TransactionIdentifier getIdentifier() {
+    public final TransactionIdentifier getIdentifier() {
         return transactionId;
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      *
      * @return True if this transaction became closed during this call
      */
-    public boolean abort() {
+    public final boolean abort() {
         if (commonAbort()) {
             parent.onTransactionAbort(this);
             return true;
@@ -74,12 +74,13 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     private boolean commonAbort() {
-        final Collection<T> toClose = ensureClosed();
+        final Map<Long, T> toClose = ensureClosed();
         if (toClose == null) {
             return false;
         }
 
-        toClose.forEach(AbstractProxyTransaction::abort);
+        toClose.values().forEach(AbstractProxyTransaction::abort);
+        parent.onTransactionShardsBound(transactionId, toClose.keySet());
         return true;
     }
 
@@ -93,14 +94,14 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      * Make sure this snapshot is closed. If it became closed as the effect of this call, return a collection of
      * {@link AbstractProxyTransaction} handles which need to be closed, too.
      *
-     * @return null if this snapshot has already been closed, otherwise a collection of proxies, which need to be
+     * @return null if this snapshot has already been closed, otherwise a State with of proxies, which need to be
      *         closed, too.
      */
-    final @Nullable Collection<T> ensureClosed() {
+    final @Nullable Map<Long, T> ensureClosed() {
         // volatile read and a conditional CAS. This ends up being better in the typical case when we are invoked more
         // than once (see ClientBackedTransaction) than performing a STATE_UPDATER.getAndSet().
         final State<T> local = state;
-        return local != null && STATE_UPDATER.compareAndSet(this, local, null) ? local.values() : null;
+        return local != null && STATE_UPDATER.compareAndSet(this, local, null) ? local : null;
     }
 
     final T ensureProxy(final YangInstanceIdentifier path) {
