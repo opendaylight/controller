@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
@@ -22,9 +23,7 @@ import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Function;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -46,7 +45,6 @@ import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import scala.concurrent.Promise;
@@ -54,7 +52,6 @@ import scala.concurrent.Promise;
 public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<AbstractProxyTransaction>> {
 
     private static final String PERSISTENCE_ID = "per-1";
-    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
 
     @Mock
     private DataTree dataTree;
@@ -113,7 +110,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
 
     @Test
     public void testGetIdentifier() {
-        Assert.assertEquals(TRANSACTION_ID, handle.getIdentifier());
+        assertEquals(TRANSACTION_ID, handle.getIdentifier());
     }
 
     @Test
@@ -122,7 +119,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         handle.abort();
         final Envelope<?> envelope = backendProbe.expectMsgClass(Envelope.class);
         final AbortLocalTransactionRequest request = (AbortLocalTransactionRequest) envelope.getMessage();
-        Assert.assertEquals(TRANSACTION_ID, request.getTarget());
+        assertEquals(TRANSACTION_ID, request.getTarget());
         checkClosed();
     }
 
@@ -132,7 +129,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         handle.localAbort(new RuntimeException("fail"));
         final Envelope<?> envelope = backendProbe.expectMsgClass(Envelope.class);
         final AbortLocalTransactionRequest request = (AbortLocalTransactionRequest) envelope.getMessage();
-        Assert.assertEquals(TRANSACTION_ID, request.getTarget());
+        assertEquals(TRANSACTION_ID, request.getTarget());
         checkClosed();
     }
 
@@ -140,23 +137,13 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     public void testEnsureClosed() {
         doHandleOperation(handle);
         final Collection<AbstractProxyTransaction> transactions = handle.ensureClosed();
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(1, transactions.size());
-    }
-
-    @Test
-    public void testEnsureProxy() {
-        final Function<Long, AbstractProxyTransaction> function = mock(Function.class);
-        final AbstractProxyTransaction expected = mock(AbstractProxyTransaction.class);
-        when(function.apply(0L)).thenReturn(expected);
-        final AbstractProxyTransaction proxy = handle.ensureProxy(PATH, function);
-        verify(function).apply(0L);
-        Assert.assertEquals(expected, proxy);
+        assertNotNull(transactions);
+        assertEquals(1, transactions.size());
     }
 
     @Test
     public void testParent() {
-        Assert.assertEquals(parent, handle.parent());
+        assertEquals(parent, handle.parent());
     }
 
     protected void checkClosed() throws Exception {
@@ -175,7 +162,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     protected <R extends Request<?, R>> R backendRespondToRequest(final Class<R> expectedRequestClass,
                                                             final Response<?, ?> response) {
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
-        Assert.assertEquals(expectedRequestClass, envelope.getMessage().getClass());
+        assertEquals(expectedRequestClass, envelope.getMessage().getClass());
         final AbstractClientConnection<ShardBackendInfo> connection = client.getConnection(0L);
         final long sessionId = envelope.getSessionId();
         final long txSequence = envelope.getTxSequence();

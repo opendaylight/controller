@@ -60,12 +60,8 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         super(parent, transactionId);
     }
 
-    private AbstractProxyTransaction createProxy(final Long shard) {
-        return parent().createTransactionProxy(getIdentifier(), shard);
-    }
-
     private AbstractProxyTransaction ensureTransactionProxy(final YangInstanceIdentifier path) {
-        return ensureProxy(path, this::createProxy);
+        return ensureProxy(path);
     }
 
     public DOMDataTreeWriteCursor openCursor() {
@@ -114,6 +110,11 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         }
 
         return parent().onTransactionReady(this, cohort);
+    }
+
+    @Override
+    final AbstractProxyTransaction createProxy(final Long shard) {
+        return parent().createTransactionProxy(getIdentifier(), shard);
     }
 
     void closeCursor(final @NonNull DOMDataTreeCursor cursorToClose) {
