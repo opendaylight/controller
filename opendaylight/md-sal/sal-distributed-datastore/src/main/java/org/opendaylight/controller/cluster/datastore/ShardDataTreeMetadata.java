@@ -13,6 +13,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 
 abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>> {
     /**
@@ -60,6 +61,8 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
     abstract void onTransactionCommitted(TransactionIdentifier txId);
 
     abstract void onTransactionPurged(TransactionIdentifier txId);
+
+    abstract void onTransactionsSkipped(LocalHistoryIdentifier historyId, ImmutableUnsignedLongSet txIds);
 
     abstract void onHistoryCreated(LocalHistoryIdentifier historyId);
 
