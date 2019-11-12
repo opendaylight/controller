@@ -253,6 +253,12 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             return;
         }
 
+        if (txContextWrappers.isEmpty()) {
+            // FIXME: CONTROLLER-1991: we forward this event ... somewhere
+            LOG.debug("Tx {} closed without any operations", getIdentifier());
+            return;
+        }
+
         for (AbstractTransactionContextWrapper contextWrapper : txContextWrappers.values()) {
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
@@ -261,8 +267,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 }
             });
         }
-
-
         txContextWrappers.clear();
     }
 
