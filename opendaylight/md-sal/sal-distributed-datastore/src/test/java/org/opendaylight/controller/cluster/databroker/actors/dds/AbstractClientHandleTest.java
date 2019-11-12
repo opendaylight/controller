@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
@@ -22,7 +21,6 @@ import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Function;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -146,12 +144,9 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
 
     @Test
     public void testEnsureProxy() {
-        final Function<Long, AbstractProxyTransaction> function = mock(Function.class);
         final AbstractProxyTransaction expected = mock(AbstractProxyTransaction.class);
-        when(function.apply(0L)).thenReturn(expected);
-        final AbstractProxyTransaction proxy = handle.ensureProxy(PATH, function);
-        verify(function).apply(0L);
-        Assert.assertEquals(expected, proxy);
+        final AbstractProxyTransaction proxy = handle.ensureProxy(PATH);
+        Assert.assertEquals(0, proxy.getIdentifier().getTransactionId());
     }
 
     @Test
