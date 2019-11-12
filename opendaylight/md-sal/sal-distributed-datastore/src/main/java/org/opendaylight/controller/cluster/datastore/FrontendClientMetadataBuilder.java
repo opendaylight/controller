@@ -75,6 +75,11 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         }
 
         @Override
+        void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final ImmutableUnsignedLongSet txIds) {
+            // No-op
+        }
+
+        @Override
         LeaderFrontendState toLeaderState(final Shard shard) {
             return new LeaderFrontendState.Disabled(shard.persistenceId(), getIdentifier(), shard.getDataStore());
         }
@@ -193,6 +198,17 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         }
 
         @Override
+        void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final ImmutableUnsignedLongSet txIds) {
+            final FrontendHistoryMetadataBuilder history = getHistory(historyId);
+            if (history != null) {
+                history.onTransactionsSkipped(txIds);
+                LOG.debug("{}: History {} skipped transactions {}", shardName(), historyId, txIds);
+            } else {
+                LOG.warn("{}: Unknown history {} for skipped transactions, ignoring", shardName(), historyId);
+            }
+        }
+
+        @Override
         LeaderFrontendState toLeaderState(final Shard shard) {
             // Note: we have to make sure to *copy* all current state and not leak any views, otherwise leader/follower
             //       interactions would get intertwined leading to inconsistencies.
@@ -225,15 +241,21 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         }
 
         private FrontendHistoryMetadataBuilder getHistory(final TransactionIdentifier txId) {
-            LocalHistoryIdentifier historyId = txId.getHistoryId();
+            return getHistory(txId.getHistoryId());
+        }
+
+        private FrontendHistoryMetadataBuilder getHistory(final LocalHistoryIdentifier historyId) {
+            final LocalHistoryIdentifier local;
             if (historyId.getHistoryId() == 0 && historyId.getCookie() != 0) {
                 // We are pre-creating the history for free-standing transactions with a zero cookie, hence our lookup
                 // needs to account for that.
                 LOG.debug("{}: looking up {} instead of {}", shardName(), standaloneId, historyId);
-                historyId = standaloneId;
+                local = standaloneId;
+            } else {
+                local = historyId;
             }
 
-            return currentHistories.get(historyId);
+            return currentHistories.get(local);
         }
 
         private LocalHistoryIdentifier standaloneHistoryId() {
@@ -254,7 +276,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
     static FrontendClientMetadataBuilder of(final String shardName, final FrontendClientMetadata meta) {
         // Completely empty histories imply disabled state, as otherwise we'd have a record of the single history --
         // either purged or active
-        return  meta.getCurrentHistories().isEmpty() && meta.getPurgedHistories().isEmpty()
+        return meta.getCurrentHistories().isEmpty() && meta.getPurgedHistories().isEmpty()
             ? new Disabled(shardName, meta.getIdentifier()) : new Enabled(shardName, meta);
     }
 
@@ -278,6 +300,8 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
     abstract void onTransactionCommitted(TransactionIdentifier txId);
 
     abstract void onTransactionPurged(TransactionIdentifier txId);
+
+    abstract void onTransactionsSkipped(LocalHistoryIdentifier historyId, ImmutableUnsignedLongSet txIds);
 
     /**
      * Transform frontend metadata for a particular client into its {@link LeaderFrontendState} counterpart.
