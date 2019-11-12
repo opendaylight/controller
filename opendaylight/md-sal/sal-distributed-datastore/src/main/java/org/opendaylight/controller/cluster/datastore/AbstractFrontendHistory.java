@@ -13,6 +13,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -173,6 +174,13 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     final void purge(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
         tree.purgeTransactionChain(getIdentifier(),
+            () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
+    }
+
+    void skipTransactions(final long sequence, final RequestEnvelope envelope, final long now,
+            final List<UnsignedLong> transactionIds) {
+        LOG.debug("{}: history {} skipping transactions {}", persistenceId(), getIdentifier(), transactionIds);
+        tree.skipTransactions(getIdentifier(), transactionIds,
             () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
     }
 
