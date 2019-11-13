@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_171d23be",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/tx/WriteCandidateRunningTx.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-03-31T10:49:51Z",
+      "side": 1,
+      "message": "I think we should be able to get rid of most or all of these blocking calls. We should probably test this out to see what we can change to non blocking without any issues.",
+      "range": {
+        "startLine": 50,
+        "startChar": 12,
+        "endLine": 50,
+        "endChar": 26
+      },
+      "revId": "20cc38c843536c26c53ccf143ca5c4c95ec8d2c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
