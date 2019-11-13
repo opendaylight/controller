@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_23ac50a0",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-04-07T11:01:30Z",
+      "side": 1,
+      "message": "remove extra space",
+      "revId": "94f48148b0a46f860af62c8c47a12ece70a9620f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_03b154f8",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-04-07T11:01:30Z",
+      "side": 1,
+      "message": "remove extra space",
+      "revId": "94f48148b0a46f860af62c8c47a12ece70a9620f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
