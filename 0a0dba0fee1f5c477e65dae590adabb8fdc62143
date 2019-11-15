@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7fcd965c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/DomInmemoryDataBrokerModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-20T09:04:41Z",
+      "side": 1,
+      "message": "Dependencies are declared optional, so this mail fail in 2phase of config.\n\nFor backwards compatibility I would suggest\ninstantiating InMemoryDOMDataStore stores if dependency is not configured.\n\nso code should be like\n\nfinal DOMStore operStore;\nif(getOperationalDataStore() !\u003d null) {\n   operStore \u003d getOperationalDataStoreDepenency();\n} else {\n     operStore \u003d new InMemoryDOMDataStore(\"DOM-OPER\", storeExecutor);\n}",
+      "revId": "0a0dba0fee1f5c477e65dae590adabb8fdc62143",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7fc6f64a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/yang/opendaylight-dom-broker-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2014-06-20T09:04:41Z",
+      "side": 1,
+      "message": "I agree that this should be mandatory false, but do not remove dependency for schema service.\n\nIf data store is not configured, DOM Data Broker module should \ninitialize InMemory DOM instances as it used to.\n\nAlso I would suggest to add description to model, which will document this, that if no data store is configured, default\nin-memory instance is configured.",
+      "revId": "0a0dba0fee1f5c477e65dae590adabb8fdc62143",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
