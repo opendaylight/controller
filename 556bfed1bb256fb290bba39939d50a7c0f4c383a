@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_ed293d38",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/factory/ActorSystemPropsFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 5007
+      },
+      "writtenOn": "2017-08-31T08:36:27Z",
+      "side": 1,
+      "message": "Logger is using different class",
+      "range": {
+        "startLine": 18,
+        "startChar": 62,
+        "endLine": 18,
+        "endChar": 85
+      },
+      "revId": "556bfed1bb256fb290bba39939d50a7c0f4c383a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
