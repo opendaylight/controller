@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a245df4_0aab091e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-24T19:45:42Z",
+      "side": 1,
+      "message": "I\u0027d rather not have all this code to parse the selection strategy config here - it isn\u0027t the job of this class. Let\u0027s keep this class as is with EntityOwnerSelectionStrategyConfig passed in.  We can keep the same Reader class as before but change the internals.",
+      "revId": "a282c68d767a6c1b48a179929a5888c4f8fe10ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_4a64e121",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-24T19:45:42Z",
+      "side": 1,
+      "message": "should not be reload",
+      "range": {
+        "startLine": 141,
+        "startChar": 133,
+        "endLine": 141,
+        "endChar": 157
+      },
+      "revId": "a282c68d767a6c1b48a179929a5888c4f8fe10ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
