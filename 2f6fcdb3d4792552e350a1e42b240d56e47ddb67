@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_ec4acf26",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/XmlAndYangTypesWithJsonReaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:01:28Z",
+      "side": 1,
+      "message": "Why do not throw Exception only?",
+      "revId": "2f6fcdb3d4792552e350a1e42b240d56e47ddb67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_ac54d7ca",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/XmlAndYangTypesWithJsonReaderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:01:28Z",
+      "side": 1,
+      "message": "Please don\u0027t drown exception in common methods. The exceptions have to be propagated back to caller.",
+      "revId": "2f6fcdb3d4792552e350a1e42b240d56e47ddb67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
