@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_ffae0097",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/factory/ActorSystemPropsFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-08-31T14:17:40Z",
+      "side": 1,
+      "message": "This seems like a generic method/class to create a Props instance yet internally it creates Props specific to QuarantinedMonitorActor. I\u0027d suggest naming this QuarantinedMonitorActorPropsFactory and passing to ActorSystemProviderImpl.",
+      "revId": "96b616e26eeecc5187eb6b3ca8bd79ad905a333f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
