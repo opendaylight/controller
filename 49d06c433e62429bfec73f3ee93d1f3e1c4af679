@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_69825dc9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed -- will submit a patch with proper reformatting",
+      "parentUuid": "fa82b9bf_e9c2ed32",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_09be31ae",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-15T13:08:40Z",
       "side": 1,
       "message": "Please don\u0027t wrap \".values()\" here - it looks a little silly.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a9caa518",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed - will submit a patch with proper formatting",
+      "parentUuid": "fa82b9bf_09be31ae",
       "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c9cda932",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed - will submit a patch",
+      "parentUuid": "fa82b9bf_c9e369d7",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_29d455ea",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-15T13:08:40Z",
       "side": 1,
       "message": "What if the wrong response type is returned? Should log an error and throw an exception.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69d01dc9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed. Will log error.",
+      "parentUuid": "fa82b9bf_29d455ea",
       "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_89d321d4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "will do proper reformatting",
+      "parentUuid": "fa82b9bf_e9d98d22",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_29fbf579",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_094871b1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Replied as part of writeData comment",
+      "parentUuid": "fa82b9bf_29fbf579",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_89000167",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2014-08-15T13:08:40Z",
       "side": 1,
       "message": "Same comment as in writeData",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e94c2dca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Replied as part of writeData comment",
+      "parentUuid": "fa82b9bf_89000167",
       "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -156,6 +282,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_29577559",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "If we get any error due to remote Actor failure or some runtime exception-- since the API doesn\u0027t specify the exception -- we have to throw runtime exception hence I choosed IllegalStateException.. We have to inform the client that there was an exception that happened.",
+      "parentUuid": "fa82b9bf_c90a8989",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2fa695ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Isn\u0027t working in a distributed environment (which user is aware of), till things happen successfully on remote node you cannot consider them successful. That said the current API limits any exposure of checked exception for distributed operation failures - in my humble opinion we shouldn\u0027t be trying to hide the distributed nature of system just because the API is not proper. There would be \"n\" places you have to do that to be consistent. Moreover by delaying how is it helping the client?.  With limitation of current API throwing IllegalStateException  when things get failed in distributed system atleast the client comes to know upfront. If we don\u0027t want that we just log an error and let user figure out from logs?... I think NoOpTransaction seem to work well for transitionary stuff -- wherein you are aware things are likely to get fixed quickly and we will not be in that state for long time?",
+      "parentUuid": "fa82b9bf_8fb6c1f7",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_69fd7d6d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 2
@@ -191,6 +353,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4952f967",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Per Moiz\u0027s explaination -- when the cluster is transitioning to determine the leader(or primary shard) -- we don\u0027t want to throw exception while the user is creating transaction and performing some operations etc and have not yet committed -- If you see this is part of NoOpTransactionContext which is created during that transitioning scenario.",
+      "parentUuid": "fa82b9bf_69fd7d6d",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_69afbd7d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 2
@@ -208,6 +388,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c9f4c95c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Ok -- will make the change",
+      "parentUuid": "fa82b9bf_69afbd7d",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_29cd3566",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 2
@@ -219,6 +417,24 @@
       "writtenOn": "2014-08-15T13:08:40Z",
       "side": 1,
       "message": "I think you want java.util.concurrent.TimeoutException here. It\u0027s confusing when classes have the same name. Can you please rename the ODL  TimeoutException to OperationTimeoutException?",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69e7bdac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "This is existing code -- will make the change",
+      "parentUuid": "fa82b9bf_29cd3566",
       "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
