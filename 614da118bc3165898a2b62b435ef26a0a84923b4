@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3576f106",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "There should be question mark here -- since you are yet to query the path exists",
+      "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d53d45de",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExists.java",
         "patchSetId": 3
@@ -38,6 +55,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b5d0c1c9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExists.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Is this just a local message - doesn\u0027t it require protobuff serialization?",
+      "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7528f999",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExistsReply.java",
         "patchSetId": 3
@@ -50,6 +84,23 @@
       "side": 1,
       "message": "has to be protobuf",
       "parentUuid": "fa82b9bf_15ce4d2e",
+      "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_15ce4d2e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExistsReply.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Is the reply message not send remotely and requires protobuff serialization?",
       "revId": "614da118bc3165898a2b62b435ef26a0a84923b4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
