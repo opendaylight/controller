@@ -37,6 +37,40 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4abf2e61",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:18:54Z",
+      "side": 1,
+      "message": "The ShardContext is shared between shards so, unfortunately, we can\u0027t store particular shard name here.",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0ab5a67c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:18:54Z",
+      "side": 1,
+      "message": "We could pass the shard name here so the ShardTx can get at the shard MBean...",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8a91b6f2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
         "patchSetId": 3
