@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_acf057ca",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnInstanceIdentifierToXmlTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:13:12Z",
+      "side": 1,
+      "message": "Why do not return Exception only ?",
+      "revId": "3a3629aa1e0a1343da9a2a79d678610651938df2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
