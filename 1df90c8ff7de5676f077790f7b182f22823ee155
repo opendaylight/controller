@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_af238abb",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodecFactory.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-28T18:25:02Z",
+      "side": 1,
+      "message": "This is called from blueprint so that will need to be changed as well wrt the ClassLoadingStrategy package.",
+      "revId": "1df90c8ff7de5676f077790f7b182f22823ee155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
