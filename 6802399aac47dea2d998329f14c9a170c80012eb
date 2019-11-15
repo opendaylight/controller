@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_0d8f9ecd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_4d087691",
+      "range": {
+        "startLine": 23,
+        "startChar": 31,
+        "endLine": 23,
+        "endChar": 40
+      },
+      "revId": "6802399aac47dea2d998329f14c9a170c80012eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_0dd79eee",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
         "patchSetId": 12
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_cdabc61c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_0dd79eee",
+      "range": {
+        "startLine": 42,
+        "startChar": 20,
+        "endLine": 42,
+        "endChar": 24
+      },
+      "revId": "6802399aac47dea2d998329f14c9a170c80012eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_6d057a79",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
         "patchSetId": 12
@@ -59,6 +107,24 @@
       "writtenOn": "2017-10-25T19:50:17Z",
       "side": 1,
       "message": "indentation - back 2 spaces",
+      "revId": "6802399aac47dea2d998329f14c9a170c80012eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_0da67e53",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_6d057a79",
       "revId": "6802399aac47dea2d998329f14c9a170c80012eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
