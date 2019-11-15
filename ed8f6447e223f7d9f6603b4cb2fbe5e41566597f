@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_78a6b0af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "This is existing code :) -- will update.",
+      "parentUuid": "fa82b9bf_58996c77",
+      "revId": "ed8f6447e223f7d9f6603b4cb2fbe5e41566597f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f88ba01c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-11T21:13:19Z",
       "side": 1,
       "message": "I that you do not increment the committed transaction count. I think we should since we are incrementing failed counts. What do you think?",
+      "revId": "ed8f6447e223f7d9f6603b4cb2fbe5e41566597f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d89b3c64",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Correct.",
+      "parentUuid": "fa82b9bf_f88ba01c",
       "revId": "ed8f6447e223f7d9f6603b4cb2fbe5e41566597f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
