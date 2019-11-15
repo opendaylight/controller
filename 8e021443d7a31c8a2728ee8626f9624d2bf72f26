@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c7eaccab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Stashing/Unstashing of messages while recovery of the shard happens is something that needs to be added.",
+      "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b9a330ff",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/BasicIntegrationTest.java",
         "patchSetId": 3
@@ -38,6 +55,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a7330861",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/BasicIntegrationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Can this blocks be put in a common method passing the reply we are expecting?",
+      "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d9a874dd",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/application.conf",
         "patchSetId": 3
@@ -50,6 +84,23 @@
       "side": 1,
       "message": "question or statement?",
       "parentUuid": "fa82b9bf_c7016c6b",
+      "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c7016c6b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/application.conf",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "we will be using opendaylight-clustering-system as our Actor system",
       "revId": "8e021443d7a31c8a2728ee8626f9624d2bf72f26",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
