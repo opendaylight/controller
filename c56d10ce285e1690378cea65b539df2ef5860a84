@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ac1b937f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T20:56:06Z",
+      "side": 1,
+      "message": "I assume you\u0027re catching Exception due to the ActorRef#tell call above. However the javadocs for ActorRef#tell don\u0027t indicate this method can throw an exception. It has fire and forget semantics. If it can throw an undocumented/unchecked ex, wouldn\u0027t you expect the call to \u0027tell\u0027 below also fail similarly? \n\nThere\u0027s no harm in catching Exception - just wondering if it\u0027s necessary...\n\nHowever, if a call to the shardMBean threw an unchecked exception we wouldn\u0027t want that to fail the commit. So if you choose to keep the try/catch, I think it would be safest to move the calls to shardMBean outside the catch block so they can\u0027t cause an unwanted failure.",
+      "revId": "c56d10ce285e1690378cea65b539df2ef5860a84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4c0a0727",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T20:56:06Z",
+      "side": 1,
+      "message": "Could you change this to TestException as well? Anybody can throw an IllegalStateException and we wouldn\u0027t want the test to succeed for the wrong reason.",
+      "revId": "c56d10ce285e1690378cea65b539df2ef5860a84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ec043b19",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T20:56:06Z",
+      "side": 1,
+      "message": "Could you change this to TestException as well?",
+      "revId": "c56d10ce285e1690378cea65b539df2ef5860a84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
