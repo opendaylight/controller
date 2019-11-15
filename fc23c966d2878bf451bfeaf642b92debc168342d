@@ -55,6 +55,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0c24d8c4",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Usually having a log message indicating metrics capture is  enabled or not is helpful",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f45a415",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
         "patchSetId": 8
@@ -103,6 +120,23 @@
       "side": 1,
       "message": "Agreed. Will cache the value.",
       "parentUuid": "fa82b9bf_5feb64b0",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9f032c0d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractMeteredUntypedActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "I assume the change in the akka.conf might require a restart as it has to be done in akka.conf -- If yes -- then I see that isMetricsCaptureEnabled should be done once and the boolean value saved rather doing read from akka.conf each time?",
       "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -286,6 +320,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_df71b445",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "If we create a proper utility class that exposes the timeReceive and isMetricsCaptureEnabled -- the actors would implement the interface methods and just delegate to this utility class methods.. \n\nAnything simple (if possible) -- to avoid duplication of code is what my suggestion is.",
+      "parentUuid": "fa82b9bf_dffe94ae",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_df46944f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "May be doing the following will help in reducing the duplicate code \n\n1. Define an interface that has the following \n             checkMeterEnabled\n             timeReceive \n             enableTimedMessaging\nThe actors that we want to be timed will implement this interface \n2. Common utility class having the checkMeterEnabled and timeReceive implementation can be called from Actors like Shard ?\n\nMoreover I noticed that AbstractUntypedActor is in two places remote-rpc and datastore -- We should move it  to clustering-commons and use it from there ? -[ A enhancement bug might be created for this]",
+      "parentUuid": "fa82b9bf_ac992c21",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7f2bc833",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 8
@@ -298,6 +368,23 @@
       "side": 1,
       "message": "As I replied on the earlier comment, the config is in memory and read only once from file during actor creation.",
       "parentUuid": "fa82b9bf_7f73c8b4",
+      "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7f73c8b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Same comment as given in another file -- If I got it right akka.conf change requires a restart of controller so the flag indicating isMetricsCaptureEnabled should be pretty much read at the startup and used instead of reading again from config?",
       "revId": "fc23c966d2878bf451bfeaf642b92debc168342d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
