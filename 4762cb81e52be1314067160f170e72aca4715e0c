@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_bfc065e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 506,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "I think we should log at debugging level to figure out the transaction chains that are getting closed",
+      "revId": "4762cb81e52be1314067160f170e72aca4715e0c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_baa950e1",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 6
@@ -32,6 +49,23 @@
       "side": 1,
       "message": "Good point. I think the best we can do at this point is to catch Exception and continue sending the message to the other of the shards.",
       "parentUuid": "fa82b9bf_2a12d158",
+      "revId": "4762cb81e52be1314067160f170e72aca4715e0c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2a12d158",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Seems sendShardOperationAsync can throw PrimaryNotFoundException which is an Runtime exception -- what would be the behavior if Primary is not found and you are trying to broadcast..",
       "revId": "4762cb81e52be1314067160f170e72aca4715e0c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
