@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_4c73bbb1",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:51:31Z",
+      "side": 1,
+      "message": "why not only Exception",
+      "revId": "f40328a382b994623d187bc539c691ce76e22e8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_acb8572b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:51:31Z",
+      "side": 1,
+      "message": "I don\u0027t think it is a target for your test method, so please use com.google.common.base.Preconditions.",
+      "revId": "f40328a382b994623d187bc539c691ce76e22e8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_8c879361",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:51:31Z",
+      "side": 1,
+      "message": "I don\u0027t think it is a target for your test method, so please use com.google.common.base.Preconditions",
+      "revId": "f40328a382b994623d187bc539c691ce76e22e8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_8cd55345",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:51:31Z",
+      "side": 1,
+      "message": "Please remove all commented out code or add there description why it is commented out and not removed.",
+      "revId": "f40328a382b994623d187bc539c691ce76e22e8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_2cca07a2",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:51:31Z",
+      "side": 1,
+      "message": "Please don\u0027t drown exception in common methods. The exceptions have to be propagated back to caller.",
+      "revId": "f40328a382b994623d187bc539c691ce76e22e8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
