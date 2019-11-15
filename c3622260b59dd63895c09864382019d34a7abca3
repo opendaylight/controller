@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2119da21",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Yes thought about it -- If we are extending ShardTransaction then a  chunk of code will get duplicated in ShardReadWriteTransaction and ShardWriteTransaction -- seems we are OK with it.. Let me update with a patch",
+      "parentUuid": "fa82b9bf_61236256",
+      "revId": "c3622260b59dd63895c09864382019d34a7abca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c1282e35",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-07T00:20:07Z",
       "side": 1,
       "message": "This does not look like a correct test. When you call tell an asynchronous messages would be sent. This will result in a ClassCastException but you will not get an exception. Put a fail after the tell this will show you the problem.",
+      "revId": "c3622260b59dd63895c09864382019d34a7abca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_41141ee8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Right -- seems a wrong version . Let me update with the right one in patch 2.",
+      "parentUuid": "fa82b9bf_c1282e35",
       "revId": "c3622260b59dd63895c09864382019d34a7abca3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
