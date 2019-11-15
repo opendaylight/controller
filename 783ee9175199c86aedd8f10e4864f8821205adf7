@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a52dcb90",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Ah I see.. (missed that) \nI think we should rename it to storeContext then..\nShardContext to me is context for a shard?\nwill use other approach to pass the ShardName",
+      "parentUuid": "fa82b9bf_aa8cbad7",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4abf2e61",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardContext.java",
         "patchSetId": 3
