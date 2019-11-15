@@ -16,6 +16,24 @@
       "revId": "fbcfb37fd322986b2288409e2c4c62966a71a921",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_aaa0f843",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done + fix in BP -\u003e means used cm:property and removed reflection",
+      "parentUuid": "9a245df4_15a5eab4",
+      "revId": "fbcfb37fd322986b2288409e2c4c62966a71a921",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
