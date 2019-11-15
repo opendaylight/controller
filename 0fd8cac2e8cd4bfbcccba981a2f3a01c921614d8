@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_6a48c587",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextPropertiesUpdater.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Nope, BP is invoking this one. Here we get from BP original org.apache.aries.blueprint.compendium.cm.CmPropertyPlaceholder object so I need to work with Object type only to avoid OSGI imports. And I don\u0027t find another way to push Dictionary from BP into Java obj.",
+      "parentUuid": "9a245df4_4ad18156",
+      "revId": "0fd8cac2e8cd4bfbcccba981a2f3a01c921614d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_8a27f963",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
         "patchSetId": 1
@@ -102,6 +120,60 @@
       "side": 1,
       "message": "Actually looking at the code it looks like it provides a java.util.Properties.",
       "parentUuid": "9a245df4_9663a0dc",
+      "revId": "0fd8cac2e8cd4bfbcccba981a2f3a01c921614d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_eaf8307e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Im working on previous patch -\u003e going to be implemented there too.",
+      "parentUuid": "9a245df4_6a056079",
+      "revId": "0fd8cac2e8cd4bfbcccba981a2f3a01c921614d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_555be22d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Yes, it should not, I forgot to remove it.\nThis is here only for initial (actual) loading properties because managed-properties invoke update method only on update props in cm so I have to have something for initial update of datastore context.",
+      "parentUuid": "9a245df4_8a27f963",
+      "revId": "0fd8cac2e8cd4bfbcccba981a2f3a01c921614d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_6a056079",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "It works, thanks :)",
+      "parentUuid": "9a245df4_b6dd0473",
       "revId": "0fd8cac2e8cd4bfbcccba981a2f3a01c921614d8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
