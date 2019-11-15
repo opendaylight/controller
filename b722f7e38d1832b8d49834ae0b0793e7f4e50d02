@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_94a4b14b",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-02T04:15:39Z",
+      "side": 1,
+      "message": "Copyright?",
+      "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_546aa9ee",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-02T04:15:39Z",
+      "side": 1,
+      "message": "protected should be good enough for this no?",
+      "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3467e527",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-02T04:15:39Z",
+      "side": 1,
+      "message": "Don\u0027t understand this comment. Can you give an example of what needs to be done?",
+      "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
