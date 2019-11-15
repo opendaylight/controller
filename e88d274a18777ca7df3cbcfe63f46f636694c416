@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3aa0d159_6038b8a0",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/rest/impl/test/providers/AbstractBodyReaderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-07T20:15:51Z",
+      "side": 1,
+      "message": "These assertions can be simplified.  There is no value in asserting that \"nnContext\" is not null right before asserting that \"nnContext.getData()\" is not null. Same with \"getInstanceIdentifierContext()\".",
+      "revId": "e88d274a18777ca7df3cbcfe63f46f636694c416",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_a0c80075",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/rest/impl/test/providers/AbstractBodyReaderTest.java",
         "patchSetId": 3
@@ -14,6 +31,24 @@
       "side": 1,
       "message": "Thank you, you are right, we are able to save 2 lines. But it could be a question about what do you want to see NPE or exact Fail for tests and how \"friendly\" help methods do you wish to have. The effectivity could be a better choice in some light.",
       "parentUuid": "3aa0d159_6038b8a0",
+      "revId": "e88d274a18777ca7df3cbcfe63f46f636694c416",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_8093844e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/rest/impl/test/providers/AbstractBodyReaderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-07T21:45:06Z",
+      "side": 1,
+      "message": "With the redundant assertions, you would get a test failure on that line saying that \"nnContext\" is null with a stacktrace.  Without the redundant assertions, you would get a test failure on that line with the NPE and stacktrace.\n\nIt isn\u0027t about saving two lines of code.  It\u0027s about seeing the essential assertions that are important for your business logic.\n\nit\u0027s not likely the test will ever fail.  It\u0027s more likely that this test and its associated CUT will evolve over time, requiring maintenance.  If you reduce your test code to only what is required to validate your CUT, then your test will be easier to evolve and maintain.",
+      "parentUuid": "3aa0d159_a0c80075",
       "revId": "e88d274a18777ca7df3cbcfe63f46f636694c416",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
