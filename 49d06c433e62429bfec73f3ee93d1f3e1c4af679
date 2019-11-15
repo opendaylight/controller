@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_e9c2ed32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "Please don\u0027t reformat all this code. It looks like the pertinent change is setting inReadyState to false but you don\u0027t need to as that\u0027s the default value",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09be31ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "Please don\u0027t wrap \".values()\" here - it looks a little silly.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c9e369d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "No need to reformat his code.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_29d455ea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "What if the wrong response type is returned? Should log an error and throw an exception.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e9d98d22",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 2
@@ -13,6 +81,40 @@
       "writtenOn": "2014-08-15T13:08:40Z",
       "side": 1,
       "message": "no line wrap here please",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_29fbf579",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "Same comment as in writeData",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_89000167",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "Same comment as in writeData",
       "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -117,6 +219,23 @@
       "writtenOn": "2014-08-15T13:08:40Z",
       "side": 1,
       "message": "I think you want java.util.concurrent.TimeoutException here. It\u0027s confusing when classes have the same name. Can you please rename the ODL  TimeoutException to OperationTimeoutException?",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_89b241e3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "I assume you catch TimeoutException only to rethrow a new instance of TimeoutException because you want contextual info in the ex message. This is fine but to be consistent, the second catch clause should do the same,",
       "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
