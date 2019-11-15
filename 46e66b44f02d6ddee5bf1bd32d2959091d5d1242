@@ -20,6 +20,126 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5baef8e8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Any reason this kind of check is done only here not in other places. e.g. on line 191",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_be7132e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "The reason I highlighted this is that with SLF4j you don\u0027t require to do  checks most of the time as it has parameter logging -- it might require if there is some conversion etc that makes the parameters expensive.",
+      "parentUuid": "fa82b9bf_3eee82b5",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bb806447",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "This doesn\u0027t require the LOG.isDebugEnabled check as the parametized logging takes care of.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fb86ec64",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "This doesn\u0027t require the LOG.isDebugEnabled check as the parametized logging takes care of.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7babbcd6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "This doesn\u0027t require the LOG.isDebugEnabled check as the parametized logging takes care of.",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5b959886",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "same comment as above",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3bb53431",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "same comment as above",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9b0ec0e4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -49,6 +169,23 @@
       "side": 1,
       "message": "~100 power of 2. I reckoned we may have about 100 modules to fit in - may as well size the capacity to fit them in.",
       "parentUuid": "fa82b9bf_9b0ec0e4",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7ecaca6f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Update schema context can happen during run-time.. If so to keep just the latest set of schemacontext modules information -- we have to first empty the journal (lastSequenceNr()-1) -- so that we always keep just one schemacontext modules message?",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -208,6 +345,23 @@
       "side": 1,
       "message": "I see this as a local \"message\" no else needs to know about so kept it local",
       "parentUuid": "fa82b9bf_fe933a4d",
+      "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fe933a4d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Keep all messages in already existing package?",
       "revId": "46e66b44f02d6ddee5bf1bd32d2959091d5d1242",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
