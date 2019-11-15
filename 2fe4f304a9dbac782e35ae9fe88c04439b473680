@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_287e60af",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-09T15:49:32Z",
+      "side": 1,
+      "message": "What I can see, the exception value is always null.",
+      "range": {
+        "startLine": 345,
+        "startChar": 69,
+        "endLine": 345,
+        "endChar": 78
+      },
+      "revId": "2fe4f304a9dbac782e35ae9fe88c04439b473680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_a87270e3",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnAndYangWithJsonReaderEmptyDataTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-09T15:49:32Z",
+      "side": 1,
+      "message": "Please, what is JsonReader and where we are using it in rest-connector?",
+      "range": {
+        "startLine": 348,
+        "startChar": 37,
+        "endLine": 348,
+        "endChar": 47
+      },
+      "revId": "2fe4f304a9dbac782e35ae9fe88c04439b473680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
