@@ -17,6 +17,40 @@
       "revId": "928c3a2a2562845eac083eda8c482f212cf37740",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8ca0e8a6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "It is being referred as remoteOperationTimeout in seconds in config but in actorContext it is being used as akka operation  timeout.. Can one term be used to be consistent  or have two timeout local and remote configurable?",
+      "revId": "928c3a2a2562845eac083eda8c482f212cf37740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6cb804e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "In config file we are mentioning it as remote operation timeout but here we are having it as operation timeout -- it will be easier to have one terminology?",
+      "revId": "928c3a2a2562845eac083eda8c482f212cf37740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
