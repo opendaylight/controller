@@ -1,0 +1,125 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e9d98d22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "no line wrap here please",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c90a8989",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "I don\u0027t think IllegalStateException is appropriate here. It\u0027s generally used to indicate the caller did something wrong. The WriteTransaction#put interface javadocs does say an IllegalStateException can be thrown but because the transaction is already closed which is a user error.\n\nI don\u0027t think this cached the exception (in a lastModificationError field) and throw it when ready() is called.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8fb6c1f7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-16T01:25:16Z",
+      "side": 1,
+      "message": "Sorry my last statement got garbled. I understand your point but I\u0027m wary of throwing an unchecked exception where it isn\u0027t the caller/user\u0027s fault and they won\u0027t expect it. If the user calls put/merge/delete when the Tx is already closed then that\u0027s a code fault on their end and they deserve to get an ex thrown at them as doc\u0027ed in the API :) But for a remote shard being down or network failure, which isn\u0027t the user\u0027s fault, I don\u0027t think they should get an unchecked/unexpected ex thrown at them. They likely won\u0027t expect it nor explicitly catch it so the end result will be unpredictable.\n\nOn the other hand, I propose we don\u0027t throw the exception at this point but just record that a write/merge/delete failed (i.e. store the ex). Since the integrity of the Tx is compromised at that point, we would silently ignore subsequent write/merge/delete\u0027s. When the user calls submit on the Tx, we can then throw the cached ex from the canCommit phase. This gracefully fails the Tx and the user will receive a TransactionCommitFailedException which is documented and they expect to handle. \n\nA similar approach is taken with the NoOpTransaction, i.e. if the remote Tx can\u0027t be initially created then we don\u0027t throw an unchecked ex but instead create a NoOpTransaction. We let the user continue with all their write/merge/delete\u0027s and silently ignore and fail the commit (at least I assume it works that way).\n\nI am proposing we take a similar approach here.",
+      "parentUuid": "fa82b9bf_29577559",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69fd7d6d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "Why do we create a NoOpCohort and return a valid reply instead of throwing an exception?",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4fcc3989",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-16T01:25:16Z",
+      "side": 1,
+      "message": "That makes sense. I now see that the NoOpCohort returns false from the canCommit phase. I missed that detail before - that\u0027s why I asked the question.",
+      "parentUuid": "fa82b9bf_4952f967",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_69afbd7d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "It\u0027s not good practice in general to throw Exception. This should be consistent with the other methods and throw RemoteOperationException or a more generalized OperationException.",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_29cd3566",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T13:08:40Z",
+      "side": 1,
+      "message": "I think you want java.util.concurrent.TimeoutException here. It\u0027s confusing when classes have the same name. Can you please rename the ODL  TimeoutException to OperationTimeoutException?",
+      "revId": "49d06c433e62429bfec73f3ee93d1f3e1c4af679",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
