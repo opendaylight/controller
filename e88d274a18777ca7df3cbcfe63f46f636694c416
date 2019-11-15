@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_a0c80075",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/rest/impl/test/providers/AbstractBodyReaderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-05-07T21:28:35Z",
+      "side": 1,
+      "message": "Thank you, you are right, we are able to save 2 lines. But it could be a question about what do you want to see NPE or exact Fail for tests and how \"friendly\" help methods do you wish to have. The effectivity could be a better choice in some light.",
+      "parentUuid": "3aa0d159_6038b8a0",
+      "revId": "e88d274a18777ca7df3cbcfe63f46f636694c416",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
