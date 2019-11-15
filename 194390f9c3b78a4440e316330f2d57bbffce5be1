@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0b31b0a1",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/functions.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2014-06-18T08:31:21Z",
+      "side": 1,
+      "message": "please add comment describing expected format of help text and exit code value",
+      "revId": "194390f9c3b78a4440e316330f2d57bbffce5be1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6b215c4c",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/run.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2014-06-18T08:31:21Z",
+      "side": 1,
+      "message": "agentpath option passes path to agent to jvm in order to load native agent library, e.g. yourkit profiler agent",
+      "revId": "194390f9c3b78a4440e316330f2d57bbffce5be1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
