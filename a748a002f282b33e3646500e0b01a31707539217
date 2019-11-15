@@ -46,6 +46,54 @@
       "revId": "a748a002f282b33e3646500e0b01a31707539217",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_ae1bb871",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "That\u0027s true. But with your suggestion we lose independetion ActorProviderImpl on OSGi. With actual implementation this can be init with non-OSGi libs.",
+      "parentUuid": "ba1f61a0_e265c71e",
+      "range": {
+        "startLine": 31,
+        "startChar": 66,
+        "endLine": 31,
+        "endChar": 83
+      },
+      "revId": "a748a002f282b33e3646500e0b01a31707539217",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_6a4a4927",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba1f61a0_c4808bc2",
+      "range": {
+        "startLine": 31,
+        "startChar": 66,
+        "endLine": 31,
+        "endChar": 83
+      },
+      "revId": "a748a002f282b33e3646500e0b01a31707539217",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
