@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_61236256",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-07T00:20:07Z",
+      "side": 1,
+      "message": "Somehow this casting makes me uncomfortable. Would be better if we had extended ShardTransaction with ShardReadTransaction, ShardReadWriteTransaction etc. Keep the common code in ShardTransaction.",
+      "revId": "c3622260b59dd63895c09864382019d34a7abca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c1282e35",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-07T00:20:07Z",
+      "side": 1,
+      "message": "This does not look like a correct test. When you call tell an asynchronous messages would be sent. This will result in a ClassCastException but you will not get an exception. Put a fail after the tell this will show you the problem.",
+      "revId": "c3622260b59dd63895c09864382019d34a7abca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
