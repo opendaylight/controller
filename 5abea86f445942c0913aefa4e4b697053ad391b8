@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f94b3129",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/implementation/src/main/java/org/opendaylight/controller/sal/connector/remoterpc/Server.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "remove this commented line whenever -- you touch this file again",
+      "revId": "5abea86f445942c0913aefa4e4b697053ad391b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
