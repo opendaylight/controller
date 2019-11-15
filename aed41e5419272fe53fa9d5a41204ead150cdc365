@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2c99c3c3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "In addition to ExecutionException other exception can also happen while sending the message to actor. My understanding is that getCause of ExecutionException will give back the cause of exception \u0026 will be consistent with other exceptions handling?",
+      "parentUuid": "fa82b9bf_e9918df1",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c99b6916",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
         "patchSetId": 1
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0cb39f4d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "ExecutionException is one of the exception that can occur as during the send of the message itself there can be other exception -- My understanding is that the getCause on ExecutionException provides the details why the exception occurred.",
+      "parentUuid": "fa82b9bf_c99b6916",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_699edd08",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
         "patchSetId": 1
@@ -89,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ecb75b38",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "as above.",
+      "parentUuid": "fa82b9bf_699edd08",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_298c55d9",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
         "patchSetId": 1
@@ -100,6 +154,24 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "Use Futures#addCallback - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4cad27e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "as above",
+      "parentUuid": "fa82b9bf_298c55d9",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -174,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4c38c7d2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "will remove",
+      "parentUuid": "fa82b9bf_8946c179",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e9566d29",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -209,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ec32fbf0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Based on testing -- I haven\u0027t seen any issues-- As in this test we are testing for generation of exception and it seem to happen properly.",
+      "parentUuid": "fa82b9bf_e9566d29",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a9662528",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -220,6 +328,24 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "This line is really not needed as the test will fail if the appropriate exception isn\u0027t thrown.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c59ef36",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "will remove",
+      "parentUuid": "fa82b9bf_a9662528",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -243,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2c446348",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Ok -- will be specific",
+      "parentUuid": "fa82b9bf_c96929fa",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_893d61df",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -254,6 +398,24 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "This can be removed - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4c3f67b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_893d61df",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -277,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ac77139f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Based on testing didn\u0027t find issue -- will increase per comment",
+      "parentUuid": "fa82b9bf_0952b134",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_696c9d08",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -294,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6ca4ab07",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_696c9d08",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_896fa1fb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -305,6 +503,24 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "Use specific TestException - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cc7a9787",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_896fa1fb",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -430,6 +646,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ec60bbd0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "We are performing all this task to mock the state criteria so that we can perform the commit - the main goal of the test case to see the exception is propogated.. Hence not waiting for each state to complete",
+      "parentUuid": "fa82b9bf_6911fd5b",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8914814d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -465,6 +699,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0c5cff17",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "We are performing all this task to mock the state criteria so that we can perform the commit - the main goal of the test case to see the exception is propogated.. Hence not waiting for each state to complete",
+      "parentUuid": "fa82b9bf_8914814d",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_693a5de8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -482,6 +734,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_cca137f9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_693a5de8",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e97f4da9",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
         "patchSetId": 1
@@ -493,6 +763,24 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "Same as above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ac9e33b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "fa82b9bf_e97f4da9",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
