@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_124e4d3b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "DataContainerNode -- should take care of augmentation,listitem, container, unkeyedlistItem any reason unkeyedlistNode is being handled explicitly here.. If needs to be -- please add comments",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_92157d9d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
         "patchSetId": 5
@@ -32,6 +49,23 @@
       "side": 1,
       "message": "It could if the node was a MixinNode so this is valid. Also code pattern is from DataNormalizer.",
       "parentUuid": "fa82b9bf_d25305e0",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d25305e0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "ret will never have null values (and hence you don\u0027t need to filter)?",
       "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -56,6 +90,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_52aff57c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Seems there is no way to get attributes for leaf",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_720eb98d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
         "patchSetId": 5
@@ -68,6 +119,23 @@
       "side": 1,
       "message": "It is. It\u0027s just that the \u0027schema\u0027 information needs to be derived from the DataSchema of ChoiceNode.",
       "parentUuid": "fa82b9bf_f2bde9b1",
+      "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f2bde9b1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/CompositeNodeCompatibility.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "My understanding was that Simple Node can be of leaf or leaflist types only?",
       "revId": "1aac6c455ccb08bf6b33bbf44482dbf8b8b80a48",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
