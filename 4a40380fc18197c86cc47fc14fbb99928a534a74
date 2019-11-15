@@ -70,6 +70,29 @@
       "revId": "4a40380fc18197c86cc47fc14fbb99928a534a74",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_83ffc5a9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarEntryDataTreeCommitCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1464
+      },
+      "writtenOn": "2019-11-15T19:17:05Z",
+      "side": 1,
+      "message": "might be cleaner to match the comments/log entries by using \u003e\u003d logic instead of \u003c",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 46
+      },
+      "revId": "4a40380fc18197c86cc47fc14fbb99928a534a74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
