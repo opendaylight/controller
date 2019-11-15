@@ -16,6 +16,24 @@
       "revId": "c3f4ab694ca3d7fcf22d91c9825cfa2896c83e4c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2118481d",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Hmm -- not sure how this happenned will fix it.",
+      "parentUuid": "fa82b9bf_41feacaf",
+      "revId": "c3f4ab694ca3d7fcf22d91c9825cfa2896c83e4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
