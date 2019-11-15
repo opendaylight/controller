@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_d51512e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done + prepareProps(final Object propsResolver) method is going to be moved out of this class in next patch",
+      "parentUuid": "9a245df4_0aab091e",
+      "revId": "a282c68d767a6c1b48a179929a5888c4f8fe10ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_4a64e121",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
         "patchSetId": 8
@@ -30,6 +48,30 @@
       "writtenOn": "2017-10-24T19:45:42Z",
       "side": 1,
       "message": "should not be reload",
+      "range": {
+        "startLine": 141,
+        "startChar": 133,
+        "endLine": 141,
+        "endChar": 157
+      },
+      "revId": "a282c68d767a6c1b48a179929a5888c4f8fe10ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_95c9da7b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_4a64e121",
       "range": {
         "startLine": 141,
         "startChar": 133,
