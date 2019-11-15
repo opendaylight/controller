@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_9e31e70d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/resources/nn-to-json/choice/choice.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-09T08:21:18Z",
+      "side": 1,
+      "message": "Please set your IDE formatting tabs to 4 spaces and empty lines without gaps.",
+      "revId": "0f8e4716b6aec3d781ffff1f51bc235fcdb3a295",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
