@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2ff51cec",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Clarification : Trying to understand the reason for maintaining a map of pathArgument class mapped to a Getter class..",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8fd9c823",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
         "patchSetId": 7
@@ -32,6 +49,40 @@
       "side": 1,
       "message": "QName could be because as per the contract it\u0027s optional. However in reality it will not be because when we serialize we atleast set it to a default instance. I will add a null check just in case.",
       "parentUuid": "fa82b9bf_cfdfd067",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cfdfd067",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/PathArgumentSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Can\u0027t QName be NULL?",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_afe04c26",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Is it possible to have null value?",
       "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -56,6 +107,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6fd6c450",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/ValueSerializer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Doesn\u0027t the checkArgument make this redundant.",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4f074082",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/Common.proto",
         "patchSetId": 7
@@ -74,6 +142,57 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8fbc6807",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/Common.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Any reason your are deprecating instead of removing them altogether since we haven\u0027t yet released for production?\n\nIn general we should think of the advantage of creating message QName2 with the latest fields",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_afb7ec1f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/Common.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Same comments regarding deprecation above",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4f3ae099",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/Common.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "same comments related to deprecation",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6f0a448b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/Main.java",
         "patchSetId": 7
@@ -86,6 +205,23 @@
       "side": 1,
       "message": "It is covered in a test case. I think I\u0027ll just remove this.",
       "parentUuid": "fa82b9bf_2f43dc13",
+      "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2f43dc13",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/serialization/Main.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Clarification: Couldn\u0027t we cover this as part of test case?",
       "revId": "6096e807288d6ee1d76a4c9fdb2e5442046560ef",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
