@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_41feacaf",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-06-25T00:09:58Z",
+      "side": 1,
+      "message": "Why is the Karaf feature removed?",
+      "revId": "c3f4ab694ca3d7fcf22d91c9825cfa2896c83e4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
