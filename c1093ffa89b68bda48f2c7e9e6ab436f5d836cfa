@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_ac75b733",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonBasicDataTypesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:28:28Z",
+      "side": 1,
+      "message": "Ignore without comments ?",
+      "revId": "c1093ffa89b68bda48f2c7e9e6ab436f5d836cfa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_8c947338",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonBasicDataTypesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:28:28Z",
+      "side": 1,
+      "message": "Are you sure you wana to have this class somewhere?",
+      "revId": "c1093ffa89b68bda48f2c7e9e6ab436f5d836cfa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
