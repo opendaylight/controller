@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_a042d90d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextPropertiesUpdater.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_6d61fa38",
+      "range": {
+        "startLine": 38,
+        "startChar": 18,
+        "endLine": 38,
+        "endChar": 28
+      },
+      "revId": "5ebf173da0c60d18cbc95d448baf283a38de89d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_0d731e16",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextPropertiesUpdater.java",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-25T20:06:20Z",
       "side": 1,
       "message": "This should be Map. Look at http://grepcode.com/file/repo1.maven.org/maven2/org.apache.aries.blueprint/org.apache.aries.blueprint.cm/1.0.7/org/apache/aries/blueprint/compendium/cm/CmManagedProperties.java - the inject method passes a Map.  Please test updating the cfg file and make sure this works (you\u0027ll see INFO output if it gets to the underlying DistributedDataStore instance)",
+      "range": {
+        "startLine": 47,
+        "startChar": 29,
+        "endLine": 47,
+        "endChar": 39
+      },
+      "revId": "5ebf173da0c60d18cbc95d448baf283a38de89d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_80451519",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextPropertiesUpdater.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 7786
+      },
+      "writtenOn": "2019-11-15T23:09:16Z",
+      "side": 1,
+      "message": "Done.\nThat\u0027s right. I tested it direct via karaf + debug mode in IDE. Works with Map and update method was invoke on update config.",
+      "parentUuid": "9a245df4_0d731e16",
       "range": {
         "startLine": 47,
         "startChar": 29,
