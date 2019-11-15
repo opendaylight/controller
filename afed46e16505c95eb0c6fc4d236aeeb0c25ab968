@@ -72,6 +72,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6ca9e4de",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "The null check should be above the log statement?",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2a466a7b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
         "patchSetId": 4
@@ -100,6 +117,23 @@
       "writtenOn": "2014-08-29T20:39:21Z",
       "side": 1,
       "message": "Eclipse automatically added the braces below.",
+      "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0cae18e8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/xml/codec/XmlUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Null check should be before the LOG",
       "revId": "afed46e16505c95eb0c6fc4d236aeeb0c25ab968",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
