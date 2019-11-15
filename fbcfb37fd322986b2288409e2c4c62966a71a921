@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a245df4_15a5eab4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-24T22:51:58Z",
+      "side": 1,
+      "message": "What I meant was not add these new start methods - just the original one that takes a EntityOwnerSelectionStrategyConfig. So no changes to the is class. Keep the EntityOwnerSelectionStrategyConfigReader (maybe rename it) so it still yields a EntityOwnerSelectionStrategyConfig instance but just change the internals.",
+      "revId": "fbcfb37fd322986b2288409e2c4c62966a71a921",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
