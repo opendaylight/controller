@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_24ae4786",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-18T08:37:08Z",
+      "side": 1,
+      "message": "You don\u0027t need to have this module replicated in this profile, this is only for the integration tests",
+      "revId": "d3d82997f9efef22b664753eec11ed65f6992bc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a4b117e3",
+        "filename": "opendaylight/md-sal/zeromq-routingtable/implementation/src/main/java/org/opendaylight/controller/sal/connector/remoterpc/api/RoutingTable.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-11-18T08:37:08Z",
+      "side": 1,
+      "message": "You should not be using a Listener pattner in OSGi rather a whiteboard pattern, the moment you uninstall the listener this may left an hanging reference to the bundle listening. Please look at the ICacheUpdateAware logic in clustering.services",
+      "revId": "d3d82997f9efef22b664753eec11ed65f6992bc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
