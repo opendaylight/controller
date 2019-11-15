@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_2c820701",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnToXmlTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:23:29Z",
+      "side": 1,
+      "message": "What exactly is method doing? Does the method have correct name?",
+      "revId": "ae5af1893b3bea587b0da917a565d24325177aa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_ac9e1762",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnToXmlTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:23:29Z",
+      "side": 1,
+      "message": "Please don\u0027t drown exception in common methods. The exceptions have to be propagated back to caller.",
+      "revId": "ae5af1893b3bea587b0da917a565d24325177aa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
