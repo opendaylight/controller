@@ -2,6 +2,41 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_e9918df1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "For an ExecutionException, you really want to propagate the cause. I would suggest using Futures#addCallback here as it unwraps the ExecutionException.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2c754363",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T18:05:30Z",
+      "side": 1,
+      "message": "Any exception thrown by the future task will be wrapped in an ExecutionException. Futures#addCallback makes it easer to handle exceptions and is cleaner as it provides explicit onSuccess and onFailure. Under the hood it actually uses addListener and calls get() for you. For an ExecutionException, it propagates the cause to onFailure. Any other ex is propagated except is ignores InterruptedEx.",
+      "parentUuid": "fa82b9bf_2c99c3c3",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c99b6916",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
         "patchSetId": 1
@@ -13,6 +48,178 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "For an ExecutionException, you really want to propagate the cause. I would suggest using Futures#addCallback here as it unwraps the ExecutionException.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ac0873da",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T18:05:30Z",
+      "side": 1,
+      "message": "See my comment in the Shard class",
+      "parentUuid": "fa82b9bf_0cb39f4d",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_699edd08",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Use Futures#addCallback - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_298c55d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Use Futures#addCallback - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cca7f7bb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T18:20:02Z",
+      "side": 1,
+      "message": "Patch https://git.opendaylight.org/gerrit/#/c/9965/ obviates the need for these changes. That patch refactors the code to make it async and, in the process, also propagates exceptions. I also added unit tests to cover all the cases. Could you please revert these changes to save me a rebase?",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6caa6b86",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T18:20:02Z",
+      "side": 1,
+      "message": "Same as above...",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09a4f148",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "I think it would be better to throw a specific TestException type here. By expecting the base Exception, it will accept any derived type but you want to verify it throws your mock exception.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8946c179",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Can you be sure the future is completed at this point as \u0027ask\u0027 is async? This call really isn\u0027t needed anyway as Await#result covers it.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e9566d29",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "I believe Duration#Zero means it won\u0027t wait. Can you be sure completion will be immediate since \u0027ask\u0027 is async? It would be safest to give it 3 sec.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cc3297a6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T18:05:30Z",
+      "side": 1,
+      "message": "I\u0027m not sure if akka sends it async or not but it\u0027s better to be safe and specify a timeout. You may not see an issue in your testing but it may cause sporadic test failures for others or on jenkins. I\u0027ve seen this many times in my experience. Besides, it doesn\u0027t hurt anything to specify a timeout. Worst thing is it would take longer to complete if it failed with a time out but it doesn\u0027t matter. The test shouldn\u0027t fail if the code is correct.",
+      "parentUuid": "fa82b9bf_ec32fbf0",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a9662528",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "This line is really not needed as the test will fail if the appropriate exception isn\u0027t thrown.",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -64,6 +271,228 @@
       "writtenOn": "2014-08-15T16:16:58Z",
       "side": 1,
       "message": "Is Duration#Zero safe?",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_696c9d08",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_896fa1fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Use specific TestException - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c937e9fd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "This can be removed - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a934e5fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Is Duration#Zero safe?",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_297a15bd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_497519c9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Use specific TestException - see above.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4923d9bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Remove extra blank lines.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e92d0da9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Remove extra blank lines.",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6911fd5b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Should this wait on the Future to ensure it completes?",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8914814d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Should this wait on the Future to ensure it completes?",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8cdfaf39",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T18:05:30Z",
+      "side": 1,
+      "message": "Is it necessary for the test to send a ReadyTransaction and the WriteData above? If it\u0027s not performing any real purpose for the test then you can remove it. I think it makes it a little confusing for others reading the code. If you want/need to keep it then please add comments explaining the purpose.",
+      "parentUuid": "fa82b9bf_0c5cff17",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_693a5de8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "s Duration#Zero safe?",
+      "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e97f4da9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortFailureTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-15T16:16:58Z",
+      "side": 1,
+      "message": "Same as above.",
       "revId": "aed41e5419272fe53fa9d5a41204ead150cdc365",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
