@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_73e8abe2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 6295
+      },
+      "writtenOn": "2017-08-22T11:11:50Z",
+      "side": 1,
+      "message": "private static final String DEFAULT_MODULESHARDS_PATH \u003d \"./configuration/initial/module-shards.conf\";\nprivate static final String DEFAULT_MODULES_PATH \u003d \"./configuration/initial/modules.conf\";",
+      "revId": "c5aebf8b6e0f445f851f7fdbbf51bf18cc13a2f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
