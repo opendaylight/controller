@@ -125,6 +125,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4dfbef78",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "No need to check other arguments?",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f577299e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
         "patchSetId": 2
@@ -143,6 +160,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6df6f390",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "No need to check arguments here?",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_157bad8c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 2
@@ -155,6 +189,23 @@
       "side": 1,
       "message": "Need to remove the precondition. super is the first thing that needs to be called.",
       "parentUuid": "fa82b9bf_0df16794",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0df16794",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "This needs to be done before supre is called? \nOR it shoudl be removed since you are checking in props?",
       "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -249,6 +300,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_cd2e1ffb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "does unknownMessage throws and exception or just logs it.. If its latter we need exception",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4dde8fde",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardIdentifier.java",
         "patchSetId": 2
@@ -279,6 +347,23 @@
       "side": 1,
       "message": "I did this because there is a very common mistake that people - including myself do which is something like this.\n\nShardIdentifier.builder().shardName(\"foo\").memberName(\"blah\").toString()\n\nI wanted to throw an exception to warn - but I think this may be overdoing it. I\u0027ll remove this for now.",
       "parentUuid": "fa82b9bf_ed31a35a",
+      "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ed31a35a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Just for my clarification -- reason for handling this.",
       "revId": "8644a2305c6ccc3f6c58eea4743d2d0d02f351c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
