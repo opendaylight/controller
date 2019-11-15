@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_4c25fba9",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnJsonChoiceCaseTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:19:55Z",
+      "side": 1,
+      "message": "I\u0027m missing validation writeTo method. Finish without exceptions is not full test.",
+      "revId": "9af177d679632764225d44904e317703bc3de7a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_cc190b7b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnJsonChoiceCaseTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T07:19:55Z",
+      "side": 1,
+      "message": "Please don\u0027t drown exception in common methods. The exceptions have to be propagated back to caller.",
+      "revId": "9af177d679632764225d44904e317703bc3de7a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
