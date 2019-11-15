@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_52c935aa",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/NormalizedNodeToNodeCodec.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "There is toNormalized to convert legacy one to the new YangInstanceIdentifier",
+      "revId": "edfde2cb2b17bd2d61eb2d3a4165be50d9cf48dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_728559cd",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/NormalizedNodeToNodeCodec.java",
         "patchSetId": 3
@@ -38,6 +55,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_72cc79bb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/NormalizedNodeToNodeCodec.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Log any exception atleast ath Warning level",
+      "revId": "edfde2cb2b17bd2d61eb2d3a4165be50d9cf48dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3224b10b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/PathUtils.java",
         "patchSetId": 3
@@ -50,6 +84,23 @@
       "side": 1,
       "message": "This is unneccessary. I need to remove this code.",
       "parentUuid": "fa82b9bf_12c72d97",
+      "revId": "edfde2cb2b17bd2d61eb2d3a4165be50d9cf48dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_12c72d97",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/PathUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "including comments might help why we are specifically looking for 2",
       "revId": "edfde2cb2b17bd2d61eb2d3a4165be50d9cf48dc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
