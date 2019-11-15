@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_fa606dd0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/exceptions/OperationException.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Wrapping another exception -- needs to be done with a throwable The original one should be having the exception cause?",
+      "parentUuid": "fa82b9bf_7a569d07",
+      "revId": "ceaae944c7acd5e8be0eb42272cc985f7582ec25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_1a2e718c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 4
@@ -64,6 +82,24 @@
       "writtenOn": "2014-08-17T00:17:10Z",
       "side": 1,
       "message": "While I understand the motivation behind spitting negative tests for a class into a separate file, in my experience, there\u0027s a couple disadvantages to doing this in terms of convenience:\n\n1) You may have helper methods or setup/cleanup code that you want to reuse between all the tests. With multiple files you have to either make a base class, put static methods in one of the files or another file or just duplicate the code in both files. In the patch I\u0027m working on, I have refactored these tests to use common helpers and setup code so I will have to either make a base class or combine them back into 1 file. The latter would be easiest for me.\n\n2) Having all the tests for a class in one file makes it convenient to run and verify all tests at once. This is especially true when you\u0027ve made a change to the tested class and want to run them all for regression. If they\u0027re in multiple files then you have to run them one at a time. Also, others that are less familiar with this project may not be aware or realize that the tests are split into multiple files. They may naturally just pick the one named TransactionProxyTest and only run that. I\u0027ve run into this in the past where I initially missed other unit test files for a class.\n\nWith that said, if a test file gets too large (# lines into the thousands), then that\u0027s a case for breaking it up. But that isn\u0027t the case (currently) with the TransactionProxy tests.",
+      "revId": "ceaae944c7acd5e8be0eb42272cc985f7582ec25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1a5c3118",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/TransactionProxyFailedTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "If you see the original one was not using Mockito mocking framework. Here Im using Mockito and this are stating failed scenarios. There is not much common code hence having them in separate classes made sense. Having more than 10-15 test cases makes it difficult to go through all of them.",
+      "parentUuid": "fa82b9bf_da7a4987",
       "revId": "ceaae944c7acd5e8be0eb42272cc985f7582ec25",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
