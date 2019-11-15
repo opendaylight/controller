@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_6cb6bfde",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnToXmlWithDataFromSeveralModulesTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:39:39Z",
+      "side": 1,
+      "message": "Please make intarnal value String outputString instead call output.toString again and again.",
+      "revId": "eeeef9297176449f37cf958178ae187fdd0801df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_2cb0c7dc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnToXmlWithDataFromSeveralModulesTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:39:39Z",
+      "side": 1,
+      "message": "Please use com.google.common.base.Preconditions",
+      "revId": "eeeef9297176449f37cf958178ae187fdd0801df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
