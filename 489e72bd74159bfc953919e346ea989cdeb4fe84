@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_df61423a",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/run.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 283
+      },
+      "writtenOn": "2014-06-20T09:49:15Z",
+      "side": 1,
+      "message": "Does not work when current directory !\u003d script\u0027s directory",
+      "revId": "489e72bd74159bfc953919e346ea989cdeb4fe84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
