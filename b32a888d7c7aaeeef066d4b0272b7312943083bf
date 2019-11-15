@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_2cb447f1",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnToXmlWithChoiceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:16:25Z",
+      "side": 1,
+      "message": "It\u0027s test method, so throw exception out.",
+      "revId": "b32a888d7c7aaeeef066d4b0272b7312943083bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_4cb97be8",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/xml/test/NnToXmlWithChoiceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T09:16:25Z",
+      "side": 1,
+      "message": "again, please throw exception out.",
+      "revId": "b32a888d7c7aaeeef066d4b0272b7312943083bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
