@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_4c173b52",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonLeafrefType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T10:59:59Z",
+      "side": 1,
+      "message": "Please throw Exception only",
+      "revId": "fdcfb041bda77889cbd2888aac80d3bca99b9853",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_ac05b715",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonLeafrefType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T10:59:59Z",
+      "side": 1,
+      "message": "Please throw Exception only",
+      "revId": "fdcfb041bda77889cbd2888aac80d3bca99b9853",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_cc026b0b",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonLeafrefType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T10:59:59Z",
+      "side": 1,
+      "message": "Please throw Exception only",
+      "revId": "fdcfb041bda77889cbd2888aac80d3bca99b9853",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_80ff5701",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonLeafrefType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T10:59:59Z",
+      "side": 1,
+      "message": "Please throw Exception only",
+      "revId": "fdcfb041bda77889cbd2888aac80d3bca99b9853",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_600ec336",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonLeafrefType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T10:59:59Z",
+      "side": 1,
+      "message": "Please throw Exception only",
+      "revId": "fdcfb041bda77889cbd2888aac80d3bca99b9853",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c01c6f6d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/nn/to/json/test/NnToJsonLeafrefType.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-06-04T10:59:59Z",
+      "side": 1,
+      "message": "Please remove not needed comments",
+      "revId": "fdcfb041bda77889cbd2888aac80d3bca99b9853",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
