@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c7a12995",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Done \ncheck next patch",
+      "parentUuid": "fa82b9bf_94a4b14b",
+      "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_546aa9ee",
         "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a77f4514",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Don\u0027t want to restrict immediate subclass extension. If somebody wants to extend it more than that they are no restrictions.",
+      "parentUuid": "fa82b9bf_546aa9ee",
+      "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3467e527",
         "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-02T04:15:39Z",
       "side": 1,
       "message": "Don\u0027t understand this comment. Can you give an example of what needs to be done?",
+      "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c77a8923",
+        "filename": "opendaylight/md-sal/sal-protocolbuffer-encoding/src/test/java/org/opendaylight/controller/protobuff/messages/AbstractMessagesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "We have shipped time serialized test data file in version-compatibiilty-serialized-data folder. This comment is just trying to help DE to generate that test data file i.e. in normal cases the serialized test data file will be created and deleted after the test run. If DE comments out the file.delete statement then he will get the test data file that he can copy to version-compatibility-serialized-data folder. The readme.txt in version-compatiblity-serialized-data points to this comment.",
+      "parentUuid": "fa82b9bf_3467e527",
       "revId": "b722f7e38d1832b8d49834ae0b0793e7f4e50d02",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
