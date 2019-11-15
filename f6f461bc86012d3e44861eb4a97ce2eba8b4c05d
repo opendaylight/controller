@@ -20,6 +20,41 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_bb041316",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 0,
+      "message": "Yes, I will create a separate patch.",
+      "parentUuid": "da5c1566_98aaf517",
+      "revId": "f6f461bc86012d3e44861eb4a97ce2eba8b4c05d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_5854dd53",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 0,
+      "message": "I was thinking of marking AbstractConfigTestBase deprecated and moving the karaf stuff into an AbstractKarafTestBase. It seems like what\u0027s left in this class is not config subsystem related.",
+      "revId": "f6f461bc86012d3e44861eb4a97ce2eba8b4c05d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_180d4591",
         "filename": "opendaylight/md-sal/samples/toaster-it/src/test/java/org/opendaylight/controller/sample/toaster/it/ToasterTest.java",
         "patchSetId": 1
