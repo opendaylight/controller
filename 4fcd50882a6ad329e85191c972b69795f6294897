@@ -20,6 +20,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_0e0b682c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardMBeanFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Im assuming that using Cache would provide us with extra functionality that we want to leverage can you provide more details on that -- Since the number of Shards are pretty much static i.e. on a running system the size of HashMap should have been fixed -- trying to understand how HashMap would have impacted.",
+      "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_105146d8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardMBeanFactory.java",
         "patchSetId": 4
@@ -38,6 +55,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4e43b06c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardMBeanFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "Trying to understand the reason for returning ShardStats that is not registered -- what would be usage?",
+      "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f06aa280",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
         "patchSetId": 4
@@ -50,6 +84,23 @@
       "side": 1,
       "message": "Currently there aren\u0027t. Jan created a bug to add them which I assigned to me.",
       "parentUuid": "fa82b9bf_f0494261",
+      "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f0494261",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 988
+      },
+      "writtenOn": "2019-11-15T19:08:23Z",
+      "side": 1,
+      "message": "If you have any transaction specific counters you were tracking for Inmemory datastore. They should also get reset here?",
       "revId": "4fcd50882a6ad329e85191c972b69795f6294897",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
