@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_aa8cbad7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:18:54Z",
+      "side": 1,
+      "message": "The ShardContext is shared between shards so we can\u0027t set the name here.",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_257e9b6a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T21:49:37Z",
+      "side": 1,
+      "message": "Yeah I think you\u0027re right - poor choice of name on my part. It really is DataStoreContext. Please change it.",
+      "parentUuid": "fa82b9bf_a52dcb90",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8a91b6f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:18:54Z",
+      "side": 1,
+      "message": "We should use long instead of Long for these counters to avoid object creation, especially for the ++ operation. Also should we assume these counters won\u0027t ever be accessed concurrently? We might want to use AtomicLong or \"volatile long\" with AtomicLongFieldUpdaters.",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2ab8aa73",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStatsMBean.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2014-08-29T20:18:54Z",
+      "side": 1,
+      "message": "See comments in ShardStats, i.e. return long instead of Long.",
+      "revId": "783ee9175199c86aedd8f10e4864f8821205adf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
