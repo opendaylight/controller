@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_358ca6d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-18T23:28:18Z",
+      "side": 1,
+      "message": "you must use the closed in \"sender\" instead of getSender() to send the failure message.\n\nhttp://stackoverflow.com/questions/11897881/akka-getsender-lost-in-future",
+      "revId": "07d7d827764c25fe64f178bc0195ace941b60947",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5587eab4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-18T23:28:18Z",
+      "side": 1,
+      "message": "you must use the closed in \"sender\" instead of getSender() to send the failure message.",
+      "revId": "07d7d827764c25fe64f178bc0195ace941b60947",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f5915ef1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2014-08-18T23:28:18Z",
+      "side": 1,
+      "message": "you must use the closed in \"sender\" instead of getSender() to send the failure message.",
+      "revId": "07d7d827764c25fe64f178bc0195ace941b60947",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
