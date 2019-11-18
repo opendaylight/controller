@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,14 +70,14 @@ public abstract class CommitTransactionPayload extends Payload implements Serial
     }
 
     public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
-        return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
+        final DataInput in = newDataInput();
+        return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
+                DataTreeCandidateInputOutput.readDataTreeCandidate(in));
     }
 
     public final Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
             final ReusableStreamReceiver receiver) throws IOException {
-        final DataInput in = newDataInput();
-        return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
-                DataTreeCandidateInputOutput.readDataTreeCandidate(in));
+        return getCandidate();
     }
 
     abstract void writeBytes(ObjectOutput out) throws IOException;
