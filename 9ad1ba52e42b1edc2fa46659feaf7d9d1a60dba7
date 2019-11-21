@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a93c228d_922bb400",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/HybridModuleShardConfigProvider.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-11-21T12:59:51Z",
+      "side": 1,
+      "message": "Public classes start their life as @Beta, please annotate accordingly.",
+      "range": {
+        "startLine": 15,
+        "startChar": 13,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "9ad1ba52e42b1edc2fa46659feaf7d9d1a60dba7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f470606b_6dd17d1f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/HybridModuleShardConfigProvider.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-11-21T12:59:51Z",
+      "side": 1,
+      "message": "if this is null then retrieveModuleConfigs() will throw a NPE (indirectly via loadConfigFromPath() -\u003e File(null)). What is the intent here?",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 51
+      },
+      "revId": "9ad1ba52e42b1edc2fa46659feaf7d9d1a60dba7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
