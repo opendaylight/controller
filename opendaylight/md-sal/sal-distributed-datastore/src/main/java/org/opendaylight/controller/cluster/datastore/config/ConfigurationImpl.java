@@ -111,11 +111,15 @@ public class ConfigurationImpl implements Configuration {
     @Override
     public String getShardNameForModule(final String moduleName) {
         requireNonNull(moduleName, "moduleName should not be null");
-
         ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
-        Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
-            Collections.<ShardConfig>emptySet();
-        return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName() : null;
+        if (moduleConfig != null) {
+            Collection<ShardConfig> shardConfigs = moduleConfig.getShardConfigs();
+            if (!shardConfigs.isEmpty()) {
+                return shardConfigs.iterator().next().getName();
+            }
+        }
+
+        return null;
     }
 
     @Override
