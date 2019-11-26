@@ -95,27 +95,30 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public String getModuleNameFromNameSpace(final String nameSpace) {
-        requireNonNull(nameSpace, "nameSpace should not be null");
-
-        return namespaceToModuleName.get(nameSpace);
+        return namespaceToModuleName.get(requireNonNull(nameSpace, "nameSpace should not be null"));
     }
 
     @Override
     public ShardStrategy getStrategyForModule(final String moduleName) {
-        requireNonNull(moduleName, "moduleName should not be null");
-
-        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        ModuleConfig moduleConfig = getModuleConfig(moduleName);
         return moduleConfig != null ? moduleConfig.getShardStrategy() : null;
     }
 
     @Override
     public String getShardNameForModule(final String moduleName) {
-        requireNonNull(moduleName, "moduleName should not be null");
+        ModuleConfig moduleConfig = getModuleConfig(moduleName);
+        if (moduleConfig != null) {
+            Collection<ShardConfig> shardConfigs = moduleConfig.getShardConfigs();
+            if (!shardConfigs.isEmpty()) {
+                return shardConfigs.iterator().next().getName();
+            }
+        }
 
-        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
-        Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
-            Collections.<ShardConfig>emptySet();
-        return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName() : null;
+        return null;
+    }
+
+    private ModuleConfig getModuleConfig(final String moduleName) {
+        return moduleConfigMap.get(requireNonNull(moduleName, "moduleName should not be null"));
     }
 
     @Override
