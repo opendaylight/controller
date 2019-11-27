@@ -103,8 +103,9 @@ public final class ModuleConfig {
             return this;
         }
 
-        public Builder shardConfig(final String shardName, final Collection<MemberName> replicas) {
-            shardConfigs.put(shardName, new ShardConfig(shardName, replicas));
+        public Builder shardConfig(final String shardName, final Boolean persistent,
+                                   final Collection<MemberName> replicas) {
+            shardConfigs.put(shardName, new ShardConfig(shardName, persistent, replicas));
             return this;
         }
 

@@ -42,6 +42,7 @@ public class PrefixShardConfiguration implements Serializable {
         @Override
         public void writeExternal(final ObjectOutput objectOutput) throws IOException {
             objectOutput.writeObject(prefixShardConfiguration.getPrefix());
+            objectOutput.writeObject(prefixShardConfiguration.isPersistent());
             objectOutput.writeObject(prefixShardConfiguration.getShardStrategyName());
 
             objectOutput.writeInt(prefixShardConfiguration.getShardMemberNames().size());
@@ -53,6 +54,7 @@ public class PrefixShardConfiguration implements Serializable {
         @Override
         public void readExternal(final ObjectInput objectInput) throws IOException, ClassNotFoundException {
             final DOMDataTreeIdentifier localPrefix = (DOMDataTreeIdentifier) objectInput.readObject();
+            final Boolean persistent = (Boolean) objectInput.readObject();
             final String localStrategyName = (String) objectInput.readObject();
 
             final int size = objectInput.readInt();
@@ -61,7 +63,7 @@ public class PrefixShardConfiguration implements Serializable {
                 localShardMemberNames.add(MemberName.readFrom(objectInput));
             }
 
-            prefixShardConfiguration = new PrefixShardConfiguration(localPrefix, localStrategyName,
+            prefixShardConfiguration = new PrefixShardConfiguration(localPrefix, persistent, localStrategyName,
                     localShardMemberNames);
         }
 
@@ -73,19 +75,25 @@ public class PrefixShardConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final DOMDataTreeIdentifier prefix;
+    private final Boolean persistent;
     private final String shardStrategyName;
     private final Collection<MemberName> shardMemberNames;
 
-    public PrefixShardConfiguration(final DOMDataTreeIdentifier prefix,
+    public PrefixShardConfiguration(final DOMDataTreeIdentifier prefix, final Boolean persistent,
                                     final String shardStrategyName,
                                     final Collection<MemberName> shardMemberNames) {
         this.prefix = requireNonNull(prefix);
+        this.persistent = persistent;
         this.shardStrategyName = requireNonNull(shardStrategyName);
         this.shardMemberNames = ImmutableSet.copyOf(shardMemberNames);
     }
 
     public DOMDataTreeIdentifier getPrefix() {
         return prefix;
+    }
+
+    public Boolean isPersistent() {
+        return persistent;
     }
 
     public String getShardStrategyName() {
@@ -100,6 +108,7 @@ public class PrefixShardConfiguration implements Serializable {
     public String toString() {
         return "PrefixShardConfiguration{"
                 + "prefix=" + prefix
+                + "persistent=" + (persistent != null ? persistent : "default")
                 + ", shardStrategyName='"
                 + shardStrategyName + '\''
                 + ", shardMemberNames=" + shardMemberNames

@@ -325,6 +325,14 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
+    typedef datastore-type {
+        type enumeration {
+             enum configuration;
+             enum operational;
+             enum both;
+         }
+    }
+
     rpc create-prefix-shard {
         description "Upon receiving this, the member creates a prefix shard at the instance-identifier, with replicas
                 on the required members.";
@@ -333,6 +341,21 @@ module odl-mdsal-lowlevel-control {
             leaf prefix {
                 mandatory true;
                 type instance-identifier;
+            }
+            container persistence {
+                leaf datastore {
+                    type datastore-type;
+                    mandatory true;
+                    description "Specify which datastore this persistence applies to - config, operational, both";
+                }
+
+                leaf persistent {
+                    type boolean;
+                    mandatory true;
+                    description "To be persistent, or not to be, that is the question.";
+                }
+                description "Specify whether this shard should be persisted and from which datastore. If left unset, the
+                             default persistence configuration of the data-stores will be used.";
             }
             leaf-list replicas {
                 min-elements 1;

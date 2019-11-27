@@ -40,6 +40,7 @@ final class ShardInformation {
     private static final Logger LOG = LoggerFactory.getLogger(ShardInformation.class);
 
     private final Set<OnShardInitialized> onShardInitializedSet = new HashSet<>();
+    private Boolean persistent;
     private final Map<String, String> initialPeerAddresses;
     private final ShardPeerAddressResolver addressResolver;
     private final ShardIdentifier shardId;
@@ -68,10 +69,17 @@ final class ShardInformation {
     private boolean activeMember = true;
 
     ShardInformation(final String shardName, final ShardIdentifier shardId,
+                     final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
+                     final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
+        this(shardName, shardId, null, initialPeerAddresses, datastoreContext, builder, addressResolver);
+    }
+
+    ShardInformation(final String shardName, final ShardIdentifier shardId, final Boolean persistent,
             final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
             final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
         this.shardName = shardName;
         this.shardId = shardId;
+        this.persistent = persistent;
         this.initialPeerAddresses = initialPeerAddresses;
         this.datastoreContext = datastoreContext;
         this.builder = builder;
@@ -80,7 +88,8 @@ final class ShardInformation {
 
     Props newProps() {
         Props props = requireNonNull(builder).id(shardId).peerAddresses(initialPeerAddresses)
-                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider).props();
+                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider)
+                .setPersistent(persistent).props();
         builder = null;
         return props;
     }

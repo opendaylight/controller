@@ -215,10 +215,10 @@ public class ClusterAdminRpcServiceTest {
         replicaNode3.kit().waitForMembersUp("member-1", "member-2");
 
         final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
-
+//TODO: FIX PERSISTENCE
         shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
-                        "prefix", Collections.singleton(MEMBER_1))),
+                        true, "prefix", Collections.singleton(MEMBER_1))),
                 ActorRef.noSender());
 
         member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
@@ -271,10 +271,10 @@ public class ClusterAdminRpcServiceTest {
         verifyFailedRpcResult(failedResult);
 
         final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
-
+//TODO: FIX PERSISTENCE
         shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
-                        "prefix", Collections.singleton(MEMBER_1))),
+                        true, "prefix", Collections.singleton(MEMBER_1))),
                 ActorRef.noSender());
 
         member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
@@ -695,7 +695,7 @@ public class ClusterAdminRpcServiceTest {
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                                                                                 "pets", null,
+                                                                                 "pets", true, null,
                                                                                  Collections.singletonList(MEMBER_1));
         leaderNode1.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
@@ -714,7 +714,7 @@ public class ClusterAdminRpcServiceTest {
 
         newReplicaNode2.operDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(new ModuleShardConfiguration(URI.create("no-leader-ns"), "no-leader-module",
-                                                             "no-leader", null,
+                                                             "no-leader", true, null,
                                                              Collections.singletonList(MEMBER_1)),
                                 Shard.builder(), null),
                                 newReplicaNode2.kit().getRef());
@@ -761,7 +761,7 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                "pets", null, Arrays.asList(MEMBER_1, MEMBER_2, MEMBER_3));
+                "pets",true, null, Arrays.asList(MEMBER_1, MEMBER_2, MEMBER_3));
         leaderNode1.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);

@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.prefix.shard.configuration.rev170110.DatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -143,6 +144,15 @@ class PrefixedShardConfigWriter {
                 .withChild(ImmutableLeafNodeBuilder.create()
                         .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PREFIX_QNAME))
                         .withValue(path)
+                        .build())
+                .withChild(ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PERSISTENCE_QNAME))
+                        .withChild(ImmutableLeafNodeBuilder.create()
+                                .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PERSISTENCE_DATASTORE_QNAME))
+                                .withValue(DatastoreType.Both.getName()).build())
+                        .withChild(ImmutableLeafNodeBuilder.create()
+                                .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PERSISTENCE_PERSISTENT_QNAME))
+                                .withValue(Boolean.TRUE).build())
                         .build())
                 .withChild(ImmutableContainerNodeBuilder.create()
                         .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_REPLICAS_QNAME))

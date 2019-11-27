@@ -106,9 +106,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private static final int ACTOR_RETRY_DELAY = 100;
     private static final TimeUnit ACTOR_RETRY_TIME_UNIT = TimeUnit.MILLISECONDS;
     private static final int LOOKUP_TASK_MAX_RETRIES = 100;
+    private static final boolean PERSISTENT = true;
     static final FiniteDuration SHARD_FUTURE_TIMEOUT_DURATION =
             new FiniteDuration(LOOKUP_TASK_MAX_RETRIES * LOOKUP_TASK_MAX_RETRIES * 3, TimeUnit.SECONDS);
     static final Timeout SHARD_FUTURE_TIMEOUT = new Timeout(SHARD_FUTURE_TIMEOUT_DURATION);
+
 
     static final String ACTOR_ID = "ShardedDOMDataTreeFrontend";
 
@@ -165,9 +167,9 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShardMessage =
                 new CreateShard(new ModuleShardConfiguration(PrefixShards.QNAME.getNamespace(),
-                        "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID, ModuleShardStrategy.NAME,
-                        memberNames),
-                        Shard.builder(), dataStore.getActorUtils().getDatastoreContext());
+                        "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID, PERSISTENT,
+                        ModuleShardStrategy.NAME, memberNames), Shard.builder(),
+                        dataStore.getActorUtils().getDatastoreContext());
 
         dataStore.getActorUtils().getShardManager().tell(createShardMessage, noSender());
     }

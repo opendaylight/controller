@@ -88,6 +88,12 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
         final Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
         for (final ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList) {
             final String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
+            Boolean persistent = null;
+            if (moduleShardConfigObject.containsKey("persistent")) {
+                persistent = Boolean.valueOf(moduleShardConfigObject.get("persistent").unwrapped()
+                        .toString());
+            }
+
             final ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
 
             final List<? extends ConfigObject> shardsConfigObjectList =
@@ -97,7 +103,10 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
                 final String shardName = shard.get("name").unwrapped().toString();
                 final List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
                         .map(MemberName::forName).collect(Collectors.toList());
-                builder.shardConfig(shardName, replicas);
+                if (shard.containsKey("persistent")) {
+                    persistent = Boolean.valueOf(shard.get("persistent").unwrapped().toString());
+                }
+                builder.shardConfig(shardName, persistent, replicas);
             }
 
             moduleConfigMap.put(moduleName, builder);

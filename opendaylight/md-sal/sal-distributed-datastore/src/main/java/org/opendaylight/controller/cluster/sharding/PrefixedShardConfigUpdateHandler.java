@@ -9,6 +9,9 @@ package org.opendaylight.controller.cluster.sharding;
 
 import static akka.actor.ActorRef.noSender;
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_PERSISTENCE_DATASTORE_QNAME;
+import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_PERSISTENCE_PERSISTENT_QNAME;
+import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_PERSISTENCE_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_PREFIX_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_REPLICAS_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_REPLICA_QNAME;
@@ -29,6 +32,7 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.prefix.shard.configuration.rev170110.DatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -142,6 +146,21 @@ public class PrefixedShardConfigUpdateHandler {
 
             LOG.debug("{}: Deserialized {} from datastore", logName, identifier);
 
+            Boolean setPersistence = null;
+            final ContainerNode persistenceContainer =
+                    (ContainerNode) entryNode.getChild(new NodeIdentifier(SHARD_PERSISTENCE_QNAME))
+                            .orElse(null);
+            if (persistenceContainer != null) {
+                LeafNode<String> leafDSType = (LeafNode<String>) persistenceContainer
+                        .getChild(new NodeIdentifier(SHARD_PERSISTENCE_DATASTORE_QNAME)).get();
+                String dsType = leafDSType.getValue();
+                if (dsType.equals(DatastoreType.Both.getName()) || dsType.equalsIgnoreCase(this.type.name())) {
+                    setPersistence = ((LeafNode<Boolean>) persistenceContainer
+                            .getChild(new NodeIdentifier(SHARD_PERSISTENCE_PERSISTENT_QNAME)).get()).getValue();
+                    LOG.info("Persistence specified as {} for datastore {}", setPersistence, dsType);
+                }
+            }
+
             final ContainerNode replicas =
                     (ContainerNode) entryNode.getChild(new NodeIdentifier(SHARD_REPLICAS_QNAME)).get();
 
@@ -153,9 +172,9 @@ public class PrefixedShardConfigUpdateHandler {
                     .collect(Collectors.toList());
 
             LOG.debug("{}: Replicas read from ds {}", logName, retReplicas.toString());
-
+//TODO: Fix persistence.. this was changed to true only because of yang rebuild
             final PrefixShardConfiguration newConfig =
-                    new PrefixShardConfiguration(new DOMDataTreeIdentifier(type, identifier),
+                    new PrefixShardConfiguration(new DOMDataTreeIdentifier(type, identifier), setPersistence,
                             PrefixShardStrategy.NAME, retReplicas);
 
             LOG.debug("{}: Resulting config {} - sending PrefixShardCreated to {}", logName, newConfig, handlingActor);

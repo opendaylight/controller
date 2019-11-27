@@ -12,6 +12,9 @@ import static java.util.Objects.requireNonNull;
 
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -83,6 +86,7 @@ public class DatastoreContext implements ClientActorConfig {
     private Timeout shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
+    private Map<String, Boolean> shardPersistanceMap = new HashMap<>();
     private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
@@ -99,6 +103,7 @@ public class DatastoreContext implements ClientActorConfig {
     private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
+
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -127,6 +132,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.shardLeaderElectionTimeout = other.shardLeaderElectionTimeout;
         this.initialSettleTimeoutMultiplier = other.initialSettleTimeoutMultiplier;
         this.persistent = other.persistent;
+        this.shardPersistanceMap = other.shardPersistanceMap;
         this.configurationReader = other.configurationReader;
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
         this.dataStoreName = other.dataStoreName;
@@ -365,6 +371,18 @@ public class DatastoreContext implements ClientActorConfig {
         return initialPayloadSerializedBufferCapacity;
     }
 
+    public boolean isShardPersistent(final String shardName) {
+        LOG.info("isShardPersistent was called on name: {}, was it defined? {}, and is it persisted? {}, ", shardName,
+                this.shardPersistanceMap.containsKey(shardName),
+                Optional.ofNullable(this.shardPersistanceMap.get(shardName)).orElse(this.persistent));
+        LOG.info("ShardPersistenceMap size: {}", this.shardPersistanceMap.size());
+        return Optional.ofNullable(this.shardPersistanceMap.get(shardName)).orElse(this.persistent);
+    }
+
+    public void setShardPersistece(final String shardName, final boolean persistant) {
+        this.shardPersistanceMap.put(shardName, persistant);
+    }
+
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
         private final DatastoreContext datastoreContext;
         private int maxShardDataChangeExecutorPoolSize =
@@ -487,6 +505,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder persistent(final boolean persistent) {
             datastoreContext.persistent = persistent;
+            return this;
+        }
+
+        public Builder shardPersistenceMap(final Map<String, Boolean> shardPersistanceMap) {
+            datastoreContext.shardPersistanceMap = shardPersistanceMap;
             return this;
         }
 

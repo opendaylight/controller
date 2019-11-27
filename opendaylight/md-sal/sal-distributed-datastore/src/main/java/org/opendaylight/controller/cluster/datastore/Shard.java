@@ -214,8 +214,11 @@ public class Shard extends RaftActor {
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
         this.frontendMetadata = new FrontendMetadata(name);
-
-        setPersistence(datastoreContext.isPersistent());
+        if (builder.isPersistent() != null) {
+            setPersistence(builder.isPersistent());
+        } else {
+            setPersistence(datastoreContext.isShardPersistent(builder.getId().getShardName()));
+        }
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
@@ -1106,6 +1109,7 @@ public class Shard extends RaftActor {
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T, S>, S extends Shard> {
         private final Class<? extends S> shardClass;
         private ShardIdentifier id;
+        private Boolean persistent;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private SchemaContextProvider schemaContextProvider;
@@ -1145,6 +1149,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T setPersistent(Boolean setPersistent) {
+            checkSealed();
+            this.persistent = setPersistent;
+            return self();
+        }
+
         public T schemaContextProvider(final SchemaContextProvider newSchemaContextProvider) {
             checkSealed();
             this.schemaContextProvider = requireNonNull(newSchemaContextProvider);
@@ -1165,6 +1175,10 @@ public class Shard extends RaftActor {
 
         public ShardIdentifier getId() {
             return id;
+        }
+
+        public Boolean isPersistent() {
+            return persistent;
         }
 
         public Map<String, String> getPeerAddresses() {
