@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -84,6 +85,9 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree;
 import org.opendaylight.mdsal.dom.spi.DOMDataTreePrefixTable;
 import org.opendaylight.mdsal.dom.spi.DOMDataTreePrefixTableEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.prefix.shard.configuration.rev170110.PrefixShards;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.DatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.PersistenceBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -106,9 +110,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private static final int ACTOR_RETRY_DELAY = 100;
     private static final TimeUnit ACTOR_RETRY_TIME_UNIT = TimeUnit.MILLISECONDS;
     private static final int LOOKUP_TASK_MAX_RETRIES = 100;
+    private static final boolean PERSISTENT = true;
     static final FiniteDuration SHARD_FUTURE_TIMEOUT_DURATION =
             new FiniteDuration(LOOKUP_TASK_MAX_RETRIES * LOOKUP_TASK_MAX_RETRIES * 3, TimeUnit.SECONDS);
     static final Timeout SHARD_FUTURE_TIMEOUT = new Timeout(SHARD_FUTURE_TIMEOUT_DURATION);
+
 
     static final String ACTOR_ID = "ShardedDOMDataTreeFrontend";
 
@@ -165,9 +171,12 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShardMessage =
                 new CreateShard(new ModuleShardConfiguration(PrefixShards.QNAME.getNamespace(),
-                        "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID, ModuleShardStrategy.NAME,
-                        memberNames),
-                        Shard.builder(), dataStore.getActorUtils().getDatastoreContext());
+                        "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID,
+                        new PersistenceBuilder().setPersistent(PERSISTENT)
+                                .setDatastore(DatastoreType.forName(dataStore.getActorUtils().getDatastoreContext()
+                                        .getLogicalStoreType().name().toLowerCase(Locale.getDefault())).get()).build(),
+                        ModuleShardStrategy.NAME, memberNames), Shard.builder(),
+                        dataStore.getActorUtils().getDatastoreContext());
 
         dataStore.getActorUtils().getShardManager().tell(createShardMessage, noSender());
     }
@@ -306,8 +315,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
     @Override
     public CompletionStage<DistributedShardRegistration> createDistributedShard(
-            final DOMDataTreeIdentifier prefix, final Collection<MemberName> replicaMembers)
-            throws DOMDataTreeShardingConflictException {
+            final DOMDataTreeIdentifier prefix, final Persistence persistence,
+            final Collection<MemberName> replicaMembers) throws DOMDataTreeShardingConflictException {
 
         synchronized (shards) {
             final DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> lookup =
@@ -321,7 +330,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         final PrefixedShardConfigWriter writer = writerMap.get(prefix.getDatastoreType());
 
         final ListenableFuture<Void> writeFuture =
-                writer.writeConfig(prefix.getRootIdentifier(), replicaMembers);
+                writer.writeConfig(prefix.getRootIdentifier(), persistence, replicaMembers);
 
         final Promise<DistributedShardRegistration> shardRegistrationPromise = akka.dispatch.Futures.promise();
         Futures.addCallback(writeFuture, new FutureCallback<Void>() {

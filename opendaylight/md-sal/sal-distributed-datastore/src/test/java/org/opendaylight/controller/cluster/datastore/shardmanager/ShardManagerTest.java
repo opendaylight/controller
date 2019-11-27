@@ -128,6 +128,10 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.DatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.PersistenceBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -1244,9 +1248,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100)
                 .persistent(false).build();
         Shard.Builder shardBuilder = Shard.builder();
-
         ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
-            "foo", null, members("member-1", "member-5", "member-6"));
+            "foo", null, null, members("member-1", "member-5", "member-6"));
         shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), kit.getRef());
 
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
@@ -1277,6 +1280,75 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         LOG.info("testOnCreateShard ending");
     }
 
+    private void testShardPersistenceWhen(LogicalDatastoreType datastore, boolean datastoreContextPersistent,
+                                          Persistence perShardPersistence, boolean expectedShardPersistence) {
+        LOG.info("testShardPersistenceWhen: datastore[{}] persistence = {}, perShardPersistence = {}, " +
+                "expected persistence = {}", datastore.name(), datastoreContextPersistent,
+                (perShardPersistence == null ? "null" : perShardPersistence.toString()), expectedShardPersistence);
+        final TestKit kit = new TestKit(getSystem());
+        datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+        ActorRef shardManager = actorFactory
+                .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
+                        .withDispatcher(Dispatchers.DefaultDispatcherId()));
+
+        SchemaContext schemaContext = TEST_SCHEMA_CONTEXT;
+        shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+
+        DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100)
+                .persistent(datastoreContextPersistent).logicalStoreType(datastore).build();
+        Shard.Builder shardBuilder = Shard.builder();
+        ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+                "foo", perShardPersistence, null, members("member-1", "member-5", "member-6"));
+        shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), kit.getRef());
+
+        kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
+
+        shardManager.tell(new FindLocalShard("foo", true), kit.getRef());
+
+        kit.expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
+
+        final TestActorRef<Shard> shardActor = actorFactory.createTestActor(shardBuilder.props());
+        assertEquals(expectedShardPersistence, shardActor.underlyingActor().persistence().isRecoveryApplicable());
+    }
+
+    @Test
+    public void testCreateShardWithVariousPersistence() {
+        LOG.info("testOnCreateShardWithVariousPersistence starting");
+        Persistence persistConfigTrue = new PersistenceBuilder().setDatastore(DatastoreType.Configuration).setPersistent(true).build();
+        Persistence persistConfigFalse = new PersistenceBuilder().setDatastore(DatastoreType.Configuration).setPersistent(false).build();
+        Persistence persistOperTrue = new PersistenceBuilder().setDatastore(DatastoreType.Operational).setPersistent(true).build();
+        Persistence persistOperFalse = new PersistenceBuilder().setDatastore(DatastoreType.Operational).setPersistent(false).build();
+        Persistence persistBothTrue = new PersistenceBuilder().setDatastore(DatastoreType.Both).setPersistent(true).build();
+        Persistence persistBothFalse = new PersistenceBuilder().setDatastore(DatastoreType.Both).setPersistent(false).build();
+
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, true, null, true);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, false, null, false);
+
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, true, persistConfigTrue, true);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, true, persistConfigFalse, false);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, true, persistBothFalse, false);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, false, persistConfigFalse, false);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, false, persistConfigTrue, true);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, false, persistBothTrue, true);
+
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, false, persistOperTrue, false);
+        testShardPersistenceWhen(LogicalDatastoreType.CONFIGURATION, true, persistOperFalse, true);
+
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, true, null, true);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, false, null, false);
+
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, true, persistOperTrue, true);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, true, persistOperFalse, false);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, true, persistBothFalse, false);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, false, persistOperFalse, false);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, false, persistOperTrue, true);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, false, persistBothTrue, true);
+
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, false, persistConfigTrue, false);
+        testShardPersistenceWhen(LogicalDatastoreType.OPERATIONAL, true, persistConfigFalse, true);
+    }
+
     @Test
     public void testOnCreateShardWithLocalMemberNotInShardConfig() {
         LOG.info("testOnCreateShardWithLocalMemberNotInShardConfig starting");
@@ -1291,7 +1363,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         Shard.Builder shardBuilder = Shard.builder();
         ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
-            "foo", null, members("member-5", "member-6"));
+            "foo", null, null, members("member-5", "member-6"));
 
         shardManager.tell(new CreateShard(config, shardBuilder, null), kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
@@ -1317,7 +1389,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         Shard.Builder shardBuilder = Shard.builder();
 
         ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
-            "foo", null, members("member-1"));
+            "foo", null, null, members("member-1"));
         shardManager.tell(new CreateShard(config, shardBuilder, null), kit.getRef());
 
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
@@ -1454,7 +1526,6 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         MockConfiguration mockConfig = new MockConfiguration(
                 ImmutableMap.<String, List<String>>builder().put("default", Arrays.asList("member-1", "member-2"))
                         .put("astronauts", Arrays.asList("member-2")).build());
-
         final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
         datastoreContextBuilder.shardManagerPersistenceId(shardManagerID);
 
@@ -2306,7 +2377,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         return new MessageInterceptor() {
             @Override
             public Object apply(final Object message) {
-                return new RemotePrimaryShardFound(Serialization.serializedActorPath(primaryActor), (short) 1);
+                return new RemotePrimaryShardFound(Serialization.serializedActorPath(primaryActor), (short) 1, null);
             }
 
             @Override

@@ -178,6 +178,19 @@ module distributed-datastore-provider {
             description "Enable or disable data persistence";
         }
 
+        list shard-persistence-map {
+            key shard-name;
+
+            leaf shard-name {
+                type string;
+            }
+
+            leaf persistent {
+                type boolean;
+            }
+            description "Map specifying which shards should/shouldn't be persisted";
+        }
+
         leaf shard-isolated-leader-check-interval-in-millis {
             default 5000;
             type heartbeat-interval-type;

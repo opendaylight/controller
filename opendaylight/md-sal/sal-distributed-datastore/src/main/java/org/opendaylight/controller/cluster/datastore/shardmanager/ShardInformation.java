@@ -31,6 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ final class ShardInformation {
     private static final Logger LOG = LoggerFactory.getLogger(ShardInformation.class);
 
     private final Set<OnShardInitialized> onShardInitializedSet = new HashSet<>();
+    private final Persistence persistence;
     private final Map<String, String> initialPeerAddresses;
     private final ShardPeerAddressResolver addressResolver;
     private final ShardIdentifier shardId;
@@ -68,10 +70,17 @@ final class ShardInformation {
     private boolean activeMember = true;
 
     ShardInformation(final String shardName, final ShardIdentifier shardId,
+                     final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
+                     final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
+        this(shardName, shardId, null, initialPeerAddresses, datastoreContext, builder, addressResolver);
+    }
+
+    ShardInformation(final String shardName, final ShardIdentifier shardId, final Persistence persistence,
             final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
             final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
         this.shardName = shardName;
         this.shardId = shardId;
+        this.persistence = persistence;
         this.initialPeerAddresses = initialPeerAddresses;
         this.datastoreContext = datastoreContext;
         this.builder = builder;
@@ -80,13 +89,18 @@ final class ShardInformation {
 
     Props newProps() {
         Props props = requireNonNull(builder).id(shardId).peerAddresses(initialPeerAddresses)
-                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider).props();
+                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider)
+                .setPersistence(persistence).props();
         builder = null;
         return props;
     }
 
     String getShardName() {
         return shardName;
+    }
+
+    Persistence getPersistence() {
+        return persistence;
     }
 
     @Nullable ActorRef getActor() {

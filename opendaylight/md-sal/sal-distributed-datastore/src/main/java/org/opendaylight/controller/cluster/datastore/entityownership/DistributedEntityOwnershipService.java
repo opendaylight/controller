@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -45,6 +46,8 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.DatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.PersistenceBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -68,6 +71,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedEntityOwnershipService.class);
     private static final Timeout MESSAGE_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
+    private static final boolean PERSISTENT = true;
 
     private final ConcurrentMap<DOMEntity, DOMEntity> registeredEntities = new ConcurrentHashMap<>();
     private final ActorUtils context;
@@ -86,8 +90,10 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         Configuration configuration = context.getConfiguration();
         Collection<MemberName> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShard = new CreateShard(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
-                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
-                        newShardBuilder(context, strategyConfig), null);
+                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, new PersistenceBuilder().setPersistent(PERSISTENT)
+                .setDatastore(DatastoreType.forName(context.getDatastoreContext().getLogicalStoreType().name()
+                        .toLowerCase(Locale.getDefault())).get()).build(),
+                ModuleShardStrategy.NAME, entityOwnersMemberNames), newShardBuilder(context, strategyConfig), null);
 
         Future<Object> createFuture = context.executeOperationAsync(shardManagerActor, createShard, MESSAGE_TIMEOUT);
         createFuture.onComplete(new OnComplete<Object>() {

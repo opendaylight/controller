@@ -114,6 +114,7 @@ import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -677,7 +678,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{} doCreatePrefixShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
                 persistenceId(), shardId, config.getShardMemberNames(), peerAddresses, isActiveMember);
 
-        final ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
+        final ShardInformation info = new ShardInformation(shardName, shardId, config.getPersistence(), peerAddresses,
                 shardDatastoreContext, Shard.builder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
@@ -739,10 +740,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 persistenceId(), shardId, moduleShardConfig.getShardMemberNames(), peerAddresses,
                 isActiveMember);
 
-        ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
-                shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
+        ShardInformation info = new ShardInformation(shardName, shardId, createShard.getShardBuilder().getPersistence(),
+                peerAddresses, shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
+        if (moduleShardConfig.getPersistence() != null) {
+            shardDatastoreContext.setShardPersistece(shardName, moduleShardConfig.getPersistence());
+        }
 
         if (schemaContext != null) {
             info.setSchemaContext(schemaContext);
@@ -1192,7 +1196,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 String primaryPath = info.getSerializedLeaderActor();
                 Object found = canReturnLocalShardState && info.isLeader()
                         ? new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().get()) :
-                            new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion());
+                            new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion(), info.getPersistence());
 
                 LOG.debug("{}: Found primary for {}: {}", persistenceId(), shardName, found);
                 return found;
@@ -1297,7 +1301,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                         final Map<String, String> peerAddresses,
                                         final DatastoreContext datastoreContext,
                                         final Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
-        return new ShardInformation(shardName, shardId, peerAddresses,
+        return new ShardInformation(shardName, shardId, null, peerAddresses,
                 datastoreContext, Shard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
                 peerAddressResolver);
     }
@@ -1378,8 +1382,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 getSelf()) {
             @Override
             public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
+                //TODO: Fix persistence.. this was changed to true only because of yang rebuild
                 final RunnableMessage runnable = (RunnableMessage) () -> addPrefixShard(getShardName(),
-                        message.getShardPrefix(), response, getSender());
+                        message.getShardPrefix(), response.getPersistence(), response, getSender());
                 if (!isPreviousShardActorStopInProgress(getShardName(), runnable)) {
                     getSelf().tell(runnable, getTargetActor());
                 }
@@ -1444,7 +1449,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
             justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void addPrefixShard(final String shardName, final YangInstanceIdentifier shardPrefix,
-                                final RemotePrimaryShardFound response, final ActorRef sender) {
+                                final Persistence persistence, final RemotePrimaryShardFound response,
+                                final ActorRef sender) {
         if (isShardReplicaOperationInProgress(shardName, sender)) {
             return;
         }
@@ -1463,8 +1469,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             DatastoreContext datastoreContext = builder.build();
 
-            shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
+            shardInfo = new ShardInformation(shardName, shardId, persistence, getPeerAddresses(shardName),
+                    datastoreContext, Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
             shardInfo.setSchemaContext(schemaContext);
             localShards.put(shardName, shardInfo);
@@ -1495,9 +1501,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName)
                     .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
-
-            shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
+//TODO: Fix persistence.. this was changed to true only because of yang rebuild
+            shardInfo = new ShardInformation(shardName, shardId, response.getPersistence(), getPeerAddresses(shardName),
+                    datastoreContext, Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
             shardInfo.setSchemaContext(schemaContext);
             localShards.put(shardName, shardInfo);
