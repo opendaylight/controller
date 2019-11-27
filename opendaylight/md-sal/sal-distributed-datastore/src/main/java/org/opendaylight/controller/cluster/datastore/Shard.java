@@ -107,6 +107,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.DatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -214,10 +216,9 @@ public class Shard extends RaftActor {
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
         this.frontendMetadata = new FrontendMetadata(name);
+        setPersistence(decidePersistence(builder.getPersistence()));
 
-        setPersistence(datastoreContext.isPersistent());
-
-        LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
+        LOG.info("Shard created : {}, persistence : {}", name, datastoreContext.isPersistent());
 
         ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
@@ -268,6 +269,25 @@ public class Shard extends RaftActor {
         listenerInfoMXBean = new ShardDataTreeListenerInfoMXBeanImpl(name, datastoreContext.getDataStoreMXBeanType(),
                 self());
         listenerInfoMXBean.register();
+    }
+
+    private boolean decidePersistence(final Persistence persistence) {
+        if (persistence != null) {
+            if (isConcerningMyDatastore(persistence)) {
+                return persistence.isPersistent();
+            }
+        } else {
+            Persistence moduleShardConfigPersistence = datastoreContext.getShardPersistence(shardName);
+            if (moduleShardConfigPersistence != null && isConcerningMyDatastore(moduleShardConfigPersistence)) {
+                return moduleShardConfigPersistence.isPersistent();
+            }
+        }
+        return datastoreContext.isPersistent();
+    }
+
+    private boolean isConcerningMyDatastore(@NonNull Persistence persistence) {
+        return (persistence.getDatastore() == DatastoreType.Both || persistence.getDatastore().getName()
+                .equalsIgnoreCase(datastoreContext.getLogicalStoreType().name()));
     }
 
     private void setTransactionCommitTimeout() {
@@ -1106,6 +1126,7 @@ public class Shard extends RaftActor {
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T, S>, S extends Shard> {
         private final Class<? extends S> shardClass;
         private ShardIdentifier id;
+        private Persistence persistence;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private SchemaContextProvider schemaContextProvider;
@@ -1145,6 +1166,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T setPersistence(final Persistence setPersistence) {
+            checkSealed();
+            this.persistence = setPersistence;
+            return self();
+        }
+
         public T schemaContextProvider(final SchemaContextProvider newSchemaContextProvider) {
             checkSealed();
             this.schemaContextProvider = requireNonNull(newSchemaContextProvider);
@@ -1165,6 +1192,10 @@ public class Shard extends RaftActor {
 
         public ShardIdentifier getId() {
             return id;
+        }
+
+        public Persistence getPersistence() {
+            return persistence;
         }
 
         public Map<String, String> getPeerAddresses() {

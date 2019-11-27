@@ -249,6 +249,7 @@
                 org.opendaylight.controller.cluster.datastore.shardmanager;
                 org.opendaylight.controller.cluster.sharding;
                 org.opendaylight.controller.cluster.databroker.actors.dds;
+                org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.*;
             </Export-Package>
           </instructions>
         </configuration>
