@@ -114,6 +114,7 @@ import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -448,7 +449,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         Future<Object> futureObj = ask(getContext().actorSelection(primaryPath),
                 new RemoveServer(shardId.toString()), removeServerTimeout);
 
-        futureObj.onComplete(new OnComplete<Object>() {
+        futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -491,7 +492,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         Future<Object> futureObj = ask(getContext().actorSelection(primaryPath),
                 new RemoveServer(shardId.toString()), removeServerTimeout);
 
-        futureObj.onComplete(new OnComplete<Object>() {
+        futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -535,7 +536,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             final Future<Boolean> stopFuture = Patterns.gracefulStop(shardActor,
                     FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
 
-            final CompositeOnComplete<Boolean> onComplete = new CompositeOnComplete<Boolean>() {
+            final CompositeOnComplete<Boolean> onComplete = new CompositeOnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final Boolean result) {
                     if (failure == null) {
@@ -677,7 +678,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{} doCreatePrefixShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
                 persistenceId(), shardId, config.getShardMemberNames(), peerAddresses, isActiveMember);
 
-        final ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
+        final ShardInformation info = new ShardInformation(shardName, shardId, config.getPersistence(), peerAddresses,
                 shardDatastoreContext, Shard.builder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
@@ -739,8 +740,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 persistenceId(), shardId, moduleShardConfig.getShardMemberNames(), peerAddresses,
                 isActiveMember);
 
-        ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
-                shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
+        ShardInformation info = new ShardInformation(shardName, shardId, moduleShardConfig.getPersistence(),
+                peerAddresses, shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
 
@@ -1192,7 +1193,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 String primaryPath = info.getSerializedLeaderActor();
                 Object found = canReturnLocalShardState && info.isLeader()
                         ? new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().get()) :
-                            new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion());
+                            new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion(), info.getPersistence());
 
                 LOG.debug("{}: Found primary for {}: {}", persistenceId(), shardName, found);
                 return found;
@@ -1234,7 +1235,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 .getShardInitializationTimeout().duration().$times(2));
 
         Future<Object> futureObj = ask(getSelf(), new FindPrimary(shardName, true), findPrimaryTimeout);
-        futureObj.onComplete(new OnComplete<Object>() {
+        futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -1379,7 +1380,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             @Override
             public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
                 final RunnableMessage runnable = (RunnableMessage) () -> addPrefixShard(getShardName(),
-                        message.getShardPrefix(), response, getSender());
+                        message.getShardPrefix(), response.getPersistence(), response, getSender());
                 if (!isPreviousShardActorStopInProgress(getShardName(), runnable)) {
                     getSelf().tell(runnable, getTargetActor());
                 }
@@ -1444,7 +1445,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
             justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void addPrefixShard(final String shardName, final YangInstanceIdentifier shardPrefix,
-                                final RemotePrimaryShardFound response, final ActorRef sender) {
+                                final Persistence persistence, final RemotePrimaryShardFound response,
+                                final ActorRef sender) {
         if (isShardReplicaOperationInProgress(shardName, sender)) {
             return;
         }
@@ -1463,8 +1465,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             DatastoreContext datastoreContext = builder.build();
 
-            shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
+            shardInfo = new ShardInformation(shardName, shardId, persistence, getPeerAddresses(shardName),
+                    datastoreContext, Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
             shardInfo.setSchemaContext(schemaContext);
             localShards.put(shardName, shardInfo);
@@ -1495,9 +1497,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName)
                     .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
-
-            shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
+//TODO: Fix persistence.. this was changed to true only because of yang rebuild
+            shardInfo = new ShardInformation(shardName, shardId, response.getPersistence(), getPeerAddresses(shardName),
+                    datastoreContext, Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
             shardInfo.setSchemaContext(schemaContext);
             localShards.put(shardName, shardInfo);
@@ -1528,7 +1530,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final Future<Object> futureObj = ask(getContext().actorSelection(response.getPrimaryPath()),
                 new AddServer(shardInfo.getShardId().toString(), localShardAddress, true), addServerTimeout);
 
-        futureObj.onComplete(new OnComplete<Object>() {
+        futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object addServerResponse) {
                 if (failure != null) {
@@ -1732,7 +1734,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             Future<Object> future = ask(localShardFound.getPath(), GetOnDemandRaftState.INSTANCE,
                     Timeout.apply(30, TimeUnit.SECONDS));
 
-            future.onComplete(new OnComplete<Object>() {
+            future.onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final Object response) {
                     if (failure != null) {
@@ -1781,7 +1783,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 .getShardInitializationTimeout().duration().$times(2));
 
         Future<Object> futureObj = ask(getSelf(), new FindLocalShard(shardName, true), findLocalTimeout);
-        futureObj.onComplete(new OnComplete<Object>() {
+        futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -1827,7 +1829,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         Timeout timeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration().$times(2));
         Future<Object> futureObj = ask(shardActorRef, changeServersVotingStatus, timeout);
 
-        futureObj.onComplete(new OnComplete<Object>() {
+        futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 shardReplicaOperationsInProgress.remove(shardName);

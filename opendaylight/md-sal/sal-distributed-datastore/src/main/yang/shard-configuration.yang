@@ -1,0 +1,39 @@
+module shard-configuration {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:shard-configuration";
+    prefix "shard-config";
+
+    description
+        "This module contains the per-shard per-datastore persistence configuration";
+
+    revision "2019-11-28" {
+        description "Initial revision.";
+    }
+
+    typedef datastore-type {
+        type enumeration {
+             enum configuration;
+             enum operational;
+             enum both;
+         }
+    }
+
+    grouping shard-persistence {
+        container persistence {
+            presence "When present persistence must be fully specified";
+            leaf datastore {
+                type datastore-type;
+                mandatory true;
+                description "Specify which datastore this persistence applies to - configuration, operational, both";
+            }
+
+            leaf persistent {
+                type boolean;
+                mandatory true;
+                description "enable/disable the persistence of selected datastore-type";
+            }
+            description "Specify whether this shard should be persisted and from which datastore. If left unset, the
+                         default persistence configuration of the data-stores will be used.";
+        }
+    }
+}

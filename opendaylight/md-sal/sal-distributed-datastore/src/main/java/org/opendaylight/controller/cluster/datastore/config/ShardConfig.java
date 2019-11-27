@@ -13,22 +13,31 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 /**
  * Encapsulated configuration for a shard.
  */
 public class ShardConfig {
-    private final String name;
-    private final Set<MemberName> replicas;
+    private final @NonNull String name;
+    private final @NonNull Set<MemberName> replicas;
+    private final Persistence persistence;
 
-    public ShardConfig(final @NonNull String name, final @NonNull Collection<MemberName> replicas) {
+    public ShardConfig(final @NonNull String name,  final @NonNull Collection<MemberName> replicas,
+            final @Nullable Persistence persistence) {
         this.name = requireNonNull(name);
         this.replicas = ImmutableSet.copyOf(replicas);
+        this.persistence = persistence;
     }
 
     public @NonNull String getName() {
         return name;
+    }
+
+    public @Nullable Persistence getPersistence() {
+        return persistence;
     }
 
     public @NonNull Set<MemberName> getReplicas() {

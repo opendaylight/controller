@@ -329,7 +329,8 @@ public class ActorUtilsTest extends AbstractActorTest {
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
             @Override
             protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-                return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion));
+                return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion,
+                        null));
             }
         };
 
@@ -448,9 +449,9 @@ public class ActorUtilsTest extends AbstractActorTest {
             MockShardManager.props());
         MockShardManager shardManagerActor = shardManagerActorRef.underlyingActor();
         shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(
-            shardActorRef1.path().toString(), DataStoreVersions.CURRENT_VERSION));
+            shardActorRef1.path().toString(), DataStoreVersions.CURRENT_VERSION, null));
         shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(
-            shardActorRef2.path().toString(), DataStoreVersions.CURRENT_VERSION));
+            shardActorRef2.path().toString(), DataStoreVersions.CURRENT_VERSION, null));
         shardManagerActor.addFindPrimaryResp("shard3", new NoShardLeaderException("not found"));
 
         Configuration mockConfig = mock(Configuration.class);

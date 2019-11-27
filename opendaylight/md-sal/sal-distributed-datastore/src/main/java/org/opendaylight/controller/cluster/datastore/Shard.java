@@ -107,6 +107,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -202,6 +204,7 @@ public class Shard extends RaftActor {
 
     private final MessageSlicer responseMessageSlicer;
     private final Dispatchers dispatchers;
+    private final Persistence persistenceConfig;
 
     private final MessageAssembler requestMessageAssembler;
 
@@ -213,11 +216,13 @@ public class Shard extends RaftActor {
         this.shardName = builder.getId().getShardName();
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
+        this.persistenceConfig = builder.getPersistence();
         this.frontendMetadata = new FrontendMetadata(name);
 
-        setPersistence(datastoreContext.isPersistent());
+        final boolean effectivelyPersistent = overriddenPersistence(datastoreContext.isPersistent());
+        super.setPersistence(effectivelyPersistent);
 
-        LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
+        LOG.info("Shard created : {}, persistent : {}", name, effectivelyPersistent);
 
         ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
@@ -268,6 +273,31 @@ public class Shard extends RaftActor {
         listenerInfoMXBean = new ShardDataTreeListenerInfoMXBeanImpl(name, datastoreContext.getDataStoreMXBeanType(),
                 self());
         listenerInfoMXBean.register();
+    }
+
+    @Override
+    protected void setPersistence(final boolean persistent) {
+        super.setPersistence(overriddenPersistence(persistent));
+    }
+
+    private boolean overriddenPersistence(final boolean persistent) {
+        if (persistenceConfig != null || isConcerningMyDatastore(persistenceConfig)) {
+            return persistenceConfig.isPersistent();
+        }
+        return persistent;
+    }
+
+    private boolean isConcerningMyDatastore(@NonNull final Persistence persistence) {
+        switch (persistence.getDatastore()) {
+            case Both:
+                return true;
+            case Configuration:
+                return datastoreContext.getLogicalStoreType() == LogicalDatastoreType.CONFIGURATION;
+            case Operational:
+                return datastoreContext.getLogicalStoreType() == LogicalDatastoreType.OPERATIONAL;
+            default:
+                throw new IllegalStateException("Unhandled persistence datastore type " + persistence.getDatastore());
+        }
     }
 
     private void setTransactionCommitTimeout() {
@@ -1106,6 +1136,7 @@ public class Shard extends RaftActor {
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T, S>, S extends Shard> {
         private final Class<? extends S> shardClass;
         private ShardIdentifier id;
+        private Persistence persistence;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private SchemaContextProvider schemaContextProvider;
@@ -1145,6 +1176,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T setPersistence(final Persistence setPersistence) {
+            checkSealed();
+            this.persistence = setPersistence;
+            return self();
+        }
+
         public T schemaContextProvider(final SchemaContextProvider newSchemaContextProvider) {
             checkSealed();
             this.schemaContextProvider = requireNonNull(newSchemaContextProvider);
@@ -1165,6 +1202,10 @@ public class Shard extends RaftActor {
 
         public ShardIdentifier getId() {
             return id;
+        }
+
+        public Persistence getPersistence() {
+            return persistence;
         }
 
         public Map<String, String> getPeerAddresses() {

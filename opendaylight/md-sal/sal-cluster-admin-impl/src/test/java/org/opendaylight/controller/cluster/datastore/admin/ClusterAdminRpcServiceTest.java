@@ -216,10 +216,9 @@ public class ClusterAdminRpcServiceTest {
         replicaNode3.kit().waitForMembersUp("member-1", "member-2");
 
         final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
-
         shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
-                        "prefix", Collections.singleton(MEMBER_1))),
+                        null, "prefix", Collections.singleton(MEMBER_1))),
                 ActorRef.noSender());
 
         member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
@@ -272,10 +271,9 @@ public class ClusterAdminRpcServiceTest {
         verifyFailedRpcResult(failedResult);
 
         final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
-
         shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
-                        "prefix", Collections.singleton(MEMBER_1))),
+                        null, "prefix", Collections.singleton(MEMBER_1))),
                 ActorRef.noSender());
 
         member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),

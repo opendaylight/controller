@@ -14,6 +14,7 @@ import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 /**
  * Encapsulates information for adding a new module shard configuration.
@@ -26,6 +27,7 @@ public class ModuleShardConfiguration {
     private final String shardName;
     private final String shardStrategyName;
     private final Collection<MemberName> shardMemberNames;
+    private final Persistence persistence;
 
     /**
      * Constructs a new instance.
@@ -37,13 +39,32 @@ public class ModuleShardConfiguration {
      *                          is used.
      * @param shardMemberNames the names of the shard's member replicas.
      */
-    public ModuleShardConfiguration(@NonNull URI namespace, @NonNull String moduleName, @NonNull String shardName,
-            @Nullable String shardStrategyName, @NonNull Collection<MemberName> shardMemberNames) {
+    public ModuleShardConfiguration(final @NonNull URI namespace, final @NonNull String moduleName,
+            final @NonNull String shardName, final @Nullable String shardStrategyName,
+            final @NonNull Collection<MemberName> shardMemberNames) {
+        this(namespace, moduleName, shardName, shardStrategyName, shardMemberNames, null);
+    }
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param namespace the name space of the module.
+     * @param moduleName the name of the module.
+     * @param shardName the name of the shard.
+     * @param shardStrategyName the name of the sharding strategy (eg "module"). If null the default strategy
+     *                          is used.
+     * @param shardMemberNames the names of the shard's member replicas.
+     * @param persistence the persistence of the shard. If not specified the default Data-store persistence is used
+     */
+    public ModuleShardConfiguration(final @NonNull URI namespace, final @NonNull String moduleName,
+            final @NonNull String shardName, final @Nullable String shardStrategyName,
+            final @NonNull Collection<MemberName> shardMemberNames, final @Nullable Persistence persistence) {
         this.namespace = requireNonNull(namespace, "nameSpace should not be null");
         this.moduleName = requireNonNull(moduleName, "moduleName should not be null");
         this.shardName = requireNonNull(shardName, "shardName should not be null");
         this.shardStrategyName = shardStrategyName;
         this.shardMemberNames = requireNonNull(shardMemberNames, "shardMemberNames");
+        this.persistence = persistence;
     }
 
     public URI getNamespace() {
@@ -56,6 +77,10 @@ public class ModuleShardConfiguration {
 
     public String getShardName() {
         return shardName;
+    }
+
+    public Persistence getPersistence() {
+        return persistence;
     }
 
     public String getShardStrategyName() {
