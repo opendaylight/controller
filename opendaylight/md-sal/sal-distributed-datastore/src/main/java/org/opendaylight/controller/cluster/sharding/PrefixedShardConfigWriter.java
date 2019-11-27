@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -29,6 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithV
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
@@ -56,10 +58,12 @@ class PrefixedShardConfigWriter {
         writeInitialParent();
     }
 
-    ListenableFuture<Void> writeConfig(final YangInstanceIdentifier path, final Collection<MemberName> replicas) {
-        LOG.debug("Writing config for {}, replicas {}", path, replicas);
+    ListenableFuture<Void> writeConfig(final YangInstanceIdentifier path, final Persistence persistence,
+                                       final Collection<MemberName> replicas) {
+        LOG.debug("Writing config for {}, persistence: {}, replicas {}", path,
+                (persistence != null ? persistence : "default"), replicas);
 
-        return doSubmit(doWrite(path, replicas));
+        return doSubmit(doWrite(path, persistence, replicas));
     }
 
     ListenableFuture<Void> removeConfig(final YangInstanceIdentifier path) {
@@ -123,7 +127,7 @@ class PrefixedShardConfigWriter {
         }
     }
 
-    private DOMStoreThreePhaseCommitCohort doWrite(final YangInstanceIdentifier path,
+    private DOMStoreThreePhaseCommitCohort doWrite(final YangInstanceIdentifier path, final Persistence persistence,
                                                    final Collection<MemberName> replicas) {
 
         final ListNodeBuilder<Object, LeafSetEntryNode<Object>> replicaListBuilder =
@@ -136,7 +140,8 @@ class PrefixedShardConfigWriter {
                         .withValue(name.getName())
                         .build()));
 
-        final MapEntryNode newEntry = ImmutableMapEntryNodeBuilder.create()
+        DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode> nodeBuilder =
+                ImmutableMapEntryNodeBuilder.create()
                 .withNodeIdentifier(
                         NodeIdentifierWithPredicates.of(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
                                 path))
@@ -147,8 +152,19 @@ class PrefixedShardConfigWriter {
                 .withChild(ImmutableContainerNodeBuilder.create()
                         .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_REPLICAS_QNAME))
                         .withChild(replicaListBuilder.build())
-                        .build())
-                .build();
+                        .build());
+        if (persistence != null) {
+            nodeBuilder.withChild(ImmutableContainerNodeBuilder.create()
+                    .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PERSISTENCE_QNAME))
+                    .withChild(ImmutableLeafNodeBuilder.create()
+                            .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PERSISTENCE_DATASTORE_QNAME))
+                            .withValue(persistence.getDatastore().getName()).build())
+                    .withChild(ImmutableLeafNodeBuilder.create()
+                            .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PERSISTENCE_PERSISTENT_QNAME))
+                            .withValue(persistence.isPersistent()).build()).build());
+        }
+
+        final MapEntryNode newEntry = nodeBuilder.build();
 
         final ClientTransaction tx = history.createTransaction();
         final DOMDataTreeWriteCursor cursor = tx.openCursor();
