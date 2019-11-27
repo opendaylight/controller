@@ -9,6 +9,8 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.datastore.utils.SerializablePersistence;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 /**
  * Local or remote message sent in reply to FindPrimaryShard to indicate the primary shard is remote to the caller.
@@ -18,10 +20,12 @@ public class RemotePrimaryShardFound implements Serializable {
 
     private final String primaryPath;
     private final short primaryVersion;
+    private final SerializablePersistence persistence;
 
-    public RemotePrimaryShardFound(final String primaryPath, short primaryVersion) {
+    public RemotePrimaryShardFound(final String primaryPath, short primaryVersion, final Persistence persistence) {
         this.primaryPath = primaryPath;
         this.primaryVersion = primaryVersion;
+        this.persistence = SerializablePersistence.from(persistence);
     }
 
     public String getPrimaryPath() {
@@ -30,6 +34,10 @@ public class RemotePrimaryShardFound implements Serializable {
 
     public short getPrimaryVersion() {
         return primaryVersion;
+    }
+
+    public Persistence getPersistence() {
+        return SerializablePersistence.toPersistence(persistence);
     }
 
     @Override
