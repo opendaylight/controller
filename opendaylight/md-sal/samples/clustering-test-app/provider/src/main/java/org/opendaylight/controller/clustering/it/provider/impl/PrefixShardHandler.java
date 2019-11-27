@@ -85,7 +85,7 @@ public class PrefixShardHandler {
 
         try {
             completionStage = shardFactory.createDistributedShard(
-                    new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, identifier),
+                    new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, identifier), input.getPersistence(),
                     input.getReplicas().stream().map(MemberName::forName).collect(Collectors.toList()));
 
             completionStage.thenAccept(registration -> {

@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 /**
  * Encapsulates configuration for a module.
@@ -104,7 +105,12 @@ public final class ModuleConfig {
         }
 
         public Builder shardConfig(final String shardName, final Collection<MemberName> replicas) {
-            shardConfigs.put(shardName, new ShardConfig(shardName, replicas));
+            return shardConfig(shardName, replicas, null);
+        }
+
+        public Builder shardConfig(final String shardName, final Collection<MemberName> replicas,
+                final Persistence persistence) {
+            shardConfigs.put(shardName, new ShardConfig(shardName, persistence, replicas));
             return this;
         }
 
