@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 // TODO clean this up once we get rid of module based configuration, prefix one should be alot simpler
@@ -75,6 +76,18 @@ public class ConfigurationImpl implements Configuration {
         }
 
         return builder.build();
+    }
+
+    @Override
+    public Persistence getShardPersistence(final String shardName) {
+        for (ModuleConfig moduleConfig : moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if (shardConfig != null) {
+                return shardConfig.getPersistence();
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -184,7 +197,7 @@ public class ConfigurationImpl implements Configuration {
         ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName())
                 .nameSpace(config.getNamespace().toASCIIString())
                 .shardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName()))
-                .shardConfig(config.getShardName(), config.getShardMemberNames()).build();
+                .shardConfig(config.getShardName(), config.getShardMemberNames(), config.getPersistence()).build();
 
         updateModuleConfigMap(moduleConfig);
 
@@ -247,7 +260,8 @@ public class ConfigurationImpl implements Configuration {
             if (shardConfig != null) {
                 Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.add(newMemberName);
-                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
+                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas,
+                    shardConfig.getPersistence()).build());
                 return;
             }
         }
@@ -263,7 +277,8 @@ public class ConfigurationImpl implements Configuration {
             if (shardConfig != null) {
                 Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.remove(newMemberName);
-                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
+                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas,
+                    shardConfig.getPersistence()).build());
                 return;
             }
         }
