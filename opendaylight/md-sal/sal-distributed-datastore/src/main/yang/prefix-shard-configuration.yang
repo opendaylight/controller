@@ -7,6 +7,10 @@ module prefix-shard-configuration {
         "This module contains the base YANG definitions for
         shards based on prefix configuration";
 
+    import shard-configuration {
+        prefix "sc";
+    }
+
     revision "2017-01-10" {
         description "Initial revision.";
     }
@@ -27,6 +31,8 @@ module prefix-shard-configuration {
 
                 description "List of cluster member nodes that this shard is replicated on";
             }
+
+            uses sc:shard-persistence;
 
             description "List of prefix-based shards configured.";
         }

@@ -39,5 +39,9 @@
             <groupId>org.opendaylight.mdsal.model</groupId>
             <artifactId>yang-ext</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-distributed-datastore</artifactId>
+        </dependency>
     </dependencies>
 </project>
