@@ -9,6 +9,10 @@ module odl-mdsal-lowlevel-control {
         prefix llc;
     }
 
+    import shard-configuration {
+        prefix sc;
+    }
+
     organization "OpenDaylight";
     contact "Vratko Polak <vrpolak@cisco.com>";
     description "Control RPCs used to dynamically register, unregister, start or stop
@@ -329,15 +333,16 @@ module odl-mdsal-lowlevel-control {
         description "Upon receiving this, the member creates a prefix shard at the instance-identifier, with replicas
                 on the required members.";
         input {
-
             leaf prefix {
                 mandatory true;
                 type instance-identifier;
             }
+
             leaf-list replicas {
                 min-elements 1;
                 type string;
             }
+            uses sc:shard-persistence;
         }
     }
 

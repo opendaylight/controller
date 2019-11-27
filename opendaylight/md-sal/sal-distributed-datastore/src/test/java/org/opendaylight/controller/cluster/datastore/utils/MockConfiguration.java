@@ -30,8 +30,8 @@ public class MockConfiguration extends ConfigurationImpl {
             for (Map.Entry<String, List<String>> e : shardMembers.entrySet()) {
                 String shardName = e.getKey();
                 retMap.put(shardName,
-                    ModuleConfig.builder(shardName).shardConfig(
-                        shardName, e.getValue().stream().map(MemberName::forName).collect(Collectors.toList())));
+                    ModuleConfig.builder(shardName).shardConfig(shardName, null,
+                            e.getValue().stream().map(MemberName::forName).collect(Collectors.toList())));
             }
 
             return retMap;

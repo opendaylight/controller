@@ -37,6 +37,7 @@ public final class SchemaContextHelper {
         // we need prefix-shard-configuration and odl-datastore-test models
         // for DistributedShardedDOMDataTree tests
         return YangParserTestUtils.parseYangResources(SchemaContextHelper.class, ODL_DATASTORE_TEST_YANG,
-            "/META-INF/yang/prefix-shard-configuration@2017-01-10.yang");
+            "/META-INF/yang/prefix-shard-configuration@2017-01-10.yang",
+                "/META-INF/yang/shard-configuration@2019-11-28.yang");
     }
 }

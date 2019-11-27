@@ -211,7 +211,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration = waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
+                leaderShardFactory.createDistributedShard(TEST_ID, null,
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
@@ -283,7 +284,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration = waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
+                leaderShardFactory.createDistributedShard(TEST_ID, null,
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
@@ -299,7 +301,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         final DOMDataTreeIdentifier outerListPath = new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, oid1);
 
         final DistributedShardRegistration outerListShardReg = waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(outerListPath, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
+                leaderShardFactory.createDistributedShard(outerListPath, null,
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
@@ -369,7 +372,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         initEmptyDatastores();
 
         final DistributedShardRegistration testShardReg = waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(TEST_ID, SINGLE_MEMBER),
+                leaderShardFactory.createDistributedShard(TEST_ID, null, SINGLE_MEMBER),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         final ArrayList<DistributedShardRegistration> registrations = new ArrayList<>();
@@ -377,7 +380,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         for (int i = 0; i < listSize; i++) {
             final YangInstanceIdentifier entryYID = getOuterListIdFor(i);
             final CompletionStage<DistributedShardRegistration> future = leaderShardFactory.createDistributedShard(
-                    new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, entryYID), SINGLE_MEMBER);
+                    new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, entryYID), null, SINGLE_MEMBER);
 
             registrations.add(waitOnAsyncTask(future, DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION));
         }
@@ -459,7 +462,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         for (int i = 0; i < 10; i++) {
             LOG.debug("Round {}", i);
             final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                    TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
+                    TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                     DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
             leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
@@ -480,7 +483,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         initEmptyDatastores();
 
         final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
+                TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
