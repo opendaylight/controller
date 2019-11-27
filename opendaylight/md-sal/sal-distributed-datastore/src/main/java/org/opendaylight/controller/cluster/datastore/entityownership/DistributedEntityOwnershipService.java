@@ -86,8 +86,8 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         Configuration configuration = context.getConfiguration();
         Collection<MemberName> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShard = new CreateShard(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
-                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
-                        newShardBuilder(context, strategyConfig), null);
+                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, null, ModuleShardStrategy.NAME,
+                entityOwnersMemberNames), newShardBuilder(context, strategyConfig), null);
 
         Future<Object> createFuture = context.executeOperationAsync(shardManagerActor, createShard, MESSAGE_TIMEOUT);
         createFuture.onComplete(new OnComplete<Object>() {
