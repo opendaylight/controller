@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.DatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.PersistenceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +91,19 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
         final Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
         for (final ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList) {
             final String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
+            Persistence persistence = null;
+            if (moduleShardConfigObject.containsKey("persistence")) {
+                final ConfigObject persistenceObject = moduleShardConfigObject.toConfig().getObject("persistence");
+                if (persistenceObject.containsKey("datastore-type") && persistenceObject.containsKey("persistent")) {
+                    final String datastore = persistenceObject.get("datastore-type").unwrapped().toString();
+                    final Boolean persist = Boolean.valueOf(persistenceObject.get("persistent").unwrapped().toString());
+                    persistence = new PersistenceBuilder().setDatastore(DatastoreType.forName(datastore).get())
+                            .setPersistent(persist).build();
+                } else {
+                    throw new IllegalStateException("Module-Shard persistence is configured incorrectly");
+                }
+            }
+
             final ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
 
             final List<? extends ConfigObject> shardsConfigObjectList =
@@ -97,7 +113,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
                 final String shardName = shard.get("name").unwrapped().toString();
                 final List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
                         .map(MemberName::forName).collect(Collectors.toList());
-                builder.shardConfig(shardName, replicas);
+                builder.shardConfig(shardName, persistence, replicas);
             }
 
             moduleConfigMap.put(moduleName, builder);

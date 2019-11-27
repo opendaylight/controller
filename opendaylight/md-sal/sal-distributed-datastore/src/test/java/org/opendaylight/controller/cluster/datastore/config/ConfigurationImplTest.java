@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 public class ConfigurationImplTest {
     private static final MemberName MEMBER_1 = MemberName.forName("member-1");
@@ -72,6 +73,19 @@ public class ConfigurationImplTest {
 
         members = configuration.getMembersFromShardName("foobar");
         assertEquals("getMembersFromShardName size", 0, members.size());
+    }
+
+    @Test
+    public void testGetShardPersistenceByName() {
+        Persistence persistence = configuration.getShardPersistence("default");
+        assertEquals(Boolean.TRUE, persistence.isPersistent());
+
+        persistence = configuration.getShardPersistence("cars-1");
+        assertEquals(Boolean.FALSE, persistence.isPersistent());
+
+        // Try to find a shard which is not present
+        persistence = configuration.getShardPersistence("foobar");
+        assertNull(persistence);
     }
 
     @Test
@@ -133,7 +147,7 @@ public class ConfigurationImplTest {
         Collection<MemberName> shardMemberNames = ImmutableSortedSet.of(MEMBER_1, MEMBER_4, MEMBER_5);
 
         configuration.addModuleShardConfiguration(new ModuleShardConfiguration(namespace, moduleName, shardName,
-                shardStrategyName, shardMemberNames));
+                null, shardStrategyName, shardMemberNames));
 
         assertEquals("getMemberShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default", shardName),
                 ImmutableSortedSet.copyOf(configuration.getMemberShardNames(MEMBER_1)));
