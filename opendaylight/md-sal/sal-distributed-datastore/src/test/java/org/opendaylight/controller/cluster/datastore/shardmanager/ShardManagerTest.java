@@ -1243,10 +1243,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100)
                 .persistent(false).build();
+        //datastoreContext.setShardPersistece("foo", null);
         Shard.Builder shardBuilder = Shard.builder();
-
         ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
-            "foo", null, members("member-1", "member-5", "member-6"));
+            "foo", null, null, members("member-1", "member-5", "member-6"));
         shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), kit.getRef());
 
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
@@ -1291,7 +1291,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         Shard.Builder shardBuilder = Shard.builder();
         ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
-            "foo", null, members("member-5", "member-6"));
+            "foo", null, null, members("member-5", "member-6"));
 
         shardManager.tell(new CreateShard(config, shardBuilder, null), kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
@@ -1317,7 +1317,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         Shard.Builder shardBuilder = Shard.builder();
 
         ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
-            "foo", null, members("member-1"));
+            "foo", null, null, members("member-1"));
         shardManager.tell(new CreateShard(config, shardBuilder, null), kit.getRef());
 
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
@@ -2306,7 +2306,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         return new MessageInterceptor() {
             @Override
             public Object apply(final Object message) {
-                return new RemotePrimaryShardFound(Serialization.serializedActorPath(primaryActor), (short) 1);
+                return new RemotePrimaryShardFound(Serialization.serializedActorPath(primaryActor), (short) 1, null);
             }
 
             @Override

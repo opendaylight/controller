@@ -18,7 +18,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.utils.SerializablePersistence;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 /**
  * Configuration for prefix based shards.
@@ -42,6 +44,7 @@ public class PrefixShardConfiguration implements Serializable {
         @Override
         public void writeExternal(final ObjectOutput objectOutput) throws IOException {
             objectOutput.writeObject(prefixShardConfiguration.getPrefix());
+            objectOutput.writeObject(prefixShardConfiguration.getPersistence());
             objectOutput.writeObject(prefixShardConfiguration.getShardStrategyName());
 
             objectOutput.writeInt(prefixShardConfiguration.getShardMemberNames().size());
@@ -53,6 +56,7 @@ public class PrefixShardConfiguration implements Serializable {
         @Override
         public void readExternal(final ObjectInput objectInput) throws IOException, ClassNotFoundException {
             final DOMDataTreeIdentifier localPrefix = (DOMDataTreeIdentifier) objectInput.readObject();
+            final Persistence persistence = (Persistence) objectInput.readObject();
             final String localStrategyName = (String) objectInput.readObject();
 
             final int size = objectInput.readInt();
@@ -61,7 +65,7 @@ public class PrefixShardConfiguration implements Serializable {
                 localShardMemberNames.add(MemberName.readFrom(objectInput));
             }
 
-            prefixShardConfiguration = new PrefixShardConfiguration(localPrefix, localStrategyName,
+            prefixShardConfiguration = new PrefixShardConfiguration(localPrefix, persistence, localStrategyName,
                     localShardMemberNames);
         }
 
@@ -73,19 +77,25 @@ public class PrefixShardConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final DOMDataTreeIdentifier prefix;
+    private final SerializablePersistence persistence;
     private final String shardStrategyName;
     private final Collection<MemberName> shardMemberNames;
 
-    public PrefixShardConfiguration(final DOMDataTreeIdentifier prefix,
+    public PrefixShardConfiguration(final DOMDataTreeIdentifier prefix, final Persistence persistence,
                                     final String shardStrategyName,
                                     final Collection<MemberName> shardMemberNames) {
         this.prefix = requireNonNull(prefix);
+        this.persistence = SerializablePersistence.from(persistence);
         this.shardStrategyName = requireNonNull(shardStrategyName);
         this.shardMemberNames = ImmutableSet.copyOf(shardMemberNames);
     }
 
     public DOMDataTreeIdentifier getPrefix() {
         return prefix;
+    }
+
+    public Persistence getPersistence() {
+        return SerializablePersistence.toPersistence(persistence);
     }
 
     public String getShardStrategyName() {
@@ -100,6 +110,7 @@ public class PrefixShardConfiguration implements Serializable {
     public String toString() {
         return "PrefixShardConfiguration{"
                 + "prefix=" + prefix
+                + "persistence=" + (persistence != null ? persistence : "default")
                 + ", shardStrategyName='"
                 + shardStrategyName + '\''
                 + ", shardMemberNames=" + shardMemberNames
