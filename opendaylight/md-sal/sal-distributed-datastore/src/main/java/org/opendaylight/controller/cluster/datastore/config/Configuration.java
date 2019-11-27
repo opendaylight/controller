@@ -17,6 +17,10 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 public interface Configuration {
+    /**
+     * Returns persistence of a Shard specified by name or null if shard with specified name doesn't exist.
+     */
+    @Nullable Boolean getShardPersistence(String shardName);
 
     /**
      * Returns all the shard names that belong on the member by the given name.

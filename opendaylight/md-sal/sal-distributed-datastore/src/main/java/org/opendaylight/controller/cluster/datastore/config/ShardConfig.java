@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
@@ -20,15 +21,22 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
  */
 public class ShardConfig {
     private final String name;
+    private final Boolean persistent;
     private final Set<MemberName> replicas;
 
-    public ShardConfig(final @NonNull String name, final @NonNull Collection<MemberName> replicas) {
+    public ShardConfig(final @NonNull String name, final @Nullable Boolean persistent,
+                       final @NonNull Collection<MemberName> replicas) {
         this.name = requireNonNull(name);
+        this.persistent = persistent;
         this.replicas = ImmutableSet.copyOf(replicas);
     }
 
     public @NonNull String getName() {
         return name;
+    }
+
+    public Boolean getPersistent() {
+        return persistent;
     }
 
     public @NonNull Set<MemberName> getReplicas() {

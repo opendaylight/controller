@@ -68,6 +68,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedEntityOwnershipService.class);
     private static final Timeout MESSAGE_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
+    private static final boolean PERSISTENT = true;
 
     private final ConcurrentMap<DOMEntity, DOMEntity> registeredEntities = new ConcurrentHashMap<>();
     private final ActorUtils context;
@@ -86,7 +87,8 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         Configuration configuration = context.getConfiguration();
         Collection<MemberName> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShard = new CreateShard(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
-                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
+                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, PERSISTENT, ModuleShardStrategy.NAME,
+                entityOwnersMemberNames),
                         newShardBuilder(context, strategyConfig), null);
 
         Future<Object> createFuture = context.executeOperationAsync(shardManagerActor, createShard, MESSAGE_TIMEOUT);

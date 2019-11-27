@@ -78,6 +78,20 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
+    public Boolean getShardPersistence(final String shardName) {
+        checkNotNullShardName(shardName);
+        Boolean shardPersistence = null;
+        for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if (shardConfig != null) {
+                return shardConfig.getPersistent();
+            }
+        }
+
+        return shardPersistence;
+    }
+
+    @Override
     public Collection<String> getMemberShardNames(final MemberName memberName) {
         requireNonNull(memberName, "memberName should not be null");
 
@@ -182,7 +196,7 @@ public class ConfigurationImpl implements Configuration {
         ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName())
                 .nameSpace(config.getNamespace().toASCIIString())
                 .shardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName()))
-                .shardConfig(config.getShardName(), config.getShardMemberNames()).build();
+                .shardConfig(config.getShardName(), config.getPersistent(), config.getShardMemberNames()).build();
 
         updateModuleConfigMap(moduleConfig);
 
@@ -245,7 +259,8 @@ public class ConfigurationImpl implements Configuration {
             if (shardConfig != null) {
                 Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.add(newMemberName);
-                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
+                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName,
+                        shardConfig.getPersistent(), replicas).build());
                 return;
             }
         }
@@ -261,7 +276,8 @@ public class ConfigurationImpl implements Configuration {
             if (shardConfig != null) {
                 Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.remove(newMemberName);
-                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
+                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName,
+                        shardConfig.getPersistent(),replicas).build());
                 return;
             }
         }

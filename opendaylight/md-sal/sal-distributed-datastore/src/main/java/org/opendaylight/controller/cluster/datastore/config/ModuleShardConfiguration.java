@@ -26,6 +26,7 @@ public class ModuleShardConfiguration {
     private final String shardName;
     private final String shardStrategyName;
     private final Collection<MemberName> shardMemberNames;
+    private final Boolean persistent;
 
     /**
      * Constructs a new instance.
@@ -33,15 +34,18 @@ public class ModuleShardConfiguration {
      * @param namespace the name space of the module.
      * @param moduleName the name of the module.
      * @param shardName the name of the shard.
+     * @param persistent the persistence of the shard. If not specified the default Data-store persistence is used
      * @param shardStrategyName the name of the sharding strategy (eg "module"). If null the default strategy
      *                          is used.
      * @param shardMemberNames the names of the shard's member replicas.
      */
     public ModuleShardConfiguration(@NonNull URI namespace, @NonNull String moduleName, @NonNull String shardName,
-            @Nullable String shardStrategyName, @NonNull Collection<MemberName> shardMemberNames) {
+                                    @Nullable Boolean persistent, @Nullable String shardStrategyName,
+                                    @NonNull Collection<MemberName> shardMemberNames) {
         this.namespace = requireNonNull(namespace, "nameSpace should not be null");
         this.moduleName = requireNonNull(moduleName, "moduleName should not be null");
         this.shardName = requireNonNull(shardName, "shardName should not be null");
+        this.persistent = persistent;
         this.shardStrategyName = shardStrategyName;
         this.shardMemberNames = requireNonNull(shardMemberNames, "shardMemberNames");
     }
@@ -56,6 +60,10 @@ public class ModuleShardConfiguration {
 
     public String getShardName() {
         return shardName;
+    }
+
+    public Boolean getPersistent() {
+        return persistent;
     }
 
     public String getShardStrategyName() {

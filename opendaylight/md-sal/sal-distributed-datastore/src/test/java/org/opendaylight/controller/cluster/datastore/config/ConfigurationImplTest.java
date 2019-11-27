@@ -44,6 +44,8 @@ public class ConfigurationImplTest {
         Assert.assertNotNull(configuration);
     }
 
+
+
     @Test
     public void testGetMemberShardNames() {
         Collection<String> memberShardNames = configuration.getMemberShardNames(MEMBER_1);
@@ -72,6 +74,19 @@ public class ConfigurationImplTest {
 
         members = configuration.getMembersFromShardName("foobar");
         assertEquals("getMembersFromShardName size", 0, members.size());
+    }
+
+    @Test
+    public void testGetShardPersistenceByName() {
+        Boolean persistence = configuration.getShardPersistence("default");
+        assertEquals( Boolean.TRUE, persistence);
+
+        persistence = configuration.getShardPersistence("cars-1");
+        assertEquals(Boolean.FALSE, persistence);
+
+        // Try to find a shard which is not present
+        persistence = configuration.getShardPersistence("foobar");
+        assertNull(persistence);
     }
 
     @Test
@@ -133,7 +148,7 @@ public class ConfigurationImplTest {
         Collection<MemberName> shardMemberNames = ImmutableSortedSet.of(MEMBER_1, MEMBER_4, MEMBER_5);
 
         configuration.addModuleShardConfiguration(new ModuleShardConfiguration(namespace, moduleName, shardName,
-                shardStrategyName, shardMemberNames));
+                true, shardStrategyName, shardMemberNames));
 
         assertEquals("getMemberShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default", shardName),
                 ImmutableSortedSet.copyOf(configuration.getMemberShardNames(MEMBER_1)));
