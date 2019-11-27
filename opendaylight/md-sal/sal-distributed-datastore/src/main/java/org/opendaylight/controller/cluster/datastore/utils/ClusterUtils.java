@@ -32,6 +32,12 @@ public final class ClusterUtils {
             QName.create(PREFIX_SHARDS_QNAME, "shard").intern();
     public static final QName SHARD_PREFIX_QNAME =
             QName.create(PREFIX_SHARDS_QNAME, "prefix").intern();
+    public static final QName SHARD_PERSISTENCE_QNAME =
+            QName.create(PREFIX_SHARDS_QNAME, "persistence").intern();
+    public static final QName SHARD_PERSISTENCE_DATASTORE_QNAME =
+            QName.create(PREFIX_SHARDS_QNAME, "datastore").intern();
+    public static final QName SHARD_PERSISTENCE_PERSISTENT_QNAME =
+            QName.create(PREFIX_SHARDS_QNAME, "persistent").intern();
     public static final QName SHARD_REPLICAS_QNAME =
             QName.create(PREFIX_SHARDS_QNAME, "replicas").intern();
     public static final QName SHARD_REPLICA_QNAME =
