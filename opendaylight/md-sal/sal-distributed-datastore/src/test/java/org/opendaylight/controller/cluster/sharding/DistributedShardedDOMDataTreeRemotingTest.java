@@ -189,7 +189,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         // TODO refactor shard creation and verification to own method
         final DistributedShardRegistration shardRegistration =
                 waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                        TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
+                        TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                         DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         leaderTestKit.waitUntilLeader(leaderConfigDatastore.getActorUtils(),
@@ -232,7 +232,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         // try to create a shard on an already registered prefix on follower
         try {
             waitOnAsyncTask(followerShardFactory.createDistributedShard(
-                    TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
+                    TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                     DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
             fail("This prefix already should have a shard registration that was forwarded from the other node");
         } catch (final DOMDataTreeShardingConflictException e) {
@@ -254,7 +254,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         LOG.debug("registering first shard");
         final DistributedShardRegistration shardRegistration =
                 waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                        TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
+                        TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                         DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
 
@@ -297,21 +297,21 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         initEmptyDatastores();
 
         final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
+                TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         final DistributedShardRegistration reg2 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH),
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH), null,
                 Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         final DistributedShardRegistration reg3 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH),
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH), null,
                 Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
         final DistributedShardRegistration reg4 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH),
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH), null,
                 Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
@@ -395,7 +395,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         for (int i = 0; i < 5; i++) {
             LOG.info("Round {}", i);
             final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
-                    TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
+                    TEST_ID, null, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                     DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
             leaderTestKit.waitUntilLeader(leaderConfigDatastore.getActorUtils(),
