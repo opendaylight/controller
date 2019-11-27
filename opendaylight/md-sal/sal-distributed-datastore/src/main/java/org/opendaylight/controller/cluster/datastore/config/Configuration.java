@@ -15,8 +15,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 public interface Configuration {
+    /**
+     * Returns persistence of a Shard specified by name or null if shard with specified name doesn't exist.
+     */
+    @Nullable Persistence getShardPersistence(String shardName);
 
     /**
      * Returns all the shard names that belong on the member by the given name.
