@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.DatastoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.PersistenceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,17 +55,36 @@ abstract class AbstractModuleShardConfigProvider implements ModuleShardConfigPro
         }
     }
 
-    static final Map<String, ModuleConfig.Builder> readModuleShardsConfig(final Config moduleShardsConfig) {
+    static Map<String, ModuleConfig.Builder> readModuleShardsConfig(final Config moduleShardsConfig) {
+        final List<? extends ConfigObject> moduleShardsConfigObjectList =
+                moduleShardsConfig.getObjectList("module-shards");
+
         final Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
-        for (final ConfigObject moduleShardConfigObject : moduleShardsConfig.getObjectList("module-shards")) {
+        for (final ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList) {
             final String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
+            Persistence persistence = null;
+            if (moduleShardConfigObject.containsKey("persistence")) {
+                final ConfigObject persistenceObj = moduleShardConfigObject.toConfig().getObject("persistence");
+                if (persistenceObj.containsKey("datastore-type") && persistenceObj.containsKey("persistent")) {
+                    final String datastore = persistenceObj.get("datastore-type").unwrapped().toString();
+                    final Boolean persist = Boolean.valueOf(persistenceObj.get("persistent").unwrapped().toString());
+                    persistence = new PersistenceBuilder().setDatastore(DatastoreType.forName(datastore).get())
+                            .setPersistent(persist).build();
+                } else {
+                    throw new IllegalStateException("Module-Shard persistence is configured incorrectly");
+                }
+            }
+
             final ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
 
-            for (final ConfigObject shard : moduleShardConfigObject.toConfig().getObjectList("shards")) {
+            final List<? extends ConfigObject> shardsConfigObjectList =
+                    moduleShardConfigObject.toConfig().getObjectList("shards");
+
+            for (final ConfigObject shard : shardsConfigObjectList) {
                 final String shardName = shard.get("name").unwrapped().toString();
                 final List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
                         .map(MemberName::forName).collect(Collectors.toList());
-                builder.shardConfig(shardName, replicas);
+                builder.shardConfig(shardName, persistence, replicas);
             }
 
             moduleConfigMap.put(moduleName, builder);

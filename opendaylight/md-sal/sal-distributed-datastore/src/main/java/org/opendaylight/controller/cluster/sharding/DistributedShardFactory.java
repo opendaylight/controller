@@ -13,6 +13,7 @@ import java.util.concurrent.CompletionStage;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.shard.configuration.rev191128.shard.persistence.Persistence;
 
 /**
  * A factory that handles addition of new clustered shard's based on a prefix. This factory is a QoL class that handles
@@ -26,6 +27,7 @@ public interface DistributedShardFactory {
      * Note to register a shard without replicas you still need to provide at least one Member for the shard.
      *
      * @param prefix         Shard root
+     * @param persistence    Shard persistence configuration
      * @param replicaMembers Members that this shard is replicated on, has to have at least one Member even if the shard
      *                       should not be replicated.
      * @return A future that will be completed with a DistributedShardRegistration once the backend and frontend shards
@@ -34,6 +36,7 @@ public interface DistributedShardFactory {
      *         sharding configuration won't be updated if this exception is thrown.
      */
     CompletionStage<DistributedShardRegistration>
-        createDistributedShard(DOMDataTreeIdentifier prefix, Collection<MemberName> replicaMembers)
+        createDistributedShard(DOMDataTreeIdentifier prefix, Persistence persistence,
+                               Collection<MemberName> replicaMembers)
             throws DOMDataTreeShardingConflictException;
 }
