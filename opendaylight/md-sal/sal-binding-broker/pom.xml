@@ -59,6 +59,16 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-util</artifactId>
     </dependency>
+
+    <dependency>
+      <!-- Required because BindingToNormalizedNodeCodec extends an annotated class and annotation
+           processors have a hard time with that. -->
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-inmemory-datastore</artifactId>
