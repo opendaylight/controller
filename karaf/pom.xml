@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>karaf4-parent</artifactId>
-    <version>6.0.1</version>
+    <version>6.0.3</version>
     <relativePath/>
   </parent>
 
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>5.0.4</version>
+      <version>5.0.5</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
