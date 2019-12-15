@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.MAGNESIUM;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -15,6 +17,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 
 /**
  * Provides various utility methods for serialization and de-serialization.
@@ -35,28 +39,21 @@ public final class SerializationUtils {
         if (!in.readBoolean()) {
             return Optional.empty();
         }
-        return Optional.of(NormalizedNodeInputOutput.newDataInput(in).readNormalizedNode());
+        return Optional.of(NormalizedNodeDataInput.newDataInput(in).readNormalizedNode());
     }
 
     public static void writeNormalizedNode(final DataOutput out, final @Nullable NormalizedNode<?, ?> node)
             throws IOException {
-        if (node != null) {
-            out.writeBoolean(true);
-
-            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
-                stream.writeNormalizedNode(node);
-            }
-        } else {
-            out.writeBoolean(false);
-        }
+        writeNormalizedNode(out, MAGNESIUM, node);
     }
 
-    public static void writeNormalizedNode(final DataOutput out, final NormalizedNodeStreamVersion version,
+    public static void writeNormalizedNode(final DataOutput out,
+            final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion version,
             final @Nullable NormalizedNode<?, ?> node) throws IOException {
         if (node != null) {
             out.writeBoolean(true);
 
-            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
+            try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
                 stream.writeNormalizedNode(node);
             }
         } else {
@@ -64,53 +61,76 @@ public final class SerializationUtils {
         }
     }
 
+    @Deprecated(forRemoval = true)
+    public static void writeNormalizedNode(final DataOutput out, final NormalizedNodeStreamVersion version,
+            final @Nullable NormalizedNode<?, ?> node) throws IOException {
+        writeNormalizedNode(out, version.toYangtools(), node);
+    }
+
     public static YangInstanceIdentifier readPath(final DataInput in) throws IOException {
-        return NormalizedNodeInputOutput.newDataInput(in).readYangInstanceIdentifier();
+        return NormalizedNodeDataInput.newDataInput(in).readYangInstanceIdentifier();
     }
 
     public static void writePath(final DataOutput out, final @NonNull YangInstanceIdentifier path)
             throws IOException {
-        try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+        writePath(out, MAGNESIUM, path);
+    }
+
+    public static void writePath(final DataOutput out,
+            final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion version,
+            final @NonNull YangInstanceIdentifier path) throws IOException {
+        try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
             stream.writeYangInstanceIdentifier(path);
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static void writePath(final DataOutput out, final NormalizedNodeStreamVersion version,
             final @NonNull YangInstanceIdentifier path) throws IOException {
-        try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
-            stream.writeYangInstanceIdentifier(path);
-        }
+        writePath(out, version.toYangtools(), path);
     }
 
     public static <T> void readNodeAndPath(final DataInput in, final T instance, final Applier<T> applier)
             throws IOException {
-        final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
+        final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
         NormalizedNode<?, ?> node = stream.readNormalizedNode();
         YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
         applier.apply(instance, path, node);
+    }
+
+    public static void writeNodeAndPath(final DataOutput out,
+            final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion version,
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws IOException {
+        try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
+            stream.writeNormalizedNode(node);
+            stream.writeYangInstanceIdentifier(path);
+        }
     }
 
     public static void writeNodeAndPath(final DataOutput out, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> node) throws IOException {
-        try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
-            stream.writeNormalizedNode(node);
-            stream.writeYangInstanceIdentifier(path);
-        }
+        writeNodeAndPath(out, MAGNESIUM, path, node);
     }
 
     public static <T> void readPathAndNode(final DataInput in, final T instance, final Applier<T> applier)
             throws IOException {
-        final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
+        final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
         YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
         NormalizedNode<?, ?> node = stream.readNormalizedNode();
         applier.apply(instance, path, node);
     }
 
-    public static void writePathAndNode(final DataOutput out, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> node) throws IOException {
-        try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+    public static void writePathAndNode(final DataOutput out,
+            final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion version,
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws IOException {
+        try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
             stream.writeYangInstanceIdentifier(path);
             stream.writeNormalizedNode(node);
         }
+    }
+
+    public static void writePathAndNode(final DataOutput out, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> node) throws IOException {
+        writePathAndNode(out, MAGNESIUM, path, node);
     }
 }

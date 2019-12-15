@@ -28,11 +28,10 @@
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-api</artifactId>
         </dependency>
-
-        <!-- Needed for serialization of yang-data-api objects -->
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-clustering-commons</artifactId>
+            <!-- Needed for serialization of yang-data-api objects -->
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-data-codec-binfmt</artifactId>
         </dependency>
 
         <!-- Testing dependencies -->

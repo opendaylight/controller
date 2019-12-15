@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Revision;
 
+@Deprecated(forRemoval = true)
 public class QNameFactoryTest {
 
     @Test

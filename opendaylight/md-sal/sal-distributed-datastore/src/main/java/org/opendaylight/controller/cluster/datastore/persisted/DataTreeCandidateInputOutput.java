@@ -14,9 +14,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -25,6 +22,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNod
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +99,7 @@ public final class DataTreeCandidateInputOutput {
 
     public static DataTreeCandidate readDataTreeCandidate(final DataInput in, final ReusableStreamReceiver receiver)
             throws IOException {
-        final NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(in);
+        final NormalizedNodeDataInput reader = NormalizedNodeDataInput.newDataInput(in);
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
 
@@ -178,8 +177,7 @@ public final class DataTreeCandidateInputOutput {
 
     public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
             throws IOException {
-        try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out,
-                PayloadVersion.current().getStreamVersion())) {
+        try (NormalizedNodeDataOutput writer = PayloadVersion.current().getStreamVersion().newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();

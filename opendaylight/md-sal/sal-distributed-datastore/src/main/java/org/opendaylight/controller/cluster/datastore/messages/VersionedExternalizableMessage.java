@@ -13,7 +13,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 /**
  * Abstract base class for a versioned Externalizable message.

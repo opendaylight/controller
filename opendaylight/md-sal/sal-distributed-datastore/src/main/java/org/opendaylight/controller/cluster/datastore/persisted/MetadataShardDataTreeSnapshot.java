@@ -22,11 +22,10 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.Map;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
                 out.writeObject(m);
             }
             out.writeBoolean(true);
-            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, version)) {
+            try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
                 stream.writeNormalizedNode(rootNode);
             }
         }
@@ -94,7 +93,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
                 throw new StreamCorruptedException("Unexpected missing root node");
             }
 
-            final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
+            final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
             version = stream.getVersion();
             rootNode = stream.readNormalizedNode();
         }

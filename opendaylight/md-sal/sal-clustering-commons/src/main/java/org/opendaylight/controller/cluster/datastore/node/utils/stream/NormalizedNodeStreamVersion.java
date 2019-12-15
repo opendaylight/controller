@@ -14,10 +14,33 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Enumeration of all stream versions this implementation supports on both input and output.
  */
 @Beta
+@Deprecated(forRemoval = true)
 @NonNullByDefault
 public enum NormalizedNodeStreamVersion {
-    LITHIUM,
-    NEON_SR2,
-    SODIUM_SR1,
-    MAGNESIUM;
+    LITHIUM {
+        @Override
+        public org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion toYangtools() {
+            return org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.LITHIUM;
+        }
+    },
+    NEON_SR2 {
+        @Override
+        public org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion toYangtools() {
+            return org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.NEON_SR2;
+        }
+    },
+    SODIUM_SR1 {
+        @Override
+        public org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion toYangtools() {
+            return org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.SODIUM_SR1;
+        }
+    },
+    MAGNESIUM {
+        @Override
+        public org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion toYangtools() {
+            return org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    };
+
+    public abstract org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion toYangtools();
 }
