@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,7 @@ public final class ActionRoutingTable extends AbstractRoutingTable<ActionRouting
             LOG.debug("deserializing ActionRoutingTable");
             opsInvoker = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
 
-            final NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(in);
+            final NormalizedNodeDataInput nnin = NormalizedNodeDataInput.newDataInput(in);
             final int size = nnin.readInt();
             actions = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {

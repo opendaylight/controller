@@ -14,7 +14,10 @@ import java.io.IOException;
  * valid serialized data.
  *
  * @author Thomas Pantelis
+ * @deprecated Use {@link org.opendaylight.yangtools.yang.data.codec.binfmt.InvalidNormalizedNodeStreamException}
+ *             instead.
  */
+@Deprecated(forRemoval = true)
 public class InvalidNormalizedNodeStreamException extends IOException {
     private static final long serialVersionUID = 1L;
 

@@ -12,10 +12,10 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 /**
  * Externalizable proxy for use with {@link ReadTransactionSuccess}. It implements the initial (Boron) serialization
@@ -48,7 +48,7 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
 
         if (data.isPresent()) {
             out.writeBoolean(true);
-            try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out, streamVersion)) {
+            try (NormalizedNodeDataOutput nnout = streamVersion.newDataOutput(out)) {
                 nnout.writeNormalizedNode(data.get());
             }
         } else {
@@ -61,7 +61,7 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
         super.readExternal(in);
 
         if (in.readBoolean()) {
-            data = Optional.of(NormalizedNodeInputOutput.newDataInput(in).readNormalizedNode());
+            data = Optional.of(NormalizedNodeDataInput.newDataInput(in).readNormalizedNode());
         } else {
             data = Optional.empty();
         }

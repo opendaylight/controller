@@ -16,13 +16,13 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode> {
@@ -83,7 +83,7 @@ public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode>
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            final NormalizedNodeDataInput stream = NormalizedNodeInputOutput.newDataInput(in);
+            final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
             final SchemaPath name = stream.readSchemaPath();
             final LogicalDatastoreType type = LogicalDatastoreType.readFrom(in);
             final YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
