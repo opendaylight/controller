@@ -14,6 +14,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 
 @Beta
+@Deprecated(forRemoval = true)
 public final class NormalizedNodeInputOutput {
     private NormalizedNodeInputOutput() {
         throw new UnsupportedOperationException();
@@ -28,7 +29,12 @@ public final class NormalizedNodeInputOutput {
      * @throws IOException if an error occurs reading from the input
      */
     public static NormalizedNodeDataInput newDataInput(final @NonNull DataInput input) throws IOException {
-        return new VersionedNormalizedNodeDataInput(input).delegate();
+        try {
+            return new CompatNormalizedNodeDataInput(org.opendaylight.yangtools.yang.data.codec.binfmt
+                .NormalizedNodeDataInput.newDataInput(input));
+        } catch (org.opendaylight.yangtools.yang.data.codec.binfmt.InvalidNormalizedNodeStreamException e) {
+            throw new InvalidNormalizedNodeStreamException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -39,7 +45,8 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataInput} instance
      */
     public static NormalizedNodeDataInput newDataInputWithoutValidation(final @NonNull DataInput input) {
-        return new VersionedNormalizedNodeDataInput(input);
+        return new CompatNormalizedNodeDataInput(org.opendaylight.yangtools.yang.data.codec.binfmt
+            .NormalizedNodeDataInput.newDataInputWithoutValidation(input));
     }
 
     /**
@@ -50,7 +57,7 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataOutput} instance
      */
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output) {
-        return new MagnesiumDataOutput(output);
+        return newDataOutput(output, NormalizedNodeStreamVersion.MAGNESIUM);
     }
 
     /**
@@ -62,18 +69,6 @@ public final class NormalizedNodeInputOutput {
      */
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output,
             final @NonNull NormalizedNodeStreamVersion version) {
-        switch (version) {
-            case LITHIUM:
-                return new LithiumNormalizedNodeOutputStreamWriter(output);
-            case NEON_SR2:
-                return new NeonSR2NormalizedNodeOutputStreamWriter(output);
-            case SODIUM_SR1:
-                return new SodiumSR1DataOutput(output);
-            case MAGNESIUM:
-                return new MagnesiumDataOutput(output);
-            default:
-                throw new IllegalStateException("Unhandled version " + version);
-        }
+        return new CompatNormalizedNodeDataOutput(version.toYangtools().newDataOutput(output));
     }
-
 }

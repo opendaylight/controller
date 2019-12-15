@@ -138,6 +138,10 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-util</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-codec-binfmt</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
