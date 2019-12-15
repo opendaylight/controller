@@ -24,7 +24,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 /**
  * Interface for reading {@link NormalizedNode}s, {@link YangInstanceIdentifier}s, {@link PathArgument}s
  * and {@link SchemaPath}s.
+ *
+ * @deprecated Use {@link org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput} instead.
  */
+@Deprecated(forRemoval = true)
 @Beta
 public interface NormalizedNodeDataInput extends DataInput {
     /**

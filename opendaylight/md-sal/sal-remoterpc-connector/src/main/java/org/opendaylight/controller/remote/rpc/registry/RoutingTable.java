@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 
 public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRpcIdentifier> {
     private static final class Proxy implements Externalizable {
@@ -60,7 +60,7 @@ public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRp
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             opsInvoker = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
 
-            final NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(in);
+            final NormalizedNodeDataInput nnin = NormalizedNodeDataInput.newDataInput(in);
             final int size = nnin.readInt();
             rpcs = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {

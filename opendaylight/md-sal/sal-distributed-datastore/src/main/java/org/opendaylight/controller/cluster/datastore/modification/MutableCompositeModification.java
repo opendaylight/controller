@@ -18,12 +18,11 @@ import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
 /**
@@ -92,7 +91,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
 
         int size = in.readInt();
         if (size > 0) {
-            final NormalizedNodeDataInput input = NormalizedNodeInputOutput.newDataInputWithoutValidation(in);
+            final NormalizedNodeDataInput input = NormalizedNodeDataInput.newDataInputWithoutValidation(in);
             final ReusableStreamReceiver receiver = ReusableImmutableNormalizedNodeStreamWriter.create();
 
             for (int i = 0; i < size; i++) {
@@ -123,7 +122,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         final int size = modifications.size();
         out.writeInt(size);
         if (size > 0) {
-            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out, getStreamVersion())) {
+            try (NormalizedNodeDataOutput stream = getStreamVersion().newDataOutput(out)) {
                 for (Modification mod : modifications) {
                     out.writeByte(mod.getType());
                     mod.writeTo(stream);

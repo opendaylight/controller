@@ -12,10 +12,10 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 /**
  * Abstract base class for serialization proxies associated with {@link AbstractReadTransactionRequest}s. It implements
@@ -45,7 +45,7 @@ abstract class AbstractReadPathTransactionRequestProxyV1<T extends AbstractReadP
     @Override
     public final void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out, streamVersion)) {
+        try (NormalizedNodeDataOutput nnout = streamVersion.newDataOutput(out)) {
             nnout.writeYangInstanceIdentifier(path);
         }
     }
@@ -53,7 +53,7 @@ abstract class AbstractReadPathTransactionRequestProxyV1<T extends AbstractReadP
     @Override
     public final void readExternal(final ObjectInput in) throws ClassNotFoundException, IOException {
         super.readExternal(in);
-        path = NormalizedNodeInputOutput.newDataInput(in).readYangInstanceIdentifier();
+        path = NormalizedNodeDataInput.newDataInput(in).readYangInstanceIdentifier();
     }
 
     @Override

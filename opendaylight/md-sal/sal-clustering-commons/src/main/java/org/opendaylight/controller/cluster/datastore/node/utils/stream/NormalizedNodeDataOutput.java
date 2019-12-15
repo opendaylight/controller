@@ -21,7 +21,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 /**
  * Interface for emitting {@link NormalizedNode}s, {@link YangInstanceIdentifier}s, {@link PathArgument}s
  * and {@link SchemaPath}s.
+ *
+ * @deprecated Used {@link org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput} instead.
  */
+@Deprecated(forRemoval = true)
 @Beta
 public interface NormalizedNodeDataOutput extends AutoCloseable, DataOutput {
     void writeQName(@NonNull QName qname) throws IOException;

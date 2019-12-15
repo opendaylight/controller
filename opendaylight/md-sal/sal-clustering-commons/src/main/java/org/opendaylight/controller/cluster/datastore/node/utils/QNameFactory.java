@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
+@Deprecated(forRemoval = true)
 public final class QNameFactory {
     private static final class StringQName implements Immutable {
         private final @NonNull String localName;

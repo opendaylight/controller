@@ -18,10 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
 /**
@@ -32,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormali
  */
 final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestProxy<ModifyTransactionRequest> {
     private static final long serialVersionUID = 1L;
+
     private List<TransactionModification> modifications;
     private Optional<PersistenceProtocol> protocol;
     private transient NormalizedNodeStreamVersion streamVersion;
@@ -59,7 +59,7 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         final int size = in.readInt();
         if (size != 0) {
             modifications = new ArrayList<>(size);
-            final NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(in);
+            final NormalizedNodeDataInput nnin = NormalizedNodeDataInput.newDataInput(in);
             final ReusableImmutableNormalizedNodeStreamWriter writer =
                     ReusableImmutableNormalizedNodeStreamWriter.create();
             for (int i = 0; i < size; ++i) {
@@ -77,7 +77,7 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         out.writeByte(PersistenceProtocol.byteValue(protocol.orElse(null)));
         out.writeInt(modifications.size());
         if (!modifications.isEmpty()) {
-            try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out, streamVersion)) {
+            try (NormalizedNodeDataOutput nnout = streamVersion.newDataOutput(out)) {
                 for (TransactionModification op : modifications) {
                     op.writeTo(nnout);
                 }
