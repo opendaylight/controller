@@ -14,6 +14,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Enumeration of all stream versions this implementation supports on both input and output.
  */
 @Beta
+@Deprecated(forRemoval = true)
 @NonNullByDefault
 public enum NormalizedNodeStreamVersion {
     LITHIUM,

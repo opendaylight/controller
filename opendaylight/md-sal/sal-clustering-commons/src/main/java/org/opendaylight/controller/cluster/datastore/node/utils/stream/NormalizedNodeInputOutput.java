@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.LITHIUM;
+import static org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.MAGNESIUM;
+import static org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.NEON_SR2;
+import static org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.SODIUM_SR1;
+
 import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -14,6 +19,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 
 @Beta
+@Deprecated(forRemoval = true)
 public final class NormalizedNodeInputOutput {
     private NormalizedNodeInputOutput() {
         throw new UnsupportedOperationException();
@@ -28,7 +34,8 @@ public final class NormalizedNodeInputOutput {
      * @throws IOException if an error occurs reading from the input
      */
     public static NormalizedNodeDataInput newDataInput(final @NonNull DataInput input) throws IOException {
-        return new VersionedNormalizedNodeDataInput(input).delegate();
+        return new CompatNormalizedNodeDataInput(org.opendaylight.yangtools.yang.data.codec.binfmt
+            .NormalizedNodeDataInput.newDataInput(input));
     }
 
     /**
@@ -39,7 +46,8 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataInput} instance
      */
     public static NormalizedNodeDataInput newDataInputWithoutValidation(final @NonNull DataInput input) {
-        return new VersionedNormalizedNodeDataInput(input);
+        return new CompatNormalizedNodeDataInput(org.opendaylight.yangtools.yang.data.codec.binfmt
+            .NormalizedNodeDataInput.newDataInputWithoutValidation(input));
     }
 
     /**
@@ -50,7 +58,7 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataOutput} instance
      */
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output) {
-        return new MagnesiumDataOutput(output);
+        return newDataOutput(output, NormalizedNodeStreamVersion.MAGNESIUM);
     }
 
     /**
@@ -62,18 +70,23 @@ public final class NormalizedNodeInputOutput {
      */
     public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output,
             final @NonNull NormalizedNodeStreamVersion version) {
+        final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput delegate;
         switch (version) {
             case LITHIUM:
-                return new LithiumNormalizedNodeOutputStreamWriter(output);
+                delegate = LITHIUM.newDataOutput(output);
+                break;
             case NEON_SR2:
-                return new NeonSR2NormalizedNodeOutputStreamWriter(output);
+                delegate = NEON_SR2.newDataOutput(output);
+                break;
             case SODIUM_SR1:
-                return new SodiumSR1DataOutput(output);
+                delegate = SODIUM_SR1.newDataOutput(output);
+                break;
             case MAGNESIUM:
-                return new MagnesiumDataOutput(output);
+                delegate = MAGNESIUM.newDataOutput(output);
+                break;
             default:
                 throw new IllegalStateException("Unhandled version " + version);
         }
+        return new CompatNormalizedNodeDataOutput(delegate);
     }
-
 }
