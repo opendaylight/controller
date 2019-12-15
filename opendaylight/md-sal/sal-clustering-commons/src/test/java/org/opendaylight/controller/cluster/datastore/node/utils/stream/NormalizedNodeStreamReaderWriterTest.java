@@ -55,6 +55,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
+@Deprecated(forRemoval = true)
 public class NormalizedNodeStreamReaderWriterTest {
 
     @Test

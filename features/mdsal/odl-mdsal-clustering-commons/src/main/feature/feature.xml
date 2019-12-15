@@ -15,5 +15,6 @@
         <feature version="[6,7)">odl-dropwizard-metrics</feature>
         <feature version="[6,7)">odl-servlet-api</feature>
         <feature version="[4,5)">odl-yangtools-data</feature>
+        <feature version="[4,5)">odl-yangtools-codec</feature>
     </feature>
 </features>
