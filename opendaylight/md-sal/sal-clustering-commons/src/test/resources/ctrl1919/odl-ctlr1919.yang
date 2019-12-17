@@ -1,0 +1,36 @@
+module odl-ctrl1919 {
+  yang-version 1;
+  namespace "urn:odl-ctlr1919";
+  prefix "ctrl1919";
+
+  description "Sodium -> Magnesium uint translation";
+
+  list lst {
+    key "a b c d e f g h";
+
+    leaf a { type int8; }
+    leaf b { type int16; }
+    leaf c { type int32; }
+    leaf d { type int64; }
+    leaf e { type uint8; }
+    leaf f { type uint16; }
+    leaf g { type uint32; }
+    leaf h { type uint64; }
+  }
+
+  leaf-list lf-lst8 {
+    type uint8;
+  }
+
+  leaf-list lf-lst16 {
+    type uint16;
+  }
+
+  leaf-list lf-lst32 {
+    type uint32;
+  }
+
+  leaf-list lf-lst64 {
+    type uint64;
+  }
+}
