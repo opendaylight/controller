@@ -38,7 +38,6 @@ public abstract class AbstractMdsalTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMdsalTestBase.class);
     private static final String MAVEN_REPO_LOCAL = "maven.repo.local";
-    private static final String ORG_OPS4J_PAX_URL_MVN_LOCAL_REPOSITORY = "org.ops4j.pax.url.mvn.localRepository";
     private static final String ETC_ORG_OPS4J_PAX_URL_MVN_CFG = "etc/org.ops4j.pax.url.mvn.cfg";
     private static final String ETC_ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
 
@@ -117,8 +116,8 @@ public abstract class AbstractMdsalTestBase {
     protected Option mvnLocalRepoOption() {
         String mvnRepoLocal = System.getProperty(MAVEN_REPO_LOCAL, "");
         LOG.info("mvnLocalRepo \"{}\"", mvnRepoLocal);
-        return editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, ORG_OPS4J_PAX_URL_MVN_LOCAL_REPOSITORY,
-                mvnRepoLocal);
+        return editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG,
+            "org.ops4j.pax.url.mvn.localRepository", mvnRepoLocal);
     }
 
     @Configuration
@@ -130,8 +129,12 @@ public abstract class AbstractMdsalTestBase {
                         .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY)).useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
-                //mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"), getLoggingOption(),
                 mvnLocalRepoOption(),
+
+                // Make sure karaf's default repository is consulted before anything else
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, "org.ops4j.pax.url.mvn.defaultRepositories",
+                        "file:${karaf.home}/${karaf.default.repository}@id=system.repository"),
+
                 configureConsole().ignoreLocalConsole().ignoreRemoteShell(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
 
