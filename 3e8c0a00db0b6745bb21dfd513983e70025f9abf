@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4c2ab5cf_5db07910",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "can you clarify a with a member state diagram/timeline, please?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 14
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e47a2a9a_9f047986",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "this needs explanation as to why",
+      "range": {
+        "startLine": 456,
+        "startChar": 77,
+        "endLine": 456,
+        "endChar": 108
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd3c5fa1_1bfc7b06",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "... \"because we have resumed leadership with that log entry having been committed.\" ?\n\n(if I understand the point of the patch)",
+      "range": {
+        "startLine": 463,
+        "startChar": 41,
+        "endLine": 463,
+        "endChar": 93
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53a50213_c3b7f25e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "extra",
+      "range": {
+        "startLine": 463,
+        "startChar": 38,
+        "endLine": 463,
+        "endChar": 39
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7231f13f_0b804e96",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "this is an ugly cast and an unneeded local -- can we perhaps lose both?",
+      "range": {
+        "startLine": 466,
+        "startChar": 12,
+        "endLine": 466,
+        "endChar": 49
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7107f56_cb5ed22c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "deserves a javadoc",
+      "range": {
+        "startLine": 422,
+        "startChar": 4,
+        "endLine": 422,
+        "endChar": 41
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fab34aff_9dae8a7b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "not thread-safe. use double-checked locking here.",
+      "range": {
+        "startLine": 78,
+        "startChar": 12,
+        "endLine": 78,
+        "endChar": 29
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c23abc78_709527ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T02:03:13Z",
+      "side": 1,
+      "message": "IllegalState with a message",
+      "range": {
+        "startLine": 95,
+        "startChar": 22,
+        "endLine": 95,
+        "endChar": 29
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
