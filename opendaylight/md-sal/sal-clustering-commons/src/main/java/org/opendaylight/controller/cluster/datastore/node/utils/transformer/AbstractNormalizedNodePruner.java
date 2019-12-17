@@ -45,13 +45,13 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @FunctionalInterface
-    private interface WriterMethod<T extends PathArgument> {
+    interface WriterMethod<T extends PathArgument> {
 
         void apply(ReusableImmutableNormalizedNodeStreamWriter writer, T name) throws IOException;
     }
 
     @FunctionalInterface
-    private interface SizedWriterMethod<T extends PathArgument> {
+    interface SizedWriterMethod<T extends PathArgument> {
 
         void apply(ReusableImmutableNormalizedNodeStreamWriter writer, T name, int childSizeHint) throws IOException;
     }
@@ -185,7 +185,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     public void scalarValue(final Object value) throws IOException {
         checkNotSealed();
         if (unknown == 0) {
-            delegate.scalarValue(translateScalar(stack.peek(), value));
+            delegate.scalarValue(translateScalar(currentSchema(), value));
         }
     }
 
@@ -256,7 +256,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         }
 
         final DataSchemaContextNode<?> schema;
-        final DataSchemaContextNode<?> parent = stack.peek();
+        final DataSchemaContextNode<?> parent = currentSchema();
         if (parent != null) {
             schema = parent.getChild(name);
         } else {
@@ -277,13 +277,17 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         return true;
     }
 
-    private <A extends PathArgument> void enter(final WriterMethod<A> method, final A name) throws IOException {
+    final DataSchemaContextNode<?> currentSchema() {
+        return stack.peek();
+    }
+
+    final <A extends PathArgument> void enter(final WriterMethod<A> method, final A name) throws IOException {
         if (enter(name)) {
             method.apply(delegate, name);
         }
     }
 
-    private <A extends PathArgument> void enter(final SizedWriterMethod<A> method, final A name, final int size)
+    final <A extends PathArgument> void enter(final SizedWriterMethod<A> method, final A name, final int size)
             throws IOException {
         if (enter(name)) {
             method.apply(delegate, name, size);
