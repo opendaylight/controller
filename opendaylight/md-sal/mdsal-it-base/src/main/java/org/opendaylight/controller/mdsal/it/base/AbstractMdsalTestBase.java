@@ -24,7 +24,6 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
-import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenUrlReference;
@@ -138,36 +137,34 @@ public abstract class AbstractMdsalTestBase {
                 configureConsole().ignoreLocalConsole().ignoreRemoteShell(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
 
-        if (JavaVersionUtil.getMajorVersion() >= 9) {
-            final String karafVersion = MavenUtils.getArtifactVersion("org.apache.karaf.features",
+        final String karafVersion = MavenUtils.getArtifactVersion("org.apache.karaf.features",
                 "org.apache.karaf.features.core");
-            options = OptionUtils.combine(options, new VMOption[] {
-                new VMOption("--add-reads=java.xml=java.logging"),
-                new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
-                new VMOption("--patch-module"),
-                new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-" + karafVersion + ".jar"),
-                new VMOption("--patch-module"),
-                new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" + karafVersion + ".jar"),
-                new VMOption("--add-opens"),
-                new VMOption("java.base/java.security=ALL-UNNAMED"),
-                new VMOption("--add-opens"),
-                new VMOption("java.base/java.net=ALL-UNNAMED"),
-                new VMOption("--add-opens"),
-                new VMOption("java.base/java.lang=ALL-UNNAMED"),
-                new VMOption("--add-opens"),
-                new VMOption("java.base/java.util=ALL-UNNAMED"),
-                new VMOption("--add-opens"),
-                new VMOption("java.naming/javax.naming.spi=ALL-UNNAMED"),
-                new VMOption("--add-opens"),
-                new VMOption("java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED"),
-                new VMOption("--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"),
-                new VMOption("--add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"),
-                new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
-                new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"),
-                new VMOption("-classpath"),
-                new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*")
-            });
-        }
+        options = OptionUtils.combine(options, new VMOption[] {
+            new VMOption("--add-reads=java.xml=java.logging"),
+            new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
+            new VMOption("--patch-module"),
+            new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-" + karafVersion + ".jar"),
+            new VMOption("--patch-module"),
+            new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" + karafVersion + ".jar"),
+            new VMOption("--add-opens"),
+            new VMOption("java.base/java.security=ALL-UNNAMED"),
+            new VMOption("--add-opens"),
+            new VMOption("java.base/java.net=ALL-UNNAMED"),
+            new VMOption("--add-opens"),
+            new VMOption("java.base/java.lang=ALL-UNNAMED"),
+            new VMOption("--add-opens"),
+            new VMOption("java.base/java.util=ALL-UNNAMED"),
+            new VMOption("--add-opens"),
+            new VMOption("java.naming/javax.naming.spi=ALL-UNNAMED"),
+            new VMOption("--add-opens"),
+            new VMOption("java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED"),
+            new VMOption("--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"),
+            new VMOption("--add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"),
+            new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
+            new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"),
+            new VMOption("-classpath"),
+            new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*")
+        });
 
         return OptionUtils.combine(options, getAdditionalOptions());
     }
