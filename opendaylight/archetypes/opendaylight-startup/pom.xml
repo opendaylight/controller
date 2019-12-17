@@ -12,12 +12,12 @@
   <parent>
      <groupId>org.opendaylight.controller.archetypes</groupId>
      <artifactId>archetypes-parent</artifactId>
-     <version>0.9.3-SNAPSHOT</version>
+     <version>0.9.3</version>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-startup-archetype</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.7.3</version>
   <packaging>maven-archetype</packaging>
   <name>${project.artifactId}</name>
 

@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>benchmark-api</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.7.3</version>
   <packaging>bundle</packaging>
 
   <dependencies>

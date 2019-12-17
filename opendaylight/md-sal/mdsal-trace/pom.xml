@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-trace-aggregator</artifactId>
-  <version>1.9.3-SNAPSHOT</version>
+  <version>1.9.3</version>
   <name>mdsaltrace</name>
   <packaging>pom</packaging>
 

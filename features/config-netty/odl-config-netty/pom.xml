@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-config-netty</artifactId>
-    <version>0.10.3-SNAPSHOT</version>
+    <version>0.10.3</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Config-Netty</name>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>blueprint</artifactId>
-            <version>0.10.3-SNAPSHOT</version>
+            <version>0.10.3</version>
         </dependency>
     </dependencies>
 

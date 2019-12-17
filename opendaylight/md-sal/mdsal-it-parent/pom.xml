@@ -19,11 +19,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-it-parent</artifactId>
-  <version>1.9.3-SNAPSHOT</version>
+  <version>1.9.3</version>
   <packaging>pom</packaging>
 
   <properties>
-    <mdsal.version>1.9.3-SNAPSHOT</mdsal.version>
+    <mdsal.version>1.9.3</mdsal.version>
     <karaf.distro.groupId>org.opendaylight.odlparent</karaf.distro.groupId>
     <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
     <karaf.distro.type>zip</karaf.distro.type>

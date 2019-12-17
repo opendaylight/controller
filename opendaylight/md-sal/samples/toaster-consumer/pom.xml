@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
-    <version>1.9.3-SNAPSHOT</version>
+    <version>1.9.3</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller.samples</groupId>
   <artifactId>sample-toaster-consumer</artifactId>
-  <version>1.9.3-SNAPSHOT</version>
+  <version>1.9.3</version>
   <packaging>bundle</packaging>
 
   <dependencies>

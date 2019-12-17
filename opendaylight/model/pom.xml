@@ -19,7 +19,7 @@
 
     <groupId>org.opendaylight.controller.model</groupId>
     <artifactId>model-aggregator</artifactId>
-    <version>1.9.3-SNAPSHOT</version>
+    <version>1.9.3</version>
     <packaging>pom</packaging>
 
     <modules>

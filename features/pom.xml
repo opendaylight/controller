@@ -17,7 +17,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-controller</artifactId>
-  <version>1.12.3-SNAPSHOT</version>
+  <version>1.12.3</version>
   <packaging>pom</packaging>
 
   <modules>

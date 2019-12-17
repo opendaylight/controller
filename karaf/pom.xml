@@ -17,7 +17,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>distribution.opendaylight-karaf</artifactId>
-  <version>1.12.3-SNAPSHOT</version>
+  <version>1.12.3</version>
   <packaging>pom</packaging>
 
   <dependencies>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>1.9.3-SNAPSHOT</version>
+      <version>1.9.3</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>

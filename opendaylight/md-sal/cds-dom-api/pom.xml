@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-parent</artifactId>
-        <version>1.9.3-SNAPSHOT</version>
+        <version>1.9.3</version>
         <relativePath>../parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>cds-dom-api</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.3</version>
     <packaging>bundle</packaging>
 
     <dependencies>

@@ -14,7 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>benchmark-aggregator</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.7.3</version>
   <name>${project.artifactId}</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
