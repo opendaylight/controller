@@ -8,26 +8,10 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import com.google.common.annotations.Beta;
-import java.io.IOException;
-import java.math.BigInteger;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.yangtools.yang.common.Uint16;
-import org.opendaylight.yangtools.yang.common.Uint32;
-import org.opendaylight.yangtools.yang.common.Uint64;
-import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.TypedDataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.type.Uint16TypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.Uint32TypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.Uint64TypeDefinition;
-import org.opendaylight.yangtools.yang.model.api.type.Uint8TypeDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The NormalizedNodePruner removes all nodes from the input NormalizedNode that do not have a corresponding
@@ -51,41 +35,6 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
         @Override
         public ReusableNormalizedNodePruner duplicate() {
             return new SimplePruner(getTree());
-        }
-    }
-
-    private static final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
-        private static final Logger LOG = LoggerFactory.getLogger(UintAdaptingPruner.class);
-
-        UintAdaptingPruner(final DataSchemaContextTree tree) {
-            super(tree);
-        }
-
-        @Override
-        public ReusableNormalizedNodePruner duplicate() {
-            return new UintAdaptingPruner(getTree());
-        }
-
-        @Override
-        Object translateScalar(final DataSchemaContextNode<?> context, final Object value) throws IOException {
-            final DataSchemaNode schema = context.getDataSchemaNode();
-            if (schema instanceof TypedDataSchemaNode) {
-                final TypeDefinition<?> type = ((TypedDataSchemaNode) schema).getType();
-                if (value instanceof Short && type instanceof Uint8TypeDefinition) {
-                    LOG.trace("Translating legacy uint8 {}", value);
-                    return Uint8.valueOf((Short) value);
-                } else if (value instanceof Integer && type instanceof Uint16TypeDefinition) {
-                    LOG.trace("Translating legacy uint16 {}", value);
-                    return Uint16.valueOf((Integer) value);
-                } else if (value instanceof Long && type instanceof Uint32TypeDefinition) {
-                    LOG.trace("Translating legacy uint32 {}", value);
-                    return Uint32.valueOf((Long) value);
-                } else if (value instanceof BigInteger && type instanceof Uint64TypeDefinition) {
-                    LOG.trace("Translating legacy uint64 {}", value);
-                    return Uint64.valueOf((BigInteger) value);
-                }
-            }
-            return value;
         }
     }
 
