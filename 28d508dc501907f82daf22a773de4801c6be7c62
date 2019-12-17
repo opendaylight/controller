@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d5840b36_5fb427d0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T00:47:23Z",
+      "side": 1,
+      "message": "should be final",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 15
+      },
+      "revId": "28d508dc501907f82daf22a773de4801c6be7c62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4fa3bc45_898b0071",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T00:47:23Z",
+      "side": 1,
+      "message": "inline constant, otherwise it\u0027s hard to track what is going on",
+      "range": {
+        "startLine": 61,
+        "startChar": 21,
+        "endLine": 61,
+        "endChar": 37
+      },
+      "revId": "28d508dc501907f82daf22a773de4801c6be7c62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1efdd0b1_da3b08ed",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-17T00:47:23Z",
+      "side": 1,
+      "message": "these are true constants -- they should be in proper fields. We will probably want to tweak them in future (i.e. runtime constants or similar)",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 46
+      },
+      "revId": "28d508dc501907f82daf22a773de4801c6be7c62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
