@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import javanet.staxutils.IndentingXMLStreamWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
