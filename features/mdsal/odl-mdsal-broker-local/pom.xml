@@ -18,13 +18,13 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-broker-local</artifactId>
-    <version>1.9.3-SNAPSHOT</version>
+    <version>1.9.4-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MDSAL :: Broker</name>
 
     <properties>
-        <blueprint.version>0.10.3-SNAPSHOT</blueprint.version>
+        <blueprint.version>0.10.4-SNAPSHOT</blueprint.version>
     </properties>
 
     <dependencyManagement>
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.9.3-SNAPSHOT</version>
+                <version>1.9.4-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-config-netty</artifactId>
-            <version>0.10.3-SNAPSHOT</version>
+            <version>0.10.4-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

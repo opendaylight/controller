@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-parent</artifactId>
-        <version>1.9.3-SNAPSHOT</version>
+        <version>1.9.4-SNAPSHOT</version>
         <relativePath>../../../parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller.samples</groupId>
-    <version>1.9.3-SNAPSHOT</version>
+    <version>1.9.4-SNAPSHOT</version>
     <artifactId>clustering-it-model</artifactId>
     <packaging>bundle</packaging>
 

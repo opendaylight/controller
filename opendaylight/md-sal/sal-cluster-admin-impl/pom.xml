@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
-    <version>1.9.3-SNAPSHOT</version>
+    <version>1.9.4-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-cluster-admin-impl</artifactId>
-  <version>1.9.3-SNAPSHOT</version>
+  <version>1.9.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>
@@ -39,7 +39,7 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-distributed-datastore</artifactId>
       <type>test-jar</type>
-      <version>1.9.3-SNAPSHOT</version>
+      <version>1.9.4-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.opendaylight.controller.samples</groupId>
       <artifactId>clustering-it-model</artifactId>
-      <version>1.9.3-SNAPSHOT</version>
+      <version>1.9.4-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
