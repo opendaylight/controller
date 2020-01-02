@@ -181,6 +181,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>sal-distributed-eos</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>sal-remoterpc-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>

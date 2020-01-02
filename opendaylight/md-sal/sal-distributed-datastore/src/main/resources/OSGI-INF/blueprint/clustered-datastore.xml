@@ -175,25 +175,6 @@
     <argument value="DOMDataBroker"/>
   </bean>
 
-  <!-- Distributed EntityOwnershipService -->
-  <cm:cm-properties id="strategiesProps" persistent-id="org.opendaylight.controller.cluster.entity.owner.selection.strategies" />
-
-  <bean id="selectionStrategyConfig" class="org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader"
-          factory-method="loadStrategyWithConfig">
-    <argument ref="strategiesProps"/>
-  </bean>
-
-  <bean id="distributedEntityOwnershipService" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService"
-          factory-method="start" destroy-method="close">
-    <argument>
-      <bean factory-ref="operDatastore" factory-method="getActorUtils"/>
-    </argument>
-    <argument ref="selectionStrategyConfig"/>
-  </bean>
-
-  <service ref="distributedEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"
-        odl:type="default"/>
-
   <!-- CDS shard manager -->
   <bean id="cdsNodeManager" class="org.opendaylight.controller.cluster.sharding.DistributedShardedDOMDataTree"
           init-method="init">

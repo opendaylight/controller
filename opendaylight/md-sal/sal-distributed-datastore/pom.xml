@@ -143,10 +143,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-eos-dom-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-dom-spi</artifactId>
     </dependency>
     <dependency>

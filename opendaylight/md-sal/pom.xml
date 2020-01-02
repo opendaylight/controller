@@ -58,6 +58,7 @@
     <module>sal-dummy-distributed-datastore</module>
     <module>sal-cluster-admin-api</module>
     <module>sal-cluster-admin-impl</module>
+    <module>sal-distributed-eos</module>
 
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
