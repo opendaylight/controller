@@ -143,10 +143,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-eos-dom-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-dom-spi</artifactId>
     </dependency>
     <dependency>
@@ -249,6 +245,7 @@
                 org.opendaylight.controller.cluster.datastore;
                 org.opendaylight.controller.cluster.datastore.config;
                 org.opendaylight.controller.cluster.datastore.exceptions;
+                org.opendaylight.controller.cluster.datastore.identifiers;
                 org.opendaylight.controller.cluster.datastore.messages;
                 org.opendaylight.controller.cluster.datastore.persisted;
                 org.opendaylight.controller.cluster.datastore.utils;
