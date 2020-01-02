@@ -111,6 +111,10 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>sal-distributed-eos</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sal-cluster-admin-api</artifactId>
         </dependency>
         <dependency>

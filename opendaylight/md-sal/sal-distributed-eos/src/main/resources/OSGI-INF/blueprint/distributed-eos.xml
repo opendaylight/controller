@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.2.0">
+
+  <!-- Distributed EntityOwnershipService -->
+  <cm:cm-properties id="strategiesProps" persistent-id="org.opendaylight.controller.cluster.entity.owner.selection.strategies" />
+
+  <reference id="operDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface" odl:type="distributed-operational"/>
+
+  <bean id="selectionStrategyConfig" class="org.opendaylight.controller.cluster.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader"
+          factory-method="loadStrategyWithConfig">
+    <argument ref="strategiesProps"/>
+  </bean>
+
+  <bean id="distributedEntityOwnershipService" class="org.opendaylight.controller.cluster.entityownership.DistributedEntityOwnershipService"
+          factory-method="start" destroy-method="close">
+    <argument>
+      <bean factory-ref="operDatastore" factory-method="getActorUtils"/>
+    </argument>
+    <argument ref="selectionStrategyConfig"/>
+  </bean>
+
+  <service ref="distributedEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"
+        odl:type="default"/>
+</blueprint>
