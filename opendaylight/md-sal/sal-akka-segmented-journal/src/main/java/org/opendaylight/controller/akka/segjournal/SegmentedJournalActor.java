@@ -255,7 +255,6 @@ final class SegmentedJournalActor extends AbstractActor {
         message.promise.success(null);
     }
 
-    @SuppressWarnings("checkstyle:illegalCatch")
     private void handleReadHighestSequenceNr(final ReadHighestSequenceNr message) {
         LOG.debug("{}: looking for highest sequence on {}", persistenceId, message);
         final Long sequence;
