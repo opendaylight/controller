@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c9b84888_41c9b1ae",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4c2ab5cf_5db07910",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 14
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e47a2a9a_9f047986",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 17
@@ -45,6 +69,30 @@
       "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7555135e_e9e36e47",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e47a2a9a_9f047986",
+      "range": {
+        "startLine": 456,
+        "startChar": 77,
+        "endLine": 456,
+        "endChar": 108
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -94,6 +142,54 @@
     },
     {
       "key": {
+        "uuid": "e027306e_b745b453",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd3c5fa1_1bfc7b06",
+      "range": {
+        "startLine": 463,
+        "startChar": 41,
+        "endLine": 463,
+        "endChar": 93
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28185476_c0402b0c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53a50213_c3b7f25e",
+      "range": {
+        "startLine": 463,
+        "startChar": 38,
+        "endLine": 463,
+        "endChar": 39
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7231f13f_0b804e96",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 17
@@ -114,6 +210,30 @@
       "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0356809_0e3d0e15",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7231f13f_0b804e96",
+      "range": {
+        "startLine": 466,
+        "startChar": 12,
+        "endLine": 466,
+        "endChar": 49
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "3dc120e7_a7fd7d89",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e7107f56_cb5ed22c",
+      "range": {
+        "startLine": 422,
+        "startChar": 4,
+        "endLine": 422,
+        "endChar": 41
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fab34aff_9dae8a7b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
         "patchSetId": 17
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "16feb756_3c47bb31",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fab34aff_9dae8a7b",
+      "range": {
+        "startLine": 78,
+        "startChar": 12,
+        "endLine": 78,
+        "endChar": 29
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c23abc78_709527ba",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
         "patchSetId": 17
@@ -183,6 +351,30 @@
       "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df38326e_b153809a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-01-15T12:39:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c23abc78_709527ba",
+      "range": {
+        "startLine": 95,
+        "startChar": 22,
+        "endLine": 95,
+        "endChar": 29
+      },
+      "revId": "3e8c0a00db0b6745bb21dfd513983e70025f9abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
