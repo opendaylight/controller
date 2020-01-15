@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>4.0.8</version>
+    <version>4.0.10</version>
     <relativePath/>
   </parent>
 
