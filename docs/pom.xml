@@ -299,8 +299,8 @@
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-3.9/</link>
                         <link>https://commons.apache.org/proper/commons-codec/apidocs/</link>
 
-                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/3.0.7/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/4.0.8/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/3.0.8/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/4.0.9/</link>
                     </links>
                     <groups>
                         <group>

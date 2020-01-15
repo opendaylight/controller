@@ -55,7 +55,7 @@
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>4.0.8</version>
+      <version>4.0.9</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
