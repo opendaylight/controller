@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent</artifactId>
-        <version>6.0.3</version>
+        <version>6.0.4</version>
         <relativePath/>
     </parent>
 
@@ -299,8 +299,8 @@
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-3.9/</link>
                         <link>https://commons.apache.org/proper/commons-codec/apidocs/</link>
 
-                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/4.0.3/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/5.0.6/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/4.0.6/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/5.0.8/</link>
                     </links>
                     <groups>
                         <group>
