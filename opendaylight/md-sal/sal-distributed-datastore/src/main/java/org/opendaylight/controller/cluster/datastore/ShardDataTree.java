@@ -57,6 +57,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifia
 import org.opendaylight.controller.cluster.datastore.persisted.CloseLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CreateLocalHistoryPayload;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionPayload;
@@ -316,10 +317,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
-        final Entry<TransactionIdentifier, DataTreeCandidate> entry = payload.getCandidate();
+        final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.getCandidate();
         final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
+        // FIXME: CONTROLLER-1923: examine version first
         final PruningDataTreeModification mod = wrapWithPruning(unwrapped);
-        DataTreeCandidates.applyToModification(mod, entry.getValue());
+        DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
         mod.ready();
 
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
@@ -367,12 +369,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private void applyReplicatedCandidate(final CommitTransactionPayload payload)
             throws DataValidationFailedException, IOException {
-        final Entry<TransactionIdentifier, DataTreeCandidate> entry = payload.getCandidate();
+        final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.getCandidate();
         final TransactionIdentifier identifier = entry.getKey();
         LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
         final DataTreeModification mod = dataTree.takeSnapshot().newModification();
-        DataTreeCandidates.applyToModification(mod, entry.getValue());
+        // TODO: check version here, which will enable us to perform forward-compatibility transformations
+        DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
         mod.ready();
 
         LOG.trace("{}: Applying foreign modification {}", logContext, mod);

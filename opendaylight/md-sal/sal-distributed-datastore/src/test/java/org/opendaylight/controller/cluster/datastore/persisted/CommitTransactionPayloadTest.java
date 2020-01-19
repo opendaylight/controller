@@ -18,6 +18,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -67,9 +68,11 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         }
     }
 
-    private static void assertCandidateEquals(final DataTreeCandidate expected, final DataTreeCandidate actual) {
-        assertEquals("root path", expected.getRootPath(), actual.getRootPath());
-        assertCandidateNodeEquals(expected.getRootNode(), actual.getRootNode());
+    private static void assertCandidateEquals(final DataTreeCandidate expected,
+            final DataTreeCandidateWithVersion actual) {
+        final DataTreeCandidate candidate = actual.getCandidate();
+        assertEquals("root path", expected.getRootPath(), candidate.getRootPath());
+        assertCandidateNodeEquals(expected.getRootNode(), candidate.getRootNode());
     }
 
     private static void assertCandidateNodeEquals(final DataTreeCandidateNode expected,
