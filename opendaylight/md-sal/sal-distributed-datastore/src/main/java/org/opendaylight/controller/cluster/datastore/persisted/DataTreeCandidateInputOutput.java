@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
@@ -14,6 +16,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -24,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,8 +102,20 @@ public final class DataTreeCandidateInputOutput {
         }
     }
 
-    public static DataTreeCandidate readDataTreeCandidate(final DataInput in, final ReusableStreamReceiver receiver)
-            throws IOException {
+    @NonNullByDefault
+    public static final class DataTreeCandidateWithVersion implements Immutable {
+        public final DataTreeCandidate candidate;
+        public final NormalizedNodeStreamVersion version;
+
+        public DataTreeCandidateWithVersion(final DataTreeCandidate candidate,
+                final NormalizedNodeStreamVersion version) {
+            this.candidate = requireNonNull(candidate);
+            this.version = requireNonNull(version);
+        }
+    }
+
+    public static DataTreeCandidateWithVersion readDataTreeCandidate(final DataInput in,
+            final ReusableStreamReceiver receiver) throws IOException {
         final NormalizedNodeDataInput reader = NormalizedNodeDataInput.newDataInput(in);
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
@@ -130,7 +147,8 @@ public final class DataTreeCandidateInputOutput {
                 throw new IllegalArgumentException("Unhandled node type " + type);
         }
 
-        return DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode);
+        return new DataTreeCandidateWithVersion(DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode),
+            reader.getVersion());
     }
 
     private static void writeChildren(final NormalizedNodeDataOutput out,
