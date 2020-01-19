@@ -48,11 +48,6 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     }
 
     public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
-            final SchemaContext schemaContext) {
-        this(delegate, dataTree, ReusableNormalizedNodePruner.forSchemaContext(schemaContext));
-    }
-
-    public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
             final DataSchemaContextTree dataSchemaContext) {
         this(delegate, dataTree, ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext));
     }
