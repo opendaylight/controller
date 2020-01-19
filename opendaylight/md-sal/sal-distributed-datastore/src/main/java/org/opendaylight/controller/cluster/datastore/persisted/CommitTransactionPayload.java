@@ -27,6 +27,7 @@ import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -70,11 +71,11 @@ public abstract class CommitTransactionPayload extends Payload implements Serial
         return create(transactionId, candidate, 512);
     }
 
-    public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
+    public Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate() throws IOException {
         return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
     }
 
-    public final Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
+    public final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate(
             final ReusableStreamReceiver receiver) throws IOException {
         final DataInput in = newDataInput();
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
