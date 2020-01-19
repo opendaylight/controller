@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.PurgeLocalHistory
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -84,6 +85,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -295,13 +297,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
     void applySnapshot(final @NonNull ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
+        // TODO: we should be taking ShardSnapshotState here and performing forward-compatibility translation
         applySnapshot(snapshot, UnaryOperator.identity());
-    }
-
-    private PruningDataTreeModification wrapWithPruning(final DataTreeModification delegate) {
-        return new PruningDataTreeModification(delegate, dataTree,
-            // TODO: we should be able to reuse the pruner, provided we are not reentrant
-            ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext));
     }
 
     /**
@@ -311,16 +308,31 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param snapshot Snapshot that needs to be applied
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
-    void applyRecoverySnapshot(final @NonNull ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
-        applySnapshot(snapshot, this::wrapWithPruning);
+    void applyRecoverySnapshot(final @NonNull ShardSnapshotState snapshot) throws DataValidationFailedException {
+        // TODO: we should be able to reuse the pruner, provided we are not reentrant
+        ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
+        if (snapshot.needsMigration()) {
+            pruner = pruner.withUintAdaption();
+        }
+
+        // For lambda below
+        final ReusableNormalizedNodePruner finalPruner = pruner;
+        applySnapshot(snapshot.getSnapshot(),
+            delegate -> new PruningDataTreeModification(delegate, dataTree, finalPruner));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
         final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.getCandidate();
         final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
-        // FIXME: CONTROLLER-1923: examine version first
-        final PruningDataTreeModification mod = wrapWithPruning(unwrapped);
+
+        // TODO: we should be able to reuse the pruner, provided we are not reentrant
+        ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
+        if (NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().getVersion()) > 0) {
+            pruner = pruner.withUintAdaption();
+        }
+
+        final PruningDataTreeModification mod = new PruningDataTreeModification(unwrapped, dataTree, pruner);
         DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
         mod.ready();
 
