@@ -23,7 +23,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
-import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,20 +39,15 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
 
     private DataTreeModification delegate;
 
-    private PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
+    public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
             final ReusableNormalizedNodePruner pruner) {
         this.delegate = requireNonNull(delegate);
         this.dataTree = requireNonNull(dataTree);
         this.pruner = requireNonNull(pruner);
     }
 
-    public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
-            final DataSchemaContextTree dataSchemaContext) {
-        this(delegate, dataTree, ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext));
-    }
-
     @Override
-    public DataTreeModification delegate() {
+    protected DataTreeModification delegate() {
         return delegate;
     }
 

@@ -34,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
+import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -97,7 +98,9 @@ public class PruningDataTreeModificationTest {
             }
         });
 
-        pruningDataTreeModification = new PruningDataTreeModification(proxyModification, dataTree, CONTEXT_TREE);
+        pruningDataTreeModification = new PruningDataTreeModification(proxyModification, dataTree,
+            // Cannot reuse with parallel tests
+            ReusableNormalizedNodePruner.forDataSchemaContext(CONTEXT_TREE));
     }
 
     @Test
