@@ -27,6 +27,7 @@ import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -47,7 +48,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
-    private volatile Entry<TransactionIdentifier, DataTreeCandidate> candidate = null;
+    private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
 
     CommitTransactionPayload() {
 
@@ -73,8 +74,8 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         return create(transactionId, candidate, 512);
     }
 
-    public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
-        Entry<TransactionIdentifier, DataTreeCandidate> localCandidate = candidate;
+    public Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate() throws IOException {
+        Entry<TransactionIdentifier, DataTreeCandidateWithVersion> localCandidate = candidate;
         if (localCandidate == null) {
             synchronized (this) {
                 localCandidate = candidate;
@@ -86,13 +87,14 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         return localCandidate;
     }
 
-    public final Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
+    public final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate(
             final ReusableStreamReceiver receiver) throws IOException {
         final DataInput in = newDataInput();
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver));
     }
 
+    @Override
     public TransactionIdentifier getIdentifier() {
         try  {
             return getCandidate().getKey();
