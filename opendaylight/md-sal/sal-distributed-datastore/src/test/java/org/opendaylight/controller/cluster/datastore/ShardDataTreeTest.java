@@ -35,6 +35,8 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import com.google.common.base.Ticker;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,20 +51,29 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
+import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardDataTreeTest extends AbstractTest {
@@ -474,6 +485,58 @@ public class ShardDataTreeTest extends AbstractTest {
         Optional<NormalizedNode<?, ?>> optional = snapshot.readNode(PeopleModel.BASE_PATH);
         assertTrue("People node present", optional.isPresent());
         assertEquals("People node", peopleNode, optional.get());
+    }
+
+    @Test
+    public void testUintCommitPayload() throws IOException {
+        shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(),
+            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), bigIntegerRoot()),
+            PayloadVersion.SODIUM_SR1));
+
+        assertCarsUint64();
+    }
+
+    @Test
+    public void testUintSnapshot() throws IOException, DataValidationFailedException {
+        shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(bigIntegerRoot()),
+            true));
+
+        assertCarsUint64();
+    }
+
+    private void assertCarsUint64() {
+        final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
+        final NormalizedNode<?, ?> cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).get();
+
+        assertEquals(Builders.mapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
+            .withChild(Builders.mapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(CarsModel.CAR_QNAME,
+                    CarsModel.CAR_NAME_QNAME, "foo"))
+                .withChild(ImmutableNodes.leafNode(CarsModel.CAR_NAME_QNAME, "foo"))
+                // Note: Uint64
+                .withChild(ImmutableNodes.leafNode(CarsModel.CAR_PRICE_QNAME, Uint64.ONE))
+                .build())
+            .build(), cars);
+    }
+
+    private static ContainerNode bigIntegerRoot() {
+        return Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME))
+                .withChild(Builders.containerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
+                    .withChild(Builders.mapBuilder()
+                        .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
+                        .withChild(Builders.mapEntryBuilder()
+                            .withNodeIdentifier(NodeIdentifierWithPredicates.of(CarsModel.CAR_QNAME,
+                                CarsModel.CAR_NAME_QNAME, "foo"))
+                            .withChild(ImmutableNodes.leafNode(CarsModel.CAR_NAME_QNAME, "foo"))
+                            // Note: old BigInteger
+                            .withChild(ImmutableNodes.leafNode(CarsModel.CAR_PRICE_QNAME, BigInteger.ONE))
+                            .build())
+                        .build())
+                    .build())
+                .build();
     }
 
     private ShardDataTreeCohort newShardDataTreeCohort(final DataTreeOperation operation) {

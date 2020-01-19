@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
@@ -54,13 +55,13 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
 
     }
 
-    public static CommitTransactionPayload create(final TransactionIdentifier transactionId,
-            final DataTreeCandidate candidate, final int initialSerializedBufferCapacity) throws IOException {
-
+    public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
+            final DataTreeCandidate candidate, final PayloadVersion version, final int initialSerializedBufferCapacity)
+                    throws IOException {
         final ChunkedOutputStream cos = new ChunkedOutputStream(initialSerializedBufferCapacity);
         try (DataOutputStream dos = new DataOutputStream(cos)) {
             transactionId.writeTo(dos);
-            DataTreeCandidateInputOutput.writeDataTreeCandidate(dos, candidate);
+            DataTreeCandidateInputOutput.writeDataTreeCandidate(dos, version, candidate);
         }
 
         final Variant<byte[], ChunkedByteArray> source = cos.toVariant();
@@ -69,12 +70,18 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     }
 
     @VisibleForTesting
-    public static CommitTransactionPayload create(final TransactionIdentifier transactionId,
-            final DataTreeCandidate candidate) throws IOException {
-        return create(transactionId, candidate, 512);
+    public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
+            final DataTreeCandidate candidate, final PayloadVersion version) throws IOException {
+        return create(transactionId, candidate, version, 512);
     }
 
-    public Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate() throws IOException {
+    @VisibleForTesting
+    public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
+            final DataTreeCandidate candidate) throws IOException {
+        return create(transactionId, candidate, PayloadVersion.current());
+    }
+
+    public @NonNull Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate() throws IOException {
         Entry<TransactionIdentifier, DataTreeCandidateWithVersion> localCandidate = candidate;
         if (localCandidate == null) {
             synchronized (this) {
@@ -87,7 +94,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         return localCandidate;
     }
 
-    public final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate(
+    public final @NonNull Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate(
             final ReusableStreamReceiver receiver) throws IOException {
         final DataInput in = newDataInput();
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
