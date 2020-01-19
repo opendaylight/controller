@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.junit.Assert.assertEquals;
@@ -27,10 +26,12 @@ import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -54,14 +55,16 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PruningDataTreeModificationTest {
-    static final SchemaContext SCHEMA_CONTEXT = SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
-            SchemaContextHelper.ODL_DATASTORE_TEST_YANG);
-
     static final QName INVALID_TEST_QNAME = QName.create(TestModel.TEST_QNAME, "invalid");
     static final YangInstanceIdentifier INVALID_TEST_PATH = YangInstanceIdentifier.of(INVALID_TEST_QNAME);
+
+    private static SchemaContext SCHEMA_CONTEXT;
+    private static DataSchemaContextTree CONTEXT_TREE;
 
     @Mock
     private DataTreeModification mockModification;
@@ -71,11 +74,16 @@ public class PruningDataTreeModificationTest {
     private DataTreeModification proxyModification;
     private PruningDataTreeModification pruningDataTreeModification;
 
+    @BeforeClass
+    public static void beforeClass() {
+        SCHEMA_CONTEXT = SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
+            SchemaContextHelper.ODL_DATASTORE_TEST_YANG);
+        CONTEXT_TREE = DataSchemaContextTree.from(SCHEMA_CONTEXT);
+    }
+
     @Before
     @SuppressWarnings("checkstyle:avoidHidingCauseException")
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_CONFIGURATION,
             SCHEMA_CONTEXT);
 
@@ -89,7 +97,7 @@ public class PruningDataTreeModificationTest {
             }
         });
 
-        pruningDataTreeModification = new PruningDataTreeModification(proxyModification, dataTree, SCHEMA_CONTEXT);
+        pruningDataTreeModification = new PruningDataTreeModification(proxyModification, dataTree, CONTEXT_TREE);
     }
 
     @Test
