@@ -122,14 +122,15 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
         if (!(snapshotState instanceof ShardSnapshotState)) {
             log.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", shardName, snapshotState);
+            return;
         }
 
         log.debug("{}: Applying recovered snapshot", shardName);
-
-        ShardDataTreeSnapshot shardSnapshot = ((ShardSnapshotState)snapshotState).getSnapshot();
+        final ShardSnapshotState shardSnapshotState = (ShardSnapshotState)snapshotState;
         try {
-            store.applyRecoverySnapshot(shardSnapshot);
+            store.applyRecoverySnapshot(shardSnapshotState);
         } catch (Exception e) {
+            final ShardDataTreeSnapshot shardSnapshot = shardSnapshotState.getSnapshot();
             final File f = writeRoot("snapshot", shardSnapshot.getRootNode().orElse(null));
             throw new IllegalStateException(String.format(
                     "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
