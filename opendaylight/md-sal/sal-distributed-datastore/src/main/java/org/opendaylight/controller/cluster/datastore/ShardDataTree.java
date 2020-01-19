@@ -51,6 +51,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort.State;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifiablePayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CloseLocalHistoryPayload;
@@ -265,7 +266,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             }
         }
 
-        final DataTreeModification mod = wrapper.apply(dataTree.takeSnapshot().newModification());
+        final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
+        final DataTreeModification mod = wrapper.apply(unwrapped);
         // delete everything first
         mod.delete(YangInstanceIdentifier.empty());
 
@@ -276,7 +278,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
         mod.ready();
 
-        final DataTreeModification unwrapped = unwrap(mod);
         dataTree.validate(unwrapped);
         DataTreeCandidateTip candidate = dataTree.prepare(unwrapped);
         dataTree.commit(candidate);
@@ -297,14 +298,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private PruningDataTreeModification wrapWithPruning(final DataTreeModification delegate) {
-        return new PruningDataTreeModification(delegate, dataTree, dataSchemaContext);
-    }
-
-    private static DataTreeModification unwrap(final DataTreeModification modification) {
-        if (modification instanceof PruningDataTreeModification) {
-            return ((PruningDataTreeModification)modification).delegate();
-        }
-        return modification;
+        return new PruningDataTreeModification(delegate, dataTree,
+            // TODO: we should be able to reuse the pruner, provided we are not reentrant
+            ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext));
     }
 
     /**
@@ -321,12 +317,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
         final Entry<TransactionIdentifier, DataTreeCandidate> entry = payload.getCandidate();
-
-        final PruningDataTreeModification mod = wrapWithPruning(dataTree.takeSnapshot().newModification());
+        final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
+        final PruningDataTreeModification mod = wrapWithPruning(unwrapped);
         DataTreeCandidates.applyToModification(mod, entry.getValue());
         mod.ready();
 
-        final DataTreeModification unwrapped = mod.delegate();
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
         try {
