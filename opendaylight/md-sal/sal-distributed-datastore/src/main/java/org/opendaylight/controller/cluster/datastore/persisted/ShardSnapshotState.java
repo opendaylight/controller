@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -62,7 +63,8 @@ public class ShardSnapshotState implements Snapshot.State {
     private final @NonNull ShardDataTreeSnapshot snapshot;
     private final boolean migrated;
 
-    ShardSnapshotState(final @NonNull ShardDataTreeSnapshot snapshot, final boolean migrated) {
+    @VisibleForTesting
+    public ShardSnapshotState(final @NonNull ShardDataTreeSnapshot snapshot, final boolean migrated) {
         this.snapshot = requireNonNull(snapshot);
         this.migrated = migrated;
     }

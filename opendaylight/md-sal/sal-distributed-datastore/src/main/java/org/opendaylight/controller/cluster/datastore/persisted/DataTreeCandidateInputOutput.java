@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -201,9 +202,10 @@ public final class DataTreeCandidateInputOutput {
         }
     }
 
-    public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
-            throws IOException {
-        try (NormalizedNodeDataOutput writer = PayloadVersion.current().getStreamVersion().newDataOutput(out)) {
+    @VisibleForTesting
+    public static void writeDataTreeCandidate(final DataOutput out, final PayloadVersion version,
+            final DataTreeCandidate candidate) throws IOException {
+        try (NormalizedNodeDataOutput writer = version.getStreamVersion().newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();
@@ -234,6 +236,11 @@ public final class DataTreeCandidateInputOutput {
                     throwUnhandledNodeType(node);
             }
         }
+    }
+
+    public static void writeDataTreeCandidate(final DataOutput out, final DataTreeCandidate candidate)
+            throws IOException {
+        writeDataTreeCandidate(out, PayloadVersion.current(), candidate);
     }
 
     private static void throwUnhandledNodeType(final DataTreeCandidateNode node) {
