@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.cluster.datastore.model;
 
 import java.io.InputStream;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public final class SchemaContextHelper {
@@ -16,6 +16,8 @@ public final class SchemaContextHelper {
     public static final String ODL_DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
     public static final String PEOPLE_YANG = "/people.yang";
     public static final String CARS_YANG = "/cars.yang";
+
+    private static volatile EffectiveModelContext FULL;
 
     private SchemaContextHelper() {
 
@@ -25,15 +27,25 @@ public final class SchemaContextHelper {
         return SchemaContextHelper.class.getResourceAsStream(yangFileName);
     }
 
-    public static SchemaContext full() {
-        return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
+    public static EffectiveModelContext full() {
+        EffectiveModelContext ret = FULL;
+        if (ret == null) {
+            synchronized (SchemaContextHelper.class) {
+                ret = FULL;
+                if (ret == null) {
+                    ret = FULL = select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
+                }
+            }
+        }
+
+        return ret;
     }
 
-    public static SchemaContext select(final String... schemaFiles) {
+    public static EffectiveModelContext select(final String... schemaFiles) {
         return YangParserTestUtils.parseYangResources(SchemaContextHelper.class, schemaFiles);
     }
 
-    public static SchemaContext distributedShardedDOMDataTreeSchemaContext() {
+    public static EffectiveModelContext distributedShardedDOMDataTreeSchemaContext() {
         // we need prefix-shard-configuration and odl-datastore-test models
         // for DistributedShardedDOMDataTree tests
         return YangParserTestUtils.parseYangResources(SchemaContextHelper.class, ODL_DATASTORE_TEST_YANG,
