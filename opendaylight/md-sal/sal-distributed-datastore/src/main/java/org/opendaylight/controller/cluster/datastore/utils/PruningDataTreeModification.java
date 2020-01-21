@@ -57,62 +57,55 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     }
 
     @Override
-    public void delete(final YangInstanceIdentifier yangInstanceIdentifier) {
+    public void delete(final YangInstanceIdentifier path) {
         try {
-            delegate.delete(yangInstanceIdentifier);
+            delegate.delete(path);
         } catch (SchemaValidationFailedException e) {
-            LOG.warn("Node at path : {} does not exist ignoring delete", yangInstanceIdentifier);
+            LOG.warn("Node at path : {} does not exist ignoring delete", path);
         }
     }
 
     @Override
-    public void merge(final YangInstanceIdentifier yangInstanceIdentifier, final NormalizedNode<?, ?> normalizedNode) {
-        try {
-            if (YangInstanceIdentifier.empty().equals(yangInstanceIdentifier)) {
-                pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
-            } else {
-                delegate.merge(yangInstanceIdentifier, normalizedNode);
-            }
-        } catch (SchemaValidationFailedException e) {
-            LOG.warn("Node at path {} was pruned during merge due to validation error: {}",
-                    yangInstanceIdentifier, e.getMessage());
-
-            pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
+    public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        if (path.isEmpty()) {
+            pruneAndMergeNode(path, data);
+            return;
         }
 
+        try {
+            delegate.merge(path, data);
+        } catch (SchemaValidationFailedException e) {
+            LOG.warn("Node at path {} was pruned during merge due to validation error: {}", path, e.getMessage());
+            pruneAndMergeNode(path, data);
+        }
     }
 
-    private void pruneAndMergeNode(final YangInstanceIdentifier yangInstanceIdentifier,
-            final NormalizedNode<?, ?> normalizedNode) {
-        NormalizedNode<?, ?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
-
+    private void pruneAndMergeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        final NormalizedNode<?, ?> pruned = pruneNormalizedNode(path, data);
         if (pruned != null) {
-            delegate.merge(yangInstanceIdentifier, pruned);
+            delegate.merge(path, pruned);
         }
     }
 
     @Override
-    public void write(final YangInstanceIdentifier yangInstanceIdentifier, final NormalizedNode<?, ?> normalizedNode) {
-        try {
-            if (YangInstanceIdentifier.empty().equals(yangInstanceIdentifier)) {
-                pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
-            } else {
-                delegate.write(yangInstanceIdentifier, normalizedNode);
-            }
-        } catch (SchemaValidationFailedException e) {
-            LOG.warn("Node at path : {} was pruned during write due to validation error: {}",
-                    yangInstanceIdentifier, e.getMessage());
+    public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        if (path.isEmpty()) {
+            pruneAndWriteNode(path, data);
+            return;
+        }
 
-            pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
+        try {
+            delegate.write(path, data);
+        } catch (SchemaValidationFailedException e) {
+            LOG.warn("Node at path : {} was pruned during write due to validation error: {}", path, e.getMessage());
+            pruneAndWriteNode(path, data);
         }
     }
 
-    private void pruneAndWriteNode(final YangInstanceIdentifier yangInstanceIdentifier,
-            final NormalizedNode<?, ?> normalizedNode) {
-        NormalizedNode<?,?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
-
+    private void pruneAndWriteNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        final NormalizedNode<?, ?> pruned = pruneNormalizedNode(path, data);
         if (pruned != null) {
-            delegate.write(yangInstanceIdentifier, pruned);
+            delegate.write(path, pruned);
         }
     }
 
@@ -169,8 +162,8 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
 
         @Override
         public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
-            YangInstanceIdentifier path = current().node(child);
-            NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
+            final YangInstanceIdentifier path = current().node(child);
+            final NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if (prunedNode != null) {
                 toModification.write(path, prunedNode);
             }
@@ -178,8 +171,8 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
 
         @Override
         public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
-            YangInstanceIdentifier path = current().node(child);
-            NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
+            final YangInstanceIdentifier path = current().node(child);
+            final NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if (prunedNode != null) {
                 toModification.merge(path, prunedNode);
             }
