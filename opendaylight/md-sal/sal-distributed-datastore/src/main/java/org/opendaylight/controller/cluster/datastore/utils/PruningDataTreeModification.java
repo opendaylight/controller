@@ -31,7 +31,82 @@ import org.slf4j.LoggerFactory;
  * The PruningDataTreeModification first removes all entries from the data which do not belong in the schemaContext
  * before delegating it to the actual DataTreeModification.
  */
-public class PruningDataTreeModification extends ForwardingObject implements DataTreeModification {
+public abstract class PruningDataTreeModification extends ForwardingObject implements DataTreeModification {
+    /**
+     * A PruningDataTreeModification which always performs pruning before attempting an operation. This sacrifices
+     * performance to ensure all data has passed through the pruner -- such that data adaptations are performed.
+     */
+    public static final class Proactive extends PruningDataTreeModification {
+        public Proactive(final DataTreeModification delegate, final DataTree dataTree,
+                final ReusableNormalizedNodePruner pruner) {
+            super(delegate, dataTree, pruner);
+        }
+
+        @Override
+        public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            pruneAndMergeNode(path, data);
+        }
+
+        @Override
+        public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            pruneAndWriteNode(path, data);
+        }
+
+        @Override
+        PruningDataTreeModification createNew(final DataTreeModification delegate, final DataTree dataTree,
+                final ReusableNormalizedNodePruner pruner) {
+            return new Proactive(delegate, dataTree, pruner);
+        }
+    }
+
+    /**
+     * A PruningDataTreeModification which performs pruning only when an operation results in an
+     * {@link SchemaValidationFailedException}. This offers superior performance in the normal case of not needing
+     * pruning.
+     */
+    public static final class Reactive extends PruningDataTreeModification {
+        public Reactive(final DataTreeModification delegate, final DataTree dataTree,
+                final ReusableNormalizedNodePruner pruner) {
+            super(delegate, dataTree, pruner);
+        }
+
+        @Override
+        public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            if (path.isEmpty()) {
+                pruneAndMergeNode(path, data);
+                return;
+            }
+
+            try {
+                delegate().merge(path, data);
+            } catch (SchemaValidationFailedException e) {
+                LOG.warn("Node at path {} was pruned during merge due to validation error: {}", path, e.getMessage());
+                pruneAndMergeNode(path, data);
+            }
+        }
+
+        @Override
+        public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+            if (path.isEmpty()) {
+                pruneAndWriteNode(path, data);
+                return;
+            }
+
+            try {
+                delegate().write(path, data);
+            } catch (SchemaValidationFailedException e) {
+                LOG.warn("Node at path : {} was pruned during write due to validation error: {}", path, e.getMessage());
+                pruneAndWriteNode(path, data);
+            }
+        }
+
+        @Override
+        PruningDataTreeModification createNew(final DataTreeModification delegate, final DataTree dataTree,
+                final ReusableNormalizedNodePruner pruner) {
+            return new Reactive(delegate, dataTree, pruner);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(PruningDataTreeModification.class);
 
     private final ReusableNormalizedNodePruner pruner;
@@ -39,7 +114,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
 
     private DataTreeModification delegate;
 
-    public PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
+    PruningDataTreeModification(final DataTreeModification delegate, final DataTree dataTree,
             final ReusableNormalizedNodePruner pruner) {
         this.delegate = requireNonNull(delegate);
         this.dataTree = requireNonNull(dataTree);
@@ -47,17 +122,17 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     }
 
     @Override
-    protected DataTreeModification delegate() {
+    protected final DataTreeModification delegate() {
         return delegate;
     }
 
     @Override
-    public SchemaContext getSchemaContext() {
+    public final SchemaContext getSchemaContext() {
         return delegate.getSchemaContext();
     }
 
     @Override
-    public void delete(final YangInstanceIdentifier path) {
+    public final void delete(final YangInstanceIdentifier path) {
         try {
             delegate.delete(path);
         } catch (SchemaValidationFailedException e) {
@@ -65,44 +140,14 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
         }
     }
 
-    @Override
-    public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        if (path.isEmpty()) {
-            pruneAndMergeNode(path, data);
-            return;
-        }
-
-        try {
-            delegate.merge(path, data);
-        } catch (SchemaValidationFailedException e) {
-            LOG.warn("Node at path {} was pruned during merge due to validation error: {}", path, e.getMessage());
-            pruneAndMergeNode(path, data);
-        }
-    }
-
-    private void pruneAndMergeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    final void pruneAndMergeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         final NormalizedNode<?, ?> pruned = pruneNormalizedNode(path, data);
         if (pruned != null) {
             delegate.merge(path, pruned);
         }
     }
 
-    @Override
-    public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        if (path.isEmpty()) {
-            pruneAndWriteNode(path, data);
-            return;
-        }
-
-        try {
-            delegate.write(path, data);
-        } catch (SchemaValidationFailedException e) {
-            LOG.warn("Node at path : {} was pruned during write due to validation error: {}", path, e.getMessage());
-            pruneAndWriteNode(path, data);
-        }
-    }
-
-    private void pruneAndWriteNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    final void pruneAndWriteNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         final NormalizedNode<?, ?> pruned = pruneNormalizedNode(path, data);
         if (pruned != null) {
             delegate.write(path, pruned);
@@ -110,7 +155,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     }
 
     @Override
-    public void ready() {
+    public final void ready() {
         try {
             delegate.ready();
         } catch (SchemaValidationFailedException e) {
@@ -123,22 +168,23 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     }
 
     @Override
-    public void applyToCursor(final DataTreeModificationCursor dataTreeModificationCursor) {
+    public final void applyToCursor(final DataTreeModificationCursor dataTreeModificationCursor) {
         delegate.applyToCursor(dataTreeModificationCursor);
     }
 
     @Override
-    public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier yangInstanceIdentifier) {
+    public final Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier yangInstanceIdentifier) {
         return delegate.readNode(yangInstanceIdentifier);
     }
 
     @Override
-    public DataTreeModification newModification() {
-        return new PruningDataTreeModification(delegate.newModification(), dataTree, pruner.duplicate());
+    public final DataTreeModification newModification() {
+        return createNew(delegate.newModification(), dataTree, pruner.duplicate());
     }
 
     @VisibleForTesting
-    NormalizedNode<?, ?> pruneNormalizedNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> input) {
+    final NormalizedNode<?, ?> pruneNormalizedNode(final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> input) {
         pruner.initializeForPath(path);
         try {
             NormalizedNodeWriter.forStreamWriter(pruner).write(input);
@@ -150,7 +196,10 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
         return pruner.getResult().orElse(null);
     }
 
-    private static class PruningDataTreeModificationCursor extends AbstractDataTreeModificationCursor {
+    abstract PruningDataTreeModification createNew(DataTreeModification delegate, DataTree dataTree,
+            ReusableNormalizedNodePruner pruner);
+
+    private static final class PruningDataTreeModificationCursor extends AbstractDataTreeModificationCursor {
         private final DataTreeModification toModification;
         private final PruningDataTreeModification pruningModification;
 

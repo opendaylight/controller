@@ -311,32 +311,27 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     void applyRecoverySnapshot(final @NonNull ShardSnapshotState snapshot) throws DataValidationFailedException {
         // TODO: we should be able to reuse the pruner, provided we are not reentrant
-        ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
+        final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(
+            dataSchemaContext);
         if (snapshot.needsMigration()) {
-            pruner = pruner.withUintAdaption();
+            final ReusableNormalizedNodePruner uintPruner = pruner.withUintAdaption();
+            applySnapshot(snapshot.getSnapshot(),
+                delegate -> new PruningDataTreeModification.Proactive(delegate, dataTree, uintPruner));
+        } else {
+            applySnapshot(snapshot.getSnapshot(),
+                delegate -> new PruningDataTreeModification.Reactive(delegate, dataTree, pruner));
         }
-
-        // For lambda below
-        final ReusableNormalizedNodePruner finalPruner = pruner;
-        applySnapshot(snapshot.getSnapshot(),
-            delegate -> new PruningDataTreeModification(delegate, dataTree, finalPruner));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
         final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.getCandidate();
         final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
+        final PruningDataTreeModification mod = createPruningModification(unwrapped,
+            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().getVersion()) > 0);
 
-        // TODO: we should be able to reuse the pruner, provided we are not reentrant
-        ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
-        if (NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().getVersion()) > 0) {
-            pruner = pruner.withUintAdaption();
-        }
-
-        final PruningDataTreeModification mod = new PruningDataTreeModification(unwrapped, dataTree, pruner);
         DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
         mod.ready();
-
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
         try {
@@ -352,6 +347,15 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         allMetadataCommittedTransaction(entry.getKey());
+    }
+
+    private PruningDataTreeModification createPruningModification(final DataTreeModification unwrapped,
+            final boolean uintAdapting) {
+        // TODO: we should be able to reuse the pruner, provided we are not reentrant
+        final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(
+            dataSchemaContext);
+        return uintAdapting ? new PruningDataTreeModification.Proactive(unwrapped, dataTree, pruner.withUintAdaption())
+                : new PruningDataTreeModification.Reactive(unwrapped, dataTree, pruner);
     }
 
     /**

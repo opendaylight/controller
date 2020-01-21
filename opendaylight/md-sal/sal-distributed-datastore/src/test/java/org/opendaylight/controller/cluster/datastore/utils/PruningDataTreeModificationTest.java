@@ -98,7 +98,7 @@ public class PruningDataTreeModificationTest {
             }
         });
 
-        pruningDataTreeModification = new PruningDataTreeModification(proxyModification, dataTree,
+        pruningDataTreeModification = new PruningDataTreeModification.Reactive(proxyModification, dataTree,
             // Cannot reuse with parallel tests
             ReusableNormalizedNodePruner.forDataSchemaContext(CONTEXT_TREE));
     }
