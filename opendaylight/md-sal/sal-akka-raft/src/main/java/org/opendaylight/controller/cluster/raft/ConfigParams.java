@@ -40,6 +40,14 @@ public interface ConfigParams {
      */
     int getSnapshotDataThresholdPercentage();
 
+
+    /**
+     * Returns the number of recovered entries before snapshot is taken during incremental recovery.
+     *
+     * @return the number of recovered entries.
+     */
+    int getRecoveredEntriesBeforeSnapshot();
+
     /**
      * Returns the interval at which a heart beat message should be sent to remote followers.
      *
