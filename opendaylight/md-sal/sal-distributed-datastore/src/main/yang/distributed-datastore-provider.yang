@@ -151,6 +151,12 @@ module distributed-datastore-provider {
                          Zero value means wait indefinitely (as long as it takes).";
         }
 
+        leaf recovery-snapshot-interval-seconds {
+            default 300;
+            type uint32;
+            description "Interval after which a snapshot should be taken during the recovery process.";
+        }
+
         leaf shard-batched-modification-count {
             default 1000;
             type non-zero-uint32-type;
