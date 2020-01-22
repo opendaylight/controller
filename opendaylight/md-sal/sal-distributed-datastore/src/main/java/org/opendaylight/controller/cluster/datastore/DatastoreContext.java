@@ -45,6 +45,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS = 30;
     public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 1;
     public static final int DEFAULT_SNAPSHOT_BATCH_COUNT = 20000;
+    public static final int DEFAULT_RECOVERED_ENTRIES_BEFORE_SNAPSHOT = 1000;
     public static final int DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS = 500;
     public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS =
             DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
@@ -107,6 +108,7 @@ public class DatastoreContext implements ClientActorConfig {
     DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
         setSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT);
+        setRecoveredEntriesBeforeSnapshot(DEFAULT_RECOVERED_ENTRIES_BEFORE_SNAPSHOT);
         setHeartbeatInterval(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS);
         setIsolatedLeaderCheckInterval(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS);
         setSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE);
@@ -145,6 +147,7 @@ public class DatastoreContext implements ClientActorConfig {
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
+        setRecoveredEntriesBeforeSnapshot(other.raftConfig.getRecoveredEntriesBeforeSnapshot());
         setHeartbeatInterval(other.raftConfig.getHeartBeatInterval().toMillis());
         setIsolatedLeaderCheckInterval(other.raftConfig.getIsolatedCheckIntervalInMillis());
         setSnapshotDataThresholdPercentage(other.raftConfig.getSnapshotDataThresholdPercentage());
@@ -303,6 +306,10 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
     }
 
+    private void setRecoveredEntriesBeforeSnapshot(final int recoveredEntriesBeforeSnapshot) {
+        raftConfig.setRecoveredEntriesBeforeSnapshot(recoveredEntriesBeforeSnapshot);
+    }
+
     @Deprecated
     private void setShardSnapshotChunkSize(final int shardSnapshotChunkSize) {
         // We'll honor the shardSnapshotChunkSize setting for backwards compatibility but only if it doesn't exceed
@@ -438,6 +445,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder shardSnapshotBatchCount(final int shardSnapshotBatchCount) {
             datastoreContext.setSnapshotBatchCount(shardSnapshotBatchCount);
+            return this;
+        }
+
+        public Builder setRecoveredEntriesBeforeSnapshot(final int recoveredEntriesBeforeSnapshot) {
+            datastoreContext.setRecoveredEntriesBeforeSnapshot(recoveredEntriesBeforeSnapshot);
             return this;
         }
 
