@@ -18,6 +18,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
@@ -44,6 +47,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,15 +63,15 @@ public class RaftActorRecoverySupportTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
 
-
     @Mock
     private RaftActorRecoveryCohort mockCohort;
 
     @Mock
-    private RaftActorSnapshotCohort mockSnapshotCohort;
-
-    @Mock
     PersistentDataProvider mockPersistentProvider;
+
+    ActorRef mockActorRef;
+
+    ActorSystem mockActorSystem;
 
     private RaftActorRecoverySupport support;
 
@@ -75,14 +79,15 @@ public class RaftActorRecoverySupportTest {
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
     private final String localId = "leader";
 
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-        context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test",
-                LOG), -1, -1, Collections.<String,String>emptyMap(), configParams,
-                mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
+        mockActorSystem = ActorSystem.create();
+        mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
+        context = new RaftActorContextImpl(mockActorRef, null, localId,
+                new ElectionTermImpl(mockPersistentProvider, "test", LOG), -1, -1,
+                Collections.<String, String>emptyMap(), configParams, mockPersistence, applyState -> {
+        }, LOG, MoreExecutors.directExecutor());
 
         support = new RaftActorRecoverySupport(context, mockCohort);
 
@@ -159,6 +164,26 @@ public class RaftActorRecoverySupportTest {
         inOrder.verifyNoMoreInteractions();
     }
 
+//    @Test
+//    public void testIncrementalRecovery() {
+//        configParams.setRecoveredEntriesBeforeSnapshot(INCREMENTAL_RECOVERY_CHUNK);
+//        context.getSnapshotManager().setCreateSnapshotConsumer(outputStream -> { });
+//
+//        final int numberOfChunks = 5;
+//        ReplicatedLog replicatedLog = context.getReplicatedLog();
+//
+//        for (int i = 0; i <= numberOfChunks * INCREMENTAL_RECOVERY_CHUNK; i++) {
+//            replicatedLog.append(new SimpleReplicatedLogEntry(i, 1,
+//                    new MockRaftActorContext.MockPayload(String.valueOf(i))));
+//        }
+//
+//        for (int i = 0; i <= numberOfChunks * INCREMENTAL_RECOVERY_CHUNK; i++) {
+//            sendMessageToSupport(new ApplyJournalEntries(i));
+//        }
+//
+//        verify(mockPersistence, times(numberOfChunks)).deleteMessages(anyLong());
+//    }
+
     @Test
     public void testOnSnapshotOffer() {
 
@@ -184,7 +209,7 @@ public class RaftActorRecoverySupportTest {
                 lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
+        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);
 
         sendMessageToSupport(snapshotOffer);
 
@@ -298,8 +323,8 @@ public class RaftActorRecoverySupportTest {
     }
 
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
-        return ArgumentMatchers.argThat(
-            other -> term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor()));
+        return ArgumentMatchers.argThat(other ->
+                term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor()));
     }
 
     @Test
@@ -380,16 +405,16 @@ public class RaftActorRecoverySupportTest {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
         ServerConfigurationPayload serverPayload = new ServerConfigurationPayload(Arrays.asList(
-                                                        new ServerInfo(localId, true),
-                                                        new ServerInfo("follower1", true),
-                                                        new ServerInfo("follower2", true)));
+                new ServerInfo(localId, true),
+                new ServerInfo("follower1", true),
+                new ServerInfo("follower2", true)));
 
         MockSnapshotState snapshotState = new MockSnapshotState(Arrays.asList(new MockPayload("1")));
         Snapshot snapshot = Snapshot.create(snapshotState, Collections.<ReplicatedLogEntry>emptyList(),
                 -1, -1, -1, -1, electionTerm, electionVotedFor, serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
+        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);
 
         sendMessageToSupport(snapshotOffer);
 
@@ -398,6 +423,6 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("Peer List", Sets.newHashSet("follower1", "follower2"),
-            Sets.newHashSet(context.getPeerIds()));
+                Sets.newHashSet(context.getPeerIds()));
     }
 }
