@@ -11,6 +11,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -39,6 +40,7 @@ class RaftActorRecoverySupport {
     private boolean hasMigratedDataRecovered;
 
     private Stopwatch recoveryTimer;
+    private Stopwatch recoverySnapshotTimer;
     private final Logger log;
 
     RaftActorRecoverySupport(final RaftActorContext context, final RaftActorRecoveryCohort cohort) {
@@ -103,6 +105,9 @@ class RaftActorRecoverySupport {
     private void initRecoveryTimer() {
         if (recoveryTimer == null) {
             recoveryTimer = Stopwatch.createStarted();
+        }
+        if (recoverySnapshotTimer == null && context.getConfigParams().getRecoverySnapshotIntervalSeconds() >= 0) {
+            recoverySnapshotTimer = Stopwatch.createStarted();
         }
     }
 
@@ -209,6 +214,23 @@ class RaftActorRecoverySupport {
 
         context.setLastApplied(lastApplied);
         context.setCommitIndex(lastApplied);
+        //TODO: figure out if storing context.getConfigParams().getRecoverySnapshotIntervalSeconds() locally
+        // is safe. We wouldn't call the getter every time, but if the context value can change in runtime, it needs to
+        // be checked frequently to keep the local value up-to-date. Updating it at the start of EntryBatch is an option
+        if (this.recoverySnapshotTimer != null) {
+            final long elapsed = this.recoverySnapshotTimer.elapsed(TimeUnit.SECONDS);
+            log.debug("Elapsed time since last snapshot or recovery start = {}s", elapsed);
+            if (elapsed > context.getConfigParams().getRecoverySnapshotIntervalSeconds()) {
+                log.debug("Time for snapshot");
+                if (context.getSnapshotManager().capture(replicatedLog().get(lastApplied), -1)) {
+                    log.info("Capturing snapshot, resetting timer for next recovery snapshot interval.");
+                    this.recoverySnapshotTimer.reset().start();
+                } else {
+                    log.debug("SnapshotManager is not able to capture snapshot at this time. It will be retried "
+                        + "again with the next recovered entry.");
+                }
+            }
+        }
     }
 
     private void onDeleteEntries(final DeleteEntries deleteEntries) {
