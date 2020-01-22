@@ -29,6 +29,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
+    /**
+     * Interval after which a snapshot should be taken during the recovery process.
+     */
+    private static final int RECOVERY_SNAPSHOT_INTERVAL_SECONDS = 300;
 
     private static final int JOURNAL_RECOVERY_LOG_BATCH_SIZE = 1000;
 
@@ -56,6 +60,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
+    private int recoverySnapshotIntervalSeconds = RECOVERY_SNAPSHOT_INTERVAL_SECONDS;
     private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.$times(1000).toMillis();
     private FiniteDuration electionTimeOutInterval;
 
@@ -84,6 +89,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setSnapshotBatchCount(final long snapshotBatchCount) {
         this.snapshotBatchCount = snapshotBatchCount;
+    }
+
+    public void setRecoverySnapshotIntervalSeconds(int recoverySnapshotInterval) {
+        this.recoverySnapshotIntervalSeconds = recoverySnapshotInterval;
     }
 
     public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
@@ -136,6 +145,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getSnapshotDataThresholdPercentage() {
         return snapshotDataThresholdPercentage;
+    }
+
+    @Override
+    public int getRecoverySnapshotIntervalSeconds() {
+        return this.recoverySnapshotIntervalSeconds;
     }
 
     @Override

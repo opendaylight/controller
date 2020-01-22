@@ -11,6 +11,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 class RaftActorRecoverySupport {
     private final RaftActorContext context;
     private final RaftActorRecoveryCohort cohort;
+    private final int recoverySnapshotInterval;
 
     private int currentRecoveryBatchCount;
     private boolean dataRecoveredWithPersistenceDisabled;
@@ -39,12 +41,14 @@ class RaftActorRecoverySupport {
     private boolean hasMigratedDataRecovered;
 
     private Stopwatch recoveryTimer;
+    private Stopwatch recoverySnapshotTimer;
     private final Logger log;
 
     RaftActorRecoverySupport(final RaftActorContext context, final RaftActorRecoveryCohort cohort) {
         this.context = context;
         this.cohort = cohort;
         this.log = context.getLogger();
+        this.recoverySnapshotInterval = context.getConfigParams().getRecoverySnapshotIntervalSeconds();
     }
 
     boolean handleRecoveryMessage(final Object message, final PersistentDataProvider persistentProvider) {
@@ -103,6 +107,9 @@ class RaftActorRecoverySupport {
     private void initRecoveryTimer() {
         if (recoveryTimer == null) {
             recoveryTimer = Stopwatch.createStarted();
+        }
+        if (recoverySnapshotTimer == null && recoverySnapshotInterval >= 0) {
+            recoverySnapshotTimer = Stopwatch.createStarted();
         }
     }
 
@@ -209,6 +216,12 @@ class RaftActorRecoverySupport {
 
         context.setLastApplied(lastApplied);
         context.setCommitIndex(lastApplied);
+        if (this.recoverySnapshotTimer != null
+            && this.recoverySnapshotTimer.elapsed(TimeUnit.SECONDS) > recoverySnapshotInterval) {
+            if (context.getSnapshotManager().capture(replicatedLog().get(lastApplied), -1)) {
+                this.recoverySnapshotTimer.reset().start();
+            }
+        }
     }
 
     private void onDeleteEntries(final DeleteEntries deleteEntries) {
