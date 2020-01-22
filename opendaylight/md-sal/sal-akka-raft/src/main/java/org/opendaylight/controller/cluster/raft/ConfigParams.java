@@ -40,6 +40,15 @@ public interface ConfigParams {
      */
     int getSnapshotDataThresholdPercentage();
 
+
+    /**
+     * Returns the interval(in seconds) after which a snapshot should be taken during recovery.
+     * Negative value means don't take snapshots.
+     *
+     * @return the interval of recovery snapshot in seconds
+     */
+    int getRecoverySnapshotIntervalSeconds();
+
     /**
      * Returns the interval at which a heart beat message should be sent to remote followers.
      *
