@@ -29,6 +29,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
+    /**
+     * Number of entries recovered before snapshot is taken during the incremental recovery process.
+     * 0 means the incremental recovery won't be used.
+     */
+    private static final int INCREMENTAL_RECOVERY_CHUNK = 0;
 
     private static final int JOURNAL_RECOVERY_LOG_BATCH_SIZE = 1000;
 
@@ -56,6 +61,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
+    private int recoveredEntriesBeforeSnapshot = INCREMENTAL_RECOVERY_CHUNK;
     private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.$times(1000).toMillis();
     private FiniteDuration electionTimeOutInterval;
 
@@ -84,6 +90,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setSnapshotBatchCount(final long snapshotBatchCount) {
         this.snapshotBatchCount = snapshotBatchCount;
+    }
+
+    public void setRecoveredEntriesBeforeSnapshot(int recoveredEntriesBeforeSnapshot) {
+        this.recoveredEntriesBeforeSnapshot = recoveredEntriesBeforeSnapshot;
     }
 
     public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
@@ -136,6 +146,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getSnapshotDataThresholdPercentage() {
         return snapshotDataThresholdPercentage;
+    }
+
+    @Override
+    public int getRecoveredEntriesBeforeSnapshot() {
+        return this.recoveredEntriesBeforeSnapshot;
     }
 
     @Override
