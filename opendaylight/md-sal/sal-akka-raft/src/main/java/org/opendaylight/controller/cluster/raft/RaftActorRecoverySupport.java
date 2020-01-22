@@ -11,6 +11,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
 import java.util.Collections;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -40,6 +41,7 @@ class RaftActorRecoverySupport {
 
     private Stopwatch recoveryTimer;
     private final Logger log;
+    private int appliedLogEntryCount;
 
     RaftActorRecoverySupport(final RaftActorContext context, final RaftActorRecoveryCohort cohort) {
         this.context = context;
@@ -94,6 +96,7 @@ class RaftActorRecoverySupport {
         log.debug("{}: Restore snapshot: {}", context.getId(), restoreFromSnapshot);
 
         context.getSnapshotManager().apply(new ApplySnapshot(restoreFromSnapshot));
+        appliedLogEntryCount = 0;
     }
 
     private ReplicatedLog replicatedLog() {
@@ -199,6 +202,7 @@ class RaftActorRecoverySupport {
             ReplicatedLogEntry logEntry = replicatedLog().get(i);
             if (logEntry != null) {
                 lastApplied++;
+                appliedLogEntryCount++;
                 batchRecoveredLogEntry(logEntry);
             } else {
                 // Shouldn't happen but cover it anyway.
@@ -209,6 +213,14 @@ class RaftActorRecoverySupport {
 
         context.setLastApplied(lastApplied);
         context.setCommitIndex(lastApplied);
+        if (context.getConfigParams().getRecoveredEntriesBeforeSnapshot() > 0
+                && appliedLogEntryCount >= context.getConfigParams().getRecoveredEntriesBeforeSnapshot()) {
+            if (context.getSnapshotManager().capture(replicatedLog().get(lastApplied), -1)) {
+                context.getSnapshotManager().persist(EmptyState.INSTANCE, Optional.empty(), context.getTotalMemory());
+                context.getSnapshotManager().commit(context.getPersistenceProvider().getLastSequenceNumber(),-1);
+                appliedLogEntryCount = 0;
+            }
+        }
     }
 
     private void onDeleteEntries(final DeleteEntries deleteEntries) {
