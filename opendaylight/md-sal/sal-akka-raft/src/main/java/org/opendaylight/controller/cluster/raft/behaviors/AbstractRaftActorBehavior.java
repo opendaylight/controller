@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -324,6 +325,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     /**
+     * Removes and returns the ClientRequestTracker for the specified log index.
+     * @param logIndex the log index
+     * @return the ClientRequestTracker or null if none available
+     */
+    protected ClientRequestTracker removeClientRequestTracker(final long logIndex) {
+        return null;
+    }
+
+    /**
      * Returns the actual index of the entry in replicated log for the given index or -1 if not found.
      *
      * @return the log entry index or -1 if not found
@@ -387,7 +397,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
 
-                final ApplyState applyState = getApplyStateFor(replicatedLogEntry);
+                final ApplyState applyState;
+                final ClientRequestTracker tracker = removeClientRequestTracker(i);
+                if (tracker != null) {
+                    applyState = new ApplyState(tracker.getClientActor(), tracker.getIdentifier(), replicatedLogEntry);
+                } else {
+                    applyState = new ApplyState(null, null, replicatedLogEntry);
+                }
 
                 log.debug("{}: Setting last applied to {}", logName(), i);
 
@@ -408,14 +424,6 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         // as the  append entries received later would initiate add this message to the journal
         actor().tell(new ApplyJournalEntries(context.getLastApplied()), actor());
     }
-
-    /**
-     * Create an ApplyState message for a particular log entry so we can determine how to apply this entry.
-     *
-     * @param entry the log entry
-     * @return ApplyState for this entry
-     */
-    abstract ApplyState getApplyStateFor(ReplicatedLogEntry entry);
 
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {

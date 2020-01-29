@@ -36,8 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@VisibleForTesting
-public final class ShardInformation {
+final class ShardInformation {
     private static final Logger LOG = LoggerFactory.getLogger(ShardInformation.class);
 
     private final Set<OnShardInitialized> onShardInitializedSet = new HashSet<>();
@@ -90,8 +89,7 @@ public final class ShardInformation {
         return shardName;
     }
 
-    @VisibleForTesting
-    @Nullable public ActorRef getActor() {
+    @Nullable ActorRef getActor() {
         return actor;
     }
 

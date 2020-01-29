@@ -12,17 +12,13 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
-import org.opendaylight.controller.cluster.datastore.LocalShardStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager;
-import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager.GetLocalShards;
-import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager.GetLocalShardsReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
-public class TestClientBackedDataStore extends ClientBackedDataStore implements LocalShardStore {
-
+public class TestClientBackedDataStore extends ClientBackedDataStore {
     public TestClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
                                      final Configuration configuration,
                                      final DatastoreContextFactory datastoreContextFactory,
@@ -38,11 +34,5 @@ public class TestClientBackedDataStore extends ClientBackedDataStore implements 
     @Override
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
         return new TestShardManager.TestShardManagerCreator();
-    }
-
-    @Override
-    public GetLocalShardsReply getLocalShards() {
-        final ActorUtils utils = getActorUtils();
-        return (GetLocalShardsReply) utils.executeOperation(utils.getShardManager(), GetLocalShards.INSTANCE);
     }
 }
