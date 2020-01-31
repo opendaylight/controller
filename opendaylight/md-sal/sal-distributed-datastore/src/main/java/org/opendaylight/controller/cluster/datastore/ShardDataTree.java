@@ -431,7 +431,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 applyReplicatedCandidate((CommitTransactionPayload) payload);
             } else {
                 verify(identifier instanceof TransactionIdentifier);
-                payloadReplicationComplete((TransactionIdentifier) identifier);
+                // if we did not track this transaction before, it means that it came from another leader and we are in
+                // the process of commiting it while in PreLeader state. That means that it hasnt yet been committed to
+                // the local DataTree and would be lost if it was only applied via payloadReplicationComplete().
+                if (!payloadReplicationComplete((TransactionIdentifier) identifier)) {
+                    applyReplicatedCandidate((CommitTransactionPayload) payload);
+                }
             }
         } else if (payload instanceof AbortTransactionPayload) {
             if (identifier != null) {
@@ -480,22 +485,23 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void payloadReplicationComplete(final TransactionIdentifier txId) {
+    private boolean payloadReplicationComplete(final TransactionIdentifier txId) {
         final CommitEntry current = pendingFinishCommits.peek();
         if (current == null) {
             LOG.warn("{}: No outstanding transactions, ignoring consensus on transaction {}", logContext, txId);
             allMetadataCommittedTransaction(txId);
-            return;
+            return false;
         }
 
         if (!current.cohort.getIdentifier().equals(txId)) {
             LOG.debug("{}: Head of pendingFinishCommits queue is {}, ignoring consensus on transaction {}", logContext,
                 current.cohort.getIdentifier(), txId);
             allMetadataCommittedTransaction(txId);
-            return;
+            return false;
         }
 
         finishCommit(current.cohort);
+        return true;
     }
 
     private void allMetadataAbortedTransaction(final TransactionIdentifier txId) {
