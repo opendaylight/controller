@@ -1,0 +1,7 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Luis Gomez <ecelgp@gmail.com>
+Submitted-at: Tue, 04 Feb 2020 18:13:11 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/87277
+Project: controller
+Branch: refs/heads/stable/sodium
