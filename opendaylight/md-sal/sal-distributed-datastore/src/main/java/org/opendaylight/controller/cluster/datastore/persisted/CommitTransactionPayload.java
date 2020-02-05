@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -44,12 +44,9 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public abstract class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier>
-        implements Serializable {
+public abstract class CommitTransactionPayload extends Payload implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
-
-    private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
 
     CommitTransactionPayload() {
 
@@ -82,16 +79,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     }
 
     public @NonNull Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate() throws IOException {
-        Entry<TransactionIdentifier, DataTreeCandidateWithVersion> localCandidate = candidate;
-        if (localCandidate == null) {
-            synchronized (this) {
-                localCandidate = candidate;
-                if (localCandidate == null) {
-                    candidate = localCandidate = getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
-                }
-            }
-        }
-        return localCandidate;
+        return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
     }
 
     public final @NonNull Entry<TransactionIdentifier, DataTreeCandidateWithVersion> getCandidate(
@@ -99,15 +87,6 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         final DataInput in = newDataInput();
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver));
-    }
-
-    @Override
-    public TransactionIdentifier getIdentifier() {
-        try  {
-            return getCandidate().getKey();
-        } catch (IOException e) {
-            throw new IllegalStateException("Candidate deserialization failed.", e);
-        }
     }
 
     abstract void writeBytes(ObjectOutput out) throws IOException;
