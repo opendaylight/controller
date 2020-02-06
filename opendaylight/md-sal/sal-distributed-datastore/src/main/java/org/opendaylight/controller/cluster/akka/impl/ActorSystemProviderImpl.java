@@ -11,6 +11,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.typesafe.config.Config;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
@@ -51,14 +52,8 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     }
 
     @Override
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public void close() {
+    public void close() throws TimeoutException, InterruptedException {
         LOG.info("Shutting down ActorSystem");
-
-        try {
-            Await.result(actorSystem.terminate(), FiniteDuration.create(10, TimeUnit.SECONDS));
-        } catch (final Exception e) {
-            LOG.warn("Error awaiting actor termination", e);
-        }
+        Await.result(actorSystem.terminate(), FiniteDuration.create(10, TimeUnit.SECONDS));
     }
 }
