@@ -18,13 +18,13 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-jolokia</artifactId>
-    <version>1.13.2-SNAPSHOT</version>
+    <version>1.13.2</version>
     <packaging>feature</packaging>
 
     <name>Jolokia JMX/HTTP bridge</name>
 
     <properties>
-        <odl-jolokia-osgi.version>0.10.2-SNAPSHOT</odl-jolokia-osgi.version>
+        <odl-jolokia-osgi.version>0.10.2</odl-jolokia-osgi.version>
     </properties>
 
     <dependencies>

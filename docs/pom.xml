@@ -19,7 +19,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>controller-docs</artifactId>
     <packaging>jar</packaging>
-    <version>0.10.2-SNAPSHOT</version>
+    <version>0.10.2</version>
     <name>${project.artifactId}</name>
     <description>Controller documentation</description>
 
@@ -28,14 +28,14 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>config-artifacts</artifactId>
-                <version>0.11.2-SNAPSHOT</version>
+                <version>0.11.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.10.2-SNAPSHOT</version>
+                <version>1.10.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

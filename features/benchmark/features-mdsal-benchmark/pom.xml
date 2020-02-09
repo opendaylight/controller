@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-mdsal-benchmark</artifactId>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.8.2</version>
     <packaging>feature</packaging>
 
     <dependencies>

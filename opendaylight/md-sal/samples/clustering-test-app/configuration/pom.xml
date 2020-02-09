@@ -12,7 +12,7 @@
     <parent>
         <artifactId>clustering-it</artifactId>
         <groupId>org.opendaylight.controller.samples</groupId>
-        <version>1.10.2-SNAPSHOT</version>
+        <version>1.10.2</version>
     </parent>
     <artifactId>clustering-it-config</artifactId>
   <packaging>jar</packaging>

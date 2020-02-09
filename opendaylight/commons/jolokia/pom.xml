@@ -17,7 +17,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>odl-jolokia-osgi</artifactId>
-  <version>0.10.2-SNAPSHOT</version>
+  <version>0.10.2</version>
   <packaging>jar</packaging>
 
   <build>

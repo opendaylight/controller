@@ -9,7 +9,7 @@
   </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>releasepom</artifactId>
-  <version>0.10.2-SNAPSHOT</version>
+  <version>0.10.2</version>
   <packaging>pom</packaging>
   <name>controller</name>
   <!-- Used by Sonar to set project name -->

@@ -19,7 +19,7 @@
 
     <groupId>org.opendaylight.controller.model</groupId>
     <artifactId>model-topology</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.2</version>
     <packaging>bundle</packaging>
 
     <dependencies>

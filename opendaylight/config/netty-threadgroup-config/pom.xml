@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
+    <version>0.11.2</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>netty-threadgroup-config</artifactId>

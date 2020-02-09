@@ -12,13 +12,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.2</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>benchmark-data-store</artifactId>
-  <version>1.10.2-SNAPSHOT</version>
+  <version>1.10.2</version>
   <packaging>jar</packaging>
 
   <properties>

@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.2</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
-  <version>1.10.2-SNAPSHOT</version>
+  <version>1.10.2</version>
   <artifactId>sal-common-api</artifactId>
   <packaging>bundle</packaging>
 

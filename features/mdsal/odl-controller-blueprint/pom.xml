@@ -18,14 +18,14 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-controller-blueprint</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.2</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Controller :: Blueprint</name>
     <description>OpenDaylight Controller Blueprint Extension</description>
 
     <properties>
-        <blueprint.version>0.11.2-SNAPSHOT</blueprint.version>
+        <blueprint.version>0.11.2</blueprint.version>
     </properties>
 
     <dependencyManagement>
@@ -40,7 +40,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.10.2-SNAPSHOT</version>
+                <version>1.10.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

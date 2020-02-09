@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-ntfbenchmark</artifactId>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.8.2</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: ntfbenchmark</name>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-broker</artifactId>
-            <version>1.10.2-SNAPSHOT</version>
+            <version>1.10.2</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
