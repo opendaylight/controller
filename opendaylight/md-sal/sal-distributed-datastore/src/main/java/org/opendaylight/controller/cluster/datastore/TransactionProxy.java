@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,14 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private void executeModification(final AbstractModification modification) {
+        if (modification instanceof WriteModification
+                && ((WriteModification) modification).getData().toString()
+                .contains("flow-table-statistics]}, value=[]")) {
+            LOG.info("Tx {} executeModification {} {} for data {} and the call stack {}", getIdentifier(),
+                    modification.getClass().getSimpleName(), modification.getPath(),
+                    ((WriteModification) modification).getData(),
+                    Arrays.toString(Thread.currentThread().getStackTrace()));
+        }
         checkModificationState();
 
         LOG.trace("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(),
