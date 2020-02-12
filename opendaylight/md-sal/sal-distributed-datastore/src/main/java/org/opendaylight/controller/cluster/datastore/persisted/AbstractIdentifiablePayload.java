@@ -18,6 +18,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -27,8 +28,8 @@ import org.opendaylight.yangtools.concepts.Identifier;
  *
  * @author Robert Varga
  */
-public abstract class AbstractIdentifiablePayload<T extends Identifier>
-        extends Payload implements Identifiable<T>, Serializable {
+public abstract class AbstractIdentifiablePayload<T extends Identifier> extends IdentifiablePayload<T>
+        implements Serializable {
     protected abstract static class AbstractProxy<T extends Identifier> implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
