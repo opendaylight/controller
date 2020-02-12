@@ -342,6 +342,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         allMetadataCommittedTransaction(entry.getKey());
+
+        // the cached candidate is not needed anymore so clear it.
+        payload.clearCandidate();
     }
 
     /**
@@ -386,6 +389,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         dataTree.commit(candidate);
 
         allMetadataCommittedTransaction(identifier);
+        // the cached candidate is not needed anymore so clear it.
+        payload.clearCandidate();
         notifyListeners(candidate);
     }
 
