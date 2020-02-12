@@ -26,8 +26,9 @@ import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -42,15 +43,18 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public abstract class CommitTransactionPayload extends Payload implements Serializable {
+public abstract class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier>
+        implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
+
+    private volatile Entry<TransactionIdentifier, DataTreeCandidate> candidate = null;
 
     CommitTransactionPayload() {
 
     }
 
-    public static CommitTransactionPayload create(final TransactionIdentifier transactionId,
+    public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
             final DataTreeCandidate candidate, final int initialSerializedBufferCapacity) throws IOException {
 
         final ChunkedOutputStream cos = new ChunkedOutputStream(initialSerializedBufferCapacity);
@@ -70,8 +74,17 @@ public abstract class CommitTransactionPayload extends Payload implements Serial
         return create(transactionId, candidate, 512);
     }
 
-    public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
-        return getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
+    public @NonNull Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
+        Entry<TransactionIdentifier, DataTreeCandidate> localCandidate = candidate;
+        if (localCandidate == null) {
+            synchronized (this) {
+                localCandidate = candidate;
+                if (localCandidate == null) {
+                    candidate = localCandidate = getCandidate(ReusableImmutableNormalizedNodeStreamWriter.create());
+                }
+            }
+        }
+        return localCandidate;
     }
 
     public final Entry<TransactionIdentifier, DataTreeCandidate> getCandidate(
@@ -79,6 +92,26 @@ public abstract class CommitTransactionPayload extends Payload implements Serial
         final DataInput in = newDataInput();
         return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver));
+    }
+
+    @Override
+    public TransactionIdentifier getIdentifier() {
+        try  {
+            return getCandidate().getKey();
+        } catch (IOException e) {
+            throw new IllegalStateException("Candidate deserialization failed.", e);
+        }
+    }
+
+    /**
+     * The cached candidate needs to be cleared after it is done applying to the DataTree, otherwise it would be keeping
+     * deserialized in memory which are not needed anymore leading to wasted memory. This lets the payload know that
+     * this was the last time the candidate was needed ant it is safe to be cleared.
+     */
+    public Entry<TransactionIdentifier, DataTreeCandidate> acquireCandidate() throws IOException {
+        final Entry<TransactionIdentifier, DataTreeCandidate> localCandidate = getCandidate();
+        candidate = null;
+        return localCandidate;
     }
 
     abstract void writeBytes(ObjectOutput out) throws IOException;
