@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.opendaylight.controller.samples</groupId>
         <artifactId>sal-samples</artifactId>
-        <version>1.10.2-SNAPSHOT</version>
+        <version>1.10.3-SNAPSHOT</version>
     </parent>
     <artifactId>clustering-it</artifactId>
     <packaging>pom</packaging>

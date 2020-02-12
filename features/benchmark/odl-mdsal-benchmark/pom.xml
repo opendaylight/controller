@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-benchmark</artifactId>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.8.3-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MD-SAL :: benchmark</name>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-broker</artifactId>
-            <version>1.10.2-SNAPSHOT</version>
+            <version>1.10.3-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

@@ -11,7 +11,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>config-subsystem</artifactId>
-  <version>0.11.2-SNAPSHOT</version>
+  <version>0.11.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
 
@@ -30,7 +30,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-artifacts</artifactId>
-        <version>0.11.2-SNAPSHOT</version>
+        <version>0.11.3-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

@@ -20,7 +20,7 @@
   <artifactId>blueprint</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-  <version>0.11.2-SNAPSHOT</version>
+  <version>0.11.3-SNAPSHOT</version>
 
   <dependencyManagement>
     <dependencies>
@@ -34,7 +34,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>1.10.2-SNAPSHOT</version>
+        <version>1.10.3-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

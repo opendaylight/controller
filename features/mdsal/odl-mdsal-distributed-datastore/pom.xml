@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-distributed-datastore</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.3-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Controller :: Clustered Datastore</name>
@@ -43,7 +43,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.10.2-SNAPSHOT</version>
+                <version>1.10.3-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

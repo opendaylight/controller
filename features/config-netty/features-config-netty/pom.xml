@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-config-netty</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
+    <version>0.11.3-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <dependencies>

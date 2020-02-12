@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.3-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <artifactId>sal-inmemory-datastore</artifactId>
-  <version>1.10.2-SNAPSHOT</version>
+  <version>1.10.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>

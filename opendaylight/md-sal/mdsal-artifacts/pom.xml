@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-artifacts</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <dependencyManagement>
@@ -209,17 +209,17 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-access-api</artifactId>
-                <version>1.6.2-SNAPSHOT</version>
+                <version>1.6.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-access-client</artifactId>
-                <version>1.6.2-SNAPSHOT</version>
+                <version>1.6.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-access-client</artifactId>
-                <version>1.6.2-SNAPSHOT</version>
+                <version>1.6.3-SNAPSHOT</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -236,7 +236,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-dom-api</artifactId>
-                <version>1.6.2-SNAPSHOT</version>
+                <version>1.6.3-SNAPSHOT</version>
             </dependency>
 
             <!-- Toaster -->

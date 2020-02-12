@@ -11,7 +11,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-trace</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.3-SNAPSHOT</version>
     <name>OpenDaylight :: TracingBroker</name>
     <packaging>feature</packaging>
 

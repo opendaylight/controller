@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-remoterpc-connector</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.3-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Controller :: Remote RPC Connector</name>
