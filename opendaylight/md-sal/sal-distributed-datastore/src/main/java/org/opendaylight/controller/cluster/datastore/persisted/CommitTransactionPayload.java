@@ -110,6 +110,14 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         }
     }
 
+    /**
+     * The cached candidate needs to be cleared after it is done applying to the DataTree, otherwise it would be keeping
+     * deserialized in memory which are not needed anymore leading to wasted memory.
+     */
+    public void clearCandidate() {
+        candidate = null;
+    }
+
     abstract void writeBytes(ObjectOutput out) throws IOException;
 
     abstract DataInput newDataInput();
