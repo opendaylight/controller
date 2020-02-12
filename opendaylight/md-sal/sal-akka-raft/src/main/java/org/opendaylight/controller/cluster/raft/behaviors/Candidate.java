@@ -15,6 +15,8 @@ import java.util.Collection;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -50,7 +52,7 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     private final Collection<String> votingPeers = new ArrayList<>();
 
-    public Candidate(RaftActorContext context) {
+    public Candidate(final RaftActorContext context) {
         super(context, RaftState.Candidate);
 
         for (PeerInfo peer: context.getPeers()) {
@@ -83,7 +85,7 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries) {
+    protected RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
 
         log.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
 
@@ -99,12 +101,13 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
+    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
+            final AppendEntriesReply appendEntriesReply) {
         return this;
     }
 
     @Override
-    protected RaftActorBehavior handleRequestVoteReply(ActorRef sender, RequestVoteReply requestVoteReply) {
+    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
         log.debug("{}: handleRequestVoteReply: {}, current voteCount: {}", logName(), requestVoteReply, voteCount);
 
         if (requestVoteReply.isVoteGranted()) {
@@ -129,8 +132,14 @@ public class Candidate extends AbstractRaftActorBehavior {
         return super.electionDuration().$div(context.getConfigParams().getCandidateElectionTimeoutDivisor());
     }
 
+
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+    final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
+        throw new IllegalStateException("A candidate should never attempt to apply " + entry);
+    }
+
+    @Override
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         if (message instanceof ElectionTimeout) {
             log.debug("{}: Received ElectionTimeout", logName());
 
@@ -178,10 +187,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         return super.handleMessage(sender, message);
     }
 
-
     private void startNewTerm() {
-
-
         // set voteCount back to 1 (that is voting for self)
         voteCount = 1;
 
