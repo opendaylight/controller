@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static akka.actor.ActorRef.noSender;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
@@ -67,6 +68,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
@@ -85,6 +87,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
@@ -387,7 +390,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private void applyReplicatedCandidate(final CommitTransactionPayload payload)
             throws DataValidationFailedException, IOException {
-        final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.acquireCandidate();
+        final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.getCandidate();
         final TransactionIdentifier identifier = entry.getKey();
         LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
@@ -439,6 +442,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     applyReplicatedCandidate((CommitTransactionPayload) payload);
                 }
             }
+
+            // make sure acquireCandidate() is the last call touching the payload data as we want it to be GC-ed.
+            checkRootOverwrite(((CommitTransactionPayload) payload).acquireCandidate().getValue()
+                    .getCandidate());
         } else if (payload instanceof AbortTransactionPayload) {
             if (identifier != null) {
                 payloadReplicationComplete((AbortTransactionPayload) payload);
@@ -466,6 +473,38 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
         } else {
             LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
+        }
+    }
+
+    private void checkRootOverwrite(DataTreeCandidate candidate) {
+        final DatastoreContext datastoreContext = shard.getDatastoreContext();
+        if (!datastoreContext.isSnapshotOnRootOverwrite()) {
+            return;
+        }
+
+        if (!datastoreContext.isPersistent()) {
+            return;
+        }
+
+        if (candidate.getRootNode().getModificationType().equals(ModificationType.UNMODIFIED)) {
+            return;
+        }
+
+        // top level container ie "/"
+        if ((candidate.getRootPath().equals(YangInstanceIdentifier.empty())
+                && candidate.getRootNode().getModificationType().equals(ModificationType.WRITE))) {
+            LOG.debug("{}: shard root overwritten, enqueuing snapshot", logContext);
+            shard.self().tell(new InitiateCaptureSnapshot(), noSender());
+            return;
+        }
+
+        // Since shards don't have the knowledge which module they represent we need to check the children since
+        // all shards have store root as YID.empty(). Checking children for writes means that module shards will
+        // check the corresponding module.
+        if (candidate.getRootNode().getChildNodes().stream().anyMatch(
+            child -> child.getModificationType().equals(ModificationType.WRITE))) {
+            LOG.debug("{}: top level container overwritten, enqueuing snapshot.", logContext);
+            shard.self().tell(new InitiateCaptureSnapshot(), noSender());
         }
     }
 
