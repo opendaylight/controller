@@ -87,6 +87,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPayload;
@@ -101,15 +102,19 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
@@ -223,10 +228,12 @@ public class Shard extends RaftActor {
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
         if (builder.getDataTree() != null) {
             store = new ShardDataTree(this, builder.getSchemaContext(), builder.getDataTree(),
-                    treeChangeListenerPublisher, name, frontendMetadata);
+                    treeChangeListenerPublisher, name, this.datastoreContext.isSnapshotOnRootOverwrite(),
+                    frontendMetadata);
         } else {
             store = new ShardDataTree(this, builder.getSchemaContext(), builder.getTreeType(),
-                    builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher, name, frontendMetadata);
+                    builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher, name,
+                    this.datastoreContext.isSnapshotOnRootOverwrite(), frontendMetadata);
         }
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name, datastoreContext.getDataStoreMXBeanType(), this);
@@ -954,11 +961,34 @@ public class Shard extends RaftActor {
 
             try {
                 store.applyReplicatedPayload(identifier, (Payload)data);
+                //Even tho it looks like it should be checked within the store.applyReplicatedPayload,
+                //check the rootOverwrite here, since ShardTataTree can't reach the raftActorContext (it's protected).
+                checkRootOverwrite((Payload)data);
+
             } catch (DataValidationFailedException | IOException e) {
                 LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
             }
         } else {
             LOG.error("{}: Unknown state for {} received {}", persistenceId(), identifier, data);
+        }
+    }
+
+    private void checkRootOverwrite(Payload data) {
+        if (datastoreContext.isSnapshotOnRootOverwrite() && data instanceof CommitTransactionPayload) {
+            try {
+                final DataTreeCandidate candidate = ((CommitTransactionPayload) data).acquireCandidate().getValue()
+                    .getCandidate();
+                if (candidate.getRootNode().getModificationType().equals(ModificationType.WRITE)
+                    && getDatastoreContext().getLogicalStoreType().equals(LogicalDatastoreType.CONFIGURATION)) {
+                    final ReplicatedLogEntry replicatedLogEntry = getRaftActorContext().getReplicatedLog()
+                        .get(getRaftActorContext().getLastApplied());
+                    if (replicatedLogEntry != null) {
+                        getRaftActorContext().getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry);
+                    }
+                }
+            } catch (IOException e) {
+                LOG.warn("Couldn't get candidate data from payload to check for rootOverwrite");
+            }
         }
     }
 
