@@ -221,12 +221,18 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards)
             throws Exception {
-        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder, commitTimeout);
+        initDatastores(type, moduleShardsConfig, shards, leaderDatastoreContextBuilder,
+                followerDatastoreContextBuilder);
+    }
+
+    private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards,
+            DatastoreContext.Builder leaderBuilder, DatastoreContext.Builder followerBuilder) throws Exception {
+        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderBuilder, commitTimeout);
 
         leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(
                 testParameter, type, moduleShardsConfig, false, shards);
 
-        followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder, commitTimeout);
+        followerTestKit = new IntegrationTestKit(followerSystem, followerBuilder, commitTimeout);
         followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
                 testParameter, type, moduleShardsConfig, false, shards);
 
@@ -1433,6 +1439,83 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
 
         executor.shutdownNow();
+    }
+
+    @Test
+    public void testSnapshotOnRootOverwrite() throws Exception {
+        if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
+            // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
+            return;
+        }
+
+        final String testName = "testSnapshotOnRootOverwrite";
+        initDatastores(testName, MODULE_SHARDS_CARS_1_2_3, CARS,
+                leaderDatastoreContextBuilder.snapshotOnRootOverwrite(true),
+                followerDatastoreContextBuilder.snapshotOnRootOverwrite(true));
+
+        final IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System,
+                DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).operationTimeoutInMillis(500)
+                        .shardLeaderElectionTimeoutInSeconds(3600).snapshotOnRootOverwrite(true),
+                commitTimeout);
+
+        try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
+                testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false)) {
+            leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.BASE_PATH, CarsModel.create());
+            IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
+                state -> assertEquals(0, state.getSnapshotIndex()));
+
+            IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
+                state -> assertEquals(0, state.getSnapshotIndex()));
+            IntegrationTestKit.verifyShardState(follower2DistributedDataStore, "cars",
+                state -> assertEquals(0, state.getSnapshotIndex()));
+
+            verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0, 1);
+            verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0, 1);
+            verifySnapshot("member-3-shard-cars-testSnapshotOnRootOverwrite", 0, 1);
+
+            for (int i = 0; i < 10; i++) {
+                leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.newCarPath("car " + i),
+                        CarsModel.newCarEntry("car " + i, Uint64.ONE));
+            }
+
+            // fake snapshot causes the snapshotIndex to move
+            IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
+                state -> assertEquals(9, state.getSnapshotIndex()));
+            IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
+                state -> assertEquals(9, state.getSnapshotIndex()));
+            IntegrationTestKit.verifyShardState(follower2DistributedDataStore, "cars",
+                state -> assertEquals(9, state.getSnapshotIndex()));
+
+            // however the real snapshot still has not changed and was taken at index 0
+            verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0, 1);
+            verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0, 1);
+            verifySnapshot("member-3-shard-cars-testSnapshotOnRootOverwrite", 0, 1);
+
+            // root overwrite so expect a snapshot
+            leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.BASE_PATH, CarsModel.create());
+
+            // this was a real snapshot so everything should be in it(1 + 10 + 1)
+            IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
+                state -> assertEquals(11, state.getSnapshotIndex()));
+            IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
+                state -> assertEquals(11, state.getSnapshotIndex()));
+            IntegrationTestKit.verifyShardState(follower2DistributedDataStore, "cars",
+                state -> assertEquals(11, state.getSnapshotIndex()));
+
+            verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 11, 1);
+            verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 11, 1);
+            verifySnapshot("member-3-shard-cars-testSnapshotOnRootOverwrite", 11, 1);
+        }
+    }
+
+    private void verifySnapshot(String persistenceId, long lastAppliedIndex, long lastAppliedTerm) {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
+                assertEquals(1, snap.size());
+                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+                assertEquals(lastAppliedTerm, snap.get(0).getLastAppliedTerm());
+            }
+        );
     }
 
     private static void verifySnapshot(final Snapshot actual, final Snapshot expected,
