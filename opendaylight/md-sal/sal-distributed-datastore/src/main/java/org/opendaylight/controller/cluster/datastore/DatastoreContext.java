@@ -54,6 +54,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
     public static final int DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER = 3;
     public static final boolean DEFAULT_PERSISTENT = true;
+    public static final boolean DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE = false;
     public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
@@ -84,6 +85,7 @@ public class DatastoreContext implements ClientActorConfig {
     private Timeout shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
+    private boolean snapshotOnRootOverwrite = DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE;
     private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
@@ -129,6 +131,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.shardLeaderElectionTimeout = other.shardLeaderElectionTimeout;
         this.initialSettleTimeoutMultiplier = other.initialSettleTimeoutMultiplier;
         this.persistent = other.persistent;
+        this.snapshotOnRootOverwrite = other.snapshotOnRootOverwrite;
         this.configurationReader = other.configurationReader;
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
         this.dataStoreName = other.dataStoreName;
@@ -218,6 +221,10 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isPersistent() {
         return persistent;
+    }
+
+    public boolean isSnapshotOnRootOverwrite() {
+        return this.snapshotOnRootOverwrite;
     }
 
     public AkkaConfigurationReader getConfigurationReader() {
@@ -504,6 +511,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder persistent(final boolean persistent) {
             datastoreContext.persistent = persistent;
+            return this;
+        }
+
+        public Builder snapshotOnRootOverwrite(final boolean snapshotOnRootOverwrite) {
+            datastoreContext.snapshotOnRootOverwrite = snapshotOnRootOverwrite;
             return this;
         }
 
