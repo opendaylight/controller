@@ -393,6 +393,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
                 context.setLastApplied(i);
                 context.getApplyStateConsumer().accept(applyState);
+                if (context.getRootOverwriteEntry() != null && !context.getSnapshotManager().isCapturing()) {
+                    context.getSnapshotManager().capture(context.getRootOverwriteEntry(), getReplicatedToAllIndex());
+                }
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either

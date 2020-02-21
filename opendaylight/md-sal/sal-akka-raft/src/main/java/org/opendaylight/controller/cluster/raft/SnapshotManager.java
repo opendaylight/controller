@@ -299,6 +299,16 @@ public class SnapshotManager implements SnapshotState {
 
             try {
                 createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
+                if (context.getRootOverwriteEntry() != null) {
+                    final ReplicatedLogEntry rootOverwriteEntry = context.getRootOverwriteEntry();
+                    // The RootOverwriteEntry can be cleared if we capture snapshot directly on it or any subsequent
+                    // entry since in both cases it will end-up in the snapshot.
+                    if (rootOverwriteEntry.equals(lastLogEntry)
+                        || (captureSnapshot.getLastIndex() > rootOverwriteEntry.getIndex()
+                        && captureSnapshot.getLastTerm() >= rootOverwriteEntry.getTerm())) {
+                        context.setRootOverwriteEntry(null);
+                    }
+                }
             } catch (Exception e) {
                 SnapshotManager.this.currentState = IDLE;
                 log.error("Error creating snapshot", e);
