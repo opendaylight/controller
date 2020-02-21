@@ -1027,6 +1027,19 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
             processNextPending();
         });
+
+        if (candidate.getRootPath().equals(dataTree.getRootPath())) {
+            final ShardDataTreeSnapshot shardDataTreeSnapshot = takeStateSnapshot();
+            if (shardDataTreeSnapshot != null) {
+                try {
+                    applySnapshot(shardDataTreeSnapshot);
+                } catch (DataValidationFailedException e) {
+                    LOG.error("{}: Failed to apply snapshot after root overwrite", logContext, e);
+                }
+            } else {
+                LOG.warn("{}: Failed to capture snapshot after root overwrite", logContext);
+            }
+        }
     }
 
     void startCommit(final SimpleShardDataTreeCohort cohort, final DataTreeCandidate candidate) {
