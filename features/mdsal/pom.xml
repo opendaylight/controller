@@ -26,8 +26,6 @@
 
         <module>odl-clustering-test-app</module>
         <module>odl-controller-mdsal-common</module>
-        <module>odl-controller-binding-api</module>
-        <module>odl-controller-dom-api</module>
         <module>odl-mdsal-clustering-commons</module>
         <module>odl-controller-blueprint</module>
 
