@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRpcIdentifier> {
     private static final class Proxy implements Externalizable {
@@ -48,11 +48,12 @@ public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRp
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(Serialization.serializedActorPath(opsInvoker));
 
-            final NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out);
-            nnout.writeInt(rpcs.size());
-            for (DOMRpcIdentifier id : rpcs) {
-                nnout.writeSchemaPath(id.getType());
-                nnout.writeYangInstanceIdentifier(id.getContextReference());
+            try (NormalizedNodeDataOutput nnout = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
+                nnout.writeInt(rpcs.size());
+                for (DOMRpcIdentifier id : rpcs) {
+                    nnout.writeSchemaPath(id.getType());
+                    nnout.writeYangInstanceIdentifier(id.getContextReference());
+                }
             }
         }
 
