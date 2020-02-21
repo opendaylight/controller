@@ -47,6 +47,14 @@ public interface SnapshotState {
     boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower);
 
     /**
+     * Initiates a capture snapshot, while enforcing trimming of the log up to lastAppliedIndex.
+     * @param lastLogEntry the last entry in the replicated log
+     * @param replicatedToAllIndex the current replicatedToAllIndex
+     * @return true if capture was started
+     */
+    boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
+
+    /**
      * Applies a snapshot on a follower that was installed by the leader.
      *
      * @param snapshot the Snapshot to apply.
