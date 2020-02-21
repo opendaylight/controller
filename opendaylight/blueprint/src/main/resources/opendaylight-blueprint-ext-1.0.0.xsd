@@ -75,17 +75,6 @@
   </xsd:complexType>
   <xsd:element name="rpc-implementation" type="TrpcImplementation"/>
 
-  <!--
-       To be deprecated. This interface contract is fulfilled by
-       action-implementation instead
-   -->
-  <xsd:complexType name="TroutedRpcImplementation">
-    <xsd:attribute name="interface" type="bp:Tclass" use="optional"/>
-    <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
-    <xsd:attribute name="id" type="xsd:ID"/>
-  </xsd:complexType>
-  <xsd:element name="routed-rpc-implementation" type="TroutedRpcImplementation"/>
-
   <xsd:complexType name="TrpcService">
     <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
     <xsd:attribute name="id" type="xsd:ID"/>

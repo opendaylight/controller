@@ -8,8 +8,8 @@
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +20,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.TransactionsParams;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -119,14 +120,14 @@ abstract class AbstractTransactionHandler {
 
         // Not completed yet: create a transaction and hook it up
         final long txId = txCounter.incrementAndGet();
-        final ListenableFuture<?> execFuture = execWrite(txId);
+        final FluentFuture<? extends CommitInfo> execFuture = execWrite(txId);
         LOG.debug("New future #{} allocated", txId);
 
         // Ordering is important: we need to add the future before hooking the callback
         futures.add(execFuture);
-        Futures.addCallback(execFuture, new FutureCallback<Object>() {
+        execFuture.addCallback(new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Object result) {
+            public void onSuccess(final CommitInfo result) {
                 txSuccess(execFuture, txId);
             }
 
@@ -225,7 +226,7 @@ abstract class AbstractTransactionHandler {
         runTimedOut("Transactions did not finish in " + DEAD_TIMEOUT_SECONDS + " seconds");
     }
 
-    abstract ListenableFuture<?> execWrite(long txId);
+    abstract FluentFuture<? extends CommitInfo> execWrite(long txId);
 
     abstract void runFailed(Throwable cause, long txId);
 
