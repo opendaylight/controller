@@ -124,6 +124,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -221,12 +222,19 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards)
             throws Exception {
-        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder, commitTimeout);
+        initDatastores(type, moduleShardsConfig, shards, leaderDatastoreContextBuilder,
+                followerDatastoreContextBuilder);
+    }
+
+    private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards,
+            final DatastoreContext.Builder leaderBuilder, final DatastoreContext.Builder followerBuilder)
+                    throws Exception {
+        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderBuilder, commitTimeout);
 
         leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(
                 testParameter, type, moduleShardsConfig, false, shards);
 
-        followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder, commitTimeout);
+        followerTestKit = new IntegrationTestKit(followerSystem, followerBuilder, commitTimeout);
         followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
                 testParameter, type, moduleShardsConfig, false, shards);
 
@@ -1433,6 +1441,74 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
 
         executor.shutdownNow();
+    }
+
+    @Test
+    @Ignore("Writes to root node are not split into shards")
+    public void testSnapshotOnRootOverwrite() throws Exception {
+        if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
+            // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
+            return;
+        }
+
+        final String testName = "testSnapshotOnRootOverwrite";
+        String[] shards = {"cars", "default"};
+        initDatastores(testName, "module-shards-default-cars-member1.conf", shards,
+                leaderDatastoreContextBuilder.snapshotOnRootOverwrite(true),
+                followerDatastoreContextBuilder.snapshotOnRootOverwrite(true));
+
+        leaderTestKit.waitForMembersUp("member-2");
+        ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(SchemaContext.NAME))
+                .withChild((ContainerNode) CarsModel.create())
+                .build();
+
+        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
+
+        IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
+            state -> assertEquals(0, state.getSnapshotIndex()));
+
+        IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
+            state -> assertEquals(0, state.getSnapshotIndex()));
+
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0);
+
+        for (int i = 0; i < 10; i++) {
+            leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.newCarPath("car " + i),
+                    CarsModel.newCarEntry("car " + i, BigInteger.ONE));
+        }
+
+        // fake snapshot causes the snapshotIndex to move
+        IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
+            state -> assertEquals(9, state.getSnapshotIndex()));
+        IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
+            state -> assertEquals(9, state.getSnapshotIndex()));
+
+        // however the real snapshot still has not changed and was taken at index 0
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0);
+
+        // root overwrite so expect a snapshot
+        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
+
+        // this was a real snapshot so everything should be in it(1 + 10 + 1)
+        IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
+            state -> assertEquals(11, state.getSnapshotIndex()));
+        IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
+            state -> assertEquals(11, state.getSnapshotIndex()));
+
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 11);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 11);
+    }
+
+    private void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
+                assertEquals(1, snap.size());
+                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+            }
+        );
     }
 
     private static void verifySnapshot(final Snapshot actual, final Snapshot expected,
