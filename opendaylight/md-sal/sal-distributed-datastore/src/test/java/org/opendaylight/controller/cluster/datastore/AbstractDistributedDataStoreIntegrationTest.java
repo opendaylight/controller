@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -55,7 +56,9 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardData
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -905,5 +908,58 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", peopleNode, optional.get());
         }
+    }
+
+    @Test
+    public void testSnapshotOnRootOverwrite() throws Exception {
+        if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
+            // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
+            return;
+        }
+
+        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(),
+                datastoreContextBuilder.snapshotOnRootOverwrite(true));
+        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
+                testParameter, "testRootOverwrite", "module-shards-member1.conf",
+                true, "cars")) {
+
+            testKit.testWriteTransaction(dataStore, CarsModel.BASE_PATH, CarsModel.create());
+            IntegrationTestKit.verifyShardState(dataStore, "cars",
+                state -> assertEquals(0, state.getSnapshotIndex()));
+
+            // root has been written expect snapshot at index 0
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 0, 1);
+
+            for (int i = 0; i < 10; i++) {
+                testKit.testWriteTransaction(dataStore, CarsModel.newCarPath("car " + i),
+                    CarsModel.newCarEntry("car " + i, Uint64.ONE));
+            }
+
+            // fake snapshot causes the snapshotIndex to move
+            IntegrationTestKit.verifyShardState(dataStore, "cars",
+                state -> assertEquals(9, state.getSnapshotIndex()));
+
+            // however the real snapshot still has not changed and was taken at index 0
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 0, 1);
+
+            // root overwrite so expect a snapshot
+            testKit.testWriteTransaction(dataStore, CarsModel.BASE_PATH, CarsModel.create());
+
+            // this was a real snapshot so everything should be in it(1 + 10 + 1)
+            IntegrationTestKit.verifyShardState(dataStore, "cars",
+                state -> assertEquals(11, state.getSnapshotIndex()));
+
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 11, 1);
+        }
+    }
+
+    private void verifySnapshot(String persistenceId, long lastAppliedIndex, long lastAppliedTerm) {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
+                assertEquals(1, snap.size());
+                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+                assertEquals(lastAppliedTerm, snap.get(0).getLastAppliedTerm());
+            }
+        );
     }
 }
