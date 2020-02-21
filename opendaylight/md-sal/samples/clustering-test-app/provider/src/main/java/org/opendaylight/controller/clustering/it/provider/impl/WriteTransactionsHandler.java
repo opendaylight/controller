@@ -9,6 +9,7 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.LinkedHashSet;
@@ -19,15 +20,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutputBuilder;
@@ -46,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class WriteTransactionsHandler extends AbstractTransactionHandler {
-    private static final class Chained extends WriteTransactionsHandler implements TransactionChainListener {
+    private static final class Chained extends WriteTransactionsHandler implements DOMTransactionChainListener {
         private final SplittableRandom random = new SplittableRandom();
         private final DOMTransactionChain transactionChain;
 
@@ -57,7 +58,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         }
 
         @Override
-        DOMDataWriteTransaction createTransaction() {
+        DOMDataTreeWriteTransaction createTransaction() {
             return transactionChain.newWriteOnlyTransaction();
         }
 
@@ -67,15 +68,15 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         }
 
         @Override
-        public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-                final AsyncTransaction<?, ?> transaction, final Throwable cause) {
+        public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
+                final Throwable cause) {
             // This is expected to happen frequently in isolation testing.
             LOG.debug("Transaction chain failed.", cause);
             // Do not return RPC here, rely on transaction failure to call runFailed.
         }
 
         @Override
-        public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+        public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
             LOG.debug("Transaction chain closed successfully.");
         }
     }
@@ -92,7 +93,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         }
 
         @Override
-        DOMDataWriteTransaction createTransaction() {
+        DOMDataTreeWriteTransaction createTransaction() {
             return dataBroker.newWriteOnlyTransaction();
         }
 
@@ -141,27 +142,35 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
                 .withChild(ImmutableNodes.mapNodeBuilder(ID_INT).build())
                 .build();
 
-        DOMDataWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
+        DOMDataTreeWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
         // write only the top list
         tx.merge(LogicalDatastoreType.CONFIGURATION, ID_INTS_YID, containerNode);
         try {
-            tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (final OptimisticLockFailedException e) {
-            // when multiple write-transactions are executed concurrently we need to ignore this.
-            // If we get optimistic lock here it means id-ints already exists and we can continue.
-            LOG.debug("Got an optimistic lock when writing initial top level list element.", e);
-        } catch (final TransactionCommitFailedException | TimeoutException e) {
+            tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException | TimeoutException e) {
             LOG.error("Error writing top-level path {}: {}", ID_INTS_YID, containerNode, e);
             return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
                 String.format("Could not start write transactions - error writing top-level path %s:  %s",
                     ID_INTS_YID, containerNode), e).buildFuture();
+        } catch (ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OptimisticLockFailedException) {
+                // when multiple write-transactions are executed concurrently we need to ignore this.
+                // If we get optimistic lock here it means id-ints already exists and we can continue.
+                LOG.debug("Got an optimistic lock when writing initial top level list element.", e);
+            } else {
+                LOG.error("Error writing top-level path {}: {}", ID_INTS_YID, containerNode, e);
+                return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+                    String.format("Could not start write transactions - error writing top-level path %s:  %s",
+                        ID_INTS_YID, containerNode), e).buildFuture();
+            }
         }
 
         tx = domDataBroker.newWriteOnlyTransaction();
         tx.merge(LogicalDatastoreType.CONFIGURATION, idListItem, entry);
 
         try {
-            tx.submit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Error writing top-level path {}: {}", idListItem, entry, e);
             return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
@@ -179,7 +188,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         tx.put(LogicalDatastoreType.CONFIGURATION, itemListId, itemListNode);
 
         try {
-            tx.submit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Error filling initial item list path {}: {}", itemListId, itemListNode, e);
             return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
@@ -201,13 +210,13 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     }
 
     @Override
-    ListenableFuture<Void> execWrite(final long txId) {
+    FluentFuture<? extends @NonNull CommitInfo> execWrite(final long txId) {
         final int i = nextInt(MAX_ITEM + 1);
 
         final YangInstanceIdentifier entryId =
                 idListItem.node(ITEM).node(YangInstanceIdentifier.NodeIdentifierWithPredicates.of(ITEM, NUMBER, i));
 
-        final DOMDataWriteTransaction tx = createTransaction();
+        final DOMDataTreeWriteTransaction tx = createTransaction();
 
         if (usedValues.contains(i)) {
             LOG.debug("Deleting item: {}", i);
@@ -223,7 +232,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             usedValues.add(i);
         }
 
-        return tx.submit();
+        return tx.commit();
     }
 
     @Override
@@ -250,7 +259,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             .withError(RpcError.ErrorType.APPLICATION, cause).build());
     }
 
-    abstract DOMDataWriteTransaction createTransaction();
+    abstract DOMDataTreeWriteTransaction createTransaction();
 
     abstract int nextInt(int bound);
 }

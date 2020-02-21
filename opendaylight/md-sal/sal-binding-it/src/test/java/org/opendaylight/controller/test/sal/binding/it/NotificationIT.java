@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import org.junit.Test;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
+import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OpendaylightTestNotificationListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotificationBuilder;
@@ -32,7 +33,11 @@ public class NotificationIT extends AbstractIT {
 
     @Inject
     @Filter(timeout = 120 * 1000)
-    NotificationProviderService notificationService;
+    NotificationService notificationService;
+
+    @Inject
+    @Filter(timeout = 120 * 1000)
+    NotificationPublishService notificationPublishService;
 
     /**
      * Test of delivering of notification.
@@ -46,7 +51,7 @@ public class NotificationIT extends AbstractIT {
         LOG.info("The notification of type FlowAdded with cookie ID 0 is created. The "
                 + "delay 100ms to make sure that the notification was delivered to "
                 + "listener.");
-        notificationService.publish(noDustNotification("rainy day", 42));
+        notificationPublishService.putNotification(noDustNotification("rainy day", 42));
         Thread.sleep(100);
 
         /**
@@ -64,9 +69,9 @@ public class NotificationIT extends AbstractIT {
                 notificationService.registerNotificationListener(listener2);
 
         LOG.info("3 notifications are published");
-        notificationService.publish(noDustNotification("rainy day", 5));
-        notificationService.publish(noDustNotification("rainy day", 10));
-        notificationService.publish(noDustNotification("tax collector", 2));
+        notificationPublishService.putNotification(noDustNotification("rainy day", 5));
+        notificationPublishService.putNotification(noDustNotification("rainy day", 10));
+        notificationPublishService.putNotification(noDustNotification("tax collector", 2));
 
         /**
          * The delay 100ms to make sure that the notifications were delivered to
@@ -88,7 +93,7 @@ public class NotificationIT extends AbstractIT {
         listener2Reg.close();
 
         LOG.info("The notification 5 is published");
-        notificationService.publish(noDustNotification("entomologist hunt", 10));
+        notificationPublishService.putNotification(noDustNotification("entomologist hunt", 10));
 
         /**
          * The delay 100ms to make sure that the notification was delivered to
@@ -118,9 +123,8 @@ public class NotificationIT extends AbstractIT {
     }
 
     /**
-     * Implements
-     * {@link OpendaylightTestNotificationListener} and contains attributes which keep lists of objects of
-     * the type {@link OutOfFairyDustNotification}.
+     * Implements {@link OpendaylightTestNotificationListener} and contains attributes which keep lists of objects of
+     * the type {@link OutOfPixieDustNotification}.
      */
     public static class NotificationTestListener implements OpendaylightTestNotificationListener {
         List<OutOfPixieDustNotification> notificationBag = new ArrayList<>();

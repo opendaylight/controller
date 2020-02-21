@@ -12,13 +12,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
@@ -51,7 +51,7 @@ public class DataServiceIT extends AbstractIT {
         UnorderedList nodeData1 = createNode("0");
 
         transaction.put(LogicalDatastoreType.OPERATIONAL, node1, nodeData1);
-        transaction.submit().get(5, TimeUnit.SECONDS);
+        transaction.commit().get(5, TimeUnit.SECONDS);
 
         Optional<UnorderedList> readedData = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
                 node1).get(5, TimeUnit.SECONDS);
@@ -63,7 +63,7 @@ public class DataServiceIT extends AbstractIT {
 
         transaction2.delete(LogicalDatastoreType.OPERATIONAL, node1);
 
-        transaction2.submit().get(5, TimeUnit.SECONDS);
+        transaction2.commit().get(5, TimeUnit.SECONDS);
 
         Optional<UnorderedList> readedData2 = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
                 node1).get(5, TimeUnit.SECONDS);

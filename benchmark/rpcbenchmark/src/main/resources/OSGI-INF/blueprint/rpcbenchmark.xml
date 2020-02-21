@@ -12,11 +12,13 @@
 
   <bean id="globalServer" class="rpcbenchmark.impl.GlobalBindingRTCServer"/>
 
-  <reference id="rpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
+  <reference id="rpcProviderService" interface="org.opendaylight.mdsal.binding.api.RpcProviderService"/>
+  <reference id="rpcConsumerRegistry" interface="org.opendaylight.mdsal.binding.api.RpcConsumerRegistry"/>
 
   <bean id="provider" class="rpcbenchmark.impl.RpcbenchmarkProvider"
           init-method="init" destroy-method="close">
-    <argument ref="rpcRegistry"/>
+    <argument ref="rpcProviderService"/>
+    <argument ref="rpcConsumerRegistry"/>
     <argument ref="globalServer"/>
   </bean>
 
