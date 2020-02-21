@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package rpcbenchmark.impl;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
-import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInputBuilder;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOutput;
@@ -33,16 +32,6 @@ public class RoutedBindingRTClient implements RTCClient {
     private final AtomicLong rpcError = new AtomicLong(0);
     private final List<RoutedRpcBenchInput> inVal;
     private final int inSize;
-
-    @Override
-    public long getRpcOk() {
-        return rpcOk.get();
-    }
-
-    @Override
-    public long getRpcError() {
-        return rpcError.get();
-    }
 
     public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize,
             final List<InstanceIdentifier<?>> routeIid) {
@@ -63,6 +52,16 @@ public class RoutedBindingRTClient implements RTCClient {
             inVal.add(new RoutedRpcBenchInputBuilder().setNode(iid).setPayload(listVals).build());
         }
 
+    }
+
+    @Override
+    public long getRpcOk() {
+        return rpcOk.get();
+    }
+
+    @Override
+    public long getRpcError() {
+        return rpcError.get();
     }
 
     @Override
