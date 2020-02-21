@@ -10,8 +10,7 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
@@ -19,6 +18,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicRpcTestService;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -29,11 +29,12 @@ public class BasicRpcTestProvider implements ClusterSingletonService, BasicRpcTe
     private static final Logger LOG = LoggerFactory.getLogger(BasicRpcTestProvider.class);
     private static final ServiceGroupIdentifier IDENTIFIER = ServiceGroupIdentifier.create("Basic-rpc-test");
 
-    private final RpcProviderRegistry rpcProviderRegistry;
+    private final RpcProviderService rpcProviderRegistry;
     private final ClusterSingletonServiceProvider singletonService;
-    private BindingAwareBroker.RpcRegistration<BasicRpcTestService> rpcRegistration;
 
-    public BasicRpcTestProvider(final RpcProviderRegistry rpcProviderRegistry,
+    private ObjectRegistration<?> rpcRegistration;
+
+    public BasicRpcTestProvider(final RpcProviderService rpcProviderRegistry,
                                 final ClusterSingletonServiceProvider singletonService) {
         this.rpcProviderRegistry = rpcProviderRegistry;
         this.singletonService = singletonService;
@@ -44,7 +45,7 @@ public class BasicRpcTestProvider implements ClusterSingletonService, BasicRpcTe
     @Override
     public void instantiateServiceInstance() {
         LOG.info("Basic testing rpc registered as global");
-        rpcRegistration = rpcProviderRegistry.addRpcImplementation(BasicRpcTestService.class, this);
+        rpcRegistration = rpcProviderRegistry.registerRpcImplementation(BasicRpcTestService.class, this);
     }
 
     @Override

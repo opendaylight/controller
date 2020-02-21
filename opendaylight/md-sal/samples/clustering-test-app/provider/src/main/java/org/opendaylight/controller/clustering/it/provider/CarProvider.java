@@ -15,19 +15,20 @@ import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
@@ -86,7 +87,7 @@ public class CarProvider implements CarService {
 
     private static final String ENTITY_TYPE = "cars";
     private static final InstanceIdentifier<Cars> CARS_IID = InstanceIdentifier.builder(Cars.class).build();
-    private static final DataTreeIdentifier<Cars> CARS_DTID = new DataTreeIdentifier<>(
+    private static final DataTreeIdentifier<Cars> CARS_DTID = DataTreeIdentifier.create(
             LogicalDatastoreType.CONFIGURATION, CARS_IID);
 
     private final DataBroker dataProvider;
@@ -163,8 +164,8 @@ public class CarProvider implements CarService {
         InstanceIdentifier<Cars> carsId = InstanceIdentifier.create(Cars.class);
         tx.merge(LogicalDatastoreType.CONFIGURATION, carsId, new CarsBuilder().build());
         try {
-            tx.submit().checkedGet(5, TimeUnit.SECONDS);
-        } catch (TransactionCommitFailedException | TimeoutException e) {
+            tx.commit().get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
             LOG_PURCHASE_CAR.error("Put Cars failed",e);
             return Futures.immediateFuture(RpcResultBuilder.success(new StressTestOutputBuilder().build()).build());
         }
@@ -181,10 +182,10 @@ public class CarProvider implements CarService {
                 CarEntry car = new CarEntryBuilder().setId(new CarId("car" + id)).build();
                 tx1.put(LogicalDatastoreType.CONFIGURATION,
                         InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.key()).build(), car);
-                Futures.addCallback(tx1.submit(), new FutureCallback<Void>() {
+                tx1.commit().addCallback(new FutureCallback<CommitInfo>() {
 
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final CommitInfo result) {
                         // Transaction succeeded
                         succcessCounter.getAndIncrement();
                     }
@@ -318,8 +319,8 @@ public class CarProvider implements CarService {
             return RpcResultBuilder.success(new RegisterCommitCohortOutputBuilder().build()).buildFuture();
         }
 
-        final DOMDataTreeCommitCohortRegistry commitCohortRegistry = (DOMDataTreeCommitCohortRegistry)
-                domDataBroker.getSupportedExtensions().get(DOMDataTreeCommitCohortRegistry.class);
+        final DOMDataTreeCommitCohortRegistry commitCohortRegistry = domDataBroker.getExtensions().getInstance(
+            DOMDataTreeCommitCohortRegistry.class);
 
         if (commitCohortRegistry == null) {
             // Shouldn't happen
