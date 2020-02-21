@@ -21,10 +21,11 @@ public class CaptureSnapshot implements ControlMessage {
     private final long replicatedToAllIndex;
     private final long replicatedToAllTerm;
     private final List<ReplicatedLogEntry> unAppliedEntries;
+    private final boolean mandatoryTrim;
 
     public CaptureSnapshot(long lastIndex, long lastTerm, long lastAppliedIndex,
             long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm,
-            List<ReplicatedLogEntry> unAppliedEntries) {
+            List<ReplicatedLogEntry> unAppliedEntries, boolean mandatoryTrim) {
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
@@ -33,6 +34,7 @@ public class CaptureSnapshot implements ControlMessage {
         this.replicatedToAllTerm = replicatedToAllTerm;
         this.unAppliedEntries = unAppliedEntries != null ? unAppliedEntries :
             Collections.<ReplicatedLogEntry>emptyList();
+        this.mandatoryTrim = mandatoryTrim;
     }
 
     public long getLastAppliedIndex() {
@@ -63,6 +65,10 @@ public class CaptureSnapshot implements ControlMessage {
         return unAppliedEntries;
     }
 
+    public boolean isMandatoryTrim() {
+        return mandatoryTrim;
+    }
+
     @Override
     public String toString() {
         return "CaptureSnapshot [lastAppliedIndex=" + lastAppliedIndex
@@ -72,7 +78,8 @@ public class CaptureSnapshot implements ControlMessage {
                 + ", installSnapshotInitiated="
                 + ", replicatedToAllIndex=" + replicatedToAllIndex
                 + ", replicatedToAllTerm=" + replicatedToAllTerm
-                + ", unAppliedEntries size=" + unAppliedEntries.size() + "]";
+                + ", unAppliedEntries size=" + unAppliedEntries.size()
+                + ", mandatoryTrim=" + mandatoryTrim + "]";
     }
 
 
