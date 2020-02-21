@@ -19,30 +19,13 @@
     <module>parent</module>
 
     <!-- Common APIs & Implementation -->
-    <module>sal-common-api</module>
-    <module>sal-common-impl</module>
     <module>sal-common-util</module>
-
-    <!-- Binding Independent -->
-    <module>sal-dom-api</module>
-    <module>sal-dom-broker</module>
-    <module>sal-dom-spi</module>
-    <module>sal-dom-compat</module>
-
-    <!-- Binding Aware -->
-    <module>sal-binding-api</module>
-    <module>sal-binding-broker</module>
-
-    <module>sal-binding-util</module>
 
     <!-- Samples -->
     <module>samples</module>
 
     <module>sal-akka-raft</module>
     <module>sal-akka-raft-example</module>
-
-    <!--InMemory DOM DataStore-->
-    <module>sal-inmemory-datastore</module>
 
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
@@ -79,10 +62,6 @@
     <!-- IT Base and Parent -->
     <module>mdsal-it-base</module>
     <module>mdsal-it-parent</module>
-
-    <!-- Debug utils -->
-    <module>mdsal-trace</module>
-
   </modules>
 
   <scm>
