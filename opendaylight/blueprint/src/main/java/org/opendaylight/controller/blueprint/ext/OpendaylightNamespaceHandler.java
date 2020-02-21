@@ -24,7 +24,6 @@ import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
 import org.apache.aries.blueprint.mutable.MutableServiceReferenceMetadata;
 import org.apache.aries.blueprint.mutable.MutableValueMetadata;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
@@ -100,8 +99,6 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
 
         if (nodeNameEquals(element, RpcImplementationBean.RPC_IMPLEMENTATION)) {
             return parseRpcImplementation(element, context);
-        } else if (nodeNameEquals(element, RoutedRpcMetadata.ROUTED_RPC_IMPLEMENTATION)) {
-            return parseRoutedRpcImplementation(element, context);
         } else if (nodeNameEquals(element, RPC_SERVICE)) {
             return parseRpcService(element, context);
         } else if (nodeNameEquals(element, NotificationListenerBean.NOTIFICATION_LISTENER)) {
@@ -277,18 +274,6 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         return metadata;
     }
 
-    private static Metadata parseRoutedRpcImplementation(final Element element, final ParserContext context) {
-        registerRefBean(context, RPC_REGISTRY_NAME, RpcProviderRegistry.class);
-        registerRoutedRpcRegistrationConverter(context);
-
-        ComponentFactoryMetadata metadata = new RoutedRpcMetadata(getId(context, element),
-                element.getAttribute(INTERFACE), element.getAttribute(REF_ATTR));
-
-        LOG.debug("parseRoutedRpcImplementation returning {}", metadata);
-
-        return metadata;
-    }
-
     private static Metadata parseActionService(final Element element, final ParserContext context) {
         ComponentFactoryMetadata metadata = new ActionServiceMetadata(getId(context, element),
                 element.getAttribute(INTERFACE));
@@ -305,16 +290,6 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         LOG.debug("parseRpcService returning {}", metadata);
 
         return metadata;
-    }
-
-    private static void registerRoutedRpcRegistrationConverter(final ParserContext context) {
-        ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
-        if (registry.getComponentDefinition(ROUTED_RPC_REG_CONVERTER_NAME) == null) {
-            MutableBeanMetadata metadata = createBeanMetadata(context, ROUTED_RPC_REG_CONVERTER_NAME,
-                    RoutedRpcRegistrationConverter.class, false, false);
-            metadata.setActivation(ReferenceMetadata.ACTIVATION_LAZY);
-            registry.registerTypeConverter(metadata);
-        }
     }
 
     private static void registerDomRpcProviderServiceRefBean(final ParserContext context) {

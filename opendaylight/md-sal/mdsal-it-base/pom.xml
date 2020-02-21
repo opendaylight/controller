@@ -24,6 +24,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>5.0.9</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
         <version>${project.version}</version>
@@ -40,8 +47,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <type>zip</type>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-api</artifactId>
     </dependency>
         <!-- Dependencies for pax exam karaf container -->
     <dependency>

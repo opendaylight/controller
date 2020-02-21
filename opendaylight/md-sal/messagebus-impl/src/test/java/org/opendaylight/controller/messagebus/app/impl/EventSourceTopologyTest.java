@@ -25,7 +25,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.messagebus.spi.EventSource;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -181,8 +180,7 @@ public class EventSourceTopologyTest {
         Map<NodeKey, Registration> localMap = eventSourceTopology.getRoutedRpcRegistrations();
         NodeKey nodeKeyMock = mock(NodeKey.class);
         doReturn(nodeKeyMock).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock =
-                mock(BindingAwareBroker.RoutedRpcRegistration.class);
+        ObjectRegistration routedRpcRegistrationMock = mock(ObjectRegistration.class);
         localMap.put(nodeKeyMock, routedRpcRegistrationMock);
         eventSourceTopology.unRegister(eventSourceMock);
         verify(routedRpcRegistrationMock, times(1)).close();
