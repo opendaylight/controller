@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.clustering.it.provider.impl;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ITEM;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -45,7 +45,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
 
         // There should only be one candidate reported
-        Preconditions.checkState(changes.size() == 1);
+        checkState(changes.size() == 1);
 
         lastNotifTimestamp.set(System.nanoTime());
 
