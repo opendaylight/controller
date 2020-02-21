@@ -7,24 +7,27 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import java.util.HashSet;
+import java.util.Set;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.People;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PeopleService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PersonContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.Person;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.PersonBuilder;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -36,17 +39,17 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(PeopleProvider.class);
 
+    private final Set<ObjectRegistration<?>> regs = new HashSet<>();
     private DataBroker dataProvider;
-
-    private BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration;
+    private RpcProviderService rpcProviderService;
+    private CarPurchaseService rpcImplementation;
 
     public void setDataProvider(final DataBroker salDataProvider) {
         this.dataProvider = salDataProvider;
     }
 
-
-    public void setRpcRegistration(final BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration) {
-        this.rpcRegistration = rpcRegistration;
+    public void setRpcImplementation(final CarPurchaseService rpcImplementation) {
+        this.rpcImplementation = rpcImplementation;
     }
 
     @Override
@@ -64,11 +67,12 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);
 
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+        tx.commit().addCallback(new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 LOG.info("RPC addPerson : person added successfully [{}]", person);
-                rpcRegistration.registerPath(PersonContext.class, personId);
+                regs.add(rpcProviderService.registerRpcImplementation(CarPurchaseService.class, rpcImplementation,
+                    ImmutableSet.of(personId)));
                 LOG.info("RPC addPerson : routed rpc registered for instance ID [{}]", personId);
                 futureResult.set(RpcResultBuilder.success(new AddPersonOutputBuilder().build()).build());
             }
@@ -85,5 +89,7 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
 
     @Override
     public void close() {
+        regs.forEach(ObjectRegistration::close);
+        regs.clear();
     }
 }
