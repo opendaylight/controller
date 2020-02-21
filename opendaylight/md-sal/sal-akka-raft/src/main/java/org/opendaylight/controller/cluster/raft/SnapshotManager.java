@@ -92,6 +92,11 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
+    public boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        return currentState.captureWithForcedTrim(lastLogEntry, replicatedToAllIndex);
+    }
+
+    @Override
     public void apply(final ApplySnapshot snapshot) {
         currentState.apply(snapshot);
     }
@@ -154,7 +159,8 @@ public class SnapshotManager implements SnapshotState {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    public CaptureSnapshot newCaptureSnapshot(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+    public CaptureSnapshot newCaptureSnapshot(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+                                              final boolean mandatoryTrim) {
         TermInformationReader lastAppliedTermInfoReader =
                 lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
                         lastLogEntry, hasFollowers());
@@ -186,7 +192,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
-                newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries);
+                newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, mandatoryTrim);
     }
 
     private class AbstractSnapshotState implements SnapshotState {
@@ -206,6 +212,12 @@ public class SnapshotManager implements SnapshotState {
         public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
                 final String targetFollower) {
             log.debug("captureToInstall should not be called in state {}", this);
+            return false;
+        }
+
+        @Override
+        public boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+            log.debug("captureWithForcedTrim should not be called in state {}", this);
             return false;
         }
 
@@ -279,8 +291,8 @@ public class SnapshotManager implements SnapshotState {
 
         @SuppressWarnings("checkstyle:IllegalCatch")
         private boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
-                final String targetFollower) {
-            captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex);
+                final String targetFollower, boolean mandatoryTrim) {
+            captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim);
 
             OutputStream installSnapshotStream = null;
             if (targetFollower != null) {
@@ -310,13 +322,18 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
-            return capture(lastLogEntry, replicatedToAllIndex, null);
+            return capture(lastLogEntry, replicatedToAllIndex, null, false);
         }
 
         @Override
         public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
                 final String targetFollower) {
-            return capture(lastLogEntry, replicatedToAllIndex, targetFollower);
+            return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
+        }
+
+        @Override
+        public boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+            return capture(lastLogEntry, replicatedToAllIndex, null, true);
         }
 
         @Override
@@ -369,17 +386,20 @@ public class SnapshotManager implements SnapshotState {
                     context.getReplicatedLog().size() >= context.getConfigParams().getSnapshotBatchCount();
 
             final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-            if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
+            if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount || captureSnapshot.isMandatoryTrim()) {
                 if (log.isDebugEnabled()) {
                     if (dataSizeThresholdExceeded) {
                         log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit "
                                 + "with index {}", context.getId(), context.getReplicatedLog().dataSize(),
                                 dataThreshold, captureSnapshot.getLastAppliedIndex());
-                    } else {
+                    } else if (logSizeExceededSnapshotBatchCount){
                         log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with "
                                 + "index {}", context.getId(), context.getReplicatedLog().size(),
                                 context.getConfigParams().getSnapshotBatchCount(),
                                 captureSnapshot.getLastAppliedIndex());
+                    } else {
+                        log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to"
+                                + "last applied index {}", context.getId(), captureSnapshot.getLastAppliedIndex());
                     }
                 }
 

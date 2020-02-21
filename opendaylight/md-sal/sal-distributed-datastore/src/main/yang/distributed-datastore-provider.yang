@@ -178,6 +178,12 @@ module distributed-datastore-provider {
             description "Enable or disable data persistence";
         }
 
+        leaf snapshotOnRootOverwrite {
+            default false;
+            type boolean;
+            description "Enable or disable capturing snapshots on DataTree root overwrites";
+        }
+
         leaf shard-isolated-leader-check-interval-in-millis {
             default 5000;
             type heartbeat-interval-type;
