@@ -85,6 +85,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
@@ -142,6 +143,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final Collection<ShardDataTreeMetadata<?>> metadata;
     private final DataTree dataTree;
+    private final boolean snapshotOnRootOverwrite;
     private final String logContext;
     private final Shard shard;
     private Runnable runOnPendingTransactionsComplete;
@@ -161,9 +163,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ShardDataTree(final Shard shard, final SchemaContext schemaContext, final DataTree dataTree,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final String logContext,
+            final String logContext, final boolean snapshotOnRootOverwrite,
             final ShardDataTreeMetadata<?>... metadata) {
         this.dataTree = requireNonNull(dataTree);
+        this.snapshotOnRootOverwrite = snapshotOnRootOverwrite;
         updateSchemaContext(schemaContext);
 
         this.shard = requireNonNull(shard);
@@ -176,9 +179,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
             final YangInstanceIdentifier root,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final String logContext,
+            final String logContext, final boolean snapshotOnRootOverwrite,
             final ShardDataTreeMetadata<?>... metadata) {
-        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher, logContext, metadata);
+        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher, logContext,
+                snapshotOnRootOverwrite, metadata);
     }
 
     private static DataTree createDataTree(final TreeType treeType, final YangInstanceIdentifier root) {
@@ -193,7 +197,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType) {
         this(shard, schemaContext, treeType, YangInstanceIdentifier.empty(),
-                new DefaultShardDataTreeChangeListenerPublisher(""), "");
+                new DefaultShardDataTreeChangeListenerPublisher(""), "", false);
     }
 
     final String logContext() {
@@ -1033,6 +1037,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
             processNextPending();
         });
+
+        if (snapshotOnRootOverwrite && candidate.getRootNode().getModificationType().equals(ModificationType.WRITE)) {
+            shard.getRaftActorContext().getSnapshotManager().trimLog(shard.getRaftActorContext().getLastApplied());
+        }
     }
 
     void startCommit(final SimpleShardDataTreeCohort cohort, final DataTreeCandidate candidate) {
