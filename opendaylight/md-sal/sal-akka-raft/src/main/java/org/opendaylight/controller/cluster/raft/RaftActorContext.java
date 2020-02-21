@@ -341,4 +341,8 @@ public interface RaftActorContext {
      * @param leadershipTransferCohort the RaftActorLeadershipTransferCohort or null to clear the existing one
      */
     void setRaftActorLeadershipTransferCohort(@Nullable RaftActorLeadershipTransferCohort leadershipTransferCohort);
+
+    ReplicatedLogEntry getRootOverwriteEntry();
+
+    void setRootOverwriteEntry(ReplicatedLogEntry entry);
 }

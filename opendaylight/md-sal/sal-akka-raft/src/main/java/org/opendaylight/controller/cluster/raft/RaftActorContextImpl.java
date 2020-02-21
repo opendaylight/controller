@@ -95,6 +95,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
+    private ReplicatedLogEntry rootOverwriteEntry;
+
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
             final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
             final @NonNull Map<String, String> peerAddresses,
@@ -446,5 +448,15 @@ public class RaftActorContextImpl implements RaftActorContext {
     @SuppressWarnings("checkstyle:hiddenField")
     public void setRaftActorLeadershipTransferCohort(final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         this.leadershipTransferCohort = leadershipTransferCohort;
+    }
+
+    @Override
+    public ReplicatedLogEntry getRootOverwriteEntry() {
+        return this.rootOverwriteEntry;
+    }
+
+    @Override
+    public void setRootOverwriteEntry(final ReplicatedLogEntry entry) {
+        this.rootOverwriteEntry = entry;
     }
 }

@@ -142,6 +142,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final Collection<ShardDataTreeMetadata<?>> metadata;
     private final DataTree dataTree;
+    private final boolean snapshotOnRootOverwrite;
     private final String logContext;
     private final Shard shard;
     private Runnable runOnPendingTransactionsComplete;
@@ -161,9 +162,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ShardDataTree(final Shard shard, final SchemaContext schemaContext, final DataTree dataTree,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final String logContext,
+            final String logContext, final boolean snapshotOnRootOverwrite,
             final ShardDataTreeMetadata<?>... metadata) {
         this.dataTree = requireNonNull(dataTree);
+        this.snapshotOnRootOverwrite = snapshotOnRootOverwrite;
         updateSchemaContext(schemaContext);
 
         this.shard = requireNonNull(shard);
@@ -176,9 +178,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
             final YangInstanceIdentifier root,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final String logContext,
+            final String logContext, final boolean snapshotOnRootOverwrite,
             final ShardDataTreeMetadata<?>... metadata) {
-        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher, logContext, metadata);
+        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher, logContext,
+                snapshotOnRootOverwrite, metadata);
     }
 
     private static DataTree createDataTree(final TreeType treeType, final YangInstanceIdentifier root) {
@@ -193,7 +196,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType) {
         this(shard, schemaContext, treeType, YangInstanceIdentifier.empty(),
-                new DefaultShardDataTreeChangeListenerPublisher(""), "");
+                new DefaultShardDataTreeChangeListenerPublisher(""), "", false);
     }
 
     final String logContext() {
