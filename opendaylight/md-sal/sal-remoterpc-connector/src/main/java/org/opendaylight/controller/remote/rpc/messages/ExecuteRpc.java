@@ -15,11 +15,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?, ?>> {
@@ -57,7 +57,7 @@ public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            try (NormalizedNodeDataOutput stream = NormalizedNodeInputOutput.newDataOutput(out)) {
+            try (NormalizedNodeDataOutput stream = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
                 stream.writeQName(executeRpc.getType().getLastComponent());
                 stream.writeOptionalNormalizedNode(executeRpc.getInput());
             }
