@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -56,6 +57,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardData
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -84,6 +86,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguratio
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class AbstractDistributedDataStoreIntegrationTest {
 
@@ -905,5 +908,64 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", peopleNode, optional.get());
         }
+    }
+
+    @Test
+    @Ignore("Writes to root node are not split into shards")
+    public void testSnapshotOnRootOverwrite() throws Exception {
+        if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
+            // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
+            return;
+        }
+
+        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(),
+                datastoreContextBuilder.snapshotOnRootOverwrite(true));
+        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
+                testParameter, "testRootOverwrite", "module-shards-member1.conf",
+                true, "cars", "default")) {
+
+            ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
+                    .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(SchemaContext.NAME))
+                    .withChild((ContainerNode) CarsModel.create())
+                    .build();
+
+            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
+            IntegrationTestKit.verifyShardState(dataStore, "cars",
+                state -> assertEquals(0, state.getSnapshotIndex()));
+
+            // root has been written expect snapshot at index 0
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 0, 1);
+
+            for (int i = 0; i < 10; i++) {
+                testKit.testWriteTransaction(dataStore, CarsModel.newCarPath("car " + i),
+                    CarsModel.newCarEntry("car " + i, Uint64.ONE));
+            }
+
+            // fake snapshot causes the snapshotIndex to move
+            IntegrationTestKit.verifyShardState(dataStore, "cars",
+                state -> assertEquals(9, state.getSnapshotIndex()));
+
+            // however the real snapshot still has not changed and was taken at index 0
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 0, 1);
+
+            // root overwrite so expect a snapshot
+            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
+
+            // this was a real snapshot so everything should be in it(1 + 10 + 1)
+            IntegrationTestKit.verifyShardState(dataStore, "cars",
+                state -> assertEquals(11, state.getSnapshotIndex()));
+
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 11, 1);
+        }
+    }
+
+    private void verifySnapshot(String persistenceId, long lastAppliedIndex, long lastAppliedTerm) {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
+                assertEquals(1, snap.size());
+                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+                assertEquals(lastAppliedTerm, snap.get(0).getLastAppliedTerm());
+            }
+        );
     }
 }
