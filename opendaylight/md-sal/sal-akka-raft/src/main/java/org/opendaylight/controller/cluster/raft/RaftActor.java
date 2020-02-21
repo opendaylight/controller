@@ -902,7 +902,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("Take a snapshot of current state. lastReplicatedLog is {} and replicatedToAllIndex is {}",
                 replicatedLog().last(), idx);
 
-            snapshotManager.capture(replicatedLog().last(), idx);
+            snapshotManager.captureWithForcedTrim(replicatedLog().last(), idx);
         }
     }
 
