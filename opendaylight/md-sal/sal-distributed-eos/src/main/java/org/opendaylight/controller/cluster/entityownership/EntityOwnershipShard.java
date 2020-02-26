@@ -22,6 +22,7 @@ import static org.opendaylight.controller.cluster.entityownership.EntityOwnersMo
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.candidateNodeKey;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
+import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -31,6 +32,7 @@ import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.pattern.Patterns;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -151,6 +153,7 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("{}: onRemoveAllCandidates: {}", persistenceId(), message);
 
         removeCandidateFromEntities(message.getMemberName());
+        removeOwnerFromEntities(message.getMemberName());
     }
 
     private void onSelectOwner(final SelectOwner selectOwner) {
@@ -586,10 +589,35 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.commitModifications(modifications, this);
     }
 
+    private void removeOwnerFromEntities(final MemberName member) {
+        searchForEntities((entityTypeNode, entityNode) -> {
+            YangInstanceIdentifier entityId =
+                    (YangInstanceIdentifier) entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
+            if (isOwner(entityNode, member)) {
+                String currentOwner = member.getName();
+                YangInstanceIdentifier entityPath = entityPath(
+                        entityTypeNode.getIdentifier().getKeyValues().get(ENTITY_TYPE_QNAME).toString(), entityId);
+                String newOwner = newOwner(currentOwner, getCandidateNames(entityNode),
+                        getEntityOwnerElectionStrategy(entityPath));
+                LOG.info("{} : Replacing owner {} for entity {} with {}", persistenceId(), currentOwner, entityPath,
+                        newOwner);
+                writeNewOwner(entityPath, newOwner);
+            }
+        });
+    }
+
     private static boolean hasCandidate(final MapEntryNode entity, final MemberName candidateName) {
         return entity.getChild(CANDIDATE_NODE_ID)
                 .flatMap(child -> ((MapNode)child).getChild(candidateNodeKey(candidateName.getName())))
                 .isPresent();
+    }
+
+    private static boolean isOwner(final MapEntryNode entity, final MemberName candidateName) {
+        java.util.Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
+                entity.getChild(ENTITY_OWNER_NODE_ID);
+        String currentOwner = possibleOwner.isPresent() ? possibleOwner.get().getValue().toString() : "";
+        return possibleOwner.isPresent()
+                && Objects.equal(possibleOwner.get().getValue().toString(), candidateName.getName());
     }
 
     private void searchForEntities(final EntityWalker walker) {
