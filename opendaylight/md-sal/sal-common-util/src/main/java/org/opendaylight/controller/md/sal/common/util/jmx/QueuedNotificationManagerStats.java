@@ -5,12 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
 import java.beans.ConstructorProperties;
 import java.util.List;
-
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 
 /**
@@ -26,7 +24,6 @@ import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats
  * @see QueuedNotificationManagerMXBeanImpl
  */
 public class QueuedNotificationManagerStats {
-
     private final int maxListenerQueueSize;
     private final List<ListenerNotificationQueueStats> currentListenerQueueStats;
 
