@@ -17,6 +17,8 @@
     <module>toaster-provider</module>
     <module>clustering-test-app</module>
     <module>toaster-it</module>
+    <module>backup-producer</module>
+    <module>backup-consumer</module>
   </modules>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
