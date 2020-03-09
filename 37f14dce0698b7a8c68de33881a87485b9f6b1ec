@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66d6af66_7bfd0b76",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-03-09T10:25:03Z",
+      "side": 1,
+      "message": "This is a bit suspicious: what happens if we do no reach this point, i.e. due to the throw above?\n\nShouldn\u0027t we have payload.acquireCandidate(), which will return the entry, plus as effect clear the candidate?",
+      "range": {
+        "startLine": 352,
+        "startChar": 8,
+        "endLine": 352,
+        "endChar": 33
+      },
+      "revId": "37f14dce0698b7a8c68de33881a87485b9f6b1ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
