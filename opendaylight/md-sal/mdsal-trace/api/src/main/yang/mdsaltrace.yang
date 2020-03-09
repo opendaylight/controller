@@ -34,5 +34,9 @@ module mdsaltrace {
                          whereas this one is specific to odl-mdsal-trace's trace:transaction leak troubleshooting command.";
             // This ^^^ description is also copy/pasted in mdsaltrace_config.xml, and should be kept in line.]
         }
+        leaf transaction-count {
+             type int32;
+             description "Counter for incremental recovery testing";
+        }
     }
 }

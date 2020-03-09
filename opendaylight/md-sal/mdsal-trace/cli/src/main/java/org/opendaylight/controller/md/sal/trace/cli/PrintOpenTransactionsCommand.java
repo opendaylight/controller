@@ -42,6 +42,7 @@ public class PrintOpenTransactionsCommand implements Action {
         boolean hasFound = false;
         for (TracingDOMDataBroker tracingDOMDataBroker : tracingDOMDataBrokers) {
             hasFound |= tracingDOMDataBroker.printOpenTransactions(System.out, minOpenTransactions);
+            break;
         }
         if (hasFound) {
             System.out.println(
