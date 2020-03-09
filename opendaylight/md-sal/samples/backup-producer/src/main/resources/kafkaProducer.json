@@ -1,0 +1,16 @@
+{
+  "kafka-connection":{
+    "kafka-host": "hostName",
+    "kafka-port": 9092
+  },
+  "kafka-messaging": {
+    "topic": "testTopic1",
+    "partition" : 0,
+    "key": "testKey"
+  },
+  "kafka-producer-properties": {
+    "retries" : 0,
+    "linger.ms" : 1,
+    "max.block.ms" : 1000
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "kafka-connection":{
+    "kafka-host": "hostName",
+    "kafka-port": 9092
+  },
+  "kafka-messaging": {
+    "topic": "testTopic1"
+  },
+  "kafka-consumer-properties": {
+    "group.id" : "test",
+    "enable.auto.commit": "true",
+    "auto.commit.interval.ms" : 1000
+  }
+}

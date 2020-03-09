@@ -22,8 +22,8 @@ import org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker;
  */
 @Service
 @Command(scope = "trace", name = "transactions",
-    description = "Show all (still) open transactions; including stack trace of creator, "
-    + "if transaction-debug-context-enabled is true in mdsaltrace_config.xml")
+        description = "Show all (still) open transactions; including stack trace of creator, "
+                + "if transaction-debug-context-enabled is true in mdsaltrace_config.xml")
 public class PrintOpenTransactionsCommand implements Action {
 
     @Argument(index = 0, name = "minOpenTransactions", required = false, multiValued = false,

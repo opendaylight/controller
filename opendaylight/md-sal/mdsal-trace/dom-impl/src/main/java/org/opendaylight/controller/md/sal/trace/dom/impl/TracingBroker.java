@@ -351,18 +351,18 @@ public class TracingBroker implements TracingDOMDataBroker {
     @Override
     public boolean printOpenTransactions(PrintStream ps, int minOpenTXs) {
         if (transactionChainsRegistry.getAllUnique().isEmpty()
-            && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
-            && writeTransactionsRegistry.getAllUnique().isEmpty()
-            && readWriteTransactionsRegistry.getAllUnique().isEmpty()) {
+                && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
+                && writeTransactionsRegistry.getAllUnique().isEmpty()
+                && readWriteTransactionsRegistry.getAllUnique().isEmpty()) {
 
             ps.println(type + ": No open transactions, great!");
             return false;
         }
 
         ps.println(type + ": " + getClass().getSimpleName()
-                 + " found some not yet (or never..) closed transaction[chain]s!");
+                + " found some not yet (or never..) closed transaction[chain]s!");
         ps.println("[NB: If no stack traces are shown below, then "
-                 + "enable transaction-debug-context-enabled in mdsaltrace_config.xml]");
+                + "enable transaction-debug-context-enabled in mdsaltrace_config.xml]");
         ps.println();
         // Flag to track if we really found any real leaks with more (or equal) to minOpenTXs
         boolean hasFound = print(readOnlyTransactionsRegistry, ps, "  ", minOpenTXs);
@@ -372,7 +372,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         // Now print details for each non-closed TransactionChain
         // incl. in turn each ones own read/Write[Only]TransactionsRegistry
         Set<CloseTrackedRegistryReportEntry<TracingTransactionChain>>
-            entries = transactionChainsRegistry.getAllUnique();
+                entries = transactionChainsRegistry.getAllUnique();
         if (!entries.isEmpty()) {
             ps.println("  " + transactionChainsRegistry.getAnchor() + " : "
                     + transactionChainsRegistry.getCreateDescription());
@@ -382,7 +382,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             printStackTraceElements(ps, "      ", entry.getStackTraceElements());
             @SuppressWarnings("resource")
             TracingTransactionChain txChain = (TracingTransactionChain) entry
-                .getExampleCloseTracked().getRealCloseTracked();
+                    .getExampleCloseTracked().getRealCloseTracked();
             hasFound |= print(txChain.getReadOnlyTransactionsRegistry(), ps, "        ", minOpenTXs);
             hasFound |= print(txChain.getWriteTransactionsRegistry(), ps, "        ", minOpenTXs);
             hasFound |= print(txChain.getReadWriteTransactionsRegistry(), ps, "        ", minOpenTXs);
@@ -407,7 +407,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         }
         entries.forEach(entry -> {
             ps.println(indent + "  " + entry.getNumberAddedNotRemoved()
-                + "x transactions opened here, which are not closed:");
+                    + "x transactions opened here, which are not closed:");
             printStackTraceElements(ps, indent + "    ", entry.getStackTraceElements());
         });
         if (!entries.isEmpty()) {
@@ -432,13 +432,13 @@ public class TracingBroker implements TracingDOMDataBroker {
     private boolean isStackTraceElementInteresting(StackTraceElement element) {
         final String className = element.getClassName();
         return !className.startsWith(getClass().getPackage().getName())
-            && !className.startsWith(CloseTracked.class.getPackage().getName())
-            && !className.startsWith("Proxy")
-            && !className.startsWith("akka")
-            && !className.startsWith("scala")
-            && !className.startsWith("sun.reflect")
-            && !className.startsWith("java.lang.reflect")
-            && !className.startsWith("org.apache.aries.blueprint")
-            && !className.startsWith("org.osgi.util.tracker");
+                && !className.startsWith(CloseTracked.class.getPackage().getName())
+                && !className.startsWith("Proxy")
+                && !className.startsWith("akka")
+                && !className.startsWith("scala")
+                && !className.startsWith("sun.reflect")
+                && !className.startsWith("java.lang.reflect")
+                && !className.startsWith("org.apache.aries.blueprint")
+                && !className.startsWith("org.osgi.util.tracker");
     }
 }
