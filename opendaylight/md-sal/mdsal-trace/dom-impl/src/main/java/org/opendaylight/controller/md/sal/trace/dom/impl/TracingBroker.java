@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.Optional;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
@@ -37,7 +39,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltra
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -350,7 +358,106 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     @Override
     public boolean printOpenTransactions(PrintStream ps, int minOpenTXs) {
-        if (transactionChainsRegistry.getAllUnique().isEmpty()
+        ps.println("Printing");
+        /*ps.println("If seen, the deprecation warning didnt throw the whole build");
+        ModuleInfoBackedContext moduleInfoBackedCntxt = ModuleInfoBackedContext.create();
+        List<YangModuleInfo> moduleInfos = new LinkedList<>();
+
+        moduleInfos.add($YangModuleInfoImpl.getInstance());
+        moduleInfoBackedCntxt.addModuleInfos(moduleInfos);
+        java.util.Optional<? extends SchemaContext> tryToCreateSchemaContext =
+                moduleInfoBackedCntxt.tryToCreateSchemaContext();
+        SchemaContext context;
+        if (!tryToCreateSchemaContext.isPresent()) {
+            ps.println("Schema wasnt created");
+        } else {
+            context = tryToCreateSchemaContext.get();
+            ps.println("Schema modules loaded: " + context.getModules().toString());
+        }*/
+
+        try {
+            /*Integer counterBefore = 0;
+            DOMDataReadOnlyTransaction readBeforeTransaction = this.delegate.newReadOnlyTransaction();
+            Optional<NormalizedNode<?, ?>> configOpt = readBeforeTransaction.read(
+                    LogicalDatastoreType.CONFIGURATION,
+                    YangInstanceIdentifier.of(Config.QNAME)).get();
+
+            if (configOpt.isPresent()) {
+                NormalizedNode<?, ?> properties = configOpt.get();
+                counterBefore = (Integer)((NormalizedNode)((DataContainerNode) properties).getValue().iterator().next())
+                        .getValue();
+                //ps.println("Found config before - counter: " + counterBefore);
+                //newData = !newData;
+            }
+            readBeforeTransaction.close();
+            if (counterBefore == 2) {
+                ps.println("Found config before - counter: " + counterBefore);
+                return true;
+            }*/
+            ps.println("Generating");
+            for (int i = 0; i < 5; i++) {
+
+                /*Boolean newData = false;
+                DOMDataReadOnlyTransaction readBeforeTransaction = this.delegate.newReadOnlyTransaction();
+                Optional<NormalizedNode<?, ?>> configOpt = readBeforeTransaction.read(
+                        LogicalDatastoreType.CONFIGURATION,
+                        YangInstanceIdentifier.of(Config.QNAME)).get();
+
+                if (configOpt.isPresent()) {
+                    NormalizedNode<?, ?> properties = configOpt.get();
+                    //ps.println("Found configBefore : " + properties.toString());
+                    newData =  (Boolean)((NormalizedNode)((DataContainerNode) properties).getValue().iterator().next())
+                            .getValue();
+                    newData = !newData;
+                }
+                readBeforeTransaction.close();*/
+
+                ContainerNode data = ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(Config.QNAME))
+                        .withChild(ImmutableLeafNodeBuilder.create()
+                                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(QName.create(Config.QNAME,
+                                        "transaction-count").intern()))
+                                .withValue(i)
+                                .build())
+                        .build();
+
+                DOMDataWriteTransaction writeTransaction = this.delegate.newWriteOnlyTransaction();
+                writeTransaction.put(LogicalDatastoreType.CONFIGURATION,
+                        YangInstanceIdentifier.of(Config.QNAME), data);
+                writeTransaction.commit().get();
+                ps.println("Writing data, creating log: " + i);
+                /*DOMDataReadOnlyTransaction readAfterTransaction = this.delegate.newReadOnlyTransaction();
+                Optional<NormalizedNode<?, ?>> configAfter = readAfterTransaction.read(
+                        LogicalDatastoreType.CONFIGURATION,
+                        YangInstanceIdentifier.of(Config.QNAME)).get();
+
+                if (configAfter.isPresent()) {
+                    NormalizedNode<?, ?> properties = configAfter.get();
+                    //ps.println("Found configAfter : " + properties.toString());
+                } else {
+                    //ps.println("configAfter wasn't present");
+                }
+                readAfterTransaction.close();*/
+            }
+            Integer counterAfter;
+            DOMDataReadOnlyTransaction readAfterTransaction = this.delegate.newReadOnlyTransaction();
+            Optional<NormalizedNode<?, ?>> configOptAfter = readAfterTransaction.read(
+                    LogicalDatastoreType.CONFIGURATION,
+                    YangInstanceIdentifier.of(Config.QNAME)).get();
+
+            if (configOptAfter.isPresent()) {
+                NormalizedNode<?, ?> properties = configOptAfter.get();
+                counterAfter = (Integer)((NormalizedNode)((DataContainerNode) properties).getValue().iterator().next())
+                        .getValue();
+                ps.println("Found config after - counter: " + counterAfter);
+                //newData = !newData;
+            }
+            readAfterTransaction.close();
+        } catch (InterruptedException | ExecutionException e) {
+            ps.println("Log generation failed: " + e.getMessage());
+        }
+
+        /*if (transactionChainsRegistry.getAllUnique().isEmpty()
             && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
             && writeTransactionsRegistry.getAllUnique().isEmpty()
             && readWriteTransactionsRegistry.getAllUnique().isEmpty()) {
@@ -387,12 +494,12 @@ public class TracingBroker implements TracingDOMDataBroker {
             hasFound |= print(txChain.getWriteTransactionsRegistry(), ps, "        ", minOpenTXs);
             hasFound |= print(txChain.getReadWriteTransactionsRegistry(), ps, "        ", minOpenTXs);
         }
-        ps.println();
+        ps.println();*/
 
-        return hasFound;
+        return true;
     }
 
-    private <T extends CloseTracked<T>> boolean print(
+    /*private <T extends CloseTracked<T>> boolean print(
             CloseTrackedRegistry<T> registry, PrintStream ps, String indent, int minOpenTransactions) {
         Set<CloseTrackedRegistryReportEntry<T>> unsorted = registry.getAllUnique();
         if (unsorted.size() < minOpenTransactions) {
@@ -414,7 +521,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             ps.println();
         }
         return true;
-    }
+    }*/
 
     private void printStackTraceElements(PrintStream ps, String indent, List<StackTraceElement> stackTraceElements) {
         boolean ellipsis = false;
