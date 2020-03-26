@@ -10,5 +10,11 @@
 # http://www.eclipse.org/legal/epl-v10.html
 ##############################################################################
 
+import xml.etree.ElementTree as ET
+
 from docs_conf.conf import *
 
+data = ET.parse('pom.xml')
+project_version = data.getroot().find('*//{http://maven.apache.org/POM/4.0.0}version').text
+version = project_version
+release = project_version
