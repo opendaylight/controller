@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d387cb12_bdad6d57",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-03-30T23:06:15Z",
+      "side": 1,
+      "message": "is this really necessary?",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 30
+      },
+      "revId": "fc064e1f9036b50ee519a1dc6ac468c4841e6d7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c31123c0_d945c2ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractDataStore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-03-30T23:06:15Z",
+      "side": 1,
+      "message": "this performs multiple calls, which leads to DataTreeChangeListenerProxy.listenerRegistrationActor being overwritten.\n\nThat means that when user calls listenerRegistrationProxy.close(), we will end shut down and unregister only the last registration will be told to exit and hence we\u0027ll fail be leaking at actors.\n\nAt any rate, this code should live in DataTreeChangeListenerProxy.init() -- all the required information has been passed to the constructor anyway -- as that will result in proper state encapsulation.",
+      "range": {
+        "startLine": 169,
+        "startChar": 42,
+        "endLine": 169,
+        "endChar": 46
+      },
+      "revId": "fc064e1f9036b50ee519a1dc6ac468c4841e6d7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
