@@ -159,12 +159,20 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         requireNonNull(treeId, "treeId should not be null");
         requireNonNull(listener, "listener should not be null");
 
-        final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
-        LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
-
         final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
                 new DataTreeChangeListenerProxy<>(actorUtils, listener, treeId);
-        listenerRegistrationProxy.init(shardName);
+
+        if (treeId.isEmpty()) {
+            LOG.debug("Registering Global Root listener");
+            for (String shardName : actorUtils.getConfiguration().getAllShardNames()) {
+                LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
+                listenerRegistrationProxy.init(shardName);
+            }
+        } else {
+            final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
+            LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
+            listenerRegistrationProxy.init(shardName);
+        }
 
         return listenerRegistrationProxy;
     }
