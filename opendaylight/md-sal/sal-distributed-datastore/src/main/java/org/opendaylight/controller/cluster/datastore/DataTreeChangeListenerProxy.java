@@ -15,6 +15,7 @@ import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
 import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.List;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -35,14 +36,17 @@ import scala.concurrent.Future;
  *
  * @param <T> listener type
  */
-final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
+abstract class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
     private final ActorRef dataChangeListenerActor;
     private final ActorUtils actorUtils;
     private final YangInstanceIdentifier registeredPath;
 
-    @GuardedBy("this")
-    private ActorSelection listenerRegistrationActor;
+    public abstract void init();
+
+    protected abstract void unregister();
+
+    protected abstract void setListenerRegistrationActor(ActorSelection actor);
 
     DataTreeChangeListenerProxy(final ActorUtils actorUtils, final T listener,
             final YangInstanceIdentifier registeredPath) {
@@ -57,58 +61,25 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                 dataChangeListenerActor, listener);
     }
 
-    @Override
-    protected synchronized void removeRegistration() {
-        if (listenerRegistrationActor != null) {
-            listenerRegistrationActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(),
-                    ActorRef.noSender());
-            listenerRegistrationActor = null;
+    public static DataTreeChangeListenerProxy create(final ActorUtils actorUtils,
+            final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
+        if (registeredPath.isEmpty()) {
+            return new DataTreeChangeListenerMultiShardProxy(actorUtils, listener, registeredPath);
         }
 
+        return new DataTreeChangeListenerSingleShardProxy(actorUtils, listener, registeredPath);
+
+    }
+
+    @Override
+    protected synchronized void removeRegistration() {
+        unregister();
         dataChangeListenerActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    void init(final String shardName) {
-        Future<ActorRef> findFuture = actorUtils.findLocalShardAsync(shardName);
-        findFuture.onComplete(new OnComplete<ActorRef>() {
-            @Override
-            public void onComplete(final Throwable failure, final ActorRef shard) {
-                if (failure instanceof LocalShardNotFoundException) {
-                    LOG.debug("{}: No local shard found for {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered", logContext(), shardName, getInstance(), registeredPath);
-                } else if (failure != null) {
-                    LOG.error("{}: Failed to find local shard {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered", logContext(), shardName, getInstance(), registeredPath,
-                            failure);
-                } else {
-                    doRegistration(shard);
-                }
-            }
-        }, actorUtils.getClientDispatcher());
-    }
-
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
             justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private void setListenerRegistrationActor(final ActorSelection actor) {
-        if (actor == null) {
-            LOG.debug("{}: Ignoring null actor on {}", logContext(), this);
-            return;
-        }
-
-        synchronized (this) {
-            if (!isClosed()) {
-                this.listenerRegistrationActor = actor;
-                return;
-            }
-        }
-
-        // This registration has already been closed, notify the actor
-        actor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), null);
-    }
-
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private void doRegistration(final ActorRef shard) {
+    protected void doRegistration(final ActorRef shard) {
 
         Future<Object> future = actorUtils.executeOperationAsync(shard,
                 new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor,
@@ -131,16 +102,19 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     }
 
     @VisibleForTesting
-    synchronized ActorSelection getListenerRegistrationActor() {
-        return listenerRegistrationActor;
-    }
-
-    @VisibleForTesting
     ActorRef getDataChangeListenerActor() {
         return dataChangeListenerActor;
     }
 
-    private String logContext() {
+    protected String logContext() {
         return actorUtils.getDatastoreContext().getLogicalStoreType().toString();
+    }
+
+    protected ActorUtils getActorUtils() {
+        return actorUtils;
+    }
+
+    protected YangInstanceIdentifier getRegisteredPath() {
+        return registeredPath;
     }
 }
