@@ -32,7 +32,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
-import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -162,9 +161,9 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
-        final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorUtils, listener, treeId);
-        listenerRegistrationProxy.init(shardName);
+        DataTreeChangeListenerProxy<L> listenerRegistrationProxy = DataTreeChangeListenerProxy
+                .create(actorUtils, listener, treeId);
+        listenerRegistrationProxy.init();
 
         return listenerRegistrationProxy;
     }
@@ -300,11 +299,11 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 delegate,shardLookup, shardName, insideShard);
 
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorUtils,
-                        // wrap this in the ClusteredDOMDataTreeChangeLister interface
-                        // since we always want clustered registration
-                        (ClusteredDOMDataTreeChangeListener) delegate::onDataTreeChanged, insideShard);
-        listenerRegistrationProxy.init(shardName);
+            DataTreeChangeListenerProxy.createForPrefixShard(actorUtils,
+                // wrap this in the ClusteredDOMDataTreeChangeLister interface
+                // since we always want clustered registration
+                (ClusteredDOMDataTreeChangeListener) delegate::onDataTreeChanged, shardName, insideShard);
+        listenerRegistrationProxy.init();
 
         return (ListenerRegistration<L>) listenerRegistrationProxy;
     }
@@ -318,8 +317,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         LOG.debug("Registering a listener for the configuration shard: {}", internalPath);
 
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy =
-                new DataTreeChangeListenerProxy<>(actorUtils, delegate, internalPath);
-        proxy.init(ClusterUtils.PREFIX_CONFIG_SHARD_ID);
+            DataTreeChangeListenerProxy.create(actorUtils, delegate, internalPath);
+        proxy.init();
 
         return (ListenerRegistration<L>) proxy;
     }
