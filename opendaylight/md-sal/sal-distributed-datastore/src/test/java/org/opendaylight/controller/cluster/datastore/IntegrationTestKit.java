@@ -47,7 +47,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -79,14 +79,14 @@ public class IntegrationTestKit extends ShardTestKit {
 
     public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
                                                           final boolean waitUntilLeader,
-                                                          final SchemaContext schemaContext) throws Exception {
+                                                          final EffectiveModelContext schemaContext) throws Exception {
         return setupDistributedDataStore(typeName, moduleShardsConfig, "modules.conf", waitUntilLeader, schemaContext);
     }
 
     public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
                                                           final String modulesConfig,
                                                           final boolean waitUntilLeader,
-                                                          final SchemaContext schemaContext,
+                                                          final EffectiveModelContext schemaContext,
                                                           final String... shardNames) throws Exception {
         return (DistributedDataStore) setupAbstractDataStore(DistributedDataStore.class, typeName, moduleShardsConfig,
                 modulesConfig, waitUntilLeader, schemaContext, shardNames);
@@ -117,7 +117,7 @@ public class IntegrationTestKit extends ShardTestKit {
     public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
                                                     final String typeName, final String moduleShardsConfig,
                                                     final boolean waitUntilLeader,
-                                                    final SchemaContext schemaContext,
+                                                    final EffectiveModelContext schemaContext,
                                                     final String... shardNames) throws Exception {
         return setupAbstractDataStore(implementation, typeName, moduleShardsConfig, "modules.conf", waitUntilLeader,
                 schemaContext, shardNames);
@@ -126,7 +126,8 @@ public class IntegrationTestKit extends ShardTestKit {
     private AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
                                                      final String typeName, final String moduleShardsConfig,
                                                      final String modulesConfig, final boolean waitUntilLeader,
-                                                     final SchemaContext schemaContext, final String... shardNames)
+                                                     final EffectiveModelContext schemaContext,
+                                                     final String... shardNames)
             throws Exception {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final Configuration config = new ConfigurationImpl(moduleShardsConfig, modulesConfig);
@@ -148,7 +149,7 @@ public class IntegrationTestKit extends ShardTestKit {
         final AbstractDataStore dataStore = constructor.newInstance(getSystem(), cluster, config, mockContextFactory,
             restoreFromSnapshot);
 
-        dataStore.onGlobalContextUpdated(schemaContext);
+        dataStore.onModelContextUpdated(schemaContext);
 
         if (waitUntilLeader) {
             waitUntilLeader(dataStore.getActorUtils(), shardNames);
@@ -169,7 +170,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
-                                                                       final SchemaContext schemaContext) {
+                                                                       final EffectiveModelContext schemaContext) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
 
@@ -184,14 +185,14 @@ public class IntegrationTestKit extends ShardTestKit {
         final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
                 configuration, mockContextFactory, restoreFromSnapshot);
 
-        dataStore.onGlobalContextUpdated(schemaContext);
+        dataStore.onModelContextUpdated(schemaContext);
 
         datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
         return dataStore;
     }
 
     public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
-                                                                       final SchemaContext schemaContext,
+                                                                       final EffectiveModelContext schemaContext,
                                                                        final LogicalDatastoreType storeType) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
@@ -208,7 +209,7 @@ public class IntegrationTestKit extends ShardTestKit {
         final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
                 configuration, mockContextFactory, restoreFromSnapshot);
 
-        dataStore.onGlobalContextUpdated(schemaContext);
+        dataStore.onModelContextUpdated(schemaContext);
 
         datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
         return dataStore;

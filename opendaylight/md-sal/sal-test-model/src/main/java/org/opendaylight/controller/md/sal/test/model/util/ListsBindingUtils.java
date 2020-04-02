@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.test.model.util;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Maps;
 import java.util.Arrays;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
@@ -28,18 +30,16 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class ListsBindingUtils {
-
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
-
-    private ListsBindingUtils() {
-        throw new UnsupportedOperationException();
-    }
 
     public static final TopLevelListKey TOP_FOO_KEY = new TopLevelListKey("foo");
     public static final TopLevelListKey TOP_BAR_KEY = new TopLevelListKey("bar");
     public static final ListViaUsesKey USES_ONE_KEY = new ListViaUsesKey("one");
     public static final ListViaUsesKey USES_TWO_KEY = new ListViaUsesKey("two");
 
+    private ListsBindingUtils() {
+
+    }
 
     public static InstanceIdentifier<TopLevelList> path(final TopLevelListKey key) {
         return TOP_PATH.child(TopLevelList.class, key);
@@ -59,7 +59,7 @@ public final class ListsBindingUtils {
     }
 
     public static Top top(final TopLevelList... listItems) {
-        return new TopBuilder().setTopLevelList(Arrays.asList(listItems)).build();
+        return new TopBuilder().setTopLevelList(Maps.uniqueIndex(Arrays.asList(listItems), TopLevelList::key)).build();
     }
 
     public static TopLevelList topLevelList(final TopLevelListKey key) {
@@ -73,9 +73,9 @@ public final class ListsBindingUtils {
     }
 
     public static TreeComplexUsesAugment complexUsesAugment(final ListViaUsesKey... keys) {
-        ImmutableList.Builder<ListViaUses> listViaUses = ImmutableList.<ListViaUses>builder();
+        Builder<ListViaUsesKey, ListViaUses> listViaUses = ImmutableMap.builderWithExpectedSize(keys.length);
         for (ListViaUsesKey key : keys) {
-            listViaUses.add(new ListViaUsesBuilder().withKey(key).build());
+            listViaUses.put(key, new ListViaUsesBuilder().withKey(key).build());
         }
         return new TreeComplexUsesAugmentBuilder().setListViaUses(listViaUses.build()).build();
     }
@@ -84,5 +84,4 @@ public final class ListsBindingUtils {
 
         return new TreeLeafOnlyUsesAugmentBuilder().setLeafFromGrouping(leafFromGroupingValue).build();
     }
-
 }

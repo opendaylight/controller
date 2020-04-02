@@ -101,7 +101,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
         dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration,
                 mockContextFactory, null);
 
-        dataStore.onGlobalContextUpdated(EOSTestUtils.SCHEMA_CONTEXT);
+        dataStore.onModelContextUpdated(EOSTestUtils.SCHEMA_CONTEXT);
     }
 
     @After

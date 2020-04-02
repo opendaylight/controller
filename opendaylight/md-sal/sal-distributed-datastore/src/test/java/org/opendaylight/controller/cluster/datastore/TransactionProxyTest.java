@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
@@ -80,7 +79,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import scala.concurrent.Promise;
 
 @SuppressWarnings({"resource", "checkstyle:IllegalThrows", "checkstyle:AvoidHidingCauseException"})
@@ -1457,9 +1456,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadRoot() throws InterruptedException, ExecutionException,
-            java.util.concurrent.TimeoutException {
-        SchemaContext schemaContext = SchemaContextHelper.full();
+    public void testReadRoot() throws InterruptedException, ExecutionException, java.util.concurrent.TimeoutException {
+        EffectiveModelContext schemaContext = SchemaContextHelper.full();
         Configuration configuration = mock(Configuration.class);
         doReturn(configuration).when(mockActorContext).getConfiguration();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();

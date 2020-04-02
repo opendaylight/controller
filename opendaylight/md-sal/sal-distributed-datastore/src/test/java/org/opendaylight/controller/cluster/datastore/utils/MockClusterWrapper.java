@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import akka.actor.ActorRef;
@@ -20,7 +19,7 @@ import akka.cluster.MemberStatus;
 import akka.cluster.UniqueAddress;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
-import scala.collection.immutable.Set;
+import scala.collection.immutable.Set.Set1;
 
 public class MockClusterWrapper implements ClusterWrapper {
 
@@ -63,34 +62,29 @@ public class MockClusterWrapper implements ClusterWrapper {
 
     public static MemberRemoved createMemberRemoved(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.removed(), setOf(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.removed(), new Set1<>(memberName));
 
         return new MemberRemoved(member, MemberStatus.up());
     }
 
     public static MemberUp createMemberUp(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), setOf(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName));
 
         return new MemberUp(member);
     }
 
     public static UnreachableMember createUnreachableMember(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), setOf(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName));
 
         return new UnreachableMember(member);
     }
 
     public static ReachableMember createReachableMember(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), setOf(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName));
 
         return new ReachableMember(member);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Set<String> setOf(final String str) {
-        return scala.collection.immutable.Set$.MODULE$.<String>newBuilder().$plus$eq(str).result();
     }
 }
