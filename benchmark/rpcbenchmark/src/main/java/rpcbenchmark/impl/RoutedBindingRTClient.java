@@ -7,8 +7,11 @@
  */
 package rpcbenchmark.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,6 +23,7 @@ import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOut
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.Payload;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadBuilder;
+import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
@@ -43,13 +47,14 @@ public class RoutedBindingRTClient implements RTCClient {
         this.inSize = inSize;
         this.inVal = new ArrayList<>();
 
-        List<Payload> listVals = new ArrayList<>();
+        Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
         for (int i = 0; i < inSize; i++) {
-            listVals.add(new PayloadBuilder().setId(i).build());
+            final PayloadKey key = new PayloadKey(i);
+            listVals.put(key, new PayloadBuilder().withKey(key).build());
         }
 
         for (InstanceIdentifier<?> iid : routeIid) {
-            inVal.add(new RoutedRpcBenchInputBuilder().setNode(iid).setPayload(listVals).build());
+            inVal.add(new RoutedRpcBenchInputBuilder().setNode(iid).setPayload(listVals.build()).build());
         }
 
     }
@@ -77,7 +82,7 @@ public class RoutedBindingRTClient implements RTCClient {
                 RpcResult<RoutedRpcBenchOutput> rpcResult = output.get();
 
                 if (rpcResult.isSuccessful()) {
-                    List<Payload> retVal = rpcResult.getResult().getPayload();
+                    Map<PayloadKey, Payload> retVal = rpcResult.getResult().getPayload();
                     if (retVal.size() == inSize) {
                         ok++;
                     }

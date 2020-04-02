@@ -7,8 +7,9 @@
  */
 package rpcbenchmark.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,6 +20,7 @@ import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOut
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.Payload;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadBuilder;
+import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadKey;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +52,12 @@ public class GlobalBindingRTCClient implements RTCClient {
         }
 
         this.inSize = inSize;
-        List<Payload> listVals = new ArrayList<>();
+        Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
         for (int i = 0; i < inSize; i++) {
-            listVals.add(new PayloadBuilder().setId(i).build());
+            final PayloadKey key = new PayloadKey(i);
+            listVals.put(key, new PayloadBuilder().withKey(key).build());
         }
-        inVal = new GlobalRpcBenchInputBuilder().setPayload(listVals).build();
+        inVal = new GlobalRpcBenchInputBuilder().setPayload(listVals.build()).build();
     }
 
     @Override
@@ -68,7 +71,7 @@ public class GlobalBindingRTCClient implements RTCClient {
                 RpcResult<GlobalRpcBenchOutput> rpcResult = output.get();
 
                 if (rpcResult.isSuccessful()) {
-                    List<Payload> retVal = rpcResult.getResult().getPayload();
+                    Map<PayloadKey, Payload> retVal = rpcResult.getResult().getPayload();
                     if (retVal.size() == inSize) {
                         ok++;
                     }
