@@ -43,8 +43,8 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
@@ -52,7 +52,7 @@ import scala.concurrent.duration.Duration;
 /**
  * Base implementation of a distributed DOMStore.
  */
-public abstract class AbstractDataStore implements DistributedDataStoreInterface, SchemaContextListener,
+public abstract class AbstractDataStore implements DistributedDataStoreInterface, EffectiveModelContextListener,
         DatastoreContextPropertiesUpdater.Listener, DOMStoreTreeChangePublisher,
         DOMDataTreeCommitCohortRegistry, AutoCloseable {
 
@@ -187,8 +187,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @Override
-    public void onGlobalContextUpdated(final SchemaContext schemaContext) {
-        actorUtils.setSchemaContext(schemaContext);
+    public void onModelContextUpdated(final EffectiveModelContext newModelContext) {
+        actorUtils.setSchemaContext(newModelContext);
     }
 
     @Override
