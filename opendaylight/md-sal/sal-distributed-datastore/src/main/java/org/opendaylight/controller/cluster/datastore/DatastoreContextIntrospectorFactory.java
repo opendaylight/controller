@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.opendaylight.binding.runtime.api.BindingRuntimeContext;
+import org.opendaylight.binding.runtime.api.ClassLoadingStrategy;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 
@@ -24,19 +24,19 @@ public class DatastoreContextIntrospectorFactory {
     private final DOMSchemaService schemaService;
     private final ClassLoadingStrategy classLoadingStrategy;
 
-    public DatastoreContextIntrospectorFactory(DOMSchemaService schemaService,
-            ClassLoadingStrategy classLoadingStrategy) {
+    public DatastoreContextIntrospectorFactory(final DOMSchemaService schemaService,
+            final ClassLoadingStrategy classLoadingStrategy) {
         this.schemaService = schemaService;
         this.classLoadingStrategy = classLoadingStrategy;
     }
 
-    public DatastoreContextIntrospector newInstance(LogicalDatastoreType datastoreType) {
+    public DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType) {
         return new DatastoreContextIntrospector(DatastoreContext.newBuilder()
                 .logicalStoreType(datastoreType).tempFileDirectory("./data").build(), newBindingSerializer());
     }
 
     @VisibleForTesting
-    DatastoreContextIntrospector newInstance(DatastoreContext context) {
+    DatastoreContextIntrospector newInstance(final DatastoreContext context) {
         return new DatastoreContextIntrospector(context, newBindingSerializer());
     }
 
