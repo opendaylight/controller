@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_MS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
@@ -21,44 +19,24 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
-import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
-import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.binding.runtime.spi.BindingRuntimeHelpers;
+import org.opendaylight.mdsal.binding.generator.impl.DefaultBindingRuntimeGenerator;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStorePropertiesContainer;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * Unit tests for DatastoreContextIntrospector.
  *
  * @author Thomas Pantelis
  */
-@SuppressWarnings("checkstyle:IllegalCatch")
 public class DatastoreContextIntrospectorTest {
 
-    static SchemaContext SCHEMA_CONTEXT;
-    static DatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY;
-
-    static {
-        final ModuleInfoBackedContext moduleContext = ModuleInfoBackedContext.create();
-        try {
-            moduleContext.addModuleInfos(Arrays.asList(
-                    BindingReflections.getModuleInfo(DataStorePropertiesContainer.class)));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        SCHEMA_CONTEXT = moduleContext.tryToCreateSchemaContext().get();
-
-        DOMSchemaService mockSchemaService = mock(DOMSchemaService.class);
-        doReturn(SCHEMA_CONTEXT).when(mockSchemaService).getGlobalContext();
-        INTROSPECTOR_FACTORY = new DatastoreContextIntrospectorFactory(mockSchemaService,
-                GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy());
-    }
+    static final DatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY = new DatastoreContextIntrospectorFactory(
+        BindingRuntimeHelpers.createRuntimeContext(new DefaultBindingRuntimeGenerator(),
+            DataStorePropertiesContainer.class));
 
     @Test
     public void testYangDefaults() {

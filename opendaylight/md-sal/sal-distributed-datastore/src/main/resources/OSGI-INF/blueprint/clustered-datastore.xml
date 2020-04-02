@@ -12,7 +12,11 @@
 
   <odl:static-reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
 
-  <reference id="classLoadingStrategy" interface="org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy" />
+  <reference id="bindingRuntimeContext" interface="org.opendaylight.binding.runtime.api.BindingRuntimeContext"/>
+
+  <bean id="introspectorFactory" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorFactory">
+    <argument ref="bindingRuntimeContext"/>
+  </bean>
 
   <!-- ActorSystemProvider -->
 
@@ -48,11 +52,6 @@
   <bean id="datastoreSnapshotRestore" class="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"
           factory-method="instance">
     <argument value="./clustered-datastore-restore"/>
-  </bean>
-
-  <bean id="introspectorFactory" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorFactory">
-    <argument ref="schemaService"/>
-    <argument ref="classLoadingStrategy"/>
   </bean>
 
   <bean id="introspectorConfig" factory-ref="introspectorFactory" factory-method="newInstance">

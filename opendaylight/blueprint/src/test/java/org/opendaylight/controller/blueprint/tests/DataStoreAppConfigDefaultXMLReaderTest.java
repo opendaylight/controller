@@ -30,7 +30,7 @@ public class DataStoreAppConfigDefaultXMLReaderTest extends AbstractConcurrentDa
                 getDataBrokerTestCustomizer().getBindingToNormalized(),
                 Lists.class).createDefaultInstance();
 
-        UnorderedList element = lists.getUnorderedContainer().getUnorderedList().get(0);
+        UnorderedList element = lists.getUnorderedContainer().getUnorderedList().values().iterator().next();
         assertThat(element.getName()).isEqualTo("someName");
         assertThat(element.getValue()).isEqualTo("someValue");
     }

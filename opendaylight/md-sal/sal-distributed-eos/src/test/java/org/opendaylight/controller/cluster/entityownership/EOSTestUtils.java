@@ -8,11 +8,11 @@
 package org.opendaylight.controller.cluster.entityownership;
 
 import java.io.File;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 final class EOSTestUtils {
-    static final SchemaContext SCHEMA_CONTEXT = YangParserTestUtils.parseYangFiles(
+    static final EffectiveModelContext SCHEMA_CONTEXT = YangParserTestUtils.parseYangFiles(
         new File("src/main/yang/entity-owners.yang"));
 
     private EOSTestUtils() {
