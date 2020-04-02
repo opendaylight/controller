@@ -49,7 +49,7 @@ public class PeopleCarListener implements CarPurchaseListener {
 
 
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson, true);
+        tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson);
 
         tx.commit().addCallback(new FutureCallback<CommitInfo>() {
             @Override
