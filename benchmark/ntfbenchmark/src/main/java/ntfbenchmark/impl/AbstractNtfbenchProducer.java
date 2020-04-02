@@ -7,13 +7,14 @@
  */
 package ntfbenchmark.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.Ntfbench;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.NtfbenchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.payload.Payload;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.payload.PayloadBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.payload.PayloadKey;
 
 public abstract class AbstractNtfbenchProducer implements Runnable {
     protected final NotificationPublishService publishService;
@@ -46,11 +47,12 @@ public abstract class AbstractNtfbenchProducer implements Runnable {
         this.publishService = publishService;
         this.iterations = iterations;
 
-        final List<Payload> listVals = new ArrayList<>();
+        final Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(payloadSize);
         for (int i = 0; i < payloadSize; i++) {
-            listVals.add(new PayloadBuilder().setId(i).build());
+            final PayloadKey key = new PayloadKey(i);
+            listVals.put(key, new PayloadBuilder().withKey(key).build());
         }
 
-        ntf = new NtfbenchBuilder().setPayload(listVals).build();
+        ntf = new NtfbenchBuilder().setPayload(listVals.build()).build();
     }
 }
