@@ -65,7 +65,7 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
                 .child(Person.class, person.key()).build();
         // Place entry in data store tree
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);
+        tx.put(LogicalDatastoreType.CONFIGURATION, personId, person);
 
         tx.commit().addCallback(new FutureCallback<CommitInfo>() {
             @Override

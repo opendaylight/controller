@@ -27,10 +27,10 @@ public class DataStoreAppConfigDefaultXMLReaderTest extends AbstractConcurrentDa
         Lists lists = new DataStoreAppConfigDefaultXMLReader<>(
                 getClass(), "/opendaylight-sal-test-store-config.xml",
                 getDataBrokerTestCustomizer().getSchemaService(),
-                getDataBrokerTestCustomizer().getBindingToNormalized(),
+                getDataBrokerTestCustomizer().getAdapterContext().currentSerializer(),
                 Lists.class).createDefaultInstance();
 
-        UnorderedList element = lists.getUnorderedContainer().getUnorderedList().get(0);
+        UnorderedList element = lists.getUnorderedContainer().getUnorderedList().values().iterator().next();
         assertThat(element.getName()).isEqualTo("someName");
         assertThat(element.getValue()).isEqualTo("someValue");
     }
@@ -40,7 +40,7 @@ public class DataStoreAppConfigDefaultXMLReaderTest extends AbstractConcurrentDa
         new DataStoreAppConfigDefaultXMLReader<>(
                 getClass(), "/badname.xml",
                 getDataBrokerTestCustomizer().getSchemaService(),
-                getDataBrokerTestCustomizer().getBindingToNormalized(),
+                getDataBrokerTestCustomizer().getAdapterContext().currentSerializer(),
                 Lists.class).createDefaultInstance();
     }
 }

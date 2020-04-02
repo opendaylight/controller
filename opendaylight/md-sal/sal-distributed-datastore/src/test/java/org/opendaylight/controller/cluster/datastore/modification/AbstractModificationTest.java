@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -21,10 +20,10 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public abstract class AbstractModificationTest {
-    private static SchemaContext TEST_SCHEMA_CONTEXT;
+    private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
 
     protected InMemoryDOMDataStore store;
 
@@ -41,7 +40,7 @@ public abstract class AbstractModificationTest {
     @Before
     public void setUp() {
         store = new InMemoryDOMDataStore("test", MoreExecutors.newDirectExecutorService());
-        store.onGlobalContextUpdated(TEST_SCHEMA_CONTEXT);
+        store.onModelContextUpdated(TEST_SCHEMA_CONTEXT);
     }
 
     protected void commitTransaction(final DOMStoreWriteTransaction transaction) {

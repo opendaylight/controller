@@ -17,8 +17,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -131,13 +130,9 @@ public class EventSourceTopologyTest {
         Topology topologyMock = mock(Topology.class);
         doReturn(Optional.of(topologyMock)).when(checkedFutureMock).get();
 
-        Node nodeMock = mock(Node.class);
-        List<Node> nodeList = new ArrayList<>();
-        nodeList.add(nodeMock);
-        doReturn(nodeList).when(topologyMock).getNode();
-
-        NodeId nodeId = new NodeId("nodeIdValue1");
-        doReturn(nodeId).when(nodeMock).getNodeId();
+        final NodeKey nodeKey = new NodeKey(new NodeId("nodeIdValue1"));
+        final Node node = new NodeBuilder().withKey(nodeKey).build();
+        doReturn(Map.of(nodeKey, node)).when(topologyMock).getNode();
     }
 
     @Test
