@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.junit.Assert.assertEquals;
@@ -32,14 +31,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public class NormalizedNodeAggregatorTest {
 
     @Test
     public void testAggregate() throws InterruptedException, ExecutionException,
         DataValidationFailedException {
-        SchemaContext schemaContext = SchemaContextHelper.full();
+        EffectiveModelContext schemaContext = SchemaContextHelper.full();
         NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
@@ -73,10 +72,10 @@ public class NormalizedNodeAggregatorTest {
 
     }
 
-    public static NormalizedNode<?, ?> getRootNode(NormalizedNode<?, ?> moduleNode, SchemaContext schemaContext)
-            throws ExecutionException, InterruptedException {
+    public static NormalizedNode<?, ?> getRootNode(final NormalizedNode<?, ?> moduleNode,
+            final EffectiveModelContext schemaContext) throws ExecutionException, InterruptedException {
         try (InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
-            store.onGlobalContextUpdated(schemaContext);
+            store.onModelContextUpdated(schemaContext);
 
             DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
@@ -98,7 +97,8 @@ public class NormalizedNodeAggregatorTest {
         }
     }
 
-    public static NormalizedNode<?,?> findChildWithQName(Collection<NormalizedNode<?, ?>> collection, QName qname) {
+    public static NormalizedNode<?,?> findChildWithQName(final Collection<NormalizedNode<?, ?>> collection,
+            final QName qname) {
         for (NormalizedNode<?, ?> node : collection) {
             if (node.getNodeType().equals(qname)) {
                 return node;

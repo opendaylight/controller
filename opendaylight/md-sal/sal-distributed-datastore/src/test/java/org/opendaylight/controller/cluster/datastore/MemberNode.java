@@ -33,7 +33,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -188,7 +188,7 @@ public class MemberNode {
         private boolean useAkkaArtery = true;
         private String[] waitForshardLeader = new String[0];
         private String testName;
-        private SchemaContext schemaContext;
+        private EffectiveModelContext schemaContext;
         private boolean createOperDatastore = true;
         private DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
                 .shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(30);
@@ -262,7 +262,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder schemaContext(final SchemaContext newSchemaContext) {
+        public Builder schemaContext(final EffectiveModelContext newSchemaContext) {
             this.schemaContext = newSchemaContext;
             return this;
         }
