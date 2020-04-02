@@ -39,8 +39,7 @@ import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.collection.Iterator;
-import scala.collection.SeqLike;
+import scala.collection.JavaConverters;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -332,10 +331,7 @@ final class SegmentedJournalActor extends AbstractActor {
     }
 
     private void writeRequest(final SegmentedJournalWriter<DataJournalEntry> writer, final AtomicWrite request) {
-        // Cast is needed for Eclipse because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=468276
-        final Iterator<PersistentRepr> it = ((SeqLike<PersistentRepr, ?>) request.payload()).iterator();
-        while (it.hasNext()) {
-            final PersistentRepr repr = it.next();
+        for (PersistentRepr repr : JavaConverters.asJavaIterable(request.payload())) {
             final Object payload = repr.payload();
             if (!(payload instanceof Serializable)) {
                 throw new UnsupportedOperationException("Non-serializable payload encountered " + payload.getClass());

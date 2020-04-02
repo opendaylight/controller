@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.collection.JavaConverters;
 import scala.concurrent.Future;
 
 /**
@@ -40,7 +41,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
         final CountDownLatch latch;
         final Class<?> ofType;
 
-        WriteMessagesComplete(int count, Class<?> ofType) {
+        WriteMessagesComplete(final int count, final Class<?> ofType) {
             this.latch = new CountDownLatch(count);
             this.ofType = ofType;
         }
@@ -56,11 +57,11 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     private static final Map<String, CountDownLatch> BLOCK_READ_MESSAGES_LATCHES = new ConcurrentHashMap<>();
 
-    private static Object deserialize(Object data) {
+    private static Object deserialize(final Object data) {
         return data instanceof byte[] ? SerializationUtils.deserialize((byte[])data) : data;
     }
 
-    public static void addEntry(String persistenceId, long sequenceNr, Object data) {
+    public static void addEntry(final String persistenceId, final long sequenceNr, final Object data) {
         Map<Long, Object> journal = JOURNALS.computeIfAbsent(persistenceId, k -> new LinkedHashMap<>());
 
         synchronized (journal) {
@@ -77,7 +78,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> get(String persistenceId, Class<T> type) {
+    public static <T> List<T> get(final String persistenceId, final Class<T> type) {
         Map<Long, Object> journalMap = JOURNALS.get(persistenceId);
         if (journalMap == null) {
             return Collections.<T>emptyList();
@@ -96,12 +97,12 @@ public class InMemoryJournal extends AsyncWriteJournal {
         }
     }
 
-    public static Map<Long, Object> get(String persistenceId) {
+    public static Map<Long, Object> get(final String persistenceId) {
         Map<Long, Object> journalMap = JOURNALS.get(persistenceId);
         return journalMap != null ? journalMap : Collections.<Long, Object>emptyMap();
     }
 
-    public static void dumpJournal(String persistenceId) {
+    public static void dumpJournal(final String persistenceId) {
         StringBuilder builder = new StringBuilder(String.format("Journal log for %s:", persistenceId));
         Map<Long, Object> journalMap = JOURNALS.get(persistenceId);
         if (journalMap != null) {
@@ -115,33 +116,34 @@ public class InMemoryJournal extends AsyncWriteJournal {
         LOG.info(builder.toString());
     }
 
-    public static void waitForDeleteMessagesComplete(String persistenceId) {
+    public static void waitForDeleteMessagesComplete(final String persistenceId) {
         if (!Uninterruptibles.awaitUninterruptibly(DELETE_MESSAGES_COMPLETE_LATCHES.get(persistenceId),
                 5, TimeUnit.SECONDS)) {
             throw new AssertionError("Delete messages did not complete");
         }
     }
 
-    public static void waitForWriteMessagesComplete(String persistenceId) {
+    public static void waitForWriteMessagesComplete(final String persistenceId) {
         if (!Uninterruptibles.awaitUninterruptibly(WRITE_MESSAGES_COMPLETE.get(persistenceId).latch,
                 5, TimeUnit.SECONDS)) {
             throw new AssertionError("Journal write messages did not complete");
         }
     }
 
-    public static void addDeleteMessagesCompleteLatch(String persistenceId) {
+    public static void addDeleteMessagesCompleteLatch(final String persistenceId) {
         DELETE_MESSAGES_COMPLETE_LATCHES.put(persistenceId, new CountDownLatch(1));
     }
 
-    public static void addWriteMessagesCompleteLatch(String persistenceId, int count) {
+    public static void addWriteMessagesCompleteLatch(final String persistenceId, final int count) {
         WRITE_MESSAGES_COMPLETE.put(persistenceId, new WriteMessagesComplete(count, null));
     }
 
-    public static void addWriteMessagesCompleteLatch(String persistenceId, int count, Class<?> ofType) {
+    public static void addWriteMessagesCompleteLatch(final String persistenceId, final int count,
+            final Class<?> ofType) {
         WRITE_MESSAGES_COMPLETE.put(persistenceId, new WriteMessagesComplete(count, ofType));
     }
 
-    public static void addBlockReadMessagesLatch(String persistenceId, CountDownLatch latch) {
+    public static void addBlockReadMessagesLatch(final String persistenceId, final CountDownLatch latch) {
         BLOCK_READ_MESSAGES_LATCHES.put(persistenceId, latch);
     }
 
@@ -178,7 +180,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     @Override
-    public Future<Long> doAsyncReadHighestSequenceNr(String persistenceId, long fromSequenceNr) {
+    public Future<Long> doAsyncReadHighestSequenceNr(final String persistenceId, final long fromSequenceNr) {
         LOG.trace("doAsyncReadHighestSequenceNr for {}: fromSequenceNr: {}", persistenceId, fromSequenceNr);
 
         // Akka calls this during recovery.
@@ -203,10 +205,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     public Future<Iterable<Optional<Exception>>> doAsyncWriteMessages(final Iterable<AtomicWrite> messages) {
         return Futures.future(() -> {
             for (AtomicWrite write : messages) {
-                // Copy to array - workaround for eclipse "ambiguous method" errors for toIterator, toIterable etc
-                PersistentRepr[] array = new PersistentRepr[write.payload().size()];
-                write.payload().copyToArray(array);
-                for (PersistentRepr repr: array) {
+                for (PersistentRepr repr: JavaConverters.asJavaIterable(write.payload())) {
                     LOG.trace("doAsyncWriteMessages: id: {}: seqNr: {}, payload: {}", repr.persistenceId(),
                         repr.sequenceNr(), repr.payload());
 
@@ -226,7 +225,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     @Override
-    public Future<Void> doAsyncDeleteMessagesTo(String persistenceId, long toSequenceNr) {
+    public Future<Void> doAsyncDeleteMessagesTo(final String persistenceId, final long toSequenceNr) {
         LOG.trace("doAsyncDeleteMessagesTo: {}", toSequenceNr);
         Map<Long, Object> journal = JOURNALS.get(persistenceId);
         if (journal != null) {
