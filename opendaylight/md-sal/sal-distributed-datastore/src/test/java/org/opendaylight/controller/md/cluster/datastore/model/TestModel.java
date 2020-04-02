@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public final class TestModel {
@@ -56,7 +56,7 @@ public final class TestModel {
 
     }
 
-    public static SchemaContext createTestContext() {
+    public static EffectiveModelContext createTestContext() {
         return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);
     }
 

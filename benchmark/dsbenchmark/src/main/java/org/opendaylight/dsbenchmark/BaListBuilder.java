@@ -7,8 +7,11 @@
  */
 package org.opendaylight.dsbenchmark;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListKey;
@@ -33,17 +36,18 @@ public final class BaListBuilder {
         return outerList;
     }
 
-    private static List<InnerList> buildInnerList(final int index, final int elements) {
-        List<InnerList> innerList = new ArrayList<>(elements);
+    private static Map<InnerListKey, InnerList> buildInnerList(final int index, final int elements) {
+        Builder<InnerListKey, InnerList> innerList = ImmutableMap.builderWithExpectedSize(elements);
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";
         for (int i = 0; i < elements; i++) {
-            innerList.add(new InnerListBuilder()
-                                .withKey(new InnerListKey(i))
+            final InnerListKey key = new InnerListKey(i);
+            innerList.put(key, new InnerListBuilder()
+                                .withKey(key)
                                 .setName(i)
                                 .setValue(itemStr + String.valueOf(i))
                                 .build());
         }
-        return innerList;
+        return innerList.build();
     }
 }

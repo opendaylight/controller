@@ -17,8 +17,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -58,7 +57,6 @@ public class EventSourceTopologyTest {
     RpcConsumerRegistry rpcServiceMock;
     CreateTopicInput createTopicInputMock;
     ListenerRegistration<?> listenerRegistrationMock;
-    NodeKey nodeKey;
     ObjectRegistration<EventAggregatorService> aggregatorRpcReg;
 
     @Before
@@ -131,13 +129,9 @@ public class EventSourceTopologyTest {
         Topology topologyMock = mock(Topology.class);
         doReturn(Optional.of(topologyMock)).when(checkedFutureMock).get();
 
-        Node nodeMock = mock(Node.class);
-        List<Node> nodeList = new ArrayList<>();
-        nodeList.add(nodeMock);
-        doReturn(nodeList).when(topologyMock).getNode();
-
-        NodeId nodeId = new NodeId("nodeIdValue1");
-        doReturn(nodeId).when(nodeMock).getNodeId();
+        final NodeKey nodeKey = new NodeKey(new NodeId("nodeIdValue1"));
+        final Node node = new NodeBuilder().withKey(nodeKey).build();
+        doReturn(Map.of(nodeKey, node)).when(topologyMock).getNode();
     }
 
     @Test
@@ -160,7 +154,7 @@ public class EventSourceTopologyTest {
         Node nodeMock = mock(Node.class);
         EventSource eventSourceMock = mock(EventSource.class);
         NodeId nodeId = new NodeId("nodeIdValue1");
-        nodeKey = new NodeKey(nodeId);
+        NodeKey nodeKey = new NodeKey(nodeId);
         doReturn(nodeKey).when(nodeMock).key();
         doReturn(nodeKey).when(eventSourceMock).getSourceNodeKey();
         ObjectRegistration routedRpcRegistrationMock = mock(ObjectRegistration.class);
@@ -176,7 +170,7 @@ public class EventSourceTopologyTest {
         topicTestHelper();
         EventSource eventSourceMock = mock(EventSource.class);
         NodeId nodeId = new NodeId("nodeIdValue1");
-        nodeKey = new NodeKey(nodeId);
+        NodeKey nodeKey = new NodeKey(nodeId);
         Map<NodeKey, Registration> localMap = eventSourceTopology.getRoutedRpcRegistrations();
         NodeKey nodeKeyMock = mock(NodeKey.class);
         doReturn(nodeKeyMock).when(eventSourceMock).getSourceNodeKey();
@@ -192,7 +186,7 @@ public class EventSourceTopologyTest {
         Node nodeMock = mock(Node.class);
         EventSource eventSourceMock = mock(EventSource.class);
         NodeId nodeId = new NodeId("nodeIdValue1");
-        nodeKey = new NodeKey(nodeId);
+        NodeKey nodeKey = new NodeKey(nodeId);
         doReturn(nodeKey).when(nodeMock).key();
         doReturn(nodeKey).when(eventSourceMock).getSourceNodeKey();
         ObjectRegistration routedRpcRegistrationMock = mock(ObjectRegistration.class);
