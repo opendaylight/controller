@@ -40,7 +40,7 @@ final class RpcUtil {
                 "Module not found in SchemaContext: " + moduleName + "; service: " + service));
         LOG.debug("Resolved service {} to module {}", service, module);
 
-        final Collection<RpcDefinition> rpcs = module.getRpcs();
+        final Collection<? extends RpcDefinition> rpcs = module.getRpcs();
         final Collection<SchemaPath> ret = new ArrayList<>(rpcs.size());
         for (RpcDefinition rpc : rpcs) {
             final RpcRoutingStrategy strategy = RpcRoutingStrategy.from(rpc);
