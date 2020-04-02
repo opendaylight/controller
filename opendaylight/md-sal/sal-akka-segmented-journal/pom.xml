@@ -61,13 +61,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>io.atomix</groupId>
             <artifactId>atomix-storage</artifactId>
-            <version>3.1.5</version>
+            <version>3.1.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.atomix</groupId>
             <artifactId>atomix-utils</artifactId>
-            <version>3.1.5</version>
+            <version>3.1.7</version>
             <scope>provided</scope>
         </dependency>
 
