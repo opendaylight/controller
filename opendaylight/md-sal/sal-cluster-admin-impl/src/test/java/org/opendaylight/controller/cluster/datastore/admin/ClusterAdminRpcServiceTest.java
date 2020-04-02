@@ -114,6 +114,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingStateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -1190,13 +1191,14 @@ public class ClusterAdminRpcServiceTest {
         });
     }
 
-    private static void verifyShardResults(final List<ShardResult> shardResults, final ShardResult... expShardResults) {
+    private static void verifyShardResults(final Map<ShardResultKey, ShardResult> shardResults,
+            final ShardResult... expShardResults) {
         Map<String, ShardResult> expResultsMap = new HashMap<>();
         for (ShardResult r: expShardResults) {
             expResultsMap.put(r.getShardName() + "-" + r.getDataStoreType(), r);
         }
 
-        for (ShardResult result: shardResults) {
+        for (ShardResult result: shardResults.values()) {
             ShardResult exp = expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType());
             assertNotNull(String.format("Unexpected result for shard %s, type %s", result.getShardName(),
                     result.getDataStoreType()), exp);

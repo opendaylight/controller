@@ -9,12 +9,10 @@ package org.opendaylight.controller.messagebus.app.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -116,31 +114,26 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
         LOG.debug("Notify existing nodes");
         final Pattern nodeRegex = this.nodeIdPattern;
 
-        final ReadTransaction tx = eventSourceTopology.getDataBroker().newReadOnlyTransaction();
-        final ListenableFuture<Optional<Topology>> future =
-                tx.read(LogicalDatastoreType.OPERATIONAL, EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
+        final FluentFuture<Optional<Topology>> future;
+        try (ReadTransaction tx = eventSourceTopology.getDataBroker().newReadOnlyTransaction()) {
+            future = tx.read(LogicalDatastoreType.OPERATIONAL, EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
+        }
 
-        Futures.addCallback(future, new FutureCallback<Optional<Topology>>() {
+        future.addCallback(new FutureCallback<Optional<Topology>>() {
             @Override
             public void onSuccess(final Optional<Topology> data) {
                 if (data.isPresent()) {
-                    final List<Node> nodes = data.get().getNode();
-                    if (nodes != null) {
-                        for (final Node node : nodes) {
-                            if (nodeRegex.matcher(node.getNodeId().getValue()).matches()) {
-                                notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class,
-                                    node.key()));
-                            }
+                    for (final Node node : data.get().nonnullNode().values()) {
+                        if (nodeRegex.matcher(node.getNodeId().getValue()).matches()) {
+                            notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.key()));
                         }
                     }
                 }
-                tx.close();
             }
 
             @Override
             public void onFailure(final Throwable ex) {
                 LOG.error("Can not notify existing nodes", ex);
-                tx.close();
             }
         }, MoreExecutors.directExecutor());
     }
