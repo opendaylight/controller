@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 
 import akka.testkit.TestProbe;
@@ -17,7 +20,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
@@ -99,8 +101,8 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final ListenableFuture<Boolean> result = transaction.directCommit();
         final TransactionTester<RemoteProxyTransaction> tester = getTester();
         final ModifyTransactionRequest req = tester.expectTransactionRequest(ModifyTransactionRequest.class);
-        Assert.assertTrue(req.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.SIMPLE, req.getPersistenceProtocol().get());
+        assertTrue(req.getPersistenceProtocol().isPresent());
+        assertEquals(PersistenceProtocol.SIMPLE, req.getPersistenceProtocol().get());
         tester.replySuccess(new TransactionCommitSuccess(TRANSACTION_ID, req.getSequence()));
         assertFutureEquals(true, result);
     }
@@ -150,9 +152,9 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         builder.setCommit(false);
         final ModifyTransactionRequest request = builder.build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
-        Assert.assertEquals(request.getPersistenceProtocol(), received.getPersistenceProtocol());
-        Assert.assertEquals(request.getModifications(), received.getModifications());
-        Assert.assertEquals(request.getTarget(), received.getTarget());
+        assertEquals(request.getPersistenceProtocol(), received.getPersistenceProtocol());
+        assertEquals(request.getModifications(), received.getModifications());
+        assertEquals(request.getTarget(), received.getTarget());
     }
 
     @Test
@@ -164,9 +166,9 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         builder.setCommit(true);
         final ModifyTransactionRequest request = builder.build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
-        Assert.assertEquals(request.getPersistenceProtocol(), received.getPersistenceProtocol());
-        Assert.assertEquals(request.getModifications(), received.getModifications());
-        Assert.assertEquals(request.getTarget(), received.getTarget());
+        assertEquals(request.getPersistenceProtocol(), received.getPersistenceProtocol());
+        assertEquals(request.getModifications(), received.getModifications());
+        assertEquals(request.getTarget(), received.getTarget());
     }
 
     @Test
@@ -178,9 +180,9 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         builder.setAbort();
         final ModifyTransactionRequest request = builder.build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
-        Assert.assertEquals(request.getTarget(), received.getTarget());
-        Assert.assertTrue(received.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.ABORT, received.getPersistenceProtocol().get());
+        assertEquals(request.getTarget(), received.getTarget());
+        assertTrue(received.getPersistenceProtocol().isPresent());
+        assertEquals(PersistenceProtocol.ABORT, received.getPersistenceProtocol().get());
     }
 
     @Test
@@ -189,8 +191,8 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final ReadTransactionRequest request =
                 new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, false);
         final ReadTransactionRequest received = testForwardToRemote(request, ReadTransactionRequest.class);
-        Assert.assertEquals(request.getTarget(), received.getTarget());
-        Assert.assertEquals(request.getPath(), received.getPath());
+        assertEquals(request.getTarget(), received.getTarget());
+        assertEquals(request.getPath(), received.getPath());
     }
 
     @Test
@@ -199,8 +201,8 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final ExistsTransactionRequest request =
                 new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, false);
         final ExistsTransactionRequest received = testForwardToRemote(request, ExistsTransactionRequest.class);
-        Assert.assertEquals(request.getTarget(), received.getTarget());
-        Assert.assertEquals(request.getPath(), received.getPath());
+        assertEquals(request.getTarget(), received.getTarget());
+        assertEquals(request.getPath(), received.getPath());
     }
 
     @Test
@@ -209,7 +211,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final TransactionPreCommitRequest request =
                 new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref());
         final TransactionPreCommitRequest received = testForwardToRemote(request, TransactionPreCommitRequest.class);
-        Assert.assertEquals(request.getTarget(), received.getTarget());
+        assertEquals(request.getTarget(), received.getTarget());
     }
 
     @Test
@@ -218,18 +220,16 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final TransactionDoCommitRequest request =
                 new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref());
         final TransactionDoCommitRequest received = testForwardToRemote(request, TransactionDoCommitRequest.class);
-        Assert.assertEquals(request.getTarget(), received.getTarget());
+        assertEquals(request.getTarget(), received.getTarget());
     }
 
 
-    private <T extends TransactionModification> void testModification(final Runnable modification,
-                                                                      final Class<T> cls,
-                                                                      final YangInstanceIdentifier expectedPath) {
+    private <T extends TransactionModification> void testModification(final Runnable modification, final Class<T> cls,
+            final YangInstanceIdentifier expectedPath) {
         modification.run();
         final ModifyTransactionRequest request = transaction.commitRequest(false);
         final List<TransactionModification> modifications = request.getModifications();
-        Assert.assertEquals(1, modifications.size());
-        Assert.assertThat(modifications, hasItem(both(isA(cls)).and(hasPath(expectedPath))));
+        assertEquals(1, modifications.size());
+        assertThat(modifications, hasItem(both(isA(cls)).and(hasPath(expectedPath))));
     }
-
 }

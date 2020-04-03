@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -280,15 +279,15 @@ public class TransactionRateLimiterTest {
     }
 
     public Matcher<Double> approximately(final double val) {
-        return new BaseMatcher<Double>() {
+        return new BaseMatcher<>() {
             @Override
-            public boolean matches(Object obj) {
+            public boolean matches(final Object obj) {
                 Double value = (Double) obj;
                 return value >= val && value <= val + 1;
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendText("> " + val + " < " + (val + 1));
             }
         };
