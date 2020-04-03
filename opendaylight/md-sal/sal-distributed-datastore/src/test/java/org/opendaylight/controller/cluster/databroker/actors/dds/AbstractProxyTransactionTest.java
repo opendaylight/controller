@@ -9,7 +9,11 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +31,6 @@ import java.util.function.Consumer;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -192,39 +195,39 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         transaction.replayMessages(mockSuccessor, entries);
 
         final ModifyTransactionRequest transformed = successor.expectTransactionRequest(ModifyTransactionRequest.class);
-        Assert.assertNotNull(transformed);
-        Assert.assertEquals(successful1.getSequence(), transformed.getSequence());
-        Assert.assertTrue(transformed.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.ABORT, transformed.getPersistenceProtocol().get());
+        assertNotNull(transformed);
+        assertEquals(successful1.getSequence(), transformed.getSequence());
+        assertTrue(transformed.getPersistenceProtocol().isPresent());
+        assertEquals(PersistenceProtocol.ABORT, transformed.getPersistenceProtocol().get());
 
         ReadTransactionRequest tmpRead = successor.expectTransactionRequest(ReadTransactionRequest.class);
-        Assert.assertNotNull(tmpRead);
-        Assert.assertEquals(successful2.getTarget(), tmpRead.getTarget());
-        Assert.assertEquals(successful2.getSequence(), tmpRead.getSequence());
-        Assert.assertEquals(successful2.getPath(), tmpRead.getPath());
-        Assert.assertEquals(successor.localActor(), tmpRead.getReplyTo());
+        assertNotNull(tmpRead);
+        assertEquals(successful2.getTarget(), tmpRead.getTarget());
+        assertEquals(successful2.getSequence(), tmpRead.getSequence());
+        assertEquals(successful2.getPath(), tmpRead.getPath());
+        assertEquals(successor.localActor(), tmpRead.getReplyTo());
 
         tmpRead = successor.expectTransactionRequest(ReadTransactionRequest.class);
-        Assert.assertNotNull(tmpRead);
-        Assert.assertEquals(request1.getTarget(), tmpRead.getTarget());
-        Assert.assertEquals(request1.getSequence(), tmpRead.getSequence());
-        Assert.assertEquals(request1.getPath(), tmpRead.getPath());
-        Assert.assertEquals(successor.localActor(), tmpRead.getReplyTo());
+        assertNotNull(tmpRead);
+        assertEquals(request1.getTarget(), tmpRead.getTarget());
+        assertEquals(request1.getSequence(), tmpRead.getSequence());
+        assertEquals(request1.getPath(), tmpRead.getPath());
+        assertEquals(successor.localActor(), tmpRead.getReplyTo());
 
         final ExistsTransactionRequest tmpExist = successor.expectTransactionRequest(ExistsTransactionRequest.class);
-        Assert.assertNotNull(tmpExist);
-        Assert.assertEquals(request2.getTarget(), tmpExist.getTarget());
-        Assert.assertEquals(request2.getSequence(), tmpExist.getSequence());
-        Assert.assertEquals(request2.getPath(), tmpExist.getPath());
-        Assert.assertEquals(successor.localActor(), tmpExist.getReplyTo());
+        assertNotNull(tmpExist);
+        assertEquals(request2.getTarget(), tmpExist.getTarget());
+        assertEquals(request2.getSequence(), tmpExist.getSequence());
+        assertEquals(request2.getPath(), tmpExist.getPath());
+        assertEquals(successor.localActor(), tmpExist.getReplyTo());
     }
 
     protected void checkModifications(final ModifyTransactionRequest modifyRequest) {
         final List<TransactionModification> modifications = modifyRequest.getModifications();
-        Assert.assertEquals(3, modifications.size());
-        Assert.assertThat(modifications, hasItem(allOf(isA(TransactionWrite.class), hasPath(PATH_1))));
-        Assert.assertThat(modifications, hasItem(allOf(isA(TransactionMerge.class), hasPath(PATH_2))));
-        Assert.assertThat(modifications, hasItem(allOf(isA(TransactionDelete.class), hasPath(PATH_3))));
+        assertEquals(3, modifications.size());
+        assertThat(modifications, hasItem(allOf(isA(TransactionWrite.class), hasPath(PATH_1))));
+        assertThat(modifications, hasItem(allOf(isA(TransactionMerge.class), hasPath(PATH_2))));
+        assertThat(modifications, hasItem(allOf(isA(TransactionDelete.class), hasPath(PATH_3))));
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
@@ -244,9 +247,9 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         transaction.handleReplayedRemoteRequest(request, createCallbackMock(), Ticker.systemTicker().read());
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
         final R received = (R) envelope.getMessage();
-        Assert.assertTrue(received.getClass().equals(request.getClass()));
-        Assert.assertEquals(TRANSACTION_ID, received.getTarget());
-        Assert.assertEquals(clientContextProbe.ref(), received.getReplyTo());
+        assertTrue(received.getClass().equals(request.getClass()));
+        assertEquals(TRANSACTION_ID, received.getTarget());
+        assertEquals(clientContextProbe.ref(), received.getReplyTo());
         return received;
     }
 
@@ -269,7 +272,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     }
 
     protected static BaseMatcher<TransactionModification> hasPath(final YangInstanceIdentifier path) {
-        return new BaseMatcher<TransactionModification>() {
+        return new BaseMatcher<>() {
 
             @Override
             public boolean matches(final Object item) {
