@@ -5,9 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,8 +44,8 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -69,7 +71,7 @@ public class DistributedShardFrontendTest {
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, OUTER_LIST_YID);
 
     @Captor
-    private ArgumentCaptor<YangInstanceIdentifier.PathArgument> pathArgumentCaptor;
+    private ArgumentCaptor<PathArgument> pathArgumentCaptor;
     @Captor
     private ArgumentCaptor<NormalizedNode<?, ?>> nodeCaptor;
 
@@ -108,7 +110,6 @@ public class DistributedShardFrontendTest {
 
     @Test
     public void testClientTransaction() throws Exception {
-
         final DistributedDataStore distributedDataStore = mock(DistributedDataStore.class);
         final ActorUtils context = mock(ActorUtils.class);
         doReturn(context).when(distributedDataStore).getActorUtils();
@@ -157,19 +158,15 @@ public class DistributedShardFrontendTest {
         //check the lower shard got the correct modification
         verify(outerListCursor, times(2)).write(pathArgumentCaptor.capture(), nodeCaptor.capture());
 
-        final YangInstanceIdentifier.PathArgument expectedYid = new NodeIdentifier(TestModel.ID_QNAME);
-        final YangInstanceIdentifier.PathArgument actualIdYid = pathArgumentCaptor.getAllValues().get(0);
-        assertEquals(expectedYid, actualIdYid);
+        final List<PathArgument> capturedArgs = pathArgumentCaptor.getAllValues();
+        assertEquals(2, capturedArgs.size());
+        assertThat(capturedArgs,
+            hasItems(new NodeIdentifier(TestModel.ID_QNAME), new NodeIdentifier(TestModel.INNER_LIST_QNAME)));
 
-        final YangInstanceIdentifier.PathArgument expectedInnerYid = new NodeIdentifier(TestModel.INNER_LIST_QNAME);
-        final YangInstanceIdentifier.PathArgument actualInnerListYid = pathArgumentCaptor.getAllValues().get(1);
-        assertEquals(expectedInnerYid, actualInnerListYid);
-
-        final LeafNode<Integer> actualIdNode = (LeafNode<Integer>) nodeCaptor.getAllValues().get(0);
-        assertEquals(ImmutableNodes.leafNode(TestModel.ID_QNAME, 1), actualIdNode);
-
-        final MapNode actualInnerListNode = (MapNode) nodeCaptor.getAllValues().get(1);
-        assertEquals(createInnerMapNode(1), actualInnerListNode);
+        final List<NormalizedNode<?, ?>> capturedValues = nodeCaptor.getAllValues();
+        assertEquals(2, capturedValues.size());
+        assertThat(capturedValues,
+            hasItems(ImmutableNodes.leafNode(TestModel.ID_QNAME, 1), createInnerMapNode(1)));
 
         txCursor.close();
         tx.commit().get();
