@@ -65,6 +65,8 @@ import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.ShardDataTreeDumperMBeanFactory;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.ShardDataTreeDumperMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -170,6 +172,8 @@ public class Shard extends RaftActor {
 
     private final ShardStats shardMBean;
 
+    private final ShardDataTreeDumperMXBeanImpl shardDataTreeDumperMBean;
+
     private final ShardDataTreeListenerInfoMXBeanImpl listenerInfoMXBean;
 
     private DatastoreContext datastoreContext;
@@ -230,6 +234,10 @@ public class Shard extends RaftActor {
         }
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name, datastoreContext.getDataStoreMXBeanType(), this);
+
+        shardDataTreeDumperMBean = ShardDataTreeDumperMBeanFactory.getShardDataTreeDumperMBean(name,
+                datastoreContext.getDataStoreMXBeanType());
+        shardDataTreeDumperMBean.setShard(this);
 
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
@@ -296,6 +304,7 @@ public class Shard extends RaftActor {
         commitCoordinator.abortPendingTransactions("Transaction aborted due to shutdown.", this);
 
         shardMBean.unregisterMBean();
+        shardDataTreeDumperMBean.unregisterMBean();
         listenerInfoMXBean.unregister();
     }
 
