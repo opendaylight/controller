@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c838c5a_466df1e3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/ShardDataTreeDumperMXBeanImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-04-06T19:35:54Z",
+      "side": 1,
+      "message": "unsanitized input, leading to an arbitrary file overwrite",
+      "range": {
+        "startLine": 42,
+        "startChar": 97,
+        "endLine": 42,
+        "endChar": 105
+      },
+      "revId": "69a189819c3fad8f387346b13232496149bd8589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71a88f1e_15f1b0a9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/ShardDataTreeDumperMXBeanImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-04-06T19:35:54Z",
+      "side": 1,
+      "message": "this can lead to a trivially-triggerable OOM",
+      "range": {
+        "startLine": 47,
+        "startChar": 65,
+        "endLine": 47,
+        "endChar": 77
+      },
+      "revId": "69a189819c3fad8f387346b13232496149bd8589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
