@@ -230,12 +230,12 @@
                 <!-- FIXME: remove this section once we can activate javadoc-links profile -->
                 <configuration combine.children="append">
                     <links>
-                        <link>https://junit.org/junit4/javadoc/4.11/</link>
-                        <link>http://hamcrest.org/JavaHamcrest/javadoc/1.3/</link>
-                        <link>http://google.github.io/truth/api/0.42/</link>
+                        <link>https://junit.org/junit4/javadoc/4.13/</link>
+                        <link>http://hamcrest.org/JavaHamcrest/javadoc/2.2/</link>
+                        <link>http://google.github.io/truth/api/1.0.1/</link>
                         <link>http://www.slf4j.org/apidocs/</link>
-                        <link>https://google.github.io/guava/releases/25.1-jre/api/docs/</link>
-                        <link>http://doc.akka.io/japi/akka/2.5.25/</link>
+                        <link>https://google.github.io/guava/releases/28.2-jre/api/docs/</link>
+                        <link>http://doc.akka.io/japi/akka/2.5.31/</link>
                         <link>http://netty.io/4.1/api/</link>
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-2.6/</link>
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-3.9/</link>
