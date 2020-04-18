@@ -23,6 +23,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>dsbenchmark</module>
     <module>ntfbenchmark</module>
     <module>rpcbenchmark</module>
-    <module>artifacts</module>
   </modules>
 </project>

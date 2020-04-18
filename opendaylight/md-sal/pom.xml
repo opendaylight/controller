@@ -15,7 +15,6 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>mdsal-artifacts</module>
     <module>parent</module>
 
     <!-- Common APIs & Implementation -->

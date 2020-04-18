@@ -15,6 +15,7 @@
   <!-- Used by Sonar to set project name -->
 
   <modules>
+    <module>artifacts</module>
 
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>

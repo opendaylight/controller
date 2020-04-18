@@ -19,7 +19,7 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>mdsal-artifacts</artifactId>
+    <artifactId>controller-artifacts</artifactId>
     <version>1.12.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -45,6 +45,12 @@
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>mdsal-it-base</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!-- Features -->
             <dependency>
@@ -54,14 +60,6 @@
                 <classifier>features</classifier>
                 <type>xml</type>
                 <scope>runtime</scope>
-            </dependency>
-            <dependency>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>features-restconf</artifactId>
-              <version>${project.version}</version>
-              <classifier>features</classifier>
-              <type>xml</type>
-              <scope>runtime</scope>
             </dependency>
 
             <!-- Base model augmentations -->
@@ -319,6 +317,56 @@
                 <classifier>features</classifier>
             </dependency>
 
+            <!-- Benchmarks -->
+            <dependency>
+               <groupId>${project.groupId}</groupId>
+                <artifactId>benchmark-api</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>dsbenchmark</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>benchmark-features</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+            </dependency>
+
+            <!-- Config remnants -->
+            <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>netty-config-api</artifactId>
+                 <version>0.13.0-SNAPSHOT</version>
+             </dependency>
+             <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>netty-event-executor-config</artifactId>
+                 <version>0.13.0-SNAPSHOT</version>
+             </dependency>
+             <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>netty-threadgroup-config</artifactId>
+                 <version>0.13.0-SNAPSHOT</version>
+             </dependency>
+             <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>netty-timer-config</artifactId>
+                 <version>0.13.0-SNAPSHOT</version>
+             </dependency>
+             <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>threadpool-config-api</artifactId>
+                 <version>0.13.0-SNAPSHOT</version>
+             </dependency>
+             <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>threadpool-config-impl</artifactId>
+                 <version>0.13.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
