@@ -17,7 +17,6 @@
 
   <modules>
     <module>threadpool-config-api</module>
-    <module>netty-config-api</module>
     <module>threadpool-config-impl</module>
     <module>netty-threadgroup-config</module>
     <module>netty-event-executor-config</module>

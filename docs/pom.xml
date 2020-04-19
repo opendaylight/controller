@@ -39,10 +39,6 @@
         <!-- Config Subsystem remnants -->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netty-config-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>netty-event-executor-config</artifactId>
         </dependency>
         <dependency>

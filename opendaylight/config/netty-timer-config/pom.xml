@@ -15,8 +15,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-config-api</artifactId>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
     </dependency>
   </dependencies>
 </project>
