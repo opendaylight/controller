@@ -169,7 +169,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
                     if (++count <= max && entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
                         PersistentRepr persistentMessage =
                                 new PersistentImpl(deserialize(entry.getValue()), entry.getKey(), persistenceId,
-                                        null, false, null, null);
+                                        null, false, null, null, 0);
                         replayCallback.accept(persistentMessage);
                     }
                 }
