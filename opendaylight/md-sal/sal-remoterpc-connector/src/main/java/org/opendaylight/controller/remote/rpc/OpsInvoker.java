@@ -82,7 +82,7 @@ final class OpsInvoker extends AbstractUntypedActor {
         LOG.debug("Executing RPC {}", msg.getType());
         final ActorRef sender = getSender();
 
-        final ListenableFuture<DOMRpcResult> future;
+        final ListenableFuture<? extends DOMRpcResult> future;
         try {
             future = rpcService.invokeRpc(msg.getType(), msg.getInput());
         } catch (final RuntimeException e) {

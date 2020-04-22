@@ -18,14 +18,16 @@ import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode> {
+public final class ExecuteAction extends AbstractExecute {
     private static final long serialVersionUID = 1128904894827335676L;
 
     private final @NonNull DOMDataTreeIdentifier path;
@@ -87,7 +89,11 @@ public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode>
             final SchemaPath name = stream.readSchemaPath();
             final LogicalDatastoreType type = LogicalDatastoreType.readFrom(in);
             final YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
-            final ContainerNode input = (ContainerNode) stream.readOptionalNormalizedNode().orElse(null);
+            ContainerNode input = (ContainerNode) stream.readOptionalNormalizedNode().orElse(null);
+            if (input == null) {
+                input = ImmutableNodes.containerNode(
+                    YangConstants.operationInputQName(name.getLastComponent().getModule()));
+            }
 
             executeAction = new ExecuteAction(name, new DOMDataTreeIdentifier(type, path), input);
         }

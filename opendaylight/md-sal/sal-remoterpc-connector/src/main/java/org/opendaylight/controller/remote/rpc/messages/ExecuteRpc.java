@@ -14,23 +14,23 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.common.YangConstants;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?, ?>> {
+public final class ExecuteRpc extends AbstractExecute {
     private static final long serialVersionUID = 1128904894827335676L;
 
-    private ExecuteRpc(final @NonNull SchemaPath type, final @Nullable NormalizedNode<?, ?> input) {
+    private ExecuteRpc(final @NonNull SchemaPath type, final @NonNull ContainerNode input) {
         super(type, input);
     }
 
-    public static @NonNull ExecuteRpc from(final @NonNull DOMRpcIdentifier rpc,
-            final @Nullable NormalizedNode<?, ?> input) {
+    public static @NonNull ExecuteRpc from(final @NonNull DOMRpcIdentifier rpc, final @NonNull ContainerNode input) {
         return new ExecuteRpc(rpc.getType(), input);
     }
 
@@ -67,7 +67,11 @@ public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?
         public void readExternal(final ObjectInput in) throws IOException {
             final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
             final SchemaPath type = SchemaPath.ROOT.createChild(stream.readQName());
-            final NormalizedNode<?, ?> input = stream.readOptionalNormalizedNode().orElse(null);
+            ContainerNode input = (ContainerNode) stream.readOptionalNormalizedNode().orElse(null);
+            if (input == null) {
+                input = ImmutableNodes.containerNode(
+                    YangConstants.operationInputQName(type.getLastComponent().getModule()));
+            }
             executeRpc = new ExecuteRpc(type, input);
         }
 

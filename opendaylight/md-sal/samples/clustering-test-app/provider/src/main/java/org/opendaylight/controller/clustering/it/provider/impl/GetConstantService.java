@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -52,7 +52,8 @@ public final class GetConstantService implements DOMRpcImplementation {
     }
 
     @Override
-    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
+    public ListenableFuture<? extends DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
+            final ContainerNode input) {
         LOG.debug("get-constant invoked, current value: {}", constant);
 
         return Futures.immediateFuture(new DefaultDOMRpcResult(ImmutableContainerNodeBuilder.create()

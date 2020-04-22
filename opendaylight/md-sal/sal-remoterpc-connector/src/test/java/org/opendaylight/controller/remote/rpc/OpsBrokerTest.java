@@ -11,7 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import akka.actor.Status.Failure;
 import java.time.Duration;
@@ -26,14 +27,12 @@ import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 public class OpsBrokerTest extends AbstractOpsTest {
-
     @Test
     public void testExecuteRpc() {
-        final ContainerNode invokeRpcResult = makeRPCOutput("bar");
-        final DOMRpcResult rpcResult = new DefaultDOMRpcResult(invokeRpcResult);
-        when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(
-            FluentFutures.immediateFluentFuture(rpcResult));
-        final ExecuteRpc executeRpc = ExecuteRpc.from(TEST_RPC_ID, null);
+        final DOMRpcResult rpcResult = new DefaultDOMRpcResult(makeRPCOutput("bar"));
+        doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService1)
+            .invokeRpc(eq(TEST_RPC_TYPE), any());
+        final ExecuteRpc executeRpc = ExecuteRpc.from(TEST_RPC_ID, mock(ContainerNode.class));
 
         rpcInvoker1.tell(executeRpc, rpcRegistry1Probe.getRef());
 
@@ -44,10 +43,10 @@ public class OpsBrokerTest extends AbstractOpsTest {
 
     @Test
     public void testExecuteRpcFailureWithException() {
-        when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(FluentFutures.immediateFailedFluentFuture(
-            new DOMRpcImplementationNotAvailableException("NOT FOUND")));
+        doReturn(FluentFutures.immediateFailedFluentFuture(new DOMRpcImplementationNotAvailableException("NOT FOUND")))
+            .when(domRpcService1).invokeRpc(eq(TEST_RPC_TYPE), any());
 
-        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
+        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, mock(ContainerNode.class));
 
         rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
 
