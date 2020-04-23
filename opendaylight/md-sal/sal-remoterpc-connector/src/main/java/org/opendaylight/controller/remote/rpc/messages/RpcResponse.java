@@ -13,12 +13,12 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class RpcResponse extends AbstractResponse {
+public class RpcResponse extends AbstractResponse<NormalizedNode<?, ?>> {
     private static final long serialVersionUID = -4211279498688989245L;
 
-    public RpcResponse(final @Nullable ContainerNode output) {
+    public RpcResponse(final @Nullable NormalizedNode<?, ?> output) {
         super(output);
     }
 
@@ -49,7 +49,7 @@ public class RpcResponse extends AbstractResponse {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            rpcResponse = new RpcResponse((ContainerNode) SerializationUtils.readNormalizedNode(in).orElse(null));
+            rpcResponse = new RpcResponse(SerializationUtils.readNormalizedNode(in).orElse(null));
         }
 
         private Object readResolve() {
