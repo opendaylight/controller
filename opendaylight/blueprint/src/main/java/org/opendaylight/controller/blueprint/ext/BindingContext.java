@@ -32,8 +32,8 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeS
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -85,8 +85,8 @@ public abstract class BindingContext {
     }
 
     public NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
-            final SchemaContext schemaContext) throws XMLStreamException, IOException, ParserConfigurationException,
-            SAXException, URISyntaxException {
+            final EffectiveModelContext schemaContext) throws XMLStreamException, IOException,
+                ParserConfigurationException, SAXException, URISyntaxException {
         final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
         final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
         final XmlParserStream xmlParser = XmlParserStream.create(writer, schemaContext, dataSchema);

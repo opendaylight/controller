@@ -307,7 +307,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         LOG.info("Shutdown of blueprint containers complete");
     }
 
-    private List<Bundle> getBundlesToDestroy(final Collection<Bundle> containerBundles) {
+    private static List<Bundle> getBundlesToDestroy(final Collection<Bundle> containerBundles) {
         List<Bundle> bundlesToDestroy = new ArrayList<>();
 
         // Find all container bundles that either have no registered services or whose services are no
@@ -352,7 +352,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         return bundlesToDestroy;
     }
 
-    private @Nullable Bundle findBundleWithHighestUsedServiceId(final Collection<Bundle> containerBundles) {
+    private static @Nullable Bundle findBundleWithHighestUsedServiceId(final Collection<Bundle> containerBundles) {
         ServiceReference<?> highestServiceRef = null;
         for (Bundle bundle : containerBundles) {
             ServiceReference<?>[] references = bundle.getRegisteredServices();
