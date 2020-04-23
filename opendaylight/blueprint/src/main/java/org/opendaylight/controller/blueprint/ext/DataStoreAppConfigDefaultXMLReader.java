@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     @FunctionalInterface
     public interface FallbackConfigProvider {
-        NormalizedNode<?,?> get(SchemaContext schemaContext, DataSchemaNode dataSchema) throws IOException,
+        NormalizedNode<?,?> get(EffectiveModelContext schemaContext, DataSchemaNode dataSchema) throws IOException,
                 XMLStreamException, ParserConfigurationException, SAXException, URISyntaxException;
     }
 
@@ -110,7 +111,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
         checkNotNull(schemaService, "%s: Could not obtain the SchemaService OSGi service", logName);
 
-        SchemaContext schemaContext = schemaService.getGlobalContext();
+        EffectiveModelContext schemaContext = schemaService.getGlobalContext();
 
         Module module = schemaContext.findModule(bindingContext.bindingQName.getModule()).orElse(null);
         checkNotNull(module, "%s: Could not obtain the module schema for namespace %s, revision %s",
@@ -149,7 +150,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         }
     }
 
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final SchemaContext schemaContext,
+    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final EffectiveModelContext schemaContext,
             final DataSchemaNode dataSchema) throws ConfigXMLReaderException {
 
         String appConfigFileName = defaultAppConfigFileName;

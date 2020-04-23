@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,9 +279,9 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
     }
 
-    private @Nullable NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(final SchemaContext schemaContext,
-            final DataSchemaNode dataSchema) throws URISyntaxException, IOException, ParserConfigurationException,
-            SAXException, XMLStreamException {
+    private @Nullable NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(
+            final EffectiveModelContext schemaContext, final DataSchemaNode dataSchema) throws URISyntaxException,
+                IOException, ParserConfigurationException, SAXException, XMLStreamException {
         if (defaultAppConfigElement == null) {
             return null;
         }
