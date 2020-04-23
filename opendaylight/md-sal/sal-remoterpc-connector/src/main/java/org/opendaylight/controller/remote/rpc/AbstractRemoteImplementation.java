@@ -18,7 +18,7 @@ import scala.concurrent.Future;
 /**
  * An abstract base class for remote RPC/action implementations.
  */
-abstract class AbstractRemoteImplementation<T extends AbstractExecute> {
+abstract class AbstractRemoteImplementation<T extends AbstractExecute<?>> {
     // 0 for local, 1 for binding, 2 for remote
     static final long COST = 2;
 

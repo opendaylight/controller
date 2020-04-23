@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 @SuppressFBWarnings({"SE_TRANSIENT_FIELD_NOT_RESTORED", "DMI_NONSERIALIZABLE_OBJECT_WRITTEN"})
-public class ActionResponse extends AbstractResponse {
+public class ActionResponse extends AbstractResponse<ContainerNode> {
     private static final long serialVersionUID = 1L;
 
     private final transient @NonNull ImmutableList<@NonNull RpcError> errors;
