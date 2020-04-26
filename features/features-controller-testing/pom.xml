@@ -17,39 +17,36 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>features-mdsal-benchmark</artifactId>
-    <version>1.10.0-SNAPSHOT</version>
+    <artifactId>features-controller-testing</artifactId>
+    <version>1.12.0-SNAPSHOT</version>
     <packaging>feature</packaging>
+    <name>OpenDaylight :: Controller :: Features to support CSIT testing</name>
+    <description>Controller CSIT Features</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>controller-artifacts</artifactId>
+                <version>1.12.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-benchmark-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-clustering-test-app</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-dsbenchmark</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-benchmark</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-ntfbenchmark</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
     </dependencies>
-
 </project>
