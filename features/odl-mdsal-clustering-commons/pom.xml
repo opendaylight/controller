@@ -10,10 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.odlparent</groupId>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>7.0.1</version>
-        <relativePath/>
+        <version>1.12.0-SNAPSHOT</version>
+        <relativePath>../single-feature-parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
@@ -23,18 +23,6 @@
 
     <name>OpenDaylight :: Controller :: Clustering Commons</name>
     <description>Common Clustering utilities</description>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yangtools-artifacts</artifactId>
-                <version>5.0.1</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -87,21 +75,18 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-clustering-commons</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-akka-raft</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Segmented Journal for Akka, including Kryo and asm-5.2 -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-akka-segmented-journal</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware</groupId>

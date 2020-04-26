@@ -9,10 +9,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.odlparent</groupId>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>7.0.1</version>
-        <relativePath/>
+        <version>1.12.0-SNAPSHOT</version>
+        <relativePath>../single-feature-parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
@@ -21,25 +21,6 @@
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MD-SAL :: Topology Model</name>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.opendaylight.mdsal</groupId>
-                <artifactId>mdsal-artifacts</artifactId>
-                <version>6.0.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>controller-artifacts</artifactId>
-                <version>1.12.0-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>

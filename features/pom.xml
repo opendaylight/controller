@@ -26,6 +26,9 @@
   </properties>
 
   <modules>
+    <!-- Common infra to cut down definitions -->
+    <module>single-feature-parent</module>
+
     <!-- Single features, to be cleaned up -->
     <module>odl-benchmark-api</module>
     <module>odl-clustering-test-app</module>
