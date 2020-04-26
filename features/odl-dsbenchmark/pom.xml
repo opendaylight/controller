@@ -33,14 +33,12 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-benchmark-api</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>dsbenchmark</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

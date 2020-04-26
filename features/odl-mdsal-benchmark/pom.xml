@@ -33,28 +33,24 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-benchmark-api</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-dsbenchmark</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-ntfbenchmark</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>rpcbenchmark</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
