@@ -29,10 +29,15 @@
     <!-- Common infra to cut down definitions -->
     <module>single-feature-parent</module>
 
+    <!-- Experimental features -->
+    <module>features-controller-experimental</module>
+    <module>odl-controller-exp-netty-config</module>
+
+
+
     <!-- Single features, to be cleaned up -->
     <module>odl-benchmark-api</module>
     <module>odl-clustering-test-app</module>
-    <module>odl-config-netty</module>
     <module>odl-controller-blueprint</module>
     <module>odl-controller-mdsal-common</module>
     <module>odl-controller-model-topology</module>
@@ -50,7 +55,6 @@
     <module>odl-toaster</module>
 
     <!-- Repositories, to be cleaned up -->
-    <module>features-config-netty</module>
     <module>features-extras</module>
     <module>features-mdsal</module>
     <module>features-mdsal-benchmark</module>

@@ -17,11 +17,11 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>odl-config-netty</artifactId>
+    <artifactId>odl-controller-exp-netty-config</artifactId>
     <version>0.13.0-SNAPSHOT</version>
     <packaging>feature</packaging>
-
-    <name>OpenDaylight :: Config-Netty</name>
+    <name>OpenDaylight :: Controller :: Experimental :: Netty Configuration</name>
+    <description>Common configuration for Netty resources</description>
 
     <dependencies>
         <dependency>
@@ -57,5 +57,4 @@
             <artifactId>threadpool-config-impl</artifactId>
         </dependency>
     </dependencies>
-
 </project>
