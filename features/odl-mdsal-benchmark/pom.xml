@@ -10,10 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.odlparent</groupId>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>7.0.1</version>
-        <relativePath/>
+        <version>1.12.0-SNAPSHOT</version>
+        <relativePath>../single-feature-parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
@@ -25,35 +25,34 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-broker</artifactId>
-            <version>1.12.0-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-benchmark-api</artifactId>
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-dsbenchmark</artifactId>
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-ntfbenchmark</artifactId>
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>rpcbenchmark</artifactId>
             <version>${project.version}</version>
         </dependency>

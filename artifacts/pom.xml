@@ -231,6 +231,48 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- Config files -->
+            <dependency>
+                <!-- finalname="configuration/initial/akka.conf" -->
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-clustering-config</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>akkaconf</classifier>
+            </dependency>
+            <dependency>
+                <!-- finalname="configuration/factory/akka.conf" override="true" -->
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-clustering-config</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>factoryakkaconf</classifier>
+            </dependency>
+            <dependency>
+                <!-- finalname="configuration/initial/module-shards.conf" -->
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-clustering-config</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>moduleshardconf</classifier>
+            </dependency>
+            <dependency>
+                <!-- finalname="configuration/initial/modules.conf" -->
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-clustering-config</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>moduleconf</classifier>
+            </dependency>
+            <dependency>
+                <!-- finalname="etc/org.opendaylight.controller.cluster.datastore.cfg" -->
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-clustering-config</artifactId>
+                <version>${project.version}</version>
+                <type>cfg</type>
+                <classifier>datastore</classifier>
+            </dependency>
+
             <!-- Features -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -337,30 +379,37 @@
             </dependency>
 
             <!-- Config remnants -->
-             <dependency>
-                 <groupId>${project.groupId}</groupId>
-                 <artifactId>netty-event-executor-config</artifactId>
-                 <version>0.13.0-SNAPSHOT</version>
-             </dependency>
-             <dependency>
-                 <groupId>${project.groupId}</groupId>
-                 <artifactId>netty-threadgroup-config</artifactId>
-                 <version>0.13.0-SNAPSHOT</version>
-             </dependency>
-             <dependency>
-                 <groupId>${project.groupId}</groupId>
-                 <artifactId>netty-timer-config</artifactId>
-                 <version>0.13.0-SNAPSHOT</version>
-             </dependency>
-             <dependency>
-                 <groupId>${project.groupId}</groupId>
-                 <artifactId>threadpool-config-api</artifactId>
-                 <version>0.13.0-SNAPSHOT</version>
-             </dependency>
-             <dependency>
-                 <groupId>${project.groupId}</groupId>
-                 <artifactId>threadpool-config-impl</artifactId>
-                 <version>0.13.0-SNAPSHOT</version>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netty-event-executor-config</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netty-threadgroup-config</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netty-timer-config</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>threadpool-config-api</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>threadpool-config-impl</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>odl-config-netty</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+                <classifier>features</classifier>
+                <type>xml</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
