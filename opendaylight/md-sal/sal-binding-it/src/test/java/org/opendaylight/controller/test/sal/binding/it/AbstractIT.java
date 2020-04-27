@@ -20,7 +20,7 @@ import org.ops4j.pax.exam.options.MavenUrlReference;
 public abstract class AbstractIT extends AbstractMdsalTestBase {
     @Override
     public MavenUrlReference getFeatureRepo() {
-        return maven().groupId("org.opendaylight.controller").artifactId("features-mdsal").classifier("features")
+        return maven().groupId("org.opendaylight.controller").artifactId("features-controller").classifier("features")
                 .type("xml").versionAsInProject();
     }
 

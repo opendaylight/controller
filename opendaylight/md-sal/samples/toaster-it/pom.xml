@@ -13,7 +13,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-mdsal</artifactId>
+      <artifactId>features-controller</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>

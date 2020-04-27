@@ -29,6 +29,9 @@
     <!-- Common infra to cut down definitions -->
     <module>single-feature-parent</module>
 
+    <!-- Production features -->
+    <module>features-controller</module>
+
     <!-- Experimental features -->
     <module>features-controller-experimental</module>
     <module>odl-controller-exp-netty-config</module>
@@ -51,9 +54,5 @@
     <module>odl-mdsal-model-inventory</module>
     <module>odl-mdsal-remoterpc-connector</module>
     <module>odl-toaster</module>
-
-    <!-- Repositories, to be cleaned up -->
-    <module>features-extras</module>
-    <module>features-mdsal</module>
   </modules>
 </project>
