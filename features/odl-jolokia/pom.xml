@@ -18,7 +18,6 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-jolokia</artifactId>
-    <version>1.15.0-SNAPSHOT</version>
     <packaging>feature</packaging>
     <name>Jolokia JMX/HTTP bridge</name>
 
