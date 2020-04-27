@@ -34,8 +34,8 @@ public class ToasterTest extends AbstractMdsalTestBase {
 
     @Override
     public MavenUrlReference getFeatureRepo() {
-        return maven().groupId("org.opendaylight.controller").artifactId("features-controller").classifier("features")
-                .type("xml").versionAsInProject();
+        return maven().groupId("org.opendaylight.controller").artifactId("features-controller-experimental")
+                .classifier("features").type("xml").versionAsInProject();
     }
 
     @Override
