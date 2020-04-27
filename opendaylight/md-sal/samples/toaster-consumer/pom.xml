@@ -10,14 +10,12 @@
 
   <groupId>org.opendaylight.controller.samples</groupId>
   <artifactId>sample-toaster-consumer</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>sample-toaster</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
