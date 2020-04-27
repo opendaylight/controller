@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public abstract class AbstractInMemoryWriteTransactionBenchmark {
     protected static final int OUTER_LIST_100K = 100000;
@@ -36,8 +36,8 @@ public abstract class AbstractInMemoryWriteTransactionBenchmark {
         return paths;
     }
 
-    protected static final int WARMUP_ITERATIONS = 20;
-    protected static final int MEASUREMENT_ITERATIONS = 20;
+    protected static final int WARMUP_ITERATIONS = 6;
+    protected static final int MEASUREMENT_ITERATIONS = 6;
 
     protected static final MapNode ONE_ITEM_INNER_LIST = initInnerListItems(1);
     protected static final MapNode TWO_ITEM_INNER_LIST = initInnerListItems(2);
@@ -73,7 +73,7 @@ public abstract class AbstractInMemoryWriteTransactionBenchmark {
         return outerListItems;
     }
 
-    protected SchemaContext schemaContext;
+    protected EffectiveModelContext schemaContext;
 
     public abstract void setUp() throws Exception;
 
