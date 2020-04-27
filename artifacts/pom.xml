@@ -402,13 +402,6 @@
                 <artifactId>rpcbenchmark</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>odl-controller-test-benchmark</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
 
             <!-- Expertimental Features -->
             <dependency>
