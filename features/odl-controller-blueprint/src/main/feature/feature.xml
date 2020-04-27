@@ -12,6 +12,6 @@
         <feature version="[6,7)">odl-mdsal-binding-api</feature>
         <feature version="[6,7)">odl-mdsal-binding-runtime</feature>
         <feature version="[6,7)">odl-mdsal-dom-api</feature>
-        <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${blueprint.version}</bundle>
+        <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${project.version}</bundle>
     </feature>
 </features>
