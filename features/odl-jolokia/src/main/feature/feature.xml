@@ -8,7 +8,7 @@
  -->
 <features name="odl-extras-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-jolokia" version="${project.version}">
-        <configfile finalname="/etc/org.jolokia.osgi.cfg">mvn:org.opendaylight.controller/odl-jolokia-osgi/${odl-jolokia-osgi.version}/cfg/configuration</configfile>
+        <configfile finalname="/etc/org.jolokia.osgi.cfg">mvn:org.opendaylight.controller/odl-jolokia-osgi/${project.version}/cfg/configuration</configfile>
         <feature>http</feature>
     </feature>
 </features>

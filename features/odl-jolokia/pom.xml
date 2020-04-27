@@ -20,12 +20,7 @@
     <artifactId>odl-jolokia</artifactId>
     <version>1.15.0-SNAPSHOT</version>
     <packaging>feature</packaging>
-
     <name>Jolokia JMX/HTTP bridge</name>
-
-    <properties>
-        <odl-jolokia-osgi.version>2.0.0-SNAPSHOT</odl-jolokia-osgi.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -36,7 +31,8 @@
             <!-- finalname="/etc/org.jolokia.osgi.cfg" -->
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-jolokia-osgi</artifactId>
-            <version>${odl-jolokia-osgi.version}</version>
+            <!-- Note: aligned with feature.xml content -->
+            <version>${project.version}</version>
             <type>cfg</type>
             <classifier>configuration</classifier>
         </dependency>
