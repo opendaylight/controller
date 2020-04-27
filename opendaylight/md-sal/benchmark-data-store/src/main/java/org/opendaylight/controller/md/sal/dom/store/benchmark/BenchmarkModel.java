@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
@@ -36,7 +36,7 @@ public final class BenchmarkModel {
     private BenchmarkModel() {
     }
 
-    public static SchemaContext createTestContext() {
+    public static EffectiveModelContext createTestContext() {
         return YangParserTestUtils.parseYangResources(BenchmarkModel.class, DATASTORE_TEST_YANG);
     }
 }

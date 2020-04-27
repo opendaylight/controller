@@ -32,7 +32,7 @@ import org.openjdk.jmh.annotations.State;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
 public class InMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryBrokerWriteTransactionBenchmark {
-    private ListeningExecutorService executor;
+    private ListeningExecutorService executor = null;
 
     @Setup(Level.Trial)
     @Override
@@ -50,8 +50,8 @@ public class InMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryBro
 
         domBroker = new SerializedDOMDataBroker(datastores, executor);
         schemaContext = BenchmarkModel.createTestContext();
-        configStore.onGlobalContextUpdated(schemaContext);
-        operStore.onGlobalContextUpdated(schemaContext);
+        configStore.onModelContextUpdated(schemaContext);
+        operStore.onModelContextUpdated(schemaContext);
         initTestNode();
     }
 
