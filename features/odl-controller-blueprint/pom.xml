@@ -26,7 +26,7 @@
 
     <properties>
         <!-- Note: this is required as it is used in feature.xml -->
-        <blueprint.version>0.13.0-SNAPSHOT</blueprint.version>
+        <blueprint.version>2.0.0-SNAPSHOT</blueprint.version>
     </properties>
 
     <dependencies>
