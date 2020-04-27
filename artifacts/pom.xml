@@ -52,15 +52,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>features-mdsal</artifactId>
-                <version>${project.version}</version>
-                <classifier>features</classifier>
-                <type>xml</type>
-                <scope>runtime</scope>
-            </dependency>
-
             <!-- Base model augmentations -->
             <dependency>
                 <groupId>org.opendaylight.controller.model</groupId>
@@ -279,7 +270,15 @@
                 <classifier>datastore</classifier>
             </dependency>
 
-            <!-- Features -->
+            <!-- Production Features -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>features-controller</artifactId>
+                <version>${project.version}</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+                <scope>runtime</scope>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-mdsal-broker</artifactId>
