@@ -6,18 +6,24 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
     <version>7.0.1</version>
     <relativePath/>
   </parent>
+
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>benchmark-aggregator</artifactId>
   <version>1.10.0-SNAPSHOT</version>
-  <name>${project.artifactId}</name>
   <packaging>pom</packaging>
-  <modelVersion>4.0.0</modelVersion>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
+
   <modules>
     <module>api</module>
     <module>dsbenchmark</module>

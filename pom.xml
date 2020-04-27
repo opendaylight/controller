@@ -7,12 +7,18 @@
     <version>7.0.1</version>
     <relativePath/>
   </parent>
+
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>releasepom</artifactId>
   <version>0.12.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>controller</name>
   <!-- Used by Sonar to set project name -->
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
 
   <modules>
     <module>artifacts</module>
@@ -37,11 +43,6 @@
     <!-- documentation -->
     <module>docs</module>
   </modules>
-
-  <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
-    <maven.install.skip>true</maven.install.skip>
-  </properties>
 
   <profiles>
     <profile>

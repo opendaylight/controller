@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
-    <groupId>org.opendaylight.mdsal</groupId>
-    <artifactId>binding-parent</artifactId>
-    <version>6.0.0</version>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>7.0.1</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
-  <artifactId>config-subsystem</artifactId>
+  <artifactId>config-aggregator</artifactId>
   <version>0.13.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>${project.artifactId}</name>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
 
   <modules>
     <module>threadpool-config-api</module>
@@ -22,16 +25,4 @@
     <module>netty-event-executor-config</module>
     <module>netty-timer-config</module>
   </modules>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>controller-artifacts</artifactId>
-        <version>1.12.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>
