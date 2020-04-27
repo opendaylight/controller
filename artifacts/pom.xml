@@ -212,6 +212,13 @@
                 <artifactId>messagebus-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>odl-controller-exp-messagebus</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
 
             <!-- Clustering system test support -->
             <dependency>
@@ -318,13 +325,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-mdsal-remoterpc-connector</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>odl-message-bus-collector</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
