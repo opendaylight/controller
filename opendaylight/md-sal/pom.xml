@@ -66,16 +66,4 @@
     <module>mdsal-it-base</module>
     <module>mdsal-it-parent</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>benchmarks</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>benchmark-data-store</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
