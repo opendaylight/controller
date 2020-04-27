@@ -49,7 +49,7 @@ public class InMemoryDataStoreWithSameThreadedExecutorBenchmark
 
         domStore = new InMemoryDOMDataStore("SINGLE_THREADED_DS_BENCHMARK", dataChangeListenerExecutor);
         schemaContext = BenchmarkModel.createTestContext();
-        domStore.onGlobalContextUpdated(schemaContext);
+        domStore.onModelContextUpdated(schemaContext);
         initTestNode();
     }
 

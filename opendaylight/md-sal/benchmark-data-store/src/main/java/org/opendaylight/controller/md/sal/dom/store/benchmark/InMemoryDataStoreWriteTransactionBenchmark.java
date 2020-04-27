@@ -39,7 +39,7 @@ public class InMemoryDataStoreWriteTransactionBenchmark extends AbstractInMemory
     public void setUp() throws Exception {
         domStore = new InMemoryDOMDataStore("SINGLE_THREADED_DS_BENCHMARK", Executors.newSingleThreadExecutor());
         schemaContext = BenchmarkModel.createTestContext();
-        domStore.onGlobalContextUpdated(schemaContext);
+        domStore.onModelContextUpdated(schemaContext);
         initTestNode();
     }
 
