@@ -85,12 +85,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-toaster</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-controller-blueprint</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
