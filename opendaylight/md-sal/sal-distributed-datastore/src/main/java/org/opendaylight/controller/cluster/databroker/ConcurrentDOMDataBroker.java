@@ -13,6 +13,7 @@ import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedException
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER;
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
 
+import akka.pattern.AskTimeoutException;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.FluentFuture;
@@ -55,6 +56,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     private static final String COMMIT = "COMMIT";
 
     private final DurationStatisticsTracker commitStatsTracker;
+    private static DatastoreExceptionTracker datastoreExceptionTracker = DatastoreExceptionTracker.getInstance();
 
     /**
      * This executor is used to execute Future listener callback Runnables async.
@@ -208,6 +210,14 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         if (clientSubmitFuture.isDone()) {
             // We must have had failures from multiple cohorts.
             return;
+        }
+        // The AskTimeoutException is handled specially, that the count is been maintained and monitored.
+        // Alarm will be raised if the count hits the configured threshold level.
+        if (throwable instanceof AskTimeoutException) {
+            String transactionClassName = transaction.getClass().getName();
+            String exceptionCounterKey = datastoreExceptionTracker.getExceptionTrackerCounterName(throwable,
+                    transactionClassName);
+            datastoreExceptionTracker.incrementAskTimeoutExceptionCounter(exceptionCounterKey);
         }
 
         // Use debug instead of warn level here because this exception gets propagate back to the caller via the Future
