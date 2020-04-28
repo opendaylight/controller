@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "5dfb1655_3ec1bf93",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/DatastoreExceptionTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-04-28T12:07:04Z",
+      "side": 1,
+      "message": "I don\u0027t think having hardcoded shard names is a good idea. Seems like we should be able to dynamicaly look these up from the ShardManager in case there are any other shards configured in module-shards.",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 63,
+        "endChar": 50
+      },
+      "revId": "c9f231a52ca4b5545dd551b331a56ce54cd4a7d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5bedad96_b033885f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/DatastoreExceptionTrackerAlarmAgent.java",
         "patchSetId": 1
@@ -64,6 +87,29 @@
         "startChar": 21,
         "endLine": 28,
         "endChar": 60
+      },
+      "revId": "c9f231a52ca4b5545dd551b331a56ce54cd4a7d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53c453ea_c2286533",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/DatastoreExceptionCountAlarmMBean.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-04-28T12:07:04Z",
+      "side": 1,
+      "message": "These could use some javadoc.",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 76
       },
       "revId": "c9f231a52ca4b5545dd551b331a56ce54cd4a7d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
