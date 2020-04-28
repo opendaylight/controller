@@ -67,9 +67,11 @@ public final class ListsBindingUtils {
     }
 
     public static TopLevelList topLevelList(final TopLevelListKey key, final TreeComplexUsesAugment augment) {
-        TopLevelListBuilder builder = new TopLevelListBuilder().withKey(key);
-        builder.addAugmentation(TreeComplexUsesAugment.class, augment);
-        return builder.build();
+        final TopLevelListBuilder builder = new TopLevelListBuilder();
+        if (augment != null) {
+            builder.addAugmentation(augment);
+        }
+        return builder.withKey(key).build();
     }
 
     public static TreeComplexUsesAugment complexUsesAugment(final ListViaUsesKey... keys) {
