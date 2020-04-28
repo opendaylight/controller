@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSelection;
+import akka.pattern.AskTimeoutException;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.databroker.DatastoreExceptionTracker;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -37,6 +39,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreTransaction txDelegate;
     private final LocalTransactionReadySupport readySupport;
     private Exception operationError;
+    private static DatastoreExceptionTracker datastoreExceptionTracker = DatastoreExceptionTracker.getInstance();
 
     LocalTransactionContext(final DOMStoreTransaction txDelegate, final TransactionIdentifier identifier,
             final LocalTransactionReadySupport readySupport) {
@@ -50,7 +53,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     protected abstract DOMStoreReadTransaction getReadDelegate();
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void executeModification(Consumer<DOMStoreWriteTransaction> consumer) {
+    private void executeModification(final Consumer<DOMStoreWriteTransaction> consumer) {
         incrementModificationCount();
         if (operationError == null) {
             try {
@@ -91,6 +94,12 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
             public void onFailure(final Throwable failure) {
                 proxyFuture.setException(failure instanceof Exception
                         ? ReadFailedException.MAPPER.apply((Exception) failure) : failure);
+                // The AskTimeoutException is handled specially, that the count is been maintained and monitored.
+                // Alarm will be raised if the count hits the configured threshold level.
+                if (failure instanceof AskTimeoutException) {
+                    datastoreExceptionTracker.incrementAskTimeoutExceptionCounter((AskTimeoutException) failure,
+                        txDelegate.getClass().getName());
+                }
             }
         }, MoreExecutors.directExecutor());
     }
