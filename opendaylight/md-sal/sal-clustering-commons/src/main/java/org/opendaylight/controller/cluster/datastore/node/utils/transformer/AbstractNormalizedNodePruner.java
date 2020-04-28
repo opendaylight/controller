@@ -64,11 +64,9 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     private final DataSchemaContextTree tree;
 
     private DataSchemaContextNode<?> nodePathSchemaNode;
+    private NormalizedNode<?, ?> normalizedNode;
     private State state = State.UNITIALIZED;
     private int unknown;
-
-    // FIXME: package-private to support unguarded NormalizedNodePruner access
-    NormalizedNode<?, ?> normalizedNode;
 
     AbstractNormalizedNodePruner(final DataSchemaContextTree tree) {
         this.tree = requireNonNull(tree);
