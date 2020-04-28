@@ -15,11 +15,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * The NormalizedNodePruner removes all nodes from the input NormalizedNode that do not have a corresponding
- * schema element in the passed in SchemaContext.
- *
- * <p>
- * Unlike {@link NormalizedNodePruner}, this class can be reused multiple times and must be initialized before each use
- * through {@link #initializeForPath(YangInstanceIdentifier)}.
+ * schema element in the passed in SchemaContext. Instances of this class can be reused multiple times and must be
+ * initialized before each use through {@link #initializeForPath(YangInstanceIdentifier)}.
  */
 @Beta
 public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNodePruner {

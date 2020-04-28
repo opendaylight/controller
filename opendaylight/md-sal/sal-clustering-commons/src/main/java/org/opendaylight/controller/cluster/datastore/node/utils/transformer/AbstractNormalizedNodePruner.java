@@ -64,11 +64,9 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     private final DataSchemaContextTree tree;
 
     private DataSchemaContextNode<?> nodePathSchemaNode;
+    private NormalizedNode<?, ?> normalizedNode;
     private State state = State.UNITIALIZED;
     private int unknown;
-
-    // FIXME: package-private to support unguarded NormalizedNodePruner access
-    NormalizedNode<?, ?> normalizedNode;
 
     AbstractNormalizedNodePruner(final DataSchemaContextTree tree) {
         this.tree = requireNonNull(tree);
@@ -92,17 +90,17 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void startLeafNode(final NodeIdentifier name) throws IOException {
+    public final void startLeafNode(final NodeIdentifier name) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startLeafNode, name);
     }
 
     @Override
-    public void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startLeafSet, name, childSizeHint);
     }
 
     @Override
-    public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startOrderedLeafSet, name, childSizeHint);
     }
 
@@ -112,28 +110,28 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startContainerNode, name, childSizeHint);
     }
 
     @Override
-    public void startYangModeledAnyXmlNode(final NodeIdentifier nodeIdentifier, final int count) {
+    public final void startYangModeledAnyXmlNode(final NodeIdentifier nodeIdentifier, final int count) {
         // FIXME: implement this
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startUnkeyedList(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startUnkeyedList, name, childSizeHint);
     }
 
     @Override
-    public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startUnkeyedListItem, name, childSizeHint);
     }
 
     @Override
-    public void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startMapNode, name, childSizeHint);
     }
 
@@ -144,22 +142,22 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startOrderedMapNode, name, childSizeHint);
     }
 
     @Override
-    public void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
+    public final void startChoiceNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startChoiceNode, name, childSizeHint);
     }
 
     @Override
-    public void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
+    public final void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startAugmentationNode, identifier);
     }
 
     @Override
-    public boolean startAnyxmlNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+    public final  boolean startAnyxmlNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
         if (enter(name)) {
             verify(delegate.startAnyxmlNode(name, objectModel),
                 "Unexpected failure to stream DOMSource node %s model %s", name, objectModel);
@@ -168,13 +166,13 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public boolean startAnydataNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
+    public final boolean startAnydataNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
         // FIXME: we do not support anydata nodes yet
         return false;
     }
 
     @Override
-    public void domSourceValue(final DOMSource value) throws IOException {
+    public final  void domSourceValue(final DOMSource value) throws IOException {
         checkNotSealed();
         if (unknown == 0) {
             delegate.domSourceValue(value);
@@ -182,7 +180,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void scalarValue(final Object value) throws IOException {
+    public final void scalarValue(final Object value) throws IOException {
         checkNotSealed();
         if (unknown == 0) {
             delegate.scalarValue(translateScalar(currentSchema(), value));
@@ -195,7 +193,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void endNode() throws IOException {
+    public final void endNode() throws IOException {
         checkNotSealed();
 
         if (unknown == 0) {
@@ -220,14 +218,14 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public void close() throws IOException {
+    public final void close() throws IOException {
         state = State.CLOSED;
         stack.clear();
         delegate.close();
     }
 
     @Override
-    public void flush() throws IOException {
+    public final void flush() throws IOException {
         delegate.flush();
     }
 
