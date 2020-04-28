@@ -15,7 +15,6 @@
         <relativePath>../single-feature-parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-jolokia</artifactId>
     <packaging>feature</packaging>
     <name>Jolokia JMX/HTTP bridge</name>

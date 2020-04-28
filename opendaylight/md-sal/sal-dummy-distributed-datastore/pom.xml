@@ -8,7 +8,6 @@
     <relativePath>../parent</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-dummy-distributed-datastore</artifactId>
   <packaging>bundle</packaging>
 

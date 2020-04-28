@@ -17,7 +17,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <relativePath>../parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>messagebus-api</artifactId>
     <packaging>bundle</packaging>
     <name>${project.artifactId}</name>

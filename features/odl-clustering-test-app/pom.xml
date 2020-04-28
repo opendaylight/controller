@@ -15,7 +15,6 @@
         <relativePath>../single-feature-parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-clustering-test-app</artifactId>
     <packaging>feature</packaging>
 

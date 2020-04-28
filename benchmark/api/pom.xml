@@ -15,7 +15,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <relativePath>../../opendaylight/md-sal/parent</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>benchmark-api</artifactId>
   <packaging>bundle</packaging>
 

@@ -10,7 +10,6 @@
         <relativePath>../parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-test-model</artifactId>
     <packaging>bundle</packaging>
 

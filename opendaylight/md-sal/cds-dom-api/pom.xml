@@ -8,7 +8,6 @@
         <relativePath>../parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>cds-dom-api</artifactId>
     <packaging>bundle</packaging>
 

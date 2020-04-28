@@ -8,7 +8,6 @@
         <relativePath>../parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-remoterpc-connector</artifactId>
     <packaging>bundle</packaging>
 
