@@ -13,6 +13,7 @@ import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedException
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER;
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
 
+import akka.pattern.AskTimeoutException;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.FluentFuture;
@@ -107,7 +108,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Boolean> futureCallback = new FutureCallback<Boolean>() {
+        FutureCallback<Boolean> futureCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Boolean result) {
                 if (result == null || !result) {
@@ -139,7 +140,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
+        FutureCallback<Void> futureCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Void notUsed) {
                 if (!cohortIterator.hasNext()) {
@@ -170,7 +171,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
+        FutureCallback<Void> futureCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Void notUsed) {
                 if (!cohortIterator.hasNext()) {
@@ -208,6 +209,12 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         if (clientSubmitFuture.isDone()) {
             // We must have had failures from multiple cohorts.
             return;
+        }
+        // The AskTimeoutException is handled specially, that the count is been maintained and monitored.
+        // Alarm will be raised if the count hits the configured threshold level.
+        if (throwable instanceof AskTimeoutException) {
+            DatastoreExceptionTracker.getInstance().incrementAskTimeoutExceptionCounter((AskTimeoutException) throwable,
+                transaction.getClass().getName());
         }
 
         // Use debug instead of warn level here because this exception gets propagate back to the caller via the Future
