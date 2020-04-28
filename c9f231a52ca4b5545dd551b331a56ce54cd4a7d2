@@ -45,6 +45,29 @@
       "revId": "c9f231a52ca4b5545dd551b331a56ce54cd4a7d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bedad96_b033885f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/DatastoreExceptionTrackerAlarmAgent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-04-28T07:26:58Z",
+      "side": 1,
+      "message": "this is a red flag indicating static wiring -- a difinitive non-starter",
+      "range": {
+        "startLine": 28,
+        "startChar": 21,
+        "endLine": 28,
+        "endChar": 60
+      },
+      "revId": "c9f231a52ca4b5545dd551b331a56ce54cd4a7d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
