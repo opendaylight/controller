@@ -15,7 +15,6 @@
         <relativePath>../single-feature-parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-remoterpc-connector</artifactId>
     <packaging>feature</packaging>
     <name>OpenDaylight :: Controller :: Remote RPC Connector</name>

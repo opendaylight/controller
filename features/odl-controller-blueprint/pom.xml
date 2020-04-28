@@ -16,7 +16,6 @@
         <relativePath>../single-feature-parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-controller-blueprint</artifactId>
     <packaging>feature</packaging>
 

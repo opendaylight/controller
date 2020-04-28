@@ -14,7 +14,6 @@
         <relativePath>../single-feature-parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-controller-model-topology</artifactId>
     <packaging>feature</packaging>
     <name>OpenDaylight :: MD-SAL :: Topology Model</name>
