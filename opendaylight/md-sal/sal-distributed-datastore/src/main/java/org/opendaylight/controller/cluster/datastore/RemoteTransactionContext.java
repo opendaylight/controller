@@ -14,10 +14,12 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
+import akka.pattern.AskTimeoutException;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.databroker.DatastoreExceptionTracker;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -50,6 +52,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private BatchedModifications batchedModifications;
     private int totalBatchedModificationsSent;
     private int batchPermits;
+    private static DatastoreExceptionTracker datastoreExceptionTracker = DatastoreExceptionTracker.getInstance();
 
     /**
      * We have observed a failed modification batch. This transaction context is effectively doomed, as the backend
@@ -263,6 +266,14 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
                 }
 
                 if (failure != null) {
+                    // The AskTimeoutException is handled specially, that the count is been maintained and monitored.
+                    // Alarm will be raised if the count hits the configured threshold level.
+                    if (failure instanceof AskTimeoutException) {
+                        String transactionClassName = this.getClass().getName();
+                        String exceptionCounterKey = datastoreExceptionTracker.getExceptionTrackerCounterName(failure,
+                                transactionClassName);
+                        datastoreExceptionTracker.incrementAskTimeoutExceptionCounter(exceptionCounterKey);
+                    }
                     LOG.debug("Tx {} {} operation failed", getIdentifier(), readCmd.getClass().getSimpleName(),
                         failure);
 
