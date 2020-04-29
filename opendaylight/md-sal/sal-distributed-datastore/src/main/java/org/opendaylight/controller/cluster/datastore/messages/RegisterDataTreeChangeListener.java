@@ -28,16 +28,18 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
     private ActorRef dataTreeChangeListenerPath;
     private YangInstanceIdentifier path;
     private boolean registerOnAllInstances;
+    private boolean notifyListenerOnInit;
 
     public RegisterDataTreeChangeListener() {
         // For Externalizable
     }
 
     public RegisterDataTreeChangeListener(final YangInstanceIdentifier path, final ActorRef dataTreeChangeListenerPath,
-            final boolean registerOnAllInstances) {
+            final boolean registerOnAllInstances, boolean notifyListenerOnInit) {
         this.path = requireNonNull(path);
         this.dataTreeChangeListenerPath = requireNonNull(dataTreeChangeListenerPath);
         this.registerOnAllInstances = registerOnAllInstances;
+        this.notifyListenerOnInit = notifyListenerOnInit;
     }
 
     public YangInstanceIdentifier getPath() {
@@ -50,6 +52,10 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
 
     public boolean isRegisterOnAllInstances() {
         return registerOnAllInstances;
+    }
+
+    public boolean isNotifyListenerOnInit() {
+        return notifyListenerOnInit;
     }
 
     @Override
@@ -69,6 +75,7 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
     @Override
     public String toString() {
         return "RegisterDataTreeChangeListener [path=" + path + ", registerOnAllInstances=" + registerOnAllInstances
-                + ", dataTreeChangeListenerPath=" + dataTreeChangeListenerPath + "]";
+                + ", dataTreeChangeListenerPath=" + dataTreeChangeListenerPath + ", notifyListenerOnInit="
+            + notifyListenerOnInit + "]";
     }
 }

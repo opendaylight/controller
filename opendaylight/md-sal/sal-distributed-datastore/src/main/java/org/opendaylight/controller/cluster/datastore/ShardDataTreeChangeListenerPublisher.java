@@ -21,6 +21,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  */
 interface ShardDataTreeChangeListenerPublisher extends ShardDataTreeNotificationPublisher {
     void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
-            Optional<DataTreeCandidate> initialState,
+            boolean notifyListenerOnInit, Optional<DataTreeCandidate> initialState,
             Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration);
 }
