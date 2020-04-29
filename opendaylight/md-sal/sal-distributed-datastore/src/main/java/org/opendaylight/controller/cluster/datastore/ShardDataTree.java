@@ -672,9 +672,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     public void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
-            final Optional<DataTreeCandidate> initialState,
+            final boolean notifyListenerOnInit, final Optional<DataTreeCandidate> initialState,
             final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
-        treeChangeListenerPublisher.registerTreeChangeListener(path, listener, initialState, onRegistration);
+        treeChangeListenerPublisher.registerTreeChangeListener(path, listener, notifyListenerOnInit, initialState,
+                onRegistration);
     }
 
     int getQueueSize() {

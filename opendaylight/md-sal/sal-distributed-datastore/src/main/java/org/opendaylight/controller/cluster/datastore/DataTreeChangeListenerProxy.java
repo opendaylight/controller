@@ -15,14 +15,19 @@ import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
 import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReplyWithInitialState;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -90,7 +95,7 @@ abstract class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener>
 
         Future<Object> future = actorUtils.executeOperationAsync(shard,
                 new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor,
-                        getInstance() instanceof ClusteredDOMDataTreeChangeListener),
+                        getInstance() instanceof ClusteredDOMDataTreeChangeListener, true),
                 actorUtils.getDatastoreContext().getShardInitializationTimeout());
 
         future.onComplete(new OnComplete<Object>() {
@@ -103,6 +108,32 @@ abstract class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener>
                     RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)result;
                     setListenerRegistrationActor(actorUtils.actorSelection(
                             reply.getListenerRegistrationPath()));
+                }
+            }
+        }, actorUtils.getClientDispatcher());
+    }
+
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
+    protected void doRegistration(final ActorRef shard, final InitialShardDataCollector initialShardDataCollector) {
+
+        Future<Object> future = actorUtils.executeOperationAsync(shard,
+                new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor,
+                        getInstance() instanceof ClusteredDOMDataTreeChangeListener, false),
+                actorUtils.getDatastoreContext().getShardInitializationTimeout());
+
+        future.onComplete(new OnComplete<Object>() {
+            @Override
+            public void onComplete(final Throwable failure, final Object result) {
+                if (failure != null) {
+                    LOG.error("{}: Failed to register DataTreeChangeListener {} at path {}", logContext(),
+                            getInstance(), registeredPath, failure);
+                } else {
+                    RegisterDataTreeNotificationListenerReplyWithInitialState reply =
+                            (RegisterDataTreeNotificationListenerReplyWithInitialState)result;
+                    setListenerRegistrationActor(actorUtils.actorSelection(
+                            reply.getListenerRegistrationPath()));
+                    initialShardDataCollector.collectInitialState(reply.getInitialData());
                 }
             }
         }, actorUtils.getClientDispatcher());
@@ -139,6 +170,8 @@ abstract class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener>
         @Override
         public void init() {
             final Set<String> allShardNames = getActorUtils().getConfiguration().getAllShardNames();
+            final CountDownLatch latch = new CountDownLatch(allShardNames.size());
+            final InitialShardDataComposer composer = new InitialShardDataComposer(latch);
             for (String shardName : allShardNames) {
                 Future<ActorRef> findFuture = getActorUtils().findLocalShardAsync(shardName);
                 findFuture.onComplete(new OnComplete<ActorRef>() {
@@ -153,11 +186,23 @@ abstract class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener>
                                             + "cannot be registered", logContext(), shardName, getInstance(),
                                     getRegisteredPath(), failure);
                         } else {
-                            doRegistration(shard);
+                            doRegistration(shard, composer);
                         }
                     }
                 }, getActorUtils().getClientDispatcher());
             }
+            try {
+                boolean collectionSuccess = latch.await(10, TimeUnit.SECONDS);
+                if (collectionSuccess) {
+                    getDataChangeListenerActor().tell(new DataTreeChanged(
+                            Collections.singleton(composer.composeCollectedState())), ActorRef.noSender());
+                    return;
+                }
+            } catch (InterruptedException e) {
+                LOG.error("Composing initial state from all shards failed. "
+                        + "Haven't received initial state from {} shards", latch.getCount(), e);
+            }
+            composer.notifyListener(getDataChangeListenerActor());
         }
 
         @Override

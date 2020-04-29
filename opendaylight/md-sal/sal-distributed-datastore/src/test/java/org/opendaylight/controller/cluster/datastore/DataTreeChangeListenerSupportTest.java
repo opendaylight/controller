@@ -164,7 +164,8 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         RegisterDataTreeNotificationListenerReply reply;
         try {
             reply = (RegisterDataTreeNotificationListenerReply)
-                    Await.result(Patterns.ask(shardActor, new RegisterDataTreeChangeListener(path, dclActor, false),
+                    Await.result(Patterns.ask(shardActor,
+                        new RegisterDataTreeChangeListener(path, dclActor, false, true),
                         new Timeout(5, TimeUnit.SECONDS)), FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (RuntimeException e) {
             throw e;

@@ -138,7 +138,7 @@ public class ShardTest extends AbstractShardTest {
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
             TestModel.TEST_PATH), "testRegisterDataTreeChangeListener-DataTreeChangeListener");
 
-        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, false), testKit.getRef());
+        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, false, true), testKit.getRef());
 
         final RegisterDataTreeNotificationListenerReply reply = testKit.expectMsgClass(Duration.ofSeconds(3),
             RegisterDataTreeNotificationListenerReply.class);
@@ -156,7 +156,7 @@ public class ShardTest extends AbstractShardTest {
         final ActorRef dclActor2 = actorFactory.createActor(DataTreeChangeListenerActor.props(listener2,
             TestModel.TEST_PATH), "testRegisterDataTreeChangeListener-DataTreeChangeListener2");
 
-        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor2, false), testKit.getRef());
+        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor2, false, true), testKit.getRef());
 
         testKit.expectMsgClass(Duration.ofSeconds(3), RegisterDataTreeNotificationListenerReply.class);
 
@@ -209,7 +209,7 @@ public class ShardTest extends AbstractShardTest {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         assertTrue("Got first ElectionTimeout", onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
 
-        shard.tell(new RegisterDataTreeChangeListener(path, dclActor, false), testKit.getRef());
+        shard.tell(new RegisterDataTreeChangeListener(path, dclActor, false, true), testKit.getRef());
         final RegisterDataTreeNotificationListenerReply reply = testKit.expectMsgClass(Duration.ofSeconds(5),
             RegisterDataTreeNotificationListenerReply.class);
         assertNotNull("getListenerRegistratioznPath", reply.getListenerRegistrationPath());
@@ -1903,7 +1903,7 @@ public class ShardTest extends AbstractShardTest {
 
         testKit.waitUntilNoLeader(shard);
 
-        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), testKit.getRef());
+        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true, true), testKit.getRef());
         final RegisterDataTreeNotificationListenerReply reply = testKit.expectMsgClass(Duration.ofSeconds(5),
             RegisterDataTreeNotificationListenerReply.class);
         assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
@@ -1933,7 +1933,7 @@ public class ShardTest extends AbstractShardTest {
 
         testKit.waitUntilNoLeader(shard);
 
-        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), testKit.getRef());
+        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true, true), testKit.getRef());
         final RegisterDataTreeNotificationListenerReply reply = testKit.expectMsgClass(Duration.ofSeconds(5),
             RegisterDataTreeNotificationListenerReply.class);
         assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
@@ -1982,7 +1982,8 @@ public class ShardTest extends AbstractShardTest {
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, path),
             actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
-        followerShard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), testKit.getRef());
+        followerShard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true, true),
+                testKit.getRef());
         final RegisterDataTreeNotificationListenerReply reply = testKit.expectMsgClass(Duration.ofSeconds(5),
             RegisterDataTreeNotificationListenerReply.class);
         assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());

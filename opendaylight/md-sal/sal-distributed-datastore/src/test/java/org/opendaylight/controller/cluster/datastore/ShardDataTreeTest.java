@@ -189,7 +189,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         DOMDataTreeChangeListener listener = mock(DOMDataTreeChangeListener.class);
         shardDataTree.registerTreeChangeListener(CarsModel.CAR_LIST_PATH.node(CarsModel.CAR_QNAME), listener,
-            Optional.empty(), noop -> { });
+            true, Optional.empty(), noop -> { });
 
         addCar(shardDataTree, "optima");
 
