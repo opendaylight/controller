@@ -34,13 +34,14 @@ public final class ShardDataTreeChangePublisherActor
         if (message instanceof RegisterListener) {
             RegisterListener reg = (RegisterListener)message;
             LOG.debug("{}: Received {}", logContext(), reg);
-            if (reg.initialState.isPresent()) {
-                DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
-                        reg.initialState.get(), logContext());
-            } else {
-                reg.listener.onInitialData();
+            if (reg.notifyListenerOnInit) {
+                if (reg.initialState.isPresent()) {
+                    DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
+                            reg.initialState.get(), logContext());
+                } else {
+                    reg.listener.onInitialData();
+                }
             }
-
             publisher().registerTreeChangeListener(reg.path, reg.listener, reg.onRegistration);
         } else {
             super.handleReceive(message);
@@ -54,14 +55,16 @@ public final class ShardDataTreeChangePublisherActor
     static class RegisterListener {
         private final YangInstanceIdentifier path;
         private final DOMDataTreeChangeListener listener;
+        private final boolean notifyListenerOnInit;
         private final Optional<DataTreeCandidate> initialState;
         private final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration;
 
         RegisterListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
-                final Optional<DataTreeCandidate> initialState,
+                final boolean notifyListenerOnInit, final Optional<DataTreeCandidate> initialState,
                 final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
             this.path = requireNonNull(path);
             this.listener = requireNonNull(listener);
+            this.notifyListenerOnInit = notifyListenerOnInit;
             this.initialState = requireNonNull(initialState);
             this.onRegistration = requireNonNull(onRegistration);
         }

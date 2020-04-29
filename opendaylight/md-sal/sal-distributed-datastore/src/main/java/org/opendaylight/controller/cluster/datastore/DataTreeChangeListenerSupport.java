@@ -11,11 +11,13 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.controller.cluster.datastore.actors.DataTreeNotificationListenerRegistrationActor;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReplyWithInitialState;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +44,10 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         LOG.debug("{}: Registering listenerActor {} for path {}", persistenceId(), listenerActor, message.getPath());
 
         final ShardDataTree shardDataTree = getShard().getDataStore();
-        shardDataTree.registerTreeChangeListener(message.getPath(),
-                listener, shardDataTree.readCurrentData(), registration -> registrationActor.tell(
-                        new DataTreeNotificationListenerRegistrationActor.SetRegistration(registration, () ->
-                            removeListenerActor(listenerActor)), ActorRef.noSender()));
+        shardDataTree.registerTreeChangeListener(message.getPath(), listener, message.isNotifyListenerOnInit(),
+            message.isNotifyListenerOnInit() ? shardDataTree.readCurrentData() : Optional.empty(),
+            registration -> registrationActor.tell(new DataTreeNotificationListenerRegistrationActor
+                .SetRegistration(registration, () -> removeListenerActor(listenerActor)), ActorRef.noSender()));
     }
 
     Collection<ActorSelection> getListenerActors() {
@@ -108,7 +110,12 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         LOG.debug("{}: sending RegisterDataTreeNotificationListenerReply, listenerRegistrationPath = {} ",
                 persistenceId(), registrationActor.path());
 
-        tellSender(new RegisterDataTreeNotificationListenerReply(registrationActor));
+        if (message.isNotifyListenerOnInit()) {
+            tellSender(new RegisterDataTreeNotificationListenerReply(registrationActor));
+        } else {
+            tellSender(new RegisterDataTreeNotificationListenerReplyWithInitialState(registrationActor,
+                getShard().getShardName(), getShard().getDataStore().readCurrentData().orElse(null)));
+        }
     }
 
     private ActorSelection processListenerRegistrationMessage(final RegisterDataTreeChangeListener message) {

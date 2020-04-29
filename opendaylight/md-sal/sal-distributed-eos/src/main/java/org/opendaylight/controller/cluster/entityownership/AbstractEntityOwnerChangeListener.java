@@ -24,7 +24,8 @@ public abstract class AbstractEntityOwnerChangeListener implements DOMDataTreeCh
             .node(ENTITY_OWNER_QNAME).build();
 
     void init(final ShardDataTree shardDataTree) {
-        shardDataTree.registerTreeChangeListener(EOS_PATH, this, Optional.empty(), noop -> { /* NOOP */ });
+        shardDataTree.registerTreeChangeListener(EOS_PATH, this, true, Optional.empty(),
+                noop -> { /* NOOP */ });
     }
 
     protected static String extractOwner(final LeafNode<?> ownerLeaf) {

@@ -59,14 +59,17 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
 
     @Override
     public void registerTreeChangeListener(final YangInstanceIdentifier treeId,
-            final DOMDataTreeChangeListener listener, final Optional<DataTreeCandidate> initialState,
+            final DOMDataTreeChangeListener listener, boolean notifyListenerOnInit,
+            final Optional<DataTreeCandidate> initialState,
             final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         registerTreeChangeListener(treeId, listener, onRegistration);
 
-        if (initialState.isPresent()) {
-            notifySingleListener(treeId, listener, initialState.get(), logContext);
-        } else {
-            listener.onInitialData();
+        if (notifyListenerOnInit) {
+            if (initialState.isPresent()) {
+                notifySingleListener(treeId, listener, initialState.get(), logContext);
+            } else {
+                listener.onInitialData();
+            }
         }
     }
 
