@@ -204,6 +204,51 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
     }
 
+    @Test
+    public void testRecoveryDeleteEntries() {
+        send2InitialPayloads();
+
+        sendPayloadData(leaderActor, "two");
+
+        // This should trigger a snapshot.
+        sendPayloadData(leaderActor, "three");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 2);
+
+        // Disconnect follower from leader
+        killActor(follower1Actor);
+
+        // Send another payloads
+        sendPayloadData(leaderActor, "four");
+        sendPayloadData(leaderActor, "five");
+
+        verifyRaftState(leaderActor, raftState -> {
+            assertEquals("leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex());
+        });
+
+        // Remove entries started from 4 index
+        leaderActor.underlyingActor().getReplicatedLog().removeFromAndPersist(4);
+
+        verifyRaftState(leaderActor, raftState -> {
+            assertEquals("leader journal last index", 3, leaderContext.getReplicatedLog().lastIndex());
+        });
+
+        // Send new payloads
+        final MockPayload payload4 = sendPayloadData(leaderActor,"newFour");
+        final MockPayload payload5 = sendPayloadData(leaderActor,"newFive");
+
+        verifyRaftState(leaderActor, raftState -> {
+            assertEquals("leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex());
+        });
+
+        reinstateLeaderActor();
+
+        assertEquals("Leader last index", 5 , leaderActor.underlyingActor().getReplicatedLog().lastIndex());
+        assertEquals(payload4 ,leaderActor.underlyingActor().getReplicatedLog().get(4).getData());
+        assertEquals(payload5 ,leaderActor.underlyingActor().getReplicatedLog().get(5).getData());
+    }
+
     private void reinstateLeaderActor() {
         killActor(leaderActor);
 
