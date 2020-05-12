@@ -42,10 +42,9 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public boolean removeFromAndPersist(final long logEntryIndex) {
-        // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
         if (adjustedIndex >= 0) {
-            context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), NoopProcedure.instance());
+            context.getPersistenceProvider().persist(new DeleteEntries(logEntryIndex), NoopProcedure.instance());
             return true;
         }
 
