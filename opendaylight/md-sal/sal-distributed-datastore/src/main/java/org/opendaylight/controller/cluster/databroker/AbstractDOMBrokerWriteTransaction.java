@@ -84,8 +84,10 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
             final NormalizedNode<?, ?> data) {
         checkArgument(data != null, "Attempted to store null data at %s", path);
         final PathArgument lastArg = path.getLastPathArgument();
-        checkArgument(lastArg == data.getIdentifier() || lastArg != null && lastArg.equals(data.getIdentifier()),
+        if (lastArg != null) {
+            checkArgument(lastArg.equals(data.getIdentifier()),
                 "Instance identifier references %s but data identifier is %s", lastArg, data);
+        }
     }
 
     @Override
