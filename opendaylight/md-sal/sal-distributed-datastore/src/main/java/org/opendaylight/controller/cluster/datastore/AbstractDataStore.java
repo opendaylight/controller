@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
@@ -17,6 +18,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -162,13 +164,27 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
+        /*
+         * We need to potentially deal with multi-shard composition for registration targeting the root of the data
+         * store. If that is the case, we delegate to a more complicated setup invol
+         */
+        if (treeId.isEmpty()) {
+            // User is targeting root of the datastore. If there is more than one shard, we have to register with them
+            // all and perform data composition.
+            final Set<String> shardNames = actorUtils.getConfiguration().getAllShardNames();
+            if (shardNames.size() > 1) {
+                checkArgument(listener instanceof ClusteredDOMDataTreeChangeListener,
+                    "Cannot listen on root without non-clustered listener %s", listener);
+                return new RootDataTreeChangeListenerProxy<>(actorUtils, listener, shardName, shardNames);
+            }
+        }
+
         final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
                 new DataTreeChangeListenerProxy<>(actorUtils, listener, treeId);
         listenerRegistrationProxy.init(shardName);
 
         return listenerRegistrationProxy;
     }
-
 
     @Override
     public <C extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<C> registerCommitCohort(
