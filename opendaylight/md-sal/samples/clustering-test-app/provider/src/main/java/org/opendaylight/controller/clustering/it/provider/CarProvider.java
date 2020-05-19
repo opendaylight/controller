@@ -29,6 +29,7 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
@@ -336,10 +337,8 @@ public class CarProvider implements CarService {
         // to address all list entries, the second path argument is wild-carded by specifying just the CarEntry.QNAME.
         final YangInstanceIdentifier carEntryPath = YangInstanceIdentifier.builder(
                 YangInstanceIdentifier.of(Cars.QNAME)).node(CarEntry.QNAME).node(CarEntry.QNAME).build();
-        commitCohortReg.set(commitCohortRegistry.registerCommitCohort(
-                new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(
-                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
-                        carEntryPath), new CarEntryDataTreeCommitCohort()));
+        commitCohortReg.set(commitCohortRegistry.registerCommitCohort(new DOMDataTreeIdentifier(
+            LogicalDatastoreType.CONFIGURATION, carEntryPath), new CarEntryDataTreeCommitCohort()));
 
         LOG_CAR_PROVIDER.info("Registered commit cohort");
 

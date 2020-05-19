@@ -287,9 +287,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @SuppressWarnings("unchecked")
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
-            final YangInstanceIdentifier shardLookup,
-            final YangInstanceIdentifier insideShard,
-            final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegate) {
+            final YangInstanceIdentifier shardLookup, final YangInstanceIdentifier insideShard,
+            final DOMDataTreeChangeListener delegate) {
 
         requireNonNull(shardLookup, "shardLookup should not be null");
         requireNonNull(insideShard, "insideShard should not be null");

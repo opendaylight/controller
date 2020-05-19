@@ -42,6 +42,6 @@ class ClientBackedWriteTransaction extends ClientBackedTransaction<ClientTransac
 
     @Override
     public final DOMStoreThreePhaseCommitCohort ready() {
-        return new DOMStoreThreePhaseCommitCohortAdaptor(delegate().ready());
+        return delegate().ready();
     }
 }
