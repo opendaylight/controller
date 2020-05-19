@@ -47,6 +47,9 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,6 +144,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         return JavaSerializer.currentSystem().withValue((ExtendedActorSystem) context().system(),
             (Callable<Object>) () -> {
                 try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+//                try (ObjectInputStream in = new ObjectInputStream(new LZ4FrameInputStream(new FileInputStream(file)))) {
                     return in.readObject();
                 } catch (ClassNotFoundException e) {
                     throw new IOException("Error loading snapshot file " + file, e);
@@ -179,6 +183,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         LOG.debug("Saving to temp file: {}", temp);
 
         try (ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(temp)))) {
+//        try (ObjectOutputStream out = new ObjectOutputStream(new LZ4FrameOutputStream(new FileOutputStream(temp)))) {
             out.writeObject(snapshot);
         } catch (IOException e) {
             LOG.error("Error saving snapshot file {}. Deleting file..", temp, e);
