@@ -24,25 +24,26 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * Proxy actor which acts as a facade to the user-provided listener. Responsible for decapsulating
  * DataTreeChanged messages and dispatching their context to the user.
  */
-final class DataTreeChangeListenerActor extends AbstractUntypedActor {
+class DataTreeChangeListenerActor extends AbstractUntypedActor {
     private final DOMDataTreeChangeListener listener;
     private final YangInstanceIdentifier registeredPath;
+
     private boolean notificationsEnabled = false;
     private long notificationCount;
     private String logContext = "";
 
-    private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
+    DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
             final YangInstanceIdentifier registeredPath) {
         this.listener = requireNonNull(listener);
         this.registeredPath = requireNonNull(registeredPath);
     }
 
     @Override
-    protected void handleReceive(final Object message) {
+    protected final void handleReceive(final Object message) {
         if (message instanceof DataTreeChanged) {
-            dataChanged((DataTreeChanged)message);
+            dataTreeChanged((DataTreeChanged) message);
         } else if (message instanceof OnInitialData) {
-            onInitialData();
+            onInitialData((OnInitialData) message);
         } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
         } else if (message instanceof GetInfo) {
@@ -54,7 +55,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void onInitialData() {
+    void onInitialData(final OnInitialData message) {
         LOG.debug("{}: Notifying onInitialData to listener {}", logContext, listener);
 
         try {
@@ -65,7 +66,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void dataChanged(final DataTreeChanged message) {
+    void dataTreeChanged(final DataTreeChanged message) {
         // Do nothing if notifications are not enabled
         if (!notificationsEnabled) {
             LOG.debug("{}: Notifications not enabled for listener {} - dropping change notification",
@@ -99,7 +100,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
                 listener);
     }
 
-    public static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
+    static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
         return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
     }
 }
