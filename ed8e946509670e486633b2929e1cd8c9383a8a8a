@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d90823d7_a6f4d47b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-05-21T16:15:30Z",
+      "side": 1,
+      "message": "hmm, is this really needed? also, it should not be among test dependencies/.",
+      "range": {
+        "startLine": 78,
+        "startChar": 5,
+        "endLine": 78,
+        "endChar": 16
+      },
+      "revId": "ed8e946509670e486633b2929e1cd8c9383a8a8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
