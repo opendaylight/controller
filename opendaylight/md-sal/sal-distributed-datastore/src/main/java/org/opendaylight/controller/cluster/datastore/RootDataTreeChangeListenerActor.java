@@ -133,6 +133,6 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
     }
 
     static Props props(final DOMDataTreeChangeListener instance, final int shardCount) {
-        return Props.create(RootDataTreeChangeListenerActor.class, shardCount);
+        return Props.create(RootDataTreeChangeListenerActor.class, instance, shardCount);
     }
 }
