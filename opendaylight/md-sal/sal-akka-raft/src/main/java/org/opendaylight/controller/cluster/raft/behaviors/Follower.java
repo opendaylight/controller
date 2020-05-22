@@ -18,6 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -506,6 +507,10 @@ public class Follower extends AbstractRaftActorBehavior {
                 if (isLeaderAvailabilityKnown() && lastLeaderMessageInterval < maxElectionTimeout) {
                     log.debug("{}: Received ElectionTimeout but leader appears to be available", logName());
                     scheduleElection(electionDuration());
+                } else if (isThisFollowerIsolated()) {
+                    log.debug("{}: this follower is isolated. Do not switch to Candidate for now.", logName());
+                    setLeaderId(null);
+                    scheduleElection(electionDuration());
                 } else {
                     log.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
                     return internalSwitchBehavior(RaftState.Candidate);
@@ -571,6 +576,40 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         log.debug("{}: Leader {} not found in the cluster member set", logName(), leaderAddress);
+
+        return false;
+    }
+
+    private boolean isThisFollowerIsolated() {
+        final Optional<Cluster> maybeCluster = context.getCluster();
+        if (!maybeCluster.isPresent()) {
+            return false;
+        }
+
+        final Cluster cluster = maybeCluster.get();
+        final Member selfMember = cluster.selfMember();
+
+        final CurrentClusterState state = cluster.state();
+        final Set<Member> unreachable = state.getUnreachable();
+        final Iterable<Member> members = state.getMembers();
+
+        log.debug("{}: Checking if this node is isolated in the cluster unreachable set {},"
+                        + "all members {} self member: {}", logName(), unreachable, members, selfMember);
+
+        // no unreachable peers means we cannot be isolated
+        if (unreachable.size() == 0) {
+            return false;
+        }
+
+        final Set<Member> membersToCheck = new HashSet<>();
+        members.forEach(membersToCheck::add);
+
+        membersToCheck.removeAll(unreachable);
+
+        // check if the only member not unreachable is us
+        if (membersToCheck.size() == 1 && membersToCheck.iterator().next().equals(selfMember)) {
+            return true;
+        }
 
         return false;
     }
