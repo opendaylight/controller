@@ -22,6 +22,29 @@
       "revId": "42c3d20d429d30160092fa8ecebe6edb9e6f18e0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2281c124_dc4696f8",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-api/src/main/yang/cluster-admin.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-05-25T10:14:32Z",
+      "side": 1,
+      "message": "also \u0027units seconds\u0027. what does \u00270\u0027 mean?",
+      "range": {
+        "startLine": 237,
+        "startChar": 14,
+        "endLine": 237,
+        "endChar": 26
+      },
+      "revId": "42c3d20d429d30160092fa8ecebe6edb9e6f18e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
