@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60a5e31c_fa9f9ae5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-05-25T12:18:25Z",
+      "side": 1,
+      "message": "this does not look quite right: we can end up skipping quite a few entries here and not trigger a snapshot.",
+      "revId": "38aca0f47b7c9b835297ec2c041121a8c7ebb8ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd8845cb_28d73bf9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-05-25T12:18:25Z",
+      "side": 1,
+      "message": "also -- note that while the context may seem to indicate we have applied all entries, they can be only staged for recovery in batchRecoveredLogEntry(), which is flushed in onRecoveryCompletedMessage(). See the processing there.\n\nI think the tunable really should be a batch multiplier, so that we capture a snapshot every X batches (with 0 being never).",
+      "revId": "38aca0f47b7c9b835297ec2c041121a8c7ebb8ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
