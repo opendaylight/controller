@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10645d90_c4b78c11",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorSnapshotMessageSupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-05-25T10:13:40Z",
+      "side": 1,
+      "message": "getSnapshot.getTimeout().map(Timeout::duration).orElse(snapshotReplyActorTimeout);",
+      "range": {
+        "startLine": 119,
+        "startChar": 20,
+        "endLine": 119,
+        "endChar": 105
+      },
+      "revId": "42c3d20d429d30160092fa8ecebe6edb9e6f18e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
