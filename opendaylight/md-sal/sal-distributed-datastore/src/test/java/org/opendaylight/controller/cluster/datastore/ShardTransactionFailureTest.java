@@ -25,7 +25,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -36,7 +36,7 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Basheeruddin Ahmed
  */
 public class ShardTransactionFailureTest extends AbstractActorTest {
-    private static final SchemaContext TEST_SCHEMA_CONTEXT = TestModel.createTestContext();
+    private static final EffectiveModelContext TEST_SCHEMA_CONTEXT = TestModel.createTestContext();
     private static final TransactionType RO = TransactionType.READ_ONLY;
     private static final TransactionType RW = TransactionType.READ_WRITE;
 

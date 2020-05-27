@@ -5,19 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.opendaylight.yangtools.yang.model.util.AbstractEffectiveModelContextProvider;
 
-public class UpdateSchemaContext {
-    private final SchemaContext schemaContext;
-
-    public UpdateSchemaContext(SchemaContext schemaContext) {
-        this.schemaContext = schemaContext;
-    }
-
-    public SchemaContext getSchemaContext() {
-        return schemaContext;
+public class UpdateSchemaContext extends AbstractEffectiveModelContextProvider {
+    public UpdateSchemaContext(final EffectiveModelContext modelContext) {
+        super(modelContext);
     }
 }

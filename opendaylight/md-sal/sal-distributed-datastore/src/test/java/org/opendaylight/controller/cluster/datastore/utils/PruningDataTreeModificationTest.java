@@ -57,14 +57,14 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PruningDataTreeModificationTest {
     static final QName INVALID_TEST_QNAME = QName.create(TestModel.TEST_QNAME, "invalid");
     static final YangInstanceIdentifier INVALID_TEST_PATH = YangInstanceIdentifier.of(INVALID_TEST_QNAME);
 
-    private static SchemaContext SCHEMA_CONTEXT;
+    private static EffectiveModelContext SCHEMA_CONTEXT;
     private static DataSchemaContextTree CONTEXT_TREE;
 
     @Mock

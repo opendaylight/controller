@@ -87,7 +87,7 @@ public class DistributedShardChangePublisher
                 .build());
 
         // XXX: can we guarantee that the root is present in the schemacontext?
-        this.dataTree.setSchemaContext(distributedDataStore.getActorUtils().getSchemaContext());
+        this.dataTree.setEffectiveModelContext(distributedDataStore.getActorUtils().getSchemaContext());
         this.shardPath = prefix.getRootIdentifier();
         this.childShards = childShards;
     }
@@ -156,7 +156,7 @@ public class DistributedShardChangePublisher
 
         @SuppressWarnings("unchecked")
         final AbstractDOMDataTreeChangeListenerRegistration<L> registration =
-            new AbstractDOMDataTreeChangeListenerRegistration<L>((L) listener) {
+            new AbstractDOMDataTreeChangeListenerRegistration<>((L) listener) {
                 @Override
                 protected void removeRegistration() {
                     listener.close();

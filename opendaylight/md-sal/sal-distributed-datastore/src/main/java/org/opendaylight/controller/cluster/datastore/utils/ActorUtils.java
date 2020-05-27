@@ -53,7 +53,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -71,7 +71,7 @@ public class ActorUtils {
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
     private static final Mapper<Throwable, Throwable> FIND_PRIMARY_FAILURE_TRANSFORMER =
-                                                              new Mapper<Throwable, Throwable>() {
+                                                              new Mapper<>() {
         @Override
         public Throwable apply(final Throwable failure) {
             Throwable actualFailure = failure;
@@ -101,7 +101,7 @@ public class ActorUtils {
     private Timeout shardInitializationTimeout;
     private final Dispatchers dispatchers;
 
-    private volatile SchemaContext schemaContext;
+    private volatile EffectiveModelContext schemaContext;
 
     // Used as a write memory barrier.
     @SuppressWarnings("unused")
@@ -178,7 +178,7 @@ public class ActorUtils {
         return actorSystem.actorSelection(actorPath);
     }
 
-    public void setSchemaContext(final SchemaContext schemaContext) {
+    public void setSchemaContext(final EffectiveModelContext schemaContext) {
         this.schemaContext = schemaContext;
 
         if (shardManager != null) {
@@ -204,7 +204,7 @@ public class ActorUtils {
         }
     }
 
-    public SchemaContext getSchemaContext() {
+    public EffectiveModelContext getSchemaContext() {
         return schemaContext;
     }
 

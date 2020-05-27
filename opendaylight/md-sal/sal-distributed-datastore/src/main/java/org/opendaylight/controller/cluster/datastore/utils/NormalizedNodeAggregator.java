@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguratio
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public final class NormalizedNodeAggregator {
     private final YangInstanceIdentifier rootIdentifier;
@@ -26,21 +26,21 @@ public final class NormalizedNodeAggregator {
     private final DataTree dataTree;
 
     private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
+            final List<Optional<NormalizedNode<?, ?>>> nodes, final EffectiveModelContext schemaContext,
             final LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
         this.dataTree = new InMemoryDataTreeFactory().create(
             logicalDatastoreType == LogicalDatastoreType.CONFIGURATION ? DataTreeConfiguration.DEFAULT_CONFIGURATION
                     : DataTreeConfiguration.DEFAULT_OPERATIONAL);
-        this.dataTree.setSchemaContext(schemaContext);
+        this.dataTree.setEffectiveModelContext(schemaContext);
     }
 
     /**
      * Combine data from all the nodes in the list into a tree with root as rootIdentifier.
      */
     public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
+            final List<Optional<NormalizedNode<?, ?>>> nodes, final EffectiveModelContext schemaContext,
             final LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
         return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
     }

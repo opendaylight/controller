@@ -89,6 +89,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,7 +160,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private int currentTransactionBatch;
 
-    ShardDataTree(final Shard shard, final SchemaContext schemaContext, final DataTree dataTree,
+    ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final DataTree dataTree,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
             final String logContext,
             final ShardDataTreeMetadata<?>... metadata) {
@@ -173,7 +174,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         tip = dataTree;
     }
 
-    ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
+    ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final TreeType treeType,
             final YangInstanceIdentifier root,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
             final String logContext,
@@ -191,7 +192,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @VisibleForTesting
-    public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType) {
+    public ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final TreeType treeType) {
         this(shard, schemaContext, treeType, YangInstanceIdentifier.empty(),
                 new DefaultShardDataTreeChangeListenerPublisher(""), "");
     }
@@ -212,9 +213,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return schemaContext;
     }
 
-    void updateSchemaContext(final SchemaContext newSchemaContext) {
-        dataTree.setSchemaContext(newSchemaContext);
-        this.schemaContext = requireNonNull(newSchemaContext);
+    void updateSchemaContext(final @NonNull EffectiveModelContext newSchemaContext) {
+        dataTree.setEffectiveModelContext(newSchemaContext);
+        this.schemaContext = newSchemaContext;
         this.dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
     }
 

@@ -33,7 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,8 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     private static final Logger FOO_LOGGER = LoggerFactory.getLogger("foo");
 
     private ShardDataTree peopleDataTree;
-    private SchemaContext peopleSchemaContext;
-    private SchemaContext carsSchemaContext;
+    private EffectiveModelContext peopleSchemaContext;
+    private EffectiveModelContext carsSchemaContext;
     private ShardRecoveryCoordinator coordinator;
 
     @Before
@@ -103,7 +103,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree) {
         final DataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
-        dataTree.setSchemaContext(peopleSchemaContext);
+        dataTree.setEffectiveModelContext(peopleSchemaContext);
 
         return shardDataTree.readNode(CarsModel.BASE_PATH);
     }
@@ -111,7 +111,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree) {
         final DataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
-        dataTree.setSchemaContext(peopleSchemaContext);
+        dataTree.setEffectiveModelContext(peopleSchemaContext);
 
         return shardDataTree.readNode(PeopleModel.BASE_PATH);
     }

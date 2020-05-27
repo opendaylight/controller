@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.O
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,11 +274,11 @@ public final class ShardInformation {
         this.activeMember = isActiveMember;
     }
 
-    SchemaContext getSchemaContext() {
-        return schemaContextProvider.getSchemaContext();
+    EffectiveModelContext getSchemaContext() {
+        return schemaContextProvider.getEffectiveModelContext();
     }
 
-    void setSchemaContext(final SchemaContext schemaContext) {
+    void setSchemaContext(final EffectiveModelContext schemaContext) {
         schemaContextProvider.set(requireNonNull(schemaContext));
     }
 
