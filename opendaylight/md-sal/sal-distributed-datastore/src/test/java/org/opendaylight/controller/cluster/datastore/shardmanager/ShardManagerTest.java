@@ -130,7 +130,7 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -142,7 +142,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     private static final MemberName MEMBER_2 = MemberName.forName("member-2");
     private static final MemberName MEMBER_3 = MemberName.forName("member-3");
 
-    private static SchemaContext TEST_SCHEMA_CONTEXT;
+    private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
 
     private final String shardMgrID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
@@ -1238,7 +1238,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
                     .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        SchemaContext schemaContext = TEST_SCHEMA_CONTEXT;
+        EffectiveModelContext schemaContext = TEST_SCHEMA_CONTEXT;
         shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100)
@@ -1322,7 +1322,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
 
-        SchemaContext schemaContext = TEST_SCHEMA_CONTEXT;
+        EffectiveModelContext schemaContext = TEST_SCHEMA_CONTEXT;
         shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
 
         shardManager.tell(new FindLocalShard("foo", true), kit.getRef());

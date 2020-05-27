@@ -77,6 +77,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardDataTreeTest extends AbstractTest {
@@ -84,7 +85,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private final Shard mockShard = Mockito.mock(Shard.class);
     private ShardDataTree shardDataTree;
-    private SchemaContext fullSchema;
+    private EffectiveModelContext fullSchema;
 
     @Before
     public void setUp() {

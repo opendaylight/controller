@@ -81,6 +81,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -92,7 +93,7 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public abstract class AbstractShardTest extends AbstractActorTest {
-    protected static final SchemaContext SCHEMA_CONTEXT = TestModel.createTestContext();
+    protected static final EffectiveModelContext SCHEMA_CONTEXT = TestModel.createTestContext();
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 

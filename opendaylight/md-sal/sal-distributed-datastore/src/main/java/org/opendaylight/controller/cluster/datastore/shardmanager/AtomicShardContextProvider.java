@@ -9,14 +9,15 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import com.google.common.base.Verify;
 import java.util.concurrent.atomic.AtomicReference;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextProvider;
 
-final class AtomicShardContextProvider extends AtomicReference<SchemaContext> implements SchemaContextProvider {
+final class AtomicShardContextProvider extends AtomicReference<EffectiveModelContext>
+        implements EffectiveModelContextProvider {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public SchemaContext getSchemaContext() {
+    public EffectiveModelContext getEffectiveModelContext() {
         return Verify.verifyNotNull(get());
     }
 }
