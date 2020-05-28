@@ -15,13 +15,16 @@ import java.util.HashSet;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
@@ -33,12 +36,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public final class CompositeModel {
+    public static final QName TEST_QNAME = QName.create(
+        "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
 
-    public static final QName TEST_QNAME = QName
-            .create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
-
-    public static final QName AUG_QNAME = QName
-            .create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug", "2014-03-13", "name");
+    public static final QName AUG_QNAME = QName.create(
+        "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug", "2014-03-13", "name");
 
     public static final QName AUG_CONTAINER = QName.create(AUG_QNAME, "aug-container");
     public static final QName AUG_INNER_CONTAINER = QName.create(AUG_QNAME, "aug-inner-container");
@@ -112,86 +114,56 @@ public final class CompositeModel {
             DATASTORE_TEST_NOTIFICATION_YANG);
     }
 
-    /**
-     * Returns a test document.
-     *
-     * <pre>
-     * test
-     *     outer-list
-     *          id 1
-     *     outer-list
-     *          id 2
-     *          inner-list
-     *                  name "one"
-     *          inner-list
-     *                  name "two"
-     *
-     * </pre>
-     */
-    public static NormalizedNode<?, ?> createDocumentOne(final SchemaContext schemaContext) {
-        return ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(schemaContext.getQName()))
-                .withChild(createTestContainer()).build();
-
-    }
-
     public static ContainerNode createTestContainer() {
-
         final LeafSetEntryNode<Object> nike = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "nike"))
+                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "nike"))
                 .withValue("nike").build();
         final LeafSetEntryNode<Object> puma = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "puma"))
+                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "puma"))
                 .withValue("puma").build();
         final LeafSetNode<Object> shoes = ImmutableLeafSetNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME, "shoe")))
+                .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "shoe")))
                 .withChild(nike).withChild(puma).build();
 
         final LeafSetEntryNode<Object> five = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME, "number"), 5))
+                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 5))
                 .withValue(5).build();
         final LeafSetEntryNode<Object> fifteen = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME, "number"), 15))
+                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 15))
                 .withValue(15).build();
         final LeafSetNode<Object> numbers = ImmutableLeafSetNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(QName.create(TEST_QNAME, "number")))
+                .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "number")))
                 .withChild(five).withChild(fifteen).build();
 
         Set<QName> childAugmentations = new HashSet<>();
         childAugmentations.add(AUG_QNAME);
-        final YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier =
-                new YangInstanceIdentifier.AugmentationIdentifier(childAugmentations);
+        final AugmentationIdentifier augmentationIdentifier = new AugmentationIdentifier(childAugmentations);
         final AugmentationNode augmentationNode = Builders.augmentationBuilder()
                 .withNodeIdentifier(augmentationIdentifier).withChild(ImmutableNodes.leafNode(AUG_QNAME, "First Test"))
                 .build();
         return ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME))
+                .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC)).withChild(augmentationNode).withChild(shoes)
                 .withChild(numbers).withChild(mapNodeBuilder(OUTER_LIST_QNAME)
                         .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID)).withChild(BAR_NODE).build())
                 .build();
-
     }
 
     public static ContainerNode createFamily() {
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder =
-            ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                    new YangInstanceIdentifier.NodeIdentifier(FAMILY_QNAME));
+        final DataContainerNodeBuilder<NodeIdentifier, ContainerNode> familyContainerBuilder =
+            ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(FAMILY_QNAME));
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> childrenBuilder = mapNodeBuilder(CHILDREN_QNAME);
 
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
             firstChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
             secondChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
 
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
             firstGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
                     FIRST_GRAND_CHILD_ID);
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
             secondGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
                     SECOND_GRAND_CHILD_ID);
 
@@ -214,5 +186,4 @@ public final class CompositeModel {
 
         return familyContainerBuilder.withChild(childrenBuilder.build()).build();
     }
-
 }
