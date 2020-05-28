@@ -117,7 +117,10 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         checkNotNull(module, "%s: Could not obtain the module schema for namespace %s, revision %s",
                 logName, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision());
 
-        DataSchemaNode dataSchema = module.getDataChildByName(bindingContext.bindingQName);
+        QName qname = bindingContext.bindingQName;
+        DataSchemaNode dataSchema = module.findDataChildByName(qname).orElseThrow(
+            () -> new ConfigXMLReaderException(logName + ": Could not obtain the schema for " + qname));
+
         checkNotNull(dataSchema, "%s: Could not obtain the schema for %s", logName, bindingContext.bindingQName);
 
         checkCondition(bindingContext.schemaType.isAssignableFrom(dataSchema.getClass()),
