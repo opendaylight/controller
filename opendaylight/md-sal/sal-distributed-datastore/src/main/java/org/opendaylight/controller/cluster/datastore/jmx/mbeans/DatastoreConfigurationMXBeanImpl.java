@@ -21,11 +21,11 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
 
     private DatastoreContext context;
 
-    public DatastoreConfigurationMXBeanImpl(String mxBeanType) {
+    public DatastoreConfigurationMXBeanImpl(final String mxBeanType) {
         super("Datastore", mxBeanType, JMX_CATEGORY_CONFIGURATION);
     }
 
-    public void setContext(DatastoreContext context) {
+    public void setContext(final DatastoreContext context) {
         this.context = context;
     }
 
@@ -110,23 +110,27 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public int getMaxShardDataChangeExecutorPoolSize() {
-        return context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize();
+        return 0;
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public int getMaxShardDataChangeExecutorQueueSize() {
-        return context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize();
+        return 0;
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public int getMaxShardDataChangeListenerQueueSize() {
-        return context.getDataStoreProperties().getMaxDataChangeListenerQueueSize();
+        return 0;
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public int getMaxShardDataStoreExecutorQueueSize() {
-        return context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize();
+        return 0;
     }
 
     @Override

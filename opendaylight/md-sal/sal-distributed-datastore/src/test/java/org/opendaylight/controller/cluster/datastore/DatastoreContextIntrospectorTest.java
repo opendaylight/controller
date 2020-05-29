@@ -24,7 +24,6 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.binding.runtime.spi.BindingRuntimeHelpers;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingCodecContext;
-import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStorePropertiesContainer;
 
 /**
@@ -93,10 +92,6 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(21, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(901, context.getShardBatchedModificationCount());
         assertEquals(200, context.getTransactionCreationInitialRateLimit());
-        assertEquals(41, context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
-        assertEquals(1111, context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
-        assertEquals(2222, context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
-        assertEquals(3333, context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
         assertEquals(600, context.getInitialPayloadSerializedBufferCapacity());
         assertFalse(context.isPersistent());
 
@@ -127,10 +122,6 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(22, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(200, context.getTransactionCreationInitialRateLimit());
-        assertEquals(42, context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
-        assertEquals(1111, context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
-        assertEquals(2222, context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
-        assertEquals(4444, context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
         assertTrue(context.isPersistent());
 
         updated = introspector.update(null);
@@ -173,8 +164,6 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,
                 context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT, context.getShardInitializationTimeout());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE,
-                context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
     }
 
     @Test
@@ -198,7 +187,6 @@ public class DatastoreContextIntrospectorTest {
 
         assertEquals(33, operContext.getShardTransactionIdleTimeout().toMinutes());
         assertTrue(operContext.isPersistent());
-        assertEquals(333, operContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
 
         final DatastoreContextIntrospector configIntrospector = INTROSPECTOR_FACTORY.newInstance(CONFIGURATION);
         updated = configIntrospector.update(properties);
@@ -207,7 +195,6 @@ public class DatastoreContextIntrospectorTest {
 
         assertEquals(44, configContext.getShardTransactionIdleTimeout().toMinutes());
         assertFalse(configContext.isPersistent());
-        assertEquals(444, configContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
     }
 
     @Test

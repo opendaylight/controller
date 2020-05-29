@@ -24,7 +24,6 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +72,6 @@ public class DatastoreContext implements ClientActorConfig {
 
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
 
-    private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private FiniteDuration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
     private long operationTimeoutInMillis = DEFAULT_OPERATION_TIMEOUT_IN_MS;
     private String dataStoreMXBeanType;
@@ -117,7 +115,6 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private DatastoreContext(final DatastoreContext other) {
-        this.dataStoreProperties = other.dataStoreProperties;
         this.shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
         this.operationTimeoutInMillis = other.operationTimeoutInMillis;
         this.dataStoreMXBeanType = other.dataStoreMXBeanType;
@@ -165,10 +162,6 @@ public class DatastoreContext implements ClientActorConfig {
 
     public static Builder newBuilderFrom(final DatastoreContext context) {
         return new Builder(new DatastoreContext(context));
-    }
-
-    public InMemoryDOMDataStoreConfigProperties getDataStoreProperties() {
-        return dataStoreProperties;
     }
 
     public FiniteDuration getShardTransactionIdleTimeout() {
@@ -367,28 +360,9 @@ public class DatastoreContext implements ClientActorConfig {
 
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
         private final DatastoreContext datastoreContext;
-        private int maxShardDataChangeExecutorPoolSize =
-                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE;
-        private int maxShardDataChangeExecutorQueueSize =
-                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE;
-        private int maxShardDataChangeListenerQueueSize =
-                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE;
-        private int maxShardDataStoreExecutorQueueSize =
-                InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE;
 
         Builder(final DatastoreContext datastoreContext) {
             this.datastoreContext = datastoreContext;
-
-            if (datastoreContext.getDataStoreProperties() != null) {
-                maxShardDataChangeExecutorPoolSize =
-                        datastoreContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize();
-                maxShardDataChangeExecutorQueueSize =
-                        datastoreContext.getDataStoreProperties().getMaxDataChangeExecutorQueueSize();
-                maxShardDataChangeListenerQueueSize =
-                        datastoreContext.getDataStoreProperties().getMaxDataChangeListenerQueueSize();
-                maxShardDataStoreExecutorQueueSize =
-                        datastoreContext.getDataStoreProperties().getMaxDataStoreExecutorQueueSize();
-            }
         }
 
         public Builder boundedMailboxCapacity(final int boundedMailboxCapacity) {
@@ -565,23 +539,23 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public Builder maxShardDataChangeExecutorPoolSize(final int newMaxShardDataChangeExecutorPoolSize) {
-            this.maxShardDataChangeExecutorPoolSize = newMaxShardDataChangeExecutorPoolSize;
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public Builder maxShardDataChangeExecutorQueueSize(final int newMaxShardDataChangeExecutorQueueSize) {
-            this.maxShardDataChangeExecutorQueueSize = newMaxShardDataChangeExecutorQueueSize;
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public Builder maxShardDataChangeListenerQueueSize(final int newMaxShardDataChangeListenerQueueSize) {
-            this.maxShardDataChangeListenerQueueSize = newMaxShardDataChangeListenerQueueSize;
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public Builder maxShardDataStoreExecutorQueueSize(final int newMaxShardDataStoreExecutorQueueSize) {
-            this.maxShardDataStoreExecutorQueueSize = newMaxShardDataStoreExecutorQueueSize;
             return this;
         }
 
@@ -659,13 +633,6 @@ public class DatastoreContext implements ClientActorConfig {
 
         @Override
         public DatastoreContext build() {
-            datastoreContext.dataStoreProperties = InMemoryDOMDataStoreConfigProperties.builder()
-                    .maxDataChangeExecutorPoolSize(maxShardDataChangeExecutorPoolSize)
-                    .maxDataChangeExecutorQueueSize(maxShardDataChangeExecutorQueueSize)
-                    .maxDataChangeListenerQueueSize(maxShardDataChangeListenerQueueSize)
-                    .maxDataStoreExecutorQueueSize(maxShardDataStoreExecutorQueueSize)
-                    .build();
-
             if (datastoreContext.dataStoreName != null) {
                 GLOBAL_DATASTORE_NAMES.add(datastoreContext.dataStoreName);
             }
