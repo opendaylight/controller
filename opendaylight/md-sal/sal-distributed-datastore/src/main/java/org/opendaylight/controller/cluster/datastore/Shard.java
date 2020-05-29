@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
@@ -150,6 +151,9 @@ public class Shard extends RaftActor {
     public static final String DEFAULT_NAME = "default";
 
     private static final Collection<ABIVersion> SUPPORTED_ABIVERSIONS;
+
+    // Make sure to keep this in sync with the journal configuration in factory-akka.conf
+    public static final String NON_PERSISTEND_JOURNAL_ID = "akka.persistence.non-persistent.journal";
 
     static {
         final ABIVersion[] values = ABIVersion.values();
@@ -645,7 +649,7 @@ public class Shard extends RaftActor {
     }
 
     protected void onDatastoreContext(final DatastoreContext context) {
-        datastoreContext = context;
+        datastoreContext = verifyNotNull(context);
 
         setTransactionCommitTimeout();
 
@@ -1080,6 +1084,16 @@ public class Shard extends RaftActor {
     @Override
     public String persistenceId() {
         return this.name;
+    }
+
+    @Override
+    public String journalPluginId() {
+        // This method may be invoked from super constructor (wonderful), hence we also need to handle the case of
+        // the field being uninitialized because our constructor is not finished.
+        if (datastoreContext != null && !datastoreContext.isPersistent()) {
+            return NON_PERSISTEND_JOURNAL_ID;
+        }
+        return super.journalPluginId();
     }
 
     @VisibleForTesting
