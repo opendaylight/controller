@@ -9,13 +9,13 @@
 package org.opendaylight.controller.cluster.sharding;
 
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
-import org.opendaylight.mdsal.dom.store.inmemory.ShardDataModificationFactoryBuilder;
+import org.opendaylight.mdsal.dom.spi.shard.AbstractShardModificationFactoryBuilder;
 
 /**
  * Builder for {@link DistributedShardModificationFactory}.
  */
 public class DistributedShardModificationFactoryBuilder
-        extends ShardDataModificationFactoryBuilder<DistributedShardModificationFactory> {
+        extends AbstractShardModificationFactoryBuilder<DistributedShardModificationFactory> {
 
 
     public DistributedShardModificationFactoryBuilder(final DOMDataTreeIdentifier root) {
