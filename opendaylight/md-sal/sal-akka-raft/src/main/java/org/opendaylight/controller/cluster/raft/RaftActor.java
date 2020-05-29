@@ -123,8 +123,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private boolean shuttingDown;
 
+    // used to determine whether this is an actor that actually has persistence turned on
+    private boolean isPersistent;
+
     protected RaftActor(final String id, final Map<String, String> peerAddresses,
-         final Optional<ConfigParams> configParams, final short payloadVersion) {
+         final Optional<ConfigParams> configParams, final boolean isPersistent, final short payloadVersion) {
+        this.isPersistent = isPersistent;
 
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
@@ -934,6 +938,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
             }, null, RaftActorLeadershipTransferCohort.USE_DEFAULT_LEADER_TIMEOUT);
         }
+    }
+
+    public boolean isPersistent() {
+        return isPersistent;
     }
 
     /**
