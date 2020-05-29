@@ -64,14 +64,6 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT, context.getTransactionCreationInitialRateLimit());
         assertEquals(DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT,
                 context.getShardBatchedModificationCount());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE,
-                context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE,
-                context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE,
-                context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE,
-                context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
         assertEquals(DEFAULT_MAX_MESSAGE_SLICE_SIZE, context.getMaximumMessageSliceSize());
     }
 
@@ -124,7 +116,7 @@ public class DatastoreContextTest {
         Assert.assertNotSame(context, newContext);
     }
 
-    private static void verifyCustomSettings(DatastoreContext context) {
+    private static void verifyCustomSettings(final DatastoreContext context) {
         assertEquals(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT.toMillis() + 1,
                 context.getShardTransactionIdleTimeout().toMillis());
         assertEquals(TimeUnit.MILLISECONDS.toSeconds(DEFAULT_OPERATION_TIMEOUT_IN_MS) + 1,
@@ -154,14 +146,6 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT + 1, context.getTransactionCreationInitialRateLimit());
         assertEquals(DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT + 1,
                 context.getShardBatchedModificationCount());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE + 1,
-                context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE + 1,
-                context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE + 1,
-                context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
-        assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE + 1,
-                context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
         assertEquals(DEFAULT_MAX_MESSAGE_SLICE_SIZE + 1, context.getMaximumMessageSliceSize());
         assertEquals(DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY + 1,
                 context.getInitialPayloadSerializedBufferCapacity());

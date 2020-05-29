@@ -46,12 +46,16 @@ public interface DatastoreConfigurationMXBean {
 
     boolean getTransactionContextDebugEnabled();
 
+    @Deprecated(forRemoval = true)
     int getMaxShardDataChangeExecutorPoolSize();
 
+    @Deprecated(forRemoval = true)
     int getMaxShardDataChangeExecutorQueueSize();
 
+    @Deprecated(forRemoval = true)
     int getMaxShardDataChangeListenerQueueSize();
 
+    @Deprecated(forRemoval = true)
     int getMaxShardDataStoreExecutorQueueSize();
 
     int getMaximumMessageSliceSize();
