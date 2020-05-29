@@ -151,6 +151,9 @@ public class Shard extends RaftActor {
 
     private static final Collection<ABIVersion> SUPPORTED_ABIVERSIONS;
 
+    // Make sure to keep this in sync with the journal configuration in factory-akka.conf
+    public static final String NON_PERSISTEND_JOURNAL_ID = "akka.persistence.non-persistent.journal";
+
     static {
         final ABIVersion[] values = ABIVersion.values();
         final ABIVersion[] real = Arrays.copyOfRange(values, 1, values.length - 1);
@@ -1080,6 +1083,11 @@ public class Shard extends RaftActor {
     @Override
     public String persistenceId() {
         return this.name;
+    }
+
+    @Override
+    public String journalPluginId() {
+        return datastoreContext.isPersistent() ? super.journalPluginId() : NON_PERSISTEND_JOURNAL_ID;
     }
 
     @VisibleForTesting
