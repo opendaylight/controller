@@ -16,6 +16,7 @@ import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
 import org.opendaylight.mdsal.dom.api.DOMActionService;
@@ -32,8 +33,8 @@ public class OpsManager extends AbstractUntypedActor {
     private final DOMRpcProviderService rpcProvisionRegistry;
     private final RemoteOpsProviderConfig config;
     private final DOMRpcService rpcServices;
-    private DOMActionProviderService actionProvisionRegistry;
-    private DOMActionService actionService;
+    private final DOMActionProviderService actionProvisionRegistry;
+    private final DOMActionService actionService;
 
     private ListenerRegistration<OpsListener> listenerReg;
     private ActorRef opsInvoker;
@@ -80,9 +81,9 @@ public class OpsManager extends AbstractUntypedActor {
                 .withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
         LOG.debug("Propagating RPC information with {}", rpcRegistry);
 
-        actionRegistry = getContext().actorOf(RpcRegistry.props(config, opsInvoker, opsRegistrar)
+        actionRegistry = getContext().actorOf(ActionRegistry.props(config, opsInvoker, opsRegistrar)
                 .withMailbox(config.getMailBoxName()), config.getActionRegistryName());
-        LOG.debug("Propagating RPC information with {}", actionRegistry);
+        LOG.debug("Propagating action information with {}", actionRegistry);
 
         final OpsListener opsListener = new OpsListener(rpcRegistry, actionRegistry);
         LOG.debug("Registering local availability listener {}", opsListener);
