@@ -27,13 +27,15 @@
 
   <!-- odl:routed-rpc-implementation id="carPurchaseRpcReg" ref="purchaseCarProvider"/ -->
 
-  <bean id="peopleProvider" class="org.opendaylight.controller.clustering.it.provider.PeopleProvider" >
-    <property name="dataProvider" ref="dataBroker"/>
-    <property name="rpcImplementation" ref="purchaseCarProvider"/>
+  <bean id="peopleProvider" class="org.opendaylight.controller.clustering.it.provider.PeopleProvider"
+        destroy-method="close">
+    <argument ref="dataBroker"/>
+    <argument ref="bindingRpcRegistry"/>
+    <argument ref="purchaseCarProvider"/>
   </bean>
 
   <bean id="carProvider" class="org.opendaylight.controller.clustering.it.provider.CarProvider"
-       destroy-method="close">
+        destroy-method="close">
     <argument ref="dataBroker"/>
     <argument ref="entityOwnershipService"/>
     <argument ref="domDataBroker"/>

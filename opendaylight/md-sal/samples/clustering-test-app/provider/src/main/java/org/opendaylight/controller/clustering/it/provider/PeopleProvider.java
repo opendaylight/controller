@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,16 +42,15 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(PeopleProvider.class);
 
     private final Set<ObjectRegistration<?>> regs = new HashSet<>();
-    private DataBroker dataProvider;
-    private RpcProviderService rpcProviderService;
-    private CarPurchaseService rpcImplementation;
+    private final DataBroker dataProvider;
+    private final RpcProviderService rpcProviderService;
+    private final CarPurchaseService rpcImplementation;
 
-    public void setDataProvider(final DataBroker salDataProvider) {
-        this.dataProvider = salDataProvider;
-    }
-
-    public void setRpcImplementation(final CarPurchaseService rpcImplementation) {
-        this.rpcImplementation = rpcImplementation;
+    public PeopleProvider(final DataBroker dataProvider, final RpcProviderService rpcProviderService,
+            final CarPurchaseService rpcImplementation) {
+        this.dataProvider = requireNonNull(dataProvider);
+        this.rpcProviderService = requireNonNull(rpcProviderService);
+        this.rpcImplementation = requireNonNull(rpcImplementation);
     }
 
     @Override
