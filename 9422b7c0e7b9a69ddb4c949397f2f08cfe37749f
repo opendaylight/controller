@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "463a6307_dfa79c98",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-04T11:51:10Z",
+      "side": 1,
+      "message": "Make this a static constant",
+      "range": {
+        "startLine": 87,
+        "startChar": 52,
+        "endLine": 87,
+        "endChar": 107
+      },
+      "revId": "9422b7c0e7b9a69ddb4c949397f2f08cfe37749f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3dd91d7_b4b6d387",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-04T11:51:10Z",
+      "side": 1,
+      "message": "I would wrap this in a try/catch block in case we are trying to load a snapshot that is not comporessed with lz4 and fallback to the regular deserialization in case lz4 fails. or perhaps name the lz4 snapshots differently so we can differentiate between them and act accordingly in case the config knob changes.",
+      "range": {
+        "startLine": 169,
+        "startChar": 12,
+        "endLine": 169,
+        "endChar": 93
+      },
+      "revId": "9422b7c0e7b9a69ddb4c949397f2f08cfe37749f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
