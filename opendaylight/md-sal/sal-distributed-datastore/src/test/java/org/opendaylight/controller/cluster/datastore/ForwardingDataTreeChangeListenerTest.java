@@ -24,7 +24,7 @@ public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
         final ActorRef actorRef = getSystem().actorOf(MessageCollectorActor.props());
 
         ForwardingDataTreeChangeListener forwardingListener = new ForwardingDataTreeChangeListener(
-                getSystem().actorSelection(actorRef.path()));
+                getSystem().actorSelection(actorRef.path()), ActorRef.noSender());
 
         Collection<DataTreeCandidate> expected = Arrays.asList(Mockito.mock(DataTreeCandidate.class));
         forwardingListener.onDataTreeChanged(expected);

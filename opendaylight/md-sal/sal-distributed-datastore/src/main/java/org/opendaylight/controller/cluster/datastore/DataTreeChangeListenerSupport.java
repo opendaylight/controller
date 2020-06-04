@@ -37,7 +37,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
     void doRegistration(final RegisterDataTreeChangeListener message, final ActorRef registrationActor) {
         final ActorSelection listenerActor = processListenerRegistrationMessage(message);
 
-        final DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(listenerActor);
+        final DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(listenerActor, getSelf());
 
         LOG.debug("{}: Registering listenerActor {} for path {}", persistenceId(), listenerActor, message.getPath());
 
