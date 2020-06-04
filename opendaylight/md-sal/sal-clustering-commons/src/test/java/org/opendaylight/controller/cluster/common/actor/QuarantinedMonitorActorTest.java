@@ -59,6 +59,28 @@ public class QuarantinedMonitorActorTest {
     }
 
     @Test
+    public void testOnReceiveQuarantinedAsAssociation() throws Exception {
+        for (int i = 0; i < 9; i++) {
+            final Throwable t =
+                    new RuntimeException("The remote system has a UID that has been quarantined. Association aborted.");
+            final InvalidAssociation cause = InvalidAssociation.apply(LOCAL, REMOTE, t, Option.apply(null));
+            final AssociationErrorEvent event =
+                    new AssociationErrorEvent(cause, LOCAL, REMOTE, true, Logging.ErrorLevel());
+            actor.tell(event, ActorRef.noSender());
+        }
+
+        final Address local1 = Address.apply("http", "local1");
+        final Address remote1 = Address.apply("http", "remote1");
+        final Throwable t1 =
+                new RuntimeException("The remote system has a UID that has been quarantined. Association aborted.");
+        final InvalidAssociation cause1 = InvalidAssociation.apply(local1, remote1, t1, Option.apply(null));
+        final AssociationErrorEvent event1 =
+                new AssociationErrorEvent(cause1, local1, remote1, true, Logging.ErrorLevel());
+        actor.tell(event1, ActorRef.noSender());
+        verify(callback, timeout(1000)).apply();
+    }
+
+    @Test
     public void testOnReceiveAnother() throws Exception {
         final Address local = Address.apply("http", "local");
         final Address remote = Address.apply("http", "remote");
