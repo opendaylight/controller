@@ -22,10 +22,8 @@
 
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
-    <property name="notificationProvider" ref="notificationPublishService"/>
+    <argument ref="notificationPublishService"/>
   </bean>
-
-  <!-- odl:routed-rpc-implementation id="carPurchaseRpcReg" ref="purchaseCarProvider"/ -->
 
   <bean id="peopleProvider" class="org.opendaylight.controller.clustering.it.provider.PeopleProvider"
         destroy-method="close">

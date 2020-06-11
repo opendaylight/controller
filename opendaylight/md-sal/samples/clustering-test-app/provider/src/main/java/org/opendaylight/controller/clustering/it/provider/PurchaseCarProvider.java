@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -22,16 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
-    private NotificationPublishService notificationProvider;
+    private final NotificationPublishService notificationProvider;
 
-
-    public void setNotificationProvider(final NotificationPublishService salService) {
-        this.notificationProvider = salService;
+    public PurchaseCarProvider(final NotificationPublishService notificationProvider) {
+        this.notificationProvider = requireNonNull(notificationProvider);
     }
-
 
     @Override
     public ListenableFuture<RpcResult<BuyCarOutput>> buyCar(final BuyCarInput input) {
@@ -47,5 +46,6 @@ public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable {
 
     @Override
     public void close() {
+
     }
 }
