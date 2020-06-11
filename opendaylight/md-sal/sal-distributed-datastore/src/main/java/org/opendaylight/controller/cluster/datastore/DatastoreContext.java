@@ -99,6 +99,7 @@ public class DatastoreContext implements ClientActorConfig {
     private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
+    private boolean exportOnRecovery = false;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -142,6 +143,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.requestTimeout = other.requestTimeout;
         this.noProgressTimeout = other.noProgressTimeout;
         this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
+        this.exportOnRecovery = other.exportOnRecovery;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -165,6 +167,10 @@ public class DatastoreContext implements ClientActorConfig {
 
     public static Builder newBuilderFrom(final DatastoreContext context) {
         return new Builder(new DatastoreContext(context));
+    }
+
+    public boolean isExportOnRecovery() {
+        return exportOnRecovery;
     }
 
     public InMemoryDOMDataStoreConfigProperties getDataStoreProperties() {
@@ -423,6 +429,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder dataStoreMXBeanType(final String dataStoreMXBeanType) {
             datastoreContext.dataStoreMXBeanType = dataStoreMXBeanType;
+            return this;
+        }
+
+        public Builder exportOnRecovery(final boolean value) {
+            datastoreContext.exportOnRecovery = value;
             return this;
         }
 

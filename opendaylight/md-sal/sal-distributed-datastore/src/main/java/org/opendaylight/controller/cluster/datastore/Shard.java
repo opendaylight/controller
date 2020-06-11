@@ -18,6 +18,8 @@ import akka.actor.ExtendedActorSystem;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.actor.Status.Failure;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.SnapshotOffer;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
@@ -63,6 +65,7 @@ import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherTy
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
+import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBeanImpl;
@@ -96,11 +99,7 @@ import org.opendaylight.controller.cluster.messaging.SliceOptions;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
-import org.opendaylight.controller.cluster.raft.LeadershipTransferFailedException;
-import org.opendaylight.controller.cluster.raft.RaftActor;
-import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.*;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -205,6 +204,14 @@ public class Shard extends RaftActor {
 
     private final MessageAssembler requestMessageAssembler;
 
+    private boolean exportOnRecovery;
+
+    private ActorRef exportActor;
+
+    private String id;
+
+    private SchemaContext schemaContext;
+
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
@@ -214,6 +221,9 @@ public class Shard extends RaftActor {
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
         this.frontendMetadata = new FrontendMetadata(name);
+        this.exportOnRecovery = datastoreContext.isExportOnRecovery();
+        this.id = builder.getId().toString();
+        this.schemaContext = builder.schemaContextProvider.getSchemaContext();
 
         setPersistence(datastoreContext.isPersistent());
 
@@ -304,7 +314,22 @@ public class Shard extends RaftActor {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
             getSender());
 
+        if (exportOnRecovery) {
+            if (exportActor == null) {
+                exportActor = getContext().actorOf(JsonExportActor.props(schemaContext));
+            }
+
+            if (message instanceof SnapshotOffer) {
+                exportActor.tell(new JsonExportActor.ExportSnapshot((SnapshotOffer) message),ActorRef.noSender());
+            } else if (message instanceof ReplicatedLogEntry) {
+                exportActor.tell(new JsonExportActor.ExportJournal((ReplicatedLogEntry) message, id),ActorRef.noSender());
+            } else if (message instanceof RecoveryCompleted) {
+                exportActor.tell(new JsonExportActor.FinishExport(id),ActorRef.noSender());
+            }
+        }
+
         super.handleRecover(message);
+
         if (LOG.isTraceEnabled()) {
             appendEntriesReplyTracker.begin();
         }
