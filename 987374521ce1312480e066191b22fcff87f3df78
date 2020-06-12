@@ -45,6 +45,29 @@
       "revId": "987374521ce1312480e066191b22fcff87f3df78",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0fce411_ab530474",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-12T04:37:16Z",
+      "side": 1,
+      "message": "this should have a proper constant",
+      "range": {
+        "startLine": 83,
+        "startChar": 29,
+        "endLine": 83,
+        "endChar": 31
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
