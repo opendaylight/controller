@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "74968c3b_dd5472a8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 8351
+      },
+      "writtenOn": "2020-06-13T19:46:33Z",
+      "side": 1,
+      "message": "This is probably because it thinks count is immutable. But thats not correct and hence it is a false positive.",
+      "parentUuid": "5cca82de_0db4b29d",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 47
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ad376e57_90f28d99",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6f131b11_c3f98850",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 8351
+      },
+      "writtenOn": "2020-06-13T19:46:33Z",
+      "side": 1,
+      "message": "Not sure if thats right. I can see it increment in my tests.",
+      "parentUuid": "ad376e57_90f28d99",
+      "range": {
+        "startLine": 81,
+        "startChar": 16,
+        "endLine": 81,
+        "endChar": 24
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a0fce411_ab530474",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2020-06-12T04:37:16Z",
       "side": 1,
       "message": "this should have a proper constant",
+      "range": {
+        "startLine": 83,
+        "startChar": 29,
+        "endLine": 83,
+        "endChar": 31
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9087093c_233ba3bb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 8351
+      },
+      "writtenOn": "2020-06-13T19:46:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a0fce411_ab530474",
       "range": {
         "startLine": 83,
         "startChar": 29,
