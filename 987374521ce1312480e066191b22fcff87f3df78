@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "41cb3838_a7615029",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-14T18:16:43Z",
+      "side": 1,
+      "message": "and it is very right about that. if you were to examine the bytecode, you will find that ...",
+      "parentUuid": "74968c3b_dd5472a8",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 47
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ad376e57_90f28d99",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
         "patchSetId": 2
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "Not sure if thats right. I can see it increment in my tests.",
       "parentUuid": "ad376e57_90f28d99",
+      "range": {
+        "startLine": 81,
+        "startChar": 16,
+        "endLine": 81,
+        "endChar": 24
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac860676_b4d2eb4b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-14T18:16:43Z",
+      "side": 1,
+      "message": "... count is a java.lang.Integer, so doing \u0027count++\u0027 really does \u0027count.intValue()++\u0027, i.e. you increment an on-stack variable and do not store it anywhere, hence it *is* a dead local store and the code *does* *not* do what you think it does.",
+      "parentUuid": "6f131b11_c3f98850",
       "range": {
         "startLine": 81,
         "startChar": 16,
