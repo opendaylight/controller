@@ -66,6 +66,8 @@ public class DatastoreContext implements ClientActorConfig {
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
+    public static final ExportOnRecovery DEFAULT_EXPORT_ON_RECOVERY = ExportOnRecovery.OFF;
+    public static final String DEFAULT_RECOVERY_EXPORT_BASE_DIR = "persistence-export";
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
@@ -102,9 +104,16 @@ public class DatastoreContext implements ClientActorConfig {
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
     private boolean useLz4Compression = false;
+    private ExportOnRecovery exportOnRecovery = DEFAULT_EXPORT_ON_RECOVERY;
+    private String recoveryExportBaseDir = DEFAULT_RECOVERY_EXPORT_BASE_DIR;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
+    }
+
+    public enum ExportOnRecovery {
+        OFF,
+        JSON
     }
 
     DatastoreContext() {
@@ -148,6 +157,8 @@ public class DatastoreContext implements ClientActorConfig {
         this.noProgressTimeout = other.noProgressTimeout;
         this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
         this.useLz4Compression = other.useLz4Compression;
+        this.exportOnRecovery = other.exportOnRecovery;
+        this.recoveryExportBaseDir = other.recoveryExportBaseDir;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -364,6 +375,14 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isUseLz4Compression() {
         return useLz4Compression;
+    }
+
+    public ExportOnRecovery getExportOnRecovery() {
+        return exportOnRecovery;
+    }
+
+    public String getRecoveryExportBaseDir() {
+        return recoveryExportBaseDir;
     }
 
     @Override
@@ -614,6 +633,16 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder useLz4Compression(final boolean value) {
             datastoreContext.useLz4Compression = value;
+            return this;
+        }
+
+        public Builder exportOnRecovery(final ExportOnRecovery value) {
+            datastoreContext.exportOnRecovery = value;
+            return this;
+        }
+
+        public Builder recoveryExportBaseDir(final String value) {
+            datastoreContext.recoveryExportBaseDir = value;
             return this;
         }
 
