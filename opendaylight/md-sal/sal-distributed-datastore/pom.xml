@@ -141,6 +141,10 @@
       <artifactId>yang-data-codec-xml</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-codec-gson</artifactId>
+    </dependency>
+    <dependency>
       <groupId>tech.pantheon.triemap</groupId>
       <artifactId>triemap</artifactId>
     </dependency>
@@ -173,6 +177,12 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>4.0.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
