@@ -94,7 +94,7 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractShardTest extends AbstractActorTest {
     protected static final EffectiveModelContext SCHEMA_CONTEXT = TestModel.createTestContext();
 
-    private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
+    protected static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
     protected static final int HEARTBEAT_MILLIS = 100;
 
@@ -434,7 +434,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     public static final class DelegatingShardCreator implements Creator<Shard> {
         private final Creator<Shard> delegate;
 
-        DelegatingShardCreator(final Creator<Shard> delegate) {
+        public DelegatingShardCreator(final Creator<Shard> delegate) {
             this.delegate = delegate;
         }
 
