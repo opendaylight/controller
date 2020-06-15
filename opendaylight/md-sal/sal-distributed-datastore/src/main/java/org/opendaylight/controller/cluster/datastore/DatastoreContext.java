@@ -66,6 +66,7 @@ public class DatastoreContext implements ClientActorConfig {
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
+    public static final String DEFAULT_RECOVERY_JSON_DUMP = "persistence-export";
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
@@ -102,6 +103,8 @@ public class DatastoreContext implements ClientActorConfig {
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
     private boolean useLz4Compression = false;
+    private boolean exportOnRecovery = false;
+    private String recoveryJsonDump = DEFAULT_RECOVERY_JSON_DUMP;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -148,6 +151,8 @@ public class DatastoreContext implements ClientActorConfig {
         this.noProgressTimeout = other.noProgressTimeout;
         this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
         this.useLz4Compression = other.useLz4Compression;
+        this.exportOnRecovery = other.exportOnRecovery;
+        this.recoveryJsonDump = other.recoveryJsonDump;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -364,6 +369,14 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isUseLz4Compression() {
         return useLz4Compression;
+    }
+
+    public boolean isExportOnRecovery() {
+        return exportOnRecovery;
+    }
+
+    public String getRecoveryJsonDump() {
+        return recoveryJsonDump;
     }
 
     @Override
@@ -614,6 +627,16 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder useLz4Compression(final boolean value) {
             datastoreContext.useLz4Compression = value;
+            return this;
+        }
+
+        public Builder exportOnRecovery(final boolean value) {
+            datastoreContext.exportOnRecovery = value;
+            return this;
+        }
+
+        public Builder recoveryJsonDump(final String value) {
+            datastoreContext.recoveryJsonDump = value;
             return this;
         }
 
