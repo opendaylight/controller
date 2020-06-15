@@ -286,6 +286,14 @@ module distributed-datastore-provider {
             type non-zero-uint32-type;
             description "The initial buffer capacity, in bytes, to use when serializing message payloads.";
         }
+
+        leaf export-on-recovery {
+            default false;
+            type boolean;
+            description "Enable export to json for snapshot and journal during recovery. It will be exported
+                         to persistence-export directory. Note that in case of large snapshot, export will
+                         take a lot of time.";
+        }
     }
 
     container data-store-properties-container {
