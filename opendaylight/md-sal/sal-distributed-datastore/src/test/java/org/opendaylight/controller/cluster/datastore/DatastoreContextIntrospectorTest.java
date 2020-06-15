@@ -76,6 +76,8 @@ public class DatastoreContextIntrospectorTest {
         properties.put("mAx-shaRd-data-STORE-executor-quEUe-size", "3333");
         properties.put("persistent", "false");
         properties.put("initial-payload-serialized-buffer-capacity", "600");
+        properties.put("export-on-recovery", "true");
+        properties.put("recovery-json-dump", "persistence-export");
 
         boolean updated = introspector.update(properties);
         assertTrue("updated", updated);
@@ -99,6 +101,8 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(901, context.getShardBatchedModificationCount());
         assertEquals(200, context.getTransactionCreationInitialRateLimit());
         assertEquals(600, context.getInitialPayloadSerializedBufferCapacity());
+        assertEquals("persistence-export", context.getRecoveryJsonDump());
+        assertTrue(context.isExportOnRecovery());
         assertFalse(context.isPersistent());
 
         properties.put("shard-transaction-idle-timeout-in-minutes", "32");
