@@ -303,6 +303,19 @@ module distributed-datastore-provider {
             description "Use lz4 compression for snapshots, sent from leader to follower, for snapshots stored
                         by LocalSnapshotStore, use akka.conf configuration.";
         }
+
+        leaf export-on-recovery {
+            default false;
+            type boolean;
+            description "Enable export to json for snapshot and journal during recovery. Note that in case of large snapshot,
+                         export will take a lot of time.";
+        }
+
+        leaf recovery-json-dump {
+            default persistence-export;
+            type string;
+            description "Directory name for snapshot and journal dumps.";
+        }
     }
 
     container data-store-properties-container {
