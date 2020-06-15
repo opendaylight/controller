@@ -388,7 +388,7 @@ public class ShardTest extends AbstractShardTest {
         InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
             new ApplyJournalEntries(nListEntries));
 
-        testRecovery(listEntryKeys);
+        testRecovery(listEntryKeys, true);
     }
 
     @Test

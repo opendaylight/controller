@@ -94,18 +94,17 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractShardTest extends AbstractActorTest {
     protected static final EffectiveModelContext SCHEMA_CONTEXT = TestModel.createTestContext();
 
-    private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
-
+    protected static final AtomicInteger SHARD_NUM = new AtomicInteger();
     protected static final int HEARTBEAT_MILLIS = 100;
-
-    protected final ShardIdentifier shardID = ShardIdentifier.create("inventory", MemberName.forName("member-1"),
-        "config" + NEXT_SHARD_NUM.getAndIncrement());
 
     protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder()
             .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000)
             .shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS);
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
+    protected final int nextShardNum = SHARD_NUM.getAndIncrement();
+    protected final ShardIdentifier shardID = ShardIdentifier.create("inventory", MemberName.forName("member-1"),
+        "config" + nextShardNum);
 
     @Before
     public void setUp() {
@@ -133,7 +132,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             .schemaContextProvider(() -> SCHEMA_CONTEXT);
     }
 
-    protected void testRecovery(final Set<Integer> listEntryKeys) throws Exception {
+    protected void testRecovery(final Set<Integer> listEntryKeys, final boolean stopActorOnFinish) throws Exception {
         // Create the actor and wait for recovery complete.
 
         final int nListEntries = listEntryKeys.size();
@@ -185,7 +184,9 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         assertEquals("Last applied", nListEntries,
                 shard.underlyingActor().getShardMBean().getLastApplied());
 
-        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        if (stopActorOnFinish) {
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }
     }
 
     protected void verifyLastApplied(final TestActorRef<Shard> shard, final long expectedValue) {
