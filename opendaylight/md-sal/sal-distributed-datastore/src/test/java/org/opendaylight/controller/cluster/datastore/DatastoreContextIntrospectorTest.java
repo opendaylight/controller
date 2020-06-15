@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingCodecContext;
 import org.opendaylight.mdsal.binding.runtime.spi.BindingRuntimeHelpers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStorePropertiesContainer;
 
 /**
@@ -76,6 +77,8 @@ public class DatastoreContextIntrospectorTest {
         properties.put("mAx-shaRd-data-STORE-executor-quEUe-size", "3333");
         properties.put("persistent", "false");
         properties.put("initial-payload-serialized-buffer-capacity", "600");
+        properties.put("export-on-recovery", "json");
+        properties.put("recovery-json-dump", "persistence-export");
 
         boolean updated = introspector.update(properties);
         assertTrue("updated", updated);
@@ -99,6 +102,8 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(901, context.getShardBatchedModificationCount());
         assertEquals(200, context.getTransactionCreationInitialRateLimit());
         assertEquals(600, context.getInitialPayloadSerializedBufferCapacity());
+        assertEquals("persistence-export", context.getRecoveryExportBaseDir());
+        assertEquals(ExportOnRecovery.Json, context.getExportOnRecovery());
         assertFalse(context.isPersistent());
 
         properties.put("shard-transaction-idle-timeout-in-minutes", "32");
