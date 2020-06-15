@@ -16,9 +16,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.ExtendedActorSystem;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.actor.Status.Failure;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.SnapshotOffer;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
@@ -64,6 +67,7 @@ import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherTy
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
+import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBeanImpl;
@@ -102,6 +106,7 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -209,6 +214,14 @@ public class Shard extends RaftActor {
 
     private final MessageAssembler requestMessageAssembler;
 
+    private boolean exportOnRecovery;
+
+    private ActorRef exportActor;
+
+    private EffectiveModelContext schema;
+
+    private String recoveryJsonDump;
+
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
@@ -218,6 +231,11 @@ public class Shard extends RaftActor {
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
         this.frontendMetadata = new FrontendMetadata(name);
+        this.exportOnRecovery = datastoreContext.isExportOnRecovery();
+
+        if (exportOnRecovery) {
+            this.schema = builder.schemaContextProvider.getEffectiveModelContext();
+        }
 
         setPersistence(datastoreContext.isPersistent());
 
@@ -311,6 +329,23 @@ public class Shard extends RaftActor {
             getSender());
 
         super.handleRecover(message);
+
+        if (exportOnRecovery) {
+            if (exportActor == null) {
+                exportActor = getContext().actorOf(JsonExportActor.props(schema, recoveryJsonDump));
+            }
+
+            if (message instanceof SnapshotOffer) {
+                exportActor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().get(), name),
+                        ActorRef.noSender());
+            } else if (message instanceof ReplicatedLogEntry) {
+                exportActor.tell(new JsonExportActor.ExportJournal((ReplicatedLogEntry) message), ActorRef.noSender());
+            } else if (message instanceof RecoveryCompleted) {
+                exportActor.tell(new JsonExportActor.FinishExport(name), ActorRef.noSender());
+                exportActor.tell(PoisonPill.getInstance(),ActorRef.noSender());
+            }
+        }
+
         if (LOG.isTraceEnabled()) {
             appendEntriesReplyTracker.begin();
         }
