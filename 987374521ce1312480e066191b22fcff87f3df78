@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "44ef8046_42c02573",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 8351
+      },
+      "writtenOn": "2020-06-15T09:43:19Z",
+      "side": 1,
+      "message": "i moved it to a primitive. although it was working perfectly fine even with Integer and removed this suppress.",
+      "parentUuid": "41cb3838_a7615029",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 47
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ad376e57_90f28d99",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
         "patchSetId": 2
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "... count is a java.lang.Integer, so doing \u0027count++\u0027 really does \u0027count.intValue()++\u0027, i.e. you increment an on-stack variable and do not store it anywhere, hence it *is* a dead local store and the code *does* *not* do what you think it does.",
       "parentUuid": "6f131b11_c3f98850",
+      "range": {
+        "startLine": 81,
+        "startChar": 16,
+        "endLine": 81,
+        "endChar": 24
+      },
+      "revId": "987374521ce1312480e066191b22fcff87f3df78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ec139d4_03aee1dc",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/QuarantinedMonitorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 8351
+      },
+      "writtenOn": "2020-06-15T09:43:19Z",
+      "side": 1,
+      "message": "i moved it to a primitive. although it was working perfectly fine even with Integer.",
+      "parentUuid": "ac860676_b4d2eb4b",
       "range": {
         "startLine": 81,
         "startChar": 16,
