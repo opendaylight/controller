@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -63,5 +64,13 @@ public final class UnsignedLongRangeSet implements Mutable {
 
     public UnsignedLongRangeSet copy() {
         return new UnsignedLongRangeSet(TreeRangeSet.create(rangeset));
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("span", rangeset.span())
+                .add("rangeSize", rangeset.asRanges().size())
+                .toString();
     }
 }
