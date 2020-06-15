@@ -26,6 +26,7 @@ import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
@@ -56,7 +57,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     @Override
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         super.setUp();
         createShard();
     }
