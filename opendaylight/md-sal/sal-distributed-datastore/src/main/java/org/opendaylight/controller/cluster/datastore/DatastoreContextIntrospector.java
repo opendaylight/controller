@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.management.ConstructorParameters;
@@ -337,8 +339,12 @@ public class DatastoreContextIntrospector {
 
             // Call the setter method on the Builder instance.
             final Method setter = BUILDER_SETTERS.get(key);
-            setter.invoke(builder, constructorValueRecursively(
-                    Primitives.wrap(setter.getParameterTypes()[0]), value.toString()));
+            if (value.getClass().isEnum()) {
+                setter.invoke(builder, value);
+            } else {
+                setter.invoke(builder, constructorValueRecursively(
+                        Primitives.wrap(setter.getParameterTypes()[0]), value.toString()));
+            }
 
             return true;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -372,6 +378,18 @@ public class DatastoreContextIntrospector {
 
         LOG.debug("Type for property {}: {}, converting value {} ({})",
                 name, propertyType.getSimpleName(), from, from.getClass().getSimpleName());
+
+        if (propertyType.isEnum()) {
+            try {
+                final Method enumConstructor = propertyType.getDeclaredMethod("forName", String.class);
+                final Object optional =  enumConstructor.invoke(null, from.toString().toLowerCase(Locale.ENGLISH));
+                if (optional instanceof Optional) {
+                    return ((Optional<Object>)optional).orElseThrow();
+                }
+            } catch (NoSuchMethodException e) {
+                LOG.error("Error constructing value ({}) for enum {}", from, propertyType);
+            }
+        }
 
         // Recurse the chain of constructors depth-first to get the resulting value. Eg, if the
         // property type is the yang-generated NonZeroUint32Type, it's constructor takes a Long so
