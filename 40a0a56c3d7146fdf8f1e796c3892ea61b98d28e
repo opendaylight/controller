@@ -16,6 +16,185 @@
       "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fcd98196_cc0b62e3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "Agree you can pass the config value directly for LocalSnapshotStore without loading the config again.",
+      "parentUuid": "636d8e07_3a0ab9b6",
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92cb2019_821ee7df",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "Same as the output stream - init and cache the decompressor, although its not going to have as large impact as the output streams since its only going to be used at the start to load a couple of snapshots.",
+      "range": {
+        "startLine": 172,
+        "startChar": 45,
+        "endLine": 172,
+        "endChar": 95
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "665a444f_ad2917a8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "This should be a warning, Also include the cause in the message.",
+      "range": {
+        "startLine": 177,
+        "startChar": 16,
+        "endLine": 177,
+        "endChar": 21
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "055ddc8c_8d2784ac",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "Make sure to initialize LZ4Compressor via the factory, cache it and use it for all Streams otherwise its going to cause slow downs when the JNI instance cannot be found.",
+      "range": {
+        "startLine": 235,
+        "startChar": 42,
+        "endLine": 235,
+        "endChar": 94
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03db974e_817f228f",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "should be moved to snapshot-store.local.use-lz4-compression \u003d false; so it can be just loaded from the Config thats passed to LocalSnapshotStore",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 34
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65c20ccb_8595a55c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardSnapshotCohort.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "cache the decompressor",
+      "range": {
+        "startLine": 114,
+        "startChar": 41,
+        "endLine": 114,
+        "endChar": 92
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c41f5198_968bfb64",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "Same here cache the compressor",
+      "range": {
+        "startLine": 92,
+        "startChar": 42,
+        "endLine": 92,
+        "endChar": 80
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c36a534_bf65b542",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T08:50:33Z",
+      "side": 1,
+      "message": "Needs to be elaborated that this is only for snapshots that are sent from the leader to followers. For LocalSnapshotStore akka.conf needs to be used.",
+      "range": {
+        "startLine": 287,
+        "startChar": 25,
+        "endLine": 287,
+        "endChar": 59
+      },
+      "revId": "40a0a56c3d7146fdf8f1e796c3892ea61b98d28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
