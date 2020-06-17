@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1eb85f1d_ec2cf57a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "I would also split the snapshots and journal with another directory inside the export dir.",
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf41160d_e2bd1952",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "persistence-export seems more appropriate to me",
+      "range": {
+        "startLine": 69,
+        "startChar": 37,
+        "endLine": 69,
+        "endChar": 41
+      },
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd3d1fa1_51355908",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "FinishExport should be the last message this actor encounters right? In that case the final thing after export should be to PoisonPill itself since its no longer needed.",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 3
+      },
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47fd4f50_9b952a9c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "I think this might be better to just indicate which Payload type we encountered.",
+      "range": {
+        "startLine": 139,
+        "startChar": 47,
+        "endLine": 139,
+        "endChar": 55
+      },
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8e88775_6465ab18",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "How about changing this to the Payload Type this is ie. CommitTransactionPayload etc?",
+      "range": {
+        "startLine": 157,
+        "startChar": 43,
+        "endLine": 157,
+        "endChar": 47
+      },
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c78cc337_e72ee8e7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "ModificationType",
+      "range": {
+        "startLine": 160,
+        "startChar": 43,
+        "endLine": 160,
+        "endChar": 55
+      },
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59ca836a_3387b505",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-17T10:51:58Z",
+      "side": 1,
+      "message": "Wouldn\u0027t Data be more appropriate?",
+      "range": {
+        "startLine": 183,
+        "startChar": 43,
+        "endLine": 183,
+        "endChar": 48
+      },
+      "revId": "66cd4dee43566db63341a003d2d0bdf7a5230731",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
