@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6502f23_be0274fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-06-18T09:40:03Z",
+      "side": 1,
+      "message": "I think we should use the RFC7951 JSONCodecFactorySupplier as that should be the newer rfc from the two",
+      "range": {
+        "startLine": 114,
+        "startChar": 49,
+        "endLine": 114,
+        "endChar": 81
+      },
+      "revId": "a7b5777c9ea8fba5b77c393a08880fac7401e386",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
