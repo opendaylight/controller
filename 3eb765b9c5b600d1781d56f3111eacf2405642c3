@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8c7de9ff_e5f58629",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-24T13:34:20Z",
+      "side": 1,
+      "message": "I believe this is always true, you should be checking whether the root modification is WRITE",
+      "range": {
+        "startLine": 1040,
+        "startChar": 40,
+        "endLine": 1040,
+        "endChar": 92
+      },
+      "revId": "3eb765b9c5b600d1781d56f3111eacf2405642c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b19816bf_aa1b595c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-24T13:34:20Z",
+      "side": 1,
+      "message": "I think you misunderstand this part. It the point is not to overwrite the datatree -- that actually just happened. The point is to trigger a RAFT-level snapshot being created, so that the in-memory journal is cleared.",
+      "range": {
+        "startLine": 1041,
+        "startChar": 64,
+        "endLine": 1041,
+        "endChar": 84
+      },
+      "revId": "3eb765b9c5b600d1781d56f3111eacf2405642c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
