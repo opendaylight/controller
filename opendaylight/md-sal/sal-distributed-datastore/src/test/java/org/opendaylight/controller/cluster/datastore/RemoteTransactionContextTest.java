@@ -34,7 +34,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -47,7 +46,6 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
     private static final TransactionIdentifier TX_ID = new TransactionIdentifier(new LocalHistoryIdentifier(
         ClientIdentifier.create(FrontendIdentifier.create(MemberName.forName("test"), FrontendType.forName("test")), 0),
         0), 0);
-    private static final DeleteModification DELETE = new DeleteModification(DataStoreVersions.CURRENT_VERSION);
 
     private OperationLimiter limiter;
     private RemoteTransactionContext txContext;
@@ -72,8 +70,8 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
      */
     @Test
     public void testLimiterOnFailure() throws TimeoutException, InterruptedException {
-        txContext.executeModification(DELETE, null);
-        txContext.executeModification(DELETE, null);
+        txContext.executeDelete(null, null);
+        txContext.executeDelete(null, null);
         assertEquals(2, limiter.availablePermits());
 
         final Future<Object> sendFuture = txContext.sendBatchedModifications();
@@ -83,14 +81,14 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         assertEquals(2, msg.getModifications().size());
         assertEquals(1, msg.getTotalMessagesSent());
         sendReply(new Failure(new NullPointerException()));
-        assertFuture(sendFuture, new OnComplete<Object>() {
+        assertFuture(sendFuture, new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 assertTrue(failure instanceof NullPointerException);
                 assertEquals(4, limiter.availablePermits());
 
                 // The transaction has failed, no throttling should occur
-                txContext.executeModification(DELETE, null);
+                txContext.executeDelete(null, null);
                 assertEquals(4, limiter.availablePermits());
 
                 // Executing a read should result in immediate failure
@@ -115,7 +113,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         assertTrue(msg.isReady());
         assertEquals(2, msg.getTotalMessagesSent());
         sendReply(new Failure(new IllegalStateException()));
-        assertFuture(commitFuture, new OnComplete<Object>() {
+        assertFuture(commitFuture, new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 assertTrue(failure instanceof IllegalStateException);
@@ -131,12 +129,12 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
      */
     @Test
     public void testLimiterOnOverflowFailure() throws TimeoutException, InterruptedException {
-        txContext.executeModification(DELETE, null);
-        txContext.executeModification(DELETE, null);
-        txContext.executeModification(DELETE, null);
-        txContext.executeModification(DELETE, null);
+        txContext.executeDelete(null, null);
+        txContext.executeDelete(null, null);
+        txContext.executeDelete(null, null);
+        txContext.executeDelete(null, null);
         assertEquals(0, limiter.availablePermits());
-        txContext.executeModification(DELETE, null);
+        txContext.executeDelete(null, null);
         // Last acquire should have failed ...
         assertEquals(0, limiter.availablePermits());
 
@@ -149,7 +147,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         assertEquals(1, msg.getTotalMessagesSent());
         sendReply(new Failure(new NullPointerException()));
 
-        assertFuture(future, new OnComplete<Object>() {
+        assertFuture(future, new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 assertTrue(failure instanceof NullPointerException);
