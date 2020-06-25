@@ -256,38 +256,42 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
     private <T> Future<T> combineFutureWithPossiblePriorReadOnlyTxFutures(final Future<T> future,
             final TransactionIdentifier txId) {
-        if (!priorReadOnlyTxPromises.containsKey(txId) && !priorReadOnlyTxPromises.isEmpty()) {
-            Collection<Entry<TransactionIdentifier, Promise<Object>>> priorReadOnlyTxPromiseEntries =
-                    new ArrayList<>(priorReadOnlyTxPromises.entrySet());
-            if (priorReadOnlyTxPromiseEntries.isEmpty()) {
-                return future;
-            }
+        return priorReadOnlyTxPromises.isEmpty() || !priorReadOnlyTxPromises.containsKey(txId) ? future
+                // Tough luck, we need do some work
+                : combineWithPriorReadOnlyTxFutures(future, txId);
+    }
 
-            List<Future<Object>> priorReadOnlyTxFutures = new ArrayList<>(priorReadOnlyTxPromiseEntries.size());
-            for (Entry<TransactionIdentifier, Promise<Object>> entry: priorReadOnlyTxPromiseEntries) {
-                LOG.debug("Tx: {} - waiting on future for prior read-only Tx {}", txId, entry.getKey());
-                priorReadOnlyTxFutures.add(entry.getValue().future());
-            }
-
-            Future<Iterable<Object>> combinedFutures = Futures.sequence(priorReadOnlyTxFutures,
-                    getActorUtils().getClientDispatcher());
-
-            final Promise<T> returnPromise = Futures.promise();
-            final OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
-                @Override
-                public void onComplete(final Throwable failure, final Iterable<Object> notUsed) {
-                    LOG.debug("Tx: {} - prior read-only Tx futures complete", txId);
-
-                    // Complete the returned Promise with the original Future.
-                    returnPromise.completeWith(future);
-                }
-            };
-
-            combinedFutures.onComplete(onComplete, getActorUtils().getClientDispatcher());
-            return returnPromise.future();
-        } else {
+    // Split out of the common path
+    private <T> Future<T> combineWithPriorReadOnlyTxFutures(final Future<T> future, final TransactionIdentifier txId) {
+        // Take a stable snapshot, and check if we raced
+        final List<Entry<TransactionIdentifier, Promise<Object>>> priorReadOnlyTxPromiseEntries =
+                new ArrayList<>(priorReadOnlyTxPromises.entrySet());
+        if (priorReadOnlyTxPromiseEntries.isEmpty()) {
             return future;
         }
+
+        final List<Future<Object>> priorReadOnlyTxFutures = new ArrayList<>(priorReadOnlyTxPromiseEntries.size());
+        for (Entry<TransactionIdentifier, Promise<Object>> entry: priorReadOnlyTxPromiseEntries) {
+            LOG.debug("Tx: {} - waiting on future for prior read-only Tx {}", txId, entry.getKey());
+            priorReadOnlyTxFutures.add(entry.getValue().future());
+        }
+
+        final Future<Iterable<Object>> combinedFutures = Futures.sequence(priorReadOnlyTxFutures,
+            getActorUtils().getClientDispatcher());
+
+        final Promise<T> returnPromise = Futures.promise();
+        final OnComplete<Iterable<Object>> onComplete = new OnComplete<>() {
+            @Override
+            public void onComplete(final Throwable failure, final Iterable<Object> notUsed) {
+                LOG.debug("Tx: {} - prior read-only Tx futures complete", txId);
+
+                // Complete the returned Promise with the original Future.
+                returnPromise.completeWith(future);
+            }
+        };
+
+        combinedFutures.onComplete(onComplete, getActorUtils().getClientDispatcher());
+        return returnPromise.future();
     }
 
     @Override
