@@ -29,13 +29,12 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.TransactionModificationOperation.DeleteOperation;
+import org.opendaylight.controller.cluster.datastore.TransactionModificationOperation.MergeOperation;
+import org.opendaylight.controller.cluster.datastore.TransactionModificationOperation.WriteOperation;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
-import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
-import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction;
@@ -140,31 +139,25 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     public void delete(final YangInstanceIdentifier path) {
         checkModificationState("delete", path);
 
-        executeModification(new DeleteModification(path));
+        executeModification(new DeleteOperation(path));
     }
 
     @Override
     public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkModificationState("merge", path);
 
-        executeModification(new MergeModification(path, data));
+        executeModification(new MergeOperation(path, data));
     }
 
     @Override
     public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkModificationState("write", path);
 
-        executeModification(new WriteModification(path, data));
+        executeModification(new WriteOperation(path, data));
     }
 
-    private void executeModification(final AbstractModification modification) {
-        final TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
-        contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
-            @Override
-            protected void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
-                transactionContext.executeModification(modification, havePermit);
-            }
-        });
+    private void executeModification(final TransactionModificationOperation operation) {
+        getContextWrapper(operation.path()).maybeExecuteTransactionOperation(operation);
     }
 
     private void checkModificationState(final String opName, final YangInstanceIdentifier path) {
