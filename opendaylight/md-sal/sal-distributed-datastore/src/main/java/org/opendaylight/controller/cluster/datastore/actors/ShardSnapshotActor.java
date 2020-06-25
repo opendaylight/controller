@@ -15,6 +15,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FrameOutputStream;
+import net.jpountz.xxhash.XXHash32;
+import net.jpountz.xxhash.XXHashFactory;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
@@ -55,9 +60,17 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
 
     //actor name override used for metering. This does not change the "real" actor name
     private static final String ACTOR_NAME_FOR_METERING = "shard-snapshot";
+    private final boolean useLz4Compression;
+    private LZ4Compressor lz4Compressor;
+    private XXHash32 hash32;
 
-    private ShardSnapshotActor() {
+    private ShardSnapshotActor(boolean useLz4Compression) {
         super(ACTOR_NAME_FOR_METERING);
+        this.useLz4Compression = useLz4Compression;
+        if (useLz4Compression) {
+            lz4Compressor = LZ4Factory.fastestInstance().fastCompressor();
+            hash32 = XXHashFactory.fastestInstance().hash32();
+        }
     }
 
     @Override
@@ -72,7 +85,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     private void onSerializeSnapshot(final SerializeSnapshot request) {
         Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
         if (installSnapshotStream.isPresent()) {
-            try (ObjectOutputStream out = new ObjectOutputStream(installSnapshotStream.get())) {
+            try (ObjectOutputStream out = getOutputStream(installSnapshotStream.get())) {
                 request.getSnapshot().serialize(out);
             } catch (IOException e) {
                 // TODO - we should communicate the failure in the CaptureSnapshotReply.
@@ -82,6 +95,19 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
 
         request.getReplyTo().tell(new CaptureSnapshotReply(new ShardSnapshotState(request.getSnapshot()),
                 installSnapshotStream), ActorRef.noSender());
+    }
+
+    private ObjectOutputStream getOutputStream(OutputStream outputStream) throws IOException {
+        if (useLz4Compression) {
+            return new ObjectOutputStream(new LZ4FrameOutputStream(
+                    outputStream,
+                    LZ4FrameOutputStream.BLOCKSIZE.SIZE_256KB,
+                    -1,
+                    lz4Compressor,
+                    hash32));
+        } else {
+            return new ObjectOutputStream(outputStream);
+        }
     }
 
     /**
@@ -98,7 +124,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
         snapshotActor.tell(new SerializeSnapshot(snapshot, installSnapshotStream, replyTo), ActorRef.noSender());
     }
 
-    public static Props props() {
-        return Props.create(ShardSnapshotActor.class);
+    public static Props props(boolean useLz4Compression) {
+        return Props.create(ShardSnapshotActor.class, useLz4Compression);
     }
 }
