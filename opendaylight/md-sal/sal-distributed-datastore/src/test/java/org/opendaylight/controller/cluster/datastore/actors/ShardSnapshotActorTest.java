@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.testkit.javadsl.TestKit;
-import java.io.ByteArrayInputStream;
+import com.google.common.io.ByteSource;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.time.Duration;
@@ -23,18 +23,21 @@ import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
+import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 public class ShardSnapshotActorTest extends AbstractActorTest {
+    private static final InputOutputStreamFactory STREAM_FACTORY = InputOutputStreamFactory.simple();
+
     private static final NormalizedNode<?, ?> DATA = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
     private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
             final boolean withInstallSnapshot) throws Exception {
         final TestKit kit = new TestKit(getSystem());
-        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(), testName);
+        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(STREAM_FACTORY), testName);
         kit.watch(snapshotActor);
 
         final NormalizedNode<?, ?> expectedRoot = snapshot.getRootNode().get();
@@ -50,8 +53,8 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
         if (installSnapshotStream != null) {
             final ShardDataTreeSnapshot deserialized;
-            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
-                installSnapshotStream.toByteArray()))) {
+            try (ObjectInputStream in = new ObjectInputStream(STREAM_FACTORY.createInputStream(
+                    ByteSource.wrap(installSnapshotStream.toByteArray())))) {
                 deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
             }
 

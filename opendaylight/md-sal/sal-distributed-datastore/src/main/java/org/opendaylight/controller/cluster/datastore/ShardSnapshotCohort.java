@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.actors.ShardSnapshotActor;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
+import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
@@ -37,13 +38,15 @@ import org.slf4j.Logger;
 final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
+    private final InputOutputStreamFactory streamFactory;
     private final ActorRef snapshotActor;
     private final ShardDataTree store;
     private final String logId;
     private final Logger log;
 
-    private ShardSnapshotCohort(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor,
-            final ShardDataTree store, final Logger log, final String logId) {
+    ShardSnapshotCohort(final InputOutputStreamFactory streamFactory, final LocalHistoryIdentifier applyHistoryId,
+            final ActorRef snapshotActor, final ShardDataTree store, final Logger log, final String logId) {
+        this.streamFactory = requireNonNull(streamFactory);
         this.snapshotActor = requireNonNull(snapshotActor);
         this.store = requireNonNull(store);
         this.log = log;
@@ -51,16 +54,19 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
-            final ShardDataTree store, final Logger log, final String logId) {
+            final ShardDataTree store, final Logger log, final String logId, final DatastoreContext context) {
         final LocalHistoryIdentifier applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
         final String snapshotActorName = "shard-" + memberName.getName() + ':' + "snapshot-read";
 
+        final InputOutputStreamFactory streamFactory = context.isUseLz4Compression()
+                ? InputOutputStreamFactory.lz4("256KB") : InputOutputStreamFactory.simple();
         // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all
         // requests.
-        final ActorRef snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(), snapshotActorName);
+        final ActorRef snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(streamFactory),
+                snapshotActorName);
 
-        return new ShardSnapshotCohort(applyHistoryId, snapshotActor, store, log, logId);
+        return new ShardSnapshotCohort(streamFactory, applyHistoryId, snapshotActor, store, log, logId);
     }
 
     @Override
@@ -99,7 +105,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     @Override
     public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
-        try (ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
+        try (ObjectInputStream in = new ObjectInputStream(streamFactory.createInputStream(snapshotBytes))) {
             return ShardDataTreeSnapshot.deserialize(in);
         }
     }
