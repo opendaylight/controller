@@ -100,6 +100,7 @@ public class DatastoreContext implements ClientActorConfig {
     private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
+    private boolean useLz4Compression = false;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -144,6 +145,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.requestTimeout = other.requestTimeout;
         this.noProgressTimeout = other.noProgressTimeout;
         this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
+        this.useLz4Compression = other.useLz4Compression;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -350,6 +352,10 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isUseTellBasedProtocol() {
         return useTellBasedProtocol;
+    }
+
+    public boolean isUseLz4Compression() {
+        return useLz4Compression;
     }
 
     @Override
@@ -590,6 +596,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder useTellBasedProtocol(final boolean value) {
             datastoreContext.useTellBasedProtocol = value;
+            return this;
+        }
+
+        public Builder useLz4Compression(final boolean value) {
+            datastoreContext.useLz4Compression = value;
             return this;
         }
 
