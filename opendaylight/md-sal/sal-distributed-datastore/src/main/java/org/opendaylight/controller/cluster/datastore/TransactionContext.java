@@ -12,7 +12,8 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
-import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
 
 /*
@@ -24,9 +25,13 @@ interface TransactionContext {
 
     Future<ActorSelection> readyTransaction(Boolean havePermit, Optional<SortedSet<String>> participatingShardNames);
 
-    void executeModification(AbstractModification modification, Boolean havePermit);
-
     <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise, Boolean havePermit);
+
+    void executeDelete(YangInstanceIdentifier path, Boolean havePermit);
+
+    void executeMerge(YangInstanceIdentifier path, NormalizedNode<?, ?> data, Boolean havePermit);
+
+    void executeWrite(YangInstanceIdentifier path, NormalizedNode<?, ?> data, Boolean havePermit);
 
     Future<Object> directCommit(Boolean havePermit);
 
