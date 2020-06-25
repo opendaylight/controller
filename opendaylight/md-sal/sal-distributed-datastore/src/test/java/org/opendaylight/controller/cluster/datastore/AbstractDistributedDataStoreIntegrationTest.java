@@ -911,7 +911,6 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     }
 
     @Test
-    @Ignore("Writes to root node are not split into shards")
     public void testSnapshotOnRootOverwrite() throws Exception {
         if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
             // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
@@ -931,10 +930,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
             IntegrationTestKit.verifyShardState(dataStore, "cars",
-                state -> assertEquals(0, state.getSnapshotIndex()));
+                state -> assertEquals(1, state.getSnapshotIndex()));
 
             // root has been written expect snapshot at index 0
-            verifySnapshot("member-1-shard-cars-testRootOverwrite", 0, 1);
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 1, 1);
 
             for (int i = 0; i < 10; i++) {
                 testKit.testWriteTransaction(dataStore, CarsModel.newCarPath("car " + i),
@@ -943,23 +942,24 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // fake snapshot causes the snapshotIndex to move
             IntegrationTestKit.verifyShardState(dataStore, "cars",
-                state -> assertEquals(9, state.getSnapshotIndex()));
+                state -> assertEquals(10, state.getSnapshotIndex()));
 
             // however the real snapshot still has not changed and was taken at index 0
-            verifySnapshot("member-1-shard-cars-testRootOverwrite", 0, 1);
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 1, 1);
 
             // root overwrite so expect a snapshot
             testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
 
             // this was a real snapshot so everything should be in it(1 + 10 + 1)
             IntegrationTestKit.verifyShardState(dataStore, "cars",
-                state -> assertEquals(11, state.getSnapshotIndex()));
+                state -> assertEquals(12, state.getSnapshotIndex()));
 
-            verifySnapshot("member-1-shard-cars-testRootOverwrite", 11, 1);
+            verifySnapshot("member-1-shard-cars-testRootOverwrite", 12, 1);
         }
     }
 
-    private void verifySnapshot(String persistenceId, long lastAppliedIndex, long lastAppliedTerm) {
+    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex,
+            final long lastAppliedTerm) {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
                 List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
                 assertEquals(1, snap.size());
