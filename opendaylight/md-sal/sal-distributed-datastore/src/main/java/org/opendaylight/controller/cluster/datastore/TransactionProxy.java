@@ -104,7 +104,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         requireNonNull(path, "path should not be null");
 
         LOG.trace("Tx {} read {}", getIdentifier(), path);
-        return path.isEmpty() ? readAllData() :  singleShardRead(shardNameFromIdentifier(path), path);
+        return path.isEmpty() ? readAllData() : singleShardRead(shardNameFromIdentifier(path), path);
     }
 
     private FluentFuture<Optional<NormalizedNode<?, ?>>> singleShardRead(
@@ -175,9 +175,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         if (state == TransactionState.OPEN) {
             state = newState;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
