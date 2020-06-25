@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
+import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 
 /**
@@ -56,8 +57,11 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     //actor name override used for metering. This does not change the "real" actor name
     private static final String ACTOR_NAME_FOR_METERING = "shard-snapshot";
 
-    private ShardSnapshotActor() {
+    private final InputOutputStreamFactory streamFactory;
+
+    private ShardSnapshotActor(final InputOutputStreamFactory streamFactory) {
         super(ACTOR_NAME_FOR_METERING);
+        this.streamFactory = requireNonNull(streamFactory);
     }
 
     @Override
@@ -72,7 +76,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     private void onSerializeSnapshot(final SerializeSnapshot request) {
         Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
         if (installSnapshotStream.isPresent()) {
-            try (ObjectOutputStream out = new ObjectOutputStream(installSnapshotStream.get())) {
+            try (ObjectOutputStream out = getOutputStream(installSnapshotStream.get())) {
                 request.getSnapshot().serialize(out);
             } catch (IOException e) {
                 // TODO - we should communicate the failure in the CaptureSnapshotReply.
@@ -82,6 +86,10 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
 
         request.getReplyTo().tell(new CaptureSnapshotReply(new ShardSnapshotState(request.getSnapshot()),
                 installSnapshotStream), ActorRef.noSender());
+    }
+
+    private ObjectOutputStream getOutputStream(final OutputStream outputStream) throws IOException {
+        return new ObjectOutputStream(streamFactory.wrapOutputStream(outputStream));
     }
 
     /**
@@ -98,7 +106,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
         snapshotActor.tell(new SerializeSnapshot(snapshot, installSnapshotStream, replyTo), ActorRef.noSender());
     }
 
-    public static Props props() {
-        return Props.create(ShardSnapshotActor.class);
+    public static Props props(final InputOutputStreamFactory streamFactory) {
+        return Props.create(ShardSnapshotActor.class, streamFactory);
     }
 }
