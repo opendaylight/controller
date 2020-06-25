@@ -138,26 +138,27 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public void delete(final YangInstanceIdentifier path) {
+        checkModificationState("delete", path);
+
         executeModification(new DeleteModification(path));
     }
 
     @Override
     public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        checkModificationState("merge", path);
+
         executeModification(new MergeModification(path, data));
     }
 
     @Override
     public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        checkModificationState("write", path);
+
         executeModification(new WriteModification(path, data));
     }
 
     private void executeModification(final AbstractModification modification) {
-        checkModificationState();
-
-        LOG.trace("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(),
-                modification.getPath());
-
-        TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
+        final TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
             protected void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
@@ -166,9 +167,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         });
     }
 
-    private void checkModificationState() {
+    private void checkModificationState(final String opName, final YangInstanceIdentifier path) {
         checkState(type != TransactionType.READ_ONLY, "Modification operation on read-only transaction is not allowed");
         checkState(state == TransactionState.OPEN, "Transaction is sealed - further modifications are not allowed");
+        LOG.trace("Tx {} {} {}", getIdentifier(), opName, path);
     }
 
     private boolean seal(final TransactionState newState) {
