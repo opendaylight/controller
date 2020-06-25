@@ -253,7 +253,7 @@ public class Shard extends RaftActor {
                 self(), getContext(), shardMBean, builder.getId().getShardName());
 
         snapshotCohort = ShardSnapshotCohort.create(getContext(), builder.getId().getMemberName(), store, LOG,
-            this.name);
+            this.name,datastoreContext);
 
         messageRetrySupport = new ShardTransactionMessageRetrySupport(this);
 
