@@ -13,9 +13,15 @@ import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4SafeDecompressor;
+import net.jpountz.xxhash.XXHash32;
+import net.jpountz.xxhash.XXHashFactory;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -34,7 +40,39 @@ import org.slf4j.Logger;
  *
  * @author Thomas Pantelis
  */
-final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
+abstract class ShardSnapshotCohort implements RaftActorSnapshotCohort {
+    private static final class Plain extends ShardSnapshotCohort {
+        Plain(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor, final ShardDataTree store,
+                final Logger log, final String logId) {
+            super(applyHistoryId, snapshotActor, store, log, logId);
+        }
+
+        @Override
+        InputStream createInputStream(final ByteSource snapshotBytes) throws IOException {
+            return snapshotBytes.openStream();
+        }
+    }
+
+    private static final class LZ4 extends ShardSnapshotCohort {
+        private static final XXHashFactory HASH_FACTORY = XXHashFactory.fastestInstance();
+        private static final LZ4Factory LZ4_FACTORY = LZ4Factory.fastestInstance();
+
+        private final LZ4SafeDecompressor lz4Decompressor;
+        private final XXHash32 hash32;
+
+        LZ4(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor, final ShardDataTree store,
+                final Logger log, final String logId) {
+            super(applyHistoryId, snapshotActor, store, log, logId);
+            lz4Decompressor = LZ4_FACTORY.safeDecompressor();
+            hash32 = HASH_FACTORY.hash32();
+        }
+
+        @Override
+        InputStream createInputStream(final ByteSource snapshotBytes) throws IOException {
+            return new LZ4FrameInputStream(snapshotBytes.openStream(), lz4Decompressor, hash32);
+        }
+    }
+
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
     private final ActorRef snapshotActor;
@@ -42,7 +80,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private final String logId;
     private final Logger log;
 
-    private ShardSnapshotCohort(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor,
+    ShardSnapshotCohort(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor,
             final ShardDataTree store, final Logger log, final String logId) {
         this.snapshotActor = requireNonNull(snapshotActor);
         this.store = requireNonNull(store);
@@ -51,16 +89,19 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
-            final ShardDataTree store, final Logger log, final String logId) {
+            final ShardDataTree store, final Logger log, final String logId, final DatastoreContext context) {
         final LocalHistoryIdentifier applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
         final String snapshotActorName = "shard-" + memberName.getName() + ':' + "snapshot-read";
+        boolean useLz4Compression = context.isUseLz4Compression();
 
         // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all
         // requests.
-        final ActorRef snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(), snapshotActorName);
+        final ActorRef snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(useLz4Compression),
+                snapshotActorName);
 
-        return new ShardSnapshotCohort(applyHistoryId, snapshotActor, store, log, logId);
+        return useLz4Compression ? new LZ4(applyHistoryId, snapshotActor, store, log, logId)
+                : new Plain(applyHistoryId, snapshotActor, store, log, logId);
     }
 
     @Override
@@ -99,8 +140,14 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     @Override
     public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
-        try (ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
+        try (ObjectInputStream in = getInputStream(snapshotBytes)) {
             return ShardDataTreeSnapshot.deserialize(in);
         }
     }
+
+    private ObjectInputStream getInputStream(final ByteSource snapshotBytes) throws IOException {
+        return new ObjectInputStream(createInputStream(snapshotBytes));
+    }
+
+    abstract InputStream createInputStream(ByteSource snapshotBytes) throws IOException;
 }
