@@ -9,9 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -40,7 +37,7 @@ abstract class TransactionModificationOperation extends TransactionOperation {
 
         @Override
         protected void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
-            transactionContext.executeModification(new DeleteModification(path()), havePermit);
+            transactionContext.executeDelete(path(), havePermit);
         }
     }
 
@@ -51,7 +48,7 @@ abstract class TransactionModificationOperation extends TransactionOperation {
 
         @Override
         protected void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
-            transactionContext.executeModification(new MergeModification(path(), data()), havePermit);
+            transactionContext.executeMerge(path(), data(), havePermit);
         }
     }
 
@@ -62,7 +59,7 @@ abstract class TransactionModificationOperation extends TransactionOperation {
 
         @Override
         protected void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
-            transactionContext.executeModification(new WriteModification(path(), data()), havePermit);
+            transactionContext.executeWrite(path(), data(), havePermit);
         }
     }
 

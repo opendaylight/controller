@@ -18,11 +18,12 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
-import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
 
 /**
@@ -48,12 +49,37 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     protected abstract DOMStoreReadTransaction getReadDelegate();
 
     @Override
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public void executeModification(final AbstractModification modification, final Boolean havePermit) {
+    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
         incrementModificationCount();
         if (operationError == null) {
             try {
-                modification.apply(getWriteDelegate());
+                getWriteDelegate().delete(path);
+            } catch (Exception e) {
+                operationError = e;
+            }
+        }
+    }
+
+    @Override
+    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final Boolean havePermit) {
+        incrementModificationCount();
+        if (operationError == null) {
+            try {
+                getWriteDelegate().merge(path, data);
+            } catch (Exception e) {
+                operationError = e;
+            }
+        }
+    }
+
+    @Override
+    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final Boolean havePermit) {
+        incrementModificationCount();
+        if (operationError == null) {
+            try {
+                getWriteDelegate().write(path, data);
             } catch (Exception e) {
                 operationError = e;
             }
