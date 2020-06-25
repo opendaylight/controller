@@ -22,9 +22,14 @@ import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -179,7 +184,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
 
             sent = actorUtils.executeOperationAsync(getActor(), toSend.toSerializable(),
                 actorUtils.getTransactionCommitOperationTimeout());
-            sent.onComplete(new OnComplete<Object>() {
+            sent.onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final Object success) {
                     if (failure != null) {
@@ -197,10 +202,26 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeModification(final AbstractModification modification, final Boolean havePermit) {
-        LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(),
-                modification.getClass().getSimpleName(), modification.getPath());
+    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+        LOG.debug("Tx {} executeDelete called path = {}", getIdentifier(), path);
+        executeModification(new DeleteModification(path), havePermit);
+    }
 
+    @Override
+    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final Boolean havePermit) {
+        LOG.debug("Tx {} executeMerge {} called path = {}", getIdentifier(), path);
+        executeModification(new MergeModification(path, data), havePermit);
+    }
+
+    @Override
+    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final Boolean havePermit) {
+        LOG.debug("Tx {} executeWrite called path = {}", getIdentifier(), path);
+        executeModification(new WriteModification(path, data), havePermit);
+    }
+
+    private void executeModification(final AbstractModification modification, final Boolean havePermit) {
         final boolean permitToRelease;
         if (havePermit == null) {
             permitToRelease = failedModification == null && acquireOperation();
@@ -233,7 +254,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         final boolean permitToRelease = havePermit == null ? acquireOperation() : havePermit.booleanValue();
         sendBatchedModifications();
 
-        OnComplete<Object> onComplete = new OnComplete<Object>() {
+        OnComplete<Object> onComplete = new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 // We have previously acquired an operation, now release it, no matter what happened

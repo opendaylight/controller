@@ -14,9 +14,10 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
-import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -50,12 +51,6 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeModification(final AbstractModification modification, final Boolean havePermit) {
-        LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(),
-                modification.getClass().getSimpleName(), modification.getPath());
-    }
-
-    @Override
     public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture,
             final Boolean havePermit) {
         LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(),
@@ -69,5 +64,22 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
         }
         proxyFuture.setException(new ReadFailedException("Error executeRead " + readCmd.getClass().getSimpleName()
                 + " for path " + readCmd.getPath(), t));
+    }
+
+    @Override
+    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+        LOG.debug("Tx {} executeDelete called path = {}", getIdentifier(), path);
+    }
+
+    @Override
+    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final Boolean havePermit) {
+        LOG.debug("Tx {} executeMerge {} called path = {}", getIdentifier(), path);
+    }
+
+    @Override
+    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final Boolean havePermit) {
+        LOG.debug("Tx {} executeWrite called path = {}", getIdentifier(), path);
     }
 }
