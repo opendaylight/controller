@@ -911,7 +911,6 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     }
 
     @Test
-    @Ignore("Writes to root node are not split into shards")
     public void testSnapshotOnRootOverwrite() throws Exception {
         if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
             // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
@@ -959,7 +958,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         }
     }
 
-    private void verifySnapshot(String persistenceId, long lastAppliedIndex, long lastAppliedTerm) {
+    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex,
+            final long lastAppliedTerm) {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
                 List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
                 assertEquals(1, snap.size());

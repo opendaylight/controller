@@ -227,7 +227,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards,
-            DatastoreContext.Builder leaderBuilder, DatastoreContext.Builder followerBuilder) throws Exception {
+            final DatastoreContext.Builder leaderBuilder, final DatastoreContext.Builder followerBuilder) throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderBuilder, commitTimeout);
 
         leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(
@@ -1443,7 +1443,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     @Test
-    @Ignore("Writes to root node are not split into shards")
     public void testSnapshotOnRootOverwrite() throws Exception {
         if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
             // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
@@ -1501,7 +1500,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 11);
     }
 
-    private void verifySnapshot(String persistenceId, long lastAppliedIndex) {
+    private void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
                 List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
                 assertEquals(1, snap.size());
