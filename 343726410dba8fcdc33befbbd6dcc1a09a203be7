@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e02d3dd6_1b0ead40",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:37:58Z",
+      "side": 1,
+      "message": "these are LZ4-specific state, hence this should live in a separate class, which is not even loaded if LZ4 is not requested.",
+      "range": {
+        "startLine": 79,
+        "startChar": 4,
+        "endLine": 82,
+        "endChar": 28
+      },
+      "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "647f0c30_04c123bc",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:37:58Z",
+      "side": 1,
+      "message": "and this is an example of functionality that is exposed by above-mentioned class. Hence we have:\n- AbstractOutputStreamSupport, which specifies the interface\n- PlainOutputStreamSupport, which is used in case of !LZ4\n- LZ4OutputStreamSupport, which is used in case of LZ4",
+      "range": {
+        "startLine": 174,
+        "startChar": 30,
+        "endLine": 174,
+        "endChar": 44
+      },
+      "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e07af5c_b7a85175",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:37:58Z",
+      "side": 1,
+      "message": "under what circumstances can this fail and the normal thing succeed?",
+      "range": {
+        "startLine": 185,
+        "startChar": 11,
+        "endLine": 185,
+        "endChar": 114
+      },
+      "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3578689a_d3a8597d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:37:58Z",
+      "side": 1,
+      "message": "this looks like it should be configurable",
+      "range": {
+        "startLine": 245,
+        "startChar": 40,
+        "endLine": 245,
+        "endChar": 61
+      },
+      "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
