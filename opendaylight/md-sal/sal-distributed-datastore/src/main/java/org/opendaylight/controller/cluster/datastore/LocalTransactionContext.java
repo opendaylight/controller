@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
@@ -48,13 +49,12 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
 
     protected abstract DOMStoreReadTransaction getReadDelegate();
 
-    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+    private void executeModification(Consumer<DOMStoreWriteTransaction> consumer) {
         incrementModificationCount();
         if (operationError == null) {
             try {
-                getWriteDelegate().delete(path);
+                consumer.accept(getWriteDelegate());
             } catch (Exception e) {
                 operationError = e;
             }
@@ -62,31 +62,20 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:IllegalCatch")
+    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+        executeModification(transaction -> transaction.delete(path));
+    }
+
+    @Override
     public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final Boolean havePermit) {
-        incrementModificationCount();
-        if (operationError == null) {
-            try {
-                getWriteDelegate().merge(path, data);
-            } catch (Exception e) {
-                operationError = e;
-            }
-        }
+        executeModification(transaction -> transaction.merge(path, data));
     }
 
     @Override
-    @SuppressWarnings("checkstyle:IllegalCatch")
     public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final Boolean havePermit) {
-        incrementModificationCount();
-        if (operationError == null) {
-            try {
-                getWriteDelegate().write(path, data);
-            } catch (Exception e) {
-                operationError = e;
-            }
-        }
+        executeModification(transaction -> transaction.write(path, data));
     }
 
     @Override
