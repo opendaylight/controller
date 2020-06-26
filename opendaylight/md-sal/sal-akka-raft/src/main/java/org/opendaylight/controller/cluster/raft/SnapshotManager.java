@@ -92,7 +92,7 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+    public boolean captureWithForcedTrim(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
         return currentState.captureWithForcedTrim(lastLogEntry, replicatedToAllIndex);
     }
 
@@ -216,7 +216,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        public boolean captureWithForcedTrim(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
             log.debug("captureWithForcedTrim should not be called in state {}", this);
             return false;
         }
@@ -291,7 +291,7 @@ public class SnapshotManager implements SnapshotState {
 
         @SuppressWarnings("checkstyle:IllegalCatch")
         private boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
-                final String targetFollower, boolean mandatoryTrim) {
+                final String targetFollower, final boolean mandatoryTrim) {
             captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim);
 
             OutputStream installSnapshotStream = null;
@@ -332,7 +332,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        public boolean captureWithForcedTrim(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
             return capture(lastLogEntry, replicatedToAllIndex, null, true);
         }
 
@@ -398,7 +398,7 @@ public class SnapshotManager implements SnapshotState {
                                 context.getConfigParams().getSnapshotBatchCount(),
                                 captureSnapshot.getLastAppliedIndex());
                     } else {
-                        log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to"
+                        log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to "
                                 + "last applied index {}", context.getId(), captureSnapshot.getLastAppliedIndex());
                     }
                 }
