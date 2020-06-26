@@ -69,7 +69,8 @@ public final class UnsignedLongRangeSet implements Mutable {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("span", rangeset.span())
+                .omitNullValues()
+                .add("span", rangeset.isEmpty() ? null : rangeset.span())
                 .add("rangeSize", rangeset.asRanges().size())
                 .toString();
     }
