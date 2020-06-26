@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc17c523_8928c3f6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "please log the entire exception, message may be empty or not tell you much",
+      "range": {
+        "startLine": 107,
+        "startChar": 44,
+        "endLine": 107,
+        "endChar": 64
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a4f76fd_ad3c74b5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "missing space (also elsewhere, please fix your editor)",
+      "range": {
+        "startLine": 119,
+        "startChar": 40,
+        "endLine": 119,
+        "endChar": 41
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f696f459_fbf2bc43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "flush after each node? why?",
+      "range": {
+        "startLine": 121,
+        "startChar": 20,
+        "endLine": 121,
+        "endChar": 37
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "519f0178_12eaba0a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "use checkstate() instead of if above",
+      "range": {
+        "startLine": 124,
+        "startChar": 16,
+        "endLine": 124,
+        "endChar": 47
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed744864_2ae20fb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "use StandardCharsets.UTF_8 instead, we are way past Java 7",
+      "range": {
+        "startLine": 221,
+        "startChar": 68,
+        "endLine": 221,
+        "endChar": 75
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72178b70_4fcaa83f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "Please use java.nio.file.Files instead, as they provide consistent errorhandling and behaviour specs",
+      "range": {
+        "startLine": 226,
+        "startChar": 8,
+        "endLine": 226,
+        "endChar": 30
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10f1f411_8394eb03",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "superfluous space",
+      "range": {
+        "startLine": 228,
+        "startChar": 14,
+        "endLine": 228,
+        "endChar": 16
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0a689ce_338e5376",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "three copies of the same code -- how about taking an argument to a static method?",
+      "range": {
+        "startLine": 245,
+        "startChar": 0,
+        "endLine": 253,
+        "endChar": 5
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8729dac9_0596ee48",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "explicit toString ?",
+      "range": {
+        "startLine": 280,
+        "startChar": 69,
+        "endLine": 280,
+        "endChar": 79
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d376f88_36521e44",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-26T19:29:37Z",
+      "side": 1,
+      "message": "please expand this with details where the export will be located, also a warning about potential implications on system stability (the JSON export can be huge and take a long time), etc.",
+      "range": {
+        "startLine": 293,
+        "startChar": 78,
+        "endLine": 293,
+        "endChar": 88
+      },
+      "revId": "8a0e0f1a35f46fe2f983188e8ffbcaf2335f50c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
