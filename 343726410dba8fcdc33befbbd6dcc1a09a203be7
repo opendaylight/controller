@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "5904b1cf_5f97fead",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-06-29T12:44:29Z",
+      "side": 1,
+      "message": "In case we are trying to load a snapshot that is not compressed with lz4",
+      "parentUuid": "1e07af5c_b7a85175",
+      "range": {
+        "startLine": 185,
+        "startChar": 11,
+        "endLine": 185,
+        "endChar": 114
+      },
+      "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3578689a_d3a8597d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
         "patchSetId": 18
