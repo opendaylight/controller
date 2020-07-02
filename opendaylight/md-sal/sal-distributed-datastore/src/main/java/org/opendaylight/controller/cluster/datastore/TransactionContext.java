@@ -36,7 +36,7 @@ interface TransactionContext {
     Future<Object> directCommit(Boolean havePermit);
 
     /**
-     * Invoked by {@link TransactionContextWrapper} when it has finished handing
+     * Invoked by {@link AbstractTransactionContextWrapper} when it has finished handing
      * off operations to this context. From this point on, the context is responsible
      * for throttling operations.
      *
