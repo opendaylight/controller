@@ -35,7 +35,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <p/>
  * The end result from a completed CreateTransaction message is a TransactionContext that is
  * used to perform transaction operations. Transaction operations that occur before the
- * CreateTransaction completes are cache via a TransactionContextWrapper and executed once the
+ * CreateTransaction completes are cached via a DelayedTransactionContextWrapper and executed once the
  * CreateTransaction completes, successfully or not.
  */
 final class RemoteTransactionContextSupport {
@@ -59,9 +59,9 @@ final class RemoteTransactionContextSupport {
 
     private final Timeout createTxMessageTimeout;
 
-    private final TransactionContextWrapper transactionContextWrapper;
+    private final DelayedTransactionContextWrapper transactionContextWrapper;
 
-    RemoteTransactionContextSupport(final TransactionContextWrapper transactionContextWrapper,
+    RemoteTransactionContextSupport(final DelayedTransactionContextWrapper transactionContextWrapper,
             final TransactionProxy parent, final String shardName) {
         this.parent = requireNonNull(parent);
         this.shardName = shardName;
@@ -231,7 +231,6 @@ final class RemoteTransactionContextSupport {
 
             localTransactionContext = new NoOpTransactionContext(exception, getIdentifier());
         }
-
         transactionContextWrapper.executePriorTransactionOperations(localTransactionContext);
     }
 
