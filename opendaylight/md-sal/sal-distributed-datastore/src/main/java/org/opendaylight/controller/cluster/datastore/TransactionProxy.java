@@ -69,7 +69,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
     private static final DeleteOperation ROOT_DELETE_OPERATION = new DeleteOperation(YangInstanceIdentifier.empty());
 
-    private final Map<String, TransactionContextWrapper> txContextWrappers = new TreeMap<>();
+    private final Map<String, AbstractTransactionContextWrapper> txContextWrappers = new TreeMap<>();
     private final AbstractTransactionContextFactory<?> txContextFactory;
     private final TransactionType type;
     private TransactionState state = TransactionState.OPEN;
@@ -95,7 +95,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         LOG.trace("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
 
         final SettableFuture<T> proxyFuture = SettableFuture.create();
-        TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
+        AbstractTransactionContextWrapper contextWrapper = getContextWrapper(shardName);
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
             public void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
@@ -253,7 +253,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             return;
         }
 
-        for (TransactionContextWrapper contextWrapper : txContextWrappers.values()) {
+        for (AbstractTransactionContextWrapper contextWrapper : txContextWrappers.values()) {
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
                 public void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
@@ -281,7 +281,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 ret = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
                 break;
             case 1:
-                final Entry<String, TransactionContextWrapper> e = Iterables.getOnlyElement(
+                final Entry<String, AbstractTransactionContextWrapper> e = Iterables.getOnlyElement(
                         txContextWrappers.entrySet());
                 ret = createSingleCommitCohort(e.getKey(), e.getValue());
                 break;
@@ -297,7 +297,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private AbstractThreePhaseCommitCohort<?> createSingleCommitCohort(final String shardName,
-            final TransactionContextWrapper contextWrapper) {
+            final AbstractTransactionContextWrapper contextWrapper) {
 
         LOG.debug("Tx {} Readying transaction for shard {}", getIdentifier(), shardName);
 
@@ -338,10 +338,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
         final List<ThreePhaseCommitCohortProxy.CohortInfo> cohorts = new ArrayList<>(txContextWrappers.size());
         final Optional<SortedSet<String>> shardNames = Optional.of(new TreeSet<>(txContextWrappers.keySet()));
-        for (Entry<String, TransactionContextWrapper> e : txContextWrappers.entrySet()) {
+        for (Entry<String, AbstractTransactionContextWrapper> e : txContextWrappers.entrySet()) {
             LOG.debug("Tx {} Readying transaction for shard {}", getIdentifier(), e.getKey());
 
-            final TransactionContextWrapper wrapper = e.getValue();
+            final AbstractTransactionContextWrapper wrapper = e.getValue();
 
             // The remote tx version is obtained the via TransactionContext which may not be available yet so
             // we pass a Supplier to dynamically obtain it. Once the ready Future is resolved the
@@ -361,17 +361,17 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return getActorUtils().getShardStrategyFactory().getStrategy(path).findShard(path);
     }
 
-    private TransactionContextWrapper getContextWrapper(final YangInstanceIdentifier path) {
+    private AbstractTransactionContextWrapper getContextWrapper(final YangInstanceIdentifier path) {
         return getContextWrapper(shardNameFromIdentifier(path));
     }
 
-    private TransactionContextWrapper getContextWrapper(final String shardName) {
-        final TransactionContextWrapper existing = txContextWrappers.get(shardName);
+    private AbstractTransactionContextWrapper getContextWrapper(final String shardName) {
+        final AbstractTransactionContextWrapper existing = txContextWrappers.get(shardName);
         if (existing != null) {
             return existing;
         }
 
-        final TransactionContextWrapper fresh = txContextFactory.newTransactionContextWrapper(this, shardName);
+        final AbstractTransactionContextWrapper fresh = txContextFactory.newTransactionContextWrapper(this, shardName);
         txContextWrappers.put(shardName, fresh);
         return fresh;
     }
