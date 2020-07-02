@@ -59,9 +59,9 @@ final class RemoteTransactionContextSupport {
 
     private final Timeout createTxMessageTimeout;
 
-    private final TransactionContextWrapper transactionContextWrapper;
+    private final DelayedTransactionContextWrapper transactionContextWrapper;
 
-    RemoteTransactionContextSupport(final TransactionContextWrapper transactionContextWrapper,
+    RemoteTransactionContextSupport(final DelayedTransactionContextWrapper transactionContextWrapper,
             final TransactionProxy parent, final String shardName) {
         this.parent = requireNonNull(parent);
         this.shardName = shardName;
