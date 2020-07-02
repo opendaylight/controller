@@ -59,9 +59,9 @@ final class RemoteTransactionContextSupport {
 
     private final Timeout createTxMessageTimeout;
 
-    private final TransactionContextWrapper transactionContextWrapper;
+    private final DelayedTransactionContextWrapper transactionContextWrapper;
 
-    RemoteTransactionContextSupport(final TransactionContextWrapper transactionContextWrapper,
+    RemoteTransactionContextSupport(final DelayedTransactionContextWrapper transactionContextWrapper,
             final TransactionProxy parent, final String shardName) {
         this.parent = requireNonNull(parent);
         this.shardName = shardName;
@@ -112,7 +112,8 @@ final class RemoteTransactionContextSupport {
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
             transactionContextWrapper.executePriorTransactionOperations(createValidTransactionContext(
-                    primaryShard, String.valueOf(primaryShard.path()), newPrimaryShardInfo.getPrimaryShardVersion()));
+                            primaryShard, String.valueOf(primaryShard.path()),
+                            newPrimaryShardInfo.getPrimaryShardVersion()));
         } else {
             tryCreateTransaction();
         }
@@ -231,7 +232,6 @@ final class RemoteTransactionContextSupport {
 
             localTransactionContext = new NoOpTransactionContext(exception, getIdentifier());
         }
-
         transactionContextWrapper.executePriorTransactionOperations(localTransactionContext);
     }
 
