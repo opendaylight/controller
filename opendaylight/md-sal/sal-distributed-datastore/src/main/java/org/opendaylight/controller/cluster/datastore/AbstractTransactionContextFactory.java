@@ -80,20 +80,28 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         return null;
     }
 
-    private void onFindPrimaryShardSuccess(PrimaryShardInfo primaryShardInfo, TransactionProxy parent,
-            String shardName, TransactionContextWrapper transactionContextWrapper) {
+    private void onFindPrimaryShardSuccess(final PrimaryShardInfo primaryShardInfo, final TransactionProxy parent,
+            final String shardName, final TransactionContextWrapper transactionContextWrapper,
+            final TransactionContext existingContext) {
         LOG.debug("Tx {}: Found primary {} for shard {}", parent.getIdentifier(),
                 primaryShardInfo.getPrimaryShardActor(), shardName);
 
         updateShardInfo(shardName, primaryShardInfo);
 
+        final TransactionContext localContext = existingContext != null
+                ? existingContext
+                : maybeCreateLocalTransactionContext(parent, shardName);
         try {
-            TransactionContext localContext = maybeCreateLocalTransactionContext(parent, shardName);
             if (localContext != null) {
-                transactionContextWrapper.executePriorTransactionOperations(localContext);
+                if (transactionContextWrapper instanceof DelayedTransactionContextWrapper) {
+                    ((DelayedTransactionContextWrapper)transactionContextWrapper)
+                            .executePriorTransactionOperations(localContext);
+                } else if (transactionContextWrapper instanceof DirectTransactionContextWrapper) {
+                    ((DirectTransactionContextWrapper) transactionContextWrapper).setTransactionContext(localContext);
+                }
             } else {
-                RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(transactionContextWrapper,
-                        parent, shardName);
+                RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(
+                        (DelayedTransactionContextWrapper) transactionContextWrapper, parent, shardName);
                 remote.setPrimaryShard(primaryShardInfo);
             }
         } finally {
@@ -101,13 +109,20 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         }
     }
 
-    private void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
-            String shardName, TransactionContextWrapper transactionContextWrapper) {
+    private void onFindPrimaryShardFailure(final Throwable failure, final TransactionProxy parent,
+            final String shardName, final TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 
         try {
-            transactionContextWrapper.executePriorTransactionOperations(new NoOpTransactionContext(failure,
-                    parent.getIdentifier()));
+            if (transactionContextWrapper instanceof DelayedTransactionContextWrapper) {
+                ((DelayedTransactionContextWrapper) transactionContextWrapper)
+                        .executePriorTransactionOperations(new NoOpTransactionContext(failure,
+                                parent.getIdentifier()));
+            }
+            if (transactionContextWrapper instanceof DirectTransactionContextWrapper) {
+                ((DirectTransactionContextWrapper) transactionContextWrapper).setTransactionContext(
+                        new NoOpTransactionContext(failure, parent.getIdentifier()));
+            }
         } finally {
             onTransactionContextCreated(parent.getIdentifier());
         }
@@ -115,31 +130,42 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
 
     final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent,
             final String shardName) {
-        final TransactionContextWrapper transactionContextWrapper =
-                new TransactionContextWrapper(parent.getIdentifier(), actorUtils, shardName);
-
         Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier());
+
+        TransactionContextWrapper contextWrapper = null;
+        final TransactionContext localContext = maybeCreateLocalTransactionContext(parent, shardName);
+
         if (findPrimaryFuture.isCompleted()) {
-            Try<PrimaryShardInfo> maybe = findPrimaryFuture.value().get();
-            if (maybe.isSuccess()) {
-                onFindPrimaryShardSuccess(maybe.get(), parent, shardName, transactionContextWrapper);
+            updateShardInfo(shardName, findPrimaryFuture.value().get().get());
+            if (localContext instanceof LocalTransactionContext) {
+                contextWrapper = new DirectTransactionContextWrapper(parent.getIdentifier(), actorUtils, shardName);
             } else {
-                onFindPrimaryShardFailure(maybe.failed().get(), parent, shardName, transactionContextWrapper);
+                contextWrapper = new DelayedTransactionContextWrapper(parent.getIdentifier(), actorUtils, shardName);
+            }
+
+            final Try<PrimaryShardInfo> maybe = findPrimaryFuture.value().get();
+            if (maybe.isSuccess()) {
+                onFindPrimaryShardSuccess(maybe.get(), parent, shardName, contextWrapper, localContext);
+            } else {
+                onFindPrimaryShardFailure(maybe.failed().get(), parent, shardName, contextWrapper);
             }
         } else {
+            final TransactionContextWrapper finalContextWrapper = contextWrapper;
+            final TransactionContext finalLocalContext = localContext;
             findPrimaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
                 @Override
                 public void onComplete(final Throwable failure, final PrimaryShardInfo primaryShardInfo) {
                     if (failure == null) {
-                        onFindPrimaryShardSuccess(primaryShardInfo, parent, shardName, transactionContextWrapper);
+                        onFindPrimaryShardSuccess(primaryShardInfo, parent, shardName,
+                                finalContextWrapper, finalLocalContext);
                     } else {
-                        onFindPrimaryShardFailure(failure, parent, shardName, transactionContextWrapper);
+                        onFindPrimaryShardFailure(failure, parent, shardName, finalContextWrapper);
                     }
                 }
             }, actorUtils.getClientDispatcher());
         }
 
-        return transactionContextWrapper;
+        return contextWrapper;
     }
 
     private void updateShardInfo(final String shardName, final PrimaryShardInfo primaryShardInfo) {
