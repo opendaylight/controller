@@ -19,20 +19,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class TransactionContextWrapperTest {
+public class DelayedTransactionContextWrapperTest {
     @Mock
     private ActorUtils actorUtils;
 
     @Mock
     private TransactionContext transactionContext;
 
-    private TransactionContextWrapper transactionContextWrapper;
+    private DelayedTransactionContextWrapper transactionContextWrapper;
 
     @Before
     public void setUp() {
         doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
-        transactionContextWrapper = new TransactionContextWrapper(MockIdentifiers.transactionIdentifier(
-            TransactionContextWrapperTest.class, "mock"), actorUtils, "mock");
+        transactionContextWrapper = new DelayedTransactionContextWrapper(MockIdentifiers.transactionIdentifier(
+            DelayedTransactionContextWrapperTest.class, "mock"), actorUtils, "mock");
     }
 
     @Test
