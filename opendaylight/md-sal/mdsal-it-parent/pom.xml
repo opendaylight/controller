@@ -113,7 +113,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <plugins>
       <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
+              <!-- Overridden to have TCP channel support -->
+          <version>3.0.0-M5</version>
           <configuration>
+              <!-- Overridden to fix corruption, where the process would hang after test -->
+              <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
               <systemPropertyVariables>
                 <!-- CONTROLLER-1799: Use the same repository for Pax Exam as is used for Maven -->
                 <org.ops4j.pax.url.mvn.localRepository>${settings.localRepository}</org.ops4j.pax.url.mvn.localRepository>
