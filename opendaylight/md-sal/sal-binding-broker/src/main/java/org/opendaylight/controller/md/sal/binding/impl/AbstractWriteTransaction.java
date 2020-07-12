@@ -36,8 +36,9 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     public final <U extends DataObject> void put(final LogicalDatastoreType store,
             final InstanceIdentifier<U> path, final U data, final boolean createParents) {
         checkArgument(!path.isWildcarded(), "Cannot put data into wildcarded path %s", path);
-
+        long start = System.currentTimeMillis();
         final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized = getCodec().toNormalizedNode(path, data);
+        System.out.println(System.currentTimeMillis() - start);
         if (createParents) {
             ensureParentsByMerge(store, normalized.getKey(), path);
         } else {

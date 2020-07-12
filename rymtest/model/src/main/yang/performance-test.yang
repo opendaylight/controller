@@ -1,0 +1,184 @@
+module opendaylight-rymtest-performance-test {
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:rymtest";
+    prefix perf-test;
+
+
+    description
+        "performance-test";
+
+    revision 2020-07-01 {
+        description
+        "Test model for testing data broker with nested lists.";
+    }
+
+    grouping two-level-list {
+        list top-level-list {
+            description
+                "Top Level List";
+            key "name";
+            leaf name {
+                type string;
+            }
+            list nested-list {
+                key "name";
+                leaf name {
+                    type string;
+                }
+                leaf type {
+                    type string;
+//                    mandatory true;
+//                    description
+//                        "Mandatory type of list.";
+                }
+                ordered-by user;
+                description
+                    "A list of service functions that compose the service chain";
+            }
+        }
+    }
+
+    grouping one-hundred-leafs {
+        leaf test1 {type string;}
+        leaf test2 {type string;}
+        leaf test3 {type string;}
+        leaf test4 {type string;}
+        leaf test5 {type string;}
+        leaf test6 {type string;}
+        leaf test7 {type string;}
+        leaf test8 {type string;}
+        leaf test9 {type string;}
+        leaf test10 {type string;}
+        leaf test11 {type string;}
+        leaf test12 {type string;}
+        leaf test13 {type string;}
+        leaf test14 {type string;}
+        leaf test15 {type string;}
+        leaf test16 {type string;}
+        leaf test17 {type string;}
+        leaf test18 {type string;}
+        leaf test19 {type string;}
+        leaf test20 {type string;}
+        leaf test21 {type string;}
+        leaf test22 {type string;}
+        leaf test23 {type string;}
+        leaf test24 {type string;}
+        leaf test25 {type string;}
+        leaf test26 {type string;}
+        leaf test27 {type string;}
+        leaf test28 {type string;}
+        leaf test29 {type string;}
+        leaf test30 {type string;}
+        leaf test31 {type string;}
+        leaf test32 {type string;}
+        leaf test33 {type string;}
+        leaf test34 {type string;}
+        leaf test35 {type string;}
+        leaf test36 {type string;}
+        leaf test37 {type string;}
+        leaf test38 {type string;}
+        leaf test39 {type string;}
+        leaf test40 {type string;}
+        leaf test41 {type string;}
+        leaf test42 {type string;}
+        leaf test43 {type string;}
+        leaf test44 {type string;}
+        leaf test45 {type string;}
+        leaf test46 {type string;}
+        leaf test47 {type string;}
+        leaf test48 {type string;}
+        leaf test49 {type string;}
+        leaf test50 {type string;}
+        leaf test51 {type string;}
+        leaf test52 {type string;}
+        leaf test53 {type string;}
+        leaf test54 {type string;}
+        leaf test55 {type string;}
+        leaf test56 {type string;}
+        leaf test57 {type string;}
+        leaf test58 {type string;}
+        leaf test59 {type string;}
+        leaf test60 {type string;}
+        leaf test61 {type string;}
+        leaf test62 {type string;}
+        leaf test63 {type string;}
+        leaf test64 {type string;}
+        leaf test65 {type string;}
+        leaf test66 {type string;}
+        leaf test67 {type string;}
+        leaf test68 {type string;}
+        leaf test69 {type string;}
+        leaf test70 {type string;}
+        leaf test71 {type string;}
+        leaf test72 {type string;}
+        leaf test73 {type string;}
+        leaf test74 {type string;}
+        leaf test75 {type string;}
+        leaf test76 {type string;}
+        leaf test77 {type string;}
+        leaf test78 {type string;}
+        leaf test79 {type string;}
+        leaf test80 {type string;}
+        leaf test81 {type string;}
+        leaf test82 {type string;}
+        leaf test83 {type string;}
+        leaf test84 {type string;}
+        leaf test85 {type string;}
+        leaf test86 {type string;}
+        leaf test87 {type string;}
+        leaf test88 {type string;}
+        leaf test89 {type string;}
+        leaf test90 {type string;}
+        leaf test91 {type string;}
+        leaf test92 {type string;}
+        leaf test93 {type string;}
+        leaf test94 {type string;}
+        leaf test95 {type string;}
+        leaf test96 {type string;}
+        leaf test97 {type string;}
+        leaf test98 {type string;}
+        leaf test99 {type string;}
+        leaf test100 {type string;}
+    }
+
+    list level1 {
+        key "test1 test2";
+        uses one-hundred-leafs;
+        list level2 {
+            key "test2";
+            uses one-hundred-leafs;
+            list level3 {
+                key "test3";
+                uses one-hundred-leafs;
+                list level4 {
+                    key "test4";
+                    uses one-hundred-leafs;
+                    list level5 {
+                        key "test5";
+                        uses one-hundred-leafs;
+                    }
+                }
+            }
+        }
+    }
+
+    container top {
+        uses two-level-list;
+    }
+
+    notification two-level-list-changed {
+        uses two-level-list;
+    }
+
+    rpc put-top {
+        input {
+            uses two-level-list;
+        }
+    }
+
+    rpc get-top {
+        output {
+            uses two-level-list;
+        }
+    }
+}
