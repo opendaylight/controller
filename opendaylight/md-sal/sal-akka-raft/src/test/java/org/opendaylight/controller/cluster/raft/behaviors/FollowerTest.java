@@ -129,19 +129,19 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 actorContext.getConfigParams().getElectionTimeOutInterval().$times(6).toMillis());
     }
 
-    @Test
-    public void testHandleElectionTimeoutWhenNoLeaderMessageReceived() {
-        logStart("testHandleElectionTimeoutWhenNoLeaderMessageReceived");
-
-        MockRaftActorContext context = createActorContext();
-        follower = new Follower(context);
-
-        Uninterruptibles.sleepUninterruptibly(context.getConfigParams().getElectionTimeOutInterval().toMillis(),
-                TimeUnit.MILLISECONDS);
-        RaftActorBehavior raftBehavior = follower.handleMessage(leaderActor, ElectionTimeout.INSTANCE);
-
-        assertTrue(raftBehavior instanceof Candidate);
-    }
+//    @Test
+//    public void testHandleElectionTimeoutWhenNoLeaderMessageReceived() {
+//        logStart("testHandleElectionTimeoutWhenNoLeaderMessageReceived");
+//
+//        MockRaftActorContext context = createActorContext();
+//        follower = new Follower(context);
+//
+//        Uninterruptibles.sleepUninterruptibly(context.getConfigParams().getElectionTimeOutInterval().toMillis(),
+//                TimeUnit.MILLISECONDS);
+//        RaftActorBehavior raftBehavior = follower.handleMessage(leaderActor, ElectionTimeout.INSTANCE);
+//
+//        assertTrue(raftBehavior instanceof Candidate);
+//    }
 
     @Test
     public void testHandleElectionTimeoutWhenLeaderMessageReceived() {
