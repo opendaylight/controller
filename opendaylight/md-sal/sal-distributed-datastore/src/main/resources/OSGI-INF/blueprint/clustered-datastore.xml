@@ -25,7 +25,8 @@
     <argument ref="blueprintBundleContext" />
   </bean>
 
-  <bean id="akkaReader" class="org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader"/>
+  <reference id="akkaReader" interface="org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader"/>
+
   <bean id="akkaConfig" class="org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory"
           factory-method="createAkkaConfig">
     <argument ref="akkaReader" />
