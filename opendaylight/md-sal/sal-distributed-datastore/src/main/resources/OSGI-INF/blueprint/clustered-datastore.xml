@@ -18,36 +18,9 @@
     <argument ref="bindingSerializer"/>
   </bean>
 
-  <!-- ActorSystemProvider -->
-
-  <bean id="bundleClassLoader" class="org.opendaylight.controller.cluster.akka.osgi.impl.BundleClassLoaderFactory"
-          factory-method="createClassLoader">
-    <argument ref="blueprintBundleContext" />
-  </bean>
-
-  <reference id="akkaReader" interface="org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader"/>
-
-  <bean id="akkaConfig" class="org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory"
-          factory-method="createAkkaConfig">
-    <argument ref="akkaReader" />
-  </bean>
-
-  <bean id="actorSystemProps" class="org.opendaylight.controller.cluster.akka.osgi.impl.QuarantinedMonitorActorPropsFactory"
-        factory-method="createProps">
-    <argument ref="blueprintBundleContext" />
-    <argument ref="akkaConfig"/>
-  </bean>
-
-  <bean id="actorSystemProvider" class="org.opendaylight.controller.cluster.akka.impl.ActorSystemProviderImpl"
-          destroy-method="close">
-    <argument ref="bundleClassLoader" />
-    <argument ref="actorSystemProps"/>
-    <argument ref="akkaConfig"/>
-  </bean>
-
-  <service ref="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
-
   <!-- Datastore properties -->
+  <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
+
   <cm:cm-properties id="datastoreProps" persistent-id="org.opendaylight.controller.cluster.datastore"/>
 
   <!-- Distributed Config Datastore -->
