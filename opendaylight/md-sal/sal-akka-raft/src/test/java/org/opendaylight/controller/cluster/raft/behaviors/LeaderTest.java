@@ -826,8 +826,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
         final byte[] bytes = new byte[]{1, 2, 3};
         installSnapshotStream.get().get().write(bytes);
-        actorContext.getSnapshotManager().persist(ByteState.of(bytes), installSnapshotStream.get(),
-                Runtime.getRuntime().totalMemory());
+        actorContext.getSnapshotManager().persist(ByteState.of(bytes), installSnapshotStream.get());
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.

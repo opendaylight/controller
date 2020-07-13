@@ -115,7 +115,7 @@ public class RaftActorSnapshotMessageSupportTest {
         Optional<OutputStream> optionalStream = Optional.of(mock(OutputStream.class));
         sendMessageToSupport(new CaptureSnapshotReply(state, optionalStream));
 
-        verify(mockSnapshotManager).persist(eq(state), eq(optionalStream), anyLong());
+        verify(mockSnapshotManager).persist(eq(state), eq(optionalStream));
     }
 
     @Test

@@ -67,9 +67,8 @@ public interface SnapshotState {
      * @param snapshotState the snapshot State
      * @param installSnapshotStream Optional OutputStream that is present if the snapshot is to also be installed
      *        on a follower.
-     * @param totalMemory the total memory threshold
      */
-    void persist(Snapshot.State snapshotState, Optional<OutputStream> installSnapshotStream, long totalMemory);
+    void persist(Snapshot.State snapshotState, Optional<OutputStream> installSnapshotStream);
 
     /**
      * Commit the snapshot by trimming the log.

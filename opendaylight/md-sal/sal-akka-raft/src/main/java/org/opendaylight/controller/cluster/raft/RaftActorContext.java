@@ -241,22 +241,6 @@ public interface RaftActorContext {
     boolean hasFollowers();
 
     /**
-     * Returns the total available memory for use in calculations. Normally this returns JVM's max memory but can be
-     * overridden for unit tests.
-     *
-     * @return the total memory.
-     */
-    long getTotalMemory();
-
-    /**
-     * Sets the retriever of the total memory metric.
-     *
-     * @param retriever a supplier of the total memory metric.
-     */
-    @VisibleForTesting
-    void setTotalMemoryRetriever(LongSupplier retriever);
-
-    /**
      * Returns the payload version to be used when replicating data.
      *
      * @return the payload version.

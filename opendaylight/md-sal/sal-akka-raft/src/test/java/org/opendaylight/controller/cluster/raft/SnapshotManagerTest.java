@@ -84,7 +84,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(false).when(mockRaftActorContext).hasFollowers();
         doReturn(mockConfigParams).when(mockRaftActorContext).getConfigParams();
         doReturn(10L).when(mockConfigParams).getSnapshotBatchCount();
-        doReturn(70).when(mockConfigParams).getSnapshotDataThresholdPercentage();
+        doReturn(500).when(mockConfigParams).getSnapshotDataThreshold();
         doReturn(mockReplicatedLog).when(mockRaftActorContext).getReplicatedLog();
         doReturn("123").when(mockRaftActorContext).getId();
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
@@ -263,7 +263,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(lastLogEntry, -1);
 
         ByteState snapshotState = ByteState.of(new byte[] {1,2,3,4,5,6,7,8,9,10});
-        snapshotManager.persist(snapshotState, Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(snapshotState, Optional.empty());
 
         ArgumentCaptor<Snapshot> snapshotArgumentCaptor = ArgumentCaptor.forClass(Snapshot.class);
         verify(mockDataPersistenceProvider).saveSnapshot(snapshotArgumentCaptor.capture());
@@ -295,7 +295,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), 9);
 
         ByteState snapshotState = ByteState.of(new byte[] {1,2,3,4,5,6,7,8,9,10});
-        snapshotManager.persist(snapshotState, Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(snapshotState, Optional.empty());
 
         ArgumentCaptor<Snapshot> snapshotArgumentCaptor = ArgumentCaptor.forClass(Snapshot.class);
         verify(mockDataPersistenceProvider).saveSnapshot(snapshotArgumentCaptor.capture());
@@ -321,7 +321,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -347,7 +347,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6,
                 new MockRaftActorContext.MockPayload()), replicatedToAllIndex);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), 2000000L);
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -378,7 +378,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         installSnapshotStream.get().write(snapshotState.getBytes());
 
-        snapshotManager.persist(snapshotState, installSnapshotStream, Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(snapshotState, installSnapshotStream);
 
         assertEquals(true, snapshotManager.isCapturing());
 
@@ -399,7 +399,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCallingPersistWithoutCaptureWillDoNothing() {
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         verify(mockDataPersistenceProvider, never()).saveSnapshot(any(Snapshot.class));
 
@@ -415,9 +415,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -431,7 +431,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         assertEquals(true, snapshotManager.isCapturing());
 
@@ -488,7 +488,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         snapshotManager.commit(100L, 0);
 
@@ -506,7 +506,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         snapshotManager.rollback();
 
@@ -538,7 +538,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty(), Runtime.getRuntime().totalMemory());
+        snapshotManager.persist(ByteState.empty(), Optional.empty());
 
         snapshotManager.rollback();
 
