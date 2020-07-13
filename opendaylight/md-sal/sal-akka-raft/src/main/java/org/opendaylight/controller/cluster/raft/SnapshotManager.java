@@ -102,9 +102,8 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void persist(final Snapshot.State state, final Optional<OutputStream> installSnapshotStream,
-            final long totalMemory) {
-        currentState.persist(state, installSnapshotStream, totalMemory);
+    public void persist(final Snapshot.State state, final Optional<OutputStream> installSnapshotStream) {
+        currentState.persist(state, installSnapshotStream);
     }
 
     @Override
@@ -227,8 +226,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void persist(final Snapshot.State state, final Optional<OutputStream> installSnapshotStream,
-                final long totalMemory) {
+        public void persist(final Snapshot.State state, final Optional<OutputStream> installSnapshotStream) {
             log.debug("persist should not be called in state {}", this);
         }
 
@@ -363,8 +361,7 @@ public class SnapshotManager implements SnapshotState {
     private class Creating extends AbstractSnapshotState {
 
         @Override
-        public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
-                final long totalMemory) {
+        public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream) {
             // create a snapshot object from the state provided and save it
             // when snapshot is saved async, SaveSnapshotSuccess is raised.
 
@@ -379,7 +376,7 @@ public class SnapshotManager implements SnapshotState {
 
             log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
 
-            long dataThreshold = totalMemory * context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+            long dataThreshold = context.getConfigParams().getSnapshotDataThreshold() * 1024L * 1024L;
             boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
 
             boolean logSizeExceededSnapshotBatchCount =

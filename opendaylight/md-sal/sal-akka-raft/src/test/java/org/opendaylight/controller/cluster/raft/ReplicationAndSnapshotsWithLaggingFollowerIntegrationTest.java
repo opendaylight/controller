@@ -482,8 +482,6 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         sendInitialPayloadsReplicatedToAllFollowers("zero");
 
-        leaderActor.underlyingActor().setMockTotalMemory(1000);
-
         // We'll expect a ReplicatedLogImplEntry message and an ApplyJournalEntries message added to the journal.
         InMemoryJournal.addWriteMessagesCompleteLatch(leaderId, 2);
 
@@ -493,8 +491,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
                 TimeUnit.MILLISECONDS);
 
-        // Send a payload with a large relative size but not enough to trigger a snapshot.
-        MockPayload payload1 = sendPayloadData(leaderActor, "one", 500);
+        // Send a payload with a size not enough to trigger a snapshot.
+        MockPayload payload1 = sendPayloadData(leaderActor, "one", 500000);
 
         // Verify the leader got consensus and applies the first log entry even though follower 2 didn't respond.
         List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 1);
@@ -517,8 +515,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 TimeUnit.MILLISECONDS);
 
         // Send another payload with a large enough relative size in combination with the last payload
-        // that exceeds the memory threshold (70% * 1000 = 700) - this should do a snapshot.
-        MockPayload payload2 = sendPayloadData(leaderActor, "two", 201);
+        // that exceeds the memory threshold - this should do a snapshot.
+        MockPayload payload2 = sendPayloadData(leaderActor, "two", 700000);
 
         // Verify the leader applies the last log entry.
         applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
@@ -599,9 +597,6 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Verify follower 2's state.
         verifyFollowersTrimmedLog(2, follower2Actor, 3);
-
-        // Revert back to JVM total memory.
-        leaderActor.underlyingActor().setMockTotalMemory(0);
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);

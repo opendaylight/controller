@@ -153,8 +153,6 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
         doReturn(1L).when(mockBehavior).getReplicatedToAllIndex();
 
-        context.setTotalMemoryRetriever(() -> 100);
-
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
         int dataSize = 600;

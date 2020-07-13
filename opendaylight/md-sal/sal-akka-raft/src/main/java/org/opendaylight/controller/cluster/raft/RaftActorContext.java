@@ -12,12 +12,10 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.cluster.Cluster;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import java.util.function.LongSupplier;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -239,22 +237,6 @@ public interface RaftActorContext {
      * @return true if there are followers otherwise false.
      */
     boolean hasFollowers();
-
-    /**
-     * Returns the total available memory for use in calculations. Normally this returns JVM's max memory but can be
-     * overridden for unit tests.
-     *
-     * @return the total memory.
-     */
-    long getTotalMemory();
-
-    /**
-     * Sets the retriever of the total memory metric.
-     *
-     * @param retriever a supplier of the total memory metric.
-     */
-    @VisibleForTesting
-    void setTotalMemoryRetriever(LongSupplier retriever);
 
     /**
      * Returns the payload version to be used when replicating data.

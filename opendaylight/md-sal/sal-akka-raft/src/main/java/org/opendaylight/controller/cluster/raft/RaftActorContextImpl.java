@@ -70,9 +70,6 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private boolean dynamicServerConfiguration = false;
 
-    @VisibleForTesting
-    private LongSupplier totalMemoryRetriever = JVM_MEMORY_RETRIEVER;
-
     // Snapshot manager will need to be created on demand as it needs raft actor context which cannot
     // be passed to it in the constructor
     private SnapshotManager snapshotManager;
@@ -332,16 +329,6 @@ public class RaftActorContextImpl implements RaftActorContext {
             snapshotManager = new SnapshotManager(this, log);
         }
         return snapshotManager;
-    }
-
-    @Override
-    public long getTotalMemory() {
-        return totalMemoryRetriever.getAsLong();
-    }
-
-    @Override
-    public void setTotalMemoryRetriever(final LongSupplier retriever) {
-        totalMemoryRetriever = retriever == null ? JVM_MEMORY_RETRIEVER : retriever;
     }
 
     @Override

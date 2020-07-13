@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -115,7 +114,7 @@ public class RaftActorSnapshotMessageSupportTest {
         Optional<OutputStream> optionalStream = Optional.of(mock(OutputStream.class));
         sendMessageToSupport(new CaptureSnapshotReply(state, optionalStream));
 
-        verify(mockSnapshotManager).persist(eq(state), eq(optionalStream), anyLong());
+        verify(mockSnapshotManager).persist(eq(state), eq(optionalStream));
     }
 
     @Test

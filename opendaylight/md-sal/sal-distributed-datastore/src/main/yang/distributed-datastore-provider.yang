@@ -75,10 +75,10 @@ module distributed-datastore-provider {
             description "The minimum number of entries to be present in the in-memory journal log before a snapshot is to be taken.";
         }
 
-        leaf shard-snapshot-data-threshold-percentage {
-            default 12;
-            type percentage;
-            description "The percentage of Runtime.maxMemory() used by the in-memory journal log before a snapshot is to be taken";
+        leaf shard-snapshot-data-threshold {
+            default 500;
+            type non-zero-uint32-type;
+            description "The threshold of in-memory journal size before a snapshot is to be taken";
         }
 
 
