@@ -84,7 +84,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(false).when(mockRaftActorContext).hasFollowers();
         doReturn(mockConfigParams).when(mockRaftActorContext).getConfigParams();
         doReturn(10L).when(mockConfigParams).getSnapshotBatchCount();
-        doReturn(70).when(mockConfigParams).getSnapshotDataThresholdPercentage();
+        doReturn(500).when(mockConfigParams).getSnapshotDataThreshold();
         doReturn(mockReplicatedLog).when(mockRaftActorContext).getReplicatedLog();
         doReturn("123").when(mockRaftActorContext).getId();
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();

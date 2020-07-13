@@ -64,9 +64,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.$times(1000).toMillis();
     private FiniteDuration electionTimeOutInterval;
 
-    // 12 is just an arbitrary percentage. This is the amount of the total memory that a raft actor's
-    // in-memory journal can use before it needs to snapshot
-    private int snapshotDataThresholdPercentage = 12;
+    // max size of in-memory journal in MB
+    private int snapshotDataThreshold = 500;
 
     private int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
@@ -96,8 +95,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.recoverySnapshotIntervalSeconds = recoverySnapshotInterval;
     }
 
-    public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
-        this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
+    public void setSnapshotDataThreshold(final int snapshotDataThreshold) {
+        this.snapshotDataThreshold = snapshotDataThreshold;
     }
 
     public void setSnapshotChunkSize(final int snapshotChunkSize) {
@@ -144,8 +143,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     @Override
-    public int getSnapshotDataThresholdPercentage() {
-        return snapshotDataThresholdPercentage;
+    public int getSnapshotDataThreshold() {
+        return snapshotDataThreshold;
     }
 
     @Override
