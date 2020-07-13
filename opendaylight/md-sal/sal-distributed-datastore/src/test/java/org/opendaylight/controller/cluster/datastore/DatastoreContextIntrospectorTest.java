@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_MS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
-import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
@@ -63,7 +63,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("initial-settle-timeout-multiplier", "5");
         properties.put("recovery-snapshot-interval-seconds", "360");
         properties.put("shard-isolated-leader-check-interval-in-millis", "123");
-        properties.put("shard-snapshot-data-threshold-percentage", "100");
+        properties.put("shard-snapshot-data-threshold", "800");
         properties.put("shard-election-timeout-factor", "21");
         properties.put("shard-batched-modification-count", "901");
         properties.put("transactionCreationInitialRateLimit", "200");
@@ -90,7 +90,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(5, context.getInitialSettleTimeoutMultiplier());
         assertEquals(360, context.getShardRaftConfig().getRecoverySnapshotIntervalSeconds());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
-        assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
+        assertEquals(800, context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(21, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(901, context.getShardBatchedModificationCount());
         assertEquals(200, context.getTransactionCreationInitialRateLimit());
@@ -121,7 +121,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
         assertEquals(6, context.getInitialSettleTimeoutMultiplier());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
-        assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
+        assertEquals(800, context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(22, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(200, context.getTransactionCreationInitialRateLimit());
         assertTrue(context.isPersistent());
@@ -146,7 +146,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("operation-timeout-in-seconds", "4"); // bad - must be >= 5
         properties.put("shard-heartbeat-interval-in-millis", "99"); // bad - must be >= 100
         properties.put("shard-transaction-commit-queue-capacity", "567"); // good
-        properties.put("shard-snapshot-data-threshold-percentage", "101"); // bad - must be 0-100
+        properties.put("shard-snapshot-data-threshold", "-1"); // bad - must be > 0
         properties.put("shard-initialization-timeout-in-seconds", "-1"); // bad - must be > 0
         properties.put("max-shard-data-change-executor-pool-size", "bogus"); // bad - NaN
         properties.put("unknownProperty", "1"); // bad - invalid property name
@@ -163,8 +163,8 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS,
                 context.getShardRaftConfig().getHeartBeatInterval().length());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
-        assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,
-                context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
+        assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD,
+                context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT, context.getShardInitializationTimeout());
     }
 

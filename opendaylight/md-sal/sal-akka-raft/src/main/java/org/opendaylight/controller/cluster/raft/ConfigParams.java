@@ -34,11 +34,11 @@ public interface ConfigParams {
     long getSnapshotBatchCount();
 
     /**
-     * Returns the percentage of total memory used in the in-memory Raft log before a snapshot should be taken.
+     * Returns the max size of memory used in the in-memory Raft log before a snapshot should be taken.
      *
      * @return the percentage.
      */
-    int getSnapshotDataThresholdPercentage();
+    int getSnapshotDataThreshold();
 
 
     /**

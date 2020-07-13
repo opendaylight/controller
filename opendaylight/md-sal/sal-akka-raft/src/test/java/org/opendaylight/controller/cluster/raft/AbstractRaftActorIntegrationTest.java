@@ -267,7 +267,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(4);
         configParams.setSnapshotBatchCount(snapshotBatchCount);
-        configParams.setSnapshotDataThresholdPercentage(70);
+        configParams.setSnapshotDataThreshold(500);
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
         configParams.setSnapshotChunkSize(snapshotChunkSize);
         return configParams;
