@@ -379,7 +379,7 @@ public class SnapshotManager implements SnapshotState {
 
             log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
 
-            long dataThreshold = totalMemory * context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+            long dataThreshold = context.getConfigParams().getSnapshotDataThreshold() * 1024L * 1024L;
             boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
 
             boolean logSizeExceededSnapshotBatchCount =
