@@ -12,14 +12,9 @@
 
   <odl:static-reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
 
-  <reference id="bindingSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
-
-  <bean id="introspectorFactory" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorFactory">
-    <argument ref="bindingSerializer"/>
-  </bean>
-
   <!-- Datastore properties -->
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
+  <reference id="introspectorFactory" interface="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorFactory"/>
 
   <cm:cm-properties id="datastoreProps" persistent-id="org.opendaylight.controller.cluster.datastore"/>
 

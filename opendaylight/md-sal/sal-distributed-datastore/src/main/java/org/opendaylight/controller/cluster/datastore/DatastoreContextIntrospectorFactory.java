@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.annotations.VisibleForTesting;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 
 /**
@@ -18,22 +15,6 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
  *
  * @author Thomas Pantelis
  */
-public class DatastoreContextIntrospectorFactory {
-    private final BindingNormalizedNodeSerializer serializer;
-
-    public DatastoreContextIntrospectorFactory(final BindingNormalizedNodeSerializer serializer) {
-        this.serializer = requireNonNull(serializer);
-    }
-
-    public DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType) {
-        return newInstance(DatastoreContext.newBuilder()
-                .logicalStoreType(datastoreType)
-                .tempFileDirectory("./data")
-                .build());
-    }
-
-    @VisibleForTesting
-    DatastoreContextIntrospector newInstance(final DatastoreContext context) {
-        return new DatastoreContextIntrospector(context, serializer);
-    }
+public interface DatastoreContextIntrospectorFactory {
+    @NonNull DatastoreContextIntrospector newInstance(LogicalDatastoreType datastoreType);
 }
