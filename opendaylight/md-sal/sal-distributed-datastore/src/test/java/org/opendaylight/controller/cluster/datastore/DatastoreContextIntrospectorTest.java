@@ -32,8 +32,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
  * @author Thomas Pantelis
  */
 public class DatastoreContextIntrospectorTest {
-    static final DatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY = new DatastoreContextIntrospectorFactory(
-        new BindingCodecContext(BindingRuntimeHelpers.createRuntimeContext(DataStorePropertiesContainer.class)));
+    static final AbstractDatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY =
+            new DefaultDatastoreContextIntrospectorFactory(new BindingCodecContext(
+                BindingRuntimeHelpers.createRuntimeContext(DataStorePropertiesContainer.class)));
 
     @Test
     public void testYangDefaults() {
