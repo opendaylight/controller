@@ -35,15 +35,13 @@ import org.apache.commons.text.WordUtils;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
-import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStoreProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStorePropertiesContainer;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.common.Uint8;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,11 +213,9 @@ public class DatastoreContextIntrospector {
 
     public DatastoreContextIntrospector(final DatastoreContext context,
             final BindingNormalizedNodeSerializer bindingSerializer) {
-        final QName qname = BindingReflections.findQName(DataStorePropertiesContainer.class);
         final DataStorePropertiesContainer defaultPropsContainer = (DataStorePropertiesContainer)
-                bindingSerializer.fromNormalizedNode(bindingSerializer.toYangInstanceIdentifier(
-                        InstanceIdentifier.builder(DataStorePropertiesContainer.class).build()),
-                ImmutableNodes.containerNode(qname)).getValue();
+                bindingSerializer.fromNormalizedNode(YangInstanceIdentifier.of(DataStorePropertiesContainer.QNAME),
+                ImmutableNodes.containerNode(DataStorePropertiesContainer.QNAME)).getValue();
 
         final Builder builder = DatastoreContext.newBuilderFrom(context);
         for (Entry<String, Entry<Class<?>, Method>> entry: DATA_STORE_PROP_INFO.entrySet()) {
