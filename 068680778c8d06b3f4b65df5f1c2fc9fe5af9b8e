@@ -22,6 +22,30 @@
       "revId": "068680778c8d06b3f4b65df5f1c2fc9fe5af9b8e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b225224b_e31a2b32",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 8
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-07-20T21:11:23Z",
+      "side": 1,
+      "message": "Actually, straight-up removal like this is going to break upgrade scenarios, so I would prefer two separate knobs, the new one overriding the old one :)",
+      "parentUuid": "1d203855_bd0468fc",
+      "range": {
+        "startLine": 56,
+        "startChar": 31,
+        "endLine": 56,
+        "endChar": 34
+      },
+      "revId": "068680778c8d06b3f4b65df5f1c2fc9fe5af9b8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
