@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "befc4750_31ccf2e9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-07-20T10:13:47Z",
+      "side": 0,
+      "message": "Does it make sense to keep total memory in RaftActorContext still? Are there any users?",
+      "range": {
+        "startLine": 58,
+        "startChar": 35,
+        "endLine": 58,
+        "endChar": 59
+      },
+      "revId": "a4a1fa690251c8521dfcbb758fe9844f4df65fab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "330e9499_c83707d3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-07-20T10:13:47Z",
+      "side": 0,
+      "message": "cant we remove this parameter? Doesnt seem to me like it\u0027s used anymore.",
+      "range": {
+        "startLine": 382,
+        "startChar": 33,
+        "endLine": 382,
+        "endChar": 44
+      },
+      "revId": "a4a1fa690251c8521dfcbb758fe9844f4df65fab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4149f897_b7f73be8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ConfigParams.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-07-20T10:13:47Z",
+      "side": 1,
+      "message": "needs to be updated as well",
+      "range": {
+        "startLine": 39,
+        "startChar": 14,
+        "endLine": 39,
+        "endChar": 30
+      },
+      "revId": "c2b3bf5d176d6bc6b05959426bcdc2a6ebe572ee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa3ce998_248081c4",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-07-20T10:13:47Z",
+      "side": 1,
+      "message": "Mention that value of zero is not permitted.",
+      "range": {
+        "startLine": 55,
+        "startChar": 2,
+        "endLine": 55,
+        "endChar": 93
+      },
+      "revId": "c2b3bf5d176d6bc6b05959426bcdc2a6ebe572ee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
