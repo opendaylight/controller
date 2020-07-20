@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d203855_bd0468fc",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 8
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-07-20T21:10:22Z",
+      "side": 1,
+      "message": "actually, can we have both and support proper suffixes?, i.e.:\n12%\n500M\n3G\n1T",
+      "range": {
+        "startLine": 56,
+        "startChar": 31,
+        "endLine": 56,
+        "endChar": 34
+      },
+      "revId": "068680778c8d06b3f4b65df5f1c2fc9fe5af9b8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
