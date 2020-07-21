@@ -65,6 +65,11 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     }
 
     @Override
+    public int getShardSnapshotDataThreshold() {
+        return context.getShardRaftConfig().getSnapshotDataThreshold();
+    }
+
+    @Override
     public long getShardSnapshotBatchCount() {
         return context.getShardRaftConfig().getSnapshotBatchCount();
     }

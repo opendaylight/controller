@@ -12,14 +12,9 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
- * Configuration Parameter interface for configuring the Raft consensus system
- *
- * <p>
- * Any component using this implementation might want to provide an implementation of
- * this interface to configure
- *
- * <p>
- * A default implementation will be used if none is provided.
+ * Configuration Parameter interface for configuring the Raft consensus system. Any component using this implementation
+ * might want to provide an implementation of this interface to configure. A default implementation will be used if none
+ * is provided.
  *
  * @author Kamal Rameshan
  */
@@ -35,15 +30,23 @@ public interface ConfigParams {
 
     /**
      * Returns the percentage of total memory used in the in-memory Raft log before a snapshot should be taken.
+     * Disabled when direct threshold is enabled.
      *
      * @return the percentage.
      */
     int getSnapshotDataThresholdPercentage();
 
+    /**
+     * Returns the max size of memory used in the in-memory Raft log before a snapshot should be taken. 0 means that
+     * direct threshold is disabled and percentage is used instead.
+     *
+     * @return maximum journal size (in MiB).
+     */
+    int getSnapshotDataThreshold();
 
     /**
-     * Returns the interval(in seconds) after which a snapshot should be taken during recovery.
-     * Negative value means don't take snapshots.
+     * Returns the interval(in seconds) after which a snapshot should be taken during recovery. Negative value means
+     * do not take snapshots.
      *
      * @return the interval of recovery snapshot in seconds
      */
@@ -100,7 +103,6 @@ public interface ConfigParams {
      */
     long getIsolatedCheckIntervalInMillis();
 
-
     /**
      * Returns the multiplication factor to be used to determine the shard election timeout. The election timeout
      * is determined by multiplying the election timeout factor with the heart beat duration.
@@ -108,7 +110,6 @@ public interface ConfigParams {
      * @return the election timeout factor.
      */
     long getElectionTimeoutFactor();
-
 
     /**
      * Returns the RaftPolicy used to determine certain Raft behaviors.

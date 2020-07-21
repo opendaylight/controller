@@ -22,6 +22,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
@@ -61,6 +62,8 @@ public class DatastoreContextTest {
                 context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,
                 context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
+        assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD,
+                context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT, context.getTransactionCreationInitialRateLimit());
         assertEquals(DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT,
@@ -91,6 +94,7 @@ public class DatastoreContextTest {
         builder.persistent(!DEFAULT_PERSISTENT);
         builder.shardIsolatedLeaderCheckIntervalInMillis(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS + 1);
         builder.shardSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE + 1);
+        builder.shardSnapshotDataThreshold(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD + 1);
         builder.shardElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1);
         builder.transactionCreationInitialRateLimit(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT + 1);
         builder.shardBatchedModificationCount(DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT + 1);
@@ -145,6 +149,8 @@ public class DatastoreContextTest {
                 context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE + 1,
                 context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
+        assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD + 1,
+                context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1,
                 context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT + 1, context.getTransactionCreationInitialRateLimit());

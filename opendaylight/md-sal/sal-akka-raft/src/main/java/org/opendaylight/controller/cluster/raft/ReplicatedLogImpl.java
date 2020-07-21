@@ -54,10 +54,14 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     @Override
     public boolean shouldCaptureSnapshot(final long logIndex) {
         final ConfigParams config = context.getConfigParams();
-        final long journalSize = logIndex + 1;
-        final long dataThreshold = context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
+        if ((logIndex + 1) % config.getSnapshotBatchCount() == 0) {
+            return true;
+        }
 
-        return journalSize % config.getSnapshotBatchCount() == 0 || getDataSizeForSnapshotCheck() > dataThreshold;
+        final long absoluteThreshold = config.getSnapshotDataThreshold();
+        final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * ConfigParams.MEGABYTE
+                : context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
+        return getDataSizeForSnapshotCheck() > dataThreshold;
     }
 
     @Override

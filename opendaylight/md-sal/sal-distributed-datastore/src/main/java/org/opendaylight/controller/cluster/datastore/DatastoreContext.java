@@ -56,6 +56,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final boolean DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE = false;
     public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
+    public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD = 0;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
     public static final int DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR = 1;
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
@@ -113,6 +114,7 @@ public class DatastoreContext implements ClientActorConfig {
         setHeartbeatInterval(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS);
         setIsolatedLeaderCheckInterval(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS);
         setSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE);
+        setSnapshotDataThreshold(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD);
         setElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR);
         setCandidateElectionTimeoutDivisor(DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
@@ -153,6 +155,7 @@ public class DatastoreContext implements ClientActorConfig {
         setHeartbeatInterval(other.raftConfig.getHeartBeatInterval().toMillis());
         setIsolatedLeaderCheckInterval(other.raftConfig.getIsolatedCheckIntervalInMillis());
         setSnapshotDataThresholdPercentage(other.raftConfig.getSnapshotDataThresholdPercentage());
+        setSnapshotDataThreshold(other.raftConfig.getSnapshotDataThreshold());
         setElectionTimeoutFactor(other.raftConfig.getElectionTimeoutFactor());
         setCandidateElectionTimeoutDivisor(other.raftConfig.getCandidateElectionTimeoutDivisor());
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
@@ -304,6 +307,11 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
     }
 
+    private void setSnapshotDataThreshold(final int shardSnapshotDataThreshold) {
+        checkArgument(shardSnapshotDataThreshold >= 0);
+        raftConfig.setSnapshotDataThreshold(shardSnapshotDataThreshold);
+    }
+
     private void setSnapshotBatchCount(final long shardSnapshotBatchCount) {
         raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
     }
@@ -447,6 +455,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder shardSnapshotDataThresholdPercentage(final int shardSnapshotDataThresholdPercentage) {
             datastoreContext.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
+            return this;
+        }
+
+        public Builder shardSnapshotDataThreshold(final int shardSnapshotDataThreshold) {
+            datastoreContext.setSnapshotDataThreshold(shardSnapshotDataThreshold);
             return this;
         }
 
