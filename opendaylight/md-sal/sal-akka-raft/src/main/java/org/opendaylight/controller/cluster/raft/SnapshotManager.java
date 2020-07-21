@@ -379,11 +379,14 @@ public class SnapshotManager implements SnapshotState {
 
             log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
 
-            long dataThreshold = totalMemory * context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
-            boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
+            final ConfigParams config = context.getConfigParams();
+            final long absoluteThreshold = config.getSnapshotDataThreshold();
+            final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * ConfigParams.MEGABYTE
+                    : totalMemory * config.getSnapshotDataThresholdPercentage() / 100;
 
-            boolean logSizeExceededSnapshotBatchCount =
-                    context.getReplicatedLog().size() >= context.getConfigParams().getSnapshotBatchCount();
+            final boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
+            final boolean logSizeExceededSnapshotBatchCount =
+                    context.getReplicatedLog().size() >= config.getSnapshotBatchCount();
 
             final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
             if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount || captureSnapshot.isMandatoryTrim()) {
@@ -395,8 +398,7 @@ public class SnapshotManager implements SnapshotState {
                     } else if (logSizeExceededSnapshotBatchCount) {
                         log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with "
                                 + "index {}", context.getId(), context.getReplicatedLog().size(),
-                                context.getConfigParams().getSnapshotBatchCount(),
-                                captureSnapshot.getLastAppliedIndex());
+                                config.getSnapshotBatchCount(), captureSnapshot.getLastAppliedIndex());
                     } else {
                         log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to "
                                 + "last applied index {}", context.getId(), captureSnapshot.getLastAppliedIndex());
