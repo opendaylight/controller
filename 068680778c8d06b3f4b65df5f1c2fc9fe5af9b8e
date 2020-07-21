@@ -46,6 +46,30 @@
       "revId": "068680778c8d06b3f4b65df5f1c2fc9fe5af9b8e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "859b0b3b_1717c608",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 8
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-07-21T09:25:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b225224b_e31a2b32",
+      "range": {
+        "startLine": 56,
+        "startChar": 31,
+        "endLine": 56,
+        "endChar": 34
+      },
+      "revId": "068680778c8d06b3f4b65df5f1c2fc9fe5af9b8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
