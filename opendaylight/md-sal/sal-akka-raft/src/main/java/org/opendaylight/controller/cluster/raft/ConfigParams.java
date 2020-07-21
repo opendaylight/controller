@@ -35,10 +35,19 @@ public interface ConfigParams {
 
     /**
      * Returns the percentage of total memory used in the in-memory Raft log before a snapshot should be taken.
+     * Disabled, if direct threshold is enabled.
      *
      * @return the percentage.
      */
     int getSnapshotDataThresholdPercentage();
+
+    /**
+     * Returns the max size of memory used in the in-memory Raft log before a snapshot should be taken.
+     *  0 means that direct threshold is disabled and percentage is used instead.
+     *
+     * @return maximum journal size (in MB).
+     */
+    int getSnapshotDataThreshold();
 
 
     /**

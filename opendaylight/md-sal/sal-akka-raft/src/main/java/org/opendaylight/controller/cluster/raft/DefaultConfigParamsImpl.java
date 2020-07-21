@@ -68,6 +68,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // in-memory journal can use before it needs to snapshot
     private int snapshotDataThresholdPercentage = 12;
 
+    // max size of in-memory journal in MB
+    // 0 means direct threshold if disabled
+    private int snapshotDataThreshold = 0;
+
     private int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
     private long electionTimeoutFactor = 2;
@@ -98,6 +102,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
         this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
+    }
+
+    public void setSnapshotDataThreshold(final int snapshotDataThreshold) {
+        this.snapshotDataThreshold = snapshotDataThreshold;
     }
 
     public void setSnapshotChunkSize(final int snapshotChunkSize) {
@@ -146,6 +154,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public int getSnapshotDataThresholdPercentage() {
         return snapshotDataThresholdPercentage;
+    }
+
+    @Override
+    public int getSnapshotDataThreshold() {
+        return snapshotDataThreshold;
     }
 
     @Override

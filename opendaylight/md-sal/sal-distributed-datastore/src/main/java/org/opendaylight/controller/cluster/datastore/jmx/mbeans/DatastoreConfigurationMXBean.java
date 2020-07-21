@@ -28,6 +28,8 @@ public interface DatastoreConfigurationMXBean {
 
     int getShardSnapshotDataThresholdPercentage();
 
+    int getShardSnapshotDataThreshold();
+
     long getShardSnapshotBatchCount();
 
     long getShardTransactionCommitTimeoutInSeconds();
