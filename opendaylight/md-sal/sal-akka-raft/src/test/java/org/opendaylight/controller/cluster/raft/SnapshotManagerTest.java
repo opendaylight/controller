@@ -578,7 +578,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("return index", -1L, retIndex);
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(anyLong(), anyLong());
-        verify(mockReplicatedLog, never()).snapshotCommit();
+        verify(mockReplicatedLog, never()).fakeSnapshotCommit();
 
         verify(mockRaftActorBehavior, never()).setReplicatedToAllIndex(anyLong());
     }
