@@ -265,7 +265,7 @@ public class SnapshotManager implements SnapshotState {
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
                 ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
                 context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
-                context.getReplicatedLog().snapshotCommit();
+                context.getReplicatedLog().snapshotCommit(false);
                 return tempMin;
             }
 
