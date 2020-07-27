@@ -61,12 +61,12 @@ public class ReplicatedLogImplTest {
                 configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
     }
 
-    private void verifyPersist(Object message) throws Exception {
+    private void verifyPersist(final Object message) throws Exception {
         verifyPersist(message, new Same(message), true);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void verifyPersist(Object message, ArgumentMatcher<?> matcher, boolean async) throws Exception {
+    private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async) throws Exception {
         ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         if (async) {
             verify(mockPersistence).persistAsync(argThat(matcher), procedure.capture());
@@ -196,7 +196,21 @@ public class ReplicatedLogImplTest {
         verifyNoMoreInteractions(mockPersistence);
     }
 
-    public ArgumentMatcher<DeleteEntries> match(final DeleteEntries actual) {
+    @Test
+    public void testCommitFakeSnapshot() {
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+
+        log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
+        final int dataSizeAfterFirstPayload = log.dataSize();
+
+        log.snapshotPreCommit(0,1);
+        log.snapshotCommit(false);
+
+        assertEquals(0, log.size());
+        assertEquals(dataSizeAfterFirstPayload, log.dataSize());
+    }
+
+    private static ArgumentMatcher<DeleteEntries> match(final DeleteEntries actual) {
         return other -> actual.getFromIndex() == other.getFromIndex();
     }
 }
