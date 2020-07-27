@@ -560,7 +560,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("return index", 10L, retIndex);
 
         verify(mockReplicatedLog).snapshotPreCommit(10, 5);
-        verify(mockReplicatedLog).snapshotCommit();
+        verify(mockReplicatedLog).snapshotCommit(false);
 
         verify(mockRaftActorBehavior, never()).setReplicatedToAllIndex(anyLong());
     }
@@ -578,7 +578,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("return index", -1L, retIndex);
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(anyLong(), anyLong());
-        verify(mockReplicatedLog, never()).snapshotCommit();
+        verify(mockReplicatedLog, never()).snapshotCommit(false);
 
         verify(mockRaftActorBehavior, never()).setReplicatedToAllIndex(anyLong());
     }
@@ -596,7 +596,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("return index", -1L, retIndex);
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(anyLong(), anyLong());
-        verify(mockReplicatedLog, never()).snapshotCommit();
+        verify(mockReplicatedLog, never()).snapshotCommit(false);
 
         verify(mockRaftActorBehavior, never()).setReplicatedToAllIndex(anyLong());
     }
@@ -611,7 +611,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("return index", -1L, retIndex);
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(anyLong(), anyLong());
-        verify(mockReplicatedLog, never()).snapshotCommit();
+        verify(mockReplicatedLog, never()).snapshotCommit(false);
 
         // Trim index is greater than replicatedToAllIndex so should update it.
         verify(mockRaftActorBehavior).setReplicatedToAllIndex(10L);
@@ -635,8 +635,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.trimLog(10);
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(anyLong(), anyLong());
-        verify(mockReplicatedLog, never()).snapshotCommit();
-
+        verify(mockReplicatedLog, never()).snapshotCommit(false);
     }
 
     @Test
@@ -658,7 +657,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(10, 5);
         verify(mockReplicatedLog, never()).snapshotCommit();
-
     }
 
     @Test
