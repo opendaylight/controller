@@ -191,6 +191,11 @@ public interface ReplicatedLog {
     void snapshotCommit();
 
     /**
+     * Sets the Replicated log to state after fake snapshot success.
+     */
+    void fakeSnapshotCommit();
+
+    /**
      * Restores the replicated log to a state in the event of a save snapshot failure.
      */
     void snapshotRollback();
