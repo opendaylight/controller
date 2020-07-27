@@ -186,9 +186,20 @@ public interface ReplicatedLog {
     void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm);
 
     /**
-     * Sets the Replicated log to state after snapshot success.
+     * Sets the Replicated log to state after snapshot success. This method is equivalent to
+     * {@code snapshotCommit(true)}.
      */
-    void snapshotCommit();
+    default void snapshotCommit() {
+        snapshotCommit(true);
+    }
+
+    /**
+     * Sets the Replicated log to state after snapshot success. Most users will want to use {@link #snapshotCommit()}
+     * instead.
+     *
+     * @param updateDataSize true if {@link #dataSize()} should also be updated
+     */
+    void snapshotCommit(boolean updateDataSize);
 
     /**
      * Restores the replicated log to a state in the event of a save snapshot failure.
