@@ -196,6 +196,21 @@ public class ReplicatedLogImplTest {
         verifyNoMoreInteractions(mockPersistence);
     }
 
+    @Test
+    public void testCommitFakeSnapshot() {
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+
+        log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
+        final int dataSizeAfterFirstPayload = log.dataSize();
+
+        log.snapshotPreCommit(0,1);
+        log.fakeSnapshotCommit();
+
+        assertEquals(0, log.size());
+        assertEquals(dataSizeAfterFirstPayload, log.dataSize());
+    }
+
+
     public ArgumentMatcher<DeleteEntries> match(final DeleteEntries actual) {
         return other -> actual.getFromIndex() == other.getFromIndex();
     }
