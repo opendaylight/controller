@@ -256,18 +256,20 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void snapshotCommit() {
+    public void snapshotCommit(final boolean updateDataSize) {
         snapshottedJournal = null;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
 
-        // need to recalc the datasize based on the entries left after precommit.
-        int newDataSize = 0;
-        for (ReplicatedLogEntry logEntry : journal) {
-            newDataSize += logEntry.size();
+        if (updateDataSize) {
+            // need to recalc the datasize based on the entries left after precommit.
+            int newDataSize = 0;
+            for (ReplicatedLogEntry logEntry : journal) {
+                newDataSize += logEntry.size();
+            }
+            LOG.trace("{}: Updated dataSize from {} to {}", logContext, dataSize, newDataSize);
+            dataSize = newDataSize;
         }
-        LOG.trace("{}: Updated dataSize from {} to {}", logContext, dataSize, newDataSize);
-        dataSize = newDataSize;
     }
 
     @Override
