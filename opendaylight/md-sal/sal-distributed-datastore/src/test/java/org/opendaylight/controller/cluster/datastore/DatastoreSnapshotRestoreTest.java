@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -77,18 +78,15 @@ public class DatastoreSnapshotRestoreTest {
             SerializationUtils.serialize(snapshotList, fos);
         }
 
-        DatastoreSnapshotRestore instance = DatastoreSnapshotRestore.instance(restoreDirectoryPath);
+        DefaultDatastoreSnapshotRestore instance = new DefaultDatastoreSnapshotRestore(restoreDirectoryPath);
+        instance.activate();
 
-        assertDatastoreSnapshotEquals(configSnapshot, instance.getAndRemove("config"));
-        assertDatastoreSnapshotEquals(operSnapshot, instance.getAndRemove("oper"));
+        assertDatastoreSnapshotEquals(configSnapshot, instance.getAndRemove("config").orElse(null));
+        assertDatastoreSnapshotEquals(operSnapshot, instance.getAndRemove("oper").orElse(null));
 
-        assertNull("DatastoreSnapshot was not removed", instance.getAndRemove("config"));
+        assertEquals("DatastoreSnapshot was not removed", Optional.empty(), instance.getAndRemove("config"));
 
         assertFalse(backupFile + " was not deleted", backupFile.exists());
-
-        instance = DatastoreSnapshotRestore.instance(restoreDirectoryPath);
-        assertNull("Expected null DatastoreSnapshot", instance.getAndRemove("config"));
-        assertNull("Expected null DatastoreSnapshot", instance.getAndRemove("oper"));
     }
 
     private static void assertDatastoreSnapshotEquals(final DatastoreSnapshot expected,
