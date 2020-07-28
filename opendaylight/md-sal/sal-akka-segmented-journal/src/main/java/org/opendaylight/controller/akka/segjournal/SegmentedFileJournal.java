@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import static akka.actor.ActorRef.noSender;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -93,7 +92,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         // Send requests to actors and zip the futures back
         map.forEach((handler, message) -> {
             LOG.trace("Sending {} to {}", message, handler);
-            handler.tell(message, noSender());
+            handler.tell(message, ActorRef.noSender());
         });
         return Futures.sequence(result, context().dispatcher());
     }
@@ -138,7 +137,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
 
     private static <T> Future<T> delegateMessage(final ActorRef handler, final AsyncMessage<T> message) {
         LOG.trace("Delegating {} to {}", message, handler);
-        handler.tell(message, noSender());
+        handler.tell(message, ActorRef.noSender());
         return message.promise.future();
     }
 
