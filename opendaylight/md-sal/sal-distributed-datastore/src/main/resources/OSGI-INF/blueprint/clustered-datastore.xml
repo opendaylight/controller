@@ -20,15 +20,11 @@
 
   <!-- Datastore properties -->
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
+  <reference id="datastoreSnapshotRestore" interface="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"/>
 
   <cm:cm-properties id="datastoreProps" persistent-id="org.opendaylight.controller.cluster.datastore"/>
 
   <!-- Distributed Config Datastore -->
-  <bean id="datastoreSnapshotRestore" class="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"
-          factory-method="instance">
-    <argument value="./clustered-datastore-restore"/>
-  </bean>
-
   <bean id="introspectorConfig" factory-ref="introspectorFactory" factory-method="newInstance">
     <argument type="org.opendaylight.mdsal.common.api.LogicalDatastoreType" value="CONFIGURATION"/>
   </bean>
