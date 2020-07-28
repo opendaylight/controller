@@ -10,6 +10,7 @@ package org.opendaylight.controller.akka.segjournal;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.akka.segjournal.DataJournalEntryFragmenter.defragmentRepr;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
@@ -20,6 +21,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.VerifyException;
+import io.atomix.storage.StorageException;
 import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.SegmentedJournal;
@@ -29,11 +33,14 @@ import io.atomix.utils.serializer.Namespace;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromFragmentedPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToFragmentedPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
@@ -280,19 +287,27 @@ final class SegmentedJournalActor extends AbstractActor {
             int count = 0;
             while (reader.hasNext() && count < message.max) {
                 final Indexed<DataJournalEntry> next = reader.next();
-                if (next.index() > message.toSequenceNr) {
+                final long nextIndex = next.index();
+                if (nextIndex > message.toSequenceNr) {
                     break;
                 }
 
                 LOG.trace("{}: replay {}", persistenceId, next);
                 updateLargestSize(next.size());
                 final DataJournalEntry entry = next.entry();
-                verify(entry instanceof FromPersistence, "Unexpected entry %s", entry);
-
-                final PersistentRepr repr = ((FromPersistence) entry).toRepr(persistenceId, next.index());
-                LOG.debug("{}: replaying {}", persistenceId, repr);
-                message.replayCallback.accept(repr);
-                count++;
+                if (entry instanceof FromPersistence) {
+                    final PersistentRepr repr = ((FromPersistence) entry).toRepr(persistenceId, nextIndex);
+                    LOG.debug("{}: replaying {}", persistenceId, repr);
+                    message.replayCallback.accept(repr);
+                    count++;
+                } else if (entry instanceof FromFragmentedPersistence) {
+                    final PersistentRepr defragmentedRepr = readFragmentedEntry(reader, next);
+                    LOG.debug("{}: replaying defragmented {}", persistenceId, defragmentedRepr);
+                    message.replayCallback.accept(defragmentedRepr);
+                    count++;
+                } else {
+                    throw new VerifyException("Unexpected entry " + entry);
+                }
             }
             LOG.debug("{}: successfully replayed {} entries", persistenceId, count);
         } catch (Exception e) {
@@ -301,6 +316,39 @@ final class SegmentedJournalActor extends AbstractActor {
         } finally {
             message.promise.success(null);
         }
+    }
+
+    private PersistentRepr readFragmentedEntry(final SegmentedJournalReader<DataJournalEntry> reader,
+        final Indexed<DataJournalEntry> firstFragDataJournalEntry) {
+
+        final long index = firstFragDataJournalEntry.index();
+        int fragmentedEntrySize = firstFragDataJournalEntry.size();
+        final FromFragmentedPersistence firstFragEntry = (FromFragmentedPersistence) firstFragDataJournalEntry.entry();
+        final FragmentedPersistentRepr firstFragEntryRepr = firstFragEntry.toRepr(persistenceId, index);
+        final int fragmentCount = firstFragEntry.getFragmentCount();
+        final List<FragmentedPersistentRepr> reprFragments = new LinkedList<>();
+        reprFragments.add(firstFragEntryRepr);
+        for (int i = 1; i < fragmentCount; i++) {
+            if (reader.hasNext()) {
+                final Indexed<DataJournalEntry> nextJournalEntry = reader.next();
+                final DataJournalEntry nextEntry = nextJournalEntry.entry();
+                verify(nextEntry instanceof FromFragmentedPersistence,
+                    persistenceId + ": Fragments on index " + index + " are shuffled with non-fragmented entries");
+                fragmentedEntrySize += nextJournalEntry.size();
+                final FragmentedPersistentRepr nextReprFragment = ((FromFragmentedPersistence) nextEntry)
+                    .toRepr(persistenceId, index);
+                reprFragments.add(nextReprFragment);
+            }
+        }
+        checkFragmentCount(fragmentCount, reprFragments.size());
+        final PersistentRepr defragmentedRepr = defragmentRepr(reprFragments);
+        updateLargestSize(fragmentedEntrySize);
+        return defragmentedRepr;
+    }
+
+    private void checkFragmentCount(final int expectedFragmentCount, final int actualFragmentCount) {
+        Preconditions.checkState(expectedFragmentCount == actualFragmentCount,
+            "Fragment count error. Expected count " + expectedFragmentCount + ", actual count " + actualFragmentCount);
     }
 
     @SuppressWarnings("checkstyle:illegalCatch")
@@ -337,9 +385,15 @@ final class SegmentedJournalActor extends AbstractActor {
                 throw new UnsupportedOperationException("Non-serializable payload encountered " + payload.getClass());
             }
 
-            final int size = writer.append(new ToPersistence(repr)).size();
-            messageSize.update(size);
-            updateLargestSize(size);
+            try {
+                final int size = writer.append(new ToPersistence(repr)).size();
+                messageSize.update(size);
+                updateLargestSize(size);
+            } catch (StorageException.TooLarge tooLargeEntryEx) {
+                final int size = DataJournalEntryFragmenter.write(writer, repr, maxEntrySize);
+                messageSize.update(size);
+                updateLargestSize(size);
+            }
         }
     }
 
@@ -369,6 +423,8 @@ final class SegmentedJournalActor extends AbstractActor {
                 .withNamespace(Namespace.builder()
                     .register(new DataJournalEntrySerializer(context().system()),
                         FromPersistence.class, ToPersistence.class)
+                    .register(new FragmentedDataJournalEntrySerializer(context().system()),
+                        FromFragmentedPersistence.class, ToFragmentedPersistence.class)
                     .build())
                 .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
                 .build();

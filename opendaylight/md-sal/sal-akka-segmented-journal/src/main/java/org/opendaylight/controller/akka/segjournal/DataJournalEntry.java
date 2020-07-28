@@ -32,6 +32,30 @@ abstract class DataJournalEntry {
         }
     }
 
+    static final class ToFragmentedPersistence extends DataJournalEntry {
+        private final PersistentRepr repr;
+        private final int fragmentCount;
+        private final int fragmentIndex;
+
+        ToFragmentedPersistence(final FragmentedPersistentRepr repr, final int fragmentCount, final int fragmentIndex) {
+            this.repr = requireNonNull(repr).toPersistentRepr();
+            this.fragmentCount = fragmentCount;
+            this.fragmentIndex = fragmentIndex;
+        }
+
+        PersistentRepr repr() {
+            return repr;
+        }
+
+        int getFragmentCount() {
+            return fragmentCount;
+        }
+
+        int getFragmentIndex() {
+            return fragmentIndex;
+        }
+    }
+
     static final class FromPersistence extends DataJournalEntry {
         private final String manifest;
         private final String writerUuid;
@@ -45,6 +69,35 @@ abstract class DataJournalEntry {
 
         PersistentRepr toRepr(final String persistenceId, final long sequenceNr) {
             return PersistentRepr.apply(payload, sequenceNr, persistenceId, manifest, false, null, writerUuid);
+        }
+    }
+
+    static final class FromFragmentedPersistence extends DataJournalEntry {
+        private final String manifest;
+        private final String writerUuid;
+        private final int fragmentCount;
+        private final int fragmentIndex;
+        private final byte[] payload;
+
+        FromFragmentedPersistence(final String manifest, final String writerUuid, final int fragmentCount,
+            final int fragmentIndex, final byte[] payload) {
+            this.manifest = manifest;
+            this.writerUuid = requireNonNull(writerUuid);
+            this.fragmentCount = fragmentCount;
+            this.fragmentIndex = fragmentIndex;
+            this.payload = requireNonNull(payload);
+        }
+
+        FragmentedPersistentRepr toRepr(final String persistenceId, final long sequenceNr) {
+            return FragmentedPersistentRepr.apply(payload, sequenceNr, persistenceId, manifest, false, null, writerUuid);
+        }
+
+        int getFragmentIndex() {
+            return fragmentIndex;
+        }
+
+        int getFragmentCount() {
+            return fragmentCount;
         }
     }
 }
