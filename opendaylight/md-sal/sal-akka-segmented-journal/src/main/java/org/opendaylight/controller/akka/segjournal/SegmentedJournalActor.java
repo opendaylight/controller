@@ -10,6 +10,7 @@ package org.opendaylight.controller.akka.segjournal;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.akka.segjournal.DataJournalEntryFragmenter.defragmentRepr;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
@@ -20,6 +21,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.VerifyException;
+import io.atomix.storage.StorageException;
 import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.SegmentedJournal;
@@ -29,11 +33,16 @@ import io.atomix.utils.serializer.Namespace;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromFragmentedPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToFragmentedPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
@@ -152,8 +161,10 @@ final class SegmentedJournalActor extends AbstractActor {
     private Histogram messageSize;
 
     private SegmentedJournal<DataJournalEntry> dataJournal;
+//    private SegmentedJournal<Long> sequenceJournal;
     private SegmentedJournal<Long> deleteJournal;
     private long lastDelete;
+    private SortedMap<Long, Long> sequenceNrToIndexMap = new TreeMap<>();
 
     // Tracks largest message size we have observed either during recovery or during write
     private int largestObservedSize;
@@ -210,6 +221,12 @@ final class SegmentedJournalActor extends AbstractActor {
             LOG.debug("{}: delete journal closed", persistenceId);
             deleteJournal = null;
         }
+
+//        if (sequenceJournal != null) {
+//            sequenceJournal.close();
+//            LOG.debug("{}: sequence journal closed", persistenceId);
+//            sequenceJournal = null;
+//        }
         LOG.debug("{}: actor stopped", persistenceId);
         super.postStop();
     }
@@ -231,13 +248,22 @@ final class SegmentedJournalActor extends AbstractActor {
         ensureOpen();
 
         LOG.debug("{}: delete messages {}", persistenceId, message);
-        final long to = Long.min(dataJournal.writer().getLastIndex(), message.toSequenceNr);
-        LOG.debug("{}: adjusted delete to {}", persistenceId, to);
+        long adjustedTo;
+        try {
+            adjustedTo = adjustIndexToSequenceNrAccordingToMapping(message.toSequenceNr);
+        } catch (IllegalStateException stateEx) {
+            message.promise.failure(stateEx);
+            return;
+        }
 
-        if (lastDelete < to) {
-            LOG.debug("{}: deleting entries up to {}", persistenceId, to);
+        LOG.debug("{}: adjusted delete to {}", persistenceId, adjustedTo);
 
-            lastDelete = to;
+        if (lastDelete < adjustedTo) {
+
+//            to = adjustIndexToSequenceNrAccordingToMapping(to);
+            LOG.debug("{}: deleting entries up to {}", persistenceId, adjustedTo);
+
+            lastDelete = adjustedTo;
             final SegmentedJournalWriter<Long> deleteWriter = deleteJournal.writer();
             final Indexed<Long> entry = deleteWriter.append(lastDelete);
             deleteWriter.commit(entry.index());
@@ -254,18 +280,122 @@ final class SegmentedJournalActor extends AbstractActor {
         message.promise.success(null);
     }
 
-    private void handleReadHighestSequenceNr(final ReadHighestSequenceNr message) {
-        LOG.debug("{}: looking for highest sequence on {}", persistenceId, message);
-        final Long sequence;
-        if (directory.isDirectory()) {
-            ensureOpen();
-            sequence = dataJournal.writer().getLastIndex();
+    //TODO: improve adjustment mechanism to cover adjusting both to the first and last fragment
+    /**
+     * Check if the index points to a fragmented entry. In case it does, return the index of the last fragment for this
+     * fragmented entry. In case the entry is not a fragment or it is the last fragment return the original index.
+     */
+    @SuppressWarnings("checkstyle:illegalCatch")
+    private long adjustIndexToSequenceNrAccordingToMapping(final long wantedSequenceNr) throws IllegalStateException {
+        // 1) check the sequenceNr of the last written entry. If it's sequenceNr is lessOrEqual than the wanted one,
+        // return the last sequenceNr
+        final Indexed<DataJournalEntry> lastEntry = dataJournal.writer().getLastEntry();
+        if (lastEntry != null) {
+            final long lastSequenceNr = lastEntry.entry().getSequenceNr();
+            if (lastSequenceNr <= wantedSequenceNr) {
+                return lastSequenceNr;
+            }
         } else {
-            sequence = 0L;
+            return 0;
         }
 
-        LOG.debug("{}: highest sequence is {}", message, sequence);
-        message.promise.success(sequence);
+        // 2) look in the map
+        final Long indexFromMapping = sequenceNrToIndexMap.get(wantedSequenceNr);
+        if (indexFromMapping != null) {
+            return indexFromMapping;
+        }
+
+        // 3) check for an entry at the index == wantedSequenceNr and whether it's sequenceNr also matches the
+        // wantedSequenceNr.
+        try (SegmentedJournalReader<DataJournalEntry> reader = dataJournal.openReader(wantedSequenceNr)) {
+            if (reader.hasNext()) {
+                DataJournalEntry targetEntry = reader.next().entry();
+                if (targetEntry.getSequenceNr() == wantedSequenceNr) {
+                    if (targetEntry instanceof FromFragmentedPersistence) {
+                        final FromFragmentedPersistence targetFragmentEntry = (FromFragmentedPersistence) targetEntry;
+                        return wantedSequenceNr
+                            + (targetFragmentEntry.getFragmentCount() - (targetFragmentEntry.getFragmentIndex() + 1));
+                    }
+                    return wantedSequenceNr;
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("{}: can't read entry at index {} - can't verify sequenceNr", persistenceId, wantedSequenceNr, e);
+        }
+
+        // 4) There seems to be some kind of mess in the data. Rebuild the map and try again
+        rebuildSequenceNrToIndexMapping();
+        final Long discoveredIndex = sequenceNrToIndexMap.get(wantedSequenceNr);
+        if (discoveredIndex != null) {
+            return discoveredIndex;
+        }
+        // this should never happen
+        throw new IllegalStateException("Cannot process sequenceNumber " + wantedSequenceNr);
+    }
+
+    /**
+     * Check the first entry. Return it's journalIndex if it is a normal entry or a first fragment.
+     * In case it is a fragment with fragmentIndex higher than 0, calculate where lies the last fragment and return
+     * the next journalIndex. This will skip the partial fragmented entry left over from previous segment.
+     */
+    private long getIndexOfFirstRealEntry() {
+        long indexOfFirstRealEntry = 0;
+        try (SegmentedJournalReader<DataJournalEntry> reader = dataJournal.openReader(0L)) {
+            if (reader.hasNext()) {
+                Indexed<DataJournalEntry> firstEntry = reader.next();
+                indexOfFirstRealEntry = firstEntry.index();
+                DataJournalEntry entry = firstEntry.entry();
+                if (entry instanceof FromFragmentedPersistence) {
+                    FromFragmentedPersistence fragEntry = (FromFragmentedPersistence) entry;
+                    if (fragEntry.getFragmentIndex() > 0) {
+                        indexOfFirstRealEntry += (fragEntry.getFragmentCount() - (fragEntry.getFragmentIndex()));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("{}: can't read data journal - cannot rebuild mapping", persistenceId, e);
+        }
+        return indexOfFirstRealEntry;
+    }
+
+    /**
+     * Read the whole dataJournal and build the sequenceNr -> lastIndex map accordingly.
+     */
+    @SuppressWarnings("checkstyle:illegalCatch")
+    private void rebuildSequenceNrToIndexMapping() {
+        try (SegmentedJournalReader<DataJournalEntry> reader = dataJournal.openReader(getIndexOfFirstRealEntry())) {
+            while (reader.hasNext()) {
+                Indexed<DataJournalEntry> next = reader.next();
+                long index = next.index();
+                DataJournalEntry entry = next.entry();
+                if (entry instanceof FromFragmentedPersistence) {
+                    FromFragmentedPersistence fragEntry = (FromFragmentedPersistence) entry;
+                    if (fragEntry.getFragmentIndex() < fragEntry.getFragmentCount() - 1) {
+                        continue;
+                    }
+                }
+                sequenceNrToIndexMap.put(entry.getSequenceNr(), index);
+            }
+        } catch (Exception e) {
+            LOG.warn("{}: can't read data journal - cannot rebuild mapping", persistenceId, e);
+        }
+    }
+
+    private void handleReadHighestSequenceNr(final ReadHighestSequenceNr message) {
+        LOG.debug("{}: looking for highest sequence on {}", persistenceId, message);
+        final Indexed<DataJournalEntry> lastEntry;
+        long highestSequenceNr = 0L;
+        if (directory.isDirectory()) {
+            ensureOpen();
+            lastEntry = dataJournal.writer().getLastEntry();
+            if (lastEntry != null) {
+                highestSequenceNr = lastEntry.entry().getSequenceNr();
+                sequenceNrToIndexMap.put(highestSequenceNr, lastEntry.index());
+            }
+        }
+
+        LOG.debug("{}: highest sequence is {}", message, highestSequenceNr);
+        message.promise.success(highestSequenceNr);
     }
 
     @SuppressWarnings("checkstyle:illegalCatch")
@@ -273,6 +403,7 @@ final class SegmentedJournalActor extends AbstractActor {
         LOG.debug("{}: replaying messages {}", persistenceId, message);
         ensureOpen();
 
+        //TODO: needs to be adjusted according to mapping and fragmentation
         final long from = Long.max(lastDelete + 1, message.fromSequenceNr);
         LOG.debug("{}: adjusted fromSequenceNr to {}", persistenceId, from);
 
@@ -280,19 +411,36 @@ final class SegmentedJournalActor extends AbstractActor {
             int count = 0;
             while (reader.hasNext() && count < message.max) {
                 final Indexed<DataJournalEntry> next = reader.next();
-                if (next.index() > message.toSequenceNr) {
-                    break;
+                LOG.trace("{}: replay {}", persistenceId, next);
+                long replayedSeqNr = 0;
+                final DataJournalEntry entry = next.entry();
+                if (entry instanceof FromPersistence) {
+                    final PersistentRepr repr = ((FromPersistence) entry).toRepr(persistenceId);
+                    LOG.debug("{}: replaying {}", persistenceId, repr);
+                    message.replayCallback.accept(repr);
+                    updateLargestSize(next.size());
+                    count++;
+                    replayedSeqNr = repr.sequenceNr();
+                } else if (entry instanceof FromFragmentedPersistence) {
+                    if (((FromFragmentedPersistence) entry).getFragmentIndex() > 0) {
+                        //TODO:this case needs to be skipped at the beginning so as not to check it pointlessly every
+                        // time - since this is only the case for first few entries left from previous segment
+                        //we are reading some left-over fragments of deleted entry from previous segment. Skip them
+                        continue;
+                    }
+                    final PersistentRepr defragmentedRepr = readFragmentedEntry(reader, next);
+                    LOG.debug("{}: replaying defragmented {}", persistenceId, defragmentedRepr);
+                    message.replayCallback.accept(defragmentedRepr);
+                    count++;
+                    replayedSeqNr = defragmentedRepr.sequenceNr();
+                } else {
+                    throw new VerifyException("Unexpected entry " + entry);
                 }
 
-                LOG.trace("{}: replay {}", persistenceId, next);
-                updateLargestSize(next.size());
-                final DataJournalEntry entry = next.entry();
-                verify(entry instanceof FromPersistence, "Unexpected entry %s", entry);
-
-                final PersistentRepr repr = ((FromPersistence) entry).toRepr(persistenceId, next.index());
-                LOG.debug("{}: replaying {}", persistenceId, repr);
-                message.replayCallback.accept(repr);
-                count++;
+                sequenceNrToIndexMap.put(replayedSeqNr, reader.getCurrentIndex());
+                if (replayedSeqNr >= message.toSequenceNr) {
+                    break;
+                }
             }
             LOG.debug("{}: successfully replayed {} entries", persistenceId, count);
         } catch (Exception e) {
@@ -301,6 +449,39 @@ final class SegmentedJournalActor extends AbstractActor {
         } finally {
             message.promise.success(null);
         }
+    }
+
+    private PersistentRepr readFragmentedEntry(final SegmentedJournalReader<DataJournalEntry> reader,
+        final Indexed<DataJournalEntry> firstFragDataJournalEntry) {
+
+        final long index = firstFragDataJournalEntry.index();
+        int defragmentedEntrySize = firstFragDataJournalEntry.size();
+        final FromFragmentedPersistence firstFragEntry = (FromFragmentedPersistence) firstFragDataJournalEntry.entry();
+        final FragmentedPersistentRepr firstFragEntryRepr = firstFragEntry.toRepr(persistenceId);
+        final int fragmentCount = firstFragEntry.getFragmentCount();
+        final List<FragmentedPersistentRepr> reprFragments = new LinkedList<>();
+        reprFragments.add(firstFragEntryRepr);
+        for (int i = 1; i < fragmentCount; i++) {
+            if (reader.hasNext()) {
+                final Indexed<DataJournalEntry> nextJournalEntry = reader.next();
+                final DataJournalEntry nextEntry = nextJournalEntry.entry();
+                verify(nextEntry instanceof FromFragmentedPersistence,
+                    persistenceId + ": Fragments on index " + index + " are shuffled with non-fragmented entries");
+                defragmentedEntrySize += nextJournalEntry.size();
+                final FragmentedPersistentRepr nextReprFragment = ((FromFragmentedPersistence) nextEntry)
+                    .toRepr(persistenceId);
+                reprFragments.add(nextReprFragment);
+            }
+        }
+        checkFragmentCount(fragmentCount, reprFragments.size());
+        final PersistentRepr defragmentedRepr = defragmentRepr(reprFragments);
+        updateLargestSize(defragmentedEntrySize);
+        return defragmentedRepr;
+    }
+
+    private void checkFragmentCount(final int expectedFragmentCount, final int actualFragmentCount) {
+        Preconditions.checkState(expectedFragmentCount == actualFragmentCount,
+            "Fragment count error. Expected count " + expectedFragmentCount + ", actual count " + actualFragmentCount);
     }
 
     @SuppressWarnings("checkstyle:illegalCatch")
@@ -313,13 +494,15 @@ final class SegmentedJournalActor extends AbstractActor {
         final long start = writer.getLastIndex();
 
         for (int i = 0; i < count; ++i) {
-            final long mark = writer.getLastIndex();
+            final long indexMark = writer.getLastIndex();
+            final long highestSeqNr = sequenceNrToIndexMap.lastKey();
             try {
                 writeRequest(writer, message.requests.get(i));
             } catch (Exception e) {
                 LOG.warn("{}: failed to write out request", persistenceId, e);
                 message.results.get(i).success(Optional.of(e));
-                writer.truncate(mark);
+                writer.truncate(indexMark);
+                sequenceNrToIndexMap = sequenceNrToIndexMap.headMap(highestSeqNr + 1);
                 continue;
             }
 
@@ -336,10 +519,16 @@ final class SegmentedJournalActor extends AbstractActor {
             if (!(payload instanceof Serializable)) {
                 throw new UnsupportedOperationException("Non-serializable payload encountered " + payload.getClass());
             }
-
-            final int size = writer.append(new ToPersistence(repr)).size();
-            messageSize.update(size);
-            updateLargestSize(size);
+            try {
+                final int size = writer.append(new ToPersistence(repr)).size();
+                messageSize.update(size);
+                updateLargestSize(size);
+            } catch (StorageException.TooLarge tooLargeEntryEx) {
+                final int size = DataJournalEntryFragmenter.write(writer, repr, maxEntrySize);
+                messageSize.update(size);
+                updateLargestSize(size);
+            }
+            sequenceNrToIndexMap.put(repr.sequenceNr(), writer.getLastIndex());
         }
     }
 
@@ -369,11 +558,15 @@ final class SegmentedJournalActor extends AbstractActor {
                 .withNamespace(Namespace.builder()
                     .register(new DataJournalEntrySerializer(context().system()),
                         FromPersistence.class, ToPersistence.class)
+                    .register(new FragmentedDataJournalEntrySerializer(context().system()),
+                        FromFragmentedPersistence.class, ToFragmentedPersistence.class)
                     .build())
                 .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
                 .build();
         final SegmentedJournalWriter<DataJournalEntry> writer = dataJournal.writer();
         writer.commit(lastDelete);
+
+        lastDelete = lastEntry == null ? 0 : lastEntry.entry();
         LOG.debug("{}: journal open with last index {}, deleted to {}", persistenceId, writer.getLastIndex(),
             lastDelete);
     }
