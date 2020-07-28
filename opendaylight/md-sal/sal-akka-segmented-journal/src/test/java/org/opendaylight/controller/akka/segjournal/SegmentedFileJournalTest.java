@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -49,6 +50,7 @@ public class SegmentedFileJournalTest {
     private static final File DIRECTORY = new File("target/sfj-test");
     private static final int SEGMENT_SIZE = 1024 * 1024;
     private static final int MESSAGE_SIZE = 512 * 1024;
+    private static final int MESSAGE_SIZE_FRAGMENTABLE = 128 * 1024;
 
     private static ActorSystem SYSTEM;
 
@@ -133,10 +135,45 @@ public class SegmentedFileJournalTest {
     }
 
     @Test
-    public void testComplexDeletesAndPartialReplays() throws Exception {
-        for (int i = 0; i <= 4; i++) {
-            writeBigPaylod();
+    public void testFragmentedSegmentation() throws IOException {
+        // create new actor for Segmented Journal with smaller maxEntrySize (better for fragmentation)
+        actor = actorForFragmentation();
+        final LargePayloadNumbered payload = new LargePayloadNumbered();
+
+        final WriteMessages write = new WriteMessages();
+        final List<Future<Optional<Exception>>> requests = new ArrayList<>();
+
+        // Each payload is half of segment size, plus some overhead. maxEntrySize was lowered so that this entry will
+        // be split into 5 fragments. 6 entries means 30 fragments and each segment can hold 9 fragments. So we expect
+        // to need 4 segments.
+        for (int i = 1; i <= 6; ++i) {
+            requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
+                "uuid"))));
         }
+
+        actor.tell(write, ActorRef.noSender());
+        requests.forEach(future -> assertFalse(getFuture(future).isPresent()));
+
+        assertFileCount(4, 1);
+
+        // delete first 3 entries. The actual index at which these entries reside is not necessary as it will be
+        // calculated according to the mapping and fragmentation.
+        deleteEntries(3);
+
+        // this should delete the first segment
+        assertFileCount(3, 1);
+
+        // Delete all but the last entry
+        deleteEntries(requests.size());
+
+        assertFileCount(1, 1);
+    }
+
+    @Test
+    public void testComplexDeletesAndPartialReplays() throws Exception {
+        actor = actor();
+
+        writeBigPaylod(new LargePayload(), 30);
 
         assertFileCount(10, 1);
 
@@ -180,19 +217,65 @@ public class SegmentedFileJournalTest {
         assertReplayCount(0);
     }
 
+    @Test
+    public void testComplexDeletesAndPartialReplaysFragmentation() throws Exception {
+        actor = actorForFragmentation();
+        // each needs to be split into 5 fragments. However the segment can only hold 9 such fragments can
+        // fit in a segment
+
+        writeBigPaylod(new LargePayloadNumbered(), 30);
+
+        assertFileCount(17, 1);
+
+        // delete including index 2, which makes the whole first segment
+        deleteEntries(2);
+        assertFileCount(16, 1);
+        // delete to index 3 which is half of the second segment.
+        deleteEntries(3);
+        assertFileCount(16, 1);
+
+        // leave last 4 entries - they reside in 3 segments
+        deleteEntries(26);
+        assertFileCount(3, 1);
+
+        restartActor();
+
+        // Check if state is retained
+        assertHighestSequenceNr(30);
+        // 28,29,30 replayed
+        assertReplayCount(4);
+
+        deleteEntries(28);
+        restartActor();
+
+        assertHighestSequenceNr(30);
+        // 29,30 replayed
+        assertReplayCount(2);
+
+        deleteEntries(29);
+        restartActor();
+
+        // 30 replayed
+        assertReplayCount(1);
+
+        deleteEntries(30);
+        restartActor();
+
+        // nothing replayed
+        assertReplayCount(0);
+    }
+
     private void restartActor() {
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         actor = actor();
     }
 
-    private void writeBigPaylod() {
-        final LargePayload payload = new LargePayload();
+    private void writeBigPaylod(final Object payload, final int amount) {
 
         final WriteMessages write = new WriteMessages();
         final List<Future<Optional<Exception>>> requests = new ArrayList<>();
 
-        // Each payload is half of segment size, plus some overhead, should result in two segments being present
-        for (int i = 1; i <= SEGMENT_SIZE * 3 / MESSAGE_SIZE; ++i) {
+        for (int i = 1; i <= amount; ++i) {
             requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
                     "uuid"))));
         }
@@ -202,9 +285,16 @@ public class SegmentedFileJournalTest {
     }
 
     private ActorRef actor() {
-        return kit.childActorOf(SegmentedJournalActor.props("foo", DIRECTORY, StorageLevel.DISK, MESSAGE_SIZE,
-            SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
+        return kit.childActorOf(SegmentedJournalActor.props("foo", DIRECTORY, StorageLevel.DISK,
+            MESSAGE_SIZE, SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
     }
+
+    private ActorRef actorForFragmentation() {
+        return kit.childActorOf(SegmentedJournalActor.props("foo", DIRECTORY, StorageLevel.DISK,
+            MESSAGE_SIZE_FRAGMENTABLE, SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
+    }
+
+
 
     private void deleteEntries(final long deleteTo) {
         final AsyncMessage<Void> delete = SegmentedJournalActor.deleteMessagesTo(deleteTo);
@@ -247,6 +337,20 @@ public class SegmentedFileJournalTest {
         private static final long serialVersionUID = 1L;
 
         final byte[] bytes = new byte[MESSAGE_SIZE / 2];
+    }
 
+    /**
+     * This payload alone takes up exactly half of a segment. This makes the wrapping DataJournalEntry a bit over
+     * maxEntrySize. This means it needs to be fragmented. The byte values are repeating sequences 0-9 just for
+     * debugging.
+     */
+    private static final class LargePayloadNumbered implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        final byte[] bytes = new byte[MESSAGE_SIZE];
+
+        LargePayloadNumbered() {
+            IntStream.range(0, bytes.length).forEach(i -> bytes[i] = Integer.valueOf(i % 10).byteValue());
+        }
     }
 }
