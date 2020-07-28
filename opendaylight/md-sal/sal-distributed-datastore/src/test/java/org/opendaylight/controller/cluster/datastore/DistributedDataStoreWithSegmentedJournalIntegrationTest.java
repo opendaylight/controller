@@ -23,10 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,6 +92,20 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         }
     }
 
+    /**
+     * Generate cars with name = [namePrefix+index] where index is number from 0 to amount-1.
+     */
+    private Collection<Pair<YangInstanceIdentifier, MapEntryNode>> generateCars(final int amount,
+        final String namePrefix) {
+        LinkedList<Pair<YangInstanceIdentifier, MapEntryNode>> cars = new LinkedList<>();
+        for (int i = 0; i < amount; ++i) {
+            YangInstanceIdentifier path = CarsModel.newCarPath(namePrefix + i);
+            MapEntryNode data = CarsModel.newCarEntry(namePrefix + i, Uint64.valueOf(20000));
+            cars.add(Pair.of(path, data));
+        }
+        return cars;
+    }
+
     @Test
     public void testManyWritesDeletes() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
@@ -105,25 +121,27 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
             writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
             testKit.doCommit(writeTx.ready());
 
-            int numCars = 20;
-            for (int i = 0; i < numCars; ++i) {
+            Collection<Pair<YangInstanceIdentifier, MapEntryNode>> genCars = generateCars(20, "car");
+            int carIndex = 0;
+            for (Pair<YangInstanceIdentifier, MapEntryNode> car : genCars) {
                 DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
-                YangInstanceIdentifier path = CarsModel.newCarPath("car" + i);
-                MapEntryNode data = CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000));
+                YangInstanceIdentifier path = car.getKey();
+                MapEntryNode data = car.getValue();
 
                 rwTx.merge(path, data);
                 carMapBuilder.withChild(data);
 
                 testKit.doCommit(rwTx.ready());
 
-                if (i % 5 == 0) {
+                if (carIndex % 5 == 0) {
                     rwTx = txChain.newReadWriteTransaction();
 
                     rwTx.delete(path);
                     carMapBuilder.withoutChild(path.getLastPathArgument());
                     testKit.doCommit(rwTx.ready());
                 }
+                carIndex++;
             }
 
             final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
@@ -167,5 +185,99 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
 
             txChain.close();
         }
+    }
+
+    /**
+     * Test writing cars with names 256KiB long (twice the size of maxEntrySize from the segmented-journal config).
+     * Fragmentation will have to be used to persist these.
+     */
+    @Test
+    public void testManyFragmentedWritesDeletes() throws Exception {
+        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        CollectionNodeBuilder<MapEntryNode, MapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
+
+        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
+            testParameter, "testManyWritesDeletes", "module-shards-cars-member-1.conf", true, "cars")) {
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+            testKit.doCommit(writeTx.ready());
+
+            Collection<Pair<YangInstanceIdentifier, MapEntryNode>> genCars = generateCars(20,
+                createStringOfSize(256 * 1024, 'a'));
+            int carIndex = 0;
+            for (Pair<YangInstanceIdentifier, MapEntryNode> car : genCars) {
+                DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+
+                YangInstanceIdentifier path = car.getKey();
+                MapEntryNode data = car.getValue();
+
+                rwTx.merge(path, data);
+                carMapBuilder.withChild(data);
+
+                testKit.doCommit(rwTx.ready());
+
+                if (carIndex % 5 == 0) {
+                    rwTx = txChain.newReadWriteTransaction();
+
+                    rwTx.delete(path);
+                    carMapBuilder.withoutChild(path.getLastPathArgument());
+                    testKit.doCommit(rwTx.ready());
+                }
+                carIndex++;
+            }
+
+            final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+                .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
+            assertTrue("isPresent", optional.isPresent());
+
+            MapNode cars = carMapBuilder.build();
+
+            assertEquals("cars not matching result", cars, optional.get());
+
+            txChain.close();
+
+
+            // wait until the journal is actually persisted, killing the datastore early results in missing entries
+            Stopwatch sw = Stopwatch.createStarted();
+            AtomicBoolean done = new AtomicBoolean(false);
+            while (!done.get()) {
+                MemberNode.verifyRaftState(dataStore, "cars", raftState -> {
+                    if (raftState.getLastApplied() == raftState.getLastLogIndex()) {
+                        done.set(true);
+                    }
+                });
+
+                assertTrue("Shard did not persist all journal entries in time.", sw.elapsed(TimeUnit.SECONDS) <= 5);
+
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        // test restoration from journal and verify data matches
+        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
+            testParameter, "testManyWritesDeletes", "module-shards-cars-member-1.conf", true, "cars")) {
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+            MapNode cars = carMapBuilder.build();
+
+            final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+                .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
+            assertTrue("isPresent", optional.isPresent());
+            assertEquals("restored cars do not match snapshot", cars, optional.get());
+
+            txChain.close();
+        }
+    }
+
+    private static String createStringOfSize(final int strSize, final char fillWithChar) {
+        final StringBuilder sb = new StringBuilder(strSize);
+        for (int i = 0; i < strSize; i++) {
+            sb.append(fillWithChar);
+        }
+        return sb.toString();
     }
 }
