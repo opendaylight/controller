@@ -7,20 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.annotations.Beta;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class looks for a previously saved data store backup file in a directory and, if found, de-serializes
@@ -28,72 +17,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public final class DatastoreSnapshotRestore {
-    private static final Logger LOG = LoggerFactory.getLogger(DatastoreSnapshotRestore.class);
+@Beta
+public interface DatastoreSnapshotRestore {
 
-    private static AtomicReference<DatastoreSnapshotRestore> instance = new AtomicReference<>();
-
-    private final String restoreDirectoryPath;
-    private final Map<String, DatastoreSnapshot> datastoreSnapshots = new ConcurrentHashMap<>();
-
-    public static DatastoreSnapshotRestore instance(final String restoreDirectoryPath) {
-        instance.compareAndSet(null, new DatastoreSnapshotRestore(restoreDirectoryPath));
-        return instance.get();
-    }
-
-    private DatastoreSnapshotRestore(final String restoreDirectoryPath) {
-        this.restoreDirectoryPath = requireNonNull(restoreDirectoryPath);
-    }
-
-    // synchronize this method so that, in case of concurrent access to getAndRemove(),
-    // no one ends up with partially initialized data
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private synchronized void initialize() {
-
-        File restoreDirectoryFile = new File(restoreDirectoryPath);
-
-        String[] files = restoreDirectoryFile.list();
-        if (files == null || files.length == 0) {
-            LOG.debug("Restore directory {} does not exist or is empty", restoreDirectoryFile);
-            return;
-        }
-
-        if (files.length > 1) {
-            LOG.error(
-                "Found {} files in clustered datastore restore directory {} - expected 1. No restore will be attempted",
-                files.length, restoreDirectoryFile);
-            return;
-        }
-
-        File restoreFile = new File(restoreDirectoryFile, files[0]);
-
-        LOG.info("Clustered datastore will be restored from file {}", restoreFile);
-
-        try (FileInputStream fis = new FileInputStream(restoreFile)) {
-            DatastoreSnapshotList snapshots = deserialize(fis);
-            LOG.debug("Deserialized {} snapshots", snapshots.size());
-
-            for (DatastoreSnapshot snapshot: snapshots) {
-                datastoreSnapshots.put(snapshot.getType(), snapshot);
-            }
-        } catch (ClassNotFoundException | IOException e) {
-            LOG.error("Error reading clustered datastore restore file {}", restoreFile, e);
-        } finally {
-            if (!restoreFile.delete()) {
-                LOG.error("Could not delete clustered datastore restore file {}", restoreFile);
-            }
-        }
-    }
-
-    private static DatastoreSnapshotList deserialize(final InputStream inputStream)
-            throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(inputStream)) {
-            return (DatastoreSnapshotList) ois.readObject();
-        }
-    }
-
-    public DatastoreSnapshot getAndRemove(final String datastoreType) {
-        initialize();
-        return datastoreSnapshots.remove(datastoreType);
-    }
+    Optional<DatastoreSnapshot> getAndRemove(String datastoreType);
 }

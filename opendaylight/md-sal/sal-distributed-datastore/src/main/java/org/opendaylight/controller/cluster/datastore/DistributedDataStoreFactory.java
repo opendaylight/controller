@@ -44,7 +44,7 @@ public final class DistributedDataStoreFactory {
         LOG.info("Create data store instance of type : {}", datastoreName);
 
         final ActorSystem actorSystem = actorSystemProvider.getActorSystem();
-        final DatastoreSnapshot restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(datastoreName);
+        final DatastoreSnapshot restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(datastoreName).orElse(null);
 
         Configuration config;
         if (orgConfig == null) {
