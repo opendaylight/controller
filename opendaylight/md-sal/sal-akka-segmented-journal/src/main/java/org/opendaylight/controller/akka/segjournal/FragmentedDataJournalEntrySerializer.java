@@ -19,36 +19,27 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import java.util.concurrent.Callable;
-import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
-import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromFragmentedPersistence;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToFragmentedPersistence;
 
-/**
- * Kryo serializer for {@link DataJournalEntry}. Each {@link SegmentedJournalActor} has its own instance, as well as
- * a nested JavaSerializer to handle the payload.
- *
- * <p>
- * Since we are persisting only parts of {@link PersistentRepr}, this class asymmetric by design:
- * {@link #write(Kryo, Output, DataJournalEntry)} only accepts {@link ToPersistence} subclass, which is a wrapper
- * around a {@link PersistentRepr}, while {@link #read(Kryo, Input, Class)} produces an {@link FromPersistence}, which
- * needs further processing to reconstruct a {@link PersistentRepr}.
- *
- * @author Robert Varga
- */
-final class DataJournalEntrySerializer extends Serializer<DataJournalEntry> {
+final class FragmentedDataJournalEntrySerializer extends Serializer<DataJournalEntry> {
     private final JavaSerializer serializer = new JavaSerializer();
     private final ExtendedActorSystem actorSystem;
 
-    DataJournalEntrySerializer(final ActorSystem actorSystem) {
+    FragmentedDataJournalEntrySerializer(final ActorSystem actorSystem) {
         this.actorSystem = requireNonNull((ExtendedActorSystem) actorSystem);
     }
 
     @Override
     public void write(final Kryo kryo, final Output output, final DataJournalEntry object) {
-        verify(object instanceof ToPersistence);
-        final PersistentRepr repr = ((ToPersistence) object).repr();
-        output.writeLong(object.getSequenceNr());
+        verify(object instanceof ToFragmentedPersistence);
+        final ToFragmentedPersistence fragmentedPersistence = (ToFragmentedPersistence) object;
+        final PersistentRepr repr = fragmentedPersistence.repr();
+        output.writeLong(fragmentedPersistence.getSequenceNr());
         output.writeString(repr.manifest());
         output.writeString(repr.writerUuid());
+        output.writeInt(fragmentedPersistence.getFragmentCount());
+        output.writeInt(fragmentedPersistence.getFragmentIndex());
         serializer.write(kryo, output, repr.payload());
     }
 
@@ -57,8 +48,10 @@ final class DataJournalEntrySerializer extends Serializer<DataJournalEntry> {
         final long sequenceNr = input.readLong();
         final String manifest = input.readString();
         final String uuid = input.readString();
-        final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
-            (Callable<Object>) () -> serializer.read(kryo, input, type));
-        return new FromPersistence(sequenceNr, manifest, uuid, payload);
+        final int fragmentCount = input.readInt();
+        final int fragmentIndex = input.readInt();
+        final byte[] payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
+            (Callable<byte[]>) () -> (byte[]) serializer.read(kryo, input, type));
+        return new FromFragmentedPersistence(sequenceNr, manifest, uuid, fragmentCount, fragmentIndex, payload);
     }
 }
