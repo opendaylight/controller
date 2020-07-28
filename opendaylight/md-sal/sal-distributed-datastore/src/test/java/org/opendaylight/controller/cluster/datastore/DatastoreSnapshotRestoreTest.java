@@ -77,18 +77,14 @@ public class DatastoreSnapshotRestoreTest {
             SerializationUtils.serialize(snapshotList, fos);
         }
 
-        DatastoreSnapshotRestore instance = DatastoreSnapshotRestore.instance(restoreDirectoryPath);
+        DatastoreSnapshotRestore instance = new DefaultDatastoreSnapshotRestore(restoreDirectoryPath);
 
-        assertDatastoreSnapshotEquals(configSnapshot, instance.getAndRemove("config"));
-        assertDatastoreSnapshotEquals(operSnapshot, instance.getAndRemove("oper"));
+        assertDatastoreSnapshotEquals(configSnapshot, instance.getAndRemove("config").orElse(null));
+        assertDatastoreSnapshotEquals(operSnapshot, instance.getAndRemove("oper").orElse(null));
 
         assertNull("DatastoreSnapshot was not removed", instance.getAndRemove("config"));
 
         assertFalse(backupFile + " was not deleted", backupFile.exists());
-
-        instance = DatastoreSnapshotRestore.instance(restoreDirectoryPath);
-        assertNull("Expected null DatastoreSnapshot", instance.getAndRemove("config"));
-        assertNull("Expected null DatastoreSnapshot", instance.getAndRemove("oper"));
     }
 
     private static void assertDatastoreSnapshotEquals(final DatastoreSnapshot expected,
