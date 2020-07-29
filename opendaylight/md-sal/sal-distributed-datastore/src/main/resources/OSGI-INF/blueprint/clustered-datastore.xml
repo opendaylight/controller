@@ -16,6 +16,7 @@
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
   <reference id="introspectorFactory" interface="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorFactory"/>
   <reference id="datastoreSnapshotRestore" interface="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"/>
+  <reference id="fileModuleShardConfigProvider" interface="org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider"/>
 
   <cm:cm-properties id="datastoreProps" persistent-id="org.opendaylight.controller.cluster.datastore"/>
 
@@ -49,10 +50,6 @@
   </service>
 
   <!-- Distributed Operational Datastore -->
-  <bean id="fileModuleShardConfigProvider" class="org.opendaylight.controller.cluster.datastore.config.FileModuleShardConfigProvider">
-    <argument value="./configuration/initial/module-shards.conf"/>
-    <argument value="./configuration/initial/modules.conf"/>
-  </bean>
 
   <bean id="configurationImpl" class="org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl">
     <argument ref="fileModuleShardConfigProvider"/>
