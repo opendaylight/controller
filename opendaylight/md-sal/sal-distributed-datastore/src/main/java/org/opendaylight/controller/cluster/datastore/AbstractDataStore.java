@@ -253,13 +253,9 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
         final Duration toWait = initialSettleTime();
         try {
-            if (toWait.isFinite()) {
-                if (!waitTillReadyCountDownLatch.await(toWait.toNanos(), TimeUnit.NANOSECONDS)) {
-                    LOG.error("Shard leaders failed to settle in {}, giving up", toWait);
-                    return;
-                }
-            } else {
-                waitTillReadyCountDownLatch.await();
+            if (!awaitReadiness(toWait)) {
+                LOG.error("Shard leaders failed to settle in {}, giving up", toWait);
+                return;
             }
         } catch (InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
@@ -267,6 +263,21 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         }
 
         LOG.debug("Data store {} is now ready", identifier);
+    }
+
+    @Beta
+    public boolean awaitReadiness() throws InterruptedException {
+        return awaitReadiness(initialSettleTime());
+    }
+
+    @Beta
+    public boolean awaitReadiness(final Duration toWait) throws InterruptedException {
+        if (toWait.isFinite()) {
+            return waitTillReadyCountDownLatch.await(toWait.toNanos(), TimeUnit.NANOSECONDS);
+        }
+
+        waitTillReadyCountDownLatch.await();
+        return true;
     }
 
     @Beta
@@ -301,6 +312,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         return waitTillReadyCountDownLatch;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
             final YangInstanceIdentifier shardLookup, final YangInstanceIdentifier insideShard,
@@ -324,10 +336,10 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         return (ListenerRegistration<L>) listenerRegistrationProxy;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerShardConfigListener(
-            final YangInstanceIdentifier internalPath,
-            final DOMDataTreeChangeListener delegate) {
+            final YangInstanceIdentifier internalPath, final DOMDataTreeChangeListener delegate) {
         requireNonNull(delegate, "delegate should not be null");
 
         LOG.debug("Registering a listener for the configuration shard: {}", internalPath);

@@ -50,7 +50,7 @@ import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -114,8 +114,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
     private final ShardedDOMDataTree shardedDOMDataTree;
     private final ActorSystem actorSystem;
-    private final AbstractDataStore distributedOperDatastore;
-    private final AbstractDataStore distributedConfigDatastore;
+    private final DistributedDataStoreInterface distributedOperDatastore;
+    private final DistributedDataStoreInterface distributedConfigDatastore;
 
     private final ActorRef shardedDataTreeActor;
     private final MemberName memberName;
@@ -133,8 +133,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private final PrefixedShardConfigUpdateHandler updateHandler;
 
     public DistributedShardedDOMDataTree(final ActorSystemProvider actorSystemProvider,
-                                         final AbstractDataStore distributedOperDatastore,
-                                         final AbstractDataStore distributedConfigDatastore) {
+                                         final DistributedDataStoreInterface distributedOperDatastore,
+                                         final DistributedDataStoreInterface distributedConfigDatastore) {
         this.actorSystem = requireNonNull(actorSystemProvider).getActorSystem();
         this.distributedOperDatastore = requireNonNull(distributedOperDatastore);
         this.distributedConfigDatastore = requireNonNull(distributedConfigDatastore);
@@ -160,7 +160,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         createPrefixConfigShard(distributedOperDatastore);
     }
 
-    private static void createPrefixConfigShard(final AbstractDataStore dataStore) {
+    private static void createPrefixConfigShard(final DistributedDataStoreInterface dataStore) {
         Configuration configuration = dataStore.getActorUtils().getConfiguration();
         Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShardMessage =
@@ -255,7 +255,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         final Future<Object> ask =
                 Patterns.ask(shardedDataTreeActor, new StartConfigShardLookup(type), SHARD_FUTURE_TIMEOUT);
 
-        ask.onComplete(new OnComplete<Object>() {
+        ask.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable throwable, final Object result) {
                 if (throwable != null) {
@@ -377,8 +377,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private void createShardFrontend(final DOMDataTreeIdentifier prefix) {
         LOG.debug("{}: Creating CDS shard for prefix: {}", memberName, prefix);
         final String shardName = ClusterUtils.getCleanShardName(prefix.getRootIdentifier());
-        final AbstractDataStore distributedDataStore =
-                prefix.getDatastoreType().equals(org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION)
+        final DistributedDataStoreInterface distributedDataStore =
+                prefix.getDatastoreType().equals(LogicalDatastoreType.CONFIGURATION)
                         ? distributedConfigDatastore : distributedOperDatastore;
 
         try (DOMDataTreeProducer producer = localCreateProducer(Collections.singletonList(prefix))) {

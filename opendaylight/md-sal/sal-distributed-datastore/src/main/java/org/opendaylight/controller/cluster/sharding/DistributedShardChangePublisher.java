@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
@@ -51,7 +51,7 @@ public class DistributedShardChangePublisher
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardChangePublisher.class);
 
-    private final AbstractDataStore distributedDataStore;
+    private final DistributedDataStoreInterface distributedDataStore;
     private final YangInstanceIdentifier shardPath;
 
     private final Map<DOMDataTreeIdentifier, ChildShardContext> childShards;
@@ -60,7 +60,7 @@ public class DistributedShardChangePublisher
     private final DataTree dataTree;
 
     public DistributedShardChangePublisher(final DataStoreClient client,
-                                           final AbstractDataStore distributedDataStore,
+                                           final DistributedDataStoreInterface distributedDataStore,
                                            final DOMDataTreeIdentifier prefix,
                                            final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
         this.distributedDataStore = distributedDataStore;
