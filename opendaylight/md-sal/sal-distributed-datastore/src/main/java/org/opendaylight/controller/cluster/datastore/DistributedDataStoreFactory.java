@@ -40,13 +40,30 @@ public final class DistributedDataStoreFactory {
             final ActorSystemProvider actorSystemProvider, final DatastoreContextIntrospector introspector,
             final DatastoreContextPropertiesUpdater updater, final Configuration orgConfig) {
 
+        final AbstractDataStore dataStore = createInstance(actorSystemProvider, initialDatastoreContext,
+            introspector, datastoreSnapshotRestore, orgConfig);
+
+        updater.setListener(dataStore);
+
+        schemaService.registerSchemaContextListener(dataStore);
+
+        dataStore.setCloseable(updater);
+        dataStore.waitTillReady();
+
+        return dataStore;
+    }
+
+    public static AbstractDataStore createInstance(final ActorSystemProvider actorSystemProvider,
+            final DatastoreContext initialDatastoreContext, final DatastoreContextIntrospector introspector,
+            final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig) {
+
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
 
         final ActorSystem actorSystem = actorSystemProvider.getActorSystem();
         final DatastoreSnapshot restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(datastoreName).orElse(null);
 
-        Configuration config;
+        final Configuration config;
         if (orgConfig == null) {
             config = new ConfigurationImpl(DEFAULT_MODULE_SHARDS_PATH, DEFAULT_MODULES_PATH);
         } else {
@@ -68,12 +85,6 @@ public final class DistributedDataStoreFactory {
                 restoreFromSnapshot);
             LOG.info("Data store {} is using ask-based protocol", datastoreName);
         }
-        updater.setListener(dataStore);
-
-        schemaService.registerSchemaContextListener(dataStore);
-
-        dataStore.setCloseable(updater);
-        dataStore.waitTillReady();
 
         return dataStore;
     }
