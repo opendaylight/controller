@@ -38,8 +38,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
@@ -90,8 +90,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     // for calls that need specific actor context tied to a datastore use the one provided in the DistributedDataStore
     private final ActorUtils actorUtils;
     private final ShardingServiceAddressResolver resolver;
-    private final AbstractDataStore distributedConfigDatastore;
-    private final AbstractDataStore distributedOperDatastore;
+    private final DistributedDataStoreInterface distributedConfigDatastore;
+    private final DistributedDataStoreInterface distributedOperDatastore;
     private final int lookupTaskMaxRetries;
 
     private final Map<DOMDataTreeIdentifier, ActorProducerRegistration> idToProducer = new HashMap<>();
@@ -499,7 +499,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             final Future<Object> ask = Patterns.ask(shard, FindLeader.INSTANCE, context.getOperationTimeout());
 
-            ask.onComplete(new OnComplete<Object>() {
+            ask.onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable throwable, final Object findLeaderReply) {
                     if (throwable != null) {
@@ -725,7 +725,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         public void run() {
             final Future<Object> ask = Patterns.ask(shard, FindLeader.INSTANCE, context.getOperationTimeout());
 
-            ask.onComplete(new OnComplete<Object>() {
+            ask.onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable throwable, final Object findLeaderReply) {
                     if (throwable != null) {
@@ -750,8 +750,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     public static class ShardedDataTreeActorCreator {
 
         private DistributedShardedDOMDataTree shardingService;
-        private AbstractDataStore distributedConfigDatastore;
-        private AbstractDataStore distributedOperDatastore;
+        private DistributedDataStoreInterface distributedConfigDatastore;
+        private DistributedDataStoreInterface distributedOperDatastore;
         private ActorSystem actorSystem;
         private ClusterWrapper cluster;
         private int maxRetries;
@@ -783,22 +783,22 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             return cluster;
         }
 
-        public AbstractDataStore getDistributedConfigDatastore() {
+        public DistributedDataStoreInterface getDistributedConfigDatastore() {
             return distributedConfigDatastore;
         }
 
         public ShardedDataTreeActorCreator setDistributedConfigDatastore(
-                final AbstractDataStore distributedConfigDatastore) {
+                final DistributedDataStoreInterface distributedConfigDatastore) {
             this.distributedConfigDatastore = distributedConfigDatastore;
             return this;
         }
 
-        public AbstractDataStore getDistributedOperDatastore() {
+        public DistributedDataStoreInterface getDistributedOperDatastore() {
             return distributedOperDatastore;
         }
 
         public ShardedDataTreeActorCreator setDistributedOperDatastore(
-                final AbstractDataStore distributedOperDatastore) {
+                final DistributedDataStoreInterface distributedOperDatastore) {
             this.distributedOperDatastore = distributedOperDatastore;
             return this;
         }

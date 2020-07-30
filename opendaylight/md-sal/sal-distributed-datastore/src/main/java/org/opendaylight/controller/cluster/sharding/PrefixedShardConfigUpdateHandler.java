@@ -19,7 +19,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.PrefixShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
@@ -60,7 +60,7 @@ public class PrefixedShardConfigUpdateHandler {
         this.memberName = requireNonNull(memberName);
     }
 
-    public void initListener(final AbstractDataStore dataStore, final LogicalDatastoreType type) {
+    public void initListener(final DistributedDataStoreInterface dataStore, final LogicalDatastoreType type) {
         registrations.put(type, dataStore.registerShardConfigListener(
                 ClusterUtils.SHARD_LIST_PATH, new ShardConfigHandler(memberName, type, handlingActor)));
     }
