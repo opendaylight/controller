@@ -38,5 +38,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>messagebus-spi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+        </dependency>
     </dependencies>
 </project>
