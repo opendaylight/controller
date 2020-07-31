@@ -17,10 +17,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -1049,13 +1047,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.handleCommand(new RoleChangeNotification(
                 memberId, RaftState.Candidate.name(), RaftState.Leader.name()));
-
-        verify(ready, never()).countDown();
+        assertFalse(ready.isDone());
 
         shardManager.handleCommand(new ShardLeaderStateChanged(memberId, memberId,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
-
-        verify(ready, times(1)).countDown();
+        assertTrue(ready.isDone());
     }
 
     @Test
@@ -1065,16 +1061,14 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.handleCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
-
-        verify(ready, never()).countDown();
+        assertFalse(ready.isDone());
 
         shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
 
         shardManager.handleCommand(
             new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
-
-        verify(ready, times(1)).countDown();
+        assertTrue(ready.isDone());
     }
 
     @Test
@@ -1084,16 +1078,14 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.handleCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
-
-        verify(ready, never()).countDown();
+        assertFalse(ready.isDone());
 
         shardManager.handleCommand(
             new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
 
         shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
-
-        verify(ready, times(1)).countDown();
+        assertTrue(ready.isDone());
     }
 
     @Test
@@ -1102,8 +1094,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         shardManager.handleCommand(new RoleChangeNotification("unknown", RaftState.Candidate.name(),
             RaftState.Leader.name()));
-
-        verify(ready, never()).countDown();
+        assertFalse(ready.isDone());
     }
 
     @Test
@@ -2267,7 +2258,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         AbstractGenericCreator(final Class<C> shardManagerClass) {
             this.shardManagerClass = shardManagerClass;
-            cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).waitTillReadyCountDownLatch(ready)
+            cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).readinessFuture(ready)
                     .primaryShardInfoCache(new PrimaryShardInfoFutureCache());
         }
 

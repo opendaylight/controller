@@ -11,7 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.Props;
-import java.util.concurrent.CountDownLatch;
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
@@ -20,11 +20,11 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 
 public abstract class AbstractShardManagerCreator<T extends AbstractShardManagerCreator<T>> {
+    private SettableFuture<Void> readinessFuture;
     private ClusterWrapper cluster;
     private Configuration configuration;
     private DatastoreContextFactory datastoreContextFactory;
     private AbstractDataStore distributedDataStore;
-    private CountDownLatch waitTillReadyCountDownLatch;
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
     private volatile boolean sealed;
@@ -82,13 +82,13 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return self();
     }
 
-    CountDownLatch getWaitTillReadyCountDownLatch() {
-        return waitTillReadyCountDownLatch;
+    SettableFuture<Void> getReadinessFuture() {
+        return readinessFuture;
     }
 
-    public T waitTillReadyCountDownLatch(final CountDownLatch newWaitTillReadyCountDownLatch) {
+    public T readinessFuture(final SettableFuture<Void> newReadinessFuture) {
         checkSealed();
-        this.waitTillReadyCountDownLatch = newWaitTillReadyCountDownLatch;
+        this.readinessFuture = newReadinessFuture;
         return self();
     }
 
@@ -118,7 +118,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         requireNonNull(configuration, "configuration should not be null");
         requireNonNull(datastoreContextFactory, "datastoreContextFactory should not be null");
         requireNonNull(distributedDataStore, "distributedDataStore should not be null");
-        requireNonNull(waitTillReadyCountDownLatch, "waitTillReadyCountdownLatch should not be null");
+        requireNonNull(readinessFuture, "readinessFuture should not be null");
         requireNonNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
 
