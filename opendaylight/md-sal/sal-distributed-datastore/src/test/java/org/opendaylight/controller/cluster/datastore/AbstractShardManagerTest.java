@@ -14,11 +14,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import java.util.concurrent.CountDownLatch;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -42,8 +41,7 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
             .dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
             .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
 
-    @Mock
-    protected static CountDownLatch ready;
+    protected static SettableFuture<Void> ready;
 
     protected TestShardManager.Builder newTestShardMgrBuilder() {
         return TestShardManager.builder(datastoreContextBuilder).distributedDataStore(mock(DistributedDataStore.class));
@@ -55,12 +53,13 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     protected Props newShardMgrProps(final Configuration config) {
-        return newTestShardMgrBuilder(config).waitTillReadyCountDownLatch(ready).props();
+        return newTestShardMgrBuilder(config).readinessFuture(ready).props();
     }
 
     @Before
     public void setUp() {
         initMocks(this);
+        ready = SettableFuture.create();
 
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();

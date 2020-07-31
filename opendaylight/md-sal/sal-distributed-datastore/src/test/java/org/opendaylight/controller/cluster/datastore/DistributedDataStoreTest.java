@@ -124,7 +124,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
             Executors.newSingleThreadExecutor().submit(() -> {
                 Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-                distributedDataStore.getWaitTillReadyCountDownLatch().countDown();
+                distributedDataStore.readinessFuture().set(null);
             });
 
             long start = System.currentTimeMillis();

@@ -17,9 +17,11 @@ import akka.actor.Props;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -60,7 +62,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStore.class);
 
-    private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
+    private final SettableFuture<Void> readinessFuture = SettableFuture.create();
     private final ClientIdentifier identifier;
     private final DataStoreClient client;
     private final ActorUtils actorUtils;
@@ -90,7 +92,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
         AbstractShardManagerCreator<?> creator = getShardManagerCreator().cluster(cluster).configuration(configuration)
                 .datastoreContextFactory(datastoreContextFactory)
-                .waitTillReadyCountDownLatch(waitTillReadyCountDownLatch)
+                .readinessFuture(readinessFuture)
                 .primaryShardInfoCache(primaryShardInfoCache)
                 .restoreFromSnapshot(restoreFromSnapshot)
                 .distributedDataStore(this);
@@ -248,6 +250,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     // TODO: consider removing this in favor of awaitReadiness()
+    @Deprecated
     public void waitTillReady() {
         LOG.info("Beginning to wait for data store to become ready : {}", identifier);
 
@@ -266,23 +269,36 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @Beta
+    @Deprecated
     public boolean awaitReadiness() throws InterruptedException {
         return awaitReadiness(initialSettleTime());
     }
 
     @Beta
+    @Deprecated
     public boolean awaitReadiness(final Duration toWait) throws InterruptedException {
-        if (toWait.isFinite()) {
-            return waitTillReadyCountDownLatch.await(toWait.toNanos(), TimeUnit.NANOSECONDS);
+        try {
+            if (toWait.isFinite()) {
+                try {
+                    readinessFuture.get(toWait.toNanos(), TimeUnit.NANOSECONDS);
+                } catch (TimeoutException e) {
+                    LOG.debug("Timed out waiting for shards to settle", e);
+                    return false;
+                }
+            } else {
+                readinessFuture.get();
+            }
+        } catch (ExecutionException e) {
+            LOG.warn("Unexpected readiness failure, assuming convergence", e);
         }
 
-        waitTillReadyCountDownLatch.await();
         return true;
     }
 
     @Beta
+    @Deprecated
     public void awaitReadiness(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException {
-        if (!waitTillReadyCountDownLatch.await(timeout, unit)) {
+        if (!awaitReadiness(Duration.create(timeout, unit))) {
             throw new TimeoutException("Shard leaders failed to settle");
         }
     }
@@ -307,9 +323,18 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         throw new IllegalStateException("Failed to create Shard Manager", lastException);
     }
 
+    /**
+     * Future which completes when all shards settle for the first time.
+     *
+     * @return A Listenable future.
+     */
+    public final ListenableFuture<?> initialSettleFuture() {
+        return readinessFuture;
+    }
+
     @VisibleForTesting
-    public CountDownLatch getWaitTillReadyCountDownLatch() {
-        return waitTillReadyCountDownLatch;
+    SettableFuture<Void> readinessFuture() {
+        return readinessFuture;
     }
 
     @Override
