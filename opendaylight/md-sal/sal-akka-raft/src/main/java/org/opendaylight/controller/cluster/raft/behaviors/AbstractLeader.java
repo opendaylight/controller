@@ -20,21 +20,16 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
-import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
-import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -86,14 +81,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
 
     /**
-     * Lookup table for request contexts based on journal index. We could use a {@link Map} here, but we really
-     * expect the entries to be modified in sequence, hence we open-code the lookup.
-     * TODO: Evaluate the use of ArrayDeque(), as that has lower memory overhead. Non-head removals are more costly,
-     *       but we already expect those to be far from frequent.
-     */
-    private final Queue<ClientRequestTracker> trackers = new LinkedList<>();
-
-    /**
      * Map of serialized AppendEntries output streams keyed by log index. This is used in conjunction with the
      * appendEntriesMessageSlicer for slicing single ReplicatedLogEntry payloads that exceed the message size threshold.
      * This Map allows the SharedFileBackedOutputStreams to be reused for multiple followers.
@@ -117,7 +104,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         if (initializeFromLeader != null) {
             followerToLog.putAll(initializeFromLeader.followerToLog);
             snapshotHolder = initializeFromLeader.snapshotHolder;
-            trackers.addAll(initializeFromLeader.trackers);
         } else {
             for (PeerInfo peerInfo: context.getPeers()) {
                 FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
@@ -436,38 +422,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         super.performSnapshotWithoutCapture(minReplicatedToAllIndex);
     }
 
-    /**
-     * Removes and returns the ClientRequestTracker for the specified log index.
-     * @param logIndex the log index
-     * @return the ClientRequestTracker or null if none available
-     */
-    private ClientRequestTracker removeClientRequestTracker(final long logIndex) {
-        final Iterator<ClientRequestTracker> it = trackers.iterator();
-        while (it.hasNext()) {
-            final ClientRequestTracker t = it.next();
-            if (t.getIndex() == logIndex) {
-                it.remove();
-                return t;
-            }
-        }
-
-        return null;
-    }
-
     @Override
     final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
-        // first check whether a ClientRequestTracker exists for this entry.
-        // If it does that means the leader wasn't dropped before the transaction applied.
-        // That means that this transaction can be safely applied as a local transaction since we
-        // have the ClientRequestTracker.
-        final ClientRequestTracker tracker = removeClientRequestTracker(entry.getIndex());
-        if (tracker != null) {
-            return new ApplyState(tracker.getClientActor(), tracker.getIdentifier(), entry);
-        }
-
-        // Tracker is missing, this means that we switched behaviours between replicate and applystate
-        // and became the leader again,. We still want to apply this as a local modification because
-        // we have resumed leadership with that log entry having been committed.
+        // Check if payload has identifier, if it has - apply this as local transaction
         final Payload payload = entry.getData();
         if (payload instanceof IdentifiablePayload) {
             return new ApplyState(null, ((IdentifiablePayload<?>) payload).getIdentifier(), entry);
@@ -647,11 +604,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 replicate.getIdentifier(), logIndex, replicate.getReplicatedLogEntry().getData().getClass(),
                 replicate.isSendImmediate());
 
-        // Create a tracker entry we will use this later to notify the
-        // client actor
-        if (replicate.getClientActor() != null) {
-            trackers.add(new ClientRequestTrackerImpl(replicate.getClientActor(), replicate.getIdentifier(),
-                    logIndex));
+        Payload payload = replicate.getReplicatedLogEntry().getData();
+        if (payload instanceof ServerConfigurationPayload) {
+            ((ServerConfigurationPayload)payload).setIdentifier(replicate.getIdentifier());
         }
 
         boolean applyModificationToState = !context.anyVotingPeers()
