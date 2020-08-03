@@ -550,12 +550,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         long newLogIndex = actorContext.getReplicatedLog().lastIndex() + 1;
         long term = actorContext.getTermInformation().getCurrentTerm();
+        final Identifier id = new MockIdentifier("state-id");
+        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("foo", id);
         ReplicatedLogEntry newEntry = new SimpleReplicatedLogEntry(
-                newLogIndex, term, new MockRaftActorContext.MockPayload("foo"));
+                newLogIndex, term, payload);
 
         actorContext.getReplicatedLog().append(newEntry);
 
-        final Identifier id = new MockIdentifier("state-id");
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
                 new Replicate(leaderActor, id, newEntry, true));
 

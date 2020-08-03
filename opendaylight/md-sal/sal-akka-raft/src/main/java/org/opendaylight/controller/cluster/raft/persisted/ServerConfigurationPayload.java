@@ -19,8 +19,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public final class ServerConfigurationPayload extends Payload implements PersistentPayload, Serializable {
+public final class ServerConfigurationPayload extends IdentifiablePayload implements PersistentPayload, Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -79,9 +80,14 @@ public final class ServerConfigurationPayload extends Payload implements Persist
             + "aren't serialized. FindBugs does not recognize this.")
     private final List<ServerInfo> serverConfig;
     private int serializedSize = -1;
+    private Identifier identifier = null;
 
     public ServerConfigurationPayload(final @NonNull List<ServerInfo> serverConfig) {
         this.serverConfig = ImmutableList.copyOf(serverConfig);
+    }
+
+    public void setIdentifier(final @NonNull Identifier identifier) {
+        this.identifier = identifier;
     }
 
     public @NonNull List<ServerInfo> getServerConfig() {
@@ -132,6 +138,11 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     @Override
     public String toString() {
         return "ServerConfigurationPayload [serverConfig=" + serverConfig + "]";
+    }
+
+    @Override
+    public Object getIdentifier() {
+        return identifier;
     }
 
     private Object writeReplace() {
