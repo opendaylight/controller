@@ -28,7 +28,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,10 +201,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static class MockPayload extends Payload implements Serializable {
+    public static class MockPayload extends IdentifiablePayload implements Serializable {
         private static final long serialVersionUID = 3121380393130864247L;
         private String value = "";
         private int size;
+        private Identifier id;
 
         public MockPayload() {
         }
@@ -211,11 +213,22 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public MockPayload(final String data) {
             this.value = data;
             size = value.length();
+            this.id = new AbstractRaftActorIntegrationTest.MockIdentifier(data);
+        }
+
+        public MockPayload(final String data, final Identifier id) {
+            this(data);
+            this.id = id;
         }
 
         public MockPayload(final String data, final int size) {
             this(data);
             this.size = size;
+        }
+
+        @Override
+        public Object getIdentifier() {
+            return id;
         }
 
         @Override
