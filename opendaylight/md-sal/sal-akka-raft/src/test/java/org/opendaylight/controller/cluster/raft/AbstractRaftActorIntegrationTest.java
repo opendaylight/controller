@@ -65,7 +65,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
 
-    private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
+    static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
         private static final long serialVersionUID = 1L;
 
         protected MockIdentifier(final String string) {
@@ -368,8 +368,6 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected void verifyApplyState(final ApplyState applyState, final ActorRef expClientActor,
             final String expId, final long expTerm, final long expIndex, final Payload payload) {
-        assertEquals("ApplyState getClientActor", expClientActor, applyState.getClientActor());
-
         final Identifier id = expId == null ? null : new MockIdentifier(expId);
         assertEquals("ApplyState getIdentifier", id, applyState.getIdentifier());
         ReplicatedLogEntry replicatedLogEntry = applyState.getReplicatedLogEntry();
