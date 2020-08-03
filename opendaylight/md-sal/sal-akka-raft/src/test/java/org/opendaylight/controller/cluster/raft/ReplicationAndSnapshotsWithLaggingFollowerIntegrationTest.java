@@ -368,6 +368,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 new ServerInfo(leaderId, true),
                 new ServerInfo(follower1Id, false),
                 new ServerInfo(follower2Id, false)));
+        serverConfig.setIdentifier(new AbstractRaftActorIntegrationTest.MockIdentifier("serverConfig"));
         leaderContext.updatePeerIds(serverConfig);
         ((AbstractLeader)leader).updateMinReplicaCount();
         leaderActor.tell(serverConfig, ActorRef.noSender());
