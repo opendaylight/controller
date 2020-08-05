@@ -1478,6 +1478,11 @@ In addition, the following ODL extension query parameter is supported:
   contain the leaf nodes modified instead of the entire subscription subtree.
   This can help in reducing the size of the notifications.
 
+:odl-skip-notification-data:
+  If this parameter is set to "true", create and update notifications will only
+  contain modified leaf nodes without data.
+  This can help in reducing the size of the notifications.
+
 The expected response status is 200 OK and response body should be
 empty. You will get your WebSocket location from **Location** header of
 response. For example in our particular toaster example location header
