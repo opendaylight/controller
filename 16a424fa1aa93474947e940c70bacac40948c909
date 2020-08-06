@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0cf6645b_bbaf7752",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 8762
+      },
+      "writtenOn": "2020-08-06T18:05:04Z",
+      "side": 1,
+      "message": "If I uderstand the logic correctly this method resets the snapshot state to the initial one, right? Why not introduce a new public method like \u0027cleanUpAfterSnapshot\u0027?",
+      "revId": "16a424fa1aa93474947e940c70bacac40948c909",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
