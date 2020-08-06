@@ -46,7 +46,6 @@ public class SharedFileBackedOutputStreamTest {
     @Before
     public void setup() {
         FileBackedOutputStreamTest.deleteTempFiles(TEMP_DIR);
-        FileBackedOutputStream.REFERENCE_CACHE.clear();
     }
 
     @After
