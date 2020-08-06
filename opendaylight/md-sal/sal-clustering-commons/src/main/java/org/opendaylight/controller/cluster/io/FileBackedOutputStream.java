@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.cluster.io;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.FinalizablePhantomReference;
-import com.google.common.base.FinalizableReferenceQueue;
-import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayInputStream;
@@ -19,9 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.Cleaner;
 import java.nio.file.Files;
-import java.util.Iterator;
-import java.util.Set;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -38,18 +33,8 @@ import org.slf4j.LoggerFactory;
 public class FileBackedOutputStream extends OutputStream {
     private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStream.class);
 
-    /**
-     * This stores the Cleanup PhantomReference instances statically. This is necessary because PhantomReferences
-     * need a hard reference so they're not garbage collected. Once finalized, the Cleanup PhantomReference removes
-     * itself from this map and thus becomes eligible for garbage collection.
-     */
-    @VisibleForTesting
-    static final Set<Cleanup> REFERENCE_CACHE = Sets.newConcurrentHashSet();
-
-    /**
-     * Used as the ReferenceQueue for the Cleanup PhantomReferences.
-     */
-    private static final FinalizableReferenceQueue REFERENCE_QUEUE = new FinalizableReferenceQueue();
+    private final Cleaner cleaner = Cleaner.create();
+    private Cleaner.Cleanable onClose;
 
     private final int fileThreshold;
     private final String fileDirectory;
@@ -141,6 +126,7 @@ public class FileBackedOutputStream extends OutputStream {
             OutputStream closeMe = out;
             out = null;
             closeMe.close();
+            onClose.clean();
         }
     }
 
@@ -164,14 +150,6 @@ public class FileBackedOutputStream extends OutputStream {
         closeQuietly();
 
         if (file != null) {
-            Iterator<Cleanup> iter = REFERENCE_CACHE.iterator();
-            while (iter.hasNext()) {
-                if (file.equals(iter.next().file)) {
-                    iter.remove();
-                    break;
-                }
-            }
-
             LOG.debug("cleanup - deleting temp file {}", file);
 
             deleteFile(file);
@@ -216,7 +194,7 @@ public class FileBackedOutputStream extends OutputStream {
                 file = temp;
                 memory = null;
 
-                new Cleanup(this, file);
+                onClose = cleaner.register(this, new Cleanup(file));
             } catch (IOException e) {
                 if (transfer != null) {
                     try {
@@ -251,28 +229,19 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
-    /**
-     * PhantomReference that deletes the temp file when the FileBackedOutputStream is garbage collected.
-     */
-    private static class Cleanup extends FinalizablePhantomReference<FileBackedOutputStream> {
-        private final File file;
+    static class Cleanup implements Runnable {
 
-        Cleanup(final FileBackedOutputStream referent, final File file) {
-            super(referent, REFERENCE_QUEUE);
+        private File file;
+
+        Cleanup(File file) {
             this.file = file;
-
-            REFERENCE_CACHE.add(this);
-
-            LOG.debug("Added Cleanup for temp file {}", file);
         }
 
         @Override
-        public void finalizeReferent() {
-            LOG.debug("In finalizeReferent");
-
-            if (REFERENCE_CACHE.remove(this)) {
-                LOG.debug("finalizeReferent - deleting temp file {}", file);
-                deleteFile(file);
+        public void run() {
+            LOG.debug("finalizeReferent - deleting temp file {}", file);
+            if (!file.delete()) {
+                LOG.warn("Could not delete temp file {}", file);
             }
         }
     }
