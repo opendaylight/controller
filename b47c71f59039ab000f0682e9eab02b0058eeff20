@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ab9a9c0_8febd993",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 8762
+      },
+      "writtenOn": "2020-08-06T17:41:02Z",
+      "side": 1,
+      "message": "I assume this can be declared as final",
+      "revId": "b47c71f59039ab000f0682e9eab02b0058eeff20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9d01672_1508b6de",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 8762
+      },
+      "writtenOn": "2020-08-06T17:41:02Z",
+      "side": 1,
+      "message": "I\u0027m not very familiar with JDK9, but does it make sense to do the cleanup inside close method?",
+      "revId": "b47c71f59039ab000f0682e9eab02b0058eeff20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
