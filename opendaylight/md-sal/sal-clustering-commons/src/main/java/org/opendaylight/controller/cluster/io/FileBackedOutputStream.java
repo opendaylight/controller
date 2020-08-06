@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.cluster.io;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.FinalizablePhantomReference;
-import com.google.common.base.FinalizableReferenceQueue;
-import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayInputStream;
@@ -19,9 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.Cleaner;
+import java.lang.ref.Cleaner.Cleanable;
 import java.nio.file.Files;
-import java.util.Iterator;
-import java.util.Set;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -39,17 +35,10 @@ public class FileBackedOutputStream extends OutputStream {
     private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStream.class);
 
     /**
-     * This stores the Cleanup PhantomReference instances statically. This is necessary because PhantomReferences
-     * need a hard reference so they're not garbage collected. Once finalized, the Cleanup PhantomReference removes
-     * itself from this map and thus becomes eligible for garbage collection.
+     * A Cleaner instance responsible for deleting any files which may be lost due to us not being cleaning up
+     * temporary files.
      */
-    @VisibleForTesting
-    static final Set<Cleanup> REFERENCE_CACHE = Sets.newConcurrentHashSet();
-
-    /**
-     * Used as the ReferenceQueue for the Cleanup PhantomReferences.
-     */
-    private static final FinalizableReferenceQueue REFERENCE_QUEUE = new FinalizableReferenceQueue();
+    private static final Cleaner FILE_CLEANER = Cleaner.create();
 
     private final int fileThreshold;
     private final String fileDirectory;
@@ -62,6 +51,8 @@ public class FileBackedOutputStream extends OutputStream {
 
     @GuardedBy("this")
     private File file;
+    @GuardedBy("this")
+    private Cleanable fileCleanup;
 
     @GuardedBy("this")
     private ByteSource source;
@@ -160,23 +151,12 @@ public class FileBackedOutputStream extends OutputStream {
      */
     public synchronized void cleanup() {
         LOG.debug("In cleanup");
-
         closeQuietly();
-
-        if (file != null) {
-            Iterator<Cleanup> iter = REFERENCE_CACHE.iterator();
-            while (iter.hasNext()) {
-                if (file.equals(iter.next().file)) {
-                    iter.remove();
-                    break;
-                }
-            }
-
-            LOG.debug("cleanup - deleting temp file {}", file);
-
-            deleteFile(file);
-            file = null;
+        if (fileCleanup != null) {
+            fileCleanup.clean();
         }
+        // Already deleted above
+        file = null;
     }
 
     @Holding("this")
@@ -210,13 +190,6 @@ public class FileBackedOutputStream extends OutputStream {
                 transfer = Files.newOutputStream(temp.toPath());
                 transfer.write(memory.getBuffer(), 0, memory.getCount());
                 transfer.flush();
-
-                // We've successfully transferred the data; switch to writing to file
-                out = transfer;
-                file = temp;
-                memory = null;
-
-                new Cleanup(this, file);
             } catch (IOException e) {
                 if (transfer != null) {
                     try {
@@ -229,6 +202,12 @@ public class FileBackedOutputStream extends OutputStream {
                 deleteFile(temp);
                 throw e;
             }
+
+            // We've successfully transferred the data; switch to writing to file
+            out = transfer;
+            fileCleanup = FILE_CLEANER.register(this, new Cleanup(temp));
+            file = temp;
+            memory = null;
         }
     }
 
@@ -251,29 +230,17 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
-    /**
-     * PhantomReference that deletes the temp file when the FileBackedOutputStream is garbage collected.
-     */
-    private static class Cleanup extends FinalizablePhantomReference<FileBackedOutputStream> {
+    static final class Cleanup implements Runnable {
         private final File file;
 
-        Cleanup(final FileBackedOutputStream referent, final File file) {
-            super(referent, REFERENCE_QUEUE);
+        Cleanup(final File file) {
             this.file = file;
-
-            REFERENCE_CACHE.add(this);
-
-            LOG.debug("Added Cleanup for temp file {}", file);
         }
 
         @Override
-        public void finalizeReferent() {
-            LOG.debug("In finalizeReferent");
-
-            if (REFERENCE_CACHE.remove(this)) {
-                LOG.debug("finalizeReferent - deleting temp file {}", file);
-                deleteFile(file);
-            }
+        public void run() {
+            LOG.debug("Deleting temp file {}", file);
+            deleteFile(file);
         }
     }
 }
