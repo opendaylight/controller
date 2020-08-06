@@ -52,7 +52,6 @@ public class FileBackedOutputStreamTest {
     @Before
     public void setup() {
         deleteTempFiles(TEMP_DIR);
-        FileBackedOutputStream.REFERENCE_CACHE.clear();
     }
 
     @After
@@ -75,8 +74,6 @@ public class FileBackedOutputStreamTest {
             // Read bytes twice.
             assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
             assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
-
-            assertEquals("Reference cache size", 0, FileBackedOutputStream.REFERENCE_CACHE.size());
 
             fbos.cleanup();
         }
@@ -112,11 +109,7 @@ public class FileBackedOutputStreamTest {
 
             inputStream.close();
 
-            assertEquals("Reference cache size", 1, FileBackedOutputStream.REFERENCE_CACHE.size());
-
             fbos.cleanup();
-
-            assertEquals("Reference cache size", 0, FileBackedOutputStream.REFERENCE_CACHE.size());
 
             assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
         }
