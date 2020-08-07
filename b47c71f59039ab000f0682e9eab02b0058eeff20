@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2a152ffe_6bb744b2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-08-07T07:35:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1ab9a9c0_8febd993",
+      "revId": "b47c71f59039ab000f0682e9eab02b0058eeff20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d9d01672_1508b6de",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2020-08-06T17:41:02Z",
       "side": 1,
       "message": "I\u0027m not very familiar with JDK9, but does it make sense to do the cleanup inside close method?",
+      "revId": "b47c71f59039ab000f0682e9eab02b0058eeff20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d3fa292_fba1c445",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-08-07T07:35:32Z",
+      "side": 1,
+      "message": "I don`t really get it, what cleanup do you mean?",
+      "parentUuid": "d9d01672_1508b6de",
       "revId": "b47c71f59039ab000f0682e9eab02b0058eeff20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
