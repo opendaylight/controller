@@ -10,7 +10,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>rymtest</artifactId>
     <version>1.10.4-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>pom</packaging>
 
     <modules>
         <module>impl</module>

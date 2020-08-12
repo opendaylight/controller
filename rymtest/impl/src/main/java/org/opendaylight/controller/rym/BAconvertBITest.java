@@ -5,10 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.rymtest;
+package org.opendaylight.controller.rym;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 
@@ -16,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -37,22 +34,27 @@ public class BAconvertBITest extends AbstractConcurrentDataBrokerTest {
     private static final InstanceIdentifier<Level1> NODE_PATH = InstanceIdentifier.builder(Level1.class, LEVEL_1_KEY).build();
     private static final Level1 NODE = new Level1Builder().withKey(LEVEL_1_KEY).setTest3("L1_3").setTest4("L1_4").build();
 
-    @Test
     public void testSubmit() throws InterruptedException, ExecutionException, TimeoutException {
         Thread.sleep(30000);
-        while (true) {
+//        while (true) {
             WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
             long start = System.currentTimeMillis();
             writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE);
             System.out.println(System.currentTimeMillis() - start);
             writeTx.submit().get(5, TimeUnit.SECONDS);
-        }
+//        }
 //
 //        ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
 //        Optional<TopLevelList> listNode = readTx.read(LogicalDatastoreType.OPERATIONAL, NODE_PATH).get();
 //        assertTrue("List node must exists after commit", listNode.isPresent());
 //        assertEquals("List node", NODE, listNode.get());
 
+    }
+
+    public static void main(String args[]) throws Exception {
+        BAconvertBITest a = new BAconvertBITest();
+        a.setup();
+        a.testSubmit();
     }
 
 }
