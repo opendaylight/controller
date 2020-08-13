@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import static java.util.Objects.requireNonNull;
+import javax.management.ConstructorParameters;
 
-import java.beans.ConstructorProperties;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Response to a {@link GetInfo} query from a data tree listener actor.
@@ -22,7 +22,7 @@ public class DataTreeListenerInfo {
     private final boolean isEnabled;
     private final long notificationCount;
 
-    @ConstructorProperties({"listener","registeredPath", "isEnabled", "notificationCount"})
+    @ConstructorParameters({"listener","registeredPath", "isEnabled", "notificationCount"})
     public DataTreeListenerInfo(final String listener, final String registeredPath, final boolean isEnabled,
             final long notificationCount) {
         this.listener = requireNonNull(listener);

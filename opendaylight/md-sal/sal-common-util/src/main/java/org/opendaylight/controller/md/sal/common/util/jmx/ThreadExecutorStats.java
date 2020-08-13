@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
-import java.beans.ConstructorProperties;
+import javax.management.ConstructorParameters;
 
 /**
  * A bean class that holds various thread executor statistic metrics. This class is suitable for
@@ -33,7 +33,7 @@ public class ThreadExecutorStats {
     private final Long largestQueueSize;
     private final Long rejectedTaskCount;
 
-    @ConstructorProperties({"activeThreadCount","currentThreadPoolSize","largestThreadPoolSize",
+    @ConstructorParameters({"activeThreadCount","currentThreadPoolSize","largestThreadPoolSize",
         "maxThreadPoolSize","currentQueueSize","largestQueueSize","maxQueueSize",
         "completedTaskCount","totalTaskCount","rejectedTaskCount"})
     public ThreadExecutorStats(long activeThreadCount, long currentThreadPoolSize,
