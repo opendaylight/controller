@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import java.beans.ConstructorProperties;
+import javax.management.ConstructorParameters;
 
 /**
  * A bean class containing a snapshot of information for a follower returned from GetOnDemandRaftStats.
@@ -22,7 +22,7 @@ public class FollowerInfo {
     private final String timeSinceLastActivity;
     private final boolean isVoting;
 
-    @ConstructorProperties({"id","nextIndex", "matchIndex", "active", "timeSinceLastActivity", "voting"})
+    @ConstructorParameters({"id","nextIndex", "matchIndex", "active", "timeSinceLastActivity", "voting"})
     public FollowerInfo(String id, long nextIndex, long matchIndex, boolean active, String timeSinceLastActivity,
             boolean voting) {
         this.id = id;
