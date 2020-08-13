@@ -12,12 +12,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
-import java.beans.BeanInfo;
-import java.beans.ConstructorProperties;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import javax.management.ConstructorParameters;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.checkerframework.checker.lock.qual.GuardedBy;
@@ -42,6 +37,7 @@ import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.common.Uint8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Introspects on a DatastoreContext instance to set its properties via reflection.
@@ -72,7 +68,7 @@ public class DatastoreContextIntrospector {
             introspectDatastoreContextBuilder();
             introspectDataStoreProperties();
             introspectPrimitiveTypes();
-        } catch (final IntrospectionException e) {
+        } catch (final IllegalArgumentException e) {
             LOG.error("Error initializing DatastoreContextIntrospector", e);
         }
     }
@@ -92,7 +88,7 @@ public class DatastoreContextIntrospector {
                 processPropertyType(primitive);
             } catch (final NoSuchMethodException e) {
                 // Ignore primitives that can't be constructed from a String, eg Character and Void.
-            } catch (SecurityException | IntrospectionException e) {
+            } catch (SecurityException | IllegalArgumentException e) {
                 LOG.error("Error introspect primitive type {}", primitive, e);
             }
         }
@@ -118,21 +114,18 @@ public class DatastoreContextIntrospector {
      * in the interface (this is the type returned from the getter method). For each type, we find
      * the appropriate constructor that we will use.
      */
-    private static void introspectDataStoreProperties() throws IntrospectionException {
-        final BeanInfo beanInfo = Introspector.getBeanInfo(DataStoreProperties.class);
-        for (final PropertyDescriptor desc: beanInfo.getPropertyDescriptors()) {
-            processDataStoreProperty(desc.getName(), desc.getPropertyType(), desc.getReadMethod());
-        }
-
-        // Getter methods that return Boolean and start with "is" instead of "get" aren't recognized as
-        // properties and thus aren't returned from getPropertyDescriptors. A getter starting with
-        // "is" is only supported if it returns primitive boolean. So we'll check for these via
-        // getMethodDescriptors.
-        for (final MethodDescriptor desc: beanInfo.getMethodDescriptors()) {
-            final String methodName = desc.getName();
-            if (Boolean.class.equals(desc.getMethod().getReturnType()) && methodName.startsWith("is")) {
-                final String propertyName = WordUtils.uncapitalize(methodName.substring(2));
-                processDataStoreProperty(propertyName, Boolean.class, desc.getMethod());
+    private static void introspectDataStoreProperties() throws IllegalArgumentException {
+        Class clazz = DataStoreProperties.class;
+        for (Method method : clazz.getDeclaredMethods()) {
+            String methodName = method.getName();
+            String propertyName = null;
+            if (Boolean.class.equals(method.getReturnType()) && methodName.startsWith("is")) {
+                propertyName = WordUtils.uncapitalize(methodName.substring(2));
+            } else if (methodName.startsWith("get")) {
+                propertyName = WordUtils.uncapitalize(methodName.substring(3));
+            }
+            if (propertyName != null) {
+                processDataStoreProperty(propertyName, method.getReturnType(), method);
             }
         }
     }
@@ -159,7 +152,7 @@ public class DatastoreContextIntrospector {
      * instances.
      */
     private static void processPropertyType(final Class<?> propertyType)
-            throws NoSuchMethodException, SecurityException, IntrospectionException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         final Class<?> wrappedType = Primitives.wrap(propertyType);
         if (CONSTRUCTORS.containsKey(wrappedType)) {
             return;
@@ -176,9 +169,9 @@ public class DatastoreContextIntrospector {
             // validation (eg range checking). The yang-generated types have a couple single-argument
             // constructors but the one we want has the bean ConstructorProperties annotation.
             for (final Constructor<?> ctor: propertyType.getConstructors()) {
-                final ConstructorProperties ctorPropsAnnotation = ctor.getAnnotation(ConstructorProperties.class);
-                if (ctor.getParameterCount() == 1 && ctorPropsAnnotation != null) {
-                    findYangTypeGetter(propertyType, ctorPropsAnnotation.value()[0]);
+                final ConstructorParameters ctorParAnnotation = ctor.getAnnotation(ConstructorParameters.class);
+                if (ctor.getParameterCount() == 1 && ctorParAnnotation != null) {
+                    findYangTypeGetter(propertyType, ctorParAnnotation.value()[0]);
                     CONSTRUCTORS.put(propertyType, ctor);
                     break;
                 }
@@ -190,15 +183,22 @@ public class DatastoreContextIntrospector {
      * Finds the getter method on a yang-generated type for the specified property name.
      */
     private static void findYangTypeGetter(final Class<?> type, final String propertyName)
-            throws IntrospectionException {
-        for (final PropertyDescriptor desc: Introspector.getBeanInfo(type).getPropertyDescriptors()) {
-            if (desc.getName().equals(propertyName)) {
-                YANG_TYPE_GETTERS.put(type, desc.getReadMethod());
+            throws IllegalArgumentException {
+        for (Method method : type.getDeclaredMethods()) {
+            String methodName = method.getName();
+            String property = null;
+            if (Boolean.class.equals(method.getReturnType()) && methodName.startsWith("is")) {
+                property = WordUtils.uncapitalize(methodName.substring(2));
+            } else if (methodName.startsWith("get")) {
+                property = WordUtils.uncapitalize(methodName.substring(3));
+            }
+            if (property.equals(propertyName)) {
+                YANG_TYPE_GETTERS.put(type, method);
                 return;
             }
         }
 
-        throw new IntrospectionException(String.format(
+        throw new IllegalArgumentException(String.format(
                 "Getter method for constructor property %s not found for YANG type %s",
                 propertyName, type));
     }
