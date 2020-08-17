@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f75edd61_458522f6",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/DataJournalEntry.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-08-17T14:53:44Z",
+      "side": 1,
+      "message": "subclass ToPersistence to eliminate duplication (and mark its methods final as appropriate)",
+      "range": {
+        "startLine": 43,
+        "startChar": 55,
+        "endLine": 43,
+        "endChar": 71
+      },
+      "revId": "53ea52d5f7848356272c4ba912a6bbd127f00d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0e69acd_32a3ae42",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/DataJournalEntry.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-08-17T14:53:44Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 95,
+        "startChar": 23,
+        "endLine": 95,
+        "endChar": 48
+      },
+      "revId": "53ea52d5f7848356272c4ba912a6bbd127f00d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
