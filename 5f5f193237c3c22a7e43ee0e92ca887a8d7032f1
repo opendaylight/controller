@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a714c54c_475c08f2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-09-03T14:12:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a0e8472_569b4ba8",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 17
+      },
+      "revId": "5f5f193237c3c22a7e43ee0e92ca887a8d7032f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83b31acc_1c48ac0d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
         "patchSetId": 8
@@ -45,6 +69,30 @@
       "revId": "5f5f193237c3c22a7e43ee0e92ca887a8d7032f1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80cb230d_ddd4e407",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStream.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-09-03T14:12:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83b31acc_1c48ac0d",
+      "range": {
+        "startLine": 195,
+        "startChar": 16,
+        "endLine": 195,
+        "endChar": 32
+      },
+      "revId": "5f5f193237c3c22a7e43ee0e92ca887a8d7032f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
