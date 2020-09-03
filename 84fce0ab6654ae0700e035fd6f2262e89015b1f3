@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82a17fea_2911fd3d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-09-03T11:57:39Z",
+      "side": 1,
+      "message": "missing commit message body: https://chris.beams.io/posts/git-commit/",
+      "revId": "84fce0ab6654ae0700e035fd6f2262e89015b1f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ef1470c_a68de0df",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-09-03T11:57:39Z",
+      "side": 1,
+      "message": "sign-off needs to always be last",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 54
+      },
+      "revId": "84fce0ab6654ae0700e035fd6f2262e89015b1f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfb539dd_aed11466",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-09-03T11:57:39Z",
+      "side": 1,
+      "message": "unchecked exception: it should be documented using @throws, but not declared",
+      "range": {
+        "startLine": 116,
+        "startChar": 56,
+        "endLine": 116,
+        "endChar": 87
+      },
+      "revId": "84fce0ab6654ae0700e035fd6f2262e89015b1f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bdd45d21_8932ac6c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-09-03T11:57:39Z",
+      "side": 1,
+      "message": "unneeded local variable",
+      "range": {
+        "startLine": 117,
+        "startChar": 8,
+        "endLine": 117,
+        "endChar": 46
+      },
+      "revId": "84fce0ab6654ae0700e035fd6f2262e89015b1f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fcc5c77_ade2a934",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-09-03T11:57:39Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 158,
+        "startChar": 61,
+        "endLine": 158,
+        "endChar": 85
+      },
+      "revId": "84fce0ab6654ae0700e035fd6f2262e89015b1f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9cf64789_bd9ad0d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-09-03T11:57:39Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 189,
+        "startChar": 12,
+        "endLine": 189,
+        "endChar": 43
+      },
+      "revId": "84fce0ab6654ae0700e035fd6f2262e89015b1f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
