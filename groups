@@ -2,4 +2,3 @@
 #
 c5415e113167fb35bf187ffa7f5235689cc07f6e                                  	saml/odl-gerrit-controller-committers
 c9025ab9ddc1e3171919e085449f22c54f8f7b54                                  	GitHub Replication
-ldap:cn=odl-gerrit-controller-committers,ou=Groups,dc=freestandards,dc=org	ldap/odl-gerrit-controller-committers
