@@ -21,7 +21,8 @@ import io.atomix.storage.journal.JournalSegment;
  */
 abstract class DataJournalEntry {
     /**
-     * A single data journal entry on its way to the backing file.
+     * A single data journal entry on its way to the backing file. This class is used by both Version 0 and Version 1
+     * data journal.
      */
     static final class ToPersistence extends DataJournalEntry {
         private final PersistentRepr repr;
@@ -36,7 +37,8 @@ abstract class DataJournalEntry {
     }
 
     /**
-     * A single data journal entry on its way from the backing file.
+     * A single data journal entry on its way from the backing file. This class is used by both Version 0 and Version 1
+     * data journal.
      */
     static final class FromPersistence extends DataJournalEntry {
         private final String manifest;
