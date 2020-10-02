@@ -53,7 +53,7 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -377,9 +377,8 @@ public class ActionRegistryTest {
         final Collection<DOMActionInstance> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
             QName type = QName.create(URI.create("/mockaction"), "mockaction" + routeIdCounter++);
-            final DOMActionInstance routeId = DOMActionInstance.of(SchemaPath.create(true,
-                    type), LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.create(new
-                    YangInstanceIdentifier.NodeIdentifier(type)));
+            final DOMActionInstance routeId = DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
+                    YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(type)));
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -415,9 +414,8 @@ public class ActionRegistryTest {
     private List<DOMActionInstance> createRouteIds() {
         QName type = QName.create(URI.create("/mockaction"), "mockaction" + routeIdCounter++);
         List<DOMActionInstance> routeIds = new ArrayList<>(1);
-        routeIds.add(DOMActionInstance.of(SchemaPath.create(true, type),
-                LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.create(
-                        new YangInstanceIdentifier.NodeIdentifier(type))));
+        routeIds.add(DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
+            YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(type))));
         return routeIds;
     }
 }

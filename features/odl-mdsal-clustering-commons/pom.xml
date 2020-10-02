@@ -22,20 +22,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-akka-system-2.5</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-akka-persistence-2.5</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-akka-clustering-2.5</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-controller-akka</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

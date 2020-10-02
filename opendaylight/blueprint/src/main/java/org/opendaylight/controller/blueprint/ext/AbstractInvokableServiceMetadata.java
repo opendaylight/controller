@@ -23,8 +23,8 @@ import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 
 abstract class AbstractInvokableServiceMetadata extends AbstractDependentComponentFactoryMetadata {
@@ -33,7 +33,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
     private ListenerRegistration<DOMRpcAvailabilityListener> rpcListenerReg;
     private RpcConsumerRegistry rpcRegistry;
     private Class<RpcService> rpcInterface;
-    private Set<SchemaPath> rpcSchemaPaths;
+    private Set<QName> rpcSchemaPaths;
 
     AbstractInvokableServiceMetadata(final String id, final String interfaceName) {
         super(id);
@@ -89,7 +89,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
     private void retrievedSchemaContext(final SchemaContext schemaContext) {
         log.debug("{}: retrievedSchemaContext", logName());
 
-        final Collection<SchemaPath> schemaPaths = RpcUtil.decomposeRpcService(rpcInterface, schemaContext,
+        final Collection<QName> schemaPaths = RpcUtil.decomposeRpcService(rpcInterface, schemaContext,
             rpcFilter());
         if (schemaPaths.isEmpty()) {
             log.debug("{}: interface {} has no acceptable entries, assuming it is satisfied", logName(), rpcInterface);

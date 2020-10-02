@@ -11,7 +11,7 @@ import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 /**
  * The NormalizedNodePruner removes all nodes from the input NormalizedNode that do not have a corresponding
@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 @Beta
 public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNodePruner {
     private static final class SimplePruner extends ReusableNormalizedNodePruner {
-        SimplePruner(final SchemaContext schemaContext) {
+        SimplePruner(final EffectiveModelContext schemaContext) {
             super(schemaContext);
         }
 
@@ -35,7 +35,7 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
         }
     }
 
-    ReusableNormalizedNodePruner(final SchemaContext schemaContext) {
+    ReusableNormalizedNodePruner(final EffectiveModelContext schemaContext) {
         super(schemaContext);
     }
 
@@ -50,13 +50,13 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
      * @return A new uninitialized pruner
      * @throws NullPointerException if {@code schemaContext} is null
      */
-    public static @NonNull ReusableNormalizedNodePruner forSchemaContext(final SchemaContext schemaContext) {
+    public static @NonNull ReusableNormalizedNodePruner forSchemaContext(final EffectiveModelContext schemaContext) {
         return new SimplePruner(schemaContext);
     }
 
     /**
      * Create a new pruner bound to a DataSchemaContextTree. This is a more efficient alternative of
-     * {@link #forSchemaContext(SchemaContext)}.
+     * {@link #forSchemaContext(EffectiveModelContext)}.
      *
      * @param tree DataSchemaContextTree to use
      * @return A new uninitialized pruner

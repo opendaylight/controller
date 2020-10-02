@@ -33,7 +33,7 @@ public class OpsBrokerTest extends AbstractOpsTest {
         final ContainerNode invokeRpcResult = makeRPCOutput("bar");
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(invokeRpcResult);
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService1)
-            .invokeRpc(eq(TEST_RPC_TYPE), any());
+            .invokeRpc(eq(TEST_RPC), any());
         final ExecuteRpc executeRpc = ExecuteRpc.from(TEST_RPC_ID, null);
 
         rpcInvoker1.tell(executeRpc, rpcRegistry1Probe.getRef());
@@ -45,7 +45,7 @@ public class OpsBrokerTest extends AbstractOpsTest {
 
     @Test
     public void testExecuteRpcFailureWithException() {
-        when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(FluentFutures.immediateFailedFluentFuture(
+        when(domRpcService1.invokeRpc(eq(TEST_RPC), any())).thenReturn(FluentFutures.immediateFailedFluentFuture(
             new DOMRpcImplementationNotAvailableException("NOT FOUND")));
 
         final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);

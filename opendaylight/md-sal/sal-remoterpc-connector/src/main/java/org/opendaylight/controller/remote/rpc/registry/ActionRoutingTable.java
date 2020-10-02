@@ -13,6 +13,7 @@ import akka.serialization.Serialization;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
@@ -22,9 +23,12 @@ import java.util.Set;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,10 +61,10 @@ public final class ActionRoutingTable extends AbstractRoutingTable<ActionRouting
             final NormalizedNodeDataOutput nnout = NormalizedNodeStreamVersion.current().newDataOutput(out);
             nnout.writeInt(actions.size());
             for (DOMActionInstance id : actions) {
-                nnout.writeSchemaPath(id.getType());
-                YangInstanceIdentifier actionPath = YangInstanceIdentifier.create(
-                        new YangInstanceIdentifier.NodeIdentifier(id.getType().getLastComponent()));
-                nnout.writeYangInstanceIdentifier(actionPath);
+                final Absolute type = id.getType();
+                nnout.writeSchemaNodeIdentifier(type);
+                nnout.writeYangInstanceIdentifier(YangInstanceIdentifier.create(new NodeIdentifier(
+                    type.lastNodeIdentifier())));
             }
         }
 
@@ -73,7 +77,12 @@ public final class ActionRoutingTable extends AbstractRoutingTable<ActionRouting
             final int size = nnin.readInt();
             actions = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {
-                actions.add(DOMActionInstance.of(nnin.readSchemaPath(), LogicalDatastoreType.OPERATIONAL,
+                final SchemaNodeIdentifier sni = nnin.readSchemaNodeIdentifier();
+                if (!(sni instanceof Absolute)) {
+                    throw new InvalidObjectException("Non-absolute type " + sni);
+                }
+
+                actions.add(DOMActionInstance.of((Absolute) sni, LogicalDatastoreType.OPERATIONAL,
                         nnin.readYangInstanceIdentifier()));
             }
         }

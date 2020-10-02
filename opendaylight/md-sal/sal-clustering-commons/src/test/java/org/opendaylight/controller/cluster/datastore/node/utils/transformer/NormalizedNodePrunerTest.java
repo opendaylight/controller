@@ -39,13 +39,13 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class NormalizedNodePrunerTest {
-    private static final SchemaContext NO_TEST_SCHEMA = TestModel.createTestContextWithoutTestSchema();
-    private static final SchemaContext NO_AUG_SCHEMA = TestModel.createTestContextWithoutAugmentationSchema();
-    private static final SchemaContext FULL_SCHEMA = TestModel.createTestContext();
+    private static final EffectiveModelContext NO_TEST_SCHEMA = TestModel.createTestContextWithoutTestSchema();
+    private static final EffectiveModelContext NO_AUG_SCHEMA = TestModel.createTestContextWithoutAugmentationSchema();
+    private static final EffectiveModelContext FULL_SCHEMA = TestModel.createTestContext();
 
     private static AbstractNormalizedNodePruner prunerFullSchema(final YangInstanceIdentifier path) {
         final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forSchemaContext(FULL_SCHEMA);

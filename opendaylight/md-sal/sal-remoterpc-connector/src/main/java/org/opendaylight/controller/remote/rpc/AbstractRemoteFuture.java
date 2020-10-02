@@ -16,24 +16,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
-abstract class AbstractRemoteFuture<T, E extends Exception> extends AbstractFuture<T> {
+abstract class AbstractRemoteFuture<T, O, E extends Exception> extends AbstractFuture<O> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractRemoteFuture.class);
 
-    private final @NonNull SchemaPath type;
+    private final @NonNull T type;
 
-    AbstractRemoteFuture(final @NonNull SchemaPath type, final Future<Object> requestFuture) {
+    AbstractRemoteFuture(final @NonNull T type, final Future<Object> requestFuture) {
         this.type = requireNonNull(type);
         requestFuture.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
     }
 
     @Override
-    public final T get() throws InterruptedException, ExecutionException {
+    public final O get() throws InterruptedException, ExecutionException {
         try {
             return super.get();
         } catch (ExecutionException e) {
@@ -42,7 +41,7 @@ abstract class AbstractRemoteFuture<T, E extends Exception> extends AbstractFutu
     }
 
     @Override
-    public final T get(final long timeout, final TimeUnit unit)
+    public final O get(final long timeout, final TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
         try {
             return super.get(timeout, unit);
@@ -52,7 +51,7 @@ abstract class AbstractRemoteFuture<T, E extends Exception> extends AbstractFutu
     }
 
     @Override
-    protected final boolean set(final T value) {
+    protected final boolean set(final O value) {
         final boolean ret = super.set(value);
         if (ret) {
             LOG.debug("Future {} for action {} successfully completed", this, type);
@@ -65,7 +64,7 @@ abstract class AbstractRemoteFuture<T, E extends Exception> extends AbstractFutu
         setException(error);
     }
 
-    abstract @Nullable T processReply(Object reply);
+    abstract @Nullable O processReply(Object reply);
 
     abstract @NonNull Class<E> exceptionClass();
 
@@ -80,7 +79,7 @@ abstract class AbstractRemoteFuture<T, E extends Exception> extends AbstractFutu
         @Override
         public void onComplete(final Throwable error, final Object reply) {
             if (error == null) {
-                final T result = processReply(reply);
+                final O result = processReply(reply);
                 if (result != null) {
                     LOG.debug("Received response for operation {}: result is {}", type, result);
                     set(result);

@@ -31,13 +31,13 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public class RemoteActionRegistryMXBeanImplTest {
 
     private static final QName LOCAL_QNAME = QName.create("base", "local");
-    private static final SchemaPath EMPTY_SCHEMA_PATH = SchemaPath.ROOT;
-    private static final SchemaPath LOCAL_SCHEMA_PATH = SchemaPath.create(true, LOCAL_QNAME);
+    private static final Absolute EMPTY_SCHEMA_PATH = Absolute.of();
+    private static final Absolute LOCAL_SCHEMA_PATH = Absolute.of(LOCAL_QNAME);
 
     private ActorSystem system;
     private TestActorRef<ActionRegistry> testActor;
