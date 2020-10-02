@@ -35,7 +35,6 @@
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-testkit_2.13</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

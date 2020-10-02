@@ -54,12 +54,7 @@
     <!-- Akka -->
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_2.13</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-testkit_2.13</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <!-- Scala -->
