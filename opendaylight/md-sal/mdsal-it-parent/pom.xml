@@ -82,11 +82,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>pax-url-aether</artifactId>
     </dependency>
     <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
-    </dependency>
-    <dependency>
         <groupId>org.apache.karaf.features</groupId>
         <artifactId>org.apache.karaf.features.core</artifactId>
         <version>${karaf.version}</version>

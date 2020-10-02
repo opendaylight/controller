@@ -83,11 +83,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>pax-url-aether</artifactId>
         <scope>compile</scope>
     </dependency>
+
+    <!-- Referenced by pax-exam-features, needs to be pulled into local repository -->
     <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <scope>compile</scope>
+        <groupId>org.ops4j.base</groupId>
+        <artifactId>ops4j-base-monitors</artifactId>
+        <version>1.5.1</version>
     </dependency>
+    <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-atinject_1.0_spec</artifactId>
+        <version>1.0</version>
+    </dependency>
+
     <dependency>
         <groupId>org.apache.karaf.features</groupId>
         <artifactId>org.apache.karaf.features.core</artifactId>
