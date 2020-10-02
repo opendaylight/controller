@@ -42,6 +42,9 @@
     <module>odl-clustering-test-app</module>
     <module>odl-mdsal-benchmark</module>
 
+    <!-- Scala feature -->
+    <module>odl-controller-scala</module>
+
     <!-- Single features, to be cleaned up -->
     <module>odl-controller-blueprint</module>
     <module>odl-controller-mdsal-common</module>
