@@ -27,7 +27,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,7 @@ public final class RoutedGetConstantService implements DOMRpcImplementation {
         LOG.debug("Registering get-contexted-constant on context: {}, with value: {}", context, constant);
 
         final YangInstanceIdentifier yid = codec.toYangInstanceIdentifier(context);
-        final DOMRpcIdentifier id = DOMRpcIdentifier.create(SchemaPath.create(true, GET_CONTEXTED_CONSTANT), yid);
+        final DOMRpcIdentifier id = DOMRpcIdentifier.create(GET_CONTEXTED_CONSTANT, yid);
 
         return rpcProviderService.registerRpcImplementation(new RoutedGetConstantService(constant), id);
     }

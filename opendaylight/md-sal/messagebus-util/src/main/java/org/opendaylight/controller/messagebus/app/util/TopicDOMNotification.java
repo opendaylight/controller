@@ -7,14 +7,15 @@
  */
 package org.opendaylight.controller.messagebus.app.util;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.dom.api.DOMNotification;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicNotification;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public class TopicDOMNotification implements DOMNotification {
+    private static final @NonNull Absolute TOPIC_NOTIFICATION_ID = Absolute.of(TopicNotification.QNAME);
 
-    private static final SchemaPath TOPIC_NOTIFICATION_ID = SchemaPath.create(true, TopicNotification.QNAME);
     private final ContainerNode body;
 
     public TopicDOMNotification(final ContainerNode body) {
@@ -22,7 +23,7 @@ public class TopicDOMNotification implements DOMNotification {
     }
 
     @Override
-    public SchemaPath getType() {
+    public Absolute getType() {
         return TOPIC_NOTIFICATION_ID;
     }
 

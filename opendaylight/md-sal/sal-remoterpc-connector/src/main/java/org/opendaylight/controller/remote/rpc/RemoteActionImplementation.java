@@ -14,7 +14,7 @@ import org.opendaylight.mdsal.dom.api.DOMActionImplementation;
 import org.opendaylight.mdsal.dom.api.DOMActionResult;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ final class RemoteActionImplementation extends AbstractRemoteImplementation<Exec
      * Routes action request to a remote invoker, which will execute the action and return with result.
      */
     @Override
-    public ListenableFuture<DOMActionResult> invokeAction(final SchemaPath type, final DOMDataTreeIdentifier path,
+    public ListenableFuture<DOMActionResult> invokeAction(final Absolute type, final DOMDataTreeIdentifier path,
                                                           final ContainerNode input) {
         LOG.debug("invoking action {} with path {}", type, path);
         return new RemoteDOMActionFuture(type, ask(ExecuteAction.from(type, path, input)));

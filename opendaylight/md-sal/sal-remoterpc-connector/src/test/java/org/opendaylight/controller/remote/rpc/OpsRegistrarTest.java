@@ -43,7 +43,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public class OpsRegistrarTest {
     @Mock
@@ -79,18 +79,16 @@ public class OpsRegistrarTest {
         testActorRef = new TestActorRef<>(system, props, testKit.getRef(), "actorRef");
         endpointAddress = new Address("http", "local");
 
-        final DOMRpcIdentifier firstEndpointId = DOMRpcIdentifier.create(
-                SchemaPath.create(true, QName.create("first:identifier", "foo")));
-        final DOMRpcIdentifier secondEndpointId = DOMRpcIdentifier.create(
-                SchemaPath.create(true, QName.create("second:identifier", "bar")));
+        final DOMRpcIdentifier firstEndpointId = DOMRpcIdentifier.create(QName.create("first:identifier", "foo"));
+        final DOMRpcIdentifier secondEndpointId = DOMRpcIdentifier.create(QName.create("second:identifier", "bar"));
         final QName firstActionQName = QName.create("first:actionIdentifier", "fooAction");
 
-        final DOMActionInstance firstActionInstance = DOMActionInstance.of(
-                SchemaPath.create(true, firstActionQName), LogicalDatastoreType.OPERATIONAL,
+        final DOMActionInstance firstActionInstance = DOMActionInstance.of(Absolute.of(firstActionQName),
+                LogicalDatastoreType.OPERATIONAL,
                 YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(firstActionQName)));
 
-        final DOMActionInstance secondActionInstance = DOMActionInstance.of(
-                SchemaPath.create(true, firstActionQName), LogicalDatastoreType.OPERATIONAL,
+        final DOMActionInstance secondActionInstance = DOMActionInstance.of(Absolute.of(firstActionQName),
+                LogicalDatastoreType.OPERATIONAL,
                 YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(firstActionQName)));
 
         final TestKit senderKit = new TestKit(system);

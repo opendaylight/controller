@@ -31,13 +31,14 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public class RemoteActionRegistryMXBeanImplTest {
 
     private static final QName LOCAL_QNAME = QName.create("base", "local");
-    private static final SchemaPath EMPTY_SCHEMA_PATH = SchemaPath.ROOT;
-    private static final SchemaPath LOCAL_SCHEMA_PATH = SchemaPath.create(true, LOCAL_QNAME);
+    private static final QName REMOTE_QNAME = QName.create("base", "local");
+    private static final Absolute LOCAL_SCHEMA_PATH = Absolute.of(LOCAL_QNAME);
+    private static final Absolute REMOTE_SCHEMA_PATH = Absolute.of(REMOTE_QNAME);
 
     private ActorSystem system;
     private TestActorRef<ActionRegistry> testActor;
@@ -49,7 +50,7 @@ public class RemoteActionRegistryMXBeanImplTest {
         system = ActorSystem.create("test");
 
         final DOMActionInstance emptyActionIdentifier = DOMActionInstance.of(
-                EMPTY_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
+                REMOTE_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty());
         final DOMActionInstance localActionIdentifier = DOMActionInstance.of(
                 LOCAL_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(LOCAL_QNAME));
 
