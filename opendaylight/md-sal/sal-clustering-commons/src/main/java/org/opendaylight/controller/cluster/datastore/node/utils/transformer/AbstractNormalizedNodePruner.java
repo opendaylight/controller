@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormali
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         this.tree = requireNonNull(tree);
     }
 
-    AbstractNormalizedNodePruner(final SchemaContext schemaContext) {
+    AbstractNormalizedNodePruner(final EffectiveModelContext schemaContext) {
         this(DataSchemaContextTree.from(schemaContext));
     }
 

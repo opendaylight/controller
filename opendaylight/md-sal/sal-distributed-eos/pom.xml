@@ -11,6 +11,11 @@
   <artifactId>sal-distributed-eos</artifactId>
   <packaging>bundle</packaging>
 
+  <properties>
+    <!-- FIXME: Remove this -->
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
@@ -35,7 +40,6 @@
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-testkit_2.13</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

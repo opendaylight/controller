@@ -12,11 +12,11 @@ import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.mdsal.dom.api.DOMRpcException;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.common.QName;
 import scala.concurrent.Future;
 
-final class RemoteDOMRpcFuture extends AbstractRemoteFuture<DOMRpcResult, DOMRpcException> {
-    RemoteDOMRpcFuture(final @NonNull SchemaPath type, final @NonNull Future<Object> requestFuture) {
+final class RemoteDOMRpcFuture extends AbstractRemoteFuture<QName, DOMRpcResult, DOMRpcException> {
+    RemoteDOMRpcFuture(final @NonNull QName type, final @NonNull Future<Object> requestFuture) {
         super(type, requestFuture);
     }
 

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -33,13 +35,10 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class RemoteRpcRegistryMXBeanImplTest {
-
     private static final QName LOCAL_QNAME = QName.create("base", "local");
-    private static final SchemaPath EMPTY_SCHEMA_PATH = SchemaPath.ROOT;
-    private static final SchemaPath LOCAL_SCHEMA_PATH = SchemaPath.create(true, LOCAL_QNAME);
+    private static final QName REMOTE_QNAME = QName.create("base", "remote");
 
     private ActorSystem system;
     private TestActorRef<RpcRegistry> testActor;
@@ -51,9 +50,9 @@ public class RemoteRpcRegistryMXBeanImplTest {
         system = ActorSystem.create("test");
 
         final DOMRpcIdentifier emptyRpcIdentifier = DOMRpcIdentifier.create(
-                EMPTY_SCHEMA_PATH, YangInstanceIdentifier.empty());
+                REMOTE_QNAME, YangInstanceIdentifier.empty());
         final DOMRpcIdentifier localRpcIdentifier = DOMRpcIdentifier.create(
-                LOCAL_SCHEMA_PATH, YangInstanceIdentifier.of(LOCAL_QNAME));
+                LOCAL_QNAME, YangInstanceIdentifier.of(LOCAL_QNAME));
 
         buckets = Lists.newArrayList(emptyRpcIdentifier, localRpcIdentifier);
 
@@ -92,7 +91,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
         assertEquals(1, globalRpc.size());
 
         final String rpc = globalRpc.iterator().next();
-        assertEquals(EMPTY_SCHEMA_PATH.toString(), rpc);
+        assertEquals(REMOTE_QNAME.toString(), rpc);
     }
 
     @Test
@@ -112,8 +111,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
         assertEquals(1, localRegisteredRoutedRpc.size());
 
         final String localRpc = localRegisteredRoutedRpc.iterator().next();
-        assertTrue(localRpc.contains(LOCAL_QNAME.toString()));
-        assertTrue(localRpc.contains(LOCAL_SCHEMA_PATH.toString()));
+        assertThat(localRpc, containsString(LOCAL_QNAME.toString()));
     }
 
     @Test

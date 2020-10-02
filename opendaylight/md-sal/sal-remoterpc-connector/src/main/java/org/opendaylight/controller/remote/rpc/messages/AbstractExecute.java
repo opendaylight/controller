@@ -14,27 +14,26 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
  * An abstract base class for invocation requests. Specialized via {@link ExecuteAction} and {@link ExecuteRpc}.
  */
-public abstract class AbstractExecute<T extends NormalizedNode<?, ?>> implements Serializable {
+public abstract class AbstractExecute<T, I extends NormalizedNode<?, ?>> implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final transient @NonNull SchemaPath type;
-    private final transient T input;
+    private final transient @NonNull T type;
+    private final transient I input;
 
-    AbstractExecute(final @NonNull SchemaPath type, final T input) {
+    AbstractExecute(final @NonNull T type, final I input) {
         this.type = requireNonNull(type);
         this.input = input;
     }
 
-    public final @NonNull SchemaPath getType() {
+    public final @NonNull T getType() {
         return type;
     }
 
-    public final T getInput() {
+    public final I getInput() {
         return input;
     }
 

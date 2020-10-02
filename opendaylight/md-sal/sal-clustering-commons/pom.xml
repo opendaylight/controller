@@ -11,6 +11,11 @@
   <artifactId>sal-clustering-commons</artifactId>
   <packaging>bundle</packaging>
 
+  <properties>
+    <!-- FIXME: Remove this -->
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+  </properties>
+
   <dependencies>
     <!-- Java -->
     <dependency>
@@ -47,40 +52,8 @@
 
     <!-- Akka -->
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_2.13</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-cluster_2.13</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-osgi_2.13</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.osgi</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-persistence_2.13</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-remote_2.13</artifactId>
-    </dependency>
-    <dependency>
-      <!-- Enforce Netty’s optional dependency on servlet API -->
-      <!-- FIXME: is this really needed ? -->
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-slf4j_2.13</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>repackaged-akka</artifactId>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
@@ -89,6 +62,13 @@
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-persistence-tck_2.13</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- Enforce Netty’s optional dependency on servlet API -->
+      <!-- FIXME: is this really needed ? -->
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
 
     <!-- Codahale -->
