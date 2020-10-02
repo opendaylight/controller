@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public interface ClientRequestTracker {

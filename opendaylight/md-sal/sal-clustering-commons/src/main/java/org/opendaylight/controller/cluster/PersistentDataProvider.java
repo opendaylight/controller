@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
-import akka.persistence.AbstractPersistentActor;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.japi.Procedure;
+import org.opendaylight.controller.repackaged.akka.persistence.AbstractPersistentActor;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
 
 /**
  * A DataPersistenceProvider implementation with persistence enabled.

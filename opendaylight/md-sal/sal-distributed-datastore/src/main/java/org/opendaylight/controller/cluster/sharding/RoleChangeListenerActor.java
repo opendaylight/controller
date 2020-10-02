@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.sharding;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocation;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocationListener;

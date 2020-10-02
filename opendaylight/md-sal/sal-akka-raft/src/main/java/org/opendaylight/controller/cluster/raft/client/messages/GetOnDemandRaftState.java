@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import akka.dispatch.ControlMessage;
+import org.opendaylight.controller.repackaged.akka.dispatch.ControlMessage;
 
 /**
  * Local message sent to a RaftActor to obtain a snapshot of statistical information. Returns an

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.dispatch.ControlMessage;
+import org.opendaylight.controller.repackaged.akka.dispatch.ControlMessage;
 
 /**
  * Internal message sent when a snapshot capture is complete.

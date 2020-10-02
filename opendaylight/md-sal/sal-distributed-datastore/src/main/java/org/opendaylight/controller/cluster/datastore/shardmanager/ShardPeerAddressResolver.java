@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.AddressFromURIString;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;

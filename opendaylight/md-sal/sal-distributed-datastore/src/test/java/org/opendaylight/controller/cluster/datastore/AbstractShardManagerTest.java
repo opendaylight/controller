@@ -11,9 +11,9 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;

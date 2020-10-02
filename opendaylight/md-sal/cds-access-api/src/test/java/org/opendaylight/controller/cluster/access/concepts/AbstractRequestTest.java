@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JavaSerializer;
-import akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ExtendedActorSystem;
+import org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;

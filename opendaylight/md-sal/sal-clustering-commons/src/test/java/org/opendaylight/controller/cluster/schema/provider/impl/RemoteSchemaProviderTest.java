@@ -16,8 +16,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import akka.dispatch.ExecutionContexts;
-import akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.dispatch.ExecutionContexts;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
 import com.google.common.io.CharSource;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;

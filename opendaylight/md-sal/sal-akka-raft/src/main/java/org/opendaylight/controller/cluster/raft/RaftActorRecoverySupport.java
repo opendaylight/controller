@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.persistence.RecoveryCompleted;
-import akka.persistence.SnapshotOffer;
+import org.opendaylight.controller.repackaged.akka.persistence.RecoveryCompleted;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;

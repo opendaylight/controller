@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import static akka.actor.ActorRef.noSender;
+import static org.opendaylight.controller.repackaged.akka.actor.ActorRef.noSender;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Futures;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentRepr;
-import akka.persistence.journal.japi.AsyncWriteJournal;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.persistence.AtomicWrite;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentRepr;
+import org.opendaylight.controller.repackaged.akka.persistence.journal.japi.AsyncWriteJournal;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigMemorySize;
 import io.atomix.storage.StorageLevel;

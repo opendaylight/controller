@@ -24,19 +24,19 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Status.Failure;
-import akka.actor.Terminated;
-import akka.dispatch.Dispatchers;
-import akka.japi.Procedure;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotOffer;
-import akka.protobuf.ByteString;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.actor.Terminated;
+import org.opendaylight.controller.repackaged.akka.dispatch.Dispatchers;
+import org.opendaylight.controller.repackaged.akka.japi.Procedure;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotFailure;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotSuccess;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotMetadata;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotOffer;
+import org.opendaylight.controller.repackaged.akka.protobuf.ByteString;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
@@ -1068,7 +1068,7 @@ public class RaftActorTest extends AbstractActorTest {
         reset(mockRaftActor.snapshotCohortDelegate);
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
-        Failure failure = kit.expectMsgClass(akka.actor.Status.Failure.class);
+        Failure failure = kit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", TimeoutException.class, failure.cause().getClass());
 
         mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(

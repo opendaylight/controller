@@ -9,8 +9,8 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;

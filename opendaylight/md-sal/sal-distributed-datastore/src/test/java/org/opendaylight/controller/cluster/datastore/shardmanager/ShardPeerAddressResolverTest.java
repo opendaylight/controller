@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import org.junit.Test;

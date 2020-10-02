@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
 import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.util.Map;

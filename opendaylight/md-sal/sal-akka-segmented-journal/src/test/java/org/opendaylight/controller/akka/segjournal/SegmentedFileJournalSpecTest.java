@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import akka.persistence.japi.journal.JavaJournalSpec;
+import org.opendaylight.controller.repackaged.akka.persistence.japi.journal.JavaJournalSpec;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import org.apache.commons.io.FileUtils;

@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.persistence.SaveSnapshotSuccess;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotSuccess;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import org.junit.Test;

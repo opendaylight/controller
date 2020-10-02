@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorRef;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotFailure;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotSuccess;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.Optional;

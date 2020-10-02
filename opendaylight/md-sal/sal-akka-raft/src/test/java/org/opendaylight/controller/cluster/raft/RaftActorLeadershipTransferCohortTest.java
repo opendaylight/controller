@@ -12,7 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.dispatch.Dispatchers;
+import org.opendaylight.controller.repackaged.akka.dispatch.Dispatchers;
 import java.util.function.Function;
 import org.junit.After;
 import org.junit.Test;

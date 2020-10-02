@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.AbstractActor.ActorContext;
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.AbstractActor.ActorContext;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;

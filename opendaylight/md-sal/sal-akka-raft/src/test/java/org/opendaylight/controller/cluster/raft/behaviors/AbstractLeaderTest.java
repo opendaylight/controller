@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.HashMap;
 import java.util.List;

@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.AbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;

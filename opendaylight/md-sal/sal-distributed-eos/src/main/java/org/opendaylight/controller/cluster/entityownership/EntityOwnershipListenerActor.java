@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.entityownership;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Props;
-import akka.japi.Creator;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.japi.Creator;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;

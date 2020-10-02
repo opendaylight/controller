@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.ObjectInput;

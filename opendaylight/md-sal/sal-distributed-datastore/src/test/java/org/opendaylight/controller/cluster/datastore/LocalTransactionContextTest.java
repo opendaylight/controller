@@ -13,7 +13,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import org.junit.Before;

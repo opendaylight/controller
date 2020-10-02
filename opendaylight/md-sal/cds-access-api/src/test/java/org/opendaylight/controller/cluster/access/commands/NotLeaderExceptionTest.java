@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.access.commands;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
@@ -19,7 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 public class NotLeaderExceptionTest extends RequestExceptionTest<NotLeaderException> {
 
     private static final ActorSystem ACTOR_SYSTEM = ActorSystem.apply();
-    private static final ActorRef ACTOR = new akka.testkit.TestProbe(ACTOR_SYSTEM).testActor();
+    private static final ActorRef ACTOR = new TestProbe(ACTOR_SYSTEM).testActor();
     private static final RequestException OBJECT = new NotLeaderException(ACTOR);
 
     @Override

@@ -8,13 +8,13 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.Address;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.japi.Effect;
-import akka.remote.AssociationErrorEvent;
-import akka.remote.RemotingLifecycleEvent;
-import akka.remote.ThisActorSystemQuarantinedEvent;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.japi.Effect;
+import org.opendaylight.controller.repackaged.akka.remote.AssociationErrorEvent;
+import org.opendaylight.controller.repackaged.akka.remote.RemotingLifecycleEvent;
+import org.opendaylight.controller.repackaged.akka.remote.ThisActorSystemQuarantinedEvent;
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;

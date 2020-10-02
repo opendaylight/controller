@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.akka.osgi.impl;
 
-import akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
 import com.typesafe.config.Config;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.ActorSystemProvider;

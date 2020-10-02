@@ -9,7 +9,7 @@ package org.opendaylight.controller.akka.segjournal;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.persistence.PersistentRepr;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentRepr;
 import io.atomix.storage.journal.JournalSegment;
 
 /**

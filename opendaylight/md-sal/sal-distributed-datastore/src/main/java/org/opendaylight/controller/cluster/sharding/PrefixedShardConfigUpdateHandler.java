@@ -13,7 +13,7 @@ import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.S
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_REPLICAS_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.SHARD_REPLICA_QNAME;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;

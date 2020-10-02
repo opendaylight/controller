@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;

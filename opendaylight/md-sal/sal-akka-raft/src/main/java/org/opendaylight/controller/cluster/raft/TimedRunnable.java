@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Cancellable;
+import org.opendaylight.controller.repackaged.akka.actor.Cancellable;
 import scala.concurrent.duration.FiniteDuration;
 
 /**

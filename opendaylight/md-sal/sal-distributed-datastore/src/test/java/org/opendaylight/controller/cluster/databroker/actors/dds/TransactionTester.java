@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import akka.actor.ActorRef;
-import akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.ABIVersion;

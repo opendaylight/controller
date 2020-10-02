@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
 
 public final class ForwardingActor extends UntypedAbstractActor {
     private final ActorRef target;

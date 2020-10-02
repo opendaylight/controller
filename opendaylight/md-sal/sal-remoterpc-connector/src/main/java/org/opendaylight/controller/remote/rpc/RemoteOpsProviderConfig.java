@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.typesafe.config.Config;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.TimeUnit;

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import akka.dispatch.ControlMessage;
+import org.opendaylight.controller.repackaged.akka.dispatch.ControlMessage;
 import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 

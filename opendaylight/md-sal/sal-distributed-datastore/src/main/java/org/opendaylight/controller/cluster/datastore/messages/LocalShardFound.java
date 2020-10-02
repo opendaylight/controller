@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 
 /**
  * LocalShardFound is a message that is sent by the

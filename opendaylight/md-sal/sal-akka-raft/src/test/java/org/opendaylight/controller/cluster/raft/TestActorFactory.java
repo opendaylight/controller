@@ -7,19 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.Actor;
-import akka.actor.ActorIdentity;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Identify;
-import akka.actor.InvalidActorNameException;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.pattern.Patterns;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.Actor;
+import org.opendaylight.controller.repackaged.akka.actor.ActorIdentity;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Identify;
+import org.opendaylight.controller.repackaged.akka.actor.InvalidActorNameException;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.LinkedList;

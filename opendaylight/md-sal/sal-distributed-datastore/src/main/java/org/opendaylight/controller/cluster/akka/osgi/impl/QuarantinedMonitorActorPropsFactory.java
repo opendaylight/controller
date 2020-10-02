@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.akka.osgi.impl;
 
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;

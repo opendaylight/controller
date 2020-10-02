@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.entityownership;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Cancellable;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.LinkedList;

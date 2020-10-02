@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Cancellable;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
 import java.io.Closeable;
 import java.util.LinkedHashSet;
 import java.util.Set;

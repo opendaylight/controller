@@ -9,15 +9,15 @@ package org.opendaylight.controller.cluster.persistence;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import akka.actor.ExtendedActorSystem;
-import akka.dispatch.Futures;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.serialization.Snapshot;
-import akka.persistence.serialization.SnapshotSerializer;
-import akka.persistence.snapshot.japi.SnapshotStore;
-import akka.serialization.JavaSerializer;
+import org.opendaylight.controller.repackaged.akka.actor.ExtendedActorSystem;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.persistence.SelectedSnapshot;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotMetadata;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.persistence.serialization.Snapshot;
+import org.opendaylight.controller.repackaged.akka.persistence.serialization.SnapshotSerializer;
+import org.opendaylight.controller.repackaged.akka.persistence.snapshot.japi.SnapshotStore;
+import org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;

@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorRef;
-import akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public interface ClusterWrapper {

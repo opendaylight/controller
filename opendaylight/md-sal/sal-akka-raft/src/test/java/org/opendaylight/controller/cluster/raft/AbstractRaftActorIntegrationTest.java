@@ -7,19 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static akka.pattern.Patterns.ask;
+import static org.opendaylight.controller.repackaged.akka.pattern.Patterns.ask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import akka.actor.ActorRef;
-import akka.actor.InvalidActorNameException;
-import akka.actor.PoisonPill;
-import akka.actor.Terminated;
-import akka.dispatch.Dispatchers;
-import akka.dispatch.Mailboxes;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.InvalidActorNameException;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Terminated;
+import org.opendaylight.controller.repackaged.akka.dispatch.Dispatchers;
+import org.opendaylight.controller.repackaged.akka.dispatch.Mailboxes;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;

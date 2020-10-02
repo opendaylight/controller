@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.snapshot.japi.SnapshotStore;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.persistence.SelectedSnapshot;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotMetadata;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.persistence.snapshot.japi.SnapshotStore;
 import java.util.Optional;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;

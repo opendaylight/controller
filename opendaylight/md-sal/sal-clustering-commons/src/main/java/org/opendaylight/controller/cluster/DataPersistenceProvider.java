@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster;
 
-import akka.japi.Procedure;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.japi.Procedure;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
 
 /**
  * DataPersistenceProvider provides methods to persist data and is an abstraction of the akka-persistence persistence

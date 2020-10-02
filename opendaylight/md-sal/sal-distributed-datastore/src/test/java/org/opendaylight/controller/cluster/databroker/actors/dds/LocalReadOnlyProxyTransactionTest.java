@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
-import akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
 import java.util.Optional;

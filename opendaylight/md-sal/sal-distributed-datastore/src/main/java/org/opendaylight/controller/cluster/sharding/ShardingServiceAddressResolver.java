@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.sharding;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

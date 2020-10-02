@@ -20,12 +20,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.persistence.RecoveryCompleted;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotOffer;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.persistence.RecoveryCompleted;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotMetadata;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotOffer;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;

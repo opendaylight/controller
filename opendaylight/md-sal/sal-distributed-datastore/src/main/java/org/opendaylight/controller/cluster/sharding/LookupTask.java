@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.sharding;
 
 import static akka.actor.ActorRef.noSender;
 
-import akka.actor.ActorRef;
-import akka.actor.Status;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Status;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**

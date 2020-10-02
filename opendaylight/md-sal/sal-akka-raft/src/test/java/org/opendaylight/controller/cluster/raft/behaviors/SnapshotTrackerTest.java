@@ -13,7 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import akka.protobuf.ByteString;
+import org.opendaylight.controller.repackaged.akka.protobuf.ByteString;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.Serializable;

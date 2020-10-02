@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.io.Serializable;
 
 public class Monitor implements Serializable {

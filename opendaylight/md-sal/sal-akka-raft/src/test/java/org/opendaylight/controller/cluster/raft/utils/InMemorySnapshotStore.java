@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.dispatch.Futures;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.snapshot.japi.SnapshotStore;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.persistence.SelectedSnapshot;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotMetadata;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.persistence.snapshot.japi.SnapshotStore;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Collections;

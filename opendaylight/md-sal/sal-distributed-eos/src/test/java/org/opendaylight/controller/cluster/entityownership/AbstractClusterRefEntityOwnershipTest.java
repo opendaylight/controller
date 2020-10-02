@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.entityownership;
 
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

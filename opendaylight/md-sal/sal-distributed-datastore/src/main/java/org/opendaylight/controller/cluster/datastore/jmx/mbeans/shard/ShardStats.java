@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
 import java.text.SimpleDateFormat;

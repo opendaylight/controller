@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer;
+import org.opendaylight.controller.repackaged.akka.serialization.Serialization;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInput;
