@@ -25,6 +25,19 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Repackaged Akka -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>repackaged-akka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>repackaged-akka-testkit</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+
             <!-- Core API/implementation -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -277,6 +290,13 @@
                 <version>${project.version}</version>
                 <classifier>features</classifier>
                 <type>xml</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>odl-controller-akka</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
