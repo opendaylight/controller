@@ -9,12 +9,12 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import static akka.actor.ActorRef.noSender;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;

@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Status.Failure;
-import akka.serialization.Serialization;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;

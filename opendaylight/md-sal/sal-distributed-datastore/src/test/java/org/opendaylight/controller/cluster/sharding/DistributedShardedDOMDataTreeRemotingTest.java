@@ -16,12 +16,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.findLocalShard;
 import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.waitUntilShardIsDown;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.AddressFromURIString;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;

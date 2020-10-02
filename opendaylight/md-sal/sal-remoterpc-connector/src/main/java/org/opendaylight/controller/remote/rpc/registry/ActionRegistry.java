@@ -9,9 +9,9 @@ package org.opendaylight.controller.remote.rpc.registry;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Address;
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

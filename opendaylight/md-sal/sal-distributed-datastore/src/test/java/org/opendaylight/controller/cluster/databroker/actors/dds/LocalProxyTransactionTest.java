@@ -13,7 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 
-import akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import java.util.Optional;
 import java.util.function.Consumer;

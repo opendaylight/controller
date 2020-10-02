@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.util.EventListener;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;

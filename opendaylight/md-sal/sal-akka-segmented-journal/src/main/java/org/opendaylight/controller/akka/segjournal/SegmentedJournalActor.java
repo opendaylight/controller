@@ -10,10 +10,10 @@ package org.opendaylight.controller.akka.segjournal;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.AbstractActor;
-import akka.actor.Props;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentRepr;
+import org.opendaylight.controller.repackaged.akka.actor.AbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.persistence.AtomicWrite;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;

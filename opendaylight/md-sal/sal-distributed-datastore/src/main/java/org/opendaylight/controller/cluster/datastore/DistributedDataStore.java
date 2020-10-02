@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;

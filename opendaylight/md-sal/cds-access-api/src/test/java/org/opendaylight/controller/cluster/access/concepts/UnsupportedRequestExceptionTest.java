@@ -11,9 +11,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 
 public class UnsupportedRequestExceptionTest extends RequestExceptionTest<UnsupportedRequestException> {

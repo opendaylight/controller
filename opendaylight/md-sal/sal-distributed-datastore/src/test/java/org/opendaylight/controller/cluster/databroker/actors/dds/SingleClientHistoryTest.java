@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

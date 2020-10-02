@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;

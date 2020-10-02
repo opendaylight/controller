@@ -20,9 +20,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
 import com.google.common.testing.FakeTicker;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;

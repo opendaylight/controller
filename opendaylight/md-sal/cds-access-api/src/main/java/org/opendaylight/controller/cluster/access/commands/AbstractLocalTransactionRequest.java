@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 
 /**
  * Abstract base class for {@link Request}s involving specific transactions local to a member node. These transactions

@@ -15,10 +15,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
 
-import akka.actor.ActorRef;
-import akka.actor.DeadLetter;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.DeadLetter;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import org.junit.Before;

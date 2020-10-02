@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;

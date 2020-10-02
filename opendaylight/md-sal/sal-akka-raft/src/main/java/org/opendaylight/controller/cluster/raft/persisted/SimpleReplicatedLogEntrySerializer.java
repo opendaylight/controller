@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JSerializer;
-import akka.util.ClassLoaderObjectInputStream;
+import org.opendaylight.controller.repackaged.akka.actor.ExtendedActorSystem;
+import org.opendaylight.controller.repackaged.akka.serialization.JSerializer;
+import org.opendaylight.controller.repackaged.akka.util.ClassLoaderObjectInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

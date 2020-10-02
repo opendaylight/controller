@@ -12,9 +12,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;

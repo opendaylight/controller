@@ -12,12 +12,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent.CurrentClusterState;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.cluster.ClusterEvent.CurrentClusterState;
+import org.opendaylight.controller.repackaged.akka.cluster.Member;
+import org.opendaylight.controller.repackaged.akka.cluster.MemberStatus;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;

@@ -23,8 +23,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Optional;

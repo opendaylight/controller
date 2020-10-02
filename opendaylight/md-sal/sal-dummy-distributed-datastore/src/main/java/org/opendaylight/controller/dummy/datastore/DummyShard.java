@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.dummy.datastore;
 
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;

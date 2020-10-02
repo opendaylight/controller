@@ -11,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.md.cluster.datastore.model.CarsModel.CAR_QNAME;
 
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.AddressFromURIString;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;

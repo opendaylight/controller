@@ -9,9 +9,9 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;

@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.entityownership;
 
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.ActorContext;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;

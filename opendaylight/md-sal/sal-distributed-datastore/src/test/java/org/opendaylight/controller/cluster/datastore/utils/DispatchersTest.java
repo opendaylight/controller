@@ -13,7 +13,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import akka.dispatch.MessageDispatcher;
+import org.opendaylight.controller.repackaged.akka.dispatch.MessageDispatcher;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 

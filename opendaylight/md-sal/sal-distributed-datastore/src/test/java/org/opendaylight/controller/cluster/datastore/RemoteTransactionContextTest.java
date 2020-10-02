@@ -12,11 +12,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorRef;
-import akka.actor.Status.Failure;
-import akka.dispatch.ExecutionContexts;
-import akka.dispatch.OnComplete;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.dispatch.ExecutionContexts;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;

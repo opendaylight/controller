@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.slf4j.Logger;

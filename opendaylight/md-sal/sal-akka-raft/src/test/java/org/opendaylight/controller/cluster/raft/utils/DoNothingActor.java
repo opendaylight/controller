@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
 
 public class DoNothingActor extends UntypedAbstractActor {
     @Override

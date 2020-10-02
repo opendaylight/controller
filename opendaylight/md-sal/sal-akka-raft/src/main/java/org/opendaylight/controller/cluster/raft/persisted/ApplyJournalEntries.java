@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import akka.dispatch.ControlMessage;
+import org.opendaylight.controller.repackaged.akka.dispatch.ControlMessage;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;

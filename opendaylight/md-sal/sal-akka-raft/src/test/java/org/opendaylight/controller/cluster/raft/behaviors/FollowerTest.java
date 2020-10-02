@@ -19,11 +19,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Dispatchers;
-import akka.protobuf.ByteString;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.dispatch.Dispatchers;
+import org.opendaylight.controller.repackaged.akka.protobuf.ByteString;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

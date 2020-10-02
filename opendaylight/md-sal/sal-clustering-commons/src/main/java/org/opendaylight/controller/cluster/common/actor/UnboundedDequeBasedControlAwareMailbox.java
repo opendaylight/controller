@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.dispatch.ControlMessage;
-import akka.dispatch.DequeBasedMessageQueueSemantics;
-import akka.dispatch.Envelope;
-import akka.dispatch.MailboxType;
-import akka.dispatch.ProducesMessageQueue;
-import akka.dispatch.UnboundedControlAwareMailbox;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.dispatch.ControlMessage;
+import org.opendaylight.controller.repackaged.akka.dispatch.DequeBasedMessageQueueSemantics;
+import org.opendaylight.controller.repackaged.akka.dispatch.Envelope;
+import org.opendaylight.controller.repackaged.akka.dispatch.MailboxType;
+import org.opendaylight.controller.repackaged.akka.dispatch.ProducesMessageQueue;
+import org.opendaylight.controller.repackaged.akka.dispatch.UnboundedControlAwareMailbox;
 import com.codahale.metrics.Gauge;
 import com.typesafe.config.Config;
 import java.util.Deque;

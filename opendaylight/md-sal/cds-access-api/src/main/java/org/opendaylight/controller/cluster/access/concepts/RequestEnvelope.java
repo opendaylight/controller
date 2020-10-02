@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 
 public final class RequestEnvelope extends Envelope<Request<?, ?>> {
     private static final long serialVersionUID = 1L;

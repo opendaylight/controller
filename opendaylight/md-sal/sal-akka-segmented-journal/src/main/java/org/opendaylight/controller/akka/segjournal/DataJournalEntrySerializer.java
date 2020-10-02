@@ -10,9 +10,6 @@ package org.opendaylight.controller.akka.segjournal;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.persistence.PersistentRepr;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
@@ -21,6 +18,9 @@ import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import java.util.concurrent.Callable;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ExtendedActorSystem;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentRepr;
 
 /**
  * Kryo serializer for {@link DataJournalEntry}. Each {@link SegmentedJournalActor} has its own instance, as well as
@@ -55,8 +55,9 @@ final class DataJournalEntrySerializer extends Serializer<DataJournalEntry> {
     public DataJournalEntry read(final Kryo kryo, final Input input, final Class<DataJournalEntry> type) {
         final String manifest = input.readString();
         final String uuid = input.readString();
-        final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
-            (Callable<Object>)() -> serializer.read(kryo, input, type));
+        final Object payload =
+            org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer.currentSystem().withValue(
+                    actorSystem, (Callable<Object>)() -> serializer.read(kryo, input, type));
         return new FromPersistence(manifest, uuid, payload);
     }
 }

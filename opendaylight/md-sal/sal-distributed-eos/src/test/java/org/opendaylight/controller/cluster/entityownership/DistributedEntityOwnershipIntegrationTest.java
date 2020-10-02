@@ -23,12 +23,12 @@ import static org.opendaylight.controller.cluster.entityownership.DistributedEnt
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
 
-import akka.actor.ActorRef;
-import akka.actor.Status.Failure;
-import akka.actor.Status.Success;
-import akka.cluster.Cluster;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Success;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;

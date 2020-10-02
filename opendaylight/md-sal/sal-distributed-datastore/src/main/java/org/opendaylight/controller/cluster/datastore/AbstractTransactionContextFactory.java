@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSelection;
-import akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

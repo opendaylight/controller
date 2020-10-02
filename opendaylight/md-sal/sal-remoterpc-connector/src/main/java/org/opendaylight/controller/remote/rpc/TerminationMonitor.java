@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import akka.actor.Terminated;
-import akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.Terminated;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.common.actor.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -11,10 +11,10 @@ package org.opendaylight.controller.cluster.raft;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.PoisonPill;
-import akka.actor.Status;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Status;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collection;

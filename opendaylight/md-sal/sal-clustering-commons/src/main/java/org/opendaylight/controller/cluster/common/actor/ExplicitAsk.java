@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.pattern.ExplicitAskSupport;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.pattern.ExplicitAskSupport;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.annotations.Beta;
 import java.util.function.Function;
 import scala.Function1;
@@ -26,7 +26,8 @@ import scala.runtime.AbstractFunction1;
  */
 @Beta
 public final class ExplicitAsk {
-    private static final ExplicitAskSupport ASK_SUPPORT = akka.pattern.extended.package$.MODULE$;
+    private static final ExplicitAskSupport ASK_SUPPORT =
+        org.opendaylight.controller.repackaged.akka.pattern.extended.package$.MODULE$;
 
     private ExplicitAsk() {
         throw new UnsupportedOperationException();

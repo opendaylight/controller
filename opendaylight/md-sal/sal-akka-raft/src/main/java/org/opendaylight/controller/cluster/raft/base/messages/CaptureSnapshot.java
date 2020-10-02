@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.dispatch.ControlMessage;
+import org.opendaylight.controller.repackaged.akka.dispatch.ControlMessage;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;

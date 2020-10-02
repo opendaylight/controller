@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ActorContext;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;

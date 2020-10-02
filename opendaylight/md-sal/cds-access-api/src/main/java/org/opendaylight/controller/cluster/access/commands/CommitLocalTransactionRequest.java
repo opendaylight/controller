@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -17,6 +16,7 @@ import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**

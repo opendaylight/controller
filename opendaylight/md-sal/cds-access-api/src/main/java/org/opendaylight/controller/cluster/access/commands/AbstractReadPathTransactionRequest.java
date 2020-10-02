@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**

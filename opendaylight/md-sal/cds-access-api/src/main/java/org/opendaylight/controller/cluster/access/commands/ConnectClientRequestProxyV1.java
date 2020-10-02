@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -15,6 +14,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 
 /**
  * Externalizable proxy for use with {@link ConnectClientRequest}. It implements the initial (Boron) serialization

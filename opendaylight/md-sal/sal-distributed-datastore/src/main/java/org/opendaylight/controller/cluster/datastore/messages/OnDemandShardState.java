@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 

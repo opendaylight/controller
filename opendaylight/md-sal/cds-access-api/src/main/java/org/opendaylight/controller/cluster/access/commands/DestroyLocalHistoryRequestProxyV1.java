@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**

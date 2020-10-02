@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.japi.Procedure;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

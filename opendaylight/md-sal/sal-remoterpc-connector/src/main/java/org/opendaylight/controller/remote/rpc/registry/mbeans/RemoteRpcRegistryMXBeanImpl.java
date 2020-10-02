@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
-import akka.actor.Address;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

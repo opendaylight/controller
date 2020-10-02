@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.actor.ReceiveTimeout;
-import akka.actor.Status.Failure;
-import akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ReceiveTimeout;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Failure;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

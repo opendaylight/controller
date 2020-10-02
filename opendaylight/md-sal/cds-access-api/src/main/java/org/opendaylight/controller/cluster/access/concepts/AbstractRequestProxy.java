@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer;
+import org.opendaylight.controller.repackaged.akka.serialization.Serialization;
 import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.io.ObjectInput;

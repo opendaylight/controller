@@ -12,12 +12,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.dispatch.Futures;
-import akka.dispatch.Mapper;
-import akka.dispatch.OnComplete;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.dispatch.Mapper;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;

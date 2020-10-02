@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotSuccess;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;

@@ -13,11 +13,11 @@ import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.removeBucketMessage;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.updateRemoteBucketsMessage;
 
-import akka.actor.ActorRef;
-import akka.actor.Address;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;

@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
 import com.google.common.util.concurrent.AbstractFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;

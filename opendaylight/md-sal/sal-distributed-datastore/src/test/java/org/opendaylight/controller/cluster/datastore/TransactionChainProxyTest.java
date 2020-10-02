@@ -21,8 +21,8 @@ import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.WRITE_ONLY;
 
-import akka.actor.ActorRef;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;

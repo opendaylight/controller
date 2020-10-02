@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertSame;
 
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;

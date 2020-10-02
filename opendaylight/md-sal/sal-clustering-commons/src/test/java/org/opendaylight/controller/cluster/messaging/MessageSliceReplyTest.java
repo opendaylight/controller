@@ -11,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JavaSerializer;
-import akka.testkit.TestProbe;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ExtendedActorSystem;
+import org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer;
+import org.opendaylight.controller.repackaged.akka.testkit.TestProbe;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;

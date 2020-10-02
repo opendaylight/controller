@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster;
 
-import akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
 import java.util.EventListener;
 
 /**

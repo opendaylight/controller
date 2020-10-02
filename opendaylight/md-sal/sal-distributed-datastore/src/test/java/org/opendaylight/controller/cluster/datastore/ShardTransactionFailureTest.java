@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;

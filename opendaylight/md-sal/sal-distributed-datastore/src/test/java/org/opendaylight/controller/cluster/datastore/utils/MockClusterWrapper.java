@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.actor.ActorRef;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.ClusterEvent.MemberRemoved;
-import akka.cluster.ClusterEvent.MemberUp;
-import akka.cluster.ClusterEvent.ReachableMember;
-import akka.cluster.ClusterEvent.UnreachableMember;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
-import akka.cluster.UniqueAddress;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.AddressFromURIString;
+import org.opendaylight.controller.repackaged.akka.cluster.ClusterEvent.MemberRemoved;
+import org.opendaylight.controller.repackaged.akka.cluster.ClusterEvent.MemberUp;
+import org.opendaylight.controller.repackaged.akka.cluster.ClusterEvent.ReachableMember;
+import org.opendaylight.controller.repackaged.akka.cluster.ClusterEvent.UnreachableMember;
+import org.opendaylight.controller.repackaged.akka.cluster.Member;
+import org.opendaylight.controller.repackaged.akka.cluster.MemberStatus;
+import org.opendaylight.controller.repackaged.akka.cluster.UniqueAddress;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import scala.collection.immutable.Set.Set1;

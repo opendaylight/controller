@@ -11,8 +11,8 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;

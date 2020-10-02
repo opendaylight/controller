@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.messaging;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
 import java.io.Serializable;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;

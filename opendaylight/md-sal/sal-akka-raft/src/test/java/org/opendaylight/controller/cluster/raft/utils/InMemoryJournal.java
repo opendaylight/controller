@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.dispatch.Futures;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentImpl;
-import akka.persistence.PersistentRepr;
-import akka.persistence.journal.japi.AsyncWriteJournal;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.persistence.AtomicWrite;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentImpl;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentRepr;
+import org.opendaylight.controller.repackaged.akka.persistence.journal.japi.AsyncWriteJournal;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.Serializable;
 import java.util.ArrayList;

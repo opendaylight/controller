@@ -13,7 +13,7 @@ import static org.opendaylight.controller.cluster.entityownership.EntityOwnersMo
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.ENTITY_QNAME;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

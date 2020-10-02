@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 
 /**
  * Request to abort a local transaction. Since local transactions do not introduce state on the backend until they

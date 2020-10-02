@@ -22,10 +22,10 @@ import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoS
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Status.Success;
-import akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Status.Success;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;

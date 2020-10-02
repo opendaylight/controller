@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;

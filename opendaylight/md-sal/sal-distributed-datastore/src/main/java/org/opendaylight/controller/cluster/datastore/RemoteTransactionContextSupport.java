@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSelection;
-import akka.dispatch.OnComplete;
-import akka.pattern.AskTimeoutException;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.pattern.AskTimeoutException;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;

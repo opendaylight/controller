@@ -12,9 +12,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import java.net.URI;
 import java.util.Collection;
 import org.junit.AfterClass;

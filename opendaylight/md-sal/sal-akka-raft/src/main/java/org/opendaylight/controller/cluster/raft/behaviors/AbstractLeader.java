@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

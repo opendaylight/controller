@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.actor.ReceiveTimeout;
-import akka.japi.Creator;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.PoisonPill;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ReceiveTimeout;
+import org.opendaylight.controller.repackaged.akka.japi.Creator;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;

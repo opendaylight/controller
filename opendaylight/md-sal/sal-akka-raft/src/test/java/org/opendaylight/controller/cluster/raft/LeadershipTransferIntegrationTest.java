@@ -13,11 +13,11 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
-import akka.actor.ActorRef;
-import akka.actor.Status;
-import akka.pattern.Patterns;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Status;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Collections;

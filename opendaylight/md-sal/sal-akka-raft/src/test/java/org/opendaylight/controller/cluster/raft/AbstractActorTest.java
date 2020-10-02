@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;

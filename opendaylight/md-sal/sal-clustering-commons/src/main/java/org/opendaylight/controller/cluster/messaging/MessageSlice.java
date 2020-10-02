@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.messaging;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.serialization.JavaSerializer;
+import org.opendaylight.controller.repackaged.akka.serialization.Serialization;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;

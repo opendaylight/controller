@@ -12,10 +12,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;

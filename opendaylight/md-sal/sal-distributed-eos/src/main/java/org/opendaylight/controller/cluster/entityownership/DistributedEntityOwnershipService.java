@@ -12,10 +12,10 @@ import static org.opendaylight.controller.cluster.entityownership.EntityOwnersMo
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
 
-import akka.actor.ActorRef;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.pattern.Patterns;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

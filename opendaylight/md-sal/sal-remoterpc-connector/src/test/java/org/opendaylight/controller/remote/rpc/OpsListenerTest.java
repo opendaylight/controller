@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
 import org.junit.AfterClass;

@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Dispatchers;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.dispatch.Dispatchers;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;

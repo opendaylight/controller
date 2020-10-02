@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import java.util.Optional;
 
 /**

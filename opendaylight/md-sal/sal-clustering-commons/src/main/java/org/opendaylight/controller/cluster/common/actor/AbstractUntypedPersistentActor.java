@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.persistence.AbstractPersistentActor;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.persistence.AbstractPersistentActor;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;

@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
-import akka.dispatch.OnComplete;
+import org.opendaylight.controller.repackaged.akka.dispatch.OnComplete;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;

@@ -16,7 +16,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import akka.japi.Procedure;
+import org.opendaylight.controller.repackaged.akka.japi.Procedure;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.function.Consumer;

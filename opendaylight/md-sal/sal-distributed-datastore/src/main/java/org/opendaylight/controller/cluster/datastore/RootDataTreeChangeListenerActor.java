@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
 import com.google.common.collect.Iterables;
 import java.util.ArrayDeque;
 import java.util.Collection;

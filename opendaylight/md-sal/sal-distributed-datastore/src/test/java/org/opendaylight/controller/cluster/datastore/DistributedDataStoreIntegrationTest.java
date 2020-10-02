@@ -13,11 +13,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.actor.AddressFromURIString;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Uninterruptibles;

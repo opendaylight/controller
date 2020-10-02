@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;

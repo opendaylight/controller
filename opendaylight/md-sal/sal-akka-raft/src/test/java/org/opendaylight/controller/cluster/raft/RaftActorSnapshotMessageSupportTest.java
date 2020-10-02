@@ -14,10 +14,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.persistence.SnapshotMetadata;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotFailure;
+import org.opendaylight.controller.repackaged.akka.persistence.SaveSnapshotSuccess;
+import org.opendaylight.controller.repackaged.akka.persistence.SnapshotMetadata;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
 import java.util.Collections;

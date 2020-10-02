@@ -13,7 +13,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;

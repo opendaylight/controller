@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.util.Timeout;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.util.Timeout;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;

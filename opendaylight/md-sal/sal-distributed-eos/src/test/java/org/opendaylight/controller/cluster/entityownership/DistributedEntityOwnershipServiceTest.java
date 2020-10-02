@@ -28,7 +28,7 @@ import static org.opendaylight.controller.cluster.entityownership.EntityOwnersMo
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Optional;

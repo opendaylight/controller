@@ -14,12 +14,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.dispatch.Dispatchers;
-import akka.dispatch.Futures;
-import akka.testkit.TestActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.Props;
+import org.opendaylight.controller.repackaged.akka.actor.UntypedAbstractActor;
+import org.opendaylight.controller.repackaged.akka.dispatch.Dispatchers;
+import org.opendaylight.controller.repackaged.akka.dispatch.Futures;
+import org.opendaylight.controller.repackaged.akka.testkit.TestActorRef;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Throwables;

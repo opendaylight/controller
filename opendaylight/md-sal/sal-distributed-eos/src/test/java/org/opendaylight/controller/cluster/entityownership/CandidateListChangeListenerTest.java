@@ -13,7 +13,7 @@ import static org.opendaylight.controller.cluster.entityownership.EntityOwnersMo
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
 
-import akka.testkit.javadsl.TestKit;
+import org.opendaylight.controller.repackaged.akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
 import org.junit.Before;

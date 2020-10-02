@@ -9,9 +9,9 @@ package org.opendaylight.controller.akka.segjournal;
 
 import static com.google.common.base.Verify.verify;
 
-import akka.actor.ActorSystem;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentRepr;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSystem;
+import org.opendaylight.controller.repackaged.akka.persistence.AtomicWrite;
+import org.opendaylight.controller.repackaged.akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.Indexed;

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
 import java.util.Optional;
 import org.opendaylight.yangtools.concepts.Immutable;
 

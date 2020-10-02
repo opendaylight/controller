@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Address;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent.CurrentClusterState;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
+import org.opendaylight.controller.repackaged.akka.actor.ActorRef;
+import org.opendaylight.controller.repackaged.akka.actor.ActorSelection;
+import org.opendaylight.controller.repackaged.akka.actor.Address;
+import org.opendaylight.controller.repackaged.akka.cluster.Cluster;
+import org.opendaylight.controller.repackaged.akka.cluster.ClusterEvent.CurrentClusterState;
+import org.opendaylight.controller.repackaged.akka.cluster.Member;
+import org.opendaylight.controller.repackaged.akka.cluster.MemberStatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
