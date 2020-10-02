@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-akka">
+    <feature version="0.0.0">
+        <feature>odl-controller-scala</feature>
+        <bundle>mvn:org.opendaylight.controller/repackaged-akka/3.0.0-SNAPSHOT</bundle>
+    </feature>
+</features>
