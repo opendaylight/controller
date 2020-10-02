@@ -23,6 +23,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRpcIdentifier> {
     private static final class Proxy implements Externalizable {
@@ -51,7 +52,8 @@ public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRp
             try (NormalizedNodeDataOutput nnout = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
                 nnout.writeInt(rpcs.size());
                 for (DOMRpcIdentifier id : rpcs) {
-                    nnout.writeSchemaPath(id.getType());
+                    // TODO: we should be able to get by with just a QName
+                    nnout.writeSchemaNodeIdentifier(Absolute.of(id.getType()));
                     nnout.writeYangInstanceIdentifier(id.getContextReference());
                 }
             }
@@ -65,7 +67,9 @@ public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRp
             final int size = nnin.readInt();
             rpcs = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {
-                rpcs.add(DOMRpcIdentifier.create(nnin.readSchemaPath(), nnin.readYangInstanceIdentifier()));
+                // TODO: we should be able to get by with just a QName
+                rpcs.add(DOMRpcIdentifier.create(nnin.readSchemaNodeIdentifier().firstNodeIdentifier(),
+                    nnin.readYangInstanceIdentifier()));
             }
         }
 

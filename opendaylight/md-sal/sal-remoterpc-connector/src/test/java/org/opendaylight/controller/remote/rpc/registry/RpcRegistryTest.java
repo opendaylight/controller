@@ -52,7 +52,6 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndp
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -370,8 +369,7 @@ public class RpcRegistryTest {
         final int nRoutes = 500;
         final Collection<DOMRpcIdentifier> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
-            final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(SchemaPath.create(true,
-                    QName.create(URI.create("/mockrpc"), "type" + i)));
+            final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(QName.create(URI.create("/mockrpc"), "type" + i));
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -406,7 +404,7 @@ public class RpcRegistryTest {
     private List<DOMRpcIdentifier> createRouteIds() {
         QName type = QName.create(URI.create("/mockrpc"), "mockrpc" + routeIdCounter++);
         List<DOMRpcIdentifier> routeIds = new ArrayList<>(1);
-        routeIds.add(DOMRpcIdentifier.create(SchemaPath.create(true, type)));
+        routeIds.add(DOMRpcIdentifier.create(type));
         return routeIds;
     }
 }

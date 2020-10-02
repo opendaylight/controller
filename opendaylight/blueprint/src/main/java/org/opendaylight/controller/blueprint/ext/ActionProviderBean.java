@@ -20,7 +20,7 @@ import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.osgi.framework.Bundle;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
@@ -121,7 +121,7 @@ public class ActionProviderBean {
     }
 
     private void registerFallback(final Class<RpcService> interfaceClass) {
-        final Collection<SchemaPath> paths = RpcUtil.decomposeRpcService(interfaceClass,
+        final Collection<QName> paths = RpcUtil.decomposeRpcService(interfaceClass,
             schemaService.getGlobalContext(), RpcRoutingStrategy::isContextBasedRouted);
         if (paths.isEmpty()) {
             LOG.warn("{}: interface {} has no actions defined", ACTION_PROVIDER, interfaceClass);

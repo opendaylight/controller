@@ -39,7 +39,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
@@ -57,10 +57,10 @@ public class AbstractOpsTest {
     static final QName TEST_RPC_OUTPUT = QName.create(TEST_NS, TEST_REV, "output");
 
 
-    static final SchemaPath TEST_RPC_TYPE = SchemaPath.create(true, TEST_RPC);
+    static final Absolute TEST_RPC_TYPE = Absolute.of(TEST_RPC);
     static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.create(
             new YangInstanceIdentifier.NodeIdentifier(TEST_RPC));
-    public static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC_TYPE, TEST_PATH);
+    public static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC, TEST_PATH);
     public static final DOMDataTreeIdentifier TEST_DATA_TREE_ID = new DOMDataTreeIdentifier(
             LogicalDatastoreType.OPERATIONAL, TEST_PATH);
 

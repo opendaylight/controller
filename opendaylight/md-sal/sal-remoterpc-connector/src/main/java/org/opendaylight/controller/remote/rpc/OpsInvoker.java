@@ -29,10 +29,12 @@ import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 /**
  * Actor receiving invocation requests from remote nodes, routing them to
@@ -91,15 +93,15 @@ final class OpsInvoker extends AbstractUntypedActor {
             return;
         }
 
-        Futures.addCallback(future, new AbstractCallback<DOMRpcResult>(getSender(), msg.getType()) {
+        Futures.addCallback(future, new AbstractCallback<QName, DOMRpcResult>(getSender(), msg.getType()) {
             @Override
-            Object nullResponse(final SchemaPath type) {
+            Object nullResponse(final QName type) {
                 LOG.warn("Execution of {} resulted in null result", type);
                 return new RpcResponse(null);
             }
 
             @Override
-            Object response(final SchemaPath type, final DOMRpcResult result) {
+            Object response(final QName type, final DOMRpcResult result) {
                 final Collection<? extends RpcError> errors = result.getErrors();
                 return errors.isEmpty() ? new RpcResponse(result.getResult())
                         // This is legacy (wrong) behavior, which ignores the fact that errors may be just warnings,
@@ -125,14 +127,14 @@ final class OpsInvoker extends AbstractUntypedActor {
             return;
         }
 
-        Futures.addCallback(future, new AbstractCallback<DOMActionResult>(getSender(), msg.getType()) {
+        Futures.addCallback(future, new AbstractCallback<Absolute, DOMActionResult>(getSender(), msg.getType()) {
             @Override
-            Object nullResponse(final SchemaPath type) {
+            Object nullResponse(final Absolute type) {
                 throw new IllegalStateException("Null invocation result of action " + type);
             }
 
             @Override
-            Object response(final SchemaPath type, final DOMActionResult result) {
+            Object response(final Absolute type, final DOMActionResult result) {
                 final Collection<? extends RpcError> errors = result.getErrors();
                 return errors.isEmpty() ? new ActionResponse(result.getOutput(), result.getErrors())
                     // This is legacy (wrong) behavior, which ignores the fact that errors may be just warnings,
@@ -143,17 +145,17 @@ final class OpsInvoker extends AbstractUntypedActor {
         }, MoreExecutors.directExecutor());
     }
 
-    private abstract class AbstractCallback<T> implements FutureCallback<T> {
+    private abstract class AbstractCallback<T, R> implements FutureCallback<R> {
         private final ActorRef replyTo;
-        private final SchemaPath type;
+        private final T type;
 
-        AbstractCallback(final ActorRef replyTo, final SchemaPath type) {
+        AbstractCallback(final ActorRef replyTo, final T type) {
             this.replyTo = requireNonNull(replyTo);
             this.type = requireNonNull(type);
         }
 
         @Override
-        public final void onSuccess(final T result) {
+        public final void onSuccess(final R result) {
             final Object response;
             if (result == null) {
                 // This shouldn't happen but the FutureCallback annotates the result param with Nullable so handle null
@@ -175,8 +177,8 @@ final class OpsInvoker extends AbstractUntypedActor {
             replyTo.tell(new Failure(failure), self());
         }
 
-        abstract @NonNull Object nullResponse(@NonNull SchemaPath type);
+        abstract @NonNull Object nullResponse(@NonNull T type);
 
-        abstract @NonNull Object response(@NonNull SchemaPath type, @NonNull T result);
+        abstract @NonNull Object response(@NonNull T type, @NonNull R result);
     }
 }
