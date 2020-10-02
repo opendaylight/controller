@@ -22,25 +22,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependencies>
         <!-- Akka -->
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.13</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-persistence_2.13</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_2.13</artifactId>
-            <scope>test</scope>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>repackaged-akka</artifactId>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-testkit_2.13</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-persistence-tck_2.13</artifactId>
         </dependency>
 
         <!-- Codahale -->
