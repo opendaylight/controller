@@ -22,6 +22,7 @@
 
   <modules>
     <module>artifacts</module>
+    <module>akka</module>
 
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>
