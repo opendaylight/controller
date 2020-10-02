@@ -53,13 +53,8 @@
 
     <!-- Akka -->
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_2.13</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
-      <scope>test</scope>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>repackaged-akka-testkit</artifactId>
     </dependency>
 
     <!-- Scala -->
