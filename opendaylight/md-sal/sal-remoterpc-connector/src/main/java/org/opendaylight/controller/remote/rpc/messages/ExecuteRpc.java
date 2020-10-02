@@ -16,16 +16,16 @@ import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?, ?>> {
     private static final long serialVersionUID = 1128904894827335676L;
 
-    private ExecuteRpc(final @NonNull SchemaPath type, final @Nullable NormalizedNode<?, ?> input) {
+    private ExecuteRpc(final @NonNull QName type, final @Nullable NormalizedNode<?, ?> input) {
         super(type, input);
     }
 
@@ -66,7 +66,7 @@ public final class ExecuteRpc extends AbstractExecute<@Nullable NormalizedNode<?
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
             final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
-            final SchemaPath type = SchemaPath.ROOT.createChild(stream.readQName());
+            final QName type = stream.readQName();
             final NormalizedNode<?, ?> input = stream.readOptionalNormalizedNode().orElse(null);
             executeRpc = new ExecuteRpc(type, input);
         }

@@ -24,19 +24,20 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public final class ExecuteAction extends AbstractExecute<@NonNull ContainerNode> {
     private static final long serialVersionUID = 1128904894827335676L;
 
     private final @NonNull DOMDataTreeIdentifier path;
 
-    private ExecuteAction(final @NonNull SchemaPath type, final @NonNull DOMDataTreeIdentifier path,
+    private ExecuteAction(final @NonNull Absolute type, final @NonNull DOMDataTreeIdentifier path,
             final @NonNull ContainerNode input) {
         super(type, requireNonNull(input));
         this.path = requireNonNull(path);
     }
 
-    public static @NonNull ExecuteAction from(final @NonNull SchemaPath type, @NonNull final DOMDataTreeIdentifier path,
+    public static @NonNull ExecuteAction from(final @NonNull Absolute type, @NonNull final DOMDataTreeIdentifier path,
             final @NonNull ContainerNode input) {
         return new ExecuteAction(type, path, input);
     }

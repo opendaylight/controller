@@ -13,11 +13,11 @@ import org.opendaylight.mdsal.dom.api.DOMActionException;
 import org.opendaylight.mdsal.dom.api.DOMActionResult;
 import org.opendaylight.mdsal.dom.spi.SimpleDOMActionResult;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import scala.concurrent.Future;
 
 final class RemoteDOMActionFuture extends AbstractRemoteFuture<DOMActionResult, DOMActionException> {
-    RemoteDOMActionFuture(final @NonNull SchemaPath type, final @NonNull Future<Object> requestFuture) {
+    RemoteDOMActionFuture(final @NonNull Absolute type, final @NonNull Future<Object> requestFuture) {
         super(type, requestFuture);
     }
 

@@ -53,7 +53,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
         final DOMRpcIdentifier emptyRpcIdentifier = DOMRpcIdentifier.create(
                 EMPTY_SCHEMA_PATH, YangInstanceIdentifier.empty());
         final DOMRpcIdentifier localRpcIdentifier = DOMRpcIdentifier.create(
-                LOCAL_SCHEMA_PATH, YangInstanceIdentifier.of(LOCAL_QNAME));
+                LOCAL_QNAME, YangInstanceIdentifier.of(LOCAL_QNAME));
 
         buckets = Lists.newArrayList(emptyRpcIdentifier, localRpcIdentifier);
 

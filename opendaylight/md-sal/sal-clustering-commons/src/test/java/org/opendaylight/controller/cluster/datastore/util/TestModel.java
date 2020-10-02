@@ -43,7 +43,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public final class TestModel {
@@ -170,16 +170,16 @@ public final class TestModel {
         return TestModel.class.getResourceAsStream(resourceName);
     }
 
-    public static SchemaContext createTestContext() {
+    public static EffectiveModelContext createTestContext() {
         return YangParserTestUtils.parseYangResources(TestModel.class, DATASTORE_TEST_YANG, DATASTORE_AUG_YANG,
             DATASTORE_TEST_NOTIFICATION_YANG);
     }
 
-    public static SchemaContext createTestContextWithoutTestSchema() {
+    public static EffectiveModelContext createTestContextWithoutTestSchema() {
         return YangParserTestUtils.parseYangResource(DATASTORE_TEST_NOTIFICATION_YANG);
     }
 
-    public static SchemaContext createTestContextWithoutAugmentationSchema() {
+    public static EffectiveModelContext createTestContextWithoutAugmentationSchema() {
         return YangParserTestUtils.parseYangResources(TestModel.class, DATASTORE_TEST_YANG,
             DATASTORE_TEST_NOTIFICATION_YANG);
     }
