@@ -31,9 +31,10 @@ import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.SimpleDOMActionResult;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 /**
  * Unit tests for RemoteRpcImplementation.
@@ -56,7 +57,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
                 ArgumentCaptor.forClass(NormalizedNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
-            .invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture());
+            .invokeRpc(eq(TEST_RPC), inputCaptor.capture());
 
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
@@ -99,7 +100,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
                 (ArgumentCaptor) ArgumentCaptor.forClass(NormalizedNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
-            .invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture());
+            .invokeRpc(eq(TEST_RPC), inputCaptor.capture());
 
         ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, null);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
@@ -144,7 +145,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
                 (ArgumentCaptor) ArgumentCaptor.forClass(NormalizedNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
-            .invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture());
+            .invokeRpc(eq(TEST_RPC), inputCaptor.capture());
 
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
@@ -164,7 +165,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final ArgumentCaptor<NormalizedNode<?, ?>> inputCaptor =
                 (ArgumentCaptor) ArgumentCaptor.forClass(NormalizedNode.class);
 
-        when(domRpcService2.invokeRpc(eq(TEST_RPC_TYPE), inputCaptor.capture())).thenReturn(
+        when(domRpcService2.invokeRpc(eq(TEST_RPC), inputCaptor.capture())).thenReturn(
                 FluentFutures.immediateFailedFluentFuture(new RemoteDOMRpcException("Test Exception", null)));
 
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
@@ -226,7 +227,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     public void testInvokeRpcWithLookupException() throws Throwable {
         final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
 
-        doThrow(new RuntimeException("test")).when(domRpcService2).invokeRpc(any(SchemaPath.class),
+        doThrow(new RuntimeException("test")).when(domRpcService2).invokeRpc(any(QName.class),
             any(NormalizedNode.class));
 
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
@@ -248,7 +249,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     public void testInvokeActionWithLookupException() throws Throwable {
         final ContainerNode invokeRpcInput = makeRPCInput("foo");
 
-        doThrow(new RuntimeException("test")).when(domActionService2).invokeAction(any(SchemaPath.class),
+        doThrow(new RuntimeException("test")).when(domActionService2).invokeAction(any(Absolute.class),
                 any(DOMDataTreeIdentifier.class), any(ContainerNode.class));
 
         final ListenableFuture<DOMActionResult> frontEndFuture = remoteActionImpl1.invokeAction(TEST_RPC_TYPE,

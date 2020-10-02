@@ -38,6 +38,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public class RemoteRpcRegistryMXBeanImplTest {
 
     private static final QName LOCAL_QNAME = QName.create("base", "local");
+    private static final QName REMOTE_QNAME = QName.create("base", "remote");
     private static final SchemaPath EMPTY_SCHEMA_PATH = SchemaPath.ROOT;
     private static final SchemaPath LOCAL_SCHEMA_PATH = SchemaPath.create(true, LOCAL_QNAME);
 
@@ -51,9 +52,9 @@ public class RemoteRpcRegistryMXBeanImplTest {
         system = ActorSystem.create("test");
 
         final DOMRpcIdentifier emptyRpcIdentifier = DOMRpcIdentifier.create(
-                EMPTY_SCHEMA_PATH, YangInstanceIdentifier.empty());
+                REMOTE_QNAME, YangInstanceIdentifier.empty());
         final DOMRpcIdentifier localRpcIdentifier = DOMRpcIdentifier.create(
-                LOCAL_SCHEMA_PATH, YangInstanceIdentifier.of(LOCAL_QNAME));
+                LOCAL_QNAME, YangInstanceIdentifier.of(LOCAL_QNAME));
 
         buckets = Lists.newArrayList(emptyRpcIdentifier, localRpcIdentifier);
 
