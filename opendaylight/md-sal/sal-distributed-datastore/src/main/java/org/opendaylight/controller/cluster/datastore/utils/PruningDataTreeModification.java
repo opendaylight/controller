@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,8 +127,8 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
     }
 
     @Override
-    public final SchemaContext getSchemaContext() {
-        return delegate.getSchemaContext();
+    public final EffectiveModelContext getEffectiveModelContext() {
+        return delegate.getEffectiveModelContext();
     }
 
     @Override
