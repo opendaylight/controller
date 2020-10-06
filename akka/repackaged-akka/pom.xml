@@ -190,6 +190,7 @@
                         <Export-Package>
                             akka.*,
                             com.typesafe.sslconfig.akka.*,
+                            jdk.jfr,
                         </Export-Package>
                         <Import-Package>
                             sun.misc;resolution:=optional,
