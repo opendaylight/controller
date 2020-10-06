@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
@@ -77,7 +77,7 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         assertEquals(registerForShard1.getListenerActorPath(), registerForShard2.getListenerActorPath());
 
         final TestKit kit2 = new TestKit(getSystem());
-        final ActorRef rootListenerActor = getSystem().actorFor(registerForShard1.getListenerActorPath());
+        final ActorSelection rootListenerActor = getSystem().actorSelection(registerForShard1.getListenerActorPath());
         rootListenerActor.tell(new EnableNotification(true, "test"), kit.getRef());
         final DataTreeCandidate peopleCandidate = DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(),
             PeopleModel.create());
