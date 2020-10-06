@@ -17,6 +17,7 @@ import akka.cluster.ClusterEvent.UnreachableMember;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.cluster.UniqueAddress;
+import akka.util.Version;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import scala.collection.immutable.Set.Set1;
@@ -62,28 +63,28 @@ public class MockClusterWrapper implements ClusterWrapper {
 
     public static MemberRemoved createMemberRemoved(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.removed(), new Set1<>(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.removed(), new Set1<>(memberName), Version.Zero());
 
         return new MemberRemoved(member, MemberStatus.up());
     }
 
     public static MemberUp createMemberUp(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName), Version.Zero());
 
         return new MemberUp(member);
     }
 
     public static UnreachableMember createUnreachableMember(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName), Version.Zero());
 
         return new UnreachableMember(member);
     }
 
     public static ReachableMember createReachableMember(final String memberName, final String address) {
         UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
-        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName));
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), new Set1<>(memberName), Version.Zero());
 
         return new ReachableMember(member);
     }
