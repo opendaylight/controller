@@ -359,27 +359,28 @@ public class DistributedEntityOwnershipIntegrationTest {
         String name = "testLeaderAndFollowerEntityOwnersReassignedAfterShutdown";
         final MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1")
                 .useAkkaArtery(false).testName(name)
-                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG)
+                .schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
                 .createOperDatastore(false).datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
         final MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2")
-                .useAkkaArtery(false).testName(name)
-                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
+                .testName(name).moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG)
+                .useAkkaArtery(false).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
                 .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         final MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3")
-                .useAkkaArtery(false).testName(name)
-                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
+                .testName(name).moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG)
+                .useAkkaArtery(false).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
                 .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         final MemberNode follower3Node = MemberNode.builder(memberNodes).akkaConfig("Member4")
-                .useAkkaArtery(false).testName(name)
-                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
+                .testName(name).moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG)
+                .useAkkaArtery(false).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
                 .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         final MemberNode follower4Node = MemberNode.builder(memberNodes).akkaConfig("Member5")
-                .useAkkaArtery(false).testName(name)
-                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
+                .testName(name).moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG)
+                .useAkkaArtery(false).schemaContext(EOSTestUtils.SCHEMA_CONTEXT)
                 .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
@@ -452,13 +453,15 @@ public class DistributedEntityOwnershipIntegrationTest {
         // Shutdown the leader and follower3
 
         leaderNode.cleanup();
-        follower3Node.cleanup();
 
         follower1Node.waitForMemberDown("member-1");
-        follower1Node.waitForMemberDown("member-4");
         follower2Node.waitForMemberDown("member-1");
-        follower2Node.waitForMemberDown("member-4");
         follower4Node.waitForMemberDown("member-1");
+
+        follower3Node.cleanup();
+
+        follower1Node.waitForMemberDown("member-4");
+        follower2Node.waitForMemberDown("member-4");
         follower4Node.waitForMemberDown("member-4");
 
         // Verify the prior leader's and follower3 entity owners are re-assigned.
