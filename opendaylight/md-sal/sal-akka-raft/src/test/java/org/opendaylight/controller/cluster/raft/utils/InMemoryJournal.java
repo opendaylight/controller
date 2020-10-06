@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Option;
 import scala.concurrent.Future;
 import scala.jdk.javaapi.CollectionConverters;
 
@@ -169,7 +170,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
                     if (++count <= max && entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
                         PersistentRepr persistentMessage =
                                 new PersistentImpl(deserialize(entry.getValue()), entry.getKey(), persistenceId,
-                                        null, false, null, null, 0);
+                                        null, false, null, null, 0, Option.empty());
                         replayCallback.accept(persistentMessage);
                     }
                 }
