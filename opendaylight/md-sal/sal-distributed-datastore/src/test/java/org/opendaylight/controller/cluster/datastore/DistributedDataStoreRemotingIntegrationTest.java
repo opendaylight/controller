@@ -756,7 +756,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         TestKit.shutdownActorSystem(leaderSystem, true);
         Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
-        followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorUtils(), CARS);
 
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_2_ADDRESS);
@@ -1269,6 +1268,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
     }
 
+    // Upgrade akka to 2.6.10: after calling TestKit.shutdownActorSystem() node is being removed from cluster
+    // instead of marking it as unreachable, as it was in previous version.
+    @Ignore
     @Test
     public void testSemiReachableCandidateNotDroppingLeader() throws Exception {
         final String testName = "testSemiReachableCandidateNotDroppingLeader";
