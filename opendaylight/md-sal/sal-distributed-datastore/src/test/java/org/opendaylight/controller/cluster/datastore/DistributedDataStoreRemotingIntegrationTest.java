@@ -1269,6 +1269,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
     }
 
+    // Upgrade akka to 2.6.10: after calling TestKit.shutdownActorSystem() node is being removed from cluster
+    // instead of marking it as unreachable, as it was in previous version.
+    @Ignore
     @Test
     public void testSemiReachableCandidateNotDroppingLeader() throws Exception {
         final String testName = "testSemiReachableCandidateNotDroppingLeader";
