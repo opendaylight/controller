@@ -110,6 +110,11 @@
                                     <artifactId>repackaged-akka-jar</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.hierynomus</groupId>
+                                    <artifactId>asn-one</artifactId>
+                                    <version>0.4.0</version>
+                                </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
@@ -190,6 +195,7 @@
                         <Export-Package>
                             akka.*,
                             com.typesafe.sslconfig.akka.*,
+                            jdk.jfr,
                         </Export-Package>
                         <Import-Package>
                             sun.misc;resolution:=optional,
