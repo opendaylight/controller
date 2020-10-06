@@ -93,6 +93,7 @@ public class MemberNode {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(kit.getSystem()).state();
+
             for (Member m : state.getUnreachable()) {
                 if (member.equals(m.getRoles().iterator().next())) {
                     return;

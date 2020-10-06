@@ -204,9 +204,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             leaderDistributedDataStore.close();
         }
 
-        TestKit.shutdownActorSystem(leaderSystem);
-        TestKit.shutdownActorSystem(followerSystem);
-        TestKit.shutdownActorSystem(follower2System);
+        TestKit.shutdownActorSystem(leaderSystem, true);
+        TestKit.shutdownActorSystem(followerSystem, true);
+        TestKit.shutdownActorSystem(follower2System,true);
 
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
@@ -1286,10 +1286,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerTestKit.waitForMembersUp("member-1", "member-3");
         follower2TestKit.waitForMembersUp("member-1", "member-2");
 
-        TestKit.shutdownActorSystem(follower2System);
+        // behavior is controlled by akka.coordinated-shutdown.run-by-actor-system-terminate configuration option
+        TestKit.shutdownActorSystem(follower2System, true);
 
         ActorRef cars = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").get();
-        OnDemandRaftState initialState = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
+        final OnDemandRaftState initialState = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
                 .executeOperation(cars, GetOnDemandRaftState.INSTANCE);
 
         Cluster leaderCluster = Cluster.get(leaderSystem);
