@@ -22,6 +22,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -93,6 +94,16 @@ public class MemberNode {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(kit.getSystem()).state();
+
+            Iterable<Member> membersIter = state.getMembers();
+            List<String> roles = new ArrayList<>();
+            membersIter.forEach(e -> {
+                roles.add(e.getRoles().iterator().next());
+            });
+            if (!roles.contains(member)) {
+                return;
+            }
+
             for (Member m : state.getUnreachable()) {
                 if (member.equals(m.getRoles().iterator().next())) {
                     return;
