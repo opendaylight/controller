@@ -83,6 +83,10 @@
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-parser-combinators_2.13</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hierynomus</groupId>
+            <artifactId>asn-one</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -190,6 +194,7 @@
                         <Export-Package>
                             akka.*,
                             com.typesafe.sslconfig.akka.*,
+                            jdk.jfr,
                         </Export-Package>
                         <Import-Package>
                             sun.misc;resolution:=optional,

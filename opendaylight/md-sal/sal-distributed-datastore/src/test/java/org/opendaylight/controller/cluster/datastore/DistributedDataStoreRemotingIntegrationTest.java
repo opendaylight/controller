@@ -756,8 +756,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         TestKit.shutdownActorSystem(leaderSystem, true);
         Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
-        followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorUtils(), CARS);
-
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_2_ADDRESS);
 
@@ -1286,10 +1284,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerTestKit.waitForMembersUp("member-1", "member-3");
         follower2TestKit.waitForMembersUp("member-1", "member-2");
 
-        TestKit.shutdownActorSystem(follower2System);
-
         ActorRef cars = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").get();
-        OnDemandRaftState initialState = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
+        final OnDemandRaftState initialState = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
                 .executeOperation(cars, GetOnDemandRaftState.INSTANCE);
 
         Cluster leaderCluster = Cluster.get(leaderSystem);
@@ -1297,6 +1293,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         Cluster follower2Cluster = Cluster.get(follower2System);
 
         Member follower2Member = follower2Cluster.readView().self();
+        leaderCluster.down(follower2Member.address());
 
         await().atMost(10, TimeUnit.SECONDS)
                 .until(() -> leaderCluster.readView().unreachableMembers().contains(follower2Member));
