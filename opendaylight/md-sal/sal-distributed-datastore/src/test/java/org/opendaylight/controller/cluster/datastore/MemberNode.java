@@ -22,11 +22,14 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -93,6 +96,16 @@ public class MemberNode {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(kit.getSystem()).state();
+
+            // Check if member is already removed from cluster
+            Iterable<Member> membersIter = state.getMembers();
+            List<String> roles = StreamSupport.stream(membersIter.spliterator(), false)
+                    .map(e-> e.getRoles().iterator().next())
+                    .collect(Collectors.toList());
+            if (!roles.contains(member)) {
+                return;
+            }
+
             for (Member m : state.getUnreachable()) {
                 if (member.equals(m.getRoles().iterator().next())) {
                     return;
