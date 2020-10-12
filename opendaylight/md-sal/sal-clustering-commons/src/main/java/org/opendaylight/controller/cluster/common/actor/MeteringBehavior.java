@@ -16,7 +16,7 @@ import scala.runtime.AbstractPartialFunction;
 import scala.runtime.BoxedUnit;
 
 /**
- * Represents behaviour that can be exhibited by actors of type {@link akka.actor.UntypedActor}
+ * Represents behaviour that can be exhibited by actors of type {@link AbstractActor}
  *
  * <p>
  * This behaviour meters actor's default behaviour. It captures 2 metrics:
@@ -79,7 +79,7 @@ public class MeteringBehavior extends AbstractPartialFunction<Object, BoxedUnit>
      * @param message the message to process
      */
     @Override
-    public BoxedUnit apply(Object message) {
+    public BoxedUnit apply(final Object message) {
         final String messageType = message.getClass().getSimpleName();
         final String msgProcessingTimeByMsgType =
                 MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE, messageType);
