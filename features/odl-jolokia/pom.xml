@@ -23,6 +23,16 @@
         <dependency>
             <groupId>org.jolokia</groupId>
             <artifactId>jolokia-osgi</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jolokia</groupId>
+                    <artifactId>jolokia-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jolokia</groupId>
+                    <artifactId>jolokia-jsr160</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <!-- finalname="/etc/org.jolokia.osgi.cfg" -->
