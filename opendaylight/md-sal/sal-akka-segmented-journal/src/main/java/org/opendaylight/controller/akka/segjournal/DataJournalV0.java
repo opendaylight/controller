@@ -52,18 +52,18 @@ final class DataJournalV0 extends DataJournal {
     }
 
     @Override
-    long lastWrittenIndex() {
+    long lastWrittenSequenceNr() {
         return entries.writer().getLastIndex();
     }
 
     @Override
-    void commitTo(final long index) {
-        entries.writer().commit(index);
+    void deleteTo(final long sequenceNr) {
+        entries.writer().commit(sequenceNr);
     }
 
     @Override
-    void compactTo(final long index) {
-        entries.compact(index);
+    void compactTo(final long sequenceNr) {
+        entries.compact(sequenceNr + 1);
     }
 
     @Override
@@ -73,8 +73,8 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     @SuppressWarnings("checkstyle:illegalCatch")
-    void handleReplayMessages(final ReplayMessages message, final long from) {
-        try (SegmentedJournalReader<DataJournalEntry> reader = entries.openReader(from)) {
+    void handleReplayMessages(final ReplayMessages message, final long fromSequenceNr) {
+        try (SegmentedJournalReader<DataJournalEntry> reader = entries.openReader(fromSequenceNr)) {
             int count = 0;
             while (reader.hasNext() && count < message.max) {
                 final Indexed<DataJournalEntry> next = reader.next();

@@ -239,7 +239,7 @@ final class SegmentedJournalActor extends AbstractActor {
         ensureOpen();
 
         LOG.debug("{}: delete messages {}", persistenceId, message);
-        final long to = Long.min(dataJournal.lastWrittenIndex(), message.toSequenceNr);
+        final long to = Long.min(dataJournal.lastWrittenSequenceNr(), message.toSequenceNr);
         LOG.debug("{}: adjusted delete to {}", persistenceId, to);
 
         if (lastDelete < to) {
@@ -249,10 +249,10 @@ final class SegmentedJournalActor extends AbstractActor {
             final SegmentedJournalWriter<Long> deleteWriter = deleteJournal.writer();
             final Indexed<Long> entry = deleteWriter.append(lastDelete);
             deleteWriter.commit(entry.index());
-            dataJournal.commitTo(lastDelete);
+            dataJournal.deleteTo(lastDelete);
 
             LOG.debug("{}: compaction started", persistenceId);
-            dataJournal.compactTo(lastDelete + 1);
+            dataJournal.compactTo(lastDelete);
             deleteJournal.compact(entry.index());
             LOG.debug("{}: compaction finished", persistenceId);
         } else {
@@ -267,7 +267,7 @@ final class SegmentedJournalActor extends AbstractActor {
         final Long sequence;
         if (directory.isDirectory()) {
             ensureOpen();
-            sequence = dataJournal.lastWrittenIndex();
+            sequence = dataJournal.lastWrittenSequenceNr();
         } else {
             sequence = 0L;
         }
@@ -276,7 +276,6 @@ final class SegmentedJournalActor extends AbstractActor {
         message.promise.success(sequence);
     }
 
-    @SuppressWarnings("checkstyle:illegalCatch")
     private void handleReplayMessages(final ReplayMessages message) {
         LOG.debug("{}: replaying messages {}", persistenceId, message);
         ensureOpen();
@@ -291,12 +290,12 @@ final class SegmentedJournalActor extends AbstractActor {
         ensureOpen();
 
         final long startTicks = System.nanoTime();
-        final long start = dataJournal.lastWrittenIndex();
+        final long start = dataJournal.lastWrittenSequenceNr();
 
         dataJournal.handleWriteMessages(message);
 
         batchWriteTime.update(System.nanoTime() - startTicks, TimeUnit.NANOSECONDS);
-        messageWriteCount.mark(dataJournal.lastWrittenIndex() - start);
+        messageWriteCount.mark(dataJournal.lastWrittenSequenceNr() - start);
     }
 
     private void handleUnknown(final Object message) {
@@ -316,8 +315,8 @@ final class SegmentedJournalActor extends AbstractActor {
 
         dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
             maxEntrySize, maxSegmentSize);
-        dataJournal.commitTo(lastDelete);
-        LOG.debug("{}: journal open with last index {}, deleted to {}", persistenceId, dataJournal.lastWrittenIndex(),
-            lastDelete);
+        dataJournal.deleteTo(lastDelete);
+        LOG.debug("{}: journal open with last index {}, deleted to {}", persistenceId,
+            dataJournal.lastWrittenSequenceNr(), lastDelete);
     }
 }
