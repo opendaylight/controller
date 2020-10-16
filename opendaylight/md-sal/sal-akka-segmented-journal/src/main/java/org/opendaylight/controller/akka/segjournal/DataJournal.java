@@ -42,15 +42,44 @@ abstract class DataJournal {
         }
     }
 
-    abstract long lastWrittenIndex();
+    /**
+     * Return the last sequence number completely written to the journal.
+     *
+     * @return Last written sequence number, {@code -1} if there are no in the journal.
+     */
+    abstract long lastWrittenSequenceNr();
 
-    abstract void commitTo(long index);
+    /**
+     * Delete all messages up to specified sequence number.
+     *
+     * @param sequenceNr Sequence number to delete to.
+     */
+    abstract void deleteTo(long sequenceNr);
 
-    abstract void compactTo(long index);
+    /**
+     * Delete all messages up to specified sequence number.
+     *
+     * @param sequenceNr Sequence number to compact to.
+     */
+    abstract void compactTo(long sequenceNr);
 
+    /**
+     * Close this journal, freeing up resources associated with it.
+     */
     abstract void close();
 
-    abstract void handleReplayMessages(ReplayMessages message, long from);
+    /**
+     * Handle a request to replay messages.
+     *
+     * @param message Request message
+     * @param fromSequenceNr Sequence number to replay from, adjusted for deletions
+     */
+    abstract void handleReplayMessages(@NonNull ReplayMessages message, long fromSequenceNr);
 
-    abstract void handleWriteMessages(WriteMessages message);
+    /**
+     * Handle a request to store some messages.
+     *
+     * @param message Request message
+     */
+    abstract void handleWriteMessages(@NonNull WriteMessages message);
 }
