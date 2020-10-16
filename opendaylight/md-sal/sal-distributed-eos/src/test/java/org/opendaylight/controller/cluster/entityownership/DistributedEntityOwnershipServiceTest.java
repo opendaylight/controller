@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.entityownership;
 
+import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -48,6 +49,7 @@ import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.entityownership.messages.RegisterListenerLocal;
@@ -306,5 +308,28 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
             final DOMEntityOwnershipCandidateRegistration reg) {
         assertNotNull("EntityOwnershipCandidateRegistration null", reg);
         assertEquals("getInstance", entity, reg.getInstance());
+    }
+
+    @Test
+    public void testRegisterCandidateResult() throws Exception {
+        ActorUtils actorUtils = dataStore.getActorUtils();
+        DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
+                actorUtils, EntityOwnerSelectionStrategyConfig.newBuilder().build()));
+
+        YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
+
+        DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+        assertNull("Registration failed with exception.", reg.getRegistrationException().get());
+
+        actorUtils.shutdown();
+
+        YangInstanceIdentifier entityId2 = YangInstanceIdentifier.of(QNAME);
+        DOMEntity entity2 = new DOMEntity(ENTITY_TYPE2, entityId2);
+
+        DOMEntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2);
+        assertNotNull("Registration should fail with exception on shutted down service.",
+                reg2.getRegistrationException().get());
+        service.close();
     }
 }

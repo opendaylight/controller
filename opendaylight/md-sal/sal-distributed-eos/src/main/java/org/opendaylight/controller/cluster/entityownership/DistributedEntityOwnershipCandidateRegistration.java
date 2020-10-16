@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.entityownership;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
+import java.util.concurrent.Future;
 
 /**
  * Implementation of EntityOwnershipCandidateRegistration.
@@ -19,11 +20,18 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 class DistributedEntityOwnershipCandidateRegistration extends AbstractObjectRegistration<DOMEntity>
         implements DOMEntityOwnershipCandidateRegistration {
     private final DistributedEntityOwnershipService service;
+    private Future<Throwable> result;
 
     DistributedEntityOwnershipCandidateRegistration(final DOMEntity entity,
-            final DistributedEntityOwnershipService service) {
+                                                    final DistributedEntityOwnershipService service, Future<Throwable> result) {
         super(entity);
         this.service = service;
+        this.result = result;
+    }
+
+    @Override
+    public Future<Throwable> getRegistrationException() {
+        return result;
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -104,7 +105,9 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         return new DistributedEntityOwnershipService(context);
     }
 
-    private void executeEntityOwnershipShardOperation(final ActorRef shardActor, final Object message) {
+    private java.util.concurrent.Future<Throwable> executeEntityOwnershipShardOperation(final ActorRef shardActor,
+                                                                                        final Object message) {
+        CompletableFuture<Throwable> futureException = new CompletableFuture<>();
         Future<Object> future = context.executeOperationAsync(shardActor, message, MESSAGE_TIMEOUT);
         future.onComplete(new OnComplete<>() {
             @Override
@@ -115,15 +118,20 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                 } else {
                     LOG.debug("{} message to {} succeeded", message, shardActor);
                 }
+                futureException.complete(failure);
             }
         }, context.getClientDispatcher());
+        return futureException;
     }
 
     @VisibleForTesting
-    void executeLocalEntityOwnershipShardOperation(final Object message) {
+    java.util.concurrent.Future<Throwable> executeLocalEntityOwnershipShardOperation(final Object message) {
+        java.util.concurrent.Future<Throwable> future;
         if (localEntityOwnershipShard == null) {
-            Future<ActorRef> future = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
-            future.onComplete(new OnComplete<ActorRef>() {
+            CompletableFuture<Throwable> futureException = new CompletableFuture<>();
+            Future<ActorRef> actorRefFuture;
+            actorRefFuture = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
+            actorRefFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef shardActor) {
                     if (failure != null) {
@@ -133,12 +141,14 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                         localEntityOwnershipShard = shardActor;
                         executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
                     }
+                    futureException.complete(failure);
                 }
             }, context.getClientDispatcher());
-
+            future = futureException;
         } else {
-            executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
+            future = executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
         }
+        return future;
     }
 
     @Override
@@ -154,8 +164,8 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
         LOG.debug("Registering candidate with message: {}", registerCandidate);
 
-        executeLocalEntityOwnershipShardOperation(registerCandidate);
-        return new DistributedEntityOwnershipCandidateRegistration(entity, this);
+        java.util.concurrent.Future<Throwable> result = executeLocalEntityOwnershipShardOperation(registerCandidate);
+        return new DistributedEntityOwnershipCandidateRegistration(entity, this, result);
     }
 
     void unregisterCandidate(final DOMEntity entity) {
