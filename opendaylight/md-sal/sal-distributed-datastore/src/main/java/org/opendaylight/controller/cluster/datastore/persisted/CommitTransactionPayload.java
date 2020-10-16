@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static com.google.common.base.Verify.verifyNotNull;
+import static com.google.common.math.IntMath.ceilingPowerOfTwo;
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.controller.cluster.datastore.persisted.ChunkedOutputStream.MAX_ARRAY_SIZE;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
+import org.opendaylight.controller.cluster.io.ChunkedByteArray;
+import org.opendaylight.controller.cluster.io.ChunkedOutputStream;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Variant;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -49,6 +51,9 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
+    private static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
+        "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
+
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
 
     CommitTransactionPayload() {
@@ -58,7 +63,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
             final DataTreeCandidate candidate, final PayloadVersion version, final int initialSerializedBufferCapacity)
                     throws IOException {
-        final ChunkedOutputStream cos = new ChunkedOutputStream(initialSerializedBufferCapacity);
+        final ChunkedOutputStream cos = new ChunkedOutputStream(initialSerializedBufferCapacity, MAX_ARRAY_SIZE);
         try (DataOutputStream dos = new DataOutputStream(cos)) {
             transactionId.writeTo(dos);
             DataTreeCandidateInputOutput.writeDataTreeCandidate(dos, version, candidate);

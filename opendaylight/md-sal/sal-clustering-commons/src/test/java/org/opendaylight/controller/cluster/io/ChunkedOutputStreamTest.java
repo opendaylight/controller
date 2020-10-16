@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.persisted;
+package org.opendaylight.controller.cluster.io;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -16,8 +16,9 @@ import org.junit.Test;
 
 public class ChunkedOutputStreamTest {
     private static final int INITIAL_SIZE = 256;
+    private static final int MAX_ARRAY_SIZE = 256 * 1024;
 
-    private final ChunkedOutputStream stream = new ChunkedOutputStream(INITIAL_SIZE);
+    private final ChunkedOutputStream stream = new ChunkedOutputStream(INITIAL_SIZE, MAX_ARRAY_SIZE);
 
     @Test
     public void testBasicWrite() throws IOException {
@@ -63,7 +64,7 @@ public class ChunkedOutputStreamTest {
 
     @Test
     public void testTwoChunksWrite() throws IOException {
-        int size = ChunkedOutputStream.MAX_ARRAY_SIZE + 1;
+        int size = MAX_ARRAY_SIZE + 1;
         for (int i = 0; i < size; ++i) {
             stream.write(i);
         }
