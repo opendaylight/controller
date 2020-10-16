@@ -7,24 +7,14 @@
  */
 package org.opendaylight.controller.cluster.entityownership;
 
-import static java.util.Objects.requireNonNull;
-import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
-import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
-import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
-
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -56,6 +46,16 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
+import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
+import static org.opendaylight.controller.cluster.entityownership.EntityOwnersModel.entityPath;
 
 /**
  * The distributed implementation of the EntityOwnershipService.
@@ -74,6 +74,8 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     private volatile ActorRef localEntityOwnershipShard;
     private volatile DataTree localEntityOwnershipShardDataTree;
+
+    private static final int CANDIDATE_REGISTRATION_RETRIES = 2;
 
     DistributedEntityOwnershipService(final ActorUtils context) {
         this.context = requireNonNull(context);
@@ -104,7 +106,8 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         return new DistributedEntityOwnershipService(context);
     }
 
-    private void executeEntityOwnershipShardOperation(final ActorRef shardActor, final Object message) {
+    private Future<?> executeEntityOwnershipShardOperation(final ActorRef shardActor,
+                                                                                        final Object message) {
         Future<Object> future = context.executeOperationAsync(shardActor, message, MESSAGE_TIMEOUT);
         future.onComplete(new OnComplete<>() {
             @Override
@@ -117,13 +120,15 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                 }
             }
         }, context.getClientDispatcher());
+        return future;
     }
 
     @VisibleForTesting
-    void executeLocalEntityOwnershipShardOperation(final Object message) {
+    Future<?> executeLocalEntityOwnershipShardOperation(final Object message) {
+        Future<?> future;
         if (localEntityOwnershipShard == null) {
-            Future<ActorRef> future = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
-            future.onComplete(new OnComplete<ActorRef>() {
+            Future<ActorRef> actorRefFuture = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
+            actorRefFuture.onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef shardActor) {
                     if (failure != null) {
@@ -135,10 +140,28 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                     }
                 }
             }, context.getClientDispatcher());
-
+            future = actorRefFuture;
         } else {
-            executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
+            future = executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
         }
+        return future;
+    }
+
+    private void executeLocalEntityOwnershipShardOperationRetry(Object message, SettableFuture<Boolean> future, int retries) {
+        Future<?> registrationResult = executeLocalEntityOwnershipShardOperation(message);
+        registrationResult.onComplete(new OnComplete() {
+            @Override
+            public void onComplete(final Throwable failure, final Object response) {
+                if (failure != null) {
+                    if (retries > 0)
+                        executeLocalEntityOwnershipShardOperationRetry(message, future, retries - 1);
+                    else
+                        future.setException(failure);
+                } else {
+                    future.set(true);
+                }
+            }
+        }, context.getClientDispatcher());
     }
 
     @Override
@@ -154,8 +177,10 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
         LOG.debug("Registering candidate with message: {}", registerCandidate);
 
-        executeLocalEntityOwnershipShardOperation(registerCandidate);
-        return new DistributedEntityOwnershipCandidateRegistration(entity, this);
+        SettableFuture<Boolean> settableFuture = SettableFuture.create();
+        executeLocalEntityOwnershipShardOperationRetry(registerCandidate, settableFuture, CANDIDATE_REGISTRATION_RETRIES);
+
+        return new DistributedEntityOwnershipCandidateRegistration(entity, this, settableFuture);
     }
 
     void unregisterCandidate(final DOMEntity entity) {

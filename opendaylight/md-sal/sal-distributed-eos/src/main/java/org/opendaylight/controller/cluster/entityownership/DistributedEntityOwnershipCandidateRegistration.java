@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.entityownership;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
@@ -19,11 +20,18 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 class DistributedEntityOwnershipCandidateRegistration extends AbstractObjectRegistration<DOMEntity>
         implements DOMEntityOwnershipCandidateRegistration {
     private final DistributedEntityOwnershipService service;
+    private ListenableFuture<Boolean> result;
 
     DistributedEntityOwnershipCandidateRegistration(final DOMEntity entity,
-            final DistributedEntityOwnershipService service) {
+                                                    final DistributedEntityOwnershipService service, ListenableFuture<Boolean> result) {
         super(entity);
         this.service = service;
+        this.result = result;
+    }
+
+    @Override
+    public ListenableFuture<Boolean> getRegistrationResult() {
+        return result;
     }
 
     @Override
