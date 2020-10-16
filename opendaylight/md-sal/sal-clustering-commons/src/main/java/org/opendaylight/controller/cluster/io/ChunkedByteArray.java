@@ -5,22 +5,27 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.persisted;
+package org.opendaylight.controller.cluster.io;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.ByteSink;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInput;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.concepts.Immutable;
 
+@Beta
 @NonNullByDefault
-final class ChunkedByteArray implements Immutable {
+public final class ChunkedByteArray implements Immutable {
     private final ImmutableList<byte[]> chunks;
     private final int size;
 
@@ -29,7 +34,7 @@ final class ChunkedByteArray implements Immutable {
         this.chunks = requireNonNull(chunks);
     }
 
-    static ChunkedByteArray readFrom(final ObjectInput in, final int size, final int chunkSize)
+    public static ChunkedByteArray readFrom(final ObjectInput in, final int size, final int chunkSize)
             throws IOException {
         final List<byte[]> chunks = new ArrayList<>(requiredChunks(size, chunkSize));
         int remaining = size;
@@ -43,17 +48,23 @@ final class ChunkedByteArray implements Immutable {
         return new ChunkedByteArray(size, ImmutableList.copyOf(chunks));
     }
 
-    int size() {
+    public int size() {
         return size;
     }
 
-    ChunkedInputStream openStream() {
+    public InputStream openStream() {
         return new ChunkedInputStream(size, chunks.iterator());
     }
 
-    void copyTo(final DataOutput output) throws IOException {
+    public void copyTo(final DataOutput output) throws IOException {
         for (byte[] chunk : chunks) {
             output.write(chunk, 0, chunk.length);
+        }
+    }
+
+    public void copyTo(final ByteSink output) throws IOException {
+        for (byte[] chunk : chunks) {
+            output.write(chunk);
         }
     }
 
@@ -62,6 +73,7 @@ final class ChunkedByteArray implements Immutable {
         return MoreObjects.toStringHelper(this).add("size", size).add("chunkCount", chunks.size()).toString();
     }
 
+    @VisibleForTesting
     ImmutableList<byte[]> getChunks() {
         return chunks;
     }
