@@ -10,7 +10,7 @@
 
     <groupId>org.opendaylight.controller.samples</groupId>
     <artifactId>clustering-test-app</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
