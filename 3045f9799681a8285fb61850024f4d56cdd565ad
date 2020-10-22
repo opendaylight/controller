@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06135951_5cc7ae2f",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-10-22T17:23:21Z",
+      "side": 1,
+      "message": "Prefer ListenableFuture",
+      "range": {
+        "startLine": 108,
+        "startChar": 12,
+        "endLine": 108,
+        "endChar": 50
+      },
+      "revId": "3045f9799681a8285fb61850024f4d56cdd565ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
