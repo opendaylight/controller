@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
@@ -53,8 +53,8 @@ public class AbstractReplicatedLogImplTest {
         assertEquals("lastTerm", -1, replicatedLogImpl.lastTerm());
         assertEquals("isPresent", false, replicatedLogImpl.isPresent(0));
         assertEquals("isInSnapshot", false, replicatedLogImpl.isInSnapshot(0));
-        Assert.assertNull("get(0)", replicatedLogImpl.get(0));
-        Assert.assertNull("last", replicatedLogImpl.last());
+        assertNull("get(0)", replicatedLogImpl.get(0));
+        assertNull("last", replicatedLogImpl.last());
 
         List<ReplicatedLogEntry> list = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
         assertEquals("getFrom size", 0, list.size());
@@ -139,39 +139,39 @@ public class AbstractReplicatedLogImplTest {
     @Test
     public void testGetFromWithMax() {
         List<ReplicatedLogEntry> from = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
-        Assert.assertEquals(1, from.size());
-        Assert.assertEquals("A", from.get(0).getData().toString());
+        assertEquals(1, from.size());
+        assertEquals("A", from.get(0).getData().toString());
 
         from = replicatedLogImpl.getFrom(0, 20, ReplicatedLog.NO_MAX_SIZE);
-        Assert.assertEquals(4, from.size());
-        Assert.assertEquals("A", from.get(0).getData().toString());
-        Assert.assertEquals("D", from.get(3).getData().toString());
+        assertEquals(4, from.size());
+        assertEquals("A", from.get(0).getData().toString());
+        assertEquals("D", from.get(3).getData().toString());
 
         from = replicatedLogImpl.getFrom(1, 2, ReplicatedLog.NO_MAX_SIZE);
-        Assert.assertEquals(2, from.size());
-        Assert.assertEquals("B", from.get(0).getData().toString());
-        Assert.assertEquals("C", from.get(1).getData().toString());
+        assertEquals(2, from.size());
+        assertEquals("B", from.get(0).getData().toString());
+        assertEquals("C", from.get(1).getData().toString());
 
         from = replicatedLogImpl.getFrom(1, 3, 2);
-        Assert.assertEquals(2, from.size());
-        Assert.assertEquals("B", from.get(0).getData().toString());
-        Assert.assertEquals("C", from.get(1).getData().toString());
+        assertEquals(2, from.size());
+        assertEquals("B", from.get(0).getData().toString());
+        assertEquals("C", from.get(1).getData().toString());
 
         from = replicatedLogImpl.getFrom(1, 3, 3);
-        Assert.assertEquals(3, from.size());
-        Assert.assertEquals("B", from.get(0).getData().toString());
-        Assert.assertEquals("C", from.get(1).getData().toString());
-        Assert.assertEquals("D", from.get(2).getData().toString());
+        assertEquals(3, from.size());
+        assertEquals("B", from.get(0).getData().toString());
+        assertEquals("C", from.get(1).getData().toString());
+        assertEquals("D", from.get(2).getData().toString());
 
         from = replicatedLogImpl.getFrom(1, 2, 3);
-        Assert.assertEquals(2, from.size());
-        Assert.assertEquals("B", from.get(0).getData().toString());
-        Assert.assertEquals("C", from.get(1).getData().toString());
+        assertEquals(2, from.size());
+        assertEquals("B", from.get(0).getData().toString());
+        assertEquals("C", from.get(1).getData().toString());
 
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("12345")));
         from = replicatedLogImpl.getFrom(4, 2, 2);
-        Assert.assertEquals(1, from.size());
-        Assert.assertEquals("12345", from.get(0).getData().toString());
+        assertEquals(1, from.size());
+        assertEquals("12345", from.get(0).getData().toString());
     }
 
     @Test
@@ -224,10 +224,10 @@ public class AbstractReplicatedLogImplTest {
         assertEquals("lastIndex", 3, replicatedLogImpl.lastIndex());
         assertEquals("lastTerm", 2, replicatedLogImpl.lastTerm());
 
-        Assert.assertNull("get(0)", replicatedLogImpl.get(0));
-        Assert.assertNull("get(1)", replicatedLogImpl.get(1));
-        Assert.assertNotNull("get(2)", replicatedLogImpl.get(2));
-        Assert.assertNotNull("get(3)", replicatedLogImpl.get(3));
+        assertNull("get(0)", replicatedLogImpl.get(0));
+        assertNull("get(1)", replicatedLogImpl.get(1));
+        assertNotNull("get(2)", replicatedLogImpl.get(2));
+        assertNotNull("get(3)", replicatedLogImpl.get(3));
     }
 
     @Test
@@ -245,8 +245,8 @@ public class AbstractReplicatedLogImplTest {
         assertEquals("dataSize", 4, replicatedLogImpl.dataSize());
         assertEquals("getSnapshotIndex", -1, replicatedLogImpl.getSnapshotIndex());
         assertEquals("getSnapshotTerm", -1, replicatedLogImpl.getSnapshotTerm());
-        Assert.assertNotNull("get(0)", replicatedLogImpl.get(0));
-        Assert.assertNotNull("get(3)", replicatedLogImpl.get(3));
+        assertNotNull("get(0)", replicatedLogImpl.get(0));
+        assertNotNull("get(3)", replicatedLogImpl.get(3));
     }
 
     @Test
@@ -318,15 +318,15 @@ public class AbstractReplicatedLogImplTest {
 
     }
 
-    class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
+    static class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
         @Override
         public boolean removeFromAndPersist(final long index) {
             return true;
         }
 
         @Override
-        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Consumer<ReplicatedLogEntry> callback,
-                boolean doAsync) {
+        public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
+                final Consumer<ReplicatedLogEntry> callback, final boolean doAsync) {
             if (callback != null) {
                 callback.accept(replicatedLogEntry);
             }
@@ -334,11 +334,12 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
+        public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
+            // No-op
         }
 
         @Override
-        public boolean shouldCaptureSnapshot(long logIndex) {
+        public boolean shouldCaptureSnapshot(final long logIndex) {
             return false;
         }
     }
