@@ -16,17 +16,25 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
  * @author Thomas Pantelis
  */
 public class DatastoreInfoMXBeanImpl extends AbstractMXBean implements DatastoreInfoMXBean {
-
     private final ActorUtils actorUtils;
 
-    public DatastoreInfoMXBeanImpl(String mxBeanType, ActorUtils actorUtils) {
+    public DatastoreInfoMXBeanImpl(final String mxBeanType, final ActorUtils actorUtils) {
         super("GeneralRuntimeInfo", mxBeanType, null);
         this.actorUtils = actorUtils;
     }
 
-
     @Override
     public double getTransactionCreationRateLimit() {
         return actorUtils.getTxCreationLimit();
+    }
+
+    @Override
+    public long getAskTimeoutExceptionCount() {
+        return actorUtils.getAskTimeoutExceptionCount();
+    }
+
+    @Override
+    public void resetAskTimeoutExceptionCount() {
+        actorUtils.resetAskTimeoutExceptionCount();
     }
 }
