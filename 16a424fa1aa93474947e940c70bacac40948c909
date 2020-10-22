@@ -34,6 +34,24 @@
       "revId": "16a424fa1aa93474947e940c70bacac40948c909",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd1572ef_57415b7a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-10-22T18:29:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a7c9eba_cd11e1d7",
+      "revId": "16a424fa1aa93474947e940c70bacac40948c909",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
