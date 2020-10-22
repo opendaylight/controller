@@ -7,11 +7,26 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
+import akka.pattern.AskTimeoutException;
+
 /**
  * JMX bean for general datastore info.
  *
  * @author Thomas Pantelis
  */
 public interface DatastoreInfoMXBean {
+
     double getTransactionCreationRateLimit();
+
+    /**
+     * Return the number of {@link AskTimeoutException}s encountered by the datastore.
+     *
+     * @return Number of exceptions encountered
+     */
+    long getAskTimeoutExceptionCount();
+
+    /**
+     * Reset the number of {@link AskTimeoutException}s encountered by the datastore.
+     */
+    void resetAskTimeoutExceptionCount();
 }
