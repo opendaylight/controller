@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
-
 /**
  * MXBean interface for data store configuration.
  *
@@ -47,18 +46,6 @@ public interface DatastoreConfigurationMXBean {
     long getTransactionCreationInitialRateLimit();
 
     boolean getTransactionContextDebugEnabled();
-
-    @Deprecated(forRemoval = true)
-    int getMaxShardDataChangeExecutorPoolSize();
-
-    @Deprecated(forRemoval = true)
-    int getMaxShardDataChangeExecutorQueueSize();
-
-    @Deprecated(forRemoval = true)
-    int getMaxShardDataChangeListenerQueueSize();
-
-    @Deprecated(forRemoval = true)
-    int getMaxShardDataStoreExecutorQueueSize();
 
     int getMaximumMessageSliceSize();
 }

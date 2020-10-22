@@ -115,30 +115,6 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     }
 
     @Override
-    @Deprecated(forRemoval = true)
-    public int getMaxShardDataChangeExecutorPoolSize() {
-        return 0;
-    }
-
-    @Override
-    @Deprecated(forRemoval = true)
-    public int getMaxShardDataChangeExecutorQueueSize() {
-        return 0;
-    }
-
-    @Override
-    @Deprecated(forRemoval = true)
-    public int getMaxShardDataChangeListenerQueueSize() {
-        return 0;
-    }
-
-    @Override
-    @Deprecated(forRemoval = true)
-    public int getMaxShardDataStoreExecutorQueueSize() {
-        return 0;
-    }
-
-    @Override
     public int getMaximumMessageSliceSize() {
         return context.getMaximumMessageSliceSize();
     }
