@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,8 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
 
-    protected AbstractReplicatedLogImpl(long snapshotIndex, long snapshotTerm,
-            List<ReplicatedLogEntry> unAppliedEntries, String logContext) {
+    protected AbstractReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm,
+            final List<ReplicatedLogEntry> unAppliedEntries, final String logContext) {
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
         this.logContext = logContext;
@@ -49,10 +50,10 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     protected AbstractReplicatedLogImpl() {
-        this(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), "");
+        this(-1L, -1L, Collections.emptyList(), "");
     }
 
-    protected int adjustedIndex(long logEntryIndex) {
+    protected int adjustedIndex(final long logEntryIndex) {
         if (snapshotIndex < 0) {
             return (int) logEntryIndex;
         }
@@ -60,7 +61,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public ReplicatedLogEntry get(long logEntryIndex) {
+    public ReplicatedLogEntry get(final long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
 
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
@@ -101,7 +102,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public long removeFrom(long logEntryIndex) {
+    public long removeFrom(final long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
             // physical index should be less than list size and >= 0
@@ -118,7 +119,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public boolean append(ReplicatedLogEntry replicatedLogEntry) {
+    public boolean append(final ReplicatedLogEntry replicatedLogEntry) {
         if (replicatedLogEntry.getIndex() > lastIndex()) {
             journal.add(replicatedLogEntry);
             dataSize += replicatedLogEntry.size();
@@ -131,17 +132,17 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void increaseJournalLogCapacity(int amount) {
+    public void increaseJournalLogCapacity(final int amount) {
         journal.ensureCapacity(journal.size() + amount);
     }
 
     @Override
-    public List<ReplicatedLogEntry> getFrom(long logEntryIndex) {
+    public List<ReplicatedLogEntry> getFrom(final long logEntryIndex) {
         return getFrom(logEntryIndex, journal.size(), NO_MAX_SIZE);
     }
 
     @Override
-    public List<ReplicatedLogEntry> getFrom(long logEntryIndex, int maxEntries, long maxDataSize) {
+    public List<ReplicatedLogEntry> getFrom(final long logEntryIndex, final int maxEntries, final long maxDataSize) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
         int size = journal.size();
         if (adjustedIndex >= 0 && adjustedIndex < size) {
@@ -161,7 +162,8 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         }
     }
 
-    private List<ReplicatedLogEntry> copyJournalEntries(int fromIndex, int toIndex, long maxDataSize) {
+    private @NonNull List<ReplicatedLogEntry> copyJournalEntries(final int fromIndex, final int toIndex,
+            final long maxDataSize) {
         List<ReplicatedLogEntry> retList = new ArrayList<>(toIndex - fromIndex);
         long totalSize = 0;
         for (int i = fromIndex; i < toIndex; i++) {
@@ -194,7 +196,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public boolean isPresent(long logEntryIndex) {
+    public boolean isPresent(final long logEntryIndex) {
         if (logEntryIndex > lastIndex()) {
             // if the request logical index is less than the last present in the list
             return false;
@@ -204,7 +206,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public boolean isInSnapshot(long logEntryIndex) {
+    public boolean isInSnapshot(final long logEntryIndex) {
         return logEntryIndex >= 0 && logEntryIndex <= snapshotIndex && snapshotIndex != -1;
     }
 
@@ -219,22 +221,22 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void setSnapshotIndex(long snapshotIndex) {
+    public void setSnapshotIndex(final long snapshotIndex) {
         this.snapshotIndex = snapshotIndex;
     }
 
     @Override
-    public void setSnapshotTerm(long snapshotTerm) {
+    public void setSnapshotTerm(final long snapshotTerm) {
         this.snapshotTerm = snapshotTerm;
     }
 
     @Override
-    public void clear(int startIndex, int endIndex) {
+    public void clear(final int startIndex, final int endIndex) {
         journal.subList(startIndex, endIndex).clear();
     }
 
     @Override
-    public void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm) {
+    public void snapshotPreCommit(final long snapshotCapturedIndex, final long snapshotCapturedTerm) {
         Preconditions.checkArgument(snapshotCapturedIndex >= snapshotIndex,
                 "snapshotCapturedIndex must be greater than or equal to snapshotIndex");
 
@@ -280,7 +282,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @VisibleForTesting
-    ReplicatedLogEntry getAtPhysicalIndex(int index) {
+    ReplicatedLogEntry getAtPhysicalIndex(final int index) {
         return journal.get(index);
     }
 }
