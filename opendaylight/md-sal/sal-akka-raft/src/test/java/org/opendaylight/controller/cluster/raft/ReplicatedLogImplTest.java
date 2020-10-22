@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -22,11 +21,12 @@ import java.util.Collections;
 import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.Same;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ReplicatedLogImplTest {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
 
@@ -54,8 +55,6 @@ public class ReplicatedLogImplTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         context = new RaftActorContextImpl(null, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Collections.emptyMap(),
                 configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
@@ -78,8 +77,8 @@ public class ReplicatedLogImplTest {
         procedure.getValue().apply(message);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testAppendAndPersistExpectingNoCapture() throws Exception {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
@@ -131,8 +130,6 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersistExpectingCaptureDueToJournalCount() throws Exception {
         configParams.setSnapshotBatchCount(2);
 
-        doReturn(1L).when(mockBehavior).getReplicatedToAllIndex();
-
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
         final ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
@@ -152,8 +149,6 @@ public class ReplicatedLogImplTest {
 
     @Test
     public void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
-        doReturn(1L).when(mockBehavior).getReplicatedToAllIndex();
-
         context.setTotalMemoryRetriever(() -> 100);
 
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
