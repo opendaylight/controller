@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
+import javax.management.MXBean;
+
 /**
  * MXBean interface for data store configuration.
  *
  * @author Thomas Pantelis
  */
+@MXBean
 public interface DatastoreConfigurationMXBean {
     long getShardTransactionIdleTimeoutInSeconds();
 

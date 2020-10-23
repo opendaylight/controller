@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
+import javax.management.MXBean;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 
 /**
@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
  *
  * @author syedbahm
  */
+@MXBean
 public interface ShardStatsMXBean {
 
     String getShardName();

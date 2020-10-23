@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
+import javax.management.MXBean;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
 
 /**
@@ -15,6 +17,9 @@ import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
  *
  * @author Thomas Pantelis
  */
+@MXBean
+@NonNullByDefault
 public interface ShardDataTreeListenerInfoMXBean {
+
     List<DataTreeListenerInfo> getDataTreeChangeListenerInfo();
 }
