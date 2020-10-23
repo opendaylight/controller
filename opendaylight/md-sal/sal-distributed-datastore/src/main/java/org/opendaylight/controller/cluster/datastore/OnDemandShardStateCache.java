@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
+package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
@@ -25,7 +25,7 @@ import scala.concurrent.Await;
  *
  * @author Thomas Pantelis
  */
-class OnDemandShardStateCache {
+final class OnDemandShardStateCache {
     private static final Cache<String, OnDemandShardState> ONDEMAND_SHARD_STATE_CACHE =
             CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.SECONDS).build();
 

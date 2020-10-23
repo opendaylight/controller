@@ -85,6 +85,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>cds-mgmt-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-akka-raft-example</artifactId>
       <scope>test</scope>
     </dependency>

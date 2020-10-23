@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
+package org.opendaylight.controller.cluster.datastore;
 
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
 /**
@@ -16,12 +16,12 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
  *
  * @author Thomas Pantelis
  */
-public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements DatastoreConfigurationMXBean {
+final class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements DatastoreConfigurationMXBean {
     public static final String JMX_CATEGORY_CONFIGURATION = "Configuration";
 
     private DatastoreContext context;
 
-    public DatastoreConfigurationMXBeanImpl(final String mxBeanType) {
+    DatastoreConfigurationMXBeanImpl(final String mxBeanType) {
         super("Datastore", mxBeanType, JMX_CATEGORY_CONFIGURATION);
     }
 

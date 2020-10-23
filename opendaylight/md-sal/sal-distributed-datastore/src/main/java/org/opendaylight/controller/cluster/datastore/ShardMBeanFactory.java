@@ -5,22 +5,21 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
+package org.opendaylight.controller.cluster.datastore;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.datastore.Shard;
 
 /**
  * Factory for creating ShardStats mbeans.
  *
  * @author Basheeruddin syedbahm@cisco.com
  */
-public final class ShardMBeanFactory {
+final class ShardMBeanFactory {
 
     private ShardMBeanFactory() {
     }
 
-    public static ShardStats getShardStatsMBean(final String shardName, final String mxBeanType,
+    static ShardStats getShardStatsMBean(final String shardName, final String mxBeanType,
             final @NonNull Shard shard) {
         String finalMXBeanType = mxBeanType != null ? mxBeanType : "DistDataStore";
         ShardStats shardStatsMBeanImpl = new ShardStats(shardName, finalMXBeanType, shard);
