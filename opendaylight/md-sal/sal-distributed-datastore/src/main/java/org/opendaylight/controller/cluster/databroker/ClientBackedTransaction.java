@@ -9,16 +9,13 @@ package org.opendaylight.controller.cluster.databroker;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.FinalizablePhantomReference;
-import com.google.common.base.FinalizableReferenceQueue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import java.lang.ref.Cleaner;
+import java.lang.ref.Cleaner.Cleanable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,50 +28,43 @@ import org.slf4j.LoggerFactory;
  */
 abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extends
         AbstractDOMStoreTransaction<TransactionIdentifier> {
-    private static final class Finalizer extends FinalizablePhantomReference<ClientBackedTransaction<?>> {
-        private static final FinalizableReferenceQueue QUEUE = new FinalizableReferenceQueue();
-        private static final Set<Finalizer> FINALIZERS = ConcurrentHashMap.newKeySet();
-        private static final Logger LOG = LoggerFactory.getLogger(Finalizer.class);
-
+    private static final class Cleanup implements Runnable {
         private final AbstractClientHandle<?> transaction;
         private final Throwable allocationContext;
 
-        private Finalizer(final ClientBackedTransaction<?> referent, final AbstractClientHandle<?> transaction,
-                final Throwable allocationContext) {
-            super(referent, QUEUE);
-            this.transaction = requireNonNull(transaction);
+        Cleanup(final AbstractClientHandle<?> transaction, final Throwable allocationContext) {
+            this.transaction = transaction;
             this.allocationContext = allocationContext;
         }
 
-        static <T extends AbstractClientHandle<?>> @NonNull T recordTransaction(
-                final @NonNull ClientBackedTransaction<T> referent, final @NonNull T transaction,
-                final @Nullable Throwable allocationContext) {
-            FINALIZERS.add(new Finalizer(referent, transaction, allocationContext));
-            return transaction;
-        }
-
         @Override
-        public void finalizeReferent() {
-            FINALIZERS.remove(this);
+        public void run() {
             if (transaction.abort()) {
                 LOG.info("Aborted orphan transaction {}", transaction, allocationContext);
             }
         }
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(ClientBackedTransaction.class);
+    private static final Cleaner CLEANER = Cleaner.create();
+
     private final T delegate;
+    private final Cleanable cleanable;
 
     ClientBackedTransaction(final T delegate, final Throwable allocationContext) {
         super(delegate.getIdentifier());
-        this.delegate = Finalizer.recordTransaction(this, delegate, allocationContext);
-    }
-
-    final T delegate() {
-        return delegate;
+        this.delegate = requireNonNull(delegate);
+        this.cleanable = CLEANER.register(this, new Cleanup(delegate, allocationContext));
     }
 
     @Override
     public void close() {
         delegate.abort();
+        // Run cleaning immediate so the references is not stuck in cleaner queue
+        cleanable.clean();
+    }
+
+    final T delegate() {
+        return delegate;
     }
 }
