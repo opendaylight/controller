@@ -13,10 +13,10 @@ import akka.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
-import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
+import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
