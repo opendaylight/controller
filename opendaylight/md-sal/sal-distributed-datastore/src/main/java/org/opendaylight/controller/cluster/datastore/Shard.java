@@ -232,7 +232,7 @@ public class Shard extends RaftActor {
                     frontendMetadata);
         }
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name, datastoreContext.getDataStoreMXBeanType(), this);
+        shardMBean = ShardStats.create(name, datastoreContext.getDataStoreMXBeanType(), this);
 
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));

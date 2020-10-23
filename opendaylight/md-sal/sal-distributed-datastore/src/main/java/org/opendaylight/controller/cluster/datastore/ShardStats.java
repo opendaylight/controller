@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
@@ -66,6 +67,13 @@ final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
         this.shard = shard;
         stateCache = new OnDemandShardStateCache(shardName, shard != null ? shard.self() : null);
+    }
+
+    static ShardStats create(final String shardName, final String mxBeanType, final @NonNull Shard shard) {
+        String finalMXBeanType = mxBeanType != null ? mxBeanType : "DistDataStore";
+        ShardStats shardStatsMBeanImpl = new ShardStats(shardName, finalMXBeanType, shard);
+        shardStatsMBeanImpl.registerMBean();
+        return shardStatsMBeanImpl;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
