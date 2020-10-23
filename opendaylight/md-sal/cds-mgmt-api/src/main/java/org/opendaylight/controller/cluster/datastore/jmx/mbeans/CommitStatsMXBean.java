@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
+import javax.management.MXBean;
+
 /**
  * MXBean interface for retrieving write Tx commit statistics.
  *
  * @author Thomas Pantelis
  */
+@MXBean
 public interface CommitStatsMXBean {
     /**
      * Returns the total number of commits that have occurred.
