@@ -22,28 +22,24 @@
 
   <modules>
     <module>artifacts</module>
-    <module>bundle-parent</module>
+    <module>docs</module>
+    <module>features</module>
+    <module>karaf</module>
+
     <module>akka</module>
+    <module>bundle-parent</module>
+    <module>benchmark</module>
+    <module>model</module>
 
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>
     <!-- config -->
     <module>opendaylight/config</module>
 
-    <module>opendaylight/model</module>
-
     <module>opendaylight/blueprint</module>
 
     <!-- Parents -->
-    <module>benchmark</module>
     <module>opendaylight/commons/jolokia</module>
-
-    <!-- Karaf Distribution -->
-    <module>karaf</module>
-    <module>features</module>
-
-    <!-- documentation -->
-    <module>docs</module>
   </modules>
 
   <profiles>
