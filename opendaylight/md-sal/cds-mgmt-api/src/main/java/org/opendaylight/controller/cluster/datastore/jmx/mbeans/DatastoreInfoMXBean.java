@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
+import javax.management.MXBean;
+
 /**
  * JMX bean for general datastore info.
  *
  * @author Thomas Pantelis
  */
+@MXBean
 public interface DatastoreInfoMXBean {
 
     double getTransactionCreationRateLimit();
