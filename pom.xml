@@ -30,7 +30,7 @@
     <!-- config -->
     <module>opendaylight/config</module>
 
-    <module>opendaylight/model</module>
+    <module>model</module>
 
     <module>opendaylight/blueprint</module>
 
