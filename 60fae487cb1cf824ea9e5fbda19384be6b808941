@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bd9ccff_b2d79a8b",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 26
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-10-23T13:37:16Z",
+      "side": 1,
+      "message": "recovery-export-base-dir seems more appropriate for this parameter",
+      "range": {
+        "startLine": 139,
+        "startChar": 1,
+        "endLine": 139,
+        "endChar": 19
+      },
+      "revId": "60fae487cb1cf824ea9e5fbda19384be6b808941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b2a0944e_09ade2e0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-10-23T13:37:16Z",
+      "side": 1,
+      "message": "doesnt seem to be used and is always null which results in wrong baseDirPath in the actor",
+      "range": {
+        "startLine": 223,
+        "startChar": 19,
+        "endLine": 223,
+        "endChar": 35
+      },
+      "revId": "60fae487cb1cf824ea9e5fbda19384be6b808941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
