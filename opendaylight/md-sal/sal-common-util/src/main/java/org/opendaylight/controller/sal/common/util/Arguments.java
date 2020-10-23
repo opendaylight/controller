@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.common.util;
 
+@Deprecated(forRemoval = true)
 public final class Arguments {
-
     private Arguments() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -19,12 +19,14 @@ public final class Arguments {
      * @param value Value to check
      * @param type Type to check
      * @return Reference which was checked
+     * @deprecated This utility is not used in this project, please brew your own or
+     *             use {@code Preconditions.checkArgument()}.
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T checkInstanceOf(Object value, Class<T> type) {
+    @Deprecated(forRemoval = true)
+    public static <T> T checkInstanceOf(final Object value, final Class<T> type) {
         if (!type.isInstance(value)) {
             throw new IllegalArgumentException(String.format("Value %s is not of type %s", value, type));
         }
-        return (T) value;
+        return type.cast(value);
     }
 }
