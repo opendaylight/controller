@@ -97,9 +97,10 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      *         closed, too.
      */
     final @Nullable Collection<T> ensureClosed() {
-        @SuppressWarnings("unchecked")
-        final State<T> local = STATE_UPDATER.getAndSet(this, null);
-        return local == null ? null : local.values();
+        // volatile read and a conditional CAS. This ends up being better in the typical case when we are invoked more
+        // than once (see ClientBackedTransaction) than performing a STATE_UPDATER.getAndSet().
+        final State<T> local = state;
+        return local != null && STATE_UPDATER.compareAndSet(this, local, null) ? local.values() : null;
     }
 
     final T ensureProxy(final YangInstanceIdentifier path) {
