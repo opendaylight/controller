@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -60,8 +59,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     @Before
     public void setup() {
-        ShardStats stats = mock(ShardStats.class);
-        when(MOCK_SHARD.getShardMBean()).thenReturn(stats);
+        doReturn(new ShardStats("inventory", "mxBeanType", MOCK_SHARD)).when(MOCK_SHARD).getShardMBean();
     }
 
     @Test(expected = ReadFailedException.class)

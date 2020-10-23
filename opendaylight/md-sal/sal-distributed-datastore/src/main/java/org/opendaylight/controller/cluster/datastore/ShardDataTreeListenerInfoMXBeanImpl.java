@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
+package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
@@ -36,13 +37,12 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
-public class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implements ShardDataTreeListenerInfoMXBean {
+final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implements ShardDataTreeListenerInfoMXBean {
     private static final String JMX_CATEGORY = "ShardDataTreeListenerInfo";
 
     private final OnDemandShardStateCache stateCache;
 
-    public ShardDataTreeListenerInfoMXBeanImpl(final String shardName, final String mxBeanType,
-            final ActorRef shardActor) {
+    ShardDataTreeListenerInfoMXBeanImpl(final String shardName, final String mxBeanType, final ActorRef shardActor) {
         super(shardName, mxBeanType, JMX_CATEGORY);
         stateCache = new OnDemandShardStateCache(shardName, requireNonNull(shardActor));
     }

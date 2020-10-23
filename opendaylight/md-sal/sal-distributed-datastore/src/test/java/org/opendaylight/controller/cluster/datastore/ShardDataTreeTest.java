@@ -49,7 +49,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
@@ -90,7 +89,7 @@ public class ShardDataTreeTest extends AbstractTest {
     @Before
     public void setUp() {
         doReturn(Ticker.systemTicker()).when(mockShard).ticker();
-        doReturn(mock(ShardStats.class)).when(mockShard).getShardMBean();
+        doReturn(new ShardStats("shardName", "mxBeanType", mockShard)).when(mockShard).getShardMBean();
         doReturn(DATASTORE_CONTEXT).when(mockShard).getDatastoreContext();
 
         fullSchema = SchemaContextHelper.full();

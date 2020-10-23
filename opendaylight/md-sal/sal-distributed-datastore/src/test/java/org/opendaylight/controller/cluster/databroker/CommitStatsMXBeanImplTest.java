@@ -5,8 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
+package org.opendaylight.controller.cluster.databroker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -20,13 +19,10 @@ import org.opendaylight.yangtools.util.DurationStatisticsTracker;
  * @author Thomas Pantelis
  */
 public class CommitStatsMXBeanImplTest {
-
     @Test
     public void test() {
-
         DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
-        CommitStatsMXBeanImpl bean =
-                new CommitStatsMXBeanImpl(commitStatsTracker, "Test");
+        CommitStatsMXBeanImpl bean = new CommitStatsMXBeanImpl(commitStatsTracker, "Test");
 
         commitStatsTracker.addDuration(100);
 
