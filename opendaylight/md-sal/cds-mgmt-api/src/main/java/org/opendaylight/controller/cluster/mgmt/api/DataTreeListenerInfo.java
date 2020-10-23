@@ -5,18 +5,20 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.messages;
+package org.opendaylight.controller.cluster.mgmt.api;
 
 import static java.util.Objects.requireNonNull;
 
 import javax.management.ConstructorParameters;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Response to a {@link GetInfo} query from a data tree listener actor.
+ * Information about a registered listener.
  *
  * @author Thomas Pantelis
  */
-public class DataTreeListenerInfo {
+@NonNullByDefault
+public final class DataTreeListenerInfo {
     private final String listener;
     private final String registeredPath;
     private final boolean isEnabled;
