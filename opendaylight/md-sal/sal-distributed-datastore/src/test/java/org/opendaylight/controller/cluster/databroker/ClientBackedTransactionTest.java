@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -31,6 +33,7 @@ public abstract class ClientBackedTransactionTest<T extends ClientBackedTransact
     public void testClose() {
         final AbstractClientHandle<?> delegate = object().delegate();
         object().close();
-        Mockito.verify(delegate).abort();
+        // Called twice because of immediate cleaning
+        verify(delegate, times(2)).abort();
     }
 }
