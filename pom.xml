@@ -29,6 +29,7 @@
     <module>akka</module>
     <module>bundle-parent</module>
     <module>benchmark</module>
+    <module>jolokia</module>
     <module>model</module>
 
     <!-- md-sal -->
@@ -37,9 +38,6 @@
     <module>opendaylight/config</module>
 
     <module>opendaylight/blueprint</module>
-
-    <!-- Parents -->
-    <module>opendaylight/commons/jolokia</module>
   </modules>
 
   <profiles>
