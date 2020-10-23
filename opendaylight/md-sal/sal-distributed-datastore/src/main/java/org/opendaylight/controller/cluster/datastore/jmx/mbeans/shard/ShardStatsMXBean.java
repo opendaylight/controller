@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
-import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
+import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 
 /**
  * MXBean interface for shard stats.
