@@ -18,6 +18,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>cds-mgmt-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>repackaged-akka</artifactId>
     </dependency>
     <dependency>

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 
 /**
  * The response to a GetOnDemandRaftState message.
