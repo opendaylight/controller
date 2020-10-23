@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
+
 /**
- * Local message sent to an actor to retrieve internal information for reporting.
+ * Local message sent to an actor to retrieve {@link DataTreeListenerInfo} for reporting.
  *
  * @author Thomas Pantelis
  */

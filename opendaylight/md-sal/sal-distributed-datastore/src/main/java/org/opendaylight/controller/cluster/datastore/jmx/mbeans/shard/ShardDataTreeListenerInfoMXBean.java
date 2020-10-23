@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
-import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
+import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
 
 /**
  * MXBean interface for reporting shard data tree change listener information.
