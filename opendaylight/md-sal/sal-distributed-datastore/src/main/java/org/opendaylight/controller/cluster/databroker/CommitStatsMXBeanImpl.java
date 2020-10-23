@@ -5,9 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
+package org.opendaylight.controller.cluster.databroker;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.CommitStatsMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 
@@ -16,8 +17,7 @@ import org.opendaylight.yangtools.util.DurationStatisticsTracker;
  *
  * @author Thomas Pantelis
  */
-public class CommitStatsMXBeanImpl extends AbstractMXBean implements CommitStatsMXBean {
-
+final class CommitStatsMXBeanImpl extends AbstractMXBean implements CommitStatsMXBean {
     private final DurationStatisticsTracker commitStatsTracker;
 
     /**
@@ -26,8 +26,8 @@ public class CommitStatsMXBeanImpl extends AbstractMXBean implements CommitStats
      * @param commitStatsTracker the DurationStatsTracker used to obtain the stats.
      * @param mbeantype mBeanType Used as the <code>type</code> property in the bean's ObjectName.
      */
-    public CommitStatsMXBeanImpl(@NonNull DurationStatisticsTracker commitStatsTracker,
-            @NonNull String mbeantype) {
+    CommitStatsMXBeanImpl(final @NonNull DurationStatisticsTracker commitStatsTracker,
+            final @NonNull String mbeantype) {
         super("CommitStats", mbeantype, null);
         this.commitStatsTracker = commitStatsTracker;
     }

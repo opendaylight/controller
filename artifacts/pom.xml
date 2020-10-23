@@ -158,6 +158,11 @@
                 <artifactId>cds-dom-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>cds-mgmt-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Toaster -->
             <dependency>

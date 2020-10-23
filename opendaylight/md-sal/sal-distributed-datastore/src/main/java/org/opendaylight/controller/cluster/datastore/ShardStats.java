@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
+package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Joiner;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
@@ -27,7 +27,7 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
  *
  * @author  Basheeruddin syedbahm@cisco.com
  */
-public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
+final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static final String JMX_CATEGORY_SHARD = "Shards";
 
     // FIXME: migrate this to Java 8 thread-safe time
@@ -62,7 +62,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private long lastLeadershipChangeTime;
 
-    public ShardStats(final String shardName, final String mxBeanType, final @Nullable Shard shard) {
+    ShardStats(final String shardName, final String mxBeanType, final @Nullable Shard shard) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
         this.shard = shard;
         stateCache = new OnDemandShardStateCache(shardName, shard != null ? shard.self() : null);
