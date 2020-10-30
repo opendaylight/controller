@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.CompletionStage;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -56,6 +57,8 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import scala.jdk.javaapi.FutureConverters;
+import static akka.pattern.Patterns.retry;
 
 /**
  * The distributed implementation of the EntityOwnershipService.
@@ -104,26 +107,27 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         return new DistributedEntityOwnershipService(context);
     }
 
-    private void executeEntityOwnershipShardOperation(final ActorRef shardActor, final Object message) {
-        Future<Object> future = context.executeOperationAsync(shardActor, message, MESSAGE_TIMEOUT);
-        future.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
-                if (failure != null) {
-                    // FIXME: CONTROLLER-1904: reduce the severity to info once we have a retry mechanism
-                    LOG.error("Error sending message {} to {}", message, shardActor, failure);
-                } else {
-                    LOG.debug("{} message to {} succeeded", message, shardActor);
-                }
-            }
-        }, context.getClientDispatcher());
+    private void executeEntityOwnershipShardOperation(final ActorRef shardActor,
+                                                           final Object message) {
+        retry(() -> FutureConverters.asJava(context.executeOperationAsync(shardActor, message, MESSAGE_TIMEOUT)),
+        100, java.time.Duration.ofMillis(200),
+                context.getActorSystem().scheduler(),
+                context.getClientDispatcher()).exceptionally(ex -> {
+            LOG.error("Error sending message {} to {}", message, shardActor);
+            return ex;
+        });
     }
 
     @VisibleForTesting
     void executeLocalEntityOwnershipShardOperation(final Object message) {
         if (localEntityOwnershipShard == null) {
-            Future<ActorRef> future = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
-            future.onComplete(new OnComplete<ActorRef>() {
+            CompletionStage<ActorRef> retry = retry(() ->
+                            FutureConverters.asJava(context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME)),
+                    100, java.time.Duration.ofMillis(200),
+                    context.getActorSystem().scheduler(),
+                    context.getClientDispatcher());
+
+            FutureConverters.asScala(retry).onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef shardActor) {
                     if (failure != null) {
