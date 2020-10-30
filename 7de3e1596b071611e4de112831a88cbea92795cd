@@ -22,6 +22,30 @@
       "revId": "7de3e1596b071611e4de112831a88cbea92795cd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "008bbd00_7accde93",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreRemotingIntegrationTest.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 1303,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-10-30T15:35:47Z",
+      "side": 1,
+      "message": "I think the point of the test is the node becomes semireachable and start sending RequestVote to other nodes, but because that node is unreachable, those messages are ignored and terms stays the same. Currently the terms are being updated after receiving RequestVote.",
+      "parentUuid": "bc1d730d_c50730d7",
+      "range": {
+        "startLine": 1302,
+        "startChar": 8,
+        "endLine": 1303,
+        "endChar": 102
+      },
+      "revId": "7de3e1596b071611e4de112831a88cbea92795cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }

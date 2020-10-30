@@ -22,6 +22,30 @@
       "revId": "81b0b9d6fd26b1567bfc6dd80fa1a90bd30bff0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fc57939_56b7625f",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/test/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-10-30T15:35:47Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "5c2ea2dd_0f795bb4",
+      "range": {
+        "startLine": 457,
+        "startChar": 8,
+        "endLine": 462,
+        "endChar": 52
+      },
+      "revId": "81b0b9d6fd26b1567bfc6dd80fa1a90bd30bff0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
