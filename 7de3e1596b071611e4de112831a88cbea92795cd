@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc1d730d_c50730d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreRemotingIntegrationTest.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 1303,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2020-10-30T13:13:52Z",
+      "side": 1,
+      "message": "If the only issue here is that the member is now exited instead of unreachable we might be able to change these checks to check for the presence of 2 members only",
+      "range": {
+        "startLine": 1302,
+        "startChar": 8,
+        "endLine": 1303,
+        "endChar": 102
+      },
+      "revId": "7de3e1596b071611e4de112831a88cbea92795cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
