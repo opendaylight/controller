@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70e77186_a7b5971d",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-11-03T14:35:36Z",
+      "side": 1,
+      "message": "please do not reformat things -- they have been just fine to start with",
+      "range": {
+        "startLine": 110,
+        "startChar": 54,
+        "endLine": 111,
+        "endChar": 79
+      },
+      "revId": "033630dd7e25d1253e0e794790e0cd684e1b60ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a3ce534_af83a7f0",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-11-03T14:35:36Z",
+      "side": 1,
+      "message": "so this ends up retrying the registration ...",
+      "range": {
+        "startLine": 161,
+        "startChar": 7,
+        "endLine": 161,
+        "endChar": 69
+      },
+      "revId": "033630dd7e25d1253e0e794790e0cd684e1b60ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "033fae54_b78c2d08",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-11-03T14:35:36Z",
+      "side": 1,
+      "message": "... and if the user removes the registration we do not cancel the registration retries, but instead have now two messages we are retrying.",
+      "range": {
+        "startLine": 168,
+        "startChar": 8,
+        "endLine": 168,
+        "endChar": 88
+      },
+      "revId": "033630dd7e25d1253e0e794790e0cd684e1b60ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
