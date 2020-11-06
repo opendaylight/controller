@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -17,7 +18,15 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 abstract class AbstractDatastoreContextIntrospectorFactory implements DatastoreContextIntrospectorFactory {
     @Override
-    public final DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType) {
+    public DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType,
+            final Map<String, Object> properties) {
+        final DatastoreContextIntrospector inst = newInstance(datastoreType);
+        inst.update(properties);
+        return inst;
+    }
+
+    @VisibleForTesting
+    final DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType) {
         return newInstance(DatastoreContext.newBuilder()
                 .logicalStoreType(datastoreType)
                 .tempFileDirectory("./data")

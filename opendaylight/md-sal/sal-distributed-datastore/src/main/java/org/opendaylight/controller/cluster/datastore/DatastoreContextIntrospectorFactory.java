@@ -7,14 +7,25 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.eclipse.jdt.annotation.NonNull;
+import java.util.Map;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 
 /**
- * Factory for creating DatastoreContextIntrospector instances.
+ * Factory for creating {@link DatastoreContextIntrospector} instances.
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public interface DatastoreContextIntrospectorFactory {
-    @NonNull DatastoreContextIntrospector newInstance(LogicalDatastoreType datastoreType);
+    /**
+     * Create a new {@link DatastoreContextIntrospector} initialized with specified properties.
+     *
+     * @param datastoreType Datastore type
+     * @param properties optional initial properties
+     * @return A new DatastoreContextIntrospector
+     */
+    DatastoreContextIntrospector newInstance(LogicalDatastoreType datastoreType,
+        @Nullable Map<String, Object> properties);
 }
