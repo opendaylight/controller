@@ -27,7 +27,6 @@ import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,6 @@ public final class OSGiDistributedDataStore {
      * to settle (which can take a long time).
      */
     private final class DatastoreState implements FutureCallback<Object> {
-        private final DatastoreContextIntrospector introspector;
         private final LogicalDatastoreType datastoreType;
         private final AbstractDataStore datastore;
         private final String serviceType;
@@ -56,18 +54,11 @@ public final class OSGiDistributedDataStore {
         @GuardedBy("this")
         private boolean stopped;
 
-        DatastoreState(final DatastoreContextIntrospector introspector, final LogicalDatastoreType datastoreType,
-                final AbstractDataStore datastore, final String serviceType) {
-            this.introspector = requireNonNull(introspector);
+        DatastoreState(final LogicalDatastoreType datastoreType, final AbstractDataStore datastore,
+                       final String serviceType) {
             this.datastoreType = requireNonNull(datastoreType);
             this.datastore = requireNonNull(datastore);
             this.serviceType = requireNonNull(serviceType);
-        }
-
-        synchronized void updateProperties(final Map<String, Object> properties) {
-            if (introspector.update(properties)) {
-                datastore.onDatastoreContextUpdated(introspector.newContextFactory());
-            }
         }
 
         void stop() {
@@ -126,18 +117,12 @@ public final class OSGiDistributedDataStore {
 
     @Activate
     void activate(final Map<String, Object> properties) {
-        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config", null);
+        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config",
+                null, properties);
         operDatastore = createDatastore(LogicalDatastoreType.OPERATIONAL, "distributed-operational",
-            new ConfigurationImpl(configProvider));
-        modified(properties);
+                new ConfigurationImpl(configProvider), properties);
     }
 
-    @Modified
-    void modified(final Map<String, Object> properties) {
-        LOG.debug("Overlaying settings: {}", properties);
-        configDatastore.updateProperties(properties);
-        operDatastore.updateProperties(properties);
-    }
 
     @Deactivate
     void deactivate() {
@@ -148,13 +133,14 @@ public final class OSGiDistributedDataStore {
     }
 
     private DatastoreState createDatastore(final LogicalDatastoreType datastoreType, final String serviceType,
-            final Configuration config) {
+                                           final Configuration config, final Map<String, Object> properties) {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType);
+        introspector.update(properties);
         final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
-            introspector.getContext(), introspector, snapshotRestore, config);
+                introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
-        final DatastoreState state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
+        final DatastoreState state = new DatastoreState(datastoreType, datastore, serviceType);
 
         Futures.addCallback(datastore.initialSettleFuture(), state,
             // Note we are invoked from shard manager and therefore could block it, hence the round-trip to executor
