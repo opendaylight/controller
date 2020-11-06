@@ -27,7 +27,6 @@ import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,12 +61,6 @@ public final class OSGiDistributedDataStore {
             this.datastoreType = requireNonNull(datastoreType);
             this.datastore = requireNonNull(datastore);
             this.serviceType = requireNonNull(serviceType);
-        }
-
-        synchronized void updateProperties(final Map<String, Object> properties) {
-            if (introspector.update(properties)) {
-                datastore.onDatastoreContextUpdated(introspector.newContextFactory());
-            }
         }
 
         void stop() {
@@ -126,18 +119,12 @@ public final class OSGiDistributedDataStore {
 
     @Activate
     void activate(final Map<String, Object> properties) {
-        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config", null);
+        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config",
+                null, properties);
         operDatastore = createDatastore(LogicalDatastoreType.OPERATIONAL, "distributed-operational",
-            new ConfigurationImpl(configProvider));
-        modified(properties);
+            new ConfigurationImpl(configProvider), properties);
     }
 
-    @Modified
-    void modified(final Map<String, Object> properties) {
-        LOG.debug("Overlaying settings: {}", properties);
-        configDatastore.updateProperties(properties);
-        operDatastore.updateProperties(properties);
-    }
 
     @Deactivate
     void deactivate() {
@@ -148,9 +135,10 @@ public final class OSGiDistributedDataStore {
     }
 
     private DatastoreState createDatastore(final LogicalDatastoreType datastoreType, final String serviceType,
-            final Configuration config) {
+            final Configuration config, final Map<String, Object> properties) {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType);
+        introspector.update(properties);
         final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
             introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
