@@ -66,6 +66,7 @@ public final class OSGiDistributedDataStore {
 
         synchronized void updateProperties(final Map<String, Object> properties) {
             if (introspector.update(properties)) {
+                LOG.info("Distributed Datastore type {} updating context", datastoreType);
                 datastore.onDatastoreContextUpdated(introspector.newContextFactory());
             }
         }
@@ -126,10 +127,9 @@ public final class OSGiDistributedDataStore {
 
     @Activate
     void activate(final Map<String, Object> properties) {
-        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config", null);
-        operDatastore = createDatastore(LogicalDatastoreType.OPERATIONAL, "distributed-operational",
+        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config", properties, null);
+        operDatastore = createDatastore(LogicalDatastoreType.OPERATIONAL, "distributed-operational", properties,
             new ConfigurationImpl(configProvider));
-        modified(properties);
     }
 
     @Modified
@@ -148,9 +148,9 @@ public final class OSGiDistributedDataStore {
     }
 
     private DatastoreState createDatastore(final LogicalDatastoreType datastoreType, final String serviceType,
-            final Configuration config) {
+            final Map<String, Object> properties, final Configuration config) {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
-        final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType);
+        final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType, properties);
         final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
             introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
