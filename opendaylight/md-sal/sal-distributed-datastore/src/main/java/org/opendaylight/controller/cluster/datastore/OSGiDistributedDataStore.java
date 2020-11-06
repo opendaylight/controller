@@ -64,12 +64,6 @@ public final class OSGiDistributedDataStore {
             this.serviceType = requireNonNull(serviceType);
         }
 
-        synchronized void updateProperties(final Map<String, Object> properties) {
-            if (introspector.update(properties)) {
-                datastore.onDatastoreContextUpdated(introspector.newContextFactory());
-            }
-        }
-
         void stop() {
             LOG.info("Distributed Datastore type {} stopping", datastoreType);
 
@@ -126,18 +120,12 @@ public final class OSGiDistributedDataStore {
 
     @Activate
     void activate(final Map<String, Object> properties) {
-        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config", null);
+        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config",
+                null, properties);
         operDatastore = createDatastore(LogicalDatastoreType.OPERATIONAL, "distributed-operational",
-            new ConfigurationImpl(configProvider));
-        modified(properties);
+            new ConfigurationImpl(configProvider), properties);
     }
 
-    @Modified
-    void modified(final Map<String, Object> properties) {
-        LOG.debug("Overlaying settings: {}", properties);
-        configDatastore.updateProperties(properties);
-        operDatastore.updateProperties(properties);
-    }
 
     @Deactivate
     void deactivate() {
@@ -148,9 +136,10 @@ public final class OSGiDistributedDataStore {
     }
 
     private DatastoreState createDatastore(final LogicalDatastoreType datastoreType, final String serviceType,
-            final Configuration config) {
+            final Configuration config, Map<String, Object> properties) {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType);
+        introspector.update(properties);
         final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
             introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
