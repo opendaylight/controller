@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Fri, 13 Nov 2020 15:51:49 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/93795
+Project: controller
+Branch: refs/heads/stable/magnesium
