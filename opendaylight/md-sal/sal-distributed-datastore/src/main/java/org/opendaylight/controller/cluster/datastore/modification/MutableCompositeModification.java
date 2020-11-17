@@ -88,29 +88,12 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-
-        int size = in.readInt();
+        final int size = in.readInt();
         if (size > 0) {
-            final NormalizedNodeDataInput input = NormalizedNodeDataInput.newDataInputWithoutValidation(in);
-            final ReusableStreamReceiver receiver = ReusableImmutableNormalizedNodeStreamWriter.create();
-
-            for (int i = 0; i < size; i++) {
-                byte type = in.readByte();
-                switch (type) {
-                    case Modification.WRITE:
-                        modifications.add(WriteModification.fromStream(input, getVersion(), receiver));
-                        break;
-
-                    case Modification.MERGE:
-                        modifications.add(MergeModification.fromStream(input, getVersion(), receiver));
-                        break;
-
-                    case Modification.DELETE:
-                        modifications.add(DeleteModification.fromStream(input, getVersion()));
-                        break;
-                    default:
-                        break;
-                }
+            if (getVersion() >= DataStoreVersions.PHOSPHORUS_VERSION) {
+                readExternalModern(NormalizedNodeDataInput.newDataInput(in), size);
+            } else {
+                readExternalLegacy(in, size);
             }
         }
     }
@@ -118,15 +101,73 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-
         final int size = modifications.size();
         out.writeInt(size);
         if (size > 0) {
-            try (NormalizedNodeDataOutput stream = getStreamVersion().newDataOutput(out)) {
-                for (Modification mod : modifications) {
-                    out.writeByte(mod.getType());
-                    mod.writeTo(stream);
-                }
+            if (getVersion() >= DataStoreVersions.PHOSPHORUS_VERSION) {
+                writeExternalModern(out);
+            } else {
+                writeExternalLegacy(out);
+            }
+        }
+    }
+
+    private void readExternalLegacy(final ObjectInput in, final int size) throws IOException, ClassNotFoundException {
+        final NormalizedNodeDataInput input = NormalizedNodeDataInput.newDataInputWithoutValidation(in);
+        final ReusableStreamReceiver receiver = ReusableImmutableNormalizedNodeStreamWriter.create();
+        for (int i = 0; i < size; i++) {
+            final byte type = in.readByte();
+            switch (type) {
+                case Modification.WRITE:
+                    modifications.add(WriteModification.fromStream(input, getVersion(), receiver));
+                    break;
+                case Modification.MERGE:
+                    modifications.add(MergeModification.fromStream(input, getVersion(), receiver));
+                    break;
+                case Modification.DELETE:
+                    modifications.add(DeleteModification.fromStream(input, getVersion()));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void writeExternalLegacy(final ObjectOutput out) throws IOException {
+        try (NormalizedNodeDataOutput stream = getStreamVersion().newDataOutput(out)) {
+            for (Modification mod : modifications) {
+                out.writeByte(mod.getType());
+                mod.writeTo(stream);
+            }
+        }
+    }
+
+    private void readExternalModern(final NormalizedNodeDataInput in, final int size)
+            throws IOException, ClassNotFoundException {
+        final ReusableStreamReceiver receiver = ReusableImmutableNormalizedNodeStreamWriter.create();
+        for (int i = 0; i < size; i++) {
+            final byte type = in.readByte();
+            switch (type) {
+                case Modification.WRITE:
+                    modifications.add(WriteModification.fromStream(in, getVersion(), receiver));
+                    break;
+                case Modification.MERGE:
+                    modifications.add(MergeModification.fromStream(in, getVersion(), receiver));
+                    break;
+                case Modification.DELETE:
+                    modifications.add(DeleteModification.fromStream(in, getVersion()));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void writeExternalModern(final ObjectOutput out) throws IOException {
+        try (NormalizedNodeDataOutput stream = getStreamVersion().newDataOutput(out)) {
+            for (Modification mod : modifications) {
+                stream.writeByte(mod.getType());
+                mod.writeTo(stream);
             }
         }
     }
