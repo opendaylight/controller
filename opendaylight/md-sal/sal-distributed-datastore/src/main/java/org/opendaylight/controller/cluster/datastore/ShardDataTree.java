@@ -12,11 +12,11 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -1285,7 +1285,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return false;
         }
 
-        DataTreeTip newTip = MoreObjects.firstNonNull(first.cohort.getCandidate(), dataTree);
+        DataTreeTip newTip = requireNonNullElse(first.cohort.getCandidate(), dataTree);
         while (it.hasNext()) {
             final CommitEntry e = it.next();
             if (cohort.equals(e.cohort)) {
@@ -1298,7 +1298,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
                 return true;
             } else {
-                newTip = MoreObjects.firstNonNull(e.cohort.getCandidate(), newTip);
+                newTip = requireNonNullElse(e.cohort.getCandidate(), newTip);
             }
         }
 
