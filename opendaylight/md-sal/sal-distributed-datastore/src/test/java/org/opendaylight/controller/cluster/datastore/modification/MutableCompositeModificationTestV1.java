@@ -1,11 +1,10 @@
 /*
- * Copyright (c) 2014, 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2020 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
@@ -22,13 +21,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
-public class MutableCompositeModificationTest extends AbstractModificationTest {
+public class MutableCompositeModificationTestV1 extends AbstractModificationTest {
 
     @Test
     public void testApply() throws Exception {
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
+        MutableCompositeModificationV1 compositeModification = new MutableCompositeModificationV1();
         compositeModification.addModification(new WriteModification(TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
+                ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
 
         DOMStoreReadWriteTransaction transaction = store.newReadWriteTransaction();
         compositeModification.apply(transaction);
@@ -53,12 +52,12 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
+        MutableCompositeModificationV1 compositeModification = new MutableCompositeModificationV1();
         compositeModification.addModification(new WriteModification(writePath, writeData));
         compositeModification.addModification(new MergeModification(mergePath, mergeData));
         compositeModification.addModification(new DeleteModification(deletePath));
 
-        MutableCompositeModification clone = (MutableCompositeModification)
+        MutableCompositeModificationV1 clone = (MutableCompositeModificationV1)
                 SerializationUtils.clone(compositeModification);
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
