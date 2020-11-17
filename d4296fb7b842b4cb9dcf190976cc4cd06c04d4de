@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28e182d7_99ac23f7",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-17T11:26:02Z",
+      "side": 1,
+      "message": "How about this case. I think we also should have a retry here.",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9217ac69_1d3fbc95",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-17T11:26:02Z",
+      "side": 1,
+      "message": "If it fixed this comment can be deleted",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1694740_b0242193",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-17T11:26:02Z",
+      "side": 1,
+      "message": "Do we need a retry for \u0027unregisterCandidate\u0027 also?",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6d5ae3b_2e77b5db",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-17T11:26:02Z",
+      "side": 1,
+      "message": "Is there any purpose in swapping these two lines?",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd0f1f8c_e5e25c9a",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-17T11:26:02Z",
+      "side": 1,
+      "message": "The same for listener - do we need a retry also here?",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
