@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7d40099e_e1a77e92",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/cluster_reference.conf",
+        "patchSetId": 23
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-11-17T16:39:10Z",
+      "side": 0,
+      "message": "This needs an update of all application.confs -- see https://doc.akka.io/docs/akka/current/project/migration-guide-2.5.x-2.6.x.html#auto-downing-removed",
+      "range": {
+        "startLine": 48,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 37
+      },
+      "revId": "81b0b9d6fd26b1567bfc6dd80fa1a90bd30bff0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5c2ea2dd_0f795bb4",
         "filename": "opendaylight/md-sal/sal-distributed-eos/src/test/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipIntegrationTest.java",
         "patchSetId": 21
