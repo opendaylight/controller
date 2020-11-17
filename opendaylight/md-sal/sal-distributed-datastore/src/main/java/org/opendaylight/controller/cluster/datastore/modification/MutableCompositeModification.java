@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormali
 public class MutableCompositeModification extends VersionedExternalizableMessage implements CompositeModification {
     private static final long serialVersionUID = 1L;
 
-    private final List<Modification> modifications = new ArrayList<>();
+    protected final List<Modification> modifications = new ArrayList<>();
     private List<Modification> immutableModifications = null;
 
     public MutableCompositeModification() {
@@ -89,29 +89,38 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
 
-        int size = in.readInt();
+        doReadExternal(in);
+    }
+
+    protected void doReadExternal(final ObjectInput in) throws IOException {
+        final int size = in.readInt();
         if (size > 0) {
-            final NormalizedNodeDataInput input = NormalizedNodeDataInput.newDataInputWithoutValidation(in);
             final ReusableStreamReceiver receiver = ReusableImmutableNormalizedNodeStreamWriter.create();
+            try {
+                final NormalizedNodeDataInput input = NormalizedNodeDataInput.newDataInput(in);
 
-            for (int i = 0; i < size; i++) {
-                byte type = in.readByte();
-                switch (type) {
-                    case Modification.WRITE:
-                        modifications.add(WriteModification.fromStream(input, getVersion(), receiver));
-                        break;
+                for (int i = 0; i < size; i++) {
+                    final byte type = in.readByte();
+                    switch (type) {
+                        case Modification.WRITE:
+                            modifications.add(WriteModification.fromStream(input, getVersion(), receiver));
+                            break;
 
-                    case Modification.MERGE:
-                        modifications.add(MergeModification.fromStream(input, getVersion(), receiver));
-                        break;
+                        case Modification.MERGE:
+                            modifications.add(MergeModification.fromStream(input, getVersion(), receiver));
+                            break;
 
-                    case Modification.DELETE:
-                        modifications.add(DeleteModification.fromStream(input, getVersion()));
-                        break;
-                    default:
-                        break;
+                        case Modification.DELETE:
+                            modifications.add(DeleteModification.fromStream(input, getVersion()));
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            } finally {
+                receiver.reset();
             }
+
         }
     }
 
@@ -119,6 +128,10 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
 
+        doWriteExternal(out);
+    }
+
+    protected void doWriteExternal(final ObjectOutput out) throws IOException {
         final int size = modifications.size();
         out.writeInt(size);
         if (size > 0) {
