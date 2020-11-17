@@ -14,19 +14,19 @@ package org.opendaylight.controller.cluster.datastore;
  */
 public final class DataStoreVersions {
     @Deprecated
-    public static final short BASE_HELIUM_VERSION = 0;
+    public static final short BASE_HELIUM_VERSION =  0;
     @Deprecated
-    public static final short HELIUM_1_VERSION = 1;
+    public static final short HELIUM_1_VERSION    =  1;
     @Deprecated
-    public static final short HELIUM_2_VERSION = 2;
+    public static final short HELIUM_2_VERSION    =  2;
     @Deprecated
-    public static final short LITHIUM_VERSION = 3;
-    public static final short BORON_VERSION = 5;
-    public static final short FLUORINE_VERSION = 9;
-    public static final short NEON_SR2_VERSION = 10;
-    public static final short SODIUM_SR1_VERSION = 11;
-    public static final short MAGNESIUM_VERSION = 12;
-    public static final short CURRENT_VERSION = SODIUM_SR1_VERSION;
+    public static final short LITHIUM_VERSION     =  3;
+    public static final short BORON_VERSION       =  5;
+    public static final short FLUORINE_VERSION    =  9;
+    public static final short NEON_SR2_VERSION    = 10;
+    public static final short SODIUM_SR1_VERSION  = 11;
+    public static final short PHOSPHORUS_VERSION  = 12;
+    public static final short CURRENT_VERSION     = SODIUM_SR1_VERSION;
 
     private DataStoreVersions() {
 

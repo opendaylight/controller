@@ -26,6 +26,7 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     private short version = DataStoreVersions.CURRENT_VERSION;
 
     public VersionedExternalizableMessage() {
+
     }
 
     public VersionedExternalizableMessage(final short version) {
@@ -37,7 +38,7 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     }
 
     protected final @NonNull NormalizedNodeStreamVersion getStreamVersion() {
-        if (version >= DataStoreVersions.MAGNESIUM_VERSION) {
+        if (version >= DataStoreVersions.PHOSPHORUS_VERSION) {
             return NormalizedNodeStreamVersion.MAGNESIUM;
         } else if (version == DataStoreVersions.SODIUM_SR1_VERSION) {
             return NormalizedNodeStreamVersion.SODIUM_SR1;
