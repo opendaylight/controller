@@ -476,26 +476,22 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void checkRootOverwrite(DataTreeCandidate candidate) {
+    private void checkRootOverwrite(final DataTreeCandidate candidate) {
         final DatastoreContext datastoreContext = shard.getDatastoreContext();
         if (!datastoreContext.isSnapshotOnRootOverwrite()) {
             return;
         }
 
         if (!datastoreContext.isPersistent()) {
-            return;
-        }
-
-        if (candidate.getRootNode().getModificationType().equals(ModificationType.UNMODIFIED)) {
+            // FIXME: why don't we want a snapshot in non-persistent state?
             return;
         }
 
         // top level container ie "/"
-        if ((candidate.getRootPath().equals(YangInstanceIdentifier.empty())
-                && candidate.getRootNode().getModificationType().equals(ModificationType.WRITE))) {
+        if (candidate.getRootPath().isEmpty()
+                && candidate.getRootNode().getModificationType() == ModificationType.WRITE) {
             LOG.debug("{}: shard root overwritten, enqueuing snapshot", logContext);
             shard.self().tell(new InitiateCaptureSnapshot(), noSender());
-            return;
         }
     }
 
