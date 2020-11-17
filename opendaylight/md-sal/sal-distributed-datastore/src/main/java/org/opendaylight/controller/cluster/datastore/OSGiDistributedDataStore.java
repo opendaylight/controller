@@ -16,6 +16,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -86,6 +87,7 @@ public final class OSGiDistributedDataStore {
         }
 
         @Override
+        @SuppressModernizer
         public void onSuccess(final Object result) {
             LOG.debug("Distributed Datastore type {} reached initial settle", datastoreType);
 
