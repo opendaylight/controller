@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormali
 public class MutableCompositeModification extends VersionedExternalizableMessage implements CompositeModification {
     private static final long serialVersionUID = 1L;
 
-    private final List<Modification> modifications = new ArrayList<>();
+    protected final List<Modification> modifications = new ArrayList<>();
     private List<Modification> immutableModifications = null;
 
     public MutableCompositeModification() {
@@ -89,6 +89,10 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
 
+        doReadExternal(in);
+    }
+
+    protected void doReadExternal(final ObjectInput in) throws IOException {
         int size = in.readInt();
         if (size > 0) {
             final NormalizedNodeDataInput input = NormalizedNodeDataInput.newDataInputWithoutValidation(in);
@@ -119,6 +123,10 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
 
+        doWriteExternal(out);
+    }
+
+    protected void doWriteExternal(final ObjectOutput out) throws IOException {
         final int size = modifications.size();
         out.writeInt(size);
         if (size > 0) {

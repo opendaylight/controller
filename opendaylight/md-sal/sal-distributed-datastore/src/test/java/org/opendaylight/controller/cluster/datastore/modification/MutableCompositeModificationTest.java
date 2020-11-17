@@ -26,8 +26,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
 
     @Test
     public void testApply() throws Exception {
-
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
+        MutableCompositeModification compositeModification = getModification();
         compositeModification.addModification(new WriteModification(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
 
@@ -54,7 +53,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
+        MutableCompositeModification compositeModification = getModification();
         compositeModification.addModification(new WriteModification(writePath, writeData));
         compositeModification.addModification(new MergeModification(mergePath, mergeData));
         compositeModification.addModification(new DeleteModification(deletePath));
@@ -79,5 +78,9 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         DeleteModification delete = (DeleteModification)clone.getModifications().get(2);
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, delete.getVersion());
         assertEquals("getPath", deletePath, delete.getPath());
+    }
+
+    protected MutableCompositeModification getModification() {
+        return new MutableCompositeModification();
     }
 }
