@@ -87,7 +87,6 @@ public class WriteModification extends AbstractModification {
 
     @Override
     public void writeTo(final NormalizedNodeDataOutput out) throws IOException {
-        // FIXME: this should be inverted, as the path helps receivers in establishment of context
         out.writeNormalizedNode(data);
         out.writeYangInstanceIdentifier(getPath());
     }
