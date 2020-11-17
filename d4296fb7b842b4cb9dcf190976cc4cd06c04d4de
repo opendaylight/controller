@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "87968b3b_607033bb",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2020-11-17T12:41:33Z",
+      "side": 1,
+      "message": "This method returns Future and will be resolved on line 172",
+      "parentUuid": "28e182d7_99ac23f7",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9217ac69_1d3fbc95",
         "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "601878f7_b814ce3f",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2020-11-17T12:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9217ac69_1d3fbc95",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1694740_b0242193",
         "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2020-11-17T11:26:02Z",
       "side": 1,
       "message": "Do we need a retry for \u0027unregisterCandidate\u0027 also?",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7f9c3b5_b325d9b8",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2020-11-17T12:41:33Z",
+      "side": 1,
+      "message": "Nope. According to issue description.",
+      "parentUuid": "b1694740_b0242193",
       "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "43966f81_1ccf4c31",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2020-11-17T12:41:33Z",
+      "side": 1,
+      "message": "Yes. As retry thread check this collection before retry start.",
+      "parentUuid": "b6d5ae3b_2e77b5db",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fd0f1f8c_e5e25c9a",
         "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
         "patchSetId": 6
@@ -81,6 +153,24 @@
       "writtenOn": "2020-11-17T11:26:02Z",
       "side": 1,
       "message": "The same for listener - do we need a retry also here?",
+      "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5dec2f5e_0d5d9ed9",
+        "filename": "opendaylight/md-sal/sal-distributed-eos/src/main/java/org/opendaylight/controller/cluster/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2020-11-17T12:41:33Z",
+      "side": 1,
+      "message": "As I see from task decryption situation occurs only in case of registerCandidate. I could not find situation for this.",
+      "parentUuid": "fd0f1f8c_e5e25c9a",
       "revId": "d4296fb7b842b4cb9dcf190976cc4cd06c04d4de",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
