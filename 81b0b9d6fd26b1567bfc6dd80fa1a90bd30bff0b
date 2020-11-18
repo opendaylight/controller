@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "463e8bee_c6489472",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/cluster_reference.conf",
+        "patchSetId": 23
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-11-18T12:37:11Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "7d40099e_e1a77e92",
+      "range": {
+        "startLine": 48,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 37
+      },
+      "revId": "81b0b9d6fd26b1567bfc6dd80fa1a90bd30bff0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1796af9f_0c9e5106",
         "filename": "features/odl-controller-akka/src/main/history/dependencies.xml",
         "patchSetId": 23
@@ -45,6 +69,30 @@
       "revId": "81b0b9d6fd26b1567bfc6dd80fa1a90bd30bff0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45170e50_057c5d08",
+        "filename": "features/odl-controller-akka/src/main/history/dependencies.xml",
+        "patchSetId": 23
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-11-18T12:37:11Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "1796af9f_0c9e5106",
+      "range": {
+        "startLine": 2,
+        "startChar": 1,
+        "endLine": 2,
+        "endChar": 91
+      },
+      "revId": "81b0b9d6fd26b1567bfc6dd80fa1a90bd30bff0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
