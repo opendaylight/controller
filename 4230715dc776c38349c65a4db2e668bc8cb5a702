@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "30761af8_527d7c22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-23T12:22:35Z",
+      "side": 1,
+      "message": "Nevermind, this question was for readExternal()",
+      "parentUuid": "569d136e_7479b815",
+      "revId": "4230715dc776c38349c65a4db2e668bc8cb5a702",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e06a17fe_8753be96",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
         "patchSetId": 2
@@ -50,6 +68,24 @@
       "revId": "4230715dc776c38349c65a4db2e668bc8cb5a702",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e606874_a3f68068",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 8665
+      },
+      "writtenOn": "2020-11-23T12:22:35Z",
+      "side": 1,
+      "message": "Nevermind, this question was for writeExternal()",
+      "parentUuid": "e06a17fe_8753be96",
+      "revId": "4230715dc776c38349c65a4db2e668bc8cb5a702",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
