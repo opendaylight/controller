@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dfacc8e2_8498f384",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-11-23T12:46:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1197c73_a4265497",
+      "revId": "4230715dc776c38349c65a4db2e668bc8cb5a702",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569d136e_7479b815",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
         "patchSetId": 2
@@ -103,6 +121,24 @@
       "revId": "4230715dc776c38349c65a4db2e668bc8cb5a702",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d56c8d4c_ca273be5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationTestV1.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2020-11-23T12:46:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "26156b16_e888584f",
+      "revId": "4230715dc776c38349c65a4db2e668bc8cb5a702",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
