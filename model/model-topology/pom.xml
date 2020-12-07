@@ -14,7 +14,7 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-parent</artifactId>
         <version>3.0.2-SNAPSHOT</version>
-        <relativePath>../opendaylight/md-sal/parent</relativePath>
+        <relativePath>../../opendaylight/md-sal/parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller.model</groupId>
