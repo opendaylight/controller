@@ -18,7 +18,7 @@
 
   <groupId>org.opendaylight.controller.archetypes</groupId>
   <artifactId>archetypes-parent</artifactId>
-  <version>0.11.3-SNAPSHOT</version>
+  <version>0.11.3</version>
   <packaging>pom</packaging>
 
   <build>
