@@ -24,6 +24,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>2.6</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Akka -->
         <dependency>
