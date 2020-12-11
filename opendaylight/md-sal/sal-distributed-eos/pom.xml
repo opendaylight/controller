@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
-    <version>1.11.3-SNAPSHOT</version>
+    <version>1.11.4-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <artifactId>sal-distributed-eos</artifactId>
-  <version>1.11.3-SNAPSHOT</version>
+  <version>1.11.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-distributed-datastore</artifactId>
-      <version>1.11.3-SNAPSHOT</version>
+      <version>1.11.4-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
