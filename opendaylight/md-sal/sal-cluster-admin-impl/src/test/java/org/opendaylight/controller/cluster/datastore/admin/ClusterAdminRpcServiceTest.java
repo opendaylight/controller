@@ -1202,8 +1202,8 @@ public class ClusterAdminRpcServiceTest {
             ShardResult exp = expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType());
             assertNotNull(String.format("Unexpected result for shard %s, type %s", result.getShardName(),
                     result.getDataStoreType()), exp);
-            assertEquals("isSucceeded", exp.isSucceeded(), result.isSucceeded());
-            if (exp.isSucceeded()) {
+            assertEquals("isSucceeded", exp.getSucceeded(), result.getSucceeded());
+            if (exp.getSucceeded()) {
                 assertNull("Expected null error message", result.getErrorMessage());
             } else {
                 assertNotNull("Expected error message", result.getErrorMessage());

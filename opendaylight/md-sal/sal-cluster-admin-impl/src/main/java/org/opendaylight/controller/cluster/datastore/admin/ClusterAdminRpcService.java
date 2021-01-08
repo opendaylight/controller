@@ -700,7 +700,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             final List<MemberVotingState> memberVotingStatus) {
         Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
         for (MemberVotingState memberStatus: memberVotingStatus) {
-            serverVotingStatusMap.put(memberStatus.getMemberName(), memberStatus.isVoting());
+            serverVotingStatusMap.put(memberStatus.getMemberName(), memberStatus.getVoting());
         }
         return new ChangeShardMembersVotingStatus(shardName, serverVotingStatusMap);
     }

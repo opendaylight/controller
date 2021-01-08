@@ -197,7 +197,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         }
 
         final WriteTransactionsHandler handler;
-        if (input.isChainedTransactions()) {
+        if (input.getChainedTransactions()) {
             handler = new Chained(domDataBroker, idListItem, input);
         } else {
             handler = new Simple(domDataBroker, idListItem, input);
