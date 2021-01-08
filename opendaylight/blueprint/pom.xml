@@ -20,7 +20,7 @@
   <artifactId>blueprint</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-  <version>3.0.4-SNAPSHOT</version>
+  <version>3.0.4</version>
 
   <dependencyManagement>
     <dependencies>

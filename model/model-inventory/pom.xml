@@ -20,7 +20,7 @@
     <groupId>org.opendaylight.controller.model</groupId>
     <artifactId>model-inventory</artifactId>
     <packaging>bundle</packaging>
-    <version>3.0.4-SNAPSHOT</version>
+    <version>3.0.4</version>
 
     <dependencies>
         <dependency>
