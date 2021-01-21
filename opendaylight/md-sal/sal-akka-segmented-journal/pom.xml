@@ -70,6 +70,36 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <version>3.1.5</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>minlog</artifactId>
+            <version>1.3.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>reflectasm</artifactId>
+            <version>1.11.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>2.6</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -87,8 +117,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        <!-- atomix.io is using an older Guava, so let's embed it to prevent duplicates -->
-                        <Embed-Dependency>*;inline=true;groupId=io.atomix</Embed-Dependency>
+                        <Import-Package>
+                            !COM.newmonics.*,
+                            !android.os,
+                            *
+                        </Import-Package>
+                        <Embed-Dependency>
+                            <!-- atomix.io is using an older Guava, and Kryo is using ancient objenesis,
+                                 so let's embed it to prevent duplicates -->
+                            *;inline=true;groupId=io.atomix,
+                            *;inline=true;groupId=com.esotericsoftware,
+                            *;inline=true;groupId=org.objenesis,
+                            *;inline=true;groupId=org.ow2.asm,
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
