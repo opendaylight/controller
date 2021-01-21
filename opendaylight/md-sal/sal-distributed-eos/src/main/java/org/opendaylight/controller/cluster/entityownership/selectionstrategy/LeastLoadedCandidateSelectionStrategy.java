@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.entityownership.selectionstrategy;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNullElse;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,17 +32,17 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
 
     @Override
     public String newOwner(final String currentOwner, final Collection<String> viableCandidates) {
-        Preconditions.checkArgument(viableCandidates.size() > 0);
+        checkArgument(viableCandidates.size() > 0);
         String leastLoadedCandidate = null;
         long leastLoadedCount = Long.MAX_VALUE;
 
         if (!Strings.isNullOrEmpty(currentOwner)) {
-            long localVal = MoreObjects.firstNonNull(localStatistics.get(currentOwner), 0L);
+            long localVal = requireNonNullElse(localStatistics.get(currentOwner), 0L);
             localStatistics.put(currentOwner, localVal - 1);
         }
 
         for (String candidateName : viableCandidates) {
-            long val = MoreObjects.firstNonNull(localStatistics.get(candidateName), 0L);
+            long val = requireNonNullElse(localStatistics.get(candidateName), 0L);
             if (val < leastLoadedCount) {
                 leastLoadedCount = val;
                 leastLoadedCandidate = candidateName;
