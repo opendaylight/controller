@@ -22,6 +22,30 @@
       "revId": "3f136f2d3cde46df9baeb6d68e11f94fc0df2351",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d0c4abb_0d211337",
+        "filename": "features/odl-controller-akka/src/main/history/dependencies.xml",
+        "patchSetId": 32
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-01-26T11:17:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d179848a_0a38a071",
+      "range": {
+        "startLine": 14,
+        "startChar": 16,
+        "endLine": 14,
+        "endChar": 24
+      },
+      "revId": "3f136f2d3cde46df9baeb6d68e11f94fc0df2351",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
