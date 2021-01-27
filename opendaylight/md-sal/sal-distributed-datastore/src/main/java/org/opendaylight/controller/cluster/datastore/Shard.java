@@ -129,6 +129,7 @@ public class Shard extends RaftActor {
         }
     };
 
+
     @VisibleForTesting
     static final Object GET_SHARD_MBEAN_MESSAGE = new Object() {
         @Override
