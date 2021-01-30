@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a67dbc3e_4447736f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreRemotingIntegrationTest.java",
+        "patchSetId": 42
+      },
+      "lineNbr": 759,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-01-30T13:19:57Z",
+      "side": 0,
+      "message": "I do not believe this is okay, as it forms a synchronization point!",
+      "revId": "34e171c6053951c69bdd032313a097d315272a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b29646d_014b9b89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreRemotingIntegrationTest.java",
+        "patchSetId": 42
+      },
+      "lineNbr": 1289,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-01-30T13:19:57Z",
+      "side": 0,
+      "message": "same thing here: we really want to terminate follower2!",
+      "range": {
+        "startLine": 1289,
+        "startChar": 8,
+        "endLine": 1289,
+        "endChar": 53
+      },
+      "revId": "34e171c6053951c69bdd032313a097d315272a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
