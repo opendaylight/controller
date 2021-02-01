@@ -22,6 +22,30 @@
       "revId": "bd3445cd6b6abf41728d51e93ef5f5b825b09f34",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f025272b_52e26e86",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/MemberNode.java",
+        "patchSetId": 42
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-02-01T10:01:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ec96b130_ed29cf6f",
+      "range": {
+        "startLine": 99,
+        "startChar": 14,
+        "endLine": 99,
+        "endChar": 62
+      },
+      "revId": "bd3445cd6b6abf41728d51e93ef5f5b825b09f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
