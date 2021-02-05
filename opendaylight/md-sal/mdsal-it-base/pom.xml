@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-it-base</artifactId>
-  <version>3.0.6-SNAPSHOT</version>
+  <version>3.0.7-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencyManagement>
