@@ -10,9 +10,9 @@
     <feature name="odl-mdsal-distributed-datastore" version="${project.version}">
         <feature version="[8,9)">odl-apache-commons-text</feature>
         <feature version="[6,7)">odl-yangtools-codec</feature>
-        <feature version="[7,8)">odl-mdsal-eos-dom</feature>
-        <feature version="[7,8)">odl-mdsal-dom-broker</feature>
-        <feature version="[7,8)">odl-mdsal-binding-dom-adapter</feature>
+        <feature version="[8,9)">odl-mdsal-eos-dom</feature>
+        <feature version="[8,9)">odl-mdsal-dom-broker</feature>
+        <feature version="[8,9)">odl-mdsal-binding-dom-adapter</feature>
         <configfile finalname="configuration/initial/akka.conf">
             mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/akkaconf
         </configfile>
