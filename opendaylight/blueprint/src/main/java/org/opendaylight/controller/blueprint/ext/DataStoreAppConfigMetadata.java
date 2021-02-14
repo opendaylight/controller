@@ -259,7 +259,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                     inputStreamProvider);
             return reader.createDefaultInstance((schemaContext, dataSchema) -> {
                 // Fallback if file cannot be read, try XML from Config
-                NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
+                NormalizedNode dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
                 if (dataNode == null) {
                     // or, as last resort, defaults from the model
                     return bindingContext.newDefaultNode(dataSchema);
@@ -279,7 +279,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
     }
 
-    private @Nullable NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(
+    private @Nullable NormalizedNode parsePossibleDefaultAppConfigElement(
             final EffectiveModelContext schemaContext, final DataSchemaNode dataSchema) throws URISyntaxException,
                 IOException, ParserConfigurationException, SAXException, XMLStreamException {
         if (defaultAppConfigElement == null) {
@@ -290,7 +290,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
         LOG.debug("{}: Got app config schema: {}", logName(), dataSchema);
 
-        NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(defaultAppConfigElement, dataSchema,
+        NormalizedNode dataNode = bindingContext.parseDataElement(defaultAppConfigElement, dataSchema,
                 schemaContext);
 
         LOG.debug("{}: Parsed data node: {}", logName(), dataNode);

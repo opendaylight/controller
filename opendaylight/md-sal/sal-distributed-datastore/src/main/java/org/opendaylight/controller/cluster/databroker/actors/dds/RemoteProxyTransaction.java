@@ -105,12 +105,12 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    void doMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
         appendModification(new TransactionMerge(path, data), OptionalLong.empty());
     }
 
     @Override
-    void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    void doWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
         appendModification(new TransactionWrite(path, data), OptionalLong.empty());
     }
 
@@ -137,8 +137,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(final YangInstanceIdentifier path) {
-        final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
+    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+        final SettableFuture<Optional<NormalizedNode>> future = SettableFuture.create();
         return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
             isSnapshotOnly()), t -> completeRead(path, future, t), future);
     }
@@ -239,8 +239,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         recordFinishedRequest(response);
     }
 
-    private void completeRead(final YangInstanceIdentifier path,
-            final SettableFuture<Optional<NormalizedNode<?, ?>>> future, final Response<?, ?> response) {
+    private void completeRead(final YangInstanceIdentifier path, final SettableFuture<Optional<NormalizedNode>> future,
+            final Response<?, ?> response) {
         LOG.debug("Read request for {} completed with {}", path, response);
 
         if (response instanceof ReadTransactionSuccess) {
@@ -415,12 +415,12 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
         mod.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
-            public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+            public void write(final PathArgument child, final NormalizedNode data) {
                 appendModification(new TransactionWrite(current().node(child), data), optTicks);
             }
 
             @Override
-            public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+            public void merge(final PathArgument child, final NormalizedNode data) {
                 appendModification(new TransactionMerge(current().node(child), data), optTicks);
             }
 

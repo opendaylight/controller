@@ -84,7 +84,7 @@ public abstract class BindingContext {
         bindingQName = BindingReflections.findQName(appConfigBindingClass);
     }
 
-    public NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
+    public NormalizedNode parseDataElement(final Element element, final DataSchemaNode dataSchema,
             final EffectiveModelContext schemaContext) throws XMLStreamException, IOException,
                 ParserConfigurationException, SAXException, URISyntaxException {
         final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
@@ -92,17 +92,17 @@ public abstract class BindingContext {
         final XmlParserStream xmlParser = XmlParserStream.create(writer, schemaContext, dataSchema);
         xmlParser.traverse(new DOMSource(element));
 
-        final NormalizedNode<?, ?> result = resultHolder.getResult();
+        final NormalizedNode result = resultHolder.getResult();
         if (result instanceof MapNode) {
             final MapNode mapNode = (MapNode) result;
-            final MapEntryNode mapEntryNode = mapNode.getValue().iterator().next();
+            final MapEntryNode mapEntryNode = mapNode.body().iterator().next();
             return mapEntryNode;
         }
 
         return result;
     }
 
-    public abstract NormalizedNode<?, ?> newDefaultNode(DataSchemaNode dataSchema);
+    public abstract NormalizedNode newDefaultNode(DataSchemaNode dataSchema);
 
     /**
      * BindingContext implementation for a container binding.
@@ -115,7 +115,7 @@ public abstract class BindingContext {
         }
 
         @Override
-        public NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
+        public NormalizedNode newDefaultNode(final DataSchemaNode dataSchema) {
             return ImmutableNodes.containerNode(bindingQName);
         }
     }
@@ -146,7 +146,7 @@ public abstract class BindingContext {
         }
 
         @Override
-        public NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
+        public NormalizedNode newDefaultNode(final DataSchemaNode dataSchema) {
             // We assume there's only one key for the list.
             List<QName> keys = ((ListSchemaNode)dataSchema).getKeyDefinition();
             Preconditions.checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);

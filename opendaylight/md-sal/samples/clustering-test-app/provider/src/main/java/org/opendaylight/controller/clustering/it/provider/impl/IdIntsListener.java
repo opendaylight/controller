@@ -36,7 +36,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(IdIntsListener.class);
     private static final long SECOND_AS_NANO = 1000000000;
 
-    private volatile NormalizedNode<?, ?> localCopy;
+    private volatile NormalizedNode localCopy;
     private final AtomicLong lastNotifTimestamp = new AtomicLong(0);
     private ScheduledExecutorService executorService;
     private ScheduledFuture<?> scheduledFuture;
@@ -70,12 +70,12 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
         return localCopy != null;
     }
 
-    public boolean checkEqual(final NormalizedNode<?, ?> expected) {
+    public boolean checkEqual(final NormalizedNode expected) {
         return localCopy.equals(expected);
     }
 
     @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
-    public String diffWithLocalCopy(final NormalizedNode<?, ?> expected) {
+    public String diffWithLocalCopy(final NormalizedNode expected) {
         return diffNodes((MapNode)expected, (MapNode)localCopy);
     }
 

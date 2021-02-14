@@ -28,7 +28,7 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
     private ClientBackedReadTransaction object;
 
     @Mock
-    private NormalizedNode<?, ?> data;
+    private NormalizedNode data;
     @Mock
     private ClientActorContext clientContext;
     @Mock
@@ -54,8 +54,8 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
 
     @Test
     public void testRead() throws Exception {
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.empty());
-        final Optional<NormalizedNode<?, ?>> resultData = result.get();
+        final ListenableFuture<Optional<NormalizedNode>> result = object().read(YangInstanceIdentifier.empty());
+        final Optional<NormalizedNode> resultData = result.get();
         assertTrue(resultData.isPresent());
         assertEquals(data, resultData.get());
     }

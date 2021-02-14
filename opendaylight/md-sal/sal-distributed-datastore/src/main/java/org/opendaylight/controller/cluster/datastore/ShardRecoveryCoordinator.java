@@ -105,7 +105,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         open = false;
     }
 
-    private File writeRoot(final String kind, final NormalizedNode<?, ?> node) {
+    private File writeRoot(final String kind, final NormalizedNode node) {
         final File file = new File(System.getProperty("karaf.data", "."),
             "failed-recovery-" + kind + "-" + shardName + ".xml");
         NormalizedNodeXMLOutput.toFile(file, node);

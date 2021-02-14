@@ -27,7 +27,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -376,7 +375,7 @@ public class ActionRegistryTest {
         final int nRoutes = 500;
         final Collection<DOMActionInstance> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
-            QName type = QName.create(URI.create("/mockaction"), "mockaction" + routeIdCounter++);
+            QName type = QName.create("/mockaction", "mockaction" + routeIdCounter++);
             final DOMActionInstance routeId = DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
                     YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(type)));
             added.add(routeId);
@@ -412,7 +411,7 @@ public class ActionRegistryTest {
     }
 
     private List<DOMActionInstance> createRouteIds() {
-        QName type = QName.create(URI.create("/mockaction"), "mockaction" + routeIdCounter++);
+        QName type = QName.create("/mockaction", "mockaction" + routeIdCounter++);
         List<DOMActionInstance> routeIds = new ArrayList<>(1);
         routeIds.add(DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
             YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(type))));

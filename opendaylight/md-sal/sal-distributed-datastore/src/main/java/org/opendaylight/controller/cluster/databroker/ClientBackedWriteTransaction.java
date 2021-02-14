@@ -26,12 +26,12 @@ class ClientBackedWriteTransaction extends ClientBackedTransaction<ClientTransac
     }
 
     @Override
-    public final void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public final void write(final YangInstanceIdentifier path, final NormalizedNode data) {
         delegate().write(path, data);
     }
 
     @Override
-    public final void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public final void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
         delegate().merge(path, data);
     }
 

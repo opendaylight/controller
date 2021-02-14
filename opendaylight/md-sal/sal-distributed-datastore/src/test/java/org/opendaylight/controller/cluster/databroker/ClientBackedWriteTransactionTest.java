@@ -24,7 +24,7 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
     @Mock
     private ClientTransaction delegate;
     @Mock
-    private NormalizedNode<?, ?> data;
+    private NormalizedNode data;
     @Mock
     private YangInstanceIdentifier path;
     @Mock

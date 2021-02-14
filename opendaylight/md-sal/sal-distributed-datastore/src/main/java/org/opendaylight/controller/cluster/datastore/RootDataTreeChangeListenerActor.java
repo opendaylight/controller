@@ -26,11 +26,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor {
@@ -111,9 +111,9 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
                     initial = Iterables.get(changes, 0);
                 }
 
-                final NormalizedNode<?, ?> root = initial.getRootNode().getDataAfter().orElseThrow();
+                final NormalizedNode root = initial.getRootNode().getDataAfter().orElseThrow();
                 verify(root instanceof ContainerNode, "Unexpected root node %s", root);
-                ((ContainerNode) root).getValue().forEach(rootBuilder::withChild);
+                ((ContainerNode) root).body().forEach(rootBuilder::withChild);
             }
         }
         // We will not be intercepting any other messages, allow initial state to be reclaimed as soon as possible

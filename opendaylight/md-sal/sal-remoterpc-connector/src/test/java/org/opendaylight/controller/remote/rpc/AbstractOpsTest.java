@@ -137,7 +137,7 @@ public class AbstractOpsTest {
         }
     }
 
-    static void assertCompositeNodeEquals(final NormalizedNode<? , ?> exp, final NormalizedNode<? , ?> actual) {
+    static void assertCompositeNodeEquals(final NormalizedNode exp, final NormalizedNode actual) {
         assertEquals(exp, actual);
     }
 
@@ -162,8 +162,7 @@ public class AbstractOpsTest {
                 applicationTag, info, causeMsg);
     }
 
-    static void assertSuccessfulRpcResult(final DOMRpcResult rpcResult,
-                                          final NormalizedNode<? , ?> expOutput) {
+    static void assertSuccessfulRpcResult(final DOMRpcResult rpcResult, final NormalizedNode expOutput) {
         assertNotNull("RpcResult was null", rpcResult);
         assertCompositeNodeEquals(expOutput, rpcResult.getResult());
     }

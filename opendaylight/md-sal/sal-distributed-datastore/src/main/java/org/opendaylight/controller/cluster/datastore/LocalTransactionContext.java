@@ -50,7 +50,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     protected abstract DOMStoreReadTransaction getReadDelegate();
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void executeModification(Consumer<DOMStoreWriteTransaction> consumer) {
+    private void executeModification(final Consumer<DOMStoreWriteTransaction> consumer) {
         incrementModificationCount();
         if (operationError == null) {
             try {
@@ -67,14 +67,12 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final Boolean havePermit) {
+    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         executeModification(transaction -> transaction.merge(path, data));
     }
 
     @Override
-    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final Boolean havePermit) {
+    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         executeModification(transaction -> transaction.write(path, data));
     }
 

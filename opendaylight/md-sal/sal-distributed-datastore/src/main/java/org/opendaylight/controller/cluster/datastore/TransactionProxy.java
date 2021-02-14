@@ -47,9 +47,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -107,7 +107,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     @Override
-    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
         checkState(type != TransactionType.WRITE_ONLY, "Reads from write-only transactions are not allowed");
         requireNonNull(path, "path should not be null");
 
@@ -115,21 +115,21 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return path.isEmpty() ? readAllData() : singleShardRead(shardNameFromIdentifier(path), path);
     }
 
-    private FluentFuture<Optional<NormalizedNode<?, ?>>> singleShardRead(
-            final String shardName, final YangInstanceIdentifier path) {
+    private FluentFuture<Optional<NormalizedNode>> singleShardRead(final String shardName,
+            final YangInstanceIdentifier path) {
         return executeRead(shardName, new ReadData(path, DataStoreVersions.CURRENT_VERSION));
     }
 
-    private FluentFuture<Optional<NormalizedNode<?, ?>>> readAllData() {
+    private FluentFuture<Optional<NormalizedNode>> readAllData() {
         final Set<String> allShardNames = txContextFactory.getActorUtils().getConfiguration().getAllShardNames();
-        final Collection<FluentFuture<Optional<NormalizedNode<?, ?>>>> futures = new ArrayList<>(allShardNames.size());
+        final Collection<FluentFuture<Optional<NormalizedNode>>> futures = new ArrayList<>(allShardNames.size());
 
         for (String shardName : allShardNames) {
             futures.add(singleShardRead(shardName, YangInstanceIdentifier.empty()));
         }
 
-        final ListenableFuture<List<Optional<NormalizedNode<?, ?>>>> listFuture = Futures.allAsList(futures);
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> aggregateFuture;
+        final ListenableFuture<List<Optional<NormalizedNode>>> listFuture = Futures.allAsList(futures);
+        final ListenableFuture<Optional<NormalizedNode>> aggregateFuture;
 
         aggregateFuture = Futures.transform(listFuture, input -> {
             try {
@@ -162,7 +162,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     @Override
-    public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
         checkModificationState("merge", path);
 
         if (path.isEmpty()) {
@@ -175,7 +175,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private void mergeAllData(final ContainerNode rootData) {
         // Populate requests for individual shards that are being touched
         final Map<String, DataContainerNodeBuilder<NodeIdentifier, ContainerNode>> rootBuilders = new HashMap<>();
-        for (DataContainerChild<?, ?> child : rootData.getValue()) {
+        for (DataContainerChild child : rootData.body()) {
             final String shardName = shardNameFromRootChild(child);
             rootBuilders.computeIfAbsent(shardName,
                 unused -> Builders.containerBuilder().withNodeIdentifier(rootData.getIdentifier()))
@@ -190,7 +190,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     @Override
-    public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void write(final YangInstanceIdentifier path, final NormalizedNode data) {
         checkModificationState("write", path);
 
         if (path.isEmpty()) {
@@ -208,7 +208,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         }
 
         // Now distribute children as needed
-        for (DataContainerChild<?, ?> child : rootData.getValue()) {
+        for (DataContainerChild child : rootData.body()) {
             final String shardName = shardNameFromRootChild(child);
             verifyNotNull(rootBuilders.get(shardName), "Failed to find builder for %s", shardName).addChild(child);
         }
@@ -224,7 +224,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         getContextWrapper(operation.path()).maybeExecuteTransactionOperation(operation);
     }
 
-    private static ContainerNode checkRootData(final NormalizedNode<?, ?> data) {
+    private static ContainerNode checkRootData(final NormalizedNode data) {
         // Root has to be a container
         checkArgument(data instanceof ContainerNode, "Invalid root data %s", data);
         return (ContainerNode) data;
@@ -353,7 +353,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return new ThreePhaseCommitCohortProxy(txContextFactory.getActorUtils(), cohorts, getIdentifier());
     }
 
-    private String shardNameFromRootChild(final DataContainerChild<?, ?> child) {
+    private String shardNameFromRootChild(final DataContainerChild child) {
         return shardNameFromIdentifier(YangInstanceIdentifier.create(child.getIdentifier()));
     }
 
