@@ -61,8 +61,8 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements DOMTransa
         try (DOMDataTreeReadTransaction tx = domDataBroker.newReadOnlyTransaction()) {
             for (int l = 0; l < outerListElem; l++) {
                 YangInstanceIdentifier yid = pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, olId, l));
-                Optional<NormalizedNode<?,?>> optionalDataObject;
-                FluentFuture<Optional<NormalizedNode<?, ?>>> submitFuture = tx.read(dsType, yid);
+                Optional<NormalizedNode> optionalDataObject;
+                FluentFuture<Optional<NormalizedNode>> submitFuture = tx.read(dsType, yid);
                 try {
                     optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {

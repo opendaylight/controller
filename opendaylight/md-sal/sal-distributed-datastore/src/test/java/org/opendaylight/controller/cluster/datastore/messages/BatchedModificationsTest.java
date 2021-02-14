@@ -39,12 +39,12 @@ public class BatchedModificationsTest extends AbstractTest {
     @Test
     public void testSerialization() {
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        NormalizedNode writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        NormalizedNode<?, ?> mergeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        NormalizedNode mergeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME)).build();
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;

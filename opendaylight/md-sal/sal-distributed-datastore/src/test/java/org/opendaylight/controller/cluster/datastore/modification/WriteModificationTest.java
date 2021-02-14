@@ -33,14 +33,14 @@ public class WriteModificationTest extends AbstractModificationTest {
         commitTransaction(writeTransaction);
 
         //Check if it's in the datastore
-        Optional<NormalizedNode<?,?>> data = readData(TestModel.TEST_PATH);
+        Optional<NormalizedNode> data = readData(TestModel.TEST_PATH);
         Assert.assertTrue(data.isPresent());
     }
 
     @Test
     public void testSerialization() {
         YangInstanceIdentifier path = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> data = ImmutableContainerNodeBuilder.create()
+        NormalizedNode data = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 

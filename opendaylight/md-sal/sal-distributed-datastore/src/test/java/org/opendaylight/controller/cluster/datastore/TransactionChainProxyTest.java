@@ -133,7 +133,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             DOMStoreWriteTransaction writeTx1 = txChainProxy.newWriteOnlyTransaction();
 
-            NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             writeTx1.write(TestModel.TEST_PATH, writeNode1);
 
             writeTx1.ready();
@@ -146,7 +146,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             expectBatchedModifications(txActorRef2, 1);
 
-            final NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+            final NormalizedNode writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
             final DOMStoreWriteTransaction writeTx2 = txChainProxy.newWriteOnlyTransaction();
 
@@ -201,7 +201,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             DOMStoreWriteTransaction writeTx1 = txChainProxy.newReadWriteTransaction();
 
-            NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             writeTx1.write(TestModel.TEST_PATH, writeNode1);
 
             writeTx1.ready();
@@ -215,7 +215,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             expectBatchedModifications(txActorRef2, 1);
 
-            final NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+            final NormalizedNode writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
             final DOMStoreWriteTransaction writeTx2 = txChainProxy.newReadWriteTransaction();
 
@@ -263,7 +263,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             DOMStoreWriteTransaction writeTx1 = txChainProxy.newWriteOnlyTransaction();
 
-            NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             writeTx1.write(TestModel.TEST_PATH, writeNode1);
 
             txChainProxy.newWriteOnlyTransaction();

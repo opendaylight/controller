@@ -66,9 +66,9 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Test
     public void testRead() throws Exception {
         final TransactionTester<RemoteProxyTransaction> tester = getTester();
-        final FluentFuture<Optional<NormalizedNode<?, ?>>> read = transaction.read(PATH_2);
+        final FluentFuture<Optional<NormalizedNode>> read = transaction.read(PATH_2);
         final ReadTransactionRequest req = tester.expectTransactionRequest(ReadTransactionRequest.class);
-        final Optional<NormalizedNode<?, ?>> result = Optional.of(DATA_1);
+        final Optional<NormalizedNode> result = Optional.of(DATA_1);
         tester.replySuccess(new ReadTransactionSuccess(TRANSACTION_ID, req.getSequence(), result));
         assertFutureEquals(result, read);
     }

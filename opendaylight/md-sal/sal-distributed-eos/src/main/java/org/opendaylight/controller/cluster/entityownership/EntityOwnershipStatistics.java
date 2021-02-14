@@ -45,7 +45,7 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
                 updateStatistics(entityType, newOwner, 1);
             }
 
-            Optional<NormalizedNode<?, ?>> dataBefore = changeRoot.getDataBefore();
+            Optional<NormalizedNode> dataBefore = changeRoot.getDataBefore();
             if (dataBefore.isPresent()) {
                 String origOwner = extractOwner((LeafNode<?>) changeRoot.getDataBefore().get());
                 if (!Strings.isNullOrEmpty(origOwner)) {

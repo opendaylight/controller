@@ -53,7 +53,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     @FunctionalInterface
     public interface FallbackConfigProvider {
-        NormalizedNode<?,?> get(EffectiveModelContext schemaContext, DataSchemaNode dataSchema) throws IOException,
+        NormalizedNode get(EffectiveModelContext schemaContext, DataSchemaNode dataSchema) throws IOException,
                 XMLStreamException, ParserConfigurationException, SAXException, URISyntaxException;
     }
 
@@ -127,7 +127,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
                 "%s: Expected schema type %s for %s but actual type is %s", logName,
                 bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass());
 
-        NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
+        NormalizedNode dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
         if (dataNode == null) {
             dataNode = fallback.get(schemaService.getGlobalContext(), dataSchema);
         }
@@ -153,7 +153,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         }
     }
 
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final EffectiveModelContext schemaContext,
+    private NormalizedNode parsePossibleDefaultAppConfigXMLFile(final EffectiveModelContext schemaContext,
             final DataSchemaNode dataSchema) throws ConfigXMLReaderException {
 
         String appConfigFileName = defaultAppConfigFileName;
@@ -176,7 +176,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         URL url = optionalURL.get();
         try (InputStream is = url.openStream()) {
             Document root = UntrustedXML.newDocumentBuilder().parse(is);
-            NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
+            NormalizedNode dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
                     schemaContext);
 
             LOG.debug("{}: Parsed data node: {}", logName, dataNode);

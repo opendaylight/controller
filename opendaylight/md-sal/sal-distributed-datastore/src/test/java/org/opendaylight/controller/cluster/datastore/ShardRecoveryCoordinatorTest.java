@@ -100,7 +100,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return dataTree.prepare(modification);
     }
 
-    private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree) {
+    private Optional<NormalizedNode> readCars(final ShardDataTree shardDataTree) {
         final DataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setEffectiveModelContext(peopleSchemaContext);
@@ -108,7 +108,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return shardDataTree.readNode(CarsModel.BASE_PATH);
     }
 
-    private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree) {
+    private Optional<NormalizedNode> readPeople(final ShardDataTree shardDataTree) {
         final DataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setEffectiveModelContext(peopleSchemaContext);

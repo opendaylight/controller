@@ -101,7 +101,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     public void setUp() {
         setUpStatic();
         final YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        final NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+        final NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
         candidate = DataTreeCandidates.fromNormalizedNode(writePath, writeData);
@@ -132,7 +132,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         YangInstanceIdentifier leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
                 .node(entryPathArg).build();
 
-        NormalizedNode<?, ?> leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
+        NormalizedNode leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
                 .withValue("one").build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
@@ -148,7 +148,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
         LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
                 .withValue("one").build();
-        NormalizedNode<?, ?> leafSetNode = Builders.leafSetBuilder().withNodeIdentifier(
+        NormalizedNode leafSetNode = Builders.leafSetBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
@@ -164,7 +164,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
         LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
                 .withValue("one").build();
-        NormalizedNode<?, ?> leafSetNode = Builders.orderedLeafSetBuilder().withNodeIdentifier(
+        NormalizedNode leafSetNode = Builders.orderedLeafSetBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);

@@ -29,9 +29,9 @@ interface TransactionContext {
 
     void executeDelete(YangInstanceIdentifier path, Boolean havePermit);
 
-    void executeMerge(YangInstanceIdentifier path, NormalizedNode<?, ?> data, Boolean havePermit);
+    void executeMerge(YangInstanceIdentifier path, NormalizedNode data, Boolean havePermit);
 
-    void executeWrite(YangInstanceIdentifier path, NormalizedNode<?, ?> data, Boolean havePermit);
+    void executeWrite(YangInstanceIdentifier path, NormalizedNode data, Boolean havePermit);
 
     Future<Object> directCommit(Boolean havePermit);
 

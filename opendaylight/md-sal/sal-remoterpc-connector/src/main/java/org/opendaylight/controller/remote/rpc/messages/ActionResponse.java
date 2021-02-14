@@ -68,7 +68,7 @@ public class ActionResponse extends AbstractResponse<ContainerNode> {
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             @SuppressWarnings("unchecked")
             final ImmutableList<RpcError> errors = (ImmutableList<RpcError>) in.readObject();
-            final Optional<NormalizedNode<?, ?>> output = SerializationUtils.readNormalizedNode(in);
+            final Optional<NormalizedNode> output = SerializationUtils.readNormalizedNode(in);
             actionResponse = new ActionResponse(output.map(ContainerNode.class::cast), errors);
         }
 

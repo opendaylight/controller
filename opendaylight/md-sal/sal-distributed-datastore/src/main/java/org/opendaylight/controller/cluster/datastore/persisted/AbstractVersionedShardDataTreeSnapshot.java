@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -56,8 +57,8 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> getRootNode() {
-        return Optional.of(Verify.verifyNotNull(rootNode(), "Snapshot %s returned non-present root node", getClass()));
+    public final Optional<NormalizedNode> getRootNode() {
+        return Optional.of(verifyNotNull(rootNode(), "Snapshot %s returned non-present root node", getClass()));
     }
 
     /**
@@ -65,7 +66,7 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
      *
      * @return The root node.
      */
-    abstract @NonNull NormalizedNode<?, ?> rootNode();
+    abstract @NonNull NormalizedNode rootNode();
 
     /**
      * Return the snapshot payload version. Implementations of this method should return a constant.

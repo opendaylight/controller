@@ -294,13 +294,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         doDelete(path);
     }
 
-    final void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    final void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
         checkReadWrite();
         checkNotSealed();
         doMerge(path, data);
     }
 
-    final void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    final void write(final YangInstanceIdentifier path, final NormalizedNode data) {
         checkReadWrite();
         checkNotSealed();
         doWrite(path, data);
@@ -311,7 +311,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         return doExists(path);
     }
 
-    final FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    final FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
         checkNotSealed();
         return doRead(path);
     }
@@ -801,13 +801,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract void doDelete(YangInstanceIdentifier path);
 
-    abstract void doMerge(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+    abstract void doMerge(YangInstanceIdentifier path, NormalizedNode data);
 
-    abstract void doWrite(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+    abstract void doWrite(YangInstanceIdentifier path, NormalizedNode data);
 
     abstract FluentFuture<Boolean> doExists(YangInstanceIdentifier path);
 
-    abstract FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(YangInstanceIdentifier path);
+    abstract FluentFuture<Optional<NormalizedNode>> doRead(YangInstanceIdentifier path);
 
     @GuardedBy("this")
     abstract Optional<ModifyTransactionRequest> flushState();

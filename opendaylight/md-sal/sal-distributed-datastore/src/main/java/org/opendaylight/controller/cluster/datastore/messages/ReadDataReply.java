@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.io.IOException;
@@ -17,17 +16,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class ReadDataReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
-    private NormalizedNode<?, ?> normalizedNode;
+    private NormalizedNode normalizedNode;
 
     public ReadDataReply() {
     }
 
-    public ReadDataReply(final NormalizedNode<?, ?> normalizedNode, final short version) {
+    public ReadDataReply(final NormalizedNode normalizedNode, final short version) {
         super(version);
         this.normalizedNode = normalizedNode;
     }
 
-    public NormalizedNode<?, ?> getNormalizedNode() {
+    public NormalizedNode getNormalizedNode() {
         return normalizedNode;
     }
 

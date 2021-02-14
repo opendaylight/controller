@@ -299,7 +299,7 @@ public class ShardTest extends AbstractShardTest {
         writeToStore(store, TestModel.TEST_PATH, container);
 
         final YangInstanceIdentifier root = YangInstanceIdentifier.empty();
-        final NormalizedNode<?,?> expected = readStore(store, root);
+        final NormalizedNode expected = readStore(store, root);
 
         final Snapshot snapshot = Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)),
                 Collections.emptyList(), 1, 2, 3, 4, -1, null, null);
@@ -343,7 +343,7 @@ public class ShardTest extends AbstractShardTest {
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             Uninterruptibles.sleepUninterruptibly(75, TimeUnit.MILLISECONDS);
 
-            final NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
+            final NormalizedNode actual = readStore(shard, TestModel.TEST_PATH);
             if (actual != null) {
                 assertEquals("Applied state", node, actual);
                 return;
@@ -748,7 +748,7 @@ public class ShardTest extends AbstractShardTest {
 
         // Verify data in the data store.
 
-        final NormalizedNode<?, ?> actualNode = readStore(shard, path);
+        final NormalizedNode actualNode = readStore(shard, path);
         assertEquals("Stored node", containerNode, actualNode);
     }
 
@@ -838,7 +838,7 @@ public class ShardTest extends AbstractShardTest {
         ShardTestKit.waitUntilLeader(shard);
 
         final TransactionIdentifier transactionID = nextTransactionId();
-        final NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         if (readWrite) {
             shard.tell(prepareForwardedReadyTransaction(shard, transactionID, TestModel.TEST_PATH, containerNode, true),
                 testKit.getRef());
@@ -849,7 +849,7 @@ public class ShardTest extends AbstractShardTest {
 
         testKit.expectMsgClass(Duration.ofSeconds(5), CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
+        final NormalizedNode actualNode = readStore(shard, TestModel.TEST_PATH);
         assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
     }
 
@@ -882,7 +882,7 @@ public class ShardTest extends AbstractShardTest {
 
         testKit.expectMsgClass(CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+        final NormalizedNode actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
     }
 
@@ -927,7 +927,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CommitTransaction(txId, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+        final NormalizedNode actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
     }
 
@@ -946,7 +946,7 @@ public class ShardTest extends AbstractShardTest {
         final Duration duration = Duration.ofSeconds(5);
 
         final TransactionIdentifier transactionID = nextTransactionId();
-        final NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH, containerNode, false),
             testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
@@ -963,7 +963,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
+        final NormalizedNode actualNode = readStore(shard, TestModel.TEST_PATH);
         assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
     }
 
@@ -1291,7 +1291,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST_PATH);
+        final NormalizedNode node = readStore(shard, TestModel.TEST_PATH);
 
         // Since we're simulating an abort occurring during replication
         // and before finish commit,
@@ -1359,7 +1359,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> node = readStore(shard, listNodePath);
+        final NormalizedNode node = readStore(shard, listNodePath);
         assertNotNull(listNodePath + " not found", node);
     }
 
@@ -1519,7 +1519,7 @@ public class ShardTest extends AbstractShardTest {
 
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
-        final NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST2_PATH);
+        final NormalizedNode node = readStore(shard, TestModel.TEST2_PATH);
         assertNotNull(TestModel.TEST2_PATH + " not found", node);
     }
 
@@ -1735,7 +1735,7 @@ public class ShardTest extends AbstractShardTest {
         ShardTestKit.waitUntilLeader(shard);
         writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        final NormalizedNode<?, ?> expectedRoot = readStore(shard, YangInstanceIdentifier.empty());
+        final NormalizedNode expectedRoot = readStore(shard, YangInstanceIdentifier.empty());
 
         // Trigger creation of a snapshot by ensuring
         final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
@@ -1747,7 +1747,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static void awaitAndValidateSnapshot(final AtomicReference<CountDownLatch> latch,
-            final AtomicReference<Object> savedSnapshot, final NormalizedNode<?, ?> expectedRoot)
+            final AtomicReference<Object> savedSnapshot, final NormalizedNode expectedRoot)
                     throws InterruptedException {
         assertTrue("Snapshot saved", latch.get().await(5, TimeUnit.SECONDS));
 
@@ -1759,8 +1759,8 @@ public class ShardTest extends AbstractShardTest {
         savedSnapshot.set(null);
     }
 
-    private static void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?, ?> expectedRoot) {
-        final NormalizedNode<?, ?> actual = ((ShardSnapshotState)snapshot.getState()).getSnapshot().getRootNode().get();
+    private static void verifySnapshot(final Snapshot snapshot, final NormalizedNode expectedRoot) {
+        final NormalizedNode actual = ((ShardSnapshotState)snapshot.getState()).getSnapshot().getRootNode().get();
         assertEquals("Root node", expectedRoot, actual);
     }
 
@@ -1778,7 +1778,7 @@ public class ShardTest extends AbstractShardTest {
         commitTransaction(store, putTransaction);
 
 
-        final NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.empty());
+        final NormalizedNode expected = readStore(store, YangInstanceIdentifier.empty());
 
         final DataTreeModification writeTransaction = store.takeSnapshot().newModification();
 
@@ -1787,7 +1787,7 @@ public class ShardTest extends AbstractShardTest {
 
         commitTransaction(store, writeTransaction);
 
-        final NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.empty());
+        final NormalizedNode actual = readStore(store, YangInstanceIdentifier.empty());
 
         assertEquals(expected, actual);
     }

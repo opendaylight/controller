@@ -15,10 +15,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class RpcResponse extends AbstractResponse<NormalizedNode<?, ?>> {
+public class RpcResponse extends AbstractResponse<NormalizedNode> {
     private static final long serialVersionUID = -4211279498688989245L;
 
-    public RpcResponse(final @Nullable NormalizedNode<?, ?> output) {
+    public RpcResponse(final @Nullable NormalizedNode output) {
         super(output);
     }
 

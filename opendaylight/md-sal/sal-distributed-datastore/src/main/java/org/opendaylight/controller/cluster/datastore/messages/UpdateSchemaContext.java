@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.util.AbstractEffectiveModelContextProvider;
+import org.opendaylight.yangtools.yang.model.spi.AbstractEffectiveModelContextProvider;
 
 public class UpdateSchemaContext extends AbstractEffectiveModelContextProvider {
     public UpdateSchemaContext(final EffectiveModelContext modelContext) {
