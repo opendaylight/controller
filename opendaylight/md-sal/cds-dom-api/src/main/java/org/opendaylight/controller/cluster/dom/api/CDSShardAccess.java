@@ -19,6 +19,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * @author Robert Varga
  */
 @Beta
+@Deprecated(forRemoval = true)
 public interface CDSShardAccess {
     /**
      * Return the shard identifier.

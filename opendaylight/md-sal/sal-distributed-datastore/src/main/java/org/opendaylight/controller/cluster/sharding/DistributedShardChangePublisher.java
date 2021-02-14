@@ -45,6 +45,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFai
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public class DistributedShardChangePublisher
         extends AbstractRegistrationTree<AbstractDOMDataTreeChangeListenerRegistration<?>>
         implements DOMStoreTreeChangePublisher {

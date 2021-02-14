@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * notifies handling actor with {@link PrefixShardCreated} and
  * {@link PrefixShardRemoved} messages.
  */
+@Deprecated(forRemoval = true)
 public class PrefixedShardConfigUpdateHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrefixedShardConfigUpdateHandler.class);

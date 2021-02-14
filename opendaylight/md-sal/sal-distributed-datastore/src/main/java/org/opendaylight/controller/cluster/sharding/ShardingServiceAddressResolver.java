@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 /**
  * Resolver for remote {@link ShardedDataTreeActor}'s.
  */
+@Deprecated(forRemoval = true)
 public class ShardingServiceAddressResolver {
 
     private final ConcurrentMap<MemberName, Address> memberNameToAddress = new ConcurrentHashMap<>();

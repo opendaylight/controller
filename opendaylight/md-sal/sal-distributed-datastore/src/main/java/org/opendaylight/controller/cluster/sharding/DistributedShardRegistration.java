@@ -15,6 +15,7 @@ import java.util.concurrent.CompletionStage;
  * This removal is done asynchronously.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public interface DistributedShardRegistration {
 
     /**

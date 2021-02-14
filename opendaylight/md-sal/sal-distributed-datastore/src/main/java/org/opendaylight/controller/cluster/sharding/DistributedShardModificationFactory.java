@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 /**
  * Factory for {@link DistributedShardModification}.
  */
+@Deprecated(forRemoval = true)
 public final class DistributedShardModificationFactory {
     private final Map<DOMDataTreeIdentifier, ForeignShardModificationContext> childShards;
     private final Map<PathArgument, WriteableModificationNode> children;

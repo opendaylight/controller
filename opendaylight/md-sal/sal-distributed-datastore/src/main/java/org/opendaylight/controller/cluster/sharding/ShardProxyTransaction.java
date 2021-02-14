@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * Proxy {@link DOMDataTreeShardWriteTransaction} that creates a proxy cursor that translates all calls into
  * {@link ClientTransaction} calls.
  */
+@Deprecated(forRemoval = true)
 class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardProxyTransaction.class);

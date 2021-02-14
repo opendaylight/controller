@@ -43,6 +43,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public final class ProduceTransactionsHandler extends AbstractTransactionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ProduceTransactionsHandler.class);
 

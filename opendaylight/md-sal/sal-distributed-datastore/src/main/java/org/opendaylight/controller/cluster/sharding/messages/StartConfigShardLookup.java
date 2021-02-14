@@ -14,9 +14,10 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
  * Message that should be sent to ShardedDataTreeActor when the lookup of the prefix config shard should begin.
  * Replied to with Succes once the shard has a leader.
  */
+@Deprecated(forRemoval = true)
 public class StartConfigShardLookup {
 
-    private LogicalDatastoreType type;
+    private final LogicalDatastoreType type;
 
     public StartConfigShardLookup(final LogicalDatastoreType type) {
         this.type = type;

@@ -52,6 +52,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
+@Deprecated(forRemoval = true)
 public class DistributedShardFrontendTest {
 
     private static final DOMDataTreeIdentifier ROOT =

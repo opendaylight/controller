@@ -19,6 +19,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
  * @author Robert Varga
  */
 @Beta
+@Deprecated(forRemoval = true)
 public interface CDSDataTreeProducer extends DOMDataTreeProducer {
     /**
      * Return a {@link CDSShardAccess} handle. This handle will remain valid

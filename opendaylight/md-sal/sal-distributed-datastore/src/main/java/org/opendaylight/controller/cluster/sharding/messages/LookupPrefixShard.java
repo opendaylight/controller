@@ -20,6 +20,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * create the required frontend/backend shards.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class LookupPrefixShard implements Serializable {
     private static final long serialVersionUID = 1L;
 

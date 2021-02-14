@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 
+@Deprecated(forRemoval = true)
 public class ClientTransactionCursorTest {
 
     private static final QName NODE_1 = QName.create("ns-1", "node-1");
