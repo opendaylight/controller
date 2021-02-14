@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
@@ -32,8 +34,10 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeS
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaTreeInference;
+import org.opendaylight.yangtools.yang.model.api.stmt.KeyEffectiveStatement;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaTreeEffectiveStatement;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -84,25 +88,24 @@ public abstract class BindingContext {
         bindingQName = BindingReflections.findQName(appConfigBindingClass);
     }
 
-    public NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
-            final EffectiveModelContext schemaContext) throws XMLStreamException, IOException,
-                ParserConfigurationException, SAXException, URISyntaxException {
+    public NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
+            throws XMLStreamException, IOException, ParserConfigurationException, SAXException, URISyntaxException {
         final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
         final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
-        final XmlParserStream xmlParser = XmlParserStream.create(writer, schemaContext, dataSchema);
+        final XmlParserStream xmlParser = XmlParserStream.create(writer, dataSchema);
         xmlParser.traverse(new DOMSource(element));
 
-        final NormalizedNode<?, ?> result = resultHolder.getResult();
+        final NormalizedNode result = resultHolder.getResult();
         if (result instanceof MapNode) {
             final MapNode mapNode = (MapNode) result;
-            final MapEntryNode mapEntryNode = mapNode.getValue().iterator().next();
+            final MapEntryNode mapEntryNode = mapNode.body().iterator().next();
             return mapEntryNode;
         }
 
         return result;
     }
 
-    public abstract NormalizedNode<?, ?> newDefaultNode(DataSchemaNode dataSchema);
+    public abstract NormalizedNode newDefaultNode(SchemaTreeInference dataSchema);
 
     /**
      * BindingContext implementation for a container binding.
@@ -115,7 +118,7 @@ public abstract class BindingContext {
         }
 
         @Override
-        public NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
+        public NormalizedNode newDefaultNode(final SchemaTreeInference dataSchema) {
             return ImmutableNodes.containerNode(bindingQName);
         }
     }
@@ -146,11 +149,15 @@ public abstract class BindingContext {
         }
 
         @Override
-        public NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
+        public NormalizedNode newDefaultNode(final SchemaTreeInference dataSchema) {
+            final SchemaTreeEffectiveStatement<?> stmt = Iterables.getLast(dataSchema.statementPath());
+
             // We assume there's only one key for the list.
-            List<QName> keys = ((ListSchemaNode)dataSchema).getKeyDefinition();
-            Preconditions.checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);
-            QName listKeyQName = keys.get(0);
+            final Set<QName> keys = stmt.findFirstEffectiveSubstatementArgument(KeyEffectiveStatement.class)
+                .orElseThrow();
+
+            checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);
+            QName listKeyQName = keys.iterator().next();
             return ImmutableNodes.mapEntryBuilder(bindingQName, listKeyQName, appConfigListKeyValue).build();
         }
     }

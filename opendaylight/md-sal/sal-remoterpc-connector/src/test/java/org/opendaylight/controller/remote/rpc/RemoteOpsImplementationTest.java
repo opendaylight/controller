@@ -51,9 +51,9 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final ContainerNode rpcOutput = makeRPCOutput("bar");
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(rpcOutput);
 
-        final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
+        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
         @SuppressWarnings({"unchecked", "rawtypes"})
-        final ArgumentCaptor<NormalizedNode<?, ?>> inputCaptor =
+        final ArgumentCaptor<NormalizedNode> inputCaptor =
                 ArgumentCaptor.forClass(NormalizedNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
@@ -73,7 +73,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     public void testInvokeAction() throws Exception {
         final ContainerNode actionOutput = makeRPCOutput("bar");
         final DOMActionResult actionResult = new SimpleDOMActionResult(actionOutput, Collections.emptyList());
-        final NormalizedNode<?, ?> invokeActionInput = makeRPCInput("foo");
+        final NormalizedNode invokeActionInput = makeRPCInput("foo");
         @SuppressWarnings({"unchecked", "rawtypes"})
         final ArgumentCaptor<ContainerNode> inputCaptor =
                 ArgumentCaptor.forClass(ContainerNode.class);
@@ -96,7 +96,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(rpcOutput);
 
         @SuppressWarnings({"unchecked", "rawtypes"})
-        final ArgumentCaptor<NormalizedNode<?, ?>> inputCaptor =
+        final ArgumentCaptor<NormalizedNode> inputCaptor =
                 (ArgumentCaptor) ArgumentCaptor.forClass(NormalizedNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
@@ -139,9 +139,9 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final ContainerNode rpcOutput = null;
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(rpcOutput);
 
-        final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
+        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
         @SuppressWarnings({"unchecked", "rawtypes"})
-        final ArgumentCaptor<NormalizedNode<?, ?>> inputCaptor =
+        final ArgumentCaptor<NormalizedNode> inputCaptor =
                 (ArgumentCaptor) ArgumentCaptor.forClass(NormalizedNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
@@ -160,9 +160,9 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     @SuppressWarnings({"checkstyle:AvoidHidingCauseException", "checkstyle:IllegalThrows"})
     @Test(expected = DOMRpcException.class)
     public void testInvokeRpcWithRemoteFailedFuture() throws Throwable {
-        final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
+        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
         @SuppressWarnings({"unchecked", "rawtypes"})
-        final ArgumentCaptor<NormalizedNode<?, ?>> inputCaptor =
+        final ArgumentCaptor<NormalizedNode> inputCaptor =
                 (ArgumentCaptor) ArgumentCaptor.forClass(NormalizedNode.class);
 
         when(domRpcService2.invokeRpc(eq(TEST_RPC), inputCaptor.capture())).thenReturn(
@@ -211,7 +211,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     @Ignore
     @Test(expected = RemoteDOMRpcException.class)
     public void testInvokeRpcWithAkkaTimeoutException() throws Exception {
-        final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
+        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertTrue(frontEndFuture instanceof RemoteDOMRpcFuture);
 
@@ -225,7 +225,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     @Test(expected = DOMRpcException.class)
     @SuppressWarnings({"checkstyle:AvoidHidingCauseException", "checkstyle:IllegalThrows"})
     public void testInvokeRpcWithLookupException() throws Throwable {
-        final NormalizedNode<?, ?> invokeRpcInput = makeRPCInput("foo");
+        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
 
         doThrow(new RuntimeException("test")).when(domRpcService2).invokeRpc(any(QName.class),
             any(NormalizedNode.class));

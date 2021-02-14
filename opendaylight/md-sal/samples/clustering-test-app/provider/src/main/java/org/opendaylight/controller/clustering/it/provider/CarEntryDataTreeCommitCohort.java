@@ -20,7 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -41,14 +40,14 @@ public class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
     private static final NodeIdentifier YEAR_NODE_ID = new NodeIdentifier(YEAR_QNAME);
 
     @Override
-    public FluentFuture<PostCanCommitStep> canCommit(Object txId, SchemaContext ctx,
-            Collection<DOMDataTreeCandidate> candidates) {
+    public FluentFuture<PostCanCommitStep> canCommit(final Object txId, final SchemaContext ctx,
+            final Collection<DOMDataTreeCandidate> candidates) {
 
         for (DOMDataTreeCandidate candidate : candidates) {
             // Simple data validation - verify the year, if present, is >= 1990
 
             final DataTreeCandidateNode rootNode = candidate.getRootNode();
-            final Optional<NormalizedNode<?, ?>> dataAfter = rootNode.getDataAfter();
+            final Optional<NormalizedNode> dataAfter = rootNode.getDataAfter();
 
             LOG.info("In canCommit: modificationType: {}, dataBefore: {}, dataAfter: {}",
                     rootNode.getModificationType(), rootNode.getDataBefore(), dataAfter);
@@ -57,18 +56,17 @@ public class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
             // ModificationType because dataAfter will not be present. Also dataAfter *should* always contain a
             // MapEntryNode but we verify anyway.
             if (dataAfter.isPresent()) {
-                final NormalizedNode<?, ?> normalizedNode = dataAfter.get();
+                final NormalizedNode normalizedNode = dataAfter.get();
                 Verify.verify(normalizedNode instanceof DataContainerNode,
                         "Expected type DataContainerNode, actual was %s", normalizedNode.getClass());
-                DataContainerNode<?> entryNode = (DataContainerNode<?>) normalizedNode;
-                final Optional<DataContainerChild<? extends PathArgument, ?>> possibleYear =
-                        entryNode.getChild(YEAR_NODE_ID);
+                DataContainerNode entryNode = (DataContainerNode) normalizedNode;
+                final Optional<DataContainerChild> possibleYear = entryNode.findChildByArg(YEAR_NODE_ID);
                 if (possibleYear.isPresent()) {
-                    final Number year = (Number) possibleYear.get().getValue();
+                    final Number year = (Number) possibleYear.get().body();
 
                     LOG.info("year is {}", year);
 
-                    if (!(year.longValue() >= 1990)) {
+                    if ((year.longValue() < 1990)) {
                         return FluentFutures.immediateFailedFluentFuture(new DataValidationFailedException(
                                 DOMDataTreeIdentifier.class, candidate.getRootPath(),
                                 String.format("Invalid year %d - year must be >= 1990", year)));

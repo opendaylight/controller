@@ -27,7 +27,7 @@ final class RemoteRpcImplementation extends AbstractRemoteImplementation<Execute
 
     @Override
     public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
-            final NormalizedNode<?, ?> input) {
+            final NormalizedNode input) {
         return new RemoteDOMRpcFuture(rpc.getType(), ask(ExecuteRpc.from(rpc, input)));
     }
 

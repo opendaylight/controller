@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * An abstract base class for invocation requests. Specialized via {@link ExecuteAction} and {@link ExecuteRpc}.
  */
-public abstract class AbstractExecute<T, I extends NormalizedNode<?, ?>> implements Serializable {
+public abstract class AbstractExecute<T, I extends NormalizedNode> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final transient @NonNull T type;

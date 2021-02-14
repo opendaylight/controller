@@ -126,12 +126,11 @@ public class DatastoreSnapshotRestoreTest {
         return new ShardManagerSnapshot(Arrays.asList(shards), Collections.emptyMap());
     }
 
-    private static Snapshot newSnapshot(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
-            throws Exception {
+    private static Snapshot newSnapshot(final YangInstanceIdentifier path, final NormalizedNode node) throws Exception {
         DataTree dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, path, node);
-        NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
+        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
 
         return Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
                 Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);

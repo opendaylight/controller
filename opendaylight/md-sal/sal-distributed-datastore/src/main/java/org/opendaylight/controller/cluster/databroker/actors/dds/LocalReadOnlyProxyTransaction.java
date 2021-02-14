@@ -28,7 +28,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
  * @author Robert Varga
  */
 final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
-
     private final DataTreeSnapshot snapshot;
 
     LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
@@ -59,12 +58,12 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    void doMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
         throw new UnsupportedOperationException("doMerge");
     }
 
     @Override
-    void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    void doWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
         throw new UnsupportedOperationException("doWrite");
     }
 

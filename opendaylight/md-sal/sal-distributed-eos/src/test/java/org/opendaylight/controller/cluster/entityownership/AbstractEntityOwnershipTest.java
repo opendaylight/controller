@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.entityownership;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -30,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
@@ -47,7 +48,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
@@ -73,7 +73,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
-    protected void verifyEntityCandidate(final NormalizedNode<?, ?> node, final String entityType,
+    protected void verifyEntityCandidate(final NormalizedNode node, final String entityType,
             final YangInstanceIdentifier entityId, final String candidateName, final boolean expectPresent) {
         try {
             assertNotNull("Missing " + EntityOwners.QNAME.toString(), node);
@@ -94,12 +94,12 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     protected void verifyEntityCandidate(final String entityType, final YangInstanceIdentifier entityId,
-            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader,
+            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode> reader,
             final boolean expectPresent) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
-            NormalizedNode<?, ?> node = reader.apply(ENTITY_OWNERS_PATH);
+            NormalizedNode node = reader.apply(ENTITY_OWNERS_PATH);
             try {
                 verifyEntityCandidate(node, entityType, entityId, candidateName, expectPresent);
                 return;
@@ -113,14 +113,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     protected void verifyEntityCandidate(final String entityType, final YangInstanceIdentifier entityId,
-            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode> reader) {
         verifyEntityCandidate(entityType, entityId, candidateName, reader, true);
     }
 
-    protected MapEntryNode getMapEntryNodeChild(final DataContainerNode<? extends PathArgument> parent,
+    protected MapEntryNode getMapEntryNodeChild(final DataContainerNode parent,
             final QName childMap, final QName child, final Object key, final boolean expectPresent) {
-        Optional<DataContainerChild<? extends PathArgument, ?>> childNode =
-                parent.getChild(new NodeIdentifier(childMap));
+        Optional<DataContainerChild> childNode = parent.findChildByArg(new NodeIdentifier(childMap));
         // We have to account for empty maps disappearing. If we expect the entry to be non-present, tolerate a missing
         // map.
         if (!expectPresent && !childNode.isPresent()) {
@@ -130,10 +129,10 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         assertTrue("Missing " + childMap.toString(), childNode.isPresent());
 
         MapNode entityTypeMapNode = (MapNode) childNode.get();
-        Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.getChild(NodeIdentifierWithPredicates.of(
+        Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.findChildByArg(NodeIdentifierWithPredicates.of(
                 childMap, child, key));
         if (expectPresent && !entityTypeEntry.isPresent()) {
-            fail("Missing " + childMap.toString() + " entry for " + key + ". Actual: " + entityTypeMapNode.getValue());
+            fail("Missing " + childMap.toString() + " entry for " + key + ". Actual: " + entityTypeMapNode.body());
         } else if (!expectPresent && entityTypeEntry.isPresent()) {
             fail("Found unexpected " + childMap.toString() + " entry for " + key);
         }
@@ -142,15 +141,15 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     static void verifyOwner(final String expected, final String entityType, final YangInstanceIdentifier entityId,
-            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            final Function<YangInstanceIdentifier,NormalizedNode> reader) {
         AssertionError lastError = null;
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             try {
-                NormalizedNode<?, ?> node = reader.apply(entityPath);
-                Assert.assertNotNull("Owner was not set for entityId: " + entityId, node);
-                Assert.assertEquals("Entity owner", expected, node.getValue().toString());
+                NormalizedNode node = reader.apply(entityPath);
+                assertNotNull("Owner was not set for entityId: " + entityId, node);
+                assertEquals("Entity owner", expected, node.body().toString());
                 return;
             } catch (AssertionError e) {
                 lastError = e;
@@ -174,13 +173,12 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     protected void verifyNodeRemoved(final YangInstanceIdentifier path,
-            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            final Function<YangInstanceIdentifier,NormalizedNode> reader) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             try {
-                NormalizedNode<?, ?> node = reader.apply(path);
-                Assert.assertNull("Node was not removed at path: " + path, node);
+                assertNull("Node was not removed at path: " + path, reader.apply(path));
                 return;
             } catch (AssertionError e) {
                 lastError = e;
@@ -191,7 +189,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         throw lastError;
     }
 
-    static void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node,
+    static void writeNode(final YangInstanceIdentifier path, final NormalizedNode node,
             final ShardDataTree shardDataTree) throws DataValidationFailedException {
         DataTreeModification modification = shardDataTree.newModification();
         modification.merge(path, node);
@@ -235,9 +233,9 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             final YangInstanceIdentifier entityId) {
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         try {
-            NormalizedNode<?, ?> node = AbstractShardTest.readStore(shard, entityPath);
+            NormalizedNode node = AbstractShardTest.readStore(shard, entityPath);
             if (node != null) {
-                Assert.fail("Owner " + node.getValue() + " was set for " + entityPath);
+                fail("Owner " + node.body() + " was set for " + entityPath);
             }
 
         } catch (Exception e) {

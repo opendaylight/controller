@@ -848,14 +848,14 @@ public class DistributedEntityOwnershipIntegrationTest {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 10000) {
-            Optional<NormalizedNode<?, ?>> possible = dataStore.newReadOnlyTransaction()
+            Optional<NormalizedNode> possible = dataStore.newReadOnlyTransaction()
                     .read(entityPath(entity.getType(), entity.getIdentifier()).node(Candidate.QNAME))
                     .get(5, TimeUnit.SECONDS);
             try {
                 assertTrue("Candidates not found for " + entity, possible.isPresent());
                 Collection<String> actual = new ArrayList<>();
-                for (MapEntryNode candidate: ((MapNode)possible.get()).getValue()) {
-                    actual.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
+                for (MapEntryNode candidate: ((MapNode)possible.get()).body()) {
+                    actual.add(candidate.findChildByArg(CANDIDATE_NAME_NODE_ID).get().body().toString());
                 }
 
                 assertEquals("Candidates for " + entity, Arrays.asList(expCandidates), actual);

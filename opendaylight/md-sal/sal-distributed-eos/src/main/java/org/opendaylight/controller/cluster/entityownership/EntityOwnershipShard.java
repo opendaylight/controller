@@ -69,7 +69,6 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -174,7 +173,7 @@ class EntityOwnershipShard extends Shard {
     private void onRegisterCandidateLocal(final RegisterCandidateLocal registerCandidate) {
         LOG.debug("{}: onRegisterCandidateLocal: {}", persistenceId(), registerCandidate);
 
-        NormalizedNode<?, ?> entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
+        NormalizedNode entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
                 registerCandidate.getEntity().getIdentifier(), localMemberName.getName());
         commitCoordinator.commitModification(new MergeModification(ENTITY_OWNERS_PATH, entityOwners), this);
 
@@ -200,15 +199,16 @@ class EntityOwnershipShard extends Shard {
         getSender().tell(SuccessReply.INSTANCE, getSelf());
 
         searchForEntities((entityTypeNode, entityNode) -> {
-            Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
-            String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
+            String entityType = entityTypeNode.findChildByArg(ENTITY_TYPE_NODE_ID)
+                .map(child -> child.body().toString())
+                .orElse(null);
             if (registerListener.getEntityType().equals(entityType)) {
                 final boolean hasOwner;
                 final boolean isOwner;
 
-                Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                Optional<DataContainerChild> possibleOwner = entityNode.findChildByArg(ENTITY_OWNER_NODE_ID);
                 if (possibleOwner.isPresent()) {
-                    isOwner = localMemberName.getName().equals(possibleOwner.get().getValue().toString());
+                    isOwner = localMemberName.getName().equals(possibleOwner.get().body().toString());
                     hasOwner = true;
                 } else {
                     isOwner = false;
@@ -216,7 +216,7 @@ class EntityOwnershipShard extends Shard {
                 }
 
                 DOMEntity entity = new DOMEntity(entityType,
-                    (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
+                    (YangInstanceIdentifier) entityNode.findChildByArg(ENTITY_ID_NODE_ID).get().body());
 
                 listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner,
                     registerListener.getListener());
@@ -300,22 +300,22 @@ class EntityOwnershipShard extends Shard {
 
     private void notifyAllListeners() {
         searchForEntities((entityTypeNode, entityNode) -> {
-            Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+            Optional<DataContainerChild> possibleType = entityTypeNode.findChildByArg(ENTITY_TYPE_NODE_ID);
             if (possibleType.isPresent()) {
                 final boolean hasOwner;
                 final boolean isOwner;
 
-                Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                Optional<DataContainerChild> possibleOwner = entityNode.findChildByArg(ENTITY_OWNER_NODE_ID);
                 if (possibleOwner.isPresent()) {
-                    isOwner = localMemberName.getName().equals(possibleOwner.get().getValue().toString());
+                    isOwner = localMemberName.getName().equals(possibleOwner.get().body().toString());
                     hasOwner = true;
                 } else {
                     isOwner = false;
                     hasOwner = false;
                 }
 
-                DOMEntity entity = new DOMEntity(possibleType.get().getValue().toString(),
-                    (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
+                DOMEntity entity = new DOMEntity(possibleType.get().body().toString(),
+                    (YangInstanceIdentifier) entityNode.findChildByArg(ENTITY_ID_NODE_ID).get().body());
 
                 listenerSupport.notifyEntityOwnershipListeners(entity, isOwner, isOwner, hasOwner);
             }
@@ -390,7 +390,7 @@ class EntityOwnershipShard extends Shard {
                     .node(ENTITY_OWNER_NODE_ID).build();
 
             Optional<String> possibleOwner =
-                    entityNode.getChild(ENTITY_OWNER_NODE_ID).map(node -> node.getValue().toString());
+                    entityNode.findChildByArg(ENTITY_OWNER_NODE_ID).map(node -> node.body().toString());
             String newOwner = newOwner(possibleOwner.orElse(null), getCandidateNames(entityNode),
                     getEntityOwnerElectionStrategy(entityPath));
 
@@ -544,11 +544,11 @@ class EntityOwnershipShard extends Shard {
     }
 
     private static Collection<String> getCandidateNames(final MapEntryNode entity) {
-        return entity.getChild(CANDIDATE_NODE_ID).map(child -> {
-            Collection<MapEntryNode> candidates = ((MapNode) child).getValue();
+        return entity.findChildByArg(CANDIDATE_NODE_ID).map(child -> {
+            Collection<MapEntryNode> candidates = ((MapNode) child).body();
             Collection<String> candidateNames = new ArrayList<>(candidates.size());
             for (MapEntryNode candidate: candidates) {
-                candidateNames.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
+                candidateNames.add(candidate.findChildByArg(CANDIDATE_NAME_NODE_ID).get().body().toString());
             }
             return candidateNames;
         }).orElse(ImmutableList.of());
@@ -558,9 +558,9 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("{}: Searching for entities owned by {}", persistenceId(), ownedBy);
 
         searchForEntities((entityTypeNode, entityNode) -> {
-            Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
-                    entityNode.getChild(ENTITY_OWNER_NODE_ID);
-            String currentOwner = possibleOwner.isPresent() ? possibleOwner.get().getValue().toString() : "";
+            String currentOwner = entityNode.findChildByArg(ENTITY_OWNER_NODE_ID)
+                .map(child -> child.body().toString())
+                .orElse("");
             if (ownedBy.contains(currentOwner)) {
                 walker.onEntity(entityTypeNode, entityNode);
             }
@@ -587,25 +587,25 @@ class EntityOwnershipShard extends Shard {
     }
 
     private static boolean hasCandidate(final MapEntryNode entity, final MemberName candidateName) {
-        return entity.getChild(CANDIDATE_NODE_ID)
-                .flatMap(child -> ((MapNode)child).getChild(candidateNodeKey(candidateName.getName())))
+        return entity.findChildByArg(CANDIDATE_NODE_ID)
+                .flatMap(child -> ((MapNode)child).findChildByArg(candidateNodeKey(candidateName.getName())))
                 .isPresent();
     }
 
     private void searchForEntities(final EntityWalker walker) {
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
+        Optional<NormalizedNode> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if (!possibleEntityTypes.isPresent()) {
             return;
         }
 
-        for (MapEntryNode entityType : ((MapNode) possibleEntityTypes.get()).getValue()) {
-            Optional<DataContainerChild<?, ?>> possibleEntities = entityType.getChild(ENTITY_NODE_ID);
+        for (MapEntryNode entityType : ((MapNode) possibleEntityTypes.get()).body()) {
+            Optional<DataContainerChild> possibleEntities = entityType.findChildByArg(ENTITY_NODE_ID);
             if (!possibleEntities.isPresent()) {
                 // shouldn't happen but handle anyway
                 continue;
             }
 
-            for (MapEntryNode entity:  ((MapNode) possibleEntities.get()).getValue()) {
+            for (MapEntryNode entity:  ((MapNode) possibleEntities.get()).body()) {
                 walker.onEntity(entityType, entity);
             }
         }
@@ -669,7 +669,7 @@ class EntityOwnershipShard extends Shard {
 
     private String getCurrentOwner(final YangInstanceIdentifier entityId) {
         return getDataStore().readNode(entityId.node(ENTITY_OWNER_QNAME))
-                .map(owner -> owner.getValue().toString())
+                .map(owner -> owner.body().toString())
                 .orElse(null);
     }
 

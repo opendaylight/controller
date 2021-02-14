@@ -67,7 +67,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -158,18 +157,18 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         // Verify data in the data store.
 
-        final NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
+        final NormalizedNode outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertNotNull(TestModel.OUTER_LIST_QNAME.getLocalName() + " not found", outerList);
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " value is not Iterable",
-                outerList.getValue() instanceof Iterable);
-        for (final Object entry: (Iterable<?>) outerList.getValue()) {
+                outerList.body() instanceof Iterable);
+        for (final Object entry: (Iterable<?>) outerList.body()) {
             assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " entry is not MapEntryNode",
                     entry instanceof MapEntryNode);
             final MapEntryNode mapEntry = (MapEntryNode)entry;
-            final Optional<DataContainerChild<? extends PathArgument, ?>> idLeaf =
-                    mapEntry.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
+            final Optional<DataContainerChild> idLeaf =
+                    mapEntry.findChildByArg(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
-            final Object value = idLeaf.get().getValue();
+            final Object value = idLeaf.get().body();
             assertTrue("Unexpected value for leaf " + TestModel.ID_QNAME.getLocalName() + ": " + value,
                     listEntryKeys.remove(value));
         }
@@ -273,7 +272,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean doCommitOnReady) {
+            final YangInstanceIdentifier path, final NormalizedNode data, final boolean doCommitOnReady) {
         final MutableCompositeModification modification = new MutableCompositeModification();
         modification.addModification(new WriteModification(path, data));
         return prepareBatchedModifications(transactionID, modification, doCommitOnReady);
@@ -281,24 +280,24 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     protected static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
             final TransactionIdentifier transactionID, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> data, final boolean doCommitOnReady) {
+            final NormalizedNode data, final boolean doCommitOnReady) {
         ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore()
                 .newReadWriteTransaction(transactionID);
         rwTx.getSnapshot().write(path, data);
         return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady, Optional.empty());
     }
 
-    public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard,
+    public static NormalizedNode readStore(final TestActorRef<? extends Shard> shard,
             final YangInstanceIdentifier id) {
         return shard.underlyingActor().getDataStore().readNode(id).orElse(null);
     }
 
-    public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
+    public static NormalizedNode readStore(final DataTree store, final YangInstanceIdentifier id) {
         return store.takeSnapshot().readNode(id).orElse(null);
     }
 
     public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
+            final NormalizedNode node) throws InterruptedException, ExecutionException {
         Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(),
                 id, node, true, true, 1), new Timeout(5, TimeUnit.SECONDS));
         try {
@@ -309,15 +308,15 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws DataValidationFailedException {
+            final NormalizedNode node) throws DataValidationFailedException {
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
         store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 
-    public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws DataValidationFailedException {
+    public static void writeToStore(final DataTree store, final YangInstanceIdentifier id, final NormalizedNode node)
+            throws DataValidationFailedException {
         final DataTreeModification transaction = store.takeSnapshot().newModification();
 
         transaction.write(id, node);
@@ -327,8 +326,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         store.commit(candidate);
     }
 
-    public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws DataValidationFailedException {
+    public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id, final NormalizedNode node)
+        throws DataValidationFailedException {
         final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
         batched.addModification(new MergeModification(id, node));
         batched.setReady();
@@ -346,7 +345,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        final NormalizedNode<?, ?> root = readStore(testStore, YangInstanceIdentifier.empty());
+        final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.empty());
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -363,7 +362,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready,
+            final YangInstanceIdentifier path, final NormalizedNode data, final boolean ready,
             final boolean doCommitOnReady, final int messagesSent) {
         final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new WriteModification(path, data));
@@ -376,7 +375,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     static BatchedModifications newReadyBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final YangInstanceIdentifier path, final NormalizedNode data,
             final SortedSet<String> participatingShardNames) {
         final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new WriteModification(path, data));
@@ -387,18 +386,18 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     @SuppressWarnings("unchecked")
     static void verifyOuterListEntry(final TestActorRef<Shard> shard, final Object expIDValue) {
-        final NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
+        final NormalizedNode outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertNotNull(TestModel.OUTER_LIST_QNAME.getLocalName() + " not found", outerList);
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " value is not Iterable",
-                outerList.getValue() instanceof Iterable);
-        final Object entry = ((Iterable<Object>)outerList.getValue()).iterator().next();
+                outerList.body() instanceof Iterable);
+        final Object entry = ((Iterable<Object>)outerList.body()).iterator().next();
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " entry is not MapEntryNode",
                 entry instanceof MapEntryNode);
         final MapEntryNode mapEntry = (MapEntryNode)entry;
-        final Optional<DataContainerChild<? extends PathArgument, ?>> idLeaf =
-                mapEntry.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
+        final Optional<DataContainerChild> idLeaf =
+                mapEntry.findChildByArg(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
         assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
-        assertEquals(TestModel.ID_QNAME.getLocalName() + " value", expIDValue, idLeaf.get().getValue());
+        assertEquals(TestModel.ID_QNAME.getLocalName() + " value", expIDValue, idLeaf.get().body());
     }
 
     public static DataTreeCandidateTip mockCandidate(final String name) {

@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidate
 import org.opendaylight.controller.cluster.io.ChunkedByteArray;
 import org.opendaylight.controller.cluster.io.ChunkedOutputStream;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
-import org.opendaylight.yangtools.concepts.Variant;
+import org.opendaylight.yangtools.concepts.Either;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
@@ -69,7 +69,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
             DataTreeCandidateInputOutput.writeDataTreeCandidate(dos, version, candidate);
         }
 
-        final Variant<byte[], ChunkedByteArray> source = cos.toVariant();
+        final Either<byte[], ChunkedByteArray> source = cos.toVariant();
         LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity, cos.size());
         return source.isFirst() ? new Simple(source.getFirst()) : new Chunked(source.getSecond());
     }

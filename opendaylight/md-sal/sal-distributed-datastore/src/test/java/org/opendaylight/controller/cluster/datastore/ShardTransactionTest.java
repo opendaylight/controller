@@ -166,12 +166,12 @@ public class ShardTransactionTest extends AbstractActorTest {
         final ActorRef transaction = newTransactionActor(RW, mockWriteTx, "testOnReceiveBatchedModifications");
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+        NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        NormalizedNode<?, ?> mergeData = ImmutableContainerNodeBuilder.create()
+        NormalizedNode mergeData = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME))
                 .build();
 
@@ -204,7 +204,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+        NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
@@ -235,7 +235,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+        NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 

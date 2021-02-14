@@ -16,8 +16,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 
 public final class DomListBuilder {
     // Inner List Qname identifiers for yang model's 'name' and 'value'
@@ -44,7 +45,7 @@ public final class DomListBuilder {
     }
 
     private static MapNode buildInnerList(final int index, final int elements) {
-        CollectionNodeBuilder<MapEntryNode, MapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
+        CollectionNodeBuilder<MapEntryNode, SystemMapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";
         for (int i = 0; i < elements; i++) {

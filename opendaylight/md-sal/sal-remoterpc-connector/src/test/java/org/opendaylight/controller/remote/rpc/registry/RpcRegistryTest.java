@@ -27,7 +27,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -369,7 +368,7 @@ public class RpcRegistryTest {
         final int nRoutes = 500;
         final Collection<DOMRpcIdentifier> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
-            final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(QName.create(URI.create("/mockrpc"), "type" + i));
+            final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(QName.create("/mockrpc", "type" + i));
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -402,7 +401,7 @@ public class RpcRegistryTest {
     }
 
     private List<DOMRpcIdentifier> createRouteIds() {
-        QName type = QName.create(URI.create("/mockrpc"), "mockrpc" + routeIdCounter++);
+        QName type = QName.create("/mockrpc", "mockrpc" + routeIdCounter++);
         List<DOMRpcIdentifier> routeIds = new ArrayList<>(1);
         routeIds.add(DOMRpcIdentifier.create(type));
         return routeIds;

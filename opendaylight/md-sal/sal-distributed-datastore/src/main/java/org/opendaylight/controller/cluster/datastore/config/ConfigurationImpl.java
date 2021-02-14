@@ -182,7 +182,7 @@ public class ConfigurationImpl implements Configuration {
         requireNonNull(config, "ModuleShardConfiguration should not be null");
 
         ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName())
-                .nameSpace(config.getNamespace().toASCIIString())
+                .nameSpace(config.getNamespace().toString())
                 .shardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName()))
                 .shardConfig(config.getShardName(), config.getShardMemberNames()).build();
 

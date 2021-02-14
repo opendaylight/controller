@@ -18,14 +18,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
  * NormalizedNodeNavigator walks a {@link NormalizedNodeVisitor} through the NormalizedNode.
  */
 public class NormalizedNodeNavigator {
-
     private final NormalizedNodeVisitor visitor;
 
     public NormalizedNodeNavigator(final NormalizedNodeVisitor visitor) {
         this.visitor = requireNonNull(visitor, "visitor should not be null");
     }
 
-    public void navigate(String parentPath, final NormalizedNode<?, ?> normalizedNode) {
+    public void navigate(String parentPath, final NormalizedNode normalizedNode) {
         if (parentPath == null) {
             parentPath = "";
         }
@@ -33,14 +32,14 @@ public class NormalizedNodeNavigator {
     }
 
     private void navigateDataContainerNode(final int level, final String parentPath,
-            final DataContainerNode<?> dataContainerNode) {
+            final DataContainerNode dataContainerNode) {
         visitor.visitNode(level, parentPath, dataContainerNode);
 
         String newParentPath = parentPath + "/" + dataContainerNode.getIdentifier().toString();
 
-        for (NormalizedNode<?, ?> node : dataContainerNode.getValue()) {
+        for (NormalizedNode node : dataContainerNode.body()) {
             if (node instanceof MixinNode && node instanceof NormalizedNodeContainer) {
-                navigateNormalizedNodeContainerMixin(level, newParentPath, (NormalizedNodeContainer<?, ?, ?>) node);
+                navigateNormalizedNodeContainerMixin(level, newParentPath, (NormalizedNodeContainer<?>) node);
             } else {
                 navigateNormalizedNode(level, newParentPath, node);
             }
@@ -49,15 +48,15 @@ public class NormalizedNodeNavigator {
     }
 
     private void navigateNormalizedNodeContainerMixin(final int level, final String parentPath,
-            final NormalizedNodeContainer<?, ?, ?> node) {
+            final NormalizedNodeContainer<?> node) {
         visitor.visitNode(level, parentPath, node);
 
         String newParentPath = parentPath + "/" + node.getIdentifier().toString();
 
-        for (NormalizedNode<?, ?> normalizedNode : node.getValue()) {
+        for (NormalizedNode normalizedNode : node.body()) {
             if (normalizedNode instanceof MixinNode && normalizedNode instanceof NormalizedNodeContainer) {
                 navigateNormalizedNodeContainerMixin(level + 1, newParentPath,
-                        (NormalizedNodeContainer<?, ?, ?>) normalizedNode);
+                        (NormalizedNodeContainer<?>) normalizedNode);
             } else {
                 navigateNormalizedNode(level, newParentPath, normalizedNode);
             }
@@ -65,13 +64,9 @@ public class NormalizedNodeNavigator {
 
     }
 
-    private void navigateNormalizedNode(final int level, final String parentPath,
-            final NormalizedNode<?, ?> normalizedNode) {
+    private void navigateNormalizedNode(final int level, final String parentPath, final NormalizedNode normalizedNode) {
         if (normalizedNode instanceof DataContainerNode) {
-
-            final DataContainerNode<?> dataContainerNode = (DataContainerNode<?>) normalizedNode;
-
-            navigateDataContainerNode(level + 1, parentPath, dataContainerNode);
+            navigateDataContainerNode(level + 1, parentPath, (DataContainerNode) normalizedNode);
         } else {
             visitor.visitNode(level + 1, parentPath, normalizedNode);
         }

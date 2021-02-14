@@ -139,7 +139,7 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
         assertEquals(val, statistics.get(ENTITY_TYPE).get(memberName).longValue());
     }
 
-    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode node)
             throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }

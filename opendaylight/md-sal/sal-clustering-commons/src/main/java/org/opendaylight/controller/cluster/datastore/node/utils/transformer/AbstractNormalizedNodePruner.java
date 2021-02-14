@@ -64,7 +64,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     private final DataSchemaContextTree tree;
 
     private DataSchemaContextNode<?> nodePathSchemaNode;
-    private NormalizedNode<?, ?> normalizedNode;
+    private NormalizedNode normalizedNode;
     private State state = State.UNITIALIZED;
     private int unknown;
 
@@ -112,12 +112,6 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     @Override
     public final void startContainerNode(final NodeIdentifier name, final int childSizeHint) throws IOException {
         enter(ReusableImmutableNormalizedNodeStreamWriter::startContainerNode, name, childSizeHint);
-    }
-
-    @Override
-    public final void startYangModeledAnyXmlNode(final NodeIdentifier nodeIdentifier, final int count) {
-        // FIXME: implement this
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -235,7 +229,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
      * @return Resulting node for the path, if it was not pruned
      * @throws IllegalStateException if this pruner has not been closed
      */
-    public final Optional<NormalizedNode<?, ?>> getResult() {
+    public final Optional<NormalizedNode> getResult() {
         checkState(state == State.CLOSED, "Cannot get result in state %s", state);
         return Optional.ofNullable(normalizedNode);
     }
