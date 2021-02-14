@@ -7,19 +7,14 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
-import static akka.actor.ActorRef.noSender;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,22 +22,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
-import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
-import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
-import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
-import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
-import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
-import org.opendaylight.controller.clustering.it.provider.impl.IdIntsDOMDataTreeLIstener;
 import org.opendaylight.controller.clustering.it.provider.impl.IdIntsListener;
-import org.opendaylight.controller.clustering.it.provider.impl.PrefixLeaderHandler;
-import org.opendaylight.controller.clustering.it.provider.impl.PrefixShardHandler;
-import org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
@@ -57,9 +43,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeLoopException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
@@ -110,7 +94,6 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlOutput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclOutputBuilder;
@@ -133,7 +116,6 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutputBuilder;
@@ -158,9 +140,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private final RpcProviderService rpcRegistry;
     private final ObjectRegistration<OdlMdsalLowlevelControlService> registration;
-    private final DistributedShardFactory distributedShardFactory;
     private final DistributedDataStoreInterface configDataStore;
-    private final DOMDataTreeService domDataTreeService;
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
     private final DOMDataBroker domDataBroker;
     private final NotificationPublishService notificationPublishService;
@@ -168,8 +148,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private final DOMSchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
-    private final PrefixLeaderHandler prefixLeaderHandler;
-    private final PrefixShardHandler prefixShardHandler;
     private final DOMDataTreeChangeService domDataTreeChangeService;
     private final ActorSystem actorSystem;
 
@@ -184,10 +162,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private ListenerRegistration<DOMDataTreeChangeListener> dtclReg;
     private IdIntsListener idIntsListener;
     private final Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
-    private ListenerRegistration<IdIntsDOMDataTreeLIstener> ddtlReg;
-    private IdIntsDOMDataTreeLIstener idIntsDdtl;
-
-
 
     public MdsalLowLevelTestProvider(final RpcProviderService rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
@@ -197,8 +171,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                                      final NotificationPublishService notificationPublishService,
                                      final NotificationService notificationService,
                                      final DOMDataBroker domDataBroker,
-                                     final DOMDataTreeService domDataTreeService,
-                                     final DistributedShardFactory distributedShardFactory,
                                      final DistributedDataStoreInterface configDataStore,
                                      final ActorSystemProvider actorSystemProvider) {
         this.rpcRegistry = rpcRegistry;
@@ -209,18 +181,12 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         this.notificationPublishService = notificationPublishService;
         this.notificationService = notificationService;
         this.domDataBroker = domDataBroker;
-        this.domDataTreeService = domDataTreeService;
-        this.distributedShardFactory = distributedShardFactory;
         this.configDataStore = configDataStore;
         this.actorSystem = actorSystemProvider.getActorSystem();
 
-        this.prefixLeaderHandler = new PrefixLeaderHandler(domDataTreeService, bindingNormalizedNodeSerializer);
         domDataTreeChangeService = domDataBroker.getExtensions().getInstance(DOMDataTreeChangeService.class);
 
         registration = rpcRegistry.registerRpcImplementation(OdlMdsalLowlevelControlService.class, this);
-
-        prefixShardHandler = new PrefixShardHandler(distributedShardFactory, domDataTreeService,
-                bindingNormalizedNodeSerializer);
     }
 
     @Override
@@ -313,17 +279,13 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public ListenableFuture<RpcResult<RemovePrefixShardOutput>> removePrefixShard(final RemovePrefixShardInput input) {
-        LOG.info("In removePrefixShard - input: {}", input);
-
-        return prefixShardHandler.onRemovePrefixShard(input);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ListenableFuture<RpcResult<BecomePrefixLeaderOutput>> becomePrefixLeader(
             final BecomePrefixLeaderInput input) {
-        LOG.info("n becomePrefixLeader - input: {}", input);
-
-        return prefixLeaderHandler.makeLeaderLocal(input);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -400,32 +362,12 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ListenableFuture<RpcResult<SubscribeDdtlOutput>> subscribeDdtl(final SubscribeDdtlInput input) {
-        LOG.info("In subscribeDdtl");
-
-        if (ddtlReg != null) {
-            return RpcResultBuilder.<SubscribeDdtlOutput>failed().withError(ErrorType.RPC,
-                "data-exists", "There is already a listener registered for id-ints").buildFuture();
-        }
-
-        idIntsDdtl = new IdIntsDOMDataTreeLIstener();
-
-        try {
-            ddtlReg = domDataTreeService.registerListener(idIntsDdtl,
-                    Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
-                            ProduceTransactionsHandler.ID_INT_YID)),
-                    true, Collections.emptyList());
-        } catch (DOMDataTreeLoopException e) {
-            LOG.error("Failed to register DOMDataTreeListener", e);
-            return RpcResultBuilder.<SubscribeDdtlOutput>failed().withError(
-                ErrorType.APPLICATION, "Failed to register DOMDataTreeListener", e).buildFuture();
-        }
-
-        return RpcResultBuilder.success(new SubscribeDdtlOutputBuilder().build()).buildFuture();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -524,9 +466,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public ListenableFuture<RpcResult<CreatePrefixShardOutput>> createPrefixShard(final CreatePrefixShardInput input) {
-        LOG.info("In createPrefixShard - input: {}", input);
-
-        return prefixShardHandler.onCreatePrefixShard(input);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -581,8 +521,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public ListenableFuture<RpcResult<ProduceTransactionsOutput>> produceTransactions(
             final ProduceTransactionsInput input) {
-        LOG.info("In produceTransactions - input: {}", input);
-        return ProduceTransactionsHandler.start(domDataTreeService, input);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -675,80 +614,12 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public ListenableFuture<RpcResult<UnregisterDefaultConstantOutput>> unregisterDefaultConstant(
             final UnregisterDefaultConstantInput input) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public ListenableFuture<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl(final UnsubscribeDdtlInput input) {
-        LOG.info("In unsubscribeDdtl");
-
-        if (idIntsDdtl == null || ddtlReg == null) {
-            return RpcResultBuilder.<UnsubscribeDdtlOutput>failed().withError(
-                    ErrorType.RPC, "data-missing", "No prior listener was registered").buildFuture();
-        }
-
-        long timeout = 120L;
-        try {
-            idIntsDdtl.tryFinishProcessing().get(timeout, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.error("Unable to finish notification processing", e);
-            return RpcResultBuilder.<UnsubscribeDdtlOutput>failed().withError(ErrorType.APPLICATION,
-                    "Unable to finish notification processing in " + timeout + " seconds", e).buildFuture();
-        }
-
-        ddtlReg.close();
-        ddtlReg = null;
-
-        if (!idIntsDdtl.hasTriggered()) {
-            return RpcResultBuilder.<UnsubscribeDdtlOutput>failed().withError(ErrorType.APPLICATION,
-                    "No notification received.", "id-ints listener has not received any notifications").buildFuture();
-        }
-
-        final String shardName = ClusterUtils.getCleanShardName(ProduceTransactionsHandler.ID_INTS_YID);
-        LOG.debug("Creating distributed datastore client for shard {}", shardName);
-
-        final ActorUtils actorUtils = configDataStore.getActorUtils();
-        final Props distributedDataStoreClientProps =
-                SimpleDataStoreClientActor.props(actorUtils.getCurrentMemberName(),
-                        "Shard-" + shardName, actorUtils, shardName);
-
-        final ActorRef clientActor = actorSystem.actorOf(distributedDataStoreClientProps);
-        final DataStoreClient distributedDataStoreClient;
-        try {
-            distributedDataStoreClient = SimpleDataStoreClientActor
-                    .getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
-        } catch (RuntimeException e) {
-            LOG.error("Failed to get actor for {}", distributedDataStoreClientProps, e);
-            clientActor.tell(PoisonPill.getInstance(), noSender());
-            return RpcResultBuilder.<UnsubscribeDdtlOutput>failed()
-                    .withError(ErrorType.APPLICATION, "Unable to create DataStoreClient for read", e).buildFuture();
-        }
-
-        final ClientLocalHistory localHistory = distributedDataStoreClient.createLocalHistory();
-        final ClientTransaction tx = localHistory.createTransaction();
-        final ListenableFuture<java.util.Optional<NormalizedNode<?, ?>>> read =
-                tx.read(YangInstanceIdentifier.of(ProduceTransactionsHandler.ID_INT));
-
-        tx.abort();
-        localHistory.close();
-        try {
-            final java.util.Optional<NormalizedNode<?, ?>> optional = read.get();
-            if (!optional.isPresent()) {
-                return RpcResultBuilder.<UnsubscribeDdtlOutput>failed().withError(ErrorType.APPLICATION,
-                        "data-missing", "Final read from id-ints is empty").buildFuture();
-            }
-
-            return RpcResultBuilder.success(new UnsubscribeDdtlOutputBuilder().setCopyMatches(
-                    idIntsDdtl.checkEqual(optional.get()))).buildFuture();
-
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Unable to read data to verify ddtl data", e);
-            return RpcResultBuilder.<UnsubscribeDdtlOutput>failed()
-                    .withError(ErrorType.APPLICATION, "Final read from id-ints failed", e).buildFuture();
-        } finally {
-            distributedDataStoreClient.close();
-            clientActor.tell(PoisonPill.getInstance(), noSender());
-        }
+        throw new UnsupportedOperationException();
     }
 }
