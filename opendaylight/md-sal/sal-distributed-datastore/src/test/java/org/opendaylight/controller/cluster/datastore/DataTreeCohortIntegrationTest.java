@@ -308,7 +308,7 @@ public class DataTreeCohortIntegrationTest {
 
     private static void assertDataTreeCandidate(final DOMDataTreeCandidate candidate,
             final DOMDataTreeIdentifier expTreeId, final ModificationType expType,
-            final Optional<NormalizedNode<?, ?>> expDataAfter, final Optional<NormalizedNode<?, ?>> expDataBefore) {
+            final Optional<NormalizedNode> expDataAfter, final Optional<NormalizedNode> expDataBefore) {
         assertNotNull("Expected candidate for path " + expTreeId.getRootIdentifier(), candidate);
         assertEquals("rootPath", expTreeId, candidate.getRootPath());
         assertEquals("modificationType", expType, candidate.getRootNode().getModificationType());

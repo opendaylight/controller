@@ -71,11 +71,11 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(pruner);
 
-        NormalizedNode<?, ?> expected = createTestContainer();
+        NormalizedNode expected = createTestContainer();
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
 
         assertEquals(expected, actual);
 
@@ -87,11 +87,11 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(pruner);
 
-        NormalizedNode<?, ?> expected = createTestContainer();
+        NormalizedNode expected = createTestContainer();
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
 
         assertEquals(expected, actual);
 
@@ -106,11 +106,11 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(pruner);
 
-        NormalizedNode<?, ?> expected = createTestContainer();
+        NormalizedNode expected = createTestContainer();
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
 
         assertNotEquals(expected, actual);
 
@@ -127,7 +127,7 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(pruner);
 
-        NormalizedNode<?, ?> expected = createTestContainer();
+        NormalizedNode expected = createTestContainer();
 
         normalizedNodeWriter.write(expected);
 
@@ -139,7 +139,7 @@ public class NormalizedNodePrunerTest {
 
     }
 
-    private static int countNodes(final NormalizedNode<?,?> normalizedNode, final String namespaceFilter) {
+    private static int countNodes(final NormalizedNode normalizedNode, final String namespaceFilter) {
         if (normalizedNode == null) {
             return 0;
         }
@@ -158,7 +158,7 @@ public class NormalizedNodePrunerTest {
     @Test
     public void testLeafNodeNotPrunedWhenHasNoParent() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.DESC_QNAME));
-        NormalizedNode<?, ?> input = Builders.leafBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.leafBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
@@ -173,17 +173,17 @@ public class NormalizedNodePrunerTest {
                         .node(TestModel.AUGMENTED_LIST_QNAME).node(augId).build());
         LeafNode<Object> child = Builders.leafBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.INVALID_QNAME)).withValue("test").build();
-        NormalizedNode<?, ?> input = Builders.augmentationBuilder().withNodeIdentifier(augId).withChild(child).build();
+        NormalizedNode input = Builders.augmentationBuilder().withNodeIdentifier(augId).withChild(child).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", Builders.augmentationBuilder().withNodeIdentifier(augId).build(), actual);
     }
 
     @Test
     public void testLeafNodePrunedWhenHasNoParentAndSchemaMissing() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.INVALID_QNAME));
-        NormalizedNode<?, ?> input = Builders.leafBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.leafBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.INVALID_QNAME)).withValue("test").build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
@@ -193,11 +193,11 @@ public class NormalizedNodePrunerTest {
     @Test
     public void testLeafSetEntryNodeNotPrunedWhenHasNoParent() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.SHOE_QNAME));
-        NormalizedNode<?, ?> input = Builders.leafSetEntryBuilder().withValue("puma").withNodeIdentifier(
+        NormalizedNode input = Builders.leafSetEntryBuilder().withValue("puma").withNodeIdentifier(
                 new NodeWithValue<>(TestModel.SHOE_QNAME, "puma")).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", input, actual);
     }
 
@@ -206,18 +206,18 @@ public class NormalizedNodePrunerTest {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.SHOE_QNAME));
         LeafSetEntryNode<Object> child = Builders.leafSetEntryBuilder().withValue("puma").withNodeIdentifier(
                 new NodeWithValue<>(TestModel.SHOE_QNAME, "puma")).build();
-        NormalizedNode<?, ?> input = Builders.leafSetBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.leafSetBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.SHOE_QNAME)).withChild(child).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", input, actual);
     }
 
     @Test
     public void testLeafSetEntryNodePrunedWhenHasNoParentAndSchemaMissing() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.INVALID_QNAME));
-        NormalizedNode<?, ?> input = Builders.leafSetEntryBuilder().withValue("test").withNodeIdentifier(
+        NormalizedNode input = Builders.leafSetEntryBuilder().withValue("test").withNodeIdentifier(
                 new NodeWithValue<>(TestModel.INVALID_QNAME, "test")).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
@@ -229,7 +229,7 @@ public class NormalizedNodePrunerTest {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.INVALID_QNAME));
         LeafSetEntryNode<Object> child = Builders.leafSetEntryBuilder().withValue("test").withNodeIdentifier(
                 new NodeWithValue<>(TestModel.INVALID_QNAME, "test")).build();
-        NormalizedNode<?, ?> input = Builders.leafSetBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.leafSetBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.INVALID_QNAME)).withChild(child).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
@@ -239,11 +239,11 @@ public class NormalizedNodePrunerTest {
     @Test
     public void testAnyXMLNodeNotPrunedWhenHasNoParent() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH.node(TestModel.ANY_XML_QNAME));
-        NormalizedNode<?, ?> input = Builders.anyXmlBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.anyXmlBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.ANY_XML_QNAME)).withValue(mock(DOMSource.class)).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", input, actual);
     }
 
@@ -252,18 +252,18 @@ public class NormalizedNodePrunerTest {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH);
         DOMSourceAnyxmlNode child = Builders.anyXmlBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.ANY_XML_QNAME)).withValue(mock(DOMSource.class)).build();
-        NormalizedNode<?, ?> input = Builders.containerBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.containerBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.TEST_QNAME)).withChild(child).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", input, actual);
     }
 
     @Test
     public void testAnyXmlNodePrunedWhenHasNoParentAndSchemaMissing() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerNoTestSchema(TestModel.TEST_PATH.node(TestModel.ANY_XML_QNAME));
-        NormalizedNode<?, ?> input = Builders.anyXmlBuilder().withNodeIdentifier(
+        NormalizedNode input = Builders.anyXmlBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.ANY_XML_QNAME)).withValue(mock(DOMSource.class)).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
@@ -278,10 +278,10 @@ public class NormalizedNodePrunerTest {
                 .node(TestModel.INNER_CONTAINER_QNAME).build();
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
-        NormalizedNode<?, ?> input = ImmutableNodes.containerNode(TestModel.INNER_CONTAINER_QNAME);
+        NormalizedNode input = ImmutableNodes.containerNode(TestModel.INNER_CONTAINER_QNAME);
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", input, actual);
     }
 
@@ -293,7 +293,7 @@ public class NormalizedNodePrunerTest {
                 .node(TestModel.INVALID_QNAME).build();
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
-        NormalizedNode<?, ?> input = ImmutableNodes.containerNode(TestModel.INVALID_QNAME);
+        NormalizedNode input = ImmutableNodes.containerNode(TestModel.INVALID_QNAME);
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
         assertEquals(Optional.empty(), pruner.getResult());
@@ -309,14 +309,14 @@ public class NormalizedNodePrunerTest {
         MapNode innerList = mapNodeBuilder(TestModel.INNER_LIST_QNAME).withChild(mapEntryBuilder(
                 TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").withChild(
                         ImmutableNodes.containerNode(TestModel.INVALID_QNAME)).build()).build();
-        NormalizedNode<?, ?> input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+        NormalizedNode input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
                 .withChild(innerList).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> expected = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+        NormalizedNode expected = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
                 .withChild(mapNodeBuilder(TestModel.INNER_LIST_QNAME).withChild(mapEntryBuilder(
                     TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").build()).build()).build();
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", expected, actual);
     }
 
@@ -332,7 +332,7 @@ public class NormalizedNodePrunerTest {
                         ImmutableNodes.containerNode(TestModel.INNER_CONTAINER_QNAME)).build()).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", input, actual);
     }
 
@@ -361,16 +361,16 @@ public class NormalizedNodePrunerTest {
         MapNode innerList = mapNodeBuilder(TestModel.INVALID_QNAME).withChild(mapEntryBuilder(
                 TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one").withChild(
                         ImmutableNodes.containerNode(TestModel.INNER_CONTAINER_QNAME)).build()).build();
-        NormalizedNode<?, ?> input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+        NormalizedNode input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
                 .withChild(innerList).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> expected = mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1);
-        NormalizedNode<?, ?> actual = pruner.getResult().orElseThrow();
+        NormalizedNode expected = mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1);
+        NormalizedNode actual = pruner.getResult().orElseThrow();
         assertEquals("normalizedNode", expected, actual);
     }
 
-    private static NormalizedNode<?, ?> createTestContainer() {
+    private static NormalizedNode createTestContainer() {
         byte[] bytes1 = {1, 2, 3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).withValue(bytes1).build();

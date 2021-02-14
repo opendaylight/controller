@@ -32,7 +32,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 public class ShardSnapshotActorTest extends AbstractActorTest {
     private static final InputOutputStreamFactory STREAM_FACTORY = InputOutputStreamFactory.simple();
 
-    private static final NormalizedNode<?, ?> DATA = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    private static final NormalizedNode DATA = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
     private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
             final boolean withInstallSnapshot) throws Exception {
@@ -40,7 +40,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
         final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(STREAM_FACTORY), testName);
         kit.watch(snapshotActor);
 
-        final NormalizedNode<?, ?> expectedRoot = snapshot.getRootNode().get();
+        final NormalizedNode expectedRoot = snapshot.getRootNode().get();
 
         ByteArrayOutputStream installSnapshotStream = withInstallSnapshot ? new ByteArrayOutputStream() : null;
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot,
@@ -60,7 +60,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
             assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
 
-            final Optional<NormalizedNode<?, ?>> maybeNode = deserialized.getRootNode();
+            final Optional<NormalizedNode> maybeNode = deserialized.getRootNode();
             assertTrue("isPresent", maybeNode.isPresent());
             assertEquals("Root node", expectedRoot, maybeNode.get());
         }

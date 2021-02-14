@@ -50,9 +50,8 @@ public class ClientSnapshotTest extends AbstractClientHandleTest<ClientSnapshot>
 
     @Test
     public void testRead() throws Exception {
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> exists = getHandle().read(PATH);
+        final ListenableFuture<Optional<NormalizedNode>> exists = getHandle().read(PATH);
         verify(getDataTreeSnapshot()).readNode(PATH);
         assertFalse(getWithTimeout(exists).isPresent());
     }
-
 }

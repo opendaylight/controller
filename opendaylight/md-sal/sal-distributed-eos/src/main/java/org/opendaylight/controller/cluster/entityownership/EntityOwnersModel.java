@@ -75,7 +75,7 @@ public final class EntityOwnersModel {
         return NodeIdentifierWithPredicates.of(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
     }
 
-    static NormalizedNode<?, ?> entityOwnersWithCandidate(final String entityType,
+    static NormalizedNode entityOwnersWithCandidate(final String entityType,
             final YangInstanceIdentifier entityId, final String candidateName) {
         return entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entityType,
                 entityEntryWithCandidateEntry(entityId, candidateName)));

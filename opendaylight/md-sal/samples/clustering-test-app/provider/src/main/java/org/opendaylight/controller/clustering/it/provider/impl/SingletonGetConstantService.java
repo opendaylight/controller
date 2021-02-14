@@ -64,7 +64,7 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
     }
 
     @Override
-    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
+    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode input) {
         LOG.debug("get-singleton-constant invoked, current value: {}", constant);
 
         return Futures.immediateFuture(new DefaultDOMRpcResult(ImmutableContainerNodeBuilder.create()

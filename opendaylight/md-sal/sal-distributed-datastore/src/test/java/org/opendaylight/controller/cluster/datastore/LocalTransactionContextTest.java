@@ -63,7 +63,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testWrite() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
-        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.executeWrite(yangInstanceIdentifier, normalizedNode, null);
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
     }
@@ -71,7 +71,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testMerge() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
-        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.executeMerge(yangInstanceIdentifier, normalizedNode, null);
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
     }
@@ -86,7 +86,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testRead() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
-        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode normalizedNode = mock(NormalizedNode.class);
         doReturn(FluentFutures.immediateFluentFuture(Optional.of(normalizedNode))).when(readWriteTransaction)
             .read(yangInstanceIdentifier);
         localTransactionContext.executeRead(new ReadData(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
@@ -118,7 +118,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testReadyWithWriteError() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
-        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode normalizedNode = mock(NormalizedNode.class);
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
 
@@ -133,7 +133,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testReadyWithMergeError() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
-        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode normalizedNode = mock(NormalizedNode.class);
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
 

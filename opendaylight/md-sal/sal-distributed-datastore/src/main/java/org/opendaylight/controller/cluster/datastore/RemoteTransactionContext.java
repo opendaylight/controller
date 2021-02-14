@@ -208,15 +208,13 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final Boolean havePermit) {
+    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeMerge called path = {}", getIdentifier(), path);
         executeModification(new MergeModification(path, data), havePermit);
     }
 
     @Override
-    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final Boolean havePermit) {
+    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeWrite called path = {}", getIdentifier(), path);
         executeModification(new WriteModification(path, data), havePermit);
     }
@@ -226,7 +224,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         if (havePermit == null) {
             permitToRelease = failedModification == null && acquireOperation();
         } else {
-            permitToRelease = havePermit.booleanValue();
+            permitToRelease = havePermit;
         }
 
         batchModification(modification, permitToRelease);
@@ -251,7 +249,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
         // public API contract.
 
-        final boolean permitToRelease = havePermit == null ? acquireOperation() : havePermit.booleanValue();
+        final boolean permitToRelease = havePermit == null ? acquireOperation() : havePermit;
         sendBatchedModifications();
 
         OnComplete<Object> onComplete = new OnComplete<>() {

@@ -43,12 +43,12 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
         }
 
         @Override
-        public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        public void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
             pruneAndMergeNode(path, data);
         }
 
         @Override
-        public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        public void write(final YangInstanceIdentifier path, final NormalizedNode data) {
             pruneAndWriteNode(path, data);
         }
 
@@ -71,7 +71,7 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
         }
 
         @Override
-        public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        public void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
             if (path.isEmpty()) {
                 pruneAndMergeNode(path, data);
                 return;
@@ -86,7 +86,7 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
         }
 
         @Override
-        public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        public void write(final YangInstanceIdentifier path, final NormalizedNode data) {
             if (path.isEmpty()) {
                 pruneAndWriteNode(path, data);
                 return;
@@ -140,15 +140,15 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
         }
     }
 
-    final void pruneAndMergeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        final NormalizedNode<?, ?> pruned = pruneNormalizedNode(path, data);
+    final void pruneAndMergeNode(final YangInstanceIdentifier path, final NormalizedNode data) {
+        final NormalizedNode pruned = pruneNormalizedNode(path, data);
         if (pruned != null) {
             delegate.merge(path, pruned);
         }
     }
 
-    final void pruneAndWriteNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        final NormalizedNode<?, ?> pruned = pruneNormalizedNode(path, data);
+    final void pruneAndWriteNode(final YangInstanceIdentifier path, final NormalizedNode data) {
+        final NormalizedNode pruned = pruneNormalizedNode(path, data);
         if (pruned != null) {
             delegate.write(path, pruned);
         }
@@ -173,7 +173,7 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier yangInstanceIdentifier) {
+    public final Optional<NormalizedNode> readNode(final YangInstanceIdentifier yangInstanceIdentifier) {
         return delegate.readNode(yangInstanceIdentifier);
     }
 
@@ -183,8 +183,7 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
     }
 
     @VisibleForTesting
-    final NormalizedNode<?, ?> pruneNormalizedNode(final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> input) {
+    final NormalizedNode pruneNormalizedNode(final YangInstanceIdentifier path, final NormalizedNode input) {
         pruner.initializeForPath(path);
         try {
             NormalizedNodeWriter.forStreamWriter(pruner).write(input);
@@ -210,18 +209,18 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
         }
 
         @Override
-        public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+        public void write(final PathArgument child, final NormalizedNode data) {
             final YangInstanceIdentifier path = current().node(child);
-            final NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
+            final NormalizedNode prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if (prunedNode != null) {
                 toModification.write(path, prunedNode);
             }
         }
 
         @Override
-        public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+        public void merge(final PathArgument child, final NormalizedNode data) {
             final YangInstanceIdentifier path = current().node(child);
-            final NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
+            final NormalizedNode prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if (prunedNode != null) {
                 toModification.merge(path, prunedNode);
             }

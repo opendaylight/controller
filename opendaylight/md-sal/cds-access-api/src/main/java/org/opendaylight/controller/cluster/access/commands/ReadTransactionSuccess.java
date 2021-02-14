@@ -28,15 +28,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransactionSuccess>
         implements SliceableMessage {
     private static final long serialVersionUID = 1L;
-    private final Optional<NormalizedNode<?, ?>> data;
+    private final Optional<NormalizedNode> data;
 
     public ReadTransactionSuccess(final TransactionIdentifier identifier, final long sequence,
-            final Optional<NormalizedNode<?, ?>> data) {
+            final Optional<NormalizedNode> data) {
         super(identifier, sequence);
         this.data = requireNonNull(data);
     }
 
-    public Optional<NormalizedNode<?, ?>> getData() {
+    public Optional<NormalizedNode> getData() {
         return data;
     }
 

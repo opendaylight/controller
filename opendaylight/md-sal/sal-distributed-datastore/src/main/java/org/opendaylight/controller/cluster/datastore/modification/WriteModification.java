@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutpu
 public class WriteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;
 
-    private NormalizedNode<?, ?> data;
+    private NormalizedNode data;
 
     public WriteModification() {
         this(DataStoreVersions.CURRENT_VERSION);
@@ -36,12 +36,12 @@ public class WriteModification extends AbstractModification {
         super(version);
     }
 
-    WriteModification(final short version, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    WriteModification(final short version, final YangInstanceIdentifier path, final NormalizedNode data) {
         super(version, path);
         this.data = data;
     }
 
-    public WriteModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public WriteModification(final YangInstanceIdentifier path, final NormalizedNode data) {
         super(path);
         this.data = data;
     }
@@ -56,7 +56,7 @@ public class WriteModification extends AbstractModification {
         transaction.write(getPath(), data);
     }
 
-    public NormalizedNode<?, ?> getData() {
+    public NormalizedNode getData() {
         return data;
     }
 
@@ -80,7 +80,7 @@ public class WriteModification extends AbstractModification {
 
     public static WriteModification fromStream(final NormalizedNodeDataInput in, final short version,
             final ReusableStreamReceiver receiver) throws IOException {
-        final NormalizedNode<?, ?> node = in.readNormalizedNode(receiver);
+        final NormalizedNode node = in.readNormalizedNode(receiver);
         final YangInstanceIdentifier path = in.readYangInstanceIdentifier();
         return new WriteModification(version, path, node);
     }

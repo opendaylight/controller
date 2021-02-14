@@ -73,7 +73,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
-    protected void verifyEntityCandidate(final NormalizedNode<?, ?> node, final String entityType,
+    protected void verifyEntityCandidate(final NormalizedNode node, final String entityType,
             final YangInstanceIdentifier entityId, final String candidateName, final boolean expectPresent) {
         try {
             assertNotNull("Missing " + EntityOwners.QNAME.toString(), node);
@@ -94,12 +94,12 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     protected void verifyEntityCandidate(final String entityType, final YangInstanceIdentifier entityId,
-            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader,
+            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode> reader,
             final boolean expectPresent) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
-            NormalizedNode<?, ?> node = reader.apply(ENTITY_OWNERS_PATH);
+            NormalizedNode node = reader.apply(ENTITY_OWNERS_PATH);
             try {
                 verifyEntityCandidate(node, entityType, entityId, candidateName, expectPresent);
                 return;
@@ -113,7 +113,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     protected void verifyEntityCandidate(final String entityType, final YangInstanceIdentifier entityId,
-            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            final String candidateName, final Function<YangInstanceIdentifier,NormalizedNode> reader) {
         verifyEntityCandidate(entityType, entityId, candidateName, reader, true);
     }
 
@@ -142,13 +142,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     static void verifyOwner(final String expected, final String entityType, final YangInstanceIdentifier entityId,
-            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            final Function<YangInstanceIdentifier,NormalizedNode> reader) {
         AssertionError lastError = null;
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             try {
-                NormalizedNode<?, ?> node = reader.apply(entityPath);
+                NormalizedNode node = reader.apply(entityPath);
                 Assert.assertNotNull("Owner was not set for entityId: " + entityId, node);
                 Assert.assertEquals("Entity owner", expected, node.getValue().toString());
                 return;
@@ -174,12 +174,12 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     protected void verifyNodeRemoved(final YangInstanceIdentifier path,
-            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            final Function<YangInstanceIdentifier,NormalizedNode> reader) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             try {
-                NormalizedNode<?, ?> node = reader.apply(path);
+                NormalizedNode node = reader.apply(path);
                 Assert.assertNull("Node was not removed at path: " + path, node);
                 return;
             } catch (AssertionError e) {
@@ -191,7 +191,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         throw lastError;
     }
 
-    static void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node,
+    static void writeNode(final YangInstanceIdentifier path, final NormalizedNode node,
             final ShardDataTree shardDataTree) throws DataValidationFailedException {
         DataTreeModification modification = shardDataTree.newModification();
         modification.merge(path, node);
@@ -235,7 +235,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             final YangInstanceIdentifier entityId) {
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         try {
-            NormalizedNode<?, ?> node = AbstractShardTest.readStore(shard, entityPath);
+            NormalizedNode node = AbstractShardTest.readStore(shard, entityPath);
             if (node != null) {
                 Assert.fail("Owner " + node.getValue() + " was set for " + entityPath);
             }

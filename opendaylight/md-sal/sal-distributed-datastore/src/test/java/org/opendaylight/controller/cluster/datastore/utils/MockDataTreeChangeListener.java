@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.DistinctNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
@@ -89,24 +89,24 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
         for (int i = 0; i < expPaths.length; i++) {
             final DataTreeCandidate candidate = changeList.get(i);
-            final Optional<NormalizedNode<?, ?>> maybeDataAfter = candidate.getRootNode().getDataAfter();
+            final Optional<NormalizedNode> maybeDataAfter = candidate.getRootNode().getDataAfter();
             if (!maybeDataAfter.isPresent()) {
                 fail(String.format("Change %d does not contain data after. Actual: %s", i + 1,
                         candidate.getRootNode()));
             }
 
-            final NormalizedNode<?, ?> dataAfter = maybeDataAfter.get();
+            final NormalizedNode dataAfter = maybeDataAfter.get();
             final Optional<YangInstanceIdentifier> relativePath = expPaths[i].relativeTo(candidate.getRootPath());
             if (!relativePath.isPresent()) {
                 assertEquals(String.format("Change %d does not contain %s. Actual: %s", i + 1, expPaths[i],
                         dataAfter), expPaths[i].getLastPathArgument(), dataAfter.getIdentifier());
             } else {
-                NormalizedNode<?, ?> nextChild = dataAfter;
+                NormalizedNode nextChild = dataAfter;
                 for (PathArgument pathArg: relativePath.get().getPathArguments()) {
                     boolean found = false;
-                    if (nextChild instanceof NormalizedNodeContainer) {
-                        Optional<NormalizedNode<?, ?>> maybeChild = ((NormalizedNodeContainer)nextChild)
-                                .getChild(pathArg);
+                    if (nextChild instanceof DistinctNodeContainer) {
+                        Optional<NormalizedNode> maybeChild = ((DistinctNodeContainer)nextChild)
+                                .findChildByArg(pathArg);
                         if (maybeChild.isPresent()) {
                             found = true;
                             nextChild = maybeChild.get();

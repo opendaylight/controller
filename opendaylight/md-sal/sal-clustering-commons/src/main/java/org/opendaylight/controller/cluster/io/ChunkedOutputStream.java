@@ -24,7 +24,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
-import org.opendaylight.yangtools.concepts.Variant;
+import org.opendaylight.yangtools.concepts.Either;
 
 /**
  * An {@link OutputStream} implementation which collects data is a series of {@code byte[]} chunks, each of which has
@@ -124,10 +124,10 @@ public final class ChunkedOutputStream extends OutputStream {
         return size;
     }
 
-    public Variant<byte[], ChunkedByteArray> toVariant() {
+    public Either<byte[], ChunkedByteArray> toVariant() {
         checkClosed();
-        return result instanceof byte[] ? Variant.ofFirst((byte[]) result)
-                : Variant.ofSecond(new ChunkedByteArray(size, (ImmutableList<byte[]>) result));
+        return result instanceof byte[] ? Either.ofFirst((byte[]) result)
+                : Either.ofSecond(new ChunkedByteArray(size, (ImmutableList<byte[]>) result));
     }
 
     @VisibleForTesting

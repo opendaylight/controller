@@ -174,7 +174,7 @@ class EntityOwnershipShard extends Shard {
     private void onRegisterCandidateLocal(final RegisterCandidateLocal registerCandidate) {
         LOG.debug("{}: onRegisterCandidateLocal: {}", persistenceId(), registerCandidate);
 
-        NormalizedNode<?, ?> entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
+        NormalizedNode entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
                 registerCandidate.getEntity().getIdentifier(), localMemberName.getName());
         commitCoordinator.commitModification(new MergeModification(ENTITY_OWNERS_PATH, entityOwners), this);
 
@@ -593,7 +593,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void searchForEntities(final EntityWalker walker) {
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
+        Optional<NormalizedNode> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if (!possibleEntityTypes.isPresent()) {
             return;
         }

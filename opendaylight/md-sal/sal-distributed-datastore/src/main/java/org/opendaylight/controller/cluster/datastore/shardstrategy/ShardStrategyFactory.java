@@ -58,7 +58,7 @@ public class ShardStrategyFactory {
             return UNKNOWN_MODULE_NAME;
         }
 
-        String namespace = path.getPathArguments().get(0).getNodeType().getNamespace().toASCIIString();
+        String namespace = path.getPathArguments().get(0).getNodeType().getNamespace().toString();
         String moduleName = configuration.getModuleNameFromNameSpace(namespace);
         return moduleName != null ? moduleName : UNKNOWN_MODULE_NAME;
     }
