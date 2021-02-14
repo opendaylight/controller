@@ -21,7 +21,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public abstract class AbstractBatchedModificationsCursor extends AbstractDataTreeModificationCursor {
-
     protected abstract BatchedModifications getModifications();
 
     @Override
@@ -30,12 +29,12 @@ public abstract class AbstractBatchedModificationsCursor extends AbstractDataTre
     }
 
     @Override
-    public final void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+    public final void merge(final PathArgument child, final NormalizedNode data) {
         getModifications().addModification(new MergeModification(current().node(child), data));
     }
 
     @Override
-    public final void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+    public final void write(final PathArgument child, final NormalizedNode data) {
         getModifications().addModification(new WriteModification(current().node(child), data));
     }
 }

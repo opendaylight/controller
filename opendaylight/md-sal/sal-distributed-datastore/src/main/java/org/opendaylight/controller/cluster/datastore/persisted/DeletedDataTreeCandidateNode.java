@@ -41,7 +41,7 @@ abstract class DeletedDataTreeCandidateNode extends AbstractDataTreeCandidateNod
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> getDataAfter() {
+    public final Optional<NormalizedNode> getDataAfter() {
         return Optional.empty();
     }
 

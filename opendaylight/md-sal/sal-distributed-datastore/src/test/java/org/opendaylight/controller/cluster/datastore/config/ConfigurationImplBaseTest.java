@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNull;
 
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 import org.junit.Assert;
@@ -22,6 +21,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 
 public abstract class ConfigurationImplBaseTest {
     private static final MemberName MEMBER_1 = MemberName.forName("member-1");
@@ -127,7 +127,7 @@ public abstract class ConfigurationImplBaseTest {
 
     @Test
     public void testAddModuleShardConfiguration() throws Exception {
-        URI namespace = new URI("urn:opendaylight:test:oven");
+        XMLNamespace namespace = XMLNamespace.of("urn:opendaylight:test:oven");
         String moduleName = "oven";
         String shardName = "oven-shard";
         String shardStrategyName = ModuleShardStrategy.NAME;
@@ -146,7 +146,7 @@ public abstract class ConfigurationImplBaseTest {
                 ImmutableSortedSet.copyOf(configuration.getMembersFromShardName(shardName)));
         assertEquals("getShardNameForModule", shardName, configuration.getShardNameForModule(moduleName));
         assertEquals("getModuleNameFromNameSpace", moduleName,
-                configuration.getModuleNameFromNameSpace(namespace.toASCIIString()));
+                configuration.getModuleNameFromNameSpace(namespace.toString()));
         assertEquals("getAllShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default", shardName),
                 ImmutableSortedSet.copyOf(configuration.getAllShardNames()));
 

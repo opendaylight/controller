@@ -36,7 +36,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(IdIntsListener.class);
     private static final long SECOND_AS_NANO = 1000000000;
 
-    private volatile NormalizedNode<?, ?> localCopy;
+    private volatile NormalizedNode localCopy;
     private final AtomicLong lastNotifTimestamp = new AtomicLong(0);
     private ScheduledExecutorService executorService;
     private ScheduledFuture<?> scheduledFuture;
@@ -70,12 +70,12 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
         return localCopy != null;
     }
 
-    public boolean checkEqual(final NormalizedNode<?, ?> expected) {
+    public boolean checkEqual(final NormalizedNode expected) {
         return localCopy.equals(expected);
     }
 
     @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
-    public String diffWithLocalCopy(final NormalizedNode<?, ?> expected) {
+    public String diffWithLocalCopy(final NormalizedNode expected) {
         return diffNodes((MapNode)expected, (MapNode)localCopy);
     }
 
@@ -94,9 +94,9 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
         final YangInstanceIdentifier.NodeIdentifier itemNodeId = new YangInstanceIdentifier.NodeIdentifier(ITEM);
 
         Map<NodeIdentifierWithPredicates, MapEntryNode> expIdIntMap = new HashMap<>();
-        expected.getValue().forEach(node -> expIdIntMap.put(node.getIdentifier(), node));
+        expected.body().forEach(node -> expIdIntMap.put(node.getIdentifier(), node));
 
-        actual.getValue().forEach(actIdInt -> {
+        actual.body().forEach(actIdInt -> {
             final MapEntryNode expIdInt = expIdIntMap.remove(actIdInt.getIdentifier());
             if (expIdInt == null) {
                 builder.append('\n').append("  Unexpected id-int entry for ").append(actIdInt.getIdentifier());
@@ -104,10 +104,10 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
             }
 
             Map<NodeIdentifierWithPredicates, MapEntryNode> expItemMap = new HashMap<>();
-            ((MapNode)expIdInt.getChild(itemNodeId).get()).getValue()
+            ((MapNode)expIdInt.findChildByArg(itemNodeId).get()).body()
                 .forEach(node -> expItemMap.put(node.getIdentifier(), node));
 
-            ((MapNode)actIdInt.getChild(itemNodeId).get()).getValue().forEach(actItem -> {
+            ((MapNode)actIdInt.findChildByArg(itemNodeId).get()).body().forEach(actItem -> {
                 final MapEntryNode expItem = expItemMap.remove(actItem.getIdentifier());
                 if (expItem == null) {
                     builder.append('\n').append("  Unexpected item entry ").append(actItem.getIdentifier())

@@ -26,18 +26,13 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -95,6 +90,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -173,7 +169,7 @@ public class ClusterAdminRpcServiceTest {
             shardNames.add(s.getName());
         }
 
-        assertEquals("DatastoreSnapshot shard names", Sets.newHashSet(expShardNames), shardNames);
+        assertEquals("DatastoreSnapshot shard names", Set.of(expShardNames), shardNames);
     }
 
     @Test
@@ -254,7 +250,7 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(newReplicaNode2.operDataStore(), "cars", "member-1", "member-3");
 
         // Write data to member-2's config datastore and read/verify via member-3
-        final NormalizedNode<?, ?> configCarsNode = writeCarsNodeAndVerify(newReplicaNode2.configDataStore(),
+        final NormalizedNode configCarsNode = writeCarsNodeAndVerify(newReplicaNode2.configDataStore(),
                 newReplicaNode3.configDataStore());
 
         // Write data to member-3's oper datastore and read/verify via member-2
@@ -311,10 +307,10 @@ public class ClusterAdminRpcServiceTest {
         verifyFailedRpcResult(rpcResult);
     }
 
-    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(final AbstractDataStore writeToStore,
+    private static NormalizedNode writeCarsNodeAndVerify(final AbstractDataStore writeToStore,
             final AbstractDataStore readFromStore) throws Exception {
         DOMStoreWriteTransaction writeTx = writeToStore.newWriteOnlyTransaction();
-        NormalizedNode<?, ?> carsNode = CarsModel.create();
+        NormalizedNode carsNode = CarsModel.create();
         writeTx.write(CarsModel.BASE_PATH, carsNode);
 
         DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
@@ -328,8 +324,8 @@ public class ClusterAdminRpcServiceTest {
     }
 
     private static void readCarsNodeAndVerify(final AbstractDataStore readFromStore,
-            final NormalizedNode<?, ?> expCarsNode) throws Exception {
-        Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction().read(CarsModel.BASE_PATH)
+            final NormalizedNode expCarsNode) throws Exception {
+        Optional<NormalizedNode> optional = readFromStore.newReadOnlyTransaction().read(CarsModel.BASE_PATH)
                 .get(15, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());
@@ -501,9 +497,8 @@ public class ClusterAdminRpcServiceTest {
         MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
-        ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                                                                                 "pets", null,
-                                                                                 Collections.singletonList(MEMBER_1));
+        ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(
+            XMLNamespace.of("pets-ns"), "pets-module", "pets", null, List.of(MEMBER_1));
         leaderNode1.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
@@ -520,9 +515,8 @@ public class ClusterAdminRpcServiceTest {
         newReplicaNode2.kit().expectMsgClass(Success.class);
 
         newReplicaNode2.operDataStore().getActorUtils().getShardManager().tell(
-                new CreateShard(new ModuleShardConfiguration(URI.create("no-leader-ns"), "no-leader-module",
-                                                             "no-leader", null,
-                                                             Collections.singletonList(MEMBER_1)),
+                new CreateShard(new ModuleShardConfiguration(XMLNamespace.of("no-leader-ns"), "no-leader-module",
+                                                             "no-leader", null, List.of(MEMBER_1)),
                                 Shard.builder(), null),
                                 newReplicaNode2.kit().getRef());
         newReplicaNode2.kit().expectMsgClass(Success.class);
@@ -567,8 +561,8 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
 
-        ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                "pets", null, Arrays.asList(MEMBER_1, MEMBER_2, MEMBER_3));
+        ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(XMLNamespace.of("pets-ns"),
+                "pets-module", "pets", null, List.of(MEMBER_1, MEMBER_2, MEMBER_3));
         leaderNode1.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
@@ -637,7 +631,7 @@ public class ClusterAdminRpcServiceTest {
         RpcResult<ChangeMemberVotingStatesForShardOutput> rpcResult = service3
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName("cars").setDataStoreType(DataStoreType.Config)
-                        .setMemberVotingState(ImmutableList.of(
+                        .setMemberVotingState(List.of(
                                 new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
                                 new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
                         .build())
@@ -671,8 +665,10 @@ public class ClusterAdminRpcServiceTest {
         RpcResult<ChangeMemberVotingStatesForShardOutput> rpcResult = service
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName("cars").setDataStoreType(DataStoreType.Config)
-                        .setMemberVotingState(ImmutableList
-                                .of(new MemberVotingStateBuilder().setMemberName("member-1").setVoting(FALSE).build()))
+                        .setMemberVotingState(List.of(new MemberVotingStateBuilder()
+                            .setMemberName("member-1")
+                            .setVoting(FALSE)
+                            .build()))
                         .build())
                 .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
@@ -709,7 +705,7 @@ public class ClusterAdminRpcServiceTest {
                 replicaNode3.operDataStore(), null);
 
         RpcResult<ChangeMemberVotingStatesForAllShardsOutput> rpcResult = service3.changeMemberVotingStatesForAllShards(
-                new ChangeMemberVotingStatesForAllShardsInputBuilder().setMemberVotingState(ImmutableList.of(
+                new ChangeMemberVotingStatesForAllShardsInputBuilder().setMemberVotingState(List.of(
                         new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
                         new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build())).build())
                 .get(10, TimeUnit.SECONDS);
@@ -730,7 +726,7 @@ public class ClusterAdminRpcServiceTest {
     public void testFlipMemberVotingStates() throws Exception {
         String name = "testFlipMemberVotingStates";
 
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("member-1", true), new ServerInfo("member-2", true),
                 new ServerInfo("member-3", false)));
 
@@ -819,7 +815,7 @@ public class ClusterAdminRpcServiceTest {
 
         // Members 1, 2, and 3 are initially started up as non-voting. Members 4, 5, and 6 are initially
         // non-voting and simulated as down by not starting them up.
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("member-1", false), new ServerInfo("member-2", false),
                 new ServerInfo("member-3", false), new ServerInfo("member-4", true),
                 new ServerInfo("member-5", true), new ServerInfo("member-6", true)));
@@ -891,7 +887,7 @@ public class ClusterAdminRpcServiceTest {
         String name = "testFlipMemberVotingStatesWithVotingMembersDown";
 
         // Members 4, 5, and 6 are initially non-voting and simulated as down by not starting them up.
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("member-1", true), new ServerInfo("member-2", true),
                 new ServerInfo("member-3", true), new ServerInfo("member-4", false),
                 new ServerInfo("member-5", false), new ServerInfo("member-6", false)));

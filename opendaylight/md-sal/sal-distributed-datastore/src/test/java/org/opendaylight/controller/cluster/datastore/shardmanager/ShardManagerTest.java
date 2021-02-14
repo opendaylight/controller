@@ -46,7 +46,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.net.URI;
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -127,6 +126,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
@@ -1236,7 +1236,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 .persistent(false).build();
         Shard.Builder shardBuilder = Shard.builder();
 
-        ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+        ModuleShardConfiguration config = new ModuleShardConfiguration(XMLNamespace.of("foo-ns"), "foo-module",
             "foo", null, members("member-1", "member-5", "member-6"));
         shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), kit.getRef());
 
@@ -1281,7 +1281,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), ActorRef.noSender());
 
         Shard.Builder shardBuilder = Shard.builder();
-        ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+        ModuleShardConfiguration config = new ModuleShardConfiguration(XMLNamespace.of("foo-ns"), "foo-module",
             "foo", null, members("member-5", "member-6"));
 
         shardManager.tell(new CreateShard(config, shardBuilder, null), kit.getRef());
@@ -1307,7 +1307,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         Shard.Builder shardBuilder = Shard.builder();
 
-        ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+        ModuleShardConfiguration config = new ModuleShardConfiguration(XMLNamespace.of("foo-ns"), "foo-module",
             "foo", null, members("member-1"));
         shardManager.tell(new CreateShard(config, shardBuilder, null), kit.getRef());
 

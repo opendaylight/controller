@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedMapNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableUserMapNodeBuilder;
 
 /**
  * Utility methods for entity-owners yang model.
@@ -75,7 +75,7 @@ public final class EntityOwnersModel {
         return NodeIdentifierWithPredicates.of(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
     }
 
-    static NormalizedNode<?, ?> entityOwnersWithCandidate(final String entityType,
+    static NormalizedNode entityOwnersWithCandidate(final String entityType,
             final YangInstanceIdentifier entityId, final String candidateName) {
         return entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entityType,
                 entityEntryWithCandidateEntry(entityId, candidateName)));
@@ -100,7 +100,7 @@ public final class EntityOwnersModel {
     }
 
     static MapNode candidateEntry(final String candidateName) {
-        return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME))
+        return ImmutableUserMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME))
                 .addChild(candidateMapEntry(candidateName)).build();
     }
 

@@ -20,13 +20,13 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaTreeInference;
+import org.opendaylight.yangtools.yang.model.api.stmt.SchemaTreeEffectiveStatement;
+import org.opendaylight.yangtools.yang.model.util.SchemaInferenceStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -53,8 +53,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     @FunctionalInterface
     public interface FallbackConfigProvider {
-        NormalizedNode<?,?> get(EffectiveModelContext schemaContext, DataSchemaNode dataSchema) throws IOException,
-                XMLStreamException, ParserConfigurationException, SAXException, URISyntaxException;
+        NormalizedNode get(SchemaTreeInference dataSchema)
+            throws IOException, XMLStreamException, ParserConfigurationException, SAXException, URISyntaxException;
     }
 
     @FunctionalInterface
@@ -95,9 +95,9 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     public T createDefaultInstance() throws ConfigXMLReaderException, ParserConfigurationException, XMLStreamException,
             IOException, SAXException, URISyntaxException {
-        return createDefaultInstance((schemaContext, dataSchema) -> {
-            throw new IllegalArgumentException("Failed to read XML "
-                    + "(not creating model from defaults as runtime would, for better clarity in tests)");
+        return createDefaultInstance(dataSchema -> {
+            throw new IllegalArgumentException(
+                "Failed to read XML (not creating model from defaults as runtime would, for better clarity in tests)");
         });
     }
 
@@ -117,19 +117,22 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         checkNotNull(module, "%s: Could not obtain the module schema for namespace %s, revision %s",
                 logName, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision());
 
-        QName qname = bindingContext.bindingQName;
-        DataSchemaNode dataSchema = module.findDataChildByName(qname).orElseThrow(
-            () -> new ConfigXMLReaderException(logName + ": Could not obtain the schema for " + qname));
+        final SchemaInferenceStack schemaStack = SchemaInferenceStack.of(schemaContext);
+        final SchemaTreeEffectiveStatement<?> dataSchema;
+        try {
+            dataSchema = schemaStack.enterSchemaTree(bindingContext.bindingQName);
+        } catch (IllegalArgumentException e) {
+            throw new ConfigXMLReaderException(
+                logName + ": Could not obtain the schema for " + bindingContext.bindingQName, e);
+        }
 
-        checkNotNull(dataSchema, "%s: Could not obtain the schema for %s", logName, bindingContext.bindingQName);
-
-        checkCondition(bindingContext.schemaType.isAssignableFrom(dataSchema.getClass()),
+        checkCondition(bindingContext.schemaType.isInstance(dataSchema),
                 "%s: Expected schema type %s for %s but actual type is %s", logName,
                 bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass());
 
-        NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
+        NormalizedNode dataNode = parsePossibleDefaultAppConfigXMLFile(schemaStack);
         if (dataNode == null) {
-            dataNode = fallback.get(schemaService.getGlobalContext(), dataSchema);
+            dataNode = fallback.get(schemaStack.toSchemaTreeInference());
         }
 
         DataObject appConfig = bindingSerializer.fromNormalizedNode(yangPath, dataNode).getValue();
@@ -153,12 +156,12 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         }
     }
 
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final EffectiveModelContext schemaContext,
-            final DataSchemaNode dataSchema) throws ConfigXMLReaderException {
-
+    private NormalizedNode parsePossibleDefaultAppConfigXMLFile(final SchemaInferenceStack schemaStack)
+            throws ConfigXMLReaderException {
         String appConfigFileName = defaultAppConfigFileName;
         if (Strings.isNullOrEmpty(appConfigFileName)) {
-            String moduleName = findYangModuleName(bindingContext.bindingQName, schemaContext);
+            String moduleName = schemaStack.currentModule().argument().getLocalName();
+
             appConfigFileName = moduleName + "_" + bindingContext.bindingQName.getLocalName() + ".xml";
         }
 
@@ -176,8 +179,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         URL url = optionalURL.get();
         try (InputStream is = url.openStream()) {
             Document root = UntrustedXML.newDocumentBuilder().parse(is);
-            NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
-                    schemaContext);
+            NormalizedNode dataNode = bindingContext.parseDataElement(root.getDocumentElement(),
+                schemaStack.toSchemaTreeInference());
 
             LOG.debug("{}: Parsed data node: {}", logName, dataNode);
 
@@ -189,16 +192,4 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
             throw new ConfigXMLReaderException(msg, e);
         }
     }
-
-    private String findYangModuleName(final QName qname, final SchemaContext schemaContext)
-            throws ConfigXMLReaderException {
-        for (Module m : schemaContext.getModules()) {
-            if (qname.getModule().equals(m.getQNameModule())) {
-                return m.getName();
-            }
-        }
-        throw new ConfigXMLReaderException(
-                String.format("%s: Could not find yang module for QName %s", logName, qname));
-    }
-
 }

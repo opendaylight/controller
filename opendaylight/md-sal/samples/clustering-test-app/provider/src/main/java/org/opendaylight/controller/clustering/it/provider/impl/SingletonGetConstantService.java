@@ -9,7 +9,6 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.net.URI;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
@@ -23,6 +22,7 @@ import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -36,7 +36,8 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
     private static final Logger LOG = LoggerFactory.getLogger(SingletonGetConstantService.class);
 
     private static final QNameModule MODULE = QNameModule.create(
-        URI.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target"), Revision.of("2017-02-15")).intern();
+        XMLNamespace.of("tag:opendaylight.org,2017:controller:yang:lowlevel:target"), Revision.of("2017-02-15"))
+        .intern();
     private static final QName OUTPUT = YangConstants.operationOutputQName(MODULE).intern();
     private static final QName CONSTANT = QName.create(MODULE, "constant").intern();
     private static final QName CONTEXT = QName.create(MODULE, "context").intern();
@@ -64,7 +65,7 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
     }
 
     @Override
-    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
+    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode input) {
         LOG.debug("get-singleton-constant invoked, current value: {}", constant);
 
         return Futures.immediateFuture(new DefaultDOMRpcResult(ImmutableContainerNodeBuilder.create()

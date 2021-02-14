@@ -36,8 +36,7 @@ import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaTreeInference;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,9 +256,9 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             DataStoreAppConfigDefaultXMLReader<?> reader = new DataStoreAppConfigDefaultXMLReader<>(logName(),
                     defaultAppConfigFileName, getOSGiService(DOMSchemaService.class), bindingSerializer, bindingContext,
                     inputStreamProvider);
-            return reader.createDefaultInstance((schemaContext, dataSchema) -> {
+            return reader.createDefaultInstance(dataSchema -> {
                 // Fallback if file cannot be read, try XML from Config
-                NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
+                NormalizedNode dataNode = parsePossibleDefaultAppConfigElement(dataSchema);
                 if (dataNode == null) {
                     // or, as last resort, defaults from the model
                     return bindingContext.newDefaultNode(dataSchema);
@@ -279,9 +278,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
     }
 
-    private @Nullable NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(
-            final EffectiveModelContext schemaContext, final DataSchemaNode dataSchema) throws URISyntaxException,
-                IOException, ParserConfigurationException, SAXException, XMLStreamException {
+    private @Nullable NormalizedNode parsePossibleDefaultAppConfigElement(final SchemaTreeInference dataSchema)
+            throws URISyntaxException, IOException, ParserConfigurationException, SAXException, XMLStreamException {
         if (defaultAppConfigElement == null) {
             return null;
         }
@@ -290,8 +288,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
         LOG.debug("{}: Got app config schema: {}", logName(), dataSchema);
 
-        NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(defaultAppConfigElement, dataSchema,
-                schemaContext);
+        NormalizedNode dataNode = bindingContext.parseDataElement(defaultAppConfigElement, dataSchema);
 
         LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
 

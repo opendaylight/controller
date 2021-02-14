@@ -71,7 +71,7 @@ public abstract class AbstractDataTreeModificationCursor implements DataTreeModi
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> readNode(final PathArgument child) {
+    public final Optional<NormalizedNode> readNode(final PathArgument child) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

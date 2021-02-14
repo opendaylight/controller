@@ -440,7 +440,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         }
 
         try (DOMDataTreeReadTransaction rTx = domDataBroker.newReadOnlyTransaction()) {
-            final Optional<NormalizedNode<?, ?>> readResult = rTx.read(LogicalDatastoreType.CONFIGURATION,
+            final Optional<NormalizedNode> readResult = rTx.read(LogicalDatastoreType.CONFIGURATION,
                 WriteTransactionsHandler.ID_INT_YID).get();
 
             if (!readResult.isPresent()) {

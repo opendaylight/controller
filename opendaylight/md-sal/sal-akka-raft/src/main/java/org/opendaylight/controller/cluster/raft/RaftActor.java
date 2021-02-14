@@ -213,7 +213,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * Handles a message.
      *
      * @deprecated This method is not final for testing purposes. DO NOT OVERRIDE IT, override
-     * {@link #handleNonRaftCommand(Object)} instead.
+     *             {@link #handleNonRaftCommand(Object)} instead.
      */
     @Deprecated
     @Override
