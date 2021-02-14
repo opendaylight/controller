@@ -50,7 +50,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -58,11 +57,9 @@ import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
-import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
@@ -70,19 +67,9 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
-import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
-import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.People;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
@@ -96,26 +83,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingStateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -200,107 +177,6 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testAddRemovePrefixShardReplica() throws Exception {
-        String name = "testAddPrefixShardReplica";
-        String moduleShardsConfig = "module-shards-default.conf";
-
-        final MemberNode member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
-                .moduleShardsConfig(moduleShardsConfig).build();
-        final MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
-                .moduleShardsConfig(moduleShardsConfig).build();
-        final MemberNode replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
-                .moduleShardsConfig(moduleShardsConfig).build();
-
-        member1.waitForMembersUp("member-2", "member-3");
-        replicaNode2.kit().waitForMembersUp("member-1", "member-3");
-        replicaNode3.kit().waitForMembersUp("member-1", "member-2");
-
-        final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
-
-        shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
-                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
-                        "prefix", Collections.singleton(MEMBER_1))),
-                ActorRef.noSender());
-
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
-                ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
-
-        final InstanceIdentifier<Cars> identifier = InstanceIdentifier.create(Cars.class);
-        final BindingNormalizedNodeSerializer serializer = Mockito.mock(BindingNormalizedNodeSerializer.class);
-        Mockito.doReturn(CarsModel.BASE_PATH).when(serializer).toYangInstanceIdentifier(identifier);
-
-        addPrefixShardReplica(replicaNode2, identifier, serializer,
-                ClusterUtils.getCleanShardName(CarsModel.BASE_PATH), "member-1");
-
-        addPrefixShardReplica(replicaNode3, identifier, serializer,
-                ClusterUtils.getCleanShardName(CarsModel.BASE_PATH), "member-1", "member-2");
-
-        verifyRaftPeersPresent(member1.configDataStore(), ClusterUtils.getCleanShardName(CarsModel.BASE_PATH),
-                "member-2", "member-3");
-
-        removePrefixShardReplica(member1, identifier, "member-3", serializer,
-                ClusterUtils.getCleanShardName(CarsModel.BASE_PATH), "member-2");
-
-        verifyNoShardPresent(replicaNode3.configDataStore(), ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
-        verifyRaftPeersPresent(replicaNode2.configDataStore(), ClusterUtils.getCleanShardName(CarsModel.BASE_PATH),
-                "member-1");
-
-        removePrefixShardReplica(member1, identifier, "member-2", serializer,
-                ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
-
-        verifyNoShardPresent(replicaNode2.configDataStore(), ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
-    }
-
-    @Test
-    public void testGetShardRole() throws Exception {
-        String name = "testGetShardRole";
-        String moduleShardsConfig = "module-shards-default-member-1.conf";
-
-        final MemberNode member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
-                .moduleShardsConfig(moduleShardsConfig).build();
-
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(), "default");
-
-        final RpcResult<GetShardRoleOutput> successResult =
-                getShardRole(member1, Mockito.mock(BindingNormalizedNodeSerializer.class), "default");
-        verifySuccessfulRpcResult(successResult);
-        assertEquals("Leader", successResult.getResult().getRole());
-
-        final RpcResult<GetShardRoleOutput> failedResult =
-                getShardRole(member1, Mockito.mock(BindingNormalizedNodeSerializer.class), "cars");
-
-        verifyFailedRpcResult(failedResult);
-
-        final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
-
-        shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
-                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
-                        "prefix", Collections.singleton(MEMBER_1))),
-                ActorRef.noSender());
-
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
-                ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
-
-        final InstanceIdentifier<Cars> identifier = InstanceIdentifier.create(Cars.class);
-        final BindingNormalizedNodeSerializer serializer = Mockito.mock(BindingNormalizedNodeSerializer.class);
-        Mockito.doReturn(CarsModel.BASE_PATH).when(serializer).toYangInstanceIdentifier(identifier);
-
-        final RpcResult<GetPrefixShardRoleOutput> prefixSuccessResult =
-                getPrefixShardRole(member1, identifier, serializer);
-
-        verifySuccessfulRpcResult(prefixSuccessResult);
-        assertEquals("Leader", prefixSuccessResult.getResult().getRole());
-
-        final InstanceIdentifier<People> peopleId = InstanceIdentifier.create(People.class);
-        Mockito.doReturn(PeopleModel.BASE_PATH).when(serializer).toYangInstanceIdentifier(peopleId);
-
-        final RpcResult<GetPrefixShardRoleOutput> prefixFail =
-                getPrefixShardRole(member1, peopleId, serializer);
-
-        verifyFailedRpcResult(prefixFail);
-    }
-
-    @Test
     public void testGetPrefixShardRole() throws Exception {
         String name = "testGetPrefixShardRole";
         String moduleShardsConfig = "module-shards-default-member-1.conf";
@@ -309,8 +185,6 @@ public class ClusterAdminRpcServiceTest {
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(), "default");
-
-
     }
 
     @Test
@@ -459,74 +333,6 @@ public class ClusterAdminRpcServiceTest {
                 .get(15, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());
-    }
-
-    private static RpcResult<GetShardRoleOutput> getShardRole(final MemberNode memberNode,
-            final BindingNormalizedNodeSerializer serializer, final String shardName) throws Exception {
-
-        final GetShardRoleInput input = new GetShardRoleInputBuilder()
-                .setDataStoreType(DataStoreType.Config)
-                .setShardName(shardName)
-                .build();
-
-        final ClusterAdminRpcService service =
-                new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
-
-        return service.getShardRole(input).get(10, TimeUnit.SECONDS);
-    }
-
-    private static RpcResult<GetPrefixShardRoleOutput> getPrefixShardRole(
-            final MemberNode memberNode,
-            final InstanceIdentifier<?> identifier,
-            final BindingNormalizedNodeSerializer serializer) throws Exception {
-
-        final GetPrefixShardRoleInput input = new GetPrefixShardRoleInputBuilder()
-                .setDataStoreType(DataStoreType.Config)
-                .setShardPrefix(identifier)
-                .build();
-
-        final ClusterAdminRpcService service =
-                new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
-
-        return service.getPrefixShardRole(input).get(10, TimeUnit.SECONDS);
-    }
-
-    private static void addPrefixShardReplica(final MemberNode memberNode, final InstanceIdentifier<?> identifier,
-            final BindingNormalizedNodeSerializer serializer, final String shardName,
-            final String... peerMemberNames) throws Exception {
-
-        final AddPrefixShardReplicaInput input = new AddPrefixShardReplicaInputBuilder()
-                .setShardPrefix(identifier)
-                .setDataStoreType(DataStoreType.Config).build();
-
-        final ClusterAdminRpcService service =
-                new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
-
-        final RpcResult<AddPrefixShardReplicaOutput> rpcResult = service.addPrefixShardReplica(input)
-                .get(10, TimeUnit.SECONDS);
-        verifySuccessfulRpcResult(rpcResult);
-
-        verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
-        Optional<ActorRef> optional = memberNode.configDataStore().getActorUtils().findLocalShard(shardName);
-        assertTrue("Replica shard not present", optional.isPresent());
-    }
-
-    private static void removePrefixShardReplica(final MemberNode memberNode, final InstanceIdentifier<?> identifier,
-            final String removeFromMember, final BindingNormalizedNodeSerializer serializer, final String shardName,
-            final String... peerMemberNames) throws Exception {
-        final RemovePrefixShardReplicaInput input = new RemovePrefixShardReplicaInputBuilder()
-                .setDataStoreType(DataStoreType.Config)
-                .setShardPrefix(identifier)
-                .setMemberName(removeFromMember).build();
-
-        final ClusterAdminRpcService service =
-                new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
-
-        final RpcResult<RemovePrefixShardReplicaOutput> rpcResult = service.removePrefixShardReplica(input)
-                .get(10, TimeUnit.SECONDS);
-        verifySuccessfulRpcResult(rpcResult);
-
-        verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
     }
 
     private static void doAddShardReplica(final MemberNode memberNode, final String shardName,

@@ -53,7 +53,6 @@ import java.util.function.Supplier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -109,10 +108,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.sharding.PrefixedShardConfigUpdateHandler;
-import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
-import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
-import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -176,9 +171,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final Set<Consumer<String>> shardAvailabilityCallbacks = new HashSet<>();
 
     private final String persistenceId;
-    private final AbstractDataStore dataStore;
-
-    private PrefixedShardConfigUpdateHandler configUpdateHandler;
 
     ShardManager(final AbstractShardManagerCreator<?> builder) {
         this.cluster = builder.getCluster();
@@ -203,8 +195,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 "shard-manager-" + this.type,
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
         shardManagerMBean.registerMBean();
-
-        dataStore = builder.getDistributedDataStore();
     }
 
     @Override
@@ -259,12 +249,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onAddShardReplica((AddShardReplica) message);
         } else if (message instanceof AddPrefixShardReplica) {
             onAddPrefixShardReplica((AddPrefixShardReplica) message);
-        } else if (message instanceof PrefixShardCreated) {
-            onPrefixShardCreated((PrefixShardCreated) message);
-        } else if (message instanceof PrefixShardRemoved) {
-            onPrefixShardRemoved((PrefixShardRemoved) message);
-        } else if (message instanceof InitConfigListener) {
-            onInitConfigListener();
         } else if (message instanceof ForwardedAddServerReply) {
             ForwardedAddServerReply msg = (ForwardedAddServerReply)message;
             onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(), msg.leaderPath,
@@ -340,21 +324,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         getSender().tell(new GetShardRoleReply(shardInformation.getRole()), ActorRef.noSender());
-    }
-
-    private void onInitConfigListener() {
-        LOG.debug("{}: Initializing config listener on {}", persistenceId(), cluster.getCurrentMemberName());
-
-        final org.opendaylight.mdsal.common.api.LogicalDatastoreType datastoreType =
-                org.opendaylight.mdsal.common.api.LogicalDatastoreType
-                        .valueOf(datastoreContextFactory.getBaseDatastoreContext().getLogicalStoreType().name());
-
-        if (configUpdateHandler != null) {
-            configUpdateHandler.close();
-        }
-
-        configUpdateHandler = new PrefixedShardConfigUpdateHandler(self(), cluster.getCurrentMemberName());
-        configUpdateHandler.initListener(dataStore, datastoreType);
     }
 
     void onShutDown() {
@@ -616,32 +585,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void onPrefixShardCreated(final PrefixShardCreated message) {
-        LOG.debug("{}: onPrefixShardCreated: {}", persistenceId(), message);
-
-        final PrefixShardConfiguration config = message.getConfiguration();
-        final ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
-                ClusterUtils.getCleanShardName(config.getPrefix().getRootIdentifier()));
-        final String shardName = shardId.getShardName();
-
-        if (isPreviousShardActorStopInProgress(shardName, message)) {
-            return;
-        }
-
-        if (localShards.containsKey(shardName)) {
-            LOG.debug("{}: Received create for an already existing shard {}", persistenceId(), shardName);
-            final PrefixShardConfiguration existing =
-                    configuration.getAllPrefixShardConfigurations().get(config.getPrefix());
-
-            if (existing != null && existing.equals(config)) {
-                // we don't have to do nothing here
-                return;
-            }
-        }
-
-        doCreatePrefixShard(config, shardId, shardName);
-    }
-
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+        justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private boolean isPreviousShardActorStopInProgress(final String shardName, final Object messageToDefer) {
         final CompositeOnComplete<Boolean> stopOnComplete = shardActorsStopping.get(shardName);
         if (stopOnComplete == null) {
@@ -660,43 +605,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         });
 
         return true;
-    }
-
-    private void doCreatePrefixShard(final PrefixShardConfiguration config, final ShardIdentifier shardId,
-            final String shardName) {
-        configuration.addPrefixShardConfiguration(config);
-
-        final Builder builder = newShardDatastoreContextBuilder(shardName);
-        builder.logicalStoreType(config.getPrefix().getDatastoreType())
-                .storeRoot(config.getPrefix().getRootIdentifier());
-        DatastoreContext shardDatastoreContext = builder.build();
-
-        final Map<String, String> peerAddresses = getPeerAddresses(shardName);
-        final boolean isActiveMember = true;
-
-        LOG.debug("{} doCreatePrefixShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
-                persistenceId(), shardId, config.getShardMemberNames(), peerAddresses, isActiveMember);
-
-        final ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
-                shardDatastoreContext, Shard.builder(), peerAddressResolver);
-        info.setActiveMember(isActiveMember);
-        localShards.put(info.getShardName(), info);
-
-        if (schemaContext != null) {
-            info.setSchemaContext(schemaContext);
-            info.setActor(newShardActor(info));
-        }
-    }
-
-    private void onPrefixShardRemoved(final PrefixShardRemoved message) {
-        LOG.debug("{}: onPrefixShardRemoved : {}", persistenceId(), message);
-
-        final DOMDataTreeIdentifier prefix = message.getPrefix();
-        final ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
-                ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
-
-        configuration.removePrefixShardConfiguration(prefix);
-        removeShard(shardId);
     }
 
     private void doCreateShard(final CreateShard createShard) {
