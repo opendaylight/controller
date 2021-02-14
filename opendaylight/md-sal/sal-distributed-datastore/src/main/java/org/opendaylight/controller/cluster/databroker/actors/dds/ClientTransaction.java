@@ -13,10 +13,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.Optional;
-import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCursor;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -53,21 +50,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 @Beta
 public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransaction> {
-
-    private ClientTransactionCursor cursor;
-
     ClientTransaction(final AbstractClientHistory parent, final TransactionIdentifier transactionId) {
         super(parent, transactionId);
     }
 
     private AbstractProxyTransaction ensureTransactionProxy(final YangInstanceIdentifier path) {
         return ensureProxy(path);
-    }
-
-    public DOMDataTreeWriteCursor openCursor() {
-        Preconditions.checkState(cursor == null, "Transaction %s has open cursor", getIdentifier());
-        cursor = new ClientTransactionCursor(this);
-        return cursor;
     }
 
     public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
@@ -115,11 +103,5 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
     @Override
     final AbstractProxyTransaction createProxy(final Long shard) {
         return parent().createTransactionProxy(getIdentifier(), shard);
-    }
-
-    void closeCursor(final @NonNull DOMDataTreeCursor cursorToClose) {
-        if (cursorToClose.equals(this.cursor)) {
-            this.cursor = null;
-        }
     }
 }
