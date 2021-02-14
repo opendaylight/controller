@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Base class for lookup tasks. Lookup tasks are supposed to run repeatedly until successful lookup or maximum retries
  * are hit. This class is NOT thread-safe.
  */
+@Deprecated(forRemoval = true)
 abstract class LookupTask implements Runnable {
     private final int maxRetries;
     private final ActorRef replyTo;

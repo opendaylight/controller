@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * by {@link DistributedShardedDOMDataTree} for updating
  * prefix-shard-configuration upon creating and de-spawning prefix-based shards.
  */
+@Deprecated(forRemoval = true)
 class PrefixedShardConfigWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrefixedShardConfigWriter.class);

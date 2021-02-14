@@ -16,6 +16,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * Sent to the local {@link ShardedDataTreeActor} to initiate the lookup of the shard, once the shard is removed from
  * the system entirely the actor responds with a success.
  */
+@Deprecated(forRemoval = true)
 public class PrefixShardRemovalLookup {
     private final DOMDataTreeIdentifier prefix;
 

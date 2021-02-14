@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.dom.api.LeaderLocationListener;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 
+@Deprecated(forRemoval = true)
 public class RoleChangeListenerActorTest extends AbstractActorTest {
 
     @Test

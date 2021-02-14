@@ -53,6 +53,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public class PrefixShardHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrefixShardHandler.class);

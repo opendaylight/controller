@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, property = "type=default")
+@Deprecated(forRemoval = true)
 public final class OSGiDistributedShardedDOMDataTree
         implements DOMDataTreeService, DOMDataTreeShardingService, DistributedShardFactory {
     private static final Logger LOG = LoggerFactory.getLogger(OSGiDistributedShardedDOMDataTree.class);

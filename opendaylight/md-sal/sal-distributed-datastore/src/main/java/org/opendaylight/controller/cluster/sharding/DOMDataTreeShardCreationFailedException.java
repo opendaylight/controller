@@ -14,6 +14,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * Exception thrown when there was a at any point during the creation of a shard via {@link DistributedShardFactory}.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class DOMDataTreeShardCreationFailedException extends Exception {
     private static final long serialVersionUID = 1L;
 

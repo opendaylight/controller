@@ -25,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(IdIntsDOMDataTreeLIstener.class);
@@ -67,7 +68,7 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
     }
 
     @Override
-    public void onDataTreeFailed(Collection<DOMDataTreeListeningException> causes) {
+    public void onDataTreeFailed(final Collection<DOMDataTreeListeningException> causes) {
 
     }
 

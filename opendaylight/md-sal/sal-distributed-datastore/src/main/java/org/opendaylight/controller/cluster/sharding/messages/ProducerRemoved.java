@@ -18,6 +18,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * attempt to close a producer on the local node.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class ProducerRemoved {
 
     private final Collection<DOMDataTreeIdentifier> subtrees;

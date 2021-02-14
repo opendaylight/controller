@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @author Robert Varga
  */
+@Deprecated(forRemoval = true)
 final class ClientTransactionCursor implements DOMDataTreeWriteCursor {
     private YangInstanceIdentifier current = YangInstanceIdentifier.empty();
     private final ClientTransaction parent;

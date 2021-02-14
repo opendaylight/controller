@@ -74,6 +74,7 @@ import scala.concurrent.duration.FiniteDuration;
  * Actor that tracks currently open producers/shards on remote nodes and handles notifications of remote
  * nodes of newly open producers/shards on the local node.
  */
+@Deprecated(forRemoval = true)
 public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardedDataTreeActor.class);

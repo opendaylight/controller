@@ -16,10 +16,11 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 /**
  * The context for a single shards modification, keeps a ClientTransaction so it can route requests correctly.
  */
+@Deprecated(forRemoval = true)
 public class DistributedShardModificationContext {
 
-    private ClientTransaction transaction;
-    private DOMDataTreeIdentifier identifier;
+    private final ClientTransaction transaction;
+    private final DOMDataTreeIdentifier identifier;
     private DOMDataTreeWriteCursor cursor;
 
     public DistributedShardModificationContext(final ClientTransaction transaction,

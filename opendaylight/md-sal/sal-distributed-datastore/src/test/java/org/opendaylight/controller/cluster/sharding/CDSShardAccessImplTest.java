@@ -39,6 +39,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+@Deprecated(forRemoval = true)
 public class CDSShardAccessImplTest extends AbstractActorTest {
 
     private static final DOMDataTreeIdentifier TEST_ID =

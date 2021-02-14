@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
  * Shard modification that consists of the whole shard context, provides cursors which correctly delegate to subshards
  * if any are present.
  */
+@Deprecated(forRemoval = true)
 public class DistributedShardModification extends WriteableNodeWithSubshard {
 
     private final DistributedShardModificationContext context;

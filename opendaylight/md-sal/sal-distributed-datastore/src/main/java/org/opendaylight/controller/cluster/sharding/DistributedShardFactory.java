@@ -20,6 +20,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
  * shard/replicas that come along with it.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public interface DistributedShardFactory {
     /**
      * Register a new shard that is rooted at the desired prefix with replicas on the provided members.

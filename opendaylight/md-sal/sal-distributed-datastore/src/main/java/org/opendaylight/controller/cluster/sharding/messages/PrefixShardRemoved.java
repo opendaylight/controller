@@ -19,6 +19,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * in the backend ShardManager.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class PrefixShardRemoved implements Serializable {
     private static final long serialVersionUID = 1L;
 
