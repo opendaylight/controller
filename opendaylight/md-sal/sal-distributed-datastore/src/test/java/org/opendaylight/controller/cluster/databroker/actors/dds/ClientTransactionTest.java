@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
-import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
 
 import com.google.common.util.concurrent.FluentFuture;
@@ -24,7 +23,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -60,20 +58,6 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     @Override
     protected void doHandleOperation(final ClientTransaction transaction) {
         transaction.read(PATH);
-    }
-
-    @Test
-    public void testOpenCloseCursor() {
-        final DOMDataTreeWriteCursor cursor = getHandle().openCursor();
-        getHandle().closeCursor(cursor);
-        getHandle().openCursor().delete(PATH.getLastPathArgument());
-        verify(modification).delete(PATH);
-    }
-
-    @Test
-    public void testOpenSecondCursor() throws Exception {
-        getHandle().openCursor();
-        assertOperationThrowsException(getHandle()::openCursor, IllegalStateException.class);
     }
 
     @Test
