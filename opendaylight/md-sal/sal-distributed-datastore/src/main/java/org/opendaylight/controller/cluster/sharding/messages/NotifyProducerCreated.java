@@ -20,6 +20,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * with success/failure based on the attempt result.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class NotifyProducerCreated implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Collection<DOMDataTreeIdentifier> subtrees;

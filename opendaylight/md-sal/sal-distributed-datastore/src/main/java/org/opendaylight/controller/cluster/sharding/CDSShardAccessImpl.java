@@ -51,6 +51,7 @@ import scala.concurrent.Future;
  * creates instances of this class has to call {@link #close()} once it is no
  * longer valid.
  */
+@Deprecated(forRemoval = true)
 final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(CDSShardAccessImpl.class);
 
@@ -164,7 +165,7 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
 
         listeners.add(listener);
 
-        return new LeaderLocationListenerRegistration<L>() {
+        return new LeaderLocationListenerRegistration<>() {
             @Override
             public L getInstance() {
                 return listener;

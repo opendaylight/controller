@@ -53,6 +53,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public class PrefixShardHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrefixShardHandler.class);
@@ -93,7 +94,7 @@ public class PrefixShardHandler {
                 registrations.put(identifier, registration);
 
                 final ListenableFuture<?> ensureFuture = ensureListExists();
-                Futures.addCallback(ensureFuture, new FutureCallback<Object>() {
+                Futures.addCallback(ensureFuture, new FutureCallback<>() {
                     @Override
                     public void onSuccess(final Object result) {
                         LOG.debug("Initial list write successful.");
@@ -189,7 +190,7 @@ public class PrefixShardHandler {
         cursor.close();
 
         final ListenableFuture<?> future = tx.commit();
-        Futures.addCallback(future, new FutureCallback<Object>() {
+        Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final Object result) {
                 try {

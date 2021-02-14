@@ -30,6 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public class PrefixLeaderHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrefixLeaderHandler.class);

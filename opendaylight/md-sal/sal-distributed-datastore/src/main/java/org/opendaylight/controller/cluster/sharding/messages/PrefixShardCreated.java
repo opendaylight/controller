@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
  * with only it's member present.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class PrefixShardCreated {
     private final PrefixShardConfiguration configuration;
 

@@ -20,6 +20,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  * with success/failure based on the attempt result. If the producer doesn't exist on this node report Success.
  */
 @Beta
+@Deprecated(forRemoval = true)
 public class NotifyProducerRemoved implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Collection<DOMDataTreeIdentifier> subtrees;

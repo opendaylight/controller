@@ -20,6 +20,7 @@ import org.opendaylight.mdsal.dom.spi.shard.DOMDataTreeShardWriteTransaction;
 /**
  * Proxy producer implementation that creates transactions that forward all calls to {@link DataStoreClient}.
  */
+@Deprecated(forRemoval = true)
 class ShardProxyProducer implements DOMDataTreeShardProducer {
     private final DOMDataTreeIdentifier shardRoot;
     private final Collection<DOMDataTreeIdentifier> prefixes;
