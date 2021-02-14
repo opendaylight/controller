@@ -59,16 +59,16 @@ public final class DataTreeModificationOutput {
         }
 
         @Override
-        public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+        public void merge(final PathArgument child, final NormalizedNode data) {
             outputPathAndNode("MERGE", child, data);
         }
 
         @Override
-        public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+        public void write(final PathArgument child, final NormalizedNode data) {
             outputPathAndNode("WRITE", child, data);
         }
 
-        private void outputPathAndNode(final String name, final PathArgument child, final NormalizedNode<?, ?> data) {
+        private void outputPathAndNode(final String name, final PathArgument child, final NormalizedNode data) {
             try {
                 output.writeByte('\n');
                 output.write(name.getBytes(StandardCharsets.UTF_8));

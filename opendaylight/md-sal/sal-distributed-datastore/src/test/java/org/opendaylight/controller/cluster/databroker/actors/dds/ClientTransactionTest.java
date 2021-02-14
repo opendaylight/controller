@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionCommitSucc
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
@@ -35,7 +36,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.builder()
             .node(QName.create("ns-1", "node-1"))
             .build();
-    private static final NormalizedNode<?, ?> DATA = Builders.containerBuilder()
+    private static final ContainerNode DATA = Builders.containerBuilder()
             .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(PATH.getLastPathArgument().getNodeType()))
             .build();
 
@@ -69,9 +70,9 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
 
     @Test
     public void testRead() throws Exception {
-        final FluentFuture<Optional<NormalizedNode<?, ?>>> resultFuture = getHandle().read(PATH);
+        final FluentFuture<Optional<NormalizedNode>> resultFuture = getHandle().read(PATH);
         verify(modification).readNode(PATH);
-        final Optional<NormalizedNode<?, ?>> result = getWithTimeout(resultFuture);
+        final Optional<NormalizedNode> result = getWithTimeout(resultFuture);
         assertTrue(result.isPresent());
         assertEquals(DATA, result.get());
     }

@@ -49,9 +49,10 @@ public abstract class AbstractModificationTest {
         cohort.commit();
     }
 
-    protected Optional<NormalizedNode<?, ?>> readData(final YangInstanceIdentifier path) throws Exception {
+    protected Optional<NormalizedNode> readData(final YangInstanceIdentifier path) throws Exception {
+        // FIXME: close the transaction
         DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
-        ListenableFuture<Optional<NormalizedNode<?, ?>>> future = transaction.read(path);
+        ListenableFuture<Optional<NormalizedNode>> future = transaction.read(path);
         return future.get();
     }
 }

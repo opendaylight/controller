@@ -28,7 +28,7 @@ final class ClientBackedReadWriteTransaction extends ClientBackedWriteTransactio
     }
 
     @Override
-    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
         return delegate().read(path);
     }
 

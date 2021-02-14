@@ -231,7 +231,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @return A state snapshot
      */
     @NonNull ShardDataTreeSnapshot takeStateSnapshot() {
-        final NormalizedNode<?, ?> rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
+        final NormalizedNode rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
         final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                 ImmutableMap.builder();
 
@@ -278,7 +278,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         // delete everything first
         mod.delete(YangInstanceIdentifier.empty());
 
-        final Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
+        final Optional<NormalizedNode> maybeNode = snapshot.getRootNode();
         if (maybeNode.isPresent()) {
             // Add everything from the remote node back
             mod.write(YangInstanceIdentifier.empty(), maybeNode.get());
@@ -739,7 +739,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
-    public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
+    public Optional<NormalizedNode> readNode(final YangInstanceIdentifier path) {
         return dataTree.takeSnapshot().readNode(path);
     }
 

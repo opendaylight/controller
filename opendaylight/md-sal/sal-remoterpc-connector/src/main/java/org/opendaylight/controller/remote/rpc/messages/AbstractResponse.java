@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * An abstract base class for invocation responses. Specialized via {@link ActionResponse} and {@link RpcResponse}.
  */
-public abstract class AbstractResponse<T extends NormalizedNode<?, ?>> implements Serializable {
+public abstract class AbstractResponse<T extends NormalizedNode> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final transient @Nullable T output;

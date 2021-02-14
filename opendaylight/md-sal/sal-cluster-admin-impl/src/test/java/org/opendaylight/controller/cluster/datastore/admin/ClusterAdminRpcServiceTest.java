@@ -254,7 +254,7 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(newReplicaNode2.operDataStore(), "cars", "member-1", "member-3");
 
         // Write data to member-2's config datastore and read/verify via member-3
-        final NormalizedNode<?, ?> configCarsNode = writeCarsNodeAndVerify(newReplicaNode2.configDataStore(),
+        final NormalizedNode configCarsNode = writeCarsNodeAndVerify(newReplicaNode2.configDataStore(),
                 newReplicaNode3.configDataStore());
 
         // Write data to member-3's oper datastore and read/verify via member-2
@@ -311,10 +311,10 @@ public class ClusterAdminRpcServiceTest {
         verifyFailedRpcResult(rpcResult);
     }
 
-    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(final AbstractDataStore writeToStore,
+    private static NormalizedNode writeCarsNodeAndVerify(final AbstractDataStore writeToStore,
             final AbstractDataStore readFromStore) throws Exception {
         DOMStoreWriteTransaction writeTx = writeToStore.newWriteOnlyTransaction();
-        NormalizedNode<?, ?> carsNode = CarsModel.create();
+        NormalizedNode carsNode = CarsModel.create();
         writeTx.write(CarsModel.BASE_PATH, carsNode);
 
         DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
@@ -328,8 +328,8 @@ public class ClusterAdminRpcServiceTest {
     }
 
     private static void readCarsNodeAndVerify(final AbstractDataStore readFromStore,
-            final NormalizedNode<?, ?> expCarsNode) throws Exception {
-        Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction().read(CarsModel.BASE_PATH)
+            final NormalizedNode expCarsNode) throws Exception {
+        Optional<NormalizedNode> optional = readFromStore.newReadOnlyTransaction().read(CarsModel.BASE_PATH)
                 .get(15, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());

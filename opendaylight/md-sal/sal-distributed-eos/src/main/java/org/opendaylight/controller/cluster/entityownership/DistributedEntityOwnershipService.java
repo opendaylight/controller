@@ -185,7 +185,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
             return Optional.empty();
         }
 
-        Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
+        Optional<NormalizedNode> entityNode = dataTree.takeSnapshot().readNode(
                 entityPath(forEntity.getType(), forEntity.getIdentifier()));
         if (!entityNode.isPresent()) {
             return Optional.empty();

@@ -154,7 +154,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // Verify the data in the store
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
@@ -176,14 +176,14 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // 2. Write some data
             final YangInstanceIdentifier nodePath = TestModel.TEST_PATH;
-            final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             readWriteTx.write(nodePath, nodeToWrite);
 
             // 3. Read the data from Tx
             final Boolean exists = readWriteTx.exists(nodePath).get(5, TimeUnit.SECONDS);
             assertEquals("exists", Boolean.TRUE, exists);
 
-            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", nodeToWrite, optional.get());
 
@@ -236,7 +236,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final Boolean exists = readWriteTx.exists(carPath).get(5, TimeUnit.SECONDS);
             assertEquals("exists", Boolean.TRUE, exists);
 
-            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
@@ -304,10 +304,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 assertTrue(frontendMetadata.getClients().get(0).getCurrentHistories().isEmpty());
             }
 
-            final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                     .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
-            assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
+            assertEquals("# cars", numCars, ((Collection<?>) optional.get().body()).size());
         }
     }
 
@@ -445,7 +445,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
             // 2. Write some data
-            final NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final NormalizedNode testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             writeTx.write(TestModel.TEST_PATH, testNode);
 
             // 3. Ready the Tx for commit
@@ -471,7 +471,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // the data from the first
             // Tx is visible after being readied.
             DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", testNode, optional.get());
 
@@ -544,7 +544,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
             readWriteTx.merge(personPath, person);
 
-            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
@@ -615,10 +615,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 f.get(5, TimeUnit.SECONDS);
             }
 
-            final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                     .read(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
-            assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
+            assertEquals("# cars", numCars, ((Collection<?>) optional.get().body()).size());
 
             txChain.close();
 
@@ -640,7 +640,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             final DOMStoreReadWriteTransaction rwTx2 = txChain.newReadWriteTransaction();
 
-            final Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+            final Optional<NormalizedNode> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
             assertFalse("isPresent", optional.isPresent());
 
             txChain.close();
@@ -696,10 +696,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
             // Create read-only tx's and issue a read.
-            FluentFuture<Optional<NormalizedNode<?, ?>>> readFuture1 = txChain
+            FluentFuture<Optional<NormalizedNode>> readFuture1 = txChain
                     .newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
-            FluentFuture<Optional<NormalizedNode<?, ?>>> readFuture2 = txChain
+            FluentFuture<Optional<NormalizedNode>> readFuture2 = txChain
                     .newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
             // Create another write tx and issue the write.
@@ -872,7 +872,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
-        NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
+        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
 
         final Snapshot carsSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -881,7 +881,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SchemaContextHelper.full());
 
-        final NormalizedNode<?, ?> peopleNode = PeopleModel.create();
+        final NormalizedNode peopleNode = PeopleModel.create();
         AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
 
         root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
@@ -900,7 +900,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             // two reads
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", carsNode, optional.get());
 
@@ -925,7 +925,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
                     .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(SchemaContext.NAME))
-                    .withChild((ContainerNode) CarsModel.create())
+                    .withChild(CarsModel.create())
                     .build();
 
             testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);

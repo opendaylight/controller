@@ -8,6 +8,6 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-mdsal-model-inventory-${project.version}">
     <feature name="odl-mdsal-model-inventory" version="${project.version}">
-        <feature version="[7,8)">odl-mdsal-model-rfc6991</feature>
+        <feature version="[8,9)">odl-mdsal-model-rfc6991</feature>
     </feature>
 </features>

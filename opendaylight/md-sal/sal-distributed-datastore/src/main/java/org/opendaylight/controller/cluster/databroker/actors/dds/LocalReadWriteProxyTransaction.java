@@ -125,7 +125,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    void doMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
         final CursorAwareDataTreeModification mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring merge to {}", getIdentifier(), path);
@@ -143,7 +143,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    void doWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
         final CursorAwareDataTreeModification mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring write to {}", getIdentifier(), path);
@@ -202,12 +202,12 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
         sealedModification.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
-            public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+            public void write(final PathArgument child, final NormalizedNode data) {
                 b.addModification(new TransactionWrite(current().node(child), data));
             }
 
             @Override
-            public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+            public void merge(final PathArgument child, final NormalizedNode data) {
                 b.addModification(new TransactionMerge(current().node(child), data));
             }
 

@@ -8,10 +8,10 @@
   -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
     <feature name="odl-mdsal-clustering-commons" version="${project.version}">
-        <feature version="[8,9)">odl-apache-commons-lang3</feature>
-        <feature version="[8,9)">odl-dropwizard-metrics</feature>
-        <feature version="[8,9)">odl-servlet-api</feature>
-        <feature version="[6,7)">odl-yangtools-data</feature>
-        <feature version="[6,7)">odl-yangtools-codec</feature>
+        <feature version="[9,10)">odl-apache-commons-lang3</feature>
+        <feature version="[9,10)">odl-dropwizard-metrics</feature>
+        <feature version="[9,10)">odl-servlet-api</feature>
+        <feature version="[7,8)">odl-yangtools-data</feature>
+        <feature version="[7,8)">odl-yangtools-codec</feature>
     </feature>
 </features>

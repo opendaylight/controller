@@ -43,7 +43,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
         private Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
         private NormalizedNodeStreamVersion version;
-        private NormalizedNode<?, ?> rootNode;
+        private NormalizedNode rootNode;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
@@ -111,13 +111,13 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
     private final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See above justification.")
-    private final NormalizedNode<?, ?> rootNode;
+    private final NormalizedNode rootNode;
 
-    public MetadataShardDataTreeSnapshot(final NormalizedNode<?, ?> rootNode) {
+    public MetadataShardDataTreeSnapshot(final NormalizedNode rootNode) {
         this(rootNode, ImmutableMap.of());
     }
 
-    public MetadataShardDataTreeSnapshot(final NormalizedNode<?, ?> rootNode,
+    public MetadataShardDataTreeSnapshot(final NormalizedNode rootNode,
             final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata) {
         this.rootNode = requireNonNull(rootNode);
         this.metadata = ImmutableMap.copyOf(metadata);
@@ -128,7 +128,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
     }
 
     @Override
-    NormalizedNode<?, ?> rootNode() {
+    NormalizedNode rootNode() {
         return rootNode;
     }
 

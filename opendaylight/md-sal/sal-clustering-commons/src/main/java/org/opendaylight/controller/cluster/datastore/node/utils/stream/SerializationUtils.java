@@ -33,24 +33,23 @@ public final class SerializationUtils {
 
     @FunctionalInterface
     public interface Applier<T> {
-        void apply(T instance, YangInstanceIdentifier path, NormalizedNode<?, ?> node);
+        void apply(T instance, YangInstanceIdentifier path, NormalizedNode node);
     }
 
-    public static Optional<NormalizedNode<?, ?>> readNormalizedNode(final DataInput in) throws IOException {
+    public static Optional<NormalizedNode> readNormalizedNode(final DataInput in) throws IOException {
         if (!in.readBoolean()) {
             return Optional.empty();
         }
         return Optional.of(NormalizedNodeDataInput.newDataInput(in).readNormalizedNode());
     }
 
-    public static void writeNormalizedNode(final DataOutput out, final @Nullable NormalizedNode<?, ?> node)
+    public static void writeNormalizedNode(final DataOutput out, final @Nullable NormalizedNode node)
             throws IOException {
         writeNormalizedNode(out, MAGNESIUM, node);
     }
 
-    public static void writeNormalizedNode(final DataOutput out,
-            final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion version,
-            final @Nullable NormalizedNode<?, ?> node) throws IOException {
+    public static void writeNormalizedNode(final DataOutput out, final NormalizedNodeStreamVersion version,
+            final @Nullable NormalizedNode node) throws IOException {
         if (node != null) {
             out.writeBoolean(true);
 
@@ -81,13 +80,13 @@ public final class SerializationUtils {
     public static <T> void readNodeAndPath(final DataInput in, final T instance, final Applier<T> applier)
             throws IOException {
         final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
-        NormalizedNode<?, ?> node = stream.readNormalizedNode();
+        NormalizedNode node = stream.readNormalizedNode();
         YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
         applier.apply(instance, path, node);
     }
 
     public static void writeNodeAndPath(final DataOutput out, final NormalizedNodeStreamVersion version,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws IOException {
+            final YangInstanceIdentifier path, final NormalizedNode node) throws IOException {
         try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
             stream.writeNormalizedNode(node);
             stream.writeYangInstanceIdentifier(path);
@@ -95,7 +94,7 @@ public final class SerializationUtils {
     }
 
     public static void writeNodeAndPath(final DataOutput out, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> node) throws IOException {
+            final NormalizedNode node) throws IOException {
         writeNodeAndPath(out, MAGNESIUM, path, node);
     }
 
@@ -103,13 +102,13 @@ public final class SerializationUtils {
             throws IOException {
         final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
         YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
-        NormalizedNode<?, ?> node = stream.readNormalizedNode();
+        NormalizedNode node = stream.readNormalizedNode();
         applier.apply(instance, path, node);
     }
 
     public static void writePathAndNode(final DataOutput out,
             final org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion version,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws IOException {
+            final YangInstanceIdentifier path, final NormalizedNode node) throws IOException {
         try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
             stream.writeYangInstanceIdentifier(path);
             stream.writeNormalizedNode(node);
@@ -117,7 +116,7 @@ public final class SerializationUtils {
     }
 
     public static void writePathAndNode(final DataOutput out, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> node) throws IOException {
+            final NormalizedNode node) throws IOException {
         writePathAndNode(out, MAGNESIUM, path, node);
     }
 }

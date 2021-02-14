@@ -147,7 +147,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             // Verify the data in the store
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+            Optional<NormalizedNode> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
 
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
@@ -192,7 +192,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
             // Do some reads on the Tx on a separate thread.
             final AtomicReference<FluentFuture<Boolean>> txExistsFuture = new AtomicReference<>();
-            final AtomicReference<FluentFuture<Optional<NormalizedNode<?, ?>>>> txReadFuture = new AtomicReference<>();
+            final AtomicReference<FluentFuture<Optional<NormalizedNode>>> txReadFuture = new AtomicReference<>();
             final AtomicReference<Exception> caughtEx = new AtomicReference<>();
             final CountDownLatch txReadsDone = new CountDownLatch(1);
             final Thread txThread = new Thread(() -> {
@@ -324,7 +324,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
             // Do a read on the Tx on a separate thread.
-            final AtomicReference<FluentFuture<Optional<NormalizedNode<?, ?>>>> txReadFuture = new AtomicReference<>();
+            final AtomicReference<FluentFuture<Optional<NormalizedNode>>> txReadFuture = new AtomicReference<>();
             final AtomicReference<Exception> caughtEx = new AtomicReference<>();
             final CountDownLatch txReadDone = new CountDownLatch(1);
             final Thread txThread = new Thread(() -> {

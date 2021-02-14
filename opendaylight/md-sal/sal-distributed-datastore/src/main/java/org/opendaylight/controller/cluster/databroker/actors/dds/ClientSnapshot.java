@@ -31,7 +31,7 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
         return ensureSnapshotProxy(path).exists(path);
     }
 
-    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).read(path);
     }
 

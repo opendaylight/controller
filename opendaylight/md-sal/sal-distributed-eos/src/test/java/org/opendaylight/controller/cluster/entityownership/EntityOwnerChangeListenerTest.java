@@ -136,7 +136,7 @@ public class EntityOwnerChangeListenerTest {
                 anyBoolean(), anyBoolean());
     }
 
-    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode node)
             throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }

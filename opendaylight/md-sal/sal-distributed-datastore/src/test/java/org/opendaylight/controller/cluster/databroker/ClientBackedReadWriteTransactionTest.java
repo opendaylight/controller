@@ -31,7 +31,7 @@ public class ClientBackedReadWriteTransactionTest
     @Mock
     private ClientTransaction delegate;
     @Mock
-    private NormalizedNode<?, ?> data;
+    private NormalizedNode data;
     @Mock
     private DOMStoreThreePhaseCommitCohort readyCohort;
 
@@ -55,8 +55,8 @@ public class ClientBackedReadWriteTransactionTest
 
     @Test
     public void testRead() throws Exception {
-        final FluentFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.empty());
-        final Optional<NormalizedNode<?, ?>> resultData = result.get();
+        final FluentFuture<Optional<NormalizedNode>> result = object().read(YangInstanceIdentifier.empty());
+        final Optional<NormalizedNode> resultData = result.get();
         assertTrue(resultData.isPresent());
         assertEquals(data, resultData.get());
     }
