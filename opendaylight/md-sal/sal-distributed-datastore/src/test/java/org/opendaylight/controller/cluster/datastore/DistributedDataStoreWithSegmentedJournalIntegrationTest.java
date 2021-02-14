@@ -44,8 +44,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 
 @RunWith(Parameterized.class)
 public class DistributedDataStoreWithSegmentedJournalIntegrationTest
@@ -93,7 +94,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
     @Test
     public void testManyWritesDeletes() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        CollectionNodeBuilder<MapEntryNode, MapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
+        CollectionNodeBuilder<MapEntryNode, SystemMapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
 
         try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
                 testParameter, "testManyWritesDeletes", "module-shards-cars-member-1.conf", true, "cars")) {
@@ -126,7 +127,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
                 }
             }
 
-            final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                     .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
 
@@ -160,7 +161,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
             DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
             MapNode cars = carMapBuilder.build();
 
-            final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                     .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
             assertEquals("restored cars do not match snapshot", cars, optional.get());

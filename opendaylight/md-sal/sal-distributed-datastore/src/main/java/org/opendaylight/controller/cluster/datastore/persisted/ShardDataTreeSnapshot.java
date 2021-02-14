@@ -43,7 +43,7 @@ public abstract class ShardDataTreeSnapshot {
      *
      * @return An optional root node.
      */
-    public abstract Optional<NormalizedNode<?, ?>> getRootNode();
+    public abstract Optional<NormalizedNode> getRootNode();
 
     public abstract void serialize(ObjectOutput out) throws IOException;
 }

@@ -81,7 +81,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    final FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(final YangInstanceIdentifier path) {
+    final FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
         return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path));
     }
 
@@ -105,7 +105,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         // listeners, which we do not want to execute while we are reconnecting.
         if (request instanceof ReadTransactionRequest) {
             final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
-            final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);
+            final Optional<NormalizedNode> result = readOnlyView().readNode(path);
             if (callback != null) {
                 // XXX: FB does not see that callback is final, on stack and has be check for non-null.
                 final Consumer<Response<?, ?>> fbIsStupid = requireNonNull(callback);
@@ -176,12 +176,12 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             LOG.debug("Applying modification {} to successor {}", mod, successor);
             mod.applyToCursor(new AbstractDataTreeModificationCursor() {
                 @Override
-                public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+                public void write(final PathArgument child, final NormalizedNode data) {
                     successor.write(current().node(child), data);
                 }
 
                 @Override
-                public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+                public void merge(final PathArgument child, final NormalizedNode data) {
                     successor.merge(current().node(child), data);
                 }
 

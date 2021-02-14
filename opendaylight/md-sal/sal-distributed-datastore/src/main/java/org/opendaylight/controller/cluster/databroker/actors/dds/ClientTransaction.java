@@ -62,7 +62,7 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         return ensureTransactionProxy(path).exists(path);
     }
 
-    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
         return ensureTransactionProxy(path).read(path);
     }
 
@@ -70,11 +70,11 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         ensureTransactionProxy(path).delete(path);
     }
 
-    public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
         ensureTransactionProxy(path).merge(path, data);
     }
 
-    public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void write(final YangInstanceIdentifier path, final NormalizedNode data) {
         ensureTransactionProxy(path).write(path, data);
     }
 

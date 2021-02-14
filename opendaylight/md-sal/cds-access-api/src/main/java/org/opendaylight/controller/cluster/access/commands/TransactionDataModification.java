@@ -22,14 +22,14 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutpu
  */
 @Beta
 public abstract class TransactionDataModification extends TransactionModification {
-    private final NormalizedNode<?, ?> data;
+    private final NormalizedNode data;
 
-    TransactionDataModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    TransactionDataModification(final YangInstanceIdentifier path, final NormalizedNode data) {
         super(path);
         this.data = requireNonNull(data);
     }
 
-    public final NormalizedNode<?, ?> getData() {
+    public final NormalizedNode getData() {
         return data;
     }
 

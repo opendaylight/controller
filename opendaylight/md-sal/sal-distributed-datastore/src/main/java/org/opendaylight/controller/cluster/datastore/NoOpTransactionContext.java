@@ -72,14 +72,12 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final Boolean havePermit) {
+    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeMerge called path = {}", getIdentifier(), path);
     }
 
     @Override
-    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final Boolean havePermit) {
+    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeWrite called path = {}", getIdentifier(), path);
     }
 }

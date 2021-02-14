@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.datastore.config;
 
 import static java.util.Objects.requireNonNull;
 
-import java.net.URI;
 import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 
 /**
  * Encapsulates information for adding a new module shard configuration.
@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
  * @author Thomas Pantelis
  */
 public class ModuleShardConfiguration {
-    private final URI namespace;
+    private final XMLNamespace namespace;
     private final String moduleName;
     private final String shardName;
     private final String shardStrategyName;
@@ -37,8 +37,9 @@ public class ModuleShardConfiguration {
      *                          is used.
      * @param shardMemberNames the names of the shard's member replicas.
      */
-    public ModuleShardConfiguration(@NonNull URI namespace, @NonNull String moduleName, @NonNull String shardName,
-            @Nullable String shardStrategyName, @NonNull Collection<MemberName> shardMemberNames) {
+    public ModuleShardConfiguration(final @NonNull XMLNamespace namespace, final @NonNull String moduleName,
+            final @NonNull String shardName, final @Nullable String shardStrategyName,
+            final @NonNull Collection<MemberName> shardMemberNames) {
         this.namespace = requireNonNull(namespace, "nameSpace should not be null");
         this.moduleName = requireNonNull(moduleName, "moduleName should not be null");
         this.shardName = requireNonNull(shardName, "shardName should not be null");
@@ -46,7 +47,7 @@ public class ModuleShardConfiguration {
         this.shardMemberNames = requireNonNull(shardMemberNames, "shardMemberNames");
     }
 
-    public URI getNamespace() {
+    public XMLNamespace getNamespace() {
         return namespace;
     }
 

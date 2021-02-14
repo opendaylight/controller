@@ -45,7 +45,6 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -185,7 +184,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
             return Optional.empty();
         }
 
-        Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
+        Optional<NormalizedNode> entityNode = dataTree.takeSnapshot().readNode(
                 entityPath(forEntity.getType(), forEntity.getIdentifier()));
         if (!entityNode.isPresent()) {
             return Optional.empty();
@@ -193,17 +192,16 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
         // Check if there are any candidates, if there are none we do not really have ownership state
         final MapEntryNode entity = (MapEntryNode) entityNode.get();
-        final Optional<DataContainerChild<? extends PathArgument, ?>> optionalCandidates =
-                entity.getChild(CANDIDATE_NODE_ID);
+        final Optional<DataContainerChild> optionalCandidates = entity.findChildByArg(CANDIDATE_NODE_ID);
         final boolean hasCandidates = optionalCandidates.isPresent()
-                && ((MapNode) optionalCandidates.get()).getValue().size() > 0;
+                && ((MapNode) optionalCandidates.get()).body().size() > 0;
         if (!hasCandidates) {
             return Optional.empty();
         }
 
         MemberName localMemberName = context.getCurrentMemberName();
-        Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = entity.getChild(ENTITY_OWNER_NODE_ID);
-        String owner = ownerLeaf.isPresent() ? ownerLeaf.get().getValue().toString() : null;
+        Optional<DataContainerChild> ownerLeaf = entity.findChildByArg(ENTITY_OWNER_NODE_ID);
+        String owner = ownerLeaf.isPresent() ? ownerLeaf.get().body().toString() : null;
         boolean hasOwner = !Strings.isNullOrEmpty(owner);
         boolean isOwner = hasOwner && localMemberName.getName().equals(owner);
 

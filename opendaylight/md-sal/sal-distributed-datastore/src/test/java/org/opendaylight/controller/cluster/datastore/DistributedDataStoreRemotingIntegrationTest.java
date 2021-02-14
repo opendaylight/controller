@@ -115,13 +115,13 @@ import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -246,12 +246,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private static void verifyCars(final DOMStoreReadTransaction readTx, final MapEntryNode... entries)
             throws Exception {
-        final Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
+        final Optional<NormalizedNode> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
 
-        final CollectionNodeBuilder<MapEntryNode, MapNode> listBuilder = ImmutableNodes.mapNodeBuilder(
+        final CollectionNodeBuilder<MapEntryNode, SystemMapNode> listBuilder = ImmutableNodes.mapNodeBuilder(
                 CarsModel.CAR_QNAME);
-        for (final NormalizedNode<?, ?> entry: entries) {
+        for (final NormalizedNode entry: entries) {
             listBuilder.withChild((MapEntryNode) entry);
         }
 
@@ -259,8 +259,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     private static void verifyNode(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> expNode) throws Exception {
-        final Optional<NormalizedNode<?, ?>> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
+            final NormalizedNode expNode) throws Exception {
+        final Optional<NormalizedNode> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expNode, optional.get());
     }
@@ -410,10 +410,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     }
                 });
 
-        final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+        final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                 .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
-        assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
+        assertEquals("# cars", numCars, ((Collection<?>) optional.get().body()).size());
     }
 
     @Test
@@ -476,10 +476,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     }
                 });
 
-        final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+        final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                 .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
-        assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
+        assertEquals("# cars", numCars, ((Collection<?>) optional.get().body()).size());
     }
 
     @Test
@@ -516,11 +516,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
         final YangInstanceIdentifier carsPath = CarsModel.BASE_PATH;
-        final NormalizedNode<?, ?> carsNode = CarsModel.emptyContainer();
+        final NormalizedNode carsNode = CarsModel.emptyContainer();
         writeTx.write(carsPath, carsNode);
 
         final YangInstanceIdentifier peoplePath = PeopleModel.BASE_PATH;
-        final NormalizedNode<?, ?> peopleNode = PeopleModel.emptyContainer();
+        final NormalizedNode peopleNode = PeopleModel.emptyContainer();
         writeTx.write(peoplePath, peopleNode);
 
         followerTestKit.doCommit(writeTx.ready());
@@ -539,11 +539,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertNotNull("newReadWriteTransaction returned null", rwTx);
 
         final YangInstanceIdentifier carsPath = CarsModel.BASE_PATH;
-        final NormalizedNode<?, ?> carsNode = CarsModel.emptyContainer();
+        final NormalizedNode carsNode = CarsModel.emptyContainer();
         rwTx.write(carsPath, carsNode);
 
         final YangInstanceIdentifier peoplePath = PeopleModel.BASE_PATH;
-        final NormalizedNode<?, ?> peopleNode = PeopleModel.emptyContainer();
+        final NormalizedNode peopleNode = PeopleModel.emptyContainer();
         rwTx.write(peoplePath, peopleNode);
 
         followerTestKit.doCommit(rwTx.ready());
@@ -630,7 +630,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
         readWriteTx.merge(personPath, person);
 
-        Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+        Optional<NormalizedNode> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", car, optional.get());
 
@@ -965,7 +965,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         writeTx2.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
-        NormalizedNode<?, ?> people = ImmutableNodes.mapNodeBuilder(PeopleModel.PERSON_QNAME)
+        NormalizedNode people = ImmutableNodes.mapNodeBuilder(PeopleModel.PERSON_QNAME)
                 .withChild(PeopleModel.newPersonEntry("Dude")).build();
         writeTx2.write(PeopleModel.PERSON_LIST_PATH, people);
         final DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
@@ -1340,7 +1340,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", Uint64.valueOf(20000))));
         AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
 
-        final NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.empty());
+        final NormalizedNode snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.empty());
         final Snapshot initialSnapshot = Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
                 Collections.emptyList(), 5, 1, 5, 1, 1, null, null);
@@ -1351,7 +1351,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         initDatastoresWithCars(testName);
 
-        final Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
+        final Optional<NormalizedNode> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
                 CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", readOptional.isPresent());
         assertEquals("Node", carsNode, readOptional.get());
@@ -1374,7 +1374,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
-        final NormalizedNode<?, ?> carsNode = CarsModel.create();
+        final NormalizedNode carsNode = CarsModel.create();
         rwTx.write(CarsModel.BASE_PATH, carsNode);
 
         verifyNode(rwTx, CarsModel.BASE_PATH, carsNode);
@@ -1460,7 +1460,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         leaderTestKit.waitForMembersUp("member-2");
         final ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(SchemaContext.NAME))
-                .withChild((ContainerNode) CarsModel.create())
+                .withChild(CarsModel.create())
                 .build();
 
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
@@ -1512,7 +1512,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     private static void verifySnapshot(final Snapshot actual, final Snapshot expected,
-                                       final NormalizedNode<?, ?> expRoot) {
+                                       final NormalizedNode expRoot) {
         assertEquals("Snapshot getLastAppliedTerm", expected.getLastAppliedTerm(), actual.getLastAppliedTerm());
         assertEquals("Snapshot getLastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", expected.getLastTerm(), actual.getLastTerm());

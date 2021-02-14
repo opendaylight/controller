@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVer
 final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProxy<ReadTransactionSuccess> {
     private static final long serialVersionUID = 1L;
 
-    private Optional<NormalizedNode<?, ?>> data;
+    private Optional<NormalizedNode> data;
     private transient NormalizedNodeStreamVersion streamVersion;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to

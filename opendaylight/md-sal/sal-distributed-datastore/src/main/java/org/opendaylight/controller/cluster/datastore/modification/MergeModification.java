@@ -30,11 +30,11 @@ public class MergeModification extends WriteModification {
         super(version);
     }
 
-    public MergeModification(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public MergeModification(final YangInstanceIdentifier path, final NormalizedNode data) {
         super(path, data);
     }
 
-    MergeModification(final short version, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    MergeModification(final short version, final YangInstanceIdentifier path, final NormalizedNode data) {
         super(version, path, data);
     }
 
@@ -55,7 +55,7 @@ public class MergeModification extends WriteModification {
 
     public static MergeModification fromStream(final NormalizedNodeDataInput in, final short version,
             final ReusableStreamReceiver receiver) throws IOException {
-        final NormalizedNode<?, ?> node = in.readNormalizedNode(receiver);
+        final NormalizedNode node = in.readNormalizedNode(receiver);
         final YangInstanceIdentifier path = in.readYangInstanceIdentifier();
         return new MergeModification(version, path, node);
     }

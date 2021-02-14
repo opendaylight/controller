@@ -73,15 +73,14 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode data) {
         checkRunning(commitImpl);
         checkInstanceIdentifierReferencesData(path,data);
         getSubtransaction(store).write(path, data);
     }
 
     private static void checkInstanceIdentifierReferencesData(final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> data) {
+            final NormalizedNode data) {
         checkArgument(data != null, "Attempted to store null data at %s", path);
         final PathArgument lastArg = path.getLastPathArgument();
         if (lastArg != null) {
@@ -97,8 +96,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode data) {
         checkRunning(commitImpl);
         checkInstanceIdentifierReferencesData(path, data);
         getSubtransaction(store).merge(path, data);

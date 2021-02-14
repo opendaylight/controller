@@ -37,7 +37,7 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testShardDataTreeSnapshotWithNoMetadata() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
+        NormalizedNode expectedNode = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
@@ -55,7 +55,7 @@ public class ShardDataTreeSnapshotTest {
             deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
-        Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
+        Optional<NormalizedNode> actualNode = deserialized.getRootNode();
         assertTrue("rootNode present", actualNode.isPresent());
         assertEquals("rootNode", expectedNode, actualNode.get());
         assertEquals("Deserialized type", MetadataShardDataTreeSnapshot.class, deserialized.getClass());
@@ -64,7 +64,7 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testShardDataTreeSnapshotWithMetadata() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
+        NormalizedNode expectedNode = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
@@ -84,7 +84,7 @@ public class ShardDataTreeSnapshotTest {
             deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
-        Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
+        Optional<NormalizedNode> actualNode = deserialized.getRootNode();
         assertTrue("rootNode present", actualNode.isPresent());
         assertEquals("rootNode", expectedNode, actualNode.get());
         assertEquals("Deserialized type", MetadataShardDataTreeSnapshot.class, deserialized.getClass());

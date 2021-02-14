@@ -33,7 +33,7 @@ public class DeleteModificationTest extends AbstractModificationTest {
         commitTransaction(writeTransaction);
 
         // Check if it's in the datastore
-        Optional<NormalizedNode<?, ?>> data = readData(TestModel.TEST_PATH);
+        Optional<NormalizedNode> data = readData(TestModel.TEST_PATH);
         Assert.assertTrue(data.isPresent());
 
         // Delete stuff from the datastore

@@ -28,7 +28,6 @@ public abstract class AbstractEntityOwnerChangeListener implements DOMDataTreeCh
     }
 
     protected static String extractOwner(final LeafNode<?> ownerLeaf) {
-        return ownerLeaf.getValue().toString();
+        return ownerLeaf.body().toString();
     }
-
 }
