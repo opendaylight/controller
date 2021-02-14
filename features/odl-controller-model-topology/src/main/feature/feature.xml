@@ -8,6 +8,6 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-controller-model-topology-${project.version}">
     <feature name="odl-controller-model-topology" version="${project.version}">
-        <feature version="[7,8)">odl-mdsal-model-draft-clemm-netmod-yang-network-topo-01-minimal</feature>
+        <feature version="[8,9)">odl-mdsal-model-draft-clemm-netmod-yang-network-topo-01-minimal</feature>
     </feature>
 </features>

@@ -8,7 +8,7 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-controller-mdsal-common-${project.version}">
     <feature name="odl-controller-mdsal-common" version="${project.version}">
-        <feature version="[7,8)">odl-mdsal-common</feature>
-        <feature version="[7,8)">odl-mdsal-binding-runtime</feature>
+        <feature version="[8,9)">odl-mdsal-common</feature>
+        <feature version="[8,9)">odl-mdsal-binding-runtime</feature>
     </feature>
 </features>
