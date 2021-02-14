@@ -14,8 +14,6 @@
   <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
   <reference id="notificationPublishService" interface="org.opendaylight.mdsal.binding.api.NotificationPublishService" />
   <reference id="notificationListenerService" interface="org.opendaylight.mdsal.binding.api.NotificationService" />
-  <reference id="domDataTreeService" interface="org.opendaylight.mdsal.dom.api.DOMDataTreeService"/>
-  <reference id="distributedShardFactory" interface="org.opendaylight.controller.cluster.sharding.DistributedShardFactory"/>
   <reference id="configDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface"
              odl:type="distributed-config"/>
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
@@ -62,8 +60,6 @@
     <argument ref="notificationPublishService"/>
     <argument ref="notificationListenerService"/>
     <argument ref="domDataBroker"/>
-    <argument ref="domDataTreeService"/>
-    <argument ref="distributedShardFactory"/>
     <argument ref="configDatastore"/>
     <argument ref="actorSystemProvider"/>
   </bean>
