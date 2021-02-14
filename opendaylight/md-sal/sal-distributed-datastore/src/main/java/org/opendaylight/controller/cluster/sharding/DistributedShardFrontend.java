@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Proxy implementation of a shard that creates forwarding producers to the backend shard.
  */
+@Deprecated(forRemoval = true)
 class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardFrontend.class);
