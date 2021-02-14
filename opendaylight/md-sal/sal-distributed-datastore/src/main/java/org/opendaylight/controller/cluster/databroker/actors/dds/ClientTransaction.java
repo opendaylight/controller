@@ -64,6 +64,7 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         return ensureProxy(path);
     }
 
+    @Deprecated(forRemoval = true)
     public DOMDataTreeWriteCursor openCursor() {
         Preconditions.checkState(cursor == null, "Transaction %s has open cursor", getIdentifier());
         cursor = new ClientTransactionCursor(this);
