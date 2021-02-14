@@ -97,6 +97,7 @@ import scala.concurrent.duration.FiniteDuration;
  * A layer on top of DOMDataTreeService that distributes producer/shard registrations to remote nodes via
  * {@link ShardedDataTreeActor}. Also provides QoL method for addition of prefix based clustered shard into the system.
  */
+@Deprecated(forRemoval = true)
 public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDataTreeShardingService,
         DistributedShardFactory {
 
