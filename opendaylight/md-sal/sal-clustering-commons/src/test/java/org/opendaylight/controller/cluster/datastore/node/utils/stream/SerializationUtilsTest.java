@@ -39,9 +39,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
+import org.opendaylight.yangtools.yang.data.api.schema.UserMapNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.w3c.dom.Document;
@@ -52,7 +52,7 @@ public class SerializationUtilsTest {
 
     @Test
     public void testSerializeDeserializeNodes() throws IOException {
-        final NormalizedNode<?, ?> normalizedNode = createNormalizedNode();
+        final NormalizedNode normalizedNode = createNormalizedNode();
         final byte[] bytes = serializeNormalizedNode(normalizedNode);
         assertEquals(10564, bytes.length);
         assertEquals(normalizedNode, deserializeNormalizedNode(bytes));
@@ -64,14 +64,14 @@ public class SerializationUtilsTest {
                 new ByteArrayInputStream("<xml><data/></xml>".getBytes(Charset.defaultCharset()));
         final Document parse = UntrustedXML.newDocumentBuilder().parse(is);
         final DOMSourceAnyxmlNode anyXmlNode = Builders.anyXmlBuilder()
-                .withNodeIdentifier(id("anyXmlNode"))
+                  .withNodeIdentifier(id("anyXmlNode"))
                 .withValue(new DOMSource(parse))
                 .build();
         final byte[] bytes = serializeNormalizedNode(anyXmlNode);
         assertEquals(113, bytes.length);
-        final NormalizedNode<?, ?> deserialized = deserializeNormalizedNode(bytes);
-        final DOMSource value = (DOMSource) deserialized.getValue();
-        final Diff diff = XMLUnit.compareXML((Document) anyXmlNode.getValue().getNode(),
+        final NormalizedNode deserialized = deserializeNormalizedNode(bytes);
+        final DOMSource value = (DOMSource) deserialized.body();
+        final Diff diff = XMLUnit.compareXML((Document) anyXmlNode.body().getNode(),
                 value.getNode().getOwnerDocument());
         assertTrue(diff.toString(), diff.similar());
     }
@@ -100,7 +100,7 @@ public class SerializationUtilsTest {
     public void testSerializeDeserializePathAndNode() throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput out = new DataOutputStream(bos);
-        final NormalizedNode<?, ?> node = createNormalizedNode();
+        final NormalizedNode node = createNormalizedNode();
         final YangInstanceIdentifier path = YangInstanceIdentifier.create(id("container1"));
         SerializationUtils.writeNodeAndPath(out, path, node);
 
@@ -136,17 +136,17 @@ public class SerializationUtilsTest {
         assertEquals(expected, read);
     }
 
-    private static NormalizedNode<?, ?> deserializeNormalizedNode(final byte[] bytes) throws IOException {
+    private static NormalizedNode deserializeNormalizedNode(final byte[] bytes) throws IOException {
         return SerializationUtils.readNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes))).get();
     }
 
-    private static byte[] serializeNormalizedNode(final NormalizedNode<?, ?> node) throws IOException {
+    private static byte[] serializeNormalizedNode(final NormalizedNode node) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         SerializationUtils.writeNormalizedNode(new DataOutputStream(bos), node);
         return bos.toByteArray();
     }
 
-    private static NormalizedNode<?, ?> createNormalizedNode() {
+    private static NormalizedNode createNormalizedNode() {
         final LeafSetNode<Object> leafSetNode = Builders.leafSetBuilder()
                 .withNodeIdentifier(id("leafSetNode"))
                 .withChild(createLeafSetEntry("leafSetNode", "leafSetValue1"))
@@ -179,7 +179,7 @@ public class SerializationUtilsTest {
                 .withChild(entry1)
                 .withChild(entry2)
                 .build();
-        final OrderedMapNode orderedMapNode = Builders.orderedMapBuilder()
+        final UserMapNode orderedMapNode = Builders.orderedMapBuilder()
                 .withNodeIdentifier(id("orderedMapNode"))
                 .withChild(entry2)
                 .withChild(entry1)

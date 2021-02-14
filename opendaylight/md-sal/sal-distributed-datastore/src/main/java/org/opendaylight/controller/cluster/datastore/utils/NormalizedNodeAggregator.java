@@ -22,11 +22,11 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public final class NormalizedNodeAggregator {
     private final YangInstanceIdentifier rootIdentifier;
-    private final List<Optional<NormalizedNode<?, ?>>> nodes;
+    private final List<Optional<NormalizedNode>> nodes;
     private final DataTree dataTree;
 
     private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode<?, ?>>> nodes, final EffectiveModelContext schemaContext,
+            final List<Optional<NormalizedNode>> nodes, final EffectiveModelContext schemaContext,
             final LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
@@ -39,20 +39,20 @@ public final class NormalizedNodeAggregator {
     /**
      * Combine data from all the nodes in the list into a tree with root as rootIdentifier.
      */
-    public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode<?, ?>>> nodes, final EffectiveModelContext schemaContext,
+    public static Optional<NormalizedNode> aggregate(final YangInstanceIdentifier rootIdentifier,
+            final List<Optional<NormalizedNode>> nodes, final EffectiveModelContext schemaContext,
             final LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
         return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
     }
 
-    private Optional<NormalizedNode<?,?>> aggregate() throws DataValidationFailedException {
+    private Optional<NormalizedNode> aggregate() throws DataValidationFailedException {
         return combine().getRootNode();
     }
 
     private NormalizedNodeAggregator combine() throws DataValidationFailedException {
         final DataTreeModification mod = dataTree.takeSnapshot().newModification();
 
-        for (final Optional<NormalizedNode<?,?>> node : nodes) {
+        for (final Optional<NormalizedNode> node : nodes) {
             if (node.isPresent()) {
                 mod.merge(rootIdentifier, node.get());
             }
@@ -65,7 +65,7 @@ public final class NormalizedNodeAggregator {
         return this;
     }
 
-    private Optional<NormalizedNode<?, ?>> getRootNode() {
+    private Optional<NormalizedNode> getRootNode() {
         return dataTree.takeSnapshot().readNode(rootIdentifier);
     }
 }

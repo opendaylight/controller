@@ -52,7 +52,7 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
             String newOwner = extractOwner(ownerLeaf);
 
             String origOwner = null;
-            Optional<NormalizedNode<?, ?>> dataBefore = changeRoot.getDataBefore();
+            Optional<NormalizedNode> dataBefore = changeRoot.getDataBefore();
             if (dataBefore.isPresent()) {
                 origOwner = extractOwner((LeafNode<?>) changeRoot.getDataBefore().get());
             }

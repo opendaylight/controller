@@ -18,14 +18,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 abstract class TransactionModificationOperation extends TransactionOperation {
     private abstract static class AbstractDataOperation extends TransactionModificationOperation {
-        private final NormalizedNode<?, ?> data;
+        private final NormalizedNode data;
 
-        AbstractDataOperation(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        AbstractDataOperation(final YangInstanceIdentifier path, final NormalizedNode data) {
             super(path);
             this.data = requireNonNull(data);
         }
 
-        final NormalizedNode<?, ?> data() {
+        final NormalizedNode data() {
             return data;
         }
     }
@@ -42,7 +42,7 @@ abstract class TransactionModificationOperation extends TransactionOperation {
     }
 
     static final class MergeOperation extends AbstractDataOperation {
-        MergeOperation(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        MergeOperation(final YangInstanceIdentifier path, final NormalizedNode data) {
             super(path, data);
         }
 
@@ -53,7 +53,7 @@ abstract class TransactionModificationOperation extends TransactionOperation {
     }
 
     static final class WriteOperation extends AbstractDataOperation {
-        WriteOperation(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        WriteOperation(final YangInstanceIdentifier path, final NormalizedNode data) {
             super(path, data);
         }
 

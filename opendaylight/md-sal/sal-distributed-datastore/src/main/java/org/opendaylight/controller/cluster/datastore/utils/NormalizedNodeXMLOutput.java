@@ -40,7 +40,7 @@ public final class NormalizedNodeXMLOutput {
     private NormalizedNodeXMLOutput() {
     }
 
-    public static void toStream(OutputStream outStream, NormalizedNode<?, ?> node)
+    public static void toStream(final OutputStream outStream, final NormalizedNode node)
             throws XMLStreamException, IOException {
         XMLStreamWriter xmlWriter = XOF.createXMLStreamWriter(outStream);
 
@@ -53,7 +53,7 @@ public final class NormalizedNodeXMLOutput {
         }
     }
 
-    public static void toFile(File file, NormalizedNode<?, ?> node) {
+    public static void toFile(final File file, final NormalizedNode node) {
         try (FileOutputStream outStream = new FileOutputStream(file)) {
             toStream(outStream, node);
         } catch (IOException | XMLStreamException e) {

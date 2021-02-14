@@ -130,9 +130,9 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
         @Override
         public String getModuleNameFromNameSpace(final String nameSpace) {
-            if (TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
+            if (TestModel.JUNK_QNAME.getNamespace().toString().equals(nameSpace)) {
                 return TestModel.JUNK_QNAME.getLocalName();
-            } else if (CarsModel.BASE_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
+            } else if (CarsModel.BASE_QNAME.getNamespace().toString().equals(nameSpace)) {
                 return CarsModel.BASE_QNAME.getLocalName();
             }
             return null;
@@ -202,7 +202,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
             final TransactionType type) {
         class CreateTransactionArgumentMatcher implements ArgumentMatcher<CreateTransaction> {
             @Override
-            public boolean matches(CreateTransaction argument) {
+            public boolean matches(final CreateTransaction argument) {
                 return argument.getTransactionId().getHistoryId().getClientId().getFrontendId().getMemberName()
                         .getName().equals(expMemberName) && argument.getTransactionType() == type.ordinal();
             }
@@ -214,7 +214,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     protected DataExists eqDataExists() {
         class DataExistsArgumentMatcher implements ArgumentMatcher<DataExists> {
             @Override
-            public boolean matches(DataExists argument) {
+            public boolean matches(final DataExists argument) {
                 return argument.getPath().equals(TestModel.TEST_PATH);
             }
         }
@@ -229,7 +229,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     protected ReadData eqReadData(final YangInstanceIdentifier path) {
         class ReadDataArgumentMatcher implements ArgumentMatcher<ReadData> {
             @Override
-            public boolean matches(ReadData argument) {
+            public boolean matches(final ReadData argument) {
                 return argument.getPath().equals(path);
             }
         }
@@ -242,7 +242,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
 
-    protected Future<ReadDataReply> readDataReply(final NormalizedNode<?, ?> data) {
+    protected Future<ReadDataReply> readDataReply(final NormalizedNode data) {
         return Futures.successful(new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION));
     }
 
@@ -470,9 +470,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
             while (iter.hasNext()) {
                 Object actual = iter.next();
                 if (CommitTransactionReply.isSerializedType(expReply)
-                        && CommitTransactionReply.isSerializedType(actual)) {
-                    found = true;
-                } else if (expReply instanceof ActorSelection && Objects.equals(expReply, actual)) {
+                        && CommitTransactionReply.isSerializedType(actual) || expReply instanceof ActorSelection && Objects.equals(expReply, actual)) {
                     found = true;
                 } else if (expReply instanceof Class && ((Class<?>) expReply).isInstance(actual)) {
                     found = true;

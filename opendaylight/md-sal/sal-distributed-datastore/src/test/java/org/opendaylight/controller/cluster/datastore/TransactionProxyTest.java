@@ -102,12 +102,12 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
 
-        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
+        Optional<NormalizedNode> readOptional = transactionProxy.read(
                 TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
         assertFalse("NormalizedNode isPresent", readOptional.isPresent());
 
-        NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
@@ -190,7 +190,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadWithPriorRecordingOperationSuccessful() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectBatchedModifications(actorRef, 1);
 
@@ -201,7 +201,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         transactionProxy.write(TestModel.TEST_PATH, expectedNode);
 
-        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
+        Optional<NormalizedNode> readOptional = transactionProxy.read(
                 TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
         assertTrue("NormalizedNode isPresent", readOptional.isPresent());
@@ -299,7 +299,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testExistsWithPriorRecordingOperationSuccessful() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectBatchedModifications(actorRef, 1);
 
@@ -333,7 +333,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         dataStoreContextBuilder.shardBatchedModificationCount(1);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectBatchedModifications(actorRef, 1);
 
@@ -360,16 +360,16 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         expectBatchedModificationsReady(actorRef);
 
-        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         final TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
         final CountDownLatch readComplete = new CountDownLatch(1);
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
         com.google.common.util.concurrent.Futures.addCallback(transactionProxy.read(TestModel.TEST_PATH),
-                new  FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+                new  FutureCallback<Optional<NormalizedNode>>() {
                     @Override
-                    public void onSuccess(final Optional<NormalizedNode<?, ?>> result) {
+                    public void onSuccess(final Optional<NormalizedNode> result) {
                         try {
                             transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
                         } catch (Exception e) {
@@ -422,7 +422,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         dataStoreContextBuilder.shardBatchedModificationCount(1);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectBatchedModifications(actorRef, 1);
 
@@ -451,7 +451,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadWrite() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
@@ -479,7 +479,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadyWithReadWrite() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
@@ -594,7 +594,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectBatchedModificationsReady(actorRef, true);
 
@@ -620,7 +620,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         dataStoreContextBuilder.shardBatchedModificationCount(1).writeOnlyTransactionOptimizationsEnabled(true);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectBatchedModificationsReady(actorRef, true);
 
@@ -649,7 +649,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         expectFailedBatchedModifications(actorRef);
 
@@ -697,7 +697,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         expectReadyLocalTransaction(shardActorRef, true);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
@@ -728,7 +728,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         expectReadyLocalTransaction(shardActorRef, true);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
@@ -741,7 +741,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
@@ -969,7 +969,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         return dataTree;
     }
 
-    private static DataTree createDataTree(final NormalizedNode<?, ?> readResponse) {
+    private static DataTree createDataTree(final NormalizedNode readResponse) {
         DataTree dataTree = mock(DataTree.class);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
         DataTreeModification dataTreeModification = mock(DataTreeModification.class);
@@ -985,7 +985,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testWriteCompletionForLocalShard() {
         completeOperationLocal(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
@@ -997,7 +997,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testWriteThrottlingWhenShardFound() {
         throttleOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectIncompleteBatchedModifications();
 
@@ -1011,7 +1011,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testWriteThrottlingWhenShardNotFound() {
         // Confirm that there is no throttling when the Shard is not found
         completeOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectBatchedModifications(2);
 
@@ -1026,7 +1026,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testWriteCompletion() {
         completeOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectBatchedModifications(2);
 
@@ -1039,7 +1039,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testMergeThrottlingWhenShardFound() {
         throttleOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectIncompleteBatchedModifications();
 
@@ -1052,7 +1052,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testMergeThrottlingWhenShardNotFound() {
         completeOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectBatchedModifications(2);
 
@@ -1065,7 +1065,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testMergeCompletion() {
         completeOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectBatchedModifications(2);
 
@@ -1079,7 +1079,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testMergeCompletionForLocalShard() {
         completeOperationLocal(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
@@ -1167,7 +1167,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testReadCompletion() {
         completeOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             doReturn(readDataReply(nodeToRead)).when(mockActorContext).executeOperationAsync(
                     any(ActorSelection.class), eqReadData(), any(Timeout.class));
@@ -1181,7 +1181,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testReadCompletionForLocalShard() {
-        final NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         completeOperationLocal(transactionProxy -> {
             transactionProxy.read(TestModel.TEST_PATH);
 
@@ -1242,7 +1242,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testExistsCompletionForLocalShard() {
-        final NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         completeOperationLocal(transactionProxy -> {
             transactionProxy.exists(TestModel.TEST_PATH);
 
@@ -1265,7 +1265,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadyThrottling() {
 
         throttleOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
             expectBatchedModifications(1);
 
@@ -1278,8 +1278,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testReadyThrottlingWithTwoTransactionContexts() {
         throttleOperation(transactionProxy -> {
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            NormalizedNode<?, ?> carsNode = ImmutableNodes.containerNode(CarsModel.BASE_QNAME);
+            NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode carsNode = ImmutableNodes.containerNode(CarsModel.BASE_QNAME);
 
             expectBatchedModifications(2);
 
@@ -1303,22 +1303,22 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         expectBatchedModifications(actorRef, shardBatchedModificationCount);
 
         YangInstanceIdentifier writePath1 = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         YangInstanceIdentifier writePath2 = TestModel.OUTER_LIST_PATH;
-        NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+        NormalizedNode writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
         YangInstanceIdentifier writePath3 = TestModel.INNER_LIST_PATH;
-        NormalizedNode<?, ?> writeNode3 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
+        NormalizedNode writeNode3 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
 
         YangInstanceIdentifier mergePath1 = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         YangInstanceIdentifier mergePath2 = TestModel.OUTER_LIST_PATH;
-        NormalizedNode<?, ?> mergeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+        NormalizedNode mergeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
         YangInstanceIdentifier mergePath3 = TestModel.INNER_LIST_PATH;
-        NormalizedNode<?, ?> mergeNode3 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
+        NormalizedNode mergeNode3 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
 
         YangInstanceIdentifier deletePath1 = TestModel.TEST_PATH;
         YangInstanceIdentifier deletePath2 = TestModel.OUTER_LIST_PATH;
@@ -1379,16 +1379,16 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         expectBatchedModifications(actorRef, shardBatchedModificationCount);
 
         final YangInstanceIdentifier writePath1 = TestModel.TEST_PATH;
-        final NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         YangInstanceIdentifier writePath2 = TestModel.OUTER_LIST_PATH;
-        NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
+        NormalizedNode writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
         final YangInstanceIdentifier mergePath1 = TestModel.TEST_PATH;
-        final NormalizedNode<?, ?> mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         YangInstanceIdentifier mergePath2 = TestModel.INNER_LIST_PATH;
-        NormalizedNode<?, ?> mergeNode2 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
+        NormalizedNode mergeNode2 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
 
         final YangInstanceIdentifier deletePath = TestModel.OUTER_LIST_PATH;
 
@@ -1406,7 +1406,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         transactionProxy.write(writePath1, writeNode1);
         transactionProxy.write(writePath2, writeNode2);
 
-        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(writePath2).get(5, TimeUnit.SECONDS);
+        Optional<NormalizedNode> readOptional = transactionProxy.read(writePath2).get(5, TimeUnit.SECONDS);
 
         assertTrue("NormalizedNode isPresent", readOptional.isPresent());
         assertEquals("Response NormalizedNode", writeNode2, readOptional.get());
@@ -1463,8 +1463,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
         doReturn(Sets.newHashSet("test", "cars")).when(configuration).getAllShardNames();
 
-        NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
+        NormalizedNode expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
         setUpReadData("test", NormalizedNodeAggregatorTest.getRootNode(expectedNode1, schemaContext));
         setUpReadData("cars", NormalizedNodeAggregatorTest.getRootNode(expectedNode2, schemaContext));
@@ -1475,19 +1475,19 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
-        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
+        Optional<NormalizedNode> readOptional = transactionProxy.read(
                 YangInstanceIdentifier.empty()).get(5, TimeUnit.SECONDS);
 
         assertTrue("NormalizedNode isPresent", readOptional.isPresent());
 
-        NormalizedNode<?, ?> normalizedNode = readOptional.get();
+        NormalizedNode normalizedNode = readOptional.get();
 
-        assertTrue("Expect value to be a Collection", normalizedNode.getValue() instanceof Collection);
+        assertTrue("Expect value to be a Collection", normalizedNode.body() instanceof Collection);
 
         @SuppressWarnings("unchecked")
-        Collection<NormalizedNode<?,?>> collection = (Collection<NormalizedNode<?,?>>) normalizedNode.getValue();
+        Collection<NormalizedNode> collection = (Collection<NormalizedNode>) normalizedNode.body();
 
-        for (NormalizedNode<?,?> node : collection) {
+        for (NormalizedNode node : collection) {
             assertTrue("Expected " + node + " to be a ContainerNode", node instanceof ContainerNode);
         }
 
@@ -1503,7 +1503,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
 
-    private void setUpReadData(final String shardName, final NormalizedNode<?, ?> expectedNode) {
+    private void setUpReadData(final String shardName, final NormalizedNode expectedNode) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 

@@ -201,7 +201,7 @@ public class UintAdaptingPrunerTest {
                 .build()));
     }
 
-    private static NormalizedNode<?, ?> prune(final NormalizedNode<?, ?> node) throws IOException {
+    private static NormalizedNode prune(final NormalizedNode node) throws IOException {
         final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forSchemaContext(CONTEXT)
                 .withUintAdaption();
         pruner.initializeForPath(YangInstanceIdentifier.create(node.getIdentifier()));

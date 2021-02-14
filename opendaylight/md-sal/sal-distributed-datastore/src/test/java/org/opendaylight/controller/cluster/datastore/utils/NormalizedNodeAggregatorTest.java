@@ -39,24 +39,24 @@ public class NormalizedNodeAggregatorTest {
     public void testAggregate() throws InterruptedException, ExecutionException,
         DataValidationFailedException {
         EffectiveModelContext schemaContext = SchemaContextHelper.full();
-        NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
+        NormalizedNode expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
-        Optional<NormalizedNode<?, ?>> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(),
+        Optional<NormalizedNode> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(),
                 ImmutableList.of(
-                        Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode1, schemaContext)),
-                        Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode2, schemaContext))),
+                        Optional.<NormalizedNode>of(getRootNode(expectedNode1, schemaContext)),
+                        Optional.<NormalizedNode>of(getRootNode(expectedNode2, schemaContext))),
                 schemaContext, LogicalDatastoreType.CONFIGURATION);
 
 
-        NormalizedNode<?,?> normalizedNode = optional.get();
+        NormalizedNode normalizedNode = optional.get();
 
-        assertTrue("Expect value to be a Collection", normalizedNode.getValue() instanceof Collection);
+        assertTrue("Expect value to be a Collection", normalizedNode.body() instanceof Collection);
 
         @SuppressWarnings("unchecked")
-        Collection<NormalizedNode<?,?>> collection = (Collection<NormalizedNode<?,?>>) normalizedNode.getValue();
+        Collection<NormalizedNode> collection = (Collection<NormalizedNode>) normalizedNode.body();
 
-        for (NormalizedNode<?,?> node : collection) {
+        for (NormalizedNode node : collection) {
             assertTrue("Expected " + node + " to be a ContainerNode", node instanceof ContainerNode);
         }
 
@@ -72,14 +72,14 @@ public class NormalizedNodeAggregatorTest {
 
     }
 
-    public static NormalizedNode<?, ?> getRootNode(final NormalizedNode<?, ?> moduleNode,
+    public static NormalizedNode getRootNode(final NormalizedNode moduleNode,
             final EffectiveModelContext schemaContext) throws ExecutionException, InterruptedException {
         try (InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
             store.onModelContextUpdated(schemaContext);
 
             DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
-            writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.getNodeType()), moduleNode);
+            writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.getIdentifier().getNodeType()), moduleNode);
 
             DOMStoreThreePhaseCommitCohort ready = writeTransaction.ready();
 
@@ -89,18 +89,18 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
-            FluentFuture<Optional<NormalizedNode<?, ?>>> read = readTransaction.read(YangInstanceIdentifier.empty());
+            FluentFuture<Optional<NormalizedNode>> read = readTransaction.read(YangInstanceIdentifier.empty());
 
-            Optional<NormalizedNode<?, ?>> nodeOptional = read.get();
+            Optional<NormalizedNode> nodeOptional = read.get();
 
             return nodeOptional.get();
         }
     }
 
-    public static NormalizedNode<?,?> findChildWithQName(final Collection<NormalizedNode<?, ?>> collection,
+    public static NormalizedNode findChildWithQName(final Collection<NormalizedNode> collection,
             final QName qname) {
-        for (NormalizedNode<?, ?> node : collection) {
-            if (node.getNodeType().equals(qname)) {
+        for (NormalizedNode node : collection) {
+            if (node.getIdentifier().getNodeType().equals(qname)) {
                 return node;
             }
         }

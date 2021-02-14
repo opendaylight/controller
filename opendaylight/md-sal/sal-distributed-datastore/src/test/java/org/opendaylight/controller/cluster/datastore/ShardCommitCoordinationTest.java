@@ -555,7 +555,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
     static void verifyInnerListEntry(TestActorRef<Shard> shard, int outerID, String innerID) {
         final YangInstanceIdentifier path = innerEntryPath(outerID, innerID);
-        final NormalizedNode<?, ?> innerListEntry = readStore(shard, path);
+        final NormalizedNode innerListEntry = readStore(shard, path);
         assertNotNull(path + " not found", innerListEntry);
     }
 }

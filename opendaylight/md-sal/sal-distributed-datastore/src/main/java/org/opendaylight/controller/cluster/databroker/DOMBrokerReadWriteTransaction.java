@@ -26,14 +26,14 @@ public class DOMBrokerReadWriteTransaction extends AbstractDOMBrokerWriteTransac
      * @param identifier identifier of transaction.
      * @param storeTxFactories the backing transaction store factories
      */
-    protected DOMBrokerReadWriteTransaction(Object identifier,
-            Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory>  storeTxFactories,
+    protected DOMBrokerReadWriteTransaction(final Object identifier,
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory>  storeTxFactories,
             final AbstractDOMTransactionFactory<?> commitImpl) {
         super(identifier, storeTxFactories, commitImpl);
     }
 
     @Override
-    public FluentFuture<Optional<NormalizedNode<?,?>>> read(final LogicalDatastoreType store,
+    public FluentFuture<Optional<NormalizedNode>> read(final LogicalDatastoreType store,
             final YangInstanceIdentifier path) {
         return getSubtransaction(store).read(path);
     }
@@ -44,7 +44,7 @@ public class DOMBrokerReadWriteTransaction extends AbstractDOMBrokerWriteTransac
     }
 
     @Override
-    protected DOMStoreReadWriteTransaction createTransaction(LogicalDatastoreType key) {
+    protected DOMStoreReadWriteTransaction createTransaction(final LogicalDatastoreType key) {
         return getTxFactory(key).newReadWriteTransaction();
     }
 }

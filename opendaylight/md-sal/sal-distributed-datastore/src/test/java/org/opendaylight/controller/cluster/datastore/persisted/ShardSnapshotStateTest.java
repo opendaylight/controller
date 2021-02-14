@@ -27,7 +27,7 @@ public class ShardSnapshotStateTest {
 
     @Test
     public void testSerialization() {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
+        NormalizedNode expectedNode = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 

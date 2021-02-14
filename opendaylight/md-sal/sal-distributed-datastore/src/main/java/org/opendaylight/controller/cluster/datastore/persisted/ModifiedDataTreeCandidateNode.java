@@ -49,7 +49,7 @@ abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNo
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> getDataAfter() {
+    public final Optional<NormalizedNode> getDataAfter() {
         throw new UnsupportedOperationException("After-image not available after serialization");
     }
 

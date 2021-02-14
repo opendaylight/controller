@@ -30,7 +30,7 @@ public class ReadDataReplyTest {
 
     @Test
     public void testSerialization() {
-        NormalizedNode<?, ?> data = ImmutableContainerNodeBuilder.create()
+        NormalizedNode data = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 

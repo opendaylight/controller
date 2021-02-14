@@ -41,7 +41,7 @@ abstract class AbstractDataTreeCandidateNode implements DataTreeCandidateNode {
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> getDataBefore() {
+    public final Optional<NormalizedNode> getDataBefore() {
         throw new UnsupportedOperationException("Before-image not available after serialization");
     }
 
@@ -53,7 +53,7 @@ abstract class AbstractDataTreeCandidateNode implements DataTreeCandidateNode {
             }
 
             @Override
-            public Optional<NormalizedNode<?, ?>> getDataAfter() {
+            public Optional<NormalizedNode> getDataAfter() {
                 throw new UnsupportedOperationException("After-image not available after serialization");
             }
 

@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -24,19 +27,19 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
 
     @Test
     public void getDataTest() {
-        final Optional<NormalizedNode<?, ?>> result = OBJECT.getData();
-        Assert.assertFalse(result.isPresent());
+        final Optional<NormalizedNode> result = OBJECT.getData();
+        assertFalse(result.isPresent());
     }
 
     @Test
     public void cloneAsVersionTest() {
         final ReadTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, clone);
     }
 
     @Override
-    protected void doAdditionalAssertions(Object deserialize) {
-        Assert.assertTrue(deserialize instanceof ReadTransactionSuccess);
-        Assert.assertEquals(OBJECT.getData(), ((ReadTransactionSuccess) deserialize).getData());
+    protected void doAdditionalAssertions(final Object deserialize) {
+        assertTrue(deserialize instanceof ReadTransactionSuccess);
+        assertEquals(OBJECT.getData(), ((ReadTransactionSuccess) deserialize).getData());
     }
 }

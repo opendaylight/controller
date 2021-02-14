@@ -327,7 +327,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     void testWriteTransaction(final AbstractDataStore dataStore, final YangInstanceIdentifier nodePath,
-            final NormalizedNode<?, ?> nodeToWrite) throws Exception {
+            final NormalizedNode nodeToWrite) throws Exception {
 
         // 1. Create a write-only Tx
 
@@ -350,7 +350,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
         DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-        Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
+        Optional<NormalizedNode> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", nodeToWrite, optional.get());
     }

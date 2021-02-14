@@ -26,13 +26,13 @@ public class DOMBrokerReadOnlyTransaction
      *
      * @param identifier Identifier of transaction.
      */
-    protected DOMBrokerReadOnlyTransaction(Object identifier,
-            Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
+    protected DOMBrokerReadOnlyTransaction(final Object identifier,
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         super(identifier, storeTxFactories);
     }
 
     @Override
-    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final LogicalDatastoreType store,
+    public FluentFuture<Optional<NormalizedNode>> read(final LogicalDatastoreType store,
             final YangInstanceIdentifier path) {
         return getSubtransaction(store).read(path);
     }
@@ -48,7 +48,7 @@ public class DOMBrokerReadOnlyTransaction
     }
 
     @Override
-    protected DOMStoreReadTransaction createTransaction(LogicalDatastoreType key) {
+    protected DOMStoreReadTransaction createTransaction(final LogicalDatastoreType key) {
         return getTxFactory(key).newReadOnlyTransaction();
     }
 }
