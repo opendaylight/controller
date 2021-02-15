@@ -1,0 +1,245 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77b41a7a_81a197a6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "can be final",
+      "range": {
+        "startLine": 214,
+        "startChar": 4,
+        "endLine": 214,
+        "endChar": 37
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "730c22de_1a3cde27",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "Do we need unit test for this class?",
+      "range": {
+        "startLine": 43,
+        "startChar": 19,
+        "endLine": 43,
+        "endChar": 35
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79e639e4_20265976",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "Can it be final?",
+      "range": {
+        "startLine": 47,
+        "startChar": 23,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05a9080a_90465bcb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "else if?",
+      "range": {
+        "startLine": 94,
+        "startChar": 9,
+        "endLine": 94,
+        "endChar": 12
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c9034ee_336e6879",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "code style(missing whitespace) - probably use code formatter?",
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4de354d7_4e63c0f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "Will this exception cause partial creation of JSON? \nProbably we need just log it or write \"Unsupported Node\" to JSON?",
+      "range": {
+        "startLine": 195,
+        "startChar": 16,
+        "endLine": 195,
+        "endChar": 109
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f296a205_578406e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "You can use try-with-resources with several resources. \nE.G.:\n    try (FileOutputStream fileOutputStream \u003d new FileOutputStream(filePath);\n             Writer fileWriter \u003d new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8)){\n            ...\n        }",
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1375d399_936f541e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "I believe fileOutputStream need to be closed",
+      "range": {
+        "startLine": 206,
+        "startChar": 25,
+        "endLine": 206,
+        "endChar": 42
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4086c4ee_7d654ce1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "Probably better create OutputStreamWriter and try-with-resources in one place - this will avoid problem in case of future refactoring.",
+      "range": {
+        "startLine": 207,
+        "startChar": 28,
+        "endLine": 207,
+        "endChar": 92
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7254dfd9_91000fb1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "same issue as above",
+      "range": {
+        "startLine": 216,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 5
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dea41e71_d943c3ff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 8808
+      },
+      "writtenOn": "2021-02-15T19:00:44Z",
+      "side": 1,
+      "message": "Same issue as above",
+      "range": {
+        "startLine": 292,
+        "startChar": 24,
+        "endLine": 292,
+        "endChar": 117
+      },
+      "revId": "65b60fadea4ce2bc46f3b2ead23cd4db0aaab8ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
