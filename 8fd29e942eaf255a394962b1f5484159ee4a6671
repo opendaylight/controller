@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9522966_43d39122",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 8762
+      },
+      "writtenOn": "2021-02-15T10:27:27Z",
+      "side": 1,
+      "message": "is it possible to make it final?",
+      "revId": "8fd29e942eaf255a394962b1f5484159ee4a6671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
