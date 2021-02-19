@@ -39,7 +39,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
               <groupId>org.glassfish.jersey.test-framework.providers</groupId>
               <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-              <version>2.4</version>
               <scope>test</scope>
         </dependency>
     </dependencies>

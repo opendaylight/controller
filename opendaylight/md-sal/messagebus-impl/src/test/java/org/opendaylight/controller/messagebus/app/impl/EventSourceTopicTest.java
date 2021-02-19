@@ -39,6 +39,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
+@Deprecated(forRemoval = true)
 public class EventSourceTopicTest {
 
     EventSourceTopic eventSourceTopic;

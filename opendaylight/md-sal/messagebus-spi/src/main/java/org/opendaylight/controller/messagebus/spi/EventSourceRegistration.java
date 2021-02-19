@@ -12,10 +12,9 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 /**
  * Instance of EventSourceRegistration is returned by {@link EventSourceRegistry#registerEventSource(EventSource)}
  * and it is used to unregister EventSource.
- *
  */
+@Deprecated(forRemoval = true)
 public interface EventSourceRegistration<T extends EventSource> extends ObjectRegistration<T> {
-
     @Override
     void close();
 }

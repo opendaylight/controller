@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  * @author ppalmar
  */
+@Deprecated(forRemoval = true)
 public class UtilTest {
 
     @Test

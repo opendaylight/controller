@@ -13,6 +13,7 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
+@Deprecated(forRemoval = true)
 public class TopicDOMNotification implements DOMNotification {
     private static final @NonNull Absolute TOPIC_NOTIFICATION_ID = Absolute.of(TopicNotification.QNAME);
 

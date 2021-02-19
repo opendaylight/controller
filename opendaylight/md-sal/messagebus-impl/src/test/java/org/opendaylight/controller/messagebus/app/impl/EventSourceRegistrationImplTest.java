@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.messagebus.spi.EventSource;
 
+@Deprecated(forRemoval = true)
 public class EventSourceRegistrationImplTest {
 
     EventSourceRegistrationImplLocal eventSourceRegistrationImplLocal;
@@ -42,7 +43,7 @@ public class EventSourceRegistrationImplTest {
 
 
     private class EventSourceRegistrationImplLocal extends EventSourceRegistrationImpl<EventSource> {
-        EventSourceRegistrationImplLocal(EventSource instance, EventSourceTopology eventSourceTopology) {
+        EventSourceRegistrationImplLocal(final EventSource instance, final EventSourceTopology eventSourceTopology) {
             super(instance, eventSourceTopology);
         }
     }

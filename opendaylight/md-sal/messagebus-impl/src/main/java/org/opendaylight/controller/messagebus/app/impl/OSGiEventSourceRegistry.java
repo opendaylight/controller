@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 @Beta
 @Component(immediate = true)
+@Deprecated(forRemoval = true)
 public final class OSGiEventSourceRegistry implements EventSourceRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(OSGiEventSourceRegistry.class);
 

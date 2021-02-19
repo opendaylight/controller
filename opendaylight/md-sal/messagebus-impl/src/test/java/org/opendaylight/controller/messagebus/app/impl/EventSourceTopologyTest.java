@@ -49,6 +49,7 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Deprecated(forRemoval = true)
 public class EventSourceTopologyTest {
 
     EventSourceTopology eventSourceTopology;

@@ -42,14 +42,16 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public final class EventSourceTopic implements DataTreeChangeListener<Node>, AutoCloseable {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EventSourceTopic.class);
+
+    private final CopyOnWriteArraySet<InstanceIdentifier<?>> joinedEventSources = new CopyOnWriteArraySet<>();
     private final NotificationPattern notificationPattern;
     private final EventSourceService sourceService;
     private final Pattern nodeIdPattern;
     private final TopicId topicId;
     private ListenerRegistration<?> listenerRegistration;
-    private final CopyOnWriteArraySet<InstanceIdentifier<?>> joinedEventSources = new CopyOnWriteArraySet<>();
 
     public static EventSourceTopic create(final NotificationPattern notificationPattern,
             final String nodeIdRegexPattern, final EventSourceTopology eventSourceTopology) {

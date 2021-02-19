@@ -10,6 +10,7 @@ package org.opendaylight.controller.messagebus.spi;
 /**
  * EventSourceRegistry is used to register {@link EventSource}.
  */
+@Deprecated(forRemoval = true)
 public interface EventSourceRegistry extends AutoCloseable {
 
     /**

@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
+@Deprecated(forRemoval = true)
 public final class Util {
     private Util() {
     }

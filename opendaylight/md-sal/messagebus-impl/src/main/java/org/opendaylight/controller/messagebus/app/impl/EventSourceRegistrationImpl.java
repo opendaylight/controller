@@ -13,6 +13,7 @@ import org.opendaylight.controller.messagebus.spi.EventSource;
 import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
+@Deprecated(forRemoval = true)
 class EventSourceRegistrationImpl<T extends EventSource> extends AbstractObjectRegistration<T>
         implements EventSourceRegistration<T> {
 
@@ -24,7 +25,7 @@ class EventSourceRegistrationImpl<T extends EventSource> extends AbstractObjectR
      * @param instance of EventSource that has been registered by
      *     {@link EventSourceRegistryImpl#registerEventSource(Node, EventSource)}
      */
-    EventSourceRegistrationImpl(T instance, EventSourceTopology eventSourceTopology) {
+    EventSourceRegistrationImpl(final T instance, final EventSourceTopology eventSourceTopology) {
         super(instance);
         this.eventSourceTopology = requireNonNull(eventSourceTopology);
     }

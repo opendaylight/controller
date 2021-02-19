@@ -20,9 +20,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * EventSourceRegistry will call method JoinTopic to request EventSource to publish notification.
  * Event source must implement method JoinTopic (from superinterface {@link EventSourceService}).
  */
-
+@Deprecated(forRemoval = true)
 public interface EventSource extends EventSourceService, AutoCloseable {
-
     /**
      * Identifier of node associated with event source.
      *

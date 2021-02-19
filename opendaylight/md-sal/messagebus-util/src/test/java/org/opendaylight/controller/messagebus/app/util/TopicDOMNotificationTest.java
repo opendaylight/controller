@@ -19,6 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
+@Deprecated(forRemoval = true)
 public class TopicDOMNotificationTest {
 
     private static final String CONTAINER_NODE_BODY_MOCK_TO_STRING = "containerNodeBodyMock";

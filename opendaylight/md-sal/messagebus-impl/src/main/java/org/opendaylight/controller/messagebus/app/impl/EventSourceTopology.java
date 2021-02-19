@@ -57,6 +57,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(forRemoval = true)
 public class EventSourceTopology implements EventAggregatorService, EventSourceRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(EventSourceTopology.class);
 
@@ -79,7 +80,7 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
     private final RpcProviderService rpcRegistry;
 
     public EventSourceTopology(final DataBroker dataBroker, final RpcProviderService providerService,
-            RpcConsumerRegistry rpcService) {
+            final RpcConsumerRegistry rpcService) {
 
         this.dataBroker = dataBroker;
         this.rpcRegistry = providerService;
