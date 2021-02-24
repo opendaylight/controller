@@ -75,7 +75,7 @@
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
                 <artifactId>akka-testkit_2.13</artifactId>
-                <version>2.6.12</version>
+                <version>2.6.13</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -87,7 +87,7 @@
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
                 <artifactId>akka-persistence-tck_2.13</artifactId>
-                <version>2.6.12</version>
+                <version>2.6.13</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -108,17 +108,17 @@
             <dependency>
                 <groupId>org.agrona</groupId>
                 <artifactId>agrona</artifactId>
-                <version>1.8.0</version>
+                <version>1.9.0</version>
             </dependency>
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-client</artifactId>
-                <version>1.31.1</version>
+                <version>1.32.0</version>
             </dependency>
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-driver</artifactId>
-                <version>1.31.1</version>
+                <version>1.32.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
