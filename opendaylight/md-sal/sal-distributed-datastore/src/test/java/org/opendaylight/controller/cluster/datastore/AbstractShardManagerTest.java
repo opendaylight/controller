@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -15,6 +16,7 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.util.concurrent.SettableFuture;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
@@ -78,6 +80,7 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
         InMemorySnapshotStore.clear();
 
         mockShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        await().atMost(Duration.ofSeconds(10)).until(mockShardActor::isTerminated);
         mockShardActor = null;
 
         actorFactory.close();
