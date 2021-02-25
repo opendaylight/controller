@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>akka-aggregator</artifactId>
-    <version>3.0.7-SNAPSHOT</version>
+    <version>3.0.7</version>
     <packaging>pom</packaging>
 
     <properties>
