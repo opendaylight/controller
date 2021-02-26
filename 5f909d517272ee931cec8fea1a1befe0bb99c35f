@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b683e99_b4f9faae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 59
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 8762
+      },
+      "writtenOn": "2021-02-26T11:41:17Z",
+      "side": 1,
+      "message": "I\u0027m not sure that\u0027s a good idea, is this related to the failing test? I assume we have to fix tests(probably the shared state or whatever is causing the issue) instead of setting this parameter to false.",
+      "revId": "5f909d517272ee931cec8fea1a1befe0bb99c35f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
