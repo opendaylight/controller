@@ -21,14 +21,6 @@
     <name>OpenDaylight :: Controller :: Broker (local)</name>
     <description>OpenDaylight Controller stack without clustering</description>
 
-    <properties>
-        <!-- FIXME: CONTROLLER-1584:
-            - mdsal-eos-dom-simple does not activate
-            - we need a DOMDataBroker instance activation
-            -->
-        <skip.karaf.featureTest>true</skip.karaf.featureTest>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
