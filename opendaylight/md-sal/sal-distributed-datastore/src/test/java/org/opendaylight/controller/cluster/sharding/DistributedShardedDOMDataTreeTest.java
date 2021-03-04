@@ -98,7 +98,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardedDOMDataTreeRemotingTest.class);
 
     private static final Address MEMBER_1_ADDRESS =
-            AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+            AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
 
     private static final DOMDataTreeIdentifier TEST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
