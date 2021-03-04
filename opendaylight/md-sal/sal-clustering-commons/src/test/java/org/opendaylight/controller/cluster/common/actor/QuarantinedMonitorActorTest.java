@@ -18,7 +18,8 @@ import akka.event.Logging;
 import akka.japi.Effect;
 import akka.remote.AssociationErrorEvent;
 import akka.remote.InvalidAssociation;
-import akka.remote.ThisActorSystemQuarantinedEvent;
+import akka.remote.UniqueAddress;
+import akka.remote.artery.ThisActorSystemQuarantinedEvent;
 import akka.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +55,9 @@ public class QuarantinedMonitorActorTest {
     public void testOnReceiveQuarantined() throws Exception {
         final Throwable t = new RuntimeException("Remote has quarantined this system");
         final InvalidAssociation cause = InvalidAssociation.apply(LOCAL, REMOTE, t, Option.apply(null));
-        final ThisActorSystemQuarantinedEvent event = new ThisActorSystemQuarantinedEvent(LOCAL, REMOTE);
+        final UniqueAddress localAddress = new UniqueAddress(LOCAL, 1);
+        final UniqueAddress remoteAddress = new UniqueAddress(REMOTE, 2);
+        final ThisActorSystemQuarantinedEvent event = new ThisActorSystemQuarantinedEvent(localAddress, remoteAddress);
         actor.tell(event, ActorRef.noSender());
         verify(callback, timeout(1000)).apply();
     }
