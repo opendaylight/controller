@@ -14,7 +14,7 @@ import akka.actor.UntypedAbstractActor;
 import akka.japi.Effect;
 import akka.remote.AssociationErrorEvent;
 import akka.remote.RemotingLifecycleEvent;
-import akka.remote.ThisActorSystemQuarantinedEvent;
+import akka.remote.artery.ThisActorSystemQuarantinedEvent;
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
