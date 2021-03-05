@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc4d8984_c2bc57fd",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/actor_reference.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-03-05T12:48:33Z",
+      "side": 1,
+      "message": "do we really want this by default?",
+      "revId": "889845f390b65d15b53ebaeabfca2c5581248602",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
