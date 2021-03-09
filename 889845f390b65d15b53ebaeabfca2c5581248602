@@ -34,6 +34,24 @@
       "revId": "889845f390b65d15b53ebaeabfca2c5581248602",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4663928c_4e9d2aca",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/actor_reference.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-03-09T13:32:35Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3434b1ac_186ebf4e",
+      "revId": "889845f390b65d15b53ebaeabfca2c5581248602",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
