@@ -20,12 +20,14 @@ import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -40,8 +42,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class RaftActorSnapshotMessageSupportTest {
-
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
 
     @Mock
@@ -66,10 +68,8 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Collections.<String,String>emptyMap(),
+                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
                 configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor()) {
             @Override
             public SnapshotManager getSnapshotManager() {
@@ -84,11 +84,11 @@ public class RaftActorSnapshotMessageSupportTest {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    private void sendMessageToSupport(Object message) {
+    private void sendMessageToSupport(final Object message) {
         sendMessageToSupport(message, true);
     }
 
-    private void sendMessageToSupport(Object message, boolean expHandled) {
+    private void sendMessageToSupport(final Object message, final boolean expHandled) {
         boolean handled = support.handleSnapshotMessage(message, mockRaftActorRef);
         assertEquals("complete", expHandled, handled);
     }
@@ -100,7 +100,7 @@ public class RaftActorSnapshotMessageSupportTest {
         long lastIndexDuringSnapshotCapture = 2;
         byte[] snapshotBytes = {1,2,3,4,5};
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), List.of(),
                 lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, -1, null, null);
 
         ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);

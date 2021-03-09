@@ -26,12 +26,12 @@ import akka.actor.Props;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,11 +42,12 @@ import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
@@ -68,8 +69,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class RaftActorRecoverySupportTest {
-
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
 
     @Mock
@@ -93,12 +94,11 @@ public class RaftActorRecoverySupportTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
         context = new RaftActorContextImpl(mockActorRef, null, localId,
                 new ElectionTermImpl(mockPersistentProvider, "test", LOG), -1, -1,
-                Collections.<String, String>emptyMap(), configParams, mockPersistence, applyState -> {
+                Map.of(), configParams, mockPersistence, applyState -> {
         }, LOG, MoreExecutors.directExecutor());
 
         support = new RaftActorRecoverySupport(context, mockCohort);
@@ -229,9 +229,9 @@ public class RaftActorRecoverySupportTest {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
 
-        MockSnapshotState snapshotState = new MockSnapshotState(Arrays.asList(new MockPayload("1")));
+        MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
         Snapshot snapshot = Snapshot.create(snapshotState,
-                Arrays.asList(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
+                List.of(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
                 lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
@@ -314,8 +314,8 @@ public class RaftActorRecoverySupportTest {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
 
-        Snapshot snapshot = Snapshot.create(new MockSnapshotState(Arrays.asList(new MockPayload("1"))),
-                Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1, -1, null, null);
+        Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))),
+                List.of(), 3, 1, 3, 1, -1, null, null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
@@ -378,7 +378,7 @@ public class RaftActorRecoverySupportTest {
         context.addToPeers(follower2, null, VotingState.VOTING);
 
         //add new Server
-        ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload obj = new ServerConfigurationPayload(List.of(
                 new ServerInfo(localId, true),
                 new ServerInfo(follower1, true),
                 new ServerInfo(follower2, false),
@@ -388,8 +388,7 @@ public class RaftActorRecoverySupportTest {
 
         //verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-        assertEquals("New peer Ids", Sets.newHashSet(follower1, follower2, follower3),
-                Sets.newHashSet(context.getPeerIds()));
+        assertEquals("New peer Ids", Set.of(follower1, follower2, follower3), Set.copyOf(context.getPeerIds()));
         assertEquals("follower1 isVoting", true, context.getPeerInfo(follower1).isVoting());
         assertEquals("follower2 isVoting", false, context.getPeerInfo(follower2).isVoting());
         assertEquals("follower3 isVoting", true, context.getPeerInfo(follower3).isVoting());
@@ -400,7 +399,7 @@ public class RaftActorRecoverySupportTest {
         verify(mockCohort, never()).appendRecoveredLogEntry(any(Payload.class));
 
         //remove existing follower1
-        obj = new ServerConfigurationPayload(Arrays.asList(
+        obj = new ServerConfigurationPayload(List.of(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower2", true),
                 new ServerInfo("follower3", true)));
@@ -409,7 +408,7 @@ public class RaftActorRecoverySupportTest {
 
         //verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-        assertEquals("New peer Ids", Sets.newHashSet(follower2, follower3), Sets.newHashSet(context.getPeerIds()));
+        assertEquals("New peer Ids", Set.of(follower2, follower3), Set.copyOf(context.getPeerIds()));
     }
 
     @Test
@@ -417,26 +416,26 @@ public class RaftActorRecoverySupportTest {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
 
         String follower = "follower";
-        ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload obj = new ServerConfigurationPayload(List.of(
                 new ServerInfo(localId, true), new ServerInfo(follower, true)));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
         //verify new peers
-        assertEquals("New peer Ids", Sets.newHashSet(follower), Sets.newHashSet(context.getPeerIds()));
+        assertEquals("New peer Ids", Set.of(follower), Set.copyOf(context.getPeerIds()));
     }
 
     @Test
     public void testOnSnapshotOfferWithServerConfiguration() {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
-        ServerConfigurationPayload serverPayload = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload serverPayload = new ServerConfigurationPayload(List.of(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower1", true),
                 new ServerInfo("follower2", true)));
 
-        MockSnapshotState snapshotState = new MockSnapshotState(Arrays.asList(new MockPayload("1")));
-        Snapshot snapshot = Snapshot.create(snapshotState, Collections.<ReplicatedLogEntry>emptyList(),
+        MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
+        Snapshot snapshot = Snapshot.create(snapshotState, List.of(),
                 -1, -1, -1, -1, electionTerm, electionVotedFor, serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
@@ -448,7 +447,6 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
         assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-        assertEquals("Peer List", Sets.newHashSet("follower1", "follower2"),
-                Sets.newHashSet(context.getPeerIds()));
+        assertEquals("Peer List", Set.of("follower1", "follower2"), Set.copyOf(context.getPeerIds()));
     }
 }
