@@ -24,14 +24,16 @@ import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotTrackerTest {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotTrackerTest.class);
 
@@ -46,8 +48,6 @@ public class SnapshotTrackerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         data = new HashMap<>();
         data.put("key1", "value1");
         data.put("key2", "value2");

@@ -11,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import akka.japi.Procedure;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.slf4j.Logger;
@@ -26,19 +26,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ElectionTermImplTest {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
 
     @Mock
     private DataPersistenceProvider mockPersistence;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testUpdateAndPersist() throws Exception {
         ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
 

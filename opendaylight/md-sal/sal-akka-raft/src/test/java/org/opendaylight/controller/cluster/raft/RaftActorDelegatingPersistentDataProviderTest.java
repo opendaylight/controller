@@ -15,9 +15,10 @@ import static org.mockito.Mockito.verify;
 import akka.japi.Procedure;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -28,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Persis
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class RaftActorDelegatingPersistentDataProviderTest {
     private static final Payload PERSISTENT_PAYLOAD = new TestPersistentPayload();
 
@@ -55,7 +57,6 @@ public class RaftActorDelegatingPersistentDataProviderTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).getData();
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).getData();
         provider = new RaftActorDelegatingPersistentDataProvider(mockDelegateProvider, mockPersistentProvider);
