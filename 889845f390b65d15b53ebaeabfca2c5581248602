@@ -16,6 +16,24 @@
       "revId": "889845f390b65d15b53ebaeabfca2c5581248602",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3434b1ac_186ebf4e",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/actor_reference.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8908
+      },
+      "writtenOn": "2021-03-09T11:42:21Z",
+      "side": 1,
+      "message": "added comment to Jira\nhttps://jira.pantheon.sk/browse/PTODL-570?focusedCommentId\u003d58504\u0026page\u003dcom.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-58504",
+      "parentUuid": "cc4d8984_c2bc57fd",
+      "revId": "889845f390b65d15b53ebaeabfca2c5581248602",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
