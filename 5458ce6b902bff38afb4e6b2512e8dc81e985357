@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "664820e1_ff762164",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 64
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-03-16T20:03:24Z",
+      "side": 1,
+      "message": "I think we could somehow get awailtility version from odlparent: https://docs.opendaylight.org/projects/odlparent/en/latest/NEWS.html",
+      "revId": "5458ce6b902bff38afb4e6b2512e8dc81e985357",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
