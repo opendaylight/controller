@@ -16,6 +16,24 @@
       "revId": "5458ce6b902bff38afb4e6b2512e8dc81e985357",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fcdcdf6d_52933ede",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 64
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 8762
+      },
+      "writtenOn": "2021-03-17T12:34:48Z",
+      "side": 1,
+      "message": "It was duplicate (existing awaitility dependency on line 173), I will remove it.",
+      "parentUuid": "664820e1_ff762164",
+      "revId": "5458ce6b902bff38afb4e6b2512e8dc81e985357",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
