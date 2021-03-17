@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ffd36c8f_df0ce26a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
+        "patchSetId": 65
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-03-17T13:29:10Z",
+      "side": 1,
+      "message": "IMHO public void setUp() throws Exception {\n.. and remove try .. catch from the body?",
+      "revId": "ca02867a8e7aa69ddaa6daa8f5f3afc644b44e50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5311c625_4a906276",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
+        "patchSetId": 65
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-03-17T13:29:10Z",
+      "side": 1,
+      "message": "probably some/all of these could be static",
+      "revId": "ca02867a8e7aa69ddaa6daa8f5f3afc644b44e50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
