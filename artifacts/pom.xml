@@ -151,6 +151,11 @@
                 <artifactId>cds-mgmt-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>eos-dom-akka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Toaster -->
             <dependency>
