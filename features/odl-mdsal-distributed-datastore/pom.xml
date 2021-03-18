@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-distributed-eos</artifactId>
+            <artifactId>sal-distributed-eos-native</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
