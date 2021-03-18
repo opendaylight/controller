@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2021 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command;
+
+import akka.actor.Address;
+import java.util.Set;
+
+public abstract class InternalClusterEvent implements OwnerSupervisorCommand {
+
+    protected final Address address;
+    protected final Set<String> roles;
+
+    public InternalClusterEvent(final Address address, final Set<String> roles) {
+        this.address = address;
+        this.roles = roles;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+}
