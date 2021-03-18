@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-distributed-eos</artifactId>
+            <artifactId>eos-dom-akka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
