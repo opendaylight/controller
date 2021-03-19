@@ -21,8 +21,6 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
  * Abstract base class for client actors and their components.
- *
- * @author Robert Varga
  */
 public abstract class AbstractClientActorTest {
     private static final MemberName MEMBER_NAME = MemberName.forName("member-1");

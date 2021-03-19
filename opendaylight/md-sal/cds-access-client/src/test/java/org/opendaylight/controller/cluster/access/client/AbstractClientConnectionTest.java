@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
@@ -64,7 +63,6 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         backendProbe = new TestProbe(system);
         contextProbe = new TestProbe(system);

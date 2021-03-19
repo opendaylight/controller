@@ -23,10 +23,12 @@ import akka.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import scala.Option;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class QuarantinedMonitorActorTest {
 
     private static final Address LOCAL = Address.apply("http", "local");
@@ -39,7 +41,6 @@ public class QuarantinedMonitorActorTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         actor = system.actorOf(QuarantinedMonitorActor.props(callback));
     }
@@ -90,5 +91,4 @@ public class QuarantinedMonitorActorTest {
         actor.tell(event, ActorRef.noSender());
         verify(callback, never()).apply();
     }
-
 }
