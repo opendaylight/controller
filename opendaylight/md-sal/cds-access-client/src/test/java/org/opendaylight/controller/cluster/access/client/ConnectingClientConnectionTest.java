@@ -33,9 +33,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
@@ -52,9 +53,8 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * Test suite covering logic contained in {@link ConnectingClientConnection}. It assumes {@link ConnectionEntryTest}
  * passes.
- *
- * @author Robert Varga
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ConnectingClientConnectionTest {
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
         private static final long serialVersionUID = 1L;
@@ -136,8 +136,6 @@ public class ConnectingClientConnectionTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         doNothing().when(mockCallback).accept(any(MockFailure.class));
 
         ticker = new FakeTicker();

@@ -17,14 +17,16 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import scala.concurrent.duration.FiniteDuration;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClientActorContextTest {
     private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
     private static final FrontendType FRONTEND_TYPE =
@@ -41,7 +43,6 @@ public class ClientActorContextTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         probe = new TestProbe(system);
         ctx = new ClientActorContext(probe.ref(), PERSISTENCE_ID, system,

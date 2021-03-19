@@ -42,7 +42,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import scala.Option;
 
 /**
@@ -51,6 +52,7 @@ import scala.Option;
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class LocalSnapshotStoreTest {
     private static final String PERSISTENCE_ID = "member-1-shard-default-config";
     private static final String PREFIX_BASED_SHARD_PERSISTENCE_ID = "member-1-shard-id-ints!-config";
@@ -74,7 +76,6 @@ public class LocalSnapshotStoreTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         cleanSnapshotDir();
     }
 
