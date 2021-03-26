@@ -194,35 +194,6 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- MessageBus -->
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>messagebus-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>messagebus-spi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>messagebus-impl</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>messagebus-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>odl-controller-exp-messagebus</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-
             <!-- Clustering system test support -->
             <dependency>
                 <groupId>org.opendaylight.controller.samples</groupId>

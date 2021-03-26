@@ -106,24 +106,6 @@
             <artifactId>cds-dom-api</artifactId>
         </dependency>
 
-        <!-- MessageBus -->
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>messagebus-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>messagebus-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>messagebus-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>messagebus-util</artifactId>
-        </dependency>
-
         <!-- Third-party dependencies -->
         <dependency>
             <groupId>javax.inject</groupId>
@@ -269,10 +251,6 @@
                         <group>
                             <title>Akka RAFT implementation</title>
                             <packages>org.opendaylight.controller.cluster.raft*</packages>
-                        </group>
-                        <group>
-                            <title>MD-SAL Message Bus Bridge (experimental)</title>
-                            <packages>org.opendaylight.controller.messagebus.*:org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.*</packages>
                         </group>
                         <group>
                             <title>MD-SAL Tracing Utilities</title>

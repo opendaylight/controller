@@ -35,7 +35,6 @@
     <!-- Experimental features -->
     <module>features-controller-experimental</module>
     <module>odl-controller-exp-netty-config</module>
-    <module>odl-controller-exp-messagebus</module>
 
     <!-- CSIT features -->
     <module>features-controller-testing</module>
