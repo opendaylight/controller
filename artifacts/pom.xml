@@ -65,11 +65,6 @@
                 <artifactId>model-inventory</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.model</groupId>
-                <artifactId>model-topology</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!-- Clustered implementation -->
             <dependency>
@@ -327,13 +322,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-mdsal-model-inventory</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>odl-controller-model-topology</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>

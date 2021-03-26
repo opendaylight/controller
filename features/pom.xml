@@ -48,7 +48,6 @@
     <!-- Single features, to be cleaned up -->
     <module>odl-controller-blueprint</module>
     <module>odl-controller-mdsal-common</module>
-    <module>odl-controller-model-topology</module>
     <module>odl-jolokia</module>
     <module>odl-mdsal-broker-local</module>
     <module>odl-mdsal-broker</module>

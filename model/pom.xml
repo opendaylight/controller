@@ -28,6 +28,5 @@
 
     <modules>
         <module>model-inventory</module>
-        <module>model-topology</module>
     </modules>
 </project>

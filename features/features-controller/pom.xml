@@ -85,12 +85,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-model-topology</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-remoterpc-connector</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
