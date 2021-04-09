@@ -131,6 +131,75 @@
       "revId": "78e5e26a4b578cf51a40bd8d45b6640b23be7e22",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "581159f0_b8302c2a",
+        "filename": "opendaylight/md-sal/sal-distributed-eos-native/src/main/java/org/opendaylight/controller/cluster/akka/eos/owner/supervisor/OwnerSupervisor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-04-09T14:46:34Z",
+      "side": 1,
+      "message": "hmm... this means all nodes have to have synchronized clocks, but ... isn\u0027t this method guaranteed to be called from a cluster-wide singleton?",
+      "range": {
+        "startLine": 314,
+        "startChar": 75,
+        "endLine": 314,
+        "endChar": 101
+      },
+      "revId": "78e5e26a4b578cf51a40bd8d45b6640b23be7e22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18f69cb2_366d850b",
+        "filename": "opendaylight/md-sal/sal-distributed-eos-native/src/main/java/org/opendaylight/controller/cluster/akka/eos/owner/supervisor/OwnerSupervisor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-04-09T14:46:34Z",
+      "side": 1,
+      "message": "magic string?",
+      "range": {
+        "startLine": 373,
+        "startChar": 82,
+        "endLine": 373,
+        "endChar": 86
+      },
+      "revId": "78e5e26a4b578cf51a40bd8d45b6640b23be7e22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "263d2312_afccfb21",
+        "filename": "opendaylight/md-sal/sal-distributed-eos-native/src/main/java/org/opendaylight/controller/cluster/akka/eos/owner/supervisor/OwnerSupervisor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-04-09T14:46:34Z",
+      "side": 1,
+      "message": "is this guaranteed to have a single role?\nif not, then iteration order is undefined -\u003e what are we returning?\nif yes, then dispense with collect() and do:\n.findFirst().orElseThrow(() -\u003e new IllegalArgumentException(...))",
+      "range": {
+        "startLine": 374,
+        "startChar": 15,
+        "endLine": 374,
+        "endChar": 42
+      },
+      "revId": "78e5e26a4b578cf51a40bd8d45b6640b23be7e22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
