@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aefb73fb_adc39b54",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/remote_reference.conf",
+        "patchSetId": 5
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-04-13T12:07:17Z",
+      "side": 1,
+      "message": "I don\u0027t think we want to flip this config -- it should be reflecting akka\u0027s defaults",
+      "range": {
+        "startLine": 745,
+        "startChar": 6,
+        "endLine": 745,
+        "endChar": 18
+      },
+      "revId": "0345329f3cd9f812872361d28996d60c611e3579",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
