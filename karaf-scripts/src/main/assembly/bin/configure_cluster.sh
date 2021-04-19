@@ -76,8 +76,8 @@ function create_strings
     # Then merge the array using the join utility defined above.
     count=1
     for ip in ${CONTROLLERIPS[@]} ; do
-        ds[$count]=\\\"akka:\\/\\/opendaylight-cluster-data@${ip}:2550\\\"
-        rpc[$count]=\\\"akka:\\/\\/odl-cluster-rpc@${ip}:2551\\\"
+        ds[$count]=\\\"akka.tcp:\\/\\/opendaylight-cluster-data@${ip}:2550\\\"
+        rpc[$count]=\\\"akka.tcp:\\/\\/odl-cluster-rpc@${ip}:2551\\\"
         members[$count]=\\\"member-${count}\\\"
         count=$[count + 1]
     done
