@@ -63,6 +63,24 @@
       "revId": "0345329f3cd9f812872361d28996d60c611e3579",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd281109_16df626c",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 8908
+      },
+      "writtenOn": "2021-04-20T14:32:05Z",
+      "side": 1,
+      "message": "made as was for netty https://git.opendaylight.org/gerrit/c/controller/+/95409/5/opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf#101",
+      "parentUuid": "6b6434f0_a92d0a5b",
+      "revId": "0345329f3cd9f812872361d28996d60c611e3579",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
