@@ -22,6 +22,47 @@
       "revId": "0345329f3cd9f812872361d28996d60c611e3579",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0e83300_708044eb",
+        "filename": "akka/repackaged-akka-jar/src/main/resources/remote_reference.conf",
+        "patchSetId": 5
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-04-20T08:31:22Z",
+      "side": 1,
+      "message": "It is OK. The default is: enabled \u003d on\nhttps://doc.akka.io/docs/akka/current/general/configuration-reference.html",
+      "parentUuid": "aefb73fb_adc39b54",
+      "range": {
+        "startLine": 745,
+        "startChar": 6,
+        "endLine": 745,
+        "endChar": 18
+      },
+      "revId": "0345329f3cd9f812872361d28996d60c611e3579",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b6434f0_a92d0a5b",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-04-20T08:31:22Z",
+      "side": 1,
+      "message": "why so high?",
+      "revId": "0345329f3cd9f812872361d28996d60c611e3579",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
