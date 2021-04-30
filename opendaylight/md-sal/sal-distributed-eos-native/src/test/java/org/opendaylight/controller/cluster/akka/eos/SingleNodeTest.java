@@ -19,14 +19,13 @@ public class SingleNodeTest extends AbstractNativeEosTest {
     public static final DOMEntity ENTITY_1 = new DOMEntity("test-type", "entity-1");
     public static final DOMEntity ENTITY_2 = new DOMEntity("test-type-2", "entity-2");
 
+    private static final String DEFAULT_DATACENTER = "dc-default";
+
     private ClusterNode clusterNode;
 
     @Before
     public void setUp() throws Exception {
         clusterNode = startup(2550, Collections.singletonList("member-1"));
-
-        reachableMember(clusterNode, "member-2");
-        reachableMember(clusterNode, "member-3");
     }
 
     @After
@@ -47,7 +46,13 @@ public class SingleNodeTest extends AbstractNativeEosTest {
     public void testListenerPriorToAddingCandidates() {
         final MockEntityOwnershipListener listener = registerListener(clusterNode, ENTITY_1);
 
-        registerCandidates(clusterNode, ENTITY_1, "member-1", "member-2", "member-3");
+        registerCandidates(clusterNode, ENTITY_1, "member-1");
+        waitUntillOwnerPresent(clusterNode, ENTITY_1);
+
+        reachableMember(clusterNode, "member-2", DEFAULT_DATACENTER);
+        reachableMember(clusterNode, "member-3", DEFAULT_DATACENTER);
+
+        registerCandidates(clusterNode, ENTITY_1, "member-2", "member-3");
         verifyListenerState(listener, ENTITY_1, true, true, false);
 
         unregisterCandidates(clusterNode, ENTITY_1, "member-1");
@@ -58,6 +63,9 @@ public class SingleNodeTest extends AbstractNativeEosTest {
     public void testListenerRegistrationAfterCandidates() {
         registerCandidates(clusterNode, ENTITY_1, "member-1", "member-2", "member-3");
         waitUntillOwnerPresent(clusterNode, ENTITY_1);
+
+        reachableMember(clusterNode, "member-2", DEFAULT_DATACENTER);
+        reachableMember(clusterNode, "member-3", DEFAULT_DATACENTER);
 
         final MockEntityOwnershipListener listener = registerListener(clusterNode, ENTITY_1);
         verifyListenerState(listener, ENTITY_1, true, true, false);
@@ -70,6 +78,9 @@ public class SingleNodeTest extends AbstractNativeEosTest {
     public void testMultipleEntities() {
         registerCandidates(clusterNode, ENTITY_1, "member-1", "member-2", "member-3");
         waitUntillOwnerPresent(clusterNode, ENTITY_1);
+
+        reachableMember(clusterNode, "member-2", DEFAULT_DATACENTER);
+        reachableMember(clusterNode, "member-3", DEFAULT_DATACENTER);
 
         final MockEntityOwnershipListener listener1 = registerListener(clusterNode, ENTITY_1);
         final MockEntityOwnershipListener listener2 = registerListener(clusterNode, ENTITY_2);
