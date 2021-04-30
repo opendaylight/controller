@@ -22,7 +22,7 @@ import org.opendaylight.controller.eos.akka.bootstrap.command.RunningContext;
 import org.opendaylight.controller.eos.akka.bootstrap.command.Terminate;
 import org.opendaylight.controller.eos.akka.owner.checker.OwnerStateChecker;
 import org.opendaylight.controller.eos.akka.owner.checker.command.StateCheckerCommand;
-import org.opendaylight.controller.eos.akka.owner.supervisor.OwnerSyncer;
+import org.opendaylight.controller.eos.akka.owner.supervisor.IdleSupervisor;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
@@ -47,7 +47,7 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
 
         final ClusterSingleton clusterSingleton = ClusterSingleton.get(context.getSystem());
         // start the initial sync behavior that switches to the regular one after syncing
-        ownerSupervisor = clusterSingleton.init(SingletonActor.of(OwnerSyncer.create(), "OwnerSupervisor"));
+        ownerSupervisor = clusterSingleton.init(SingletonActor.of(IdleSupervisor.create(), "OwnerSupervisor"));
     }
 
     public static Behavior<BootstrapCommand> create() {

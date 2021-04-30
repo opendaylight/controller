@@ -57,7 +57,6 @@ public class ThreeNodeReachabilityTest extends AbstractNativeEosTest {
         ActorTestKit.shutdown(node1.getActorSystem(), Duration.ofSeconds(20));
         ActorTestKit.shutdown(node2.getActorSystem(), Duration.ofSeconds(20));
 
-
         if (node3 != null) {
             ActorTestKit.shutdown(node3.getActorSystem(), Duration.ofSeconds(20));
         }
@@ -142,7 +141,7 @@ public class ThreeNodeReachabilityTest extends AbstractNativeEosTest {
         verifyListenerState(secondEntityListener2, ENTITY_2, true, true, false);
         verifyListenerState(secondEntityListener3, ENTITY_2, true, false, false);
 
-        unreachableMember(node1, "member-2");
+        unreachableMember(node1, "member-2", DEFAULT_DATACENTER);
 
         verifyListenerState(firstEntityListener1, ENTITY_1, true, true, false);
         verifyListenerState(firstEntityListener2, ENTITY_1, true, false, true);
@@ -152,14 +151,14 @@ public class ThreeNodeReachabilityTest extends AbstractNativeEosTest {
         verifyListenerState(secondEntityListener2, ENTITY_2, true, false, true);
         verifyListenerState(secondEntityListener3, ENTITY_2, true, false, false);
 
-        unreachableMember(node1, "member-3");
+        unreachableMember(node1, "member-3", DEFAULT_DATACENTER);
 
         verifyListenerState(firstEntityListener1, ENTITY_1, true, true, false);
         verifyListenerState(firstEntityListener2, ENTITY_1, true, false, true);
         verifyListenerState(firstEntityListener3, ENTITY_1, true, false, false);
 
-        unregisterCandidates(node1, ENTITY_1, "member-1");
-        unregisterCandidates(node1, ENTITY_2, "member-1");
+        unregisterCandidates(node1, ENTITY_1, "member-1", DEFAULT_DATACENTER);
+        unregisterCandidates(node1, ENTITY_2, "member-1", DEFAULT_DATACENTER);
 
         verifyListenerState(firstEntityListener1, ENTITY_1, false, false, true);
         verifyListenerState(firstEntityListener2, ENTITY_1, false, false, false);
@@ -169,7 +168,7 @@ public class ThreeNodeReachabilityTest extends AbstractNativeEosTest {
         verifyListenerState(secondEntityListener2, ENTITY_2, false, false, false);
         verifyListenerState(secondEntityListener3, ENTITY_2, false, false, false);
 
-        reachableMember(node1, "member-2");
+        reachableMember(node1, "member-2", DEFAULT_DATACENTER);
         verifyListenerState(firstEntityListener1, ENTITY_1, true, false, false);
         verifyListenerState(firstEntityListener2, ENTITY_1, true, true, false);
         verifyListenerState(firstEntityListener3, ENTITY_1, true, false, false);

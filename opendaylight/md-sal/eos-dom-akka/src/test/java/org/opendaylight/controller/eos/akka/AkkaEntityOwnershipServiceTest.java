@@ -152,15 +152,15 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         registerCandidates(runningContext.getCandidateRegistry(), entity, "member-2");
 
         final ActorRef<OwnerSupervisorCommand> ownerSupervisor = runningContext.getOwnerSupervisor();
-        reachableMember(ownerSupervisor, "member-2");
-        unreachableMember(ownerSupervisor, "member-1");
+        reachableMember(ownerSupervisor, "member-2", DEFAULT_DATACENTER);
+        unreachableMember(ownerSupervisor, "member-1", DEFAULT_DATACENTER);
         verifyGetOwnershipState(service, entity, EntityOwnershipState.OWNED_BY_OTHER);
 
         final DOMEntity entity2 = new DOMEntity(ENTITY_TYPE, "two");
         final Optional<EntityOwnershipState> state = service.getOwnershipState(entity2);
         assertFalse(state.isPresent());
 
-        unreachableMember(ownerSupervisor, "member-2");
+        unreachableMember(ownerSupervisor, "member-2", DEFAULT_DATACENTER);
         verifyGetOwnershipState(service, entity, EntityOwnershipState.NO_OWNER);
     }
 
