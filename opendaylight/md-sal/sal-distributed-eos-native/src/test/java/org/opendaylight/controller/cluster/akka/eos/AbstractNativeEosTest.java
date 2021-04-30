@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +38,8 @@ import org.opendaylight.controller.cluster.akka.eos.bootstrap.EOSMain;
 import org.opendaylight.controller.cluster.akka.eos.bootstrap.command.BootstrapCommand;
 import org.opendaylight.controller.cluster.akka.eos.bootstrap.command.GetRunningContext;
 import org.opendaylight.controller.cluster.akka.eos.bootstrap.command.RunningContext;
+import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.ActivateDataCenter;
+import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.DeactivateDataCenter;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.MemberReachableEvent;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.MemberUnreachableEvent;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.OwnerSupervisorCommand;
@@ -65,10 +68,17 @@ public abstract class AbstractNativeEosTest {
                     "akka://ClusterSystem@127.0.0.1:2551",
                     "akka://ClusterSystem@127.0.0.1:2552");
 
+    protected static final List<String> DATACENTER_SEED_NODES =
+            List.of("akka.tcp://ClusterSystem@127.0.0.1:2550",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2551",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2552",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2553");
+
     private static final String REMOTE_PROTOCOL = "akka.tcp";
     private static final String PORT_PARAM = "akka.remote.artery.canonical.port";
     private static final String ROLE_PARAM = "akka.cluster.roles";
     private static final String SEED_NODES_PARAM = "akka.cluster.seed-nodes";
+    private static final String DATA_CENTER_PARAM = "akka.cluster.multi-data-center.self-data-center";
 
 
     protected static ClusterNode startupRemote(final int port, final List<String> roles)
@@ -122,6 +132,36 @@ public abstract class AbstractNativeEosTest {
                 runningContext.getCandidateRegistry(), runningContext.getOwnerSupervisor());
     }
 
+    protected static ClusterNode startupWithDatacenter(final int port, final List<String> roles,
+                                                       final List<String> seedNodes, final String dataCenter)
+            throws ExecutionException, InterruptedException {
+        final Map<String, Object> overrides = new HashMap<>();
+        overrides.put(PORT_PARAM, port);
+        overrides.put(ROLE_PARAM, roles);
+        if (!seedNodes.isEmpty()) {
+            overrides.put(SEED_NODES_PARAM, seedNodes);
+        }
+        overrides.put(DATA_CENTER_PARAM, dataCenter);
+
+        final Config config = ConfigFactory.parseMap(overrides)
+                .withFallback(ConfigFactory.load());
+
+        // Create a classic Akka system since thats what we will have in osgi
+        final akka.actor.ActorSystem system = akka.actor.ActorSystem.create("ClusterSystem", config);
+        final ActorRef<BootstrapCommand> eosBootstrap =
+                Adapter.spawn(system, EOSMain.create(), "EOSBootstrap");
+
+        final CompletionStage<RunningContext> ask = AskPattern.ask(eosBootstrap,
+                GetRunningContext::new,
+                Duration.ofSeconds(5),
+                Adapter.toTyped(system.scheduler()));
+        final RunningContext runningContext = ask.toCompletableFuture().get();
+
+
+        return new ClusterNode(port, roles, system, eosBootstrap, runningContext.getListenerRegistry(),
+                runningContext.getCandidateRegistry(), runningContext.getOwnerSupervisor());
+    }
+
     private static Behavior<BootstrapCommand> rootBehavior() {
         return Behaviors.setup(context -> EOSMain.create());
     }
@@ -155,22 +195,24 @@ public abstract class AbstractNativeEosTest {
         return listener;
     }
 
-    protected static void reachableMember(final ClusterNode node, final String role) {
+    protected static void reachableMember(final ClusterNode node, final String... role) {
         reachableMember(node.getOwnerSupervisor(), role);
     }
 
-    protected static void reachableMember(final ActorRef<OwnerSupervisorCommand> ownerSupervisor, final String role) {
+    protected static void reachableMember(final ActorRef<OwnerSupervisorCommand> ownerSupervisor,
+                                          final String... role) {
         ownerSupervisor.tell(new MemberReachableEvent(
-                new Address(REMOTE_PROTOCOL, "ClusterSystem@127.0.0.1:2550"), Collections.singleton(role)));
+                new Address(REMOTE_PROTOCOL, "ClusterSystem@127.0.0.1:2550"), Set.of(role)));
     }
 
-    protected static void unreachableMember(final ClusterNode node, final String role) {
+    protected static void unreachableMember(final ClusterNode node, final String... role) {
         unreachableMember(node.getOwnerSupervisor(), role);
     }
 
-    protected static void unreachableMember(final ActorRef<OwnerSupervisorCommand> ownerSupervisor, final String role) {
+    protected static void unreachableMember(final ActorRef<OwnerSupervisorCommand> ownerSupervisor,
+                                            final String... role) {
         ownerSupervisor.tell(new MemberUnreachableEvent(
-                new Address(REMOTE_PROTOCOL, "ClusterSystem@127.0.0.1:2550"), Collections.singleton(role)));
+                new Address(REMOTE_PROTOCOL, "ClusterSystem@127.0.0.1:2550"), Set.of(role)));
     }
 
     protected static void waitUntillOwnerPresent(final ClusterNode clusterNode, final DOMEntity entity) {
@@ -193,6 +235,14 @@ public abstract class AbstractNativeEosTest {
 
             return false;
         });
+    }
+
+    protected static void activateDatacenter(final ClusterNode clusterNode) {
+        clusterNode.getOwnerSupervisor().tell(ActivateDataCenter.INSTANCE);
+    }
+
+    protected static void deactivateDatacenter(final ClusterNode clusterNode) {
+        clusterNode.getOwnerSupervisor().tell(DeactivateDataCenter.INSTANCE);
     }
 
     protected static void verifyListenerState(final MockEntityOwnershipListener listener,
