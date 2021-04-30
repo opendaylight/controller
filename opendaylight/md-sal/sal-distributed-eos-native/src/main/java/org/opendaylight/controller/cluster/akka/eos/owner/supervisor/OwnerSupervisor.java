@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.CandidatesChanged;
+import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.DeactivateDataCenter;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.MemberDownEvent;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.MemberReachableEvent;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.MemberUnreachableEvent;
@@ -60,7 +61,7 @@ import scala.collection.JavaConverters;
 public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorCommand> {
 
     private static final Logger LOG = LoggerFactory.getLogger(OwnerSupervisor.class);
-    private static final String DATACENTER_PREFIX = "dc";
+    private static final String DATACENTER_PREFIX = "dc-";
 
     private final ReplicatorMessageAdapter<OwnerSupervisorCommand, LWWRegister<String>> ownerReplicator;
 
@@ -71,6 +72,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
 
     private final Cluster cluster;
     private final SelfUniqueAddress node;
+    private final String dataCenter;
 
     private final Set<String> activeMembers;
 
@@ -91,9 +93,10 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         super(context);
         this.cluster = Cluster.get(context.getSystem());
         this.ownerReplicator = ownerReplicator;
+        dataCenter = extractDatacenterRole(cluster.selfMember());
 
         this.node = DistributedData.get(context.getSystem()).selfUniqueAddress();
-        this.activeMembers = getActiveMembers(cluster);
+        this.activeMembers = getActiveMembers();
 
         this.currentCandidates = currentCandidates;
         this.currentOwners = currentOwners;
@@ -153,11 +156,17 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     public Receive<OwnerSupervisorCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(CandidatesChanged.class, this::onCandidatesChanged)
+                .onMessage(DeactivateDataCenter.class, this::onDeactivateDatacenter)
                 .onMessage(MemberUpEvent.class, this::onPeerUp)
                 .onMessage(MemberDownEvent.class, this::onPeerDown)
                 .onMessage(MemberReachableEvent.class, this::onPeerReachable)
                 .onMessage(MemberUnreachableEvent.class, this::onPeerUnreachable)
                 .build();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onDeactivateDatacenter(final DeactivateDataCenter command) {
+        LOG.debug("Deactivating Owner Supervisor on {}", cluster.selfMember());
+        return IdleSupervisor.create();
     }
 
     private void reassignUnreachableOwners() {
@@ -338,6 +347,11 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     }
 
     private void handleReachableEvent(final Set<String> roles) {
+        if (!roles.contains(dataCenter)) {
+            LOG.debug("Received reachable event from a foreign datacenter, Ignoring... Roles: {}", roles);
+            return;
+        }
+
         activeMembers.add(extractRole(roles));
         assignMissingOwners();
     }
@@ -357,17 +371,30 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     }
 
     private void handleUnreachableEvent(final Set<String> roles) {
+        if (!roles.contains(dataCenter)) {
+            LOG.debug("Received unreachable event from a foreign datacenter, Ignoring... Roles: {}", roles);
+            return;
+        }
+
         activeMembers.remove(extractRole(roles));
         reassignUnreachableOwners();
     }
 
-    private static Set<String> getActiveMembers(final Cluster cluster) {
-        final Set<String> activeMembers = new HashSet<>();
-        cluster.state().getMembers().forEach(member -> activeMembers.add(extractRole(member)));
-        activeMembers.removeAll(cluster.state().getUnreachable().stream()
-                .map(OwnerSupervisor::extractRole).collect(Collectors.toSet()));
+    private Set<String> getActiveMembers() {
+        final Set<String> members = new HashSet<>();
+        cluster.state().getMembers().forEach(member -> members.add(extractRole(member)));
+        members.removeAll(cluster.state().getUnreachable().stream()
+                // filter out members not from our datacenter
+                .map(OwnerSupervisor::extractRole)
+                .collect(Collectors.toSet()));
 
-        return activeMembers;
+        cluster.state().getMembers().forEach(member -> {
+            if (!member.roles().contains(dataCenter)) {
+                members.remove(extractRole(member));
+            }
+        });
+
+        return members;
     }
 
     private static String extractRole(final Member member) {
@@ -376,6 +403,11 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
 
     private static String extractRole(final Set<String> roles) {
         return roles.stream().filter(role -> !role.contains(DATACENTER_PREFIX))
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("No valid role found."));
+    }
+
+    private String extractDatacenterRole(final Member member) {
+        return member.getRoles().stream().filter(role -> role.contains(DATACENTER_PREFIX))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("No valid role found."));
     }
 }

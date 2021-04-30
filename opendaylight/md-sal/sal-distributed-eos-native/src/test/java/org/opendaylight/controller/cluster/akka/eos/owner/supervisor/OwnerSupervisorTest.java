@@ -42,29 +42,29 @@ public class OwnerSupervisorTest extends AbstractNativeEosTest {
     public void testCandidatePickingWhenUnreachableCandidates() throws Exception {
 
         final ClusterNode node = startup(2550, Collections.singletonList("member-1"));
-        reachableMember(node, "member-2");
-        reachableMember(node, "member-3");
+        reachableMember(node, "member-2", "dc-default");
+        reachableMember(node, "member-3", "dc-default");
         registerCandidates(node, ENTITY_1, "member-1", "member-2", "member-3");
 
         final MockEntityOwnershipListener listener = registerListener(node, ENTITY_1);
         verifyListenerState(listener, ENTITY_1, 0,true, true, false);
 
-        unreachableMember(node, "member-1");
+        unreachableMember(node, "member-1", "dc-default");
         verifyListenerState(listener, ENTITY_1, 1, true, false, true);
 
-        unreachableMember(node, "member-2");
+        unreachableMember(node, "member-2", "dc-default");
         verifyListenerState(listener, ENTITY_1, 2, true, false, false);
 
-        unreachableMember(node, "member-3");
+        unreachableMember(node, "member-3", "dc-default");
         verifyListenerState(listener, ENTITY_1, 3, false, false, false);
 
-        reachableMember(node, "member-2");
+        reachableMember(node, "member-2", "dc-default");
         verifyListenerState(listener, ENTITY_1, 4, true, false, false);
 
         // no notification here as member-2 is already the owner
-        reachableMember(node, "member-1");
+        reachableMember(node, "member-1", "dc-default");
 
-        unreachableMember(node, "member-2");
+        unreachableMember(node, "member-2", "dc-default");
         verifyListenerState(listener, ENTITY_1, 5,true, true, false);
 
         ActorTestKit.shutdown(node.getActorSystem());
@@ -93,7 +93,7 @@ public class OwnerSupervisorTest extends AbstractNativeEosTest {
         // this one could not be assigned during init as we dont have member-2 thats reachable
         verifyListenerState(listener2, ENTITY_2, 0, false, false, false);
 
-        reachableMember(node, "member-2");
+        reachableMember(node, "member-2", "dc-default");
         verifyListenerState(listener2, ENTITY_2, 1, true, false, false);
 
         ActorTestKit.shutdown(node.getActorSystem());
