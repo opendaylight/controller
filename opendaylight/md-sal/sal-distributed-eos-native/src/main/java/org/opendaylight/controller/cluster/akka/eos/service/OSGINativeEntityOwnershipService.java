@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Beta
-@Component(immediate = true)
-public class OSGINativeEntityOwnershipService implements DOMEntityOwnershipService {
+@Component(immediate = true, service = { DOMEntityOwnershipService.class,  NativeEosService.class })
+public class OSGINativeEntityOwnershipService implements DOMEntityOwnershipService, NativeEosService {
     private static final Logger LOG = LoggerFactory.getLogger(OSGINativeEntityOwnershipService.class);
 
     @Reference(target = "(type=distributed-operational)")
@@ -58,6 +58,16 @@ public class OSGINativeEntityOwnershipService implements DOMEntityOwnershipServi
         return delegate.isCandidateRegistered(forEntity);
     }
 
+    @Override
+    public void activateDataCenter() {
+        delegate.activateDataCenter();
+    }
+
+    @Override
+    public void deactivateDataCenter() {
+        delegate.deactivateDataCenter();
+    }
+
     @Activate
     void activate(final Map<Object, Object> properties) throws ExecutionException, InterruptedException {
         LOG.info("Native Entity Ownership Service starting");
@@ -71,4 +81,6 @@ public class OSGINativeEntityOwnershipService implements DOMEntityOwnershipServi
         delegate.close();
         LOG.info("Native Entity Ownership Service stopped");
     }
+
+
 }
