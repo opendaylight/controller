@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterDeactivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberDownEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberReachableEvent;
@@ -154,6 +155,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
 
     private Behavior<OwnerSupervisorCommand> onDeactivateDatacenter(final DeactivateDataCenter command) {
         LOG.debug("Deactivating Owner Supervisor on {}", cluster.selfMember());
+        command.getReplyTo().tell(DataCenterDeactivated.INSTANCE);
         return IdleSupervisor.create();
     }
 

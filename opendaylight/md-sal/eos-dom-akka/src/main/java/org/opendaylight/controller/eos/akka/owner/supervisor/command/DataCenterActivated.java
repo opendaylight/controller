@@ -7,20 +7,13 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.typed.ActorRef;
 import java.io.Serializable;
-import org.eclipse.jdt.annotation.Nullable;
 
-public final class DeactivateDataCenter extends OwnerSupervisorCommand implements Serializable {
+public final class DataCenterActivated extends OwnerSupervisorReply implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final DataCenterActivated INSTANCE = new DataCenterActivated();
 
-    private final ActorRef<OwnerSupervisorReply> replyTo;
-
-    public DeactivateDataCenter(final @Nullable ActorRef<OwnerSupervisorReply> replyTo) {
-        this.replyTo = replyTo;
-    }
-
-    public ActorRef<OwnerSupervisorReply> getReplyTo() {
-        return replyTo;
+    private DataCenterActivated() {
+        // NOOP
     }
 }

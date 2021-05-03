@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +43,7 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateD
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberReachableEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberUnreachableEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterCandidate;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.UnregisterCandidate;
@@ -235,12 +237,22 @@ public abstract class AbstractNativeEosTest {
         });
     }
 
-    protected static void activateDatacenter(final ClusterNode clusterNode) {
-        clusterNode.getOwnerSupervisor().tell(ActivateDataCenter.INSTANCE);
+    protected static CompletableFuture<OwnerSupervisorReply> activateDatacenter(final ClusterNode clusterNode) {
+        final CompletionStage<OwnerSupervisorReply> ask =
+                AskPattern.ask(clusterNode.getOwnerSupervisor(),
+                        ActivateDataCenter::new,
+                        Duration.ofSeconds(20),
+                        clusterNode.actorSystem.scheduler());
+        return ask.toCompletableFuture();
     }
 
-    protected static void deactivateDatacenter(final ClusterNode clusterNode) {
-        clusterNode.getOwnerSupervisor().tell(DeactivateDataCenter.INSTANCE);
+    protected static CompletableFuture<OwnerSupervisorReply> deactivateDatacenter(final ClusterNode clusterNode) {
+        final CompletionStage<OwnerSupervisorReply> ask =
+                AskPattern.ask(clusterNode.getOwnerSupervisor(),
+                        DeactivateDataCenter::new,
+                        Duration.ofSeconds(20),
+                        clusterNode.actorSystem.scheduler());
+        return ask.toCompletableFuture();
     }
 
     protected static void verifyListenerState(final MockEntityOwnershipListener listener,
