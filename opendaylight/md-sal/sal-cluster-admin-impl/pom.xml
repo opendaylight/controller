@@ -65,6 +65,10 @@
 
     <!-- OpenDaylight -->
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>eos-dom-akka</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-binding-api</artifactId>
     </dependency>

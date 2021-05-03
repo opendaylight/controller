@@ -261,4 +261,18 @@ module cluster-admin {
             }
         }
     }
+
+    rpc activate-eos-datacenter {
+        description "Activates the datacenter that the node this rpc is called on belongs to. The caller must maintain
+                     only a single active datacenter at a time as the singleton components will interfere with each
+                     other otherwise. This only needs to be used if configuring multiple datacenters or if not using
+                     default datacenter.";
+    }
+
+    rpc deactivate-eos-datacenter {
+        description "Deactivates the datacenter that the node this rpc is called on belongs to. The caller must maintain
+                     only a single active datacenter at a time as the singleton components will interfere with each
+                     other otherwise. This only needs to be used if configuring multiple datacenters or if not using
+                     default datacenter.";
+    }
 }
