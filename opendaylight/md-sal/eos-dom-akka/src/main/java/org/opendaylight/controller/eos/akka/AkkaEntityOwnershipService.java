@@ -33,6 +33,9 @@ import org.opendaylight.controller.eos.akka.bootstrap.command.Terminate;
 import org.opendaylight.controller.eos.akka.owner.checker.command.GetOwnershipState;
 import org.opendaylight.controller.eos.akka.owner.checker.command.GetOwnershipStateReply;
 import org.opendaylight.controller.eos.akka.owner.checker.command.StateCheckerCommand;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterCandidate;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.UnregisterCandidate;
@@ -59,27 +62,32 @@ import org.slf4j.LoggerFactory;
  * the appropriate owners.
  */
 @Singleton
-@Component(immediate = true, service = DOMEntityOwnershipService.class)
-public final class AkkaEntityOwnershipService implements DOMEntityOwnershipService, AutoCloseable {
+@Component(immediate = true, service = { DOMEntityOwnershipService.class, NativeEosService.class })
+public final class AkkaEntityOwnershipService implements DOMEntityOwnershipService, NativeEosService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AkkaEntityOwnershipService.class);
     private static final String DATACENTER_PREFIX = "dc";
 
     private final Set<DOMEntity> registeredEntities = ConcurrentHashMap.newKeySet();
     private final String localCandidate;
     private final Scheduler scheduler;
+    private final String datacenter;
 
     private final ActorRef<BootstrapCommand> bootstrap;
     private final RunningContext runningContext;
     private final ActorRef<CandidateRegistryCommand> candidateRegistry;
     private final ActorRef<TypeListenerRegistryCommand> listenerRegistry;
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
+    private final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
 
     @VisibleForTesting
     AkkaEntityOwnershipService(final ActorSystem actorSystem) throws ExecutionException, InterruptedException {
         final var typedActorSystem = Adapter.toTyped(actorSystem);
-
         scheduler = typedActorSystem.scheduler();
-        localCandidate = Cluster.get(typedActorSystem).selfMember().getRoles().stream()
+
+        final Cluster cluster = Cluster.get(typedActorSystem);
+        datacenter = cluster.selfMember().dataCenter();
+
+        localCandidate = cluster.selfMember().getRoles().stream()
             .filter(role -> !role.contains(DATACENTER_PREFIX))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No valid role found."));
@@ -93,6 +101,7 @@ public final class AkkaEntityOwnershipService implements DOMEntityOwnershipServi
         candidateRegistry = runningContext.getCandidateRegistry();
         listenerRegistry = runningContext.getListenerRegistry();
         ownerStateChecker = runningContext.getOwnerStateChecker();
+        ownerSupervisor = runningContext.getOwnerSupervisor();
     }
 
     @Inject
@@ -154,6 +163,18 @@ public final class AkkaEntityOwnershipService implements DOMEntityOwnershipServi
     @Override
     public boolean isCandidateRegistered(final DOMEntity forEntity) {
         return registeredEntities.contains(forEntity);
+    }
+
+    @Override
+    public void activateDataCenter() {
+        LOG.debug("Activating datacenter: {}", datacenter);
+        ownerSupervisor.tell(ActivateDataCenter.INSTANCE);
+    }
+
+    @Override
+    public void deactivateDataCenter() {
+        LOG.debug("Deactivating datacenter: {}", datacenter);
+        ownerSupervisor.tell(DeactivateDataCenter.INSTANCE);
     }
 
     void unregisterCandidate(final DOMEntity entity) {
