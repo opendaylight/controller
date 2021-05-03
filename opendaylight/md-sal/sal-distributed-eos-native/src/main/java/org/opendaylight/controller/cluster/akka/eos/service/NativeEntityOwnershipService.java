@@ -29,6 +29,9 @@ import org.opendaylight.controller.cluster.akka.eos.bootstrap.command.RunningCon
 import org.opendaylight.controller.cluster.akka.eos.owner.checker.command.GetOwnershipState;
 import org.opendaylight.controller.cluster.akka.eos.owner.checker.command.GetOwnershipStateReply;
 import org.opendaylight.controller.cluster.akka.eos.owner.checker.command.StateCheckerCommand;
+import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.ActivateDataCenter;
+import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.DeactivateDataCenter;
+import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.cluster.akka.eos.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.cluster.akka.eos.registry.candidate.command.RegisterCandidate;
 import org.opendaylight.controller.cluster.akka.eos.registry.candidate.command.UnregisterCandidate;
@@ -50,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * DOMEntityOwnershipService implementation backed by native akka backed thats using distributed-data and
  * cluster-singleton to maintaining a registry of entity candidates and owners.
  */
-public class NativeEntityOwnershipService implements DOMEntityOwnershipService, AutoCloseable {
+public class NativeEntityOwnershipService implements DOMEntityOwnershipService, NativeEosService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(NativeEntityOwnershipService.class);
 
@@ -64,13 +67,16 @@ public class NativeEntityOwnershipService implements DOMEntityOwnershipService, 
     private final ActorRef<CandidateRegistryCommand> candidateRegistry;
     private final ActorRef<TypeListenerRegistryCommand> listenerRegistry;
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
+    private final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
 
     // classic system
     private final ActorSystem actorSystem;
+    private final Cluster cluster;
 
     NativeEntityOwnershipService(final akka.actor.ActorSystem classicActorSystem)
             throws ExecutionException, InterruptedException {
         this.actorSystem = classicActorSystem;
+        cluster = Cluster.get(Adapter.toTyped(actorSystem));
 
         localCandidate = extractRole(actorSystem);
 
@@ -86,6 +92,7 @@ public class NativeEntityOwnershipService implements DOMEntityOwnershipService, 
         candidateRegistry = runningContext.getCandidateRegistry();
         listenerRegistry = runningContext.getListenerRegistry();
         ownerStateChecker = runningContext.getOwnerStateChecker();
+        ownerSupervisor = runningContext.getOwnerSupervisor();
     }
 
     public static NativeEntityOwnershipService start(final ActorUtils actorUtils)
@@ -158,6 +165,18 @@ public class NativeEntityOwnershipService implements DOMEntityOwnershipService, 
         listenerRegistry.tell(new UnregisterListener(entityType, listener));
     }
 
+    @Override
+    public void activateDataCenter() {
+        LOG.debug("Activating datacenter: {}", cluster.selfMember().dataCenter());
+        ownerSupervisor.tell(ActivateDataCenter.INSTANCE);
+    }
+
+    @Override
+    public void deactivateDataCenter() {
+        LOG.debug("Deactivating datacenter: {}", cluster.selfMember().dataCenter());
+        ownerSupervisor.tell(DeactivateDataCenter.INSTANCE);
+    }
+
     private static String extractRole(final ActorSystem actorSystem) {
         final Member selfMember = Cluster.get(Adapter.toTyped(actorSystem)).selfMember();
 
@@ -173,4 +192,6 @@ public class NativeEntityOwnershipService implements DOMEntityOwnershipService, 
     @Override
     public void close() {
     }
+
+
 }
