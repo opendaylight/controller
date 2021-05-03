@@ -37,7 +37,7 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
         final String datacenterRole = extractDatacenterRole(cluster.selfMember());
         if (datacenterRole.equals(DEFAULT_DATACENTER)) {
             LOG.debug("No datacenter configured, activating default data center");
-            context.getSelf().tell(ActivateDataCenter.INSTANCE);
+            context.getSelf().tell(new ActivateDataCenter(null));
         }
 
         LOG.debug("Idle supervisor started on {}.", cluster.selfMember());
@@ -57,7 +57,7 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
 
     private Behavior<OwnerSupervisorCommand> onActivateDataCenter(final ActivateDataCenter message) {
         LOG.debug("Received ActivateDataCenter command switching to syncer behavior,");
-        return OwnerSyncer.create();
+        return OwnerSyncer.create(message.getReplyTo());
     }
 
     private String extractDatacenterRole(final Member selfMember) {

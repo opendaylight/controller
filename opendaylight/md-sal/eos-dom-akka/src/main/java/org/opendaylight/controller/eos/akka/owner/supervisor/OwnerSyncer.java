@@ -25,9 +25,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterActivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.InitialCandidateSync;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.InitialOwnerSync;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.slf4j.Logger;
@@ -49,7 +52,8 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
 
     private int toSync = -1;
 
-    private OwnerSyncer(final ActorContext<OwnerSupervisorCommand> context) {
+    private OwnerSyncer(final ActorContext<OwnerSupervisorCommand> context,
+                        @Nullable final ActorRef<OwnerSupervisorReply> notifyDatacenterStarted) {
         super(context);
         LOG.debug("Starting candidate and owner sync");
 
@@ -61,10 +65,15 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
             Duration.ofSeconds(5)).askGet(
                 askReplyTo -> new Replicator.Get<>(CandidateRegistry.KEY, Replicator.readLocal(), askReplyTo),
                 InitialCandidateSync::new);
+
+        if (notifyDatacenterStarted != null) {
+            notifyDatacenterStarted.tell(DataCenterActivated.INSTANCE);
+        }
     }
 
-    public static Behavior<OwnerSupervisorCommand> create() {
-        return Behaviors.setup(OwnerSyncer::new);
+    public static Behavior<OwnerSupervisorCommand> create(
+            final ActorRef<OwnerSupervisorReply> notifyDatacenterStarted) {
+        return Behaviors.setup(ctx -> new OwnerSyncer(ctx, notifyDatacenterStarted));
     }
 
     @Override

@@ -54,7 +54,10 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
+import org.opendaylight.controller.eos.akka.NativeEosService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutputBuilder;
@@ -72,6 +75,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenterInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenterOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutputBuilder;
@@ -130,10 +135,12 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private final DistributedDataStoreInterface operDataStore;
     private final BindingNormalizedNodeSerializer serializer;
     private final Timeout makeLeaderLocalTimeout;
+    private final NativeEosService nativeEosService;
 
     public ClusterAdminRpcService(final DistributedDataStoreInterface configDataStore,
-            final DistributedDataStoreInterface operDataStore,
-            final BindingNormalizedNodeSerializer serializer) {
+                                  final DistributedDataStoreInterface operDataStore,
+                                  final BindingNormalizedNodeSerializer serializer,
+                                  final NativeEosService nativeEosService) {
         this.configDataStore = configDataStore;
         this.operDataStore = operDataStore;
         this.serializer = serializer;
@@ -141,6 +148,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         this.makeLeaderLocalTimeout =
                 new Timeout(configDataStore.getActorUtils().getDatastoreContext()
                         .getShardLeaderElectionTimeout().duration().$times(2));
+
+        this.nativeEosService = nativeEosService;
     }
 
     @Override
@@ -512,6 +521,50 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 getAllShardLeadersClients();
         return Futures.whenAllComplete(allShardReplies.values()).call(() -> processReplies(allShardReplies),
             MoreExecutors.directExecutor());
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<ActivateEosDatacenterOutput>> activateEosDatacenter(
+            final ActivateEosDatacenterInput input) {
+        LOG.debug("Activating EOS Datacenter");
+        final SettableFuture<RpcResult<ActivateEosDatacenterOutput>> future = SettableFuture.create();
+        Futures.addCallback(nativeEosService.activateDataCenter(), new FutureCallback<>() {
+            @Override
+            public void onSuccess(final Void result) {
+                LOG.debug("Successfully activated datacenter.");
+                future.set(RpcResultBuilder.<ActivateEosDatacenterOutput>success().build());
+            }
+
+            @Override
+            public void onFailure(final Throwable failure) {
+                future.set(ClusterAdminRpcService.<ActivateEosDatacenterOutput>newFailedRpcResultBuilder(
+                        "Failed to activate datacenter.", failure).build());
+            }
+        }, MoreExecutors.directExecutor());
+
+        return future;
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<DeactivateEosDatacenterOutput>> deactivateEosDatacenter(
+            final DeactivateEosDatacenterInput input) {
+        LOG.debug("Deactivating EOS Datacenter");
+        final SettableFuture<RpcResult<DeactivateEosDatacenterOutput>> future = SettableFuture.create();
+        Futures.addCallback(nativeEosService.deactivateDataCenter(), new FutureCallback<>() {
+            @Override
+            public void onSuccess(final Void result) {
+                LOG.debug("Successfully deactivated datacenter.");
+                future.set(RpcResultBuilder.<DeactivateEosDatacenterOutput>success().build());
+            }
+
+            @Override
+            public void onFailure(final Throwable failure) {
+                future.set(ClusterAdminRpcService.<DeactivateEosDatacenterOutput>newFailedRpcResultBuilder(
+                        "Failed to deactivate datacenter.", failure).build());
+            }
+        }, MoreExecutors.directExecutor());
+
+        return future;
     }
 
     private static RpcResult<GetKnownClientsForAllShardsOutput> processReplies(
