@@ -62,7 +62,7 @@ public class DataCentersTest extends AbstractNativeEosTest {
         registerCandidates(node3, ENTITY_1, "member-3");
         registerCandidates(node4, ENTITY_1, "member-4");
 
-        activateDatacenter(node1);
+        activateDatacenter(node1).get();
 
         waitUntillOwnerPresent(node1, ENTITY_1);
         final MockEntityOwnershipListener listener1 = registerListener(node1, ENTITY_1);
@@ -76,8 +76,8 @@ public class DataCentersTest extends AbstractNativeEosTest {
         verifyListenerState(listener1, ENTITY_1, false, false, true);
         verifyListenerState(listener2, ENTITY_1, false, false, false);
 
-        deactivateDatacenter(node1);
-        activateDatacenter(node4);
+        deactivateDatacenter(node1).get();
+        activateDatacenter(node4).get();
 
         verifyListenerState(listener1, ENTITY_1, true, false, false);
         verifyListenerState(listener2, ENTITY_1, true, true, false);
@@ -88,8 +88,8 @@ public class DataCentersTest extends AbstractNativeEosTest {
         verifyListenerState(listener1, ENTITY_1, true, false, false);
         verifyListenerState(listener2, ENTITY_1, true, false, true);
 
-        deactivateDatacenter(node3);
-        activateDatacenter(node2);
+        deactivateDatacenter(node3).get();
+        activateDatacenter(node2).get();
 
         // no candidate in dc-primary so no owners after datacenter activation
         verifyListenerState(listener1, ENTITY_1, false, false, false);
@@ -97,12 +97,12 @@ public class DataCentersTest extends AbstractNativeEosTest {
     }
 
     @Test
-    public void testDataCenterShutdown() {
+    public void testDataCenterShutdown() throws Exception {
         registerCandidates(node1, ENTITY_1, "member-1");
         registerCandidates(node3, ENTITY_1, "member-3");
         registerCandidates(node4, ENTITY_1, "member-4");
 
-        activateDatacenter(node1);
+        activateDatacenter(node1).get();
 
         waitUntillOwnerPresent(node1, ENTITY_1);
         final MockEntityOwnershipListener listener1 = registerListener(node1, ENTITY_1);
@@ -119,7 +119,7 @@ public class DataCentersTest extends AbstractNativeEosTest {
         ActorTestKit.shutdown(node1.getActorSystem(), Duration.ofSeconds(20));
         ActorTestKit.shutdown(node2.getActorSystem(), Duration.ofSeconds(20));
 
-        activateDatacenter(node3);
+        activateDatacenter(node3).get();
         verifyListenerState(listener2, ENTITY_1, true, true, false);
 
         unregisterCandidates(node3, ENTITY_1, "member-3");
