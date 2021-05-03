@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.admin;
 
 import com.google.common.annotations.Beta;
+import org.opendaylight.controller.cluster.akka.eos.service.NativeEosService;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -33,13 +34,15 @@ public final class OSGiClusterAdmin {
     BindingNormalizedNodeSerializer serializer = null;
     @Reference
     RpcProviderService rpcProviderService = null;
+    @Reference
+    NativeEosService nativeEosService = null;
 
     private ObjectRegistration<?> reg;
 
     @Activate
     void activate() {
         reg = rpcProviderService.registerRpcImplementation(ClusterAdminService.class,
-            new ClusterAdminRpcService(configDatastore, operDatastore, serializer));
+            new ClusterAdminRpcService(configDatastore, operDatastore, serializer, nativeEosService));
         LOG.info("Cluster Admin services started");
     }
 
