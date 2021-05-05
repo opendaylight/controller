@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c45fdab1_63926253",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 66
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-05-05T12:36:09Z",
+      "side": 1,
+      "message": "there should be some specification of the JSON file structure somewhere",
+      "range": {
+        "startLine": 135,
+        "startChar": 41,
+        "endLine": 135,
+        "endChar": 45
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6fd03752_1a5ea42f",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 66
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-05-05T12:36:09Z",
+      "side": 1,
+      "message": "Rather than having true/false here, let\u0027s specify the output format, so that\n\ncurrent \"true\" becomes \"json\"\ncurrent \"false\" becomes \"off\"\n\nThis will allow us to retrofit other formats",
+      "range": {
+        "startLine": 136,
+        "startChar": 20,
+        "endLine": 136,
+        "endChar": 24
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da468c2e_89cbd75a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 66
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-05-05T12:36:09Z",
+      "side": 1,
+      "message": "this needs to be picked out from \u0027store\u0027",
+      "range": {
+        "startLine": 218,
+        "startChar": 4,
+        "endLine": 218,
+        "endChar": 41
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29662606_055c8fcd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 66
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-05-05T12:36:09Z",
+      "side": 1,
+      "message": "why are we replicating these and not pick them up from datastore context as needed?",
+      "range": {
+        "startLine": 220,
+        "startChar": 12,
+        "endLine": 220,
+        "endChar": 41
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
