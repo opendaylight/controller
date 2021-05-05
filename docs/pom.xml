@@ -104,9 +104,8 @@
 
         <!-- Third-party dependencies -->
         <dependency>
-            <groupId>javax.inject</groupId>
+            <groupId>com.guicedee.services</groupId>
             <artifactId>javax.inject</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.kohsuke.metainf-services</groupId>
