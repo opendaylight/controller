@@ -31,7 +31,7 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
 
     private final TrieMap<String, TrieMap<String, Long>> statistics = TrieMap.create();
 
-    EntityOwnershipStatistics(){
+    EntityOwnershipStatistics() {
     }
 
     @Override
