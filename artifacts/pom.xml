@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>controller-artifacts</artifactId>
-    <version>3.0.8-SNAPSHOT</version>
+    <version>3.0.8</version>
     <packaging>pom</packaging>
 
     <dependencyManagement>
@@ -440,27 +440,27 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>netty-event-executor-config</artifactId>
-                <version>0.14.8-SNAPSHOT</version>
+                <version>0.14.8</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>netty-threadgroup-config</artifactId>
-                <version>0.14.8-SNAPSHOT</version>
+                <version>0.14.8</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>netty-timer-config</artifactId>
-                <version>0.14.8-SNAPSHOT</version>
+                <version>0.14.8</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>threadpool-config-api</artifactId>
-                <version>0.14.8-SNAPSHOT</version>
+                <version>0.14.8</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>threadpool-config-impl</artifactId>
-                <version>0.14.8-SNAPSHOT</version>
+                <version>0.14.8</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
