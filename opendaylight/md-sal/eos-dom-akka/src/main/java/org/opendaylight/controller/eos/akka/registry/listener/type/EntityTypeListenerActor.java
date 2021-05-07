@@ -107,7 +107,7 @@ public class EntityTypeListenerActor extends AbstractBehavior<TypeListenerComman
     }
 
     private Behavior<TypeListenerCommand> onOwnerChanged(final EntityOwnerChanged rsp) {
-        LOG.debug("Entity-type: {} listener, owner change: {}", entityType, rsp);
+        LOG.debug("{} : Entity-type: {} listener, owner change: {}", localMember, entityType, rsp);
 
         listener.ownershipChanged(rsp.getOwnershipChange());
         return this;
