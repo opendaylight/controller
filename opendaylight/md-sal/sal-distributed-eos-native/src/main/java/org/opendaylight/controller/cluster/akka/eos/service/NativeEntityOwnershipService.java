@@ -67,13 +67,13 @@ public class NativeEntityOwnershipService implements DOMEntityOwnershipService, 
     private final ActorRef<CandidateRegistryCommand> candidateRegistry;
     private final ActorRef<TypeListenerRegistryCommand> listenerRegistry;
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
-    private final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
+    protected final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
 
     // classic system
     private final ActorSystem actorSystem;
     private final Cluster cluster;
 
-    NativeEntityOwnershipService(final akka.actor.ActorSystem classicActorSystem)
+    protected NativeEntityOwnershipService(final akka.actor.ActorSystem classicActorSystem)
             throws ExecutionException, InterruptedException {
         this.actorSystem = classicActorSystem;
         cluster = Cluster.get(Adapter.toTyped(actorSystem));
