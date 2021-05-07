@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.akka.eos.registry.candidate.command.R
 import org.opendaylight.controller.cluster.akka.eos.registry.candidate.command.UnregisterCandidate;
 import org.opendaylight.controller.cluster.akka.eos.registry.listener.type.command.RegisterListener;
 import org.opendaylight.controller.cluster.akka.eos.registry.listener.type.command.TypeListenerRegistryCommand;
+import org.opendaylight.controller.cluster.akka.eos.service.NativeEntityOwnershipService;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
@@ -80,6 +81,24 @@ public abstract class AbstractNativeEosTest {
     private static final String SEED_NODES_PARAM = "akka.cluster.seed-nodes";
     private static final String DATA_CENTER_PARAM = "akka.cluster.multi-data-center.self-data-center";
 
+    protected static MockNativeEntityOwnershipService startupNativeService(final int port, List<String> roles,
+                                                                           final List<String> seedNodes)
+            throws ExecutionException, InterruptedException {
+        final Map<String, Object> overrides = new HashMap<>();
+        overrides.put(PORT_PARAM, port);
+        overrides.put(ROLE_PARAM, roles);
+        if (!seedNodes.isEmpty()) {
+            overrides.put(SEED_NODES_PARAM, seedNodes);
+        }
+
+        final Config config = ConfigFactory.parseMap(overrides)
+                .withFallback(ConfigFactory.load());
+
+        // Create a classic Akka system since thats what we will have in osgi
+        final akka.actor.ActorSystem system = akka.actor.ActorSystem.create("ClusterSystem", config);
+
+        return new MockNativeEntityOwnershipService(system);
+    }
 
     protected static ClusterNode startupRemote(final int port, final List<String> roles)
             throws ExecutionException, InterruptedException {
@@ -359,6 +378,28 @@ public abstract class AbstractNativeEosTest {
 
         public List<DOMEntityOwnershipChange> getChanges() {
             return changes;
+        }
+    }
+
+    protected static final class MockNativeEntityOwnershipService extends NativeEntityOwnershipService {
+        private ActorSystem classicActorSystem;
+
+        protected MockNativeEntityOwnershipService(ActorSystem classicActorSystem)
+                throws ExecutionException, InterruptedException {
+            super(classicActorSystem);
+            this.classicActorSystem = classicActorSystem;
+        }
+
+        protected void reachableMember(final String... role) {
+            AbstractNativeEosTest.reachableMember(ownerSupervisor, role);
+        }
+
+        public void unreachableMember(final String... role) {
+            AbstractNativeEosTest.unreachableMember(ownerSupervisor, role);
+        }
+
+        public ActorSystem getActorSystem() {
+            return classicActorSystem;
         }
     }
 }
