@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @Component(immediate = true, service = { DOMEntityOwnershipService.class, NativeEosService.class })
-public final class AkkaEntityOwnershipService implements DOMEntityOwnershipService, NativeEosService, AutoCloseable {
+public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, NativeEosService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AkkaEntityOwnershipService.class);
     private static final String DATACENTER_PREFIX = "dc";
 
@@ -77,10 +77,11 @@ public final class AkkaEntityOwnershipService implements DOMEntityOwnershipServi
     private final ActorRef<CandidateRegistryCommand> candidateRegistry;
     private final ActorRef<TypeListenerRegistryCommand> listenerRegistry;
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
-    private final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
+    protected final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
 
     @VisibleForTesting
-    AkkaEntityOwnershipService(final ActorSystem actorSystem) throws ExecutionException, InterruptedException {
+    protected AkkaEntityOwnershipService(final ActorSystem actorSystem)
+            throws ExecutionException, InterruptedException {
         final var typedActorSystem = Adapter.toTyped(actorSystem);
         scheduler = typedActorSystem.scheduler();
 
