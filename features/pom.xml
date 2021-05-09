@@ -53,7 +53,6 @@
     <module>odl-mdsal-broker</module>
     <module>odl-mdsal-clustering-commons</module>
     <module>odl-mdsal-distributed-datastore</module>
-    <module>odl-mdsal-model-inventory</module>
     <module>odl-mdsal-remoterpc-connector</module>
     <module>odl-toaster</module>
   </modules>

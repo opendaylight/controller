@@ -79,12 +79,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-model-inventory</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-remoterpc-connector</artifactId>
             <type>xml</type>
             <classifier>features</classifier>

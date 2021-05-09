@@ -59,13 +59,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- Base model augmentations -->
-            <dependency>
-                <groupId>org.opendaylight.controller.model</groupId>
-                <artifactId>model-inventory</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Clustered implementation -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -315,13 +308,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-mdsal-remoterpc-connector</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>odl-mdsal-model-inventory</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>

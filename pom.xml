@@ -30,7 +30,6 @@
     <module>bundle-parent</module>
     <module>benchmark</module>
     <module>jolokia</module>
-    <module>model</module>
 
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>

@@ -58,12 +58,6 @@
             <artifactId>threadpool-config-impl</artifactId>
         </dependency>
 
-        <!-- Base model augmentations -->
-        <dependency>
-            <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-inventory</artifactId>
-        </dependency>
-
         <!-- Clustered implementation -->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
