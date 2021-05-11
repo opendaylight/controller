@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.akka.eos.owner.checker.OwnerStateChec
 import org.opendaylight.controller.cluster.akka.eos.owner.checker.command.StateCheckerCommand;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.IdleSupervisor;
 import org.opendaylight.controller.cluster.akka.eos.owner.supervisor.command.OwnerSupervisorCommand;
-import org.opendaylight.controller.cluster.akka.eos.registry.candidate.CandidateRegistry;
+import org.opendaylight.controller.cluster.akka.eos.registry.candidate.CandidateRegistryInit;
 import org.opendaylight.controller.cluster.akka.eos.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.cluster.akka.eos.registry.listener.type.EntityTypeListenerRegistry;
 import org.opendaylight.controller.cluster.akka.eos.registry.listener.type.command.TypeListenerRegistryCommand;
@@ -42,7 +42,7 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
         final String role = cluster.selfMember().getRoles().iterator().next();
 
         listenerRegistry = context.spawn(EntityTypeListenerRegistry.create(role), "ListenerRegistry");
-        candidateRegistry = context.spawn(CandidateRegistry.create(), "CandidateRegistry");
+        candidateRegistry = context.spawn(CandidateRegistryInit.create(), "CandidateRegistry");
         ownerStateChecker = context.spawn(OwnerStateChecker.create(role), "OwnerStateChecker");
 
         final ClusterSingleton clusterSingleton = ClusterSingleton.get(context.getSystem());
