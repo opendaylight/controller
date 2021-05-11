@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
@@ -82,6 +83,10 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     private final Map<DOMEntity, String> currentOwners;
     // reverse lookup of owner to entity
     private final Multimap<String, DOMEntity> ownerToEntity = HashMultimap.create();
+
+    // only reassign owner for those entities that lost this candidate or is not reachable
+    private final BiPredicate<DOMEntity, String> reassignPredicate = (entity, candidate) ->
+            !isActiveCandidate(candidate) || !isCandidateFor(entity, candidate);
 
     private OwnerSupervisor(final ActorContext<OwnerSupervisorCommand> context,
                             final Map<DOMEntity, Set<String>> currentCandidates,
@@ -166,7 +171,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         }
 
         for (final String owner : ownersToReassign) {
-            reassignCandidatesFor(owner, ImmutableList.copyOf(ownerToEntity.get(owner)));
+            reassignCandidatesFor(owner, ImmutableList.copyOf(ownerToEntity.get(owner)), reassignPredicate);
         }
     }
 
@@ -247,7 +252,8 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
 
         // then reassign those that need new owners
         for (final String toReassign : ownersToReassign) {
-            reassignCandidatesFor(toReassign, ImmutableList.copyOf(ownerToEntity.get(toReassign)));
+            reassignCandidatesFor(toReassign, ImmutableList.copyOf(ownerToEntity.get(toReassign)),
+                    reassignPredicate);
         }
 
         if (currentCandidates.get(entity) == null) {
@@ -257,17 +263,25 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         }
     }
 
-    private void reassignCandidatesFor(final String oldOwner, final Collection<DOMEntity> entities) {
+    private void reassignCandidatesFor(final String oldOwner, final Collection<DOMEntity> entities,
+                                       final BiPredicate<DOMEntity, String> predicate) {
         LOG.debug("Reassigning owners for {}", entities);
         for (final DOMEntity entity : entities) {
 
-            // only reassign owner for those entities that lost this candidate or is not reachable
-            if (!activeMembers.contains(oldOwner)
-                    || !currentCandidates.getOrDefault(entity, Collections.emptySet()).contains(oldOwner)) {
+
+            if (predicate.test(entity, oldOwner)) {
                 ownerToEntity.remove(oldOwner, entity);
                 assignOwnerFor(entity);
             }
         }
+    }
+
+    private boolean isActiveCandidate(final String candidate) {
+        return activeMembers.contains(candidate);
+    }
+
+    private boolean isCandidateFor(final DOMEntity entity, final String candidate) {
+        return currentCandidates.getOrDefault(entity, Collections.emptySet()).contains(candidate);
     }
 
     private void assignOwnerFor(final DOMEntity entity) {
