@@ -11,7 +11,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>netty-threadgroup-config</artifactId>
-  <version>0.13.8-SNAPSHOT</version>
+  <version>0.13.8</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Configuration Wrapper around netty's event group</description>
