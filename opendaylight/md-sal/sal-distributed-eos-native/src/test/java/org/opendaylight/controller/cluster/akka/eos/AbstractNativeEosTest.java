@@ -61,22 +61,22 @@ public abstract class AbstractNativeEosTest {
     public static final DOMEntity ENTITY_2 = new DOMEntity("test-type-2", "entity-2");
 
     protected static final List<String> TWO_NODE_SEED_NODES =
-            List.of("akka://ClusterSystem@127.0.0.1:2550",
-                    "akka://ClusterSystem@127.0.0.1:2551");
+            List.of("akka.tcp://ClusterSystem@127.0.0.1:2550",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2551");
 
     protected static final List<String> THREE_NODE_SEED_NODES =
-            List.of("akka://ClusterSystem@127.0.0.1:2550",
-                    "akka://ClusterSystem@127.0.0.1:2551",
-                    "akka://ClusterSystem@127.0.0.1:2552");
+            List.of("akka.tcp://ClusterSystem@127.0.0.1:2550",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2551",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2552");
 
     protected static final List<String> DATACENTER_SEED_NODES =
-            List.of("akka://ClusterSystem@127.0.0.1:2550",
-                    "akka://ClusterSystem@127.0.0.1:2551",
-                    "akka://ClusterSystem@127.0.0.1:2552",
-                    "akka://ClusterSystem@127.0.0.1:2553");
+            List.of("akka.tcp://ClusterSystem@127.0.0.1:2550",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2551",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2552",
+                    "akka.tcp://ClusterSystem@127.0.0.1:2553");
 
-    private static final String REMOTE_PROTOCOL = "akka";
-    private static final String PORT_PARAM = "akka.remote.artery.canonical.port";
+    private static final String REMOTE_PROTOCOL = "akka.tcp";
+    private static final String PORT_PARAM = "akka.remote.classic.netty.tcp.port";
     private static final String ROLE_PARAM = "akka.cluster.roles";
     private static final String SEED_NODES_PARAM = "akka.cluster.seed-nodes";
     private static final String DATA_CENTER_PARAM = "akka.cluster.multi-data-center.self-data-center";
