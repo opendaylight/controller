@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ShardStrategyFactoryTest {
@@ -25,8 +24,7 @@ public class ShardStrategyFactoryTest {
 
     @Before
     public void setUp() {
-        factory = new ShardStrategyFactory(new ConfigurationImpl("module-shards.conf", "modules.conf"),
-            LogicalDatastoreType.CONFIGURATION);
+        factory = new ShardStrategyFactory(new ConfigurationImpl("module-shards.conf", "modules.conf"));
     }
 
     @Test

@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import com.google.common.collect.ImmutableList;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -44,8 +43,7 @@ public final class ShardManagerSnapshot implements Serializable {
     }
 
     private Object readResolve() {
-        return new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(shardList,
-                Collections.emptyMap());
+        return new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(shardList);
     }
 
     @Override

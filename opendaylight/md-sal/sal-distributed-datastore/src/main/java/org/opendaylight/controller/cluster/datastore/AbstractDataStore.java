@@ -34,7 +34,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
-import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -357,21 +356,6 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         listenerRegistrationProxy.init(shardName);
 
         return (ListenerRegistration<L>) listenerRegistrationProxy;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerShardConfigListener(
-            final YangInstanceIdentifier internalPath, final DOMDataTreeChangeListener delegate) {
-        requireNonNull(delegate, "delegate should not be null");
-
-        LOG.debug("Registering a listener for the configuration shard: {}", internalPath);
-
-        final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy =
-                new DataTreeChangeListenerProxy<>(actorUtils, delegate, internalPath);
-        proxy.init(ClusterUtils.PREFIX_CONFIG_SHARD_ID);
-
-        return (ListenerRegistration<L>) proxy;
     }
 
     private Duration initialSettleTime() {

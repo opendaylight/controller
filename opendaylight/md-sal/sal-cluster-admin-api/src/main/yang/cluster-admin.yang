@@ -119,49 +119,6 @@ module cluster-admin {
                      within two election timeout periods the operation fails.";
     }
 
-    rpc add-prefix-shard-replica {
-        input {
-            leaf shard-prefix {
-                mandatory true;
-                type instance-identifier;
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the replica belongs";
-            }
-        }
-
-        description "Adds a replica of a shard to this node and joins it to an existing cluster. There must already be
-                     a shard existing on another node with a leader. This RPC first contacts peer member seed nodes
-                     searching for a shard. When found, an AddServer message is sent to the shard leader and applied as
-                     described in the Raft paper.";
-    }
-
-    rpc remove-prefix-shard-replica {
-        input {
-            leaf shard-prefix {
-                mandatory true;
-                type instance-identifier;
-            }
-            leaf member-name {
-                mandatory true;
-                type string;
-                description "The cluster member from which the shard replica should be removed";
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the replica belongs";
-            }
-        }
-
-        description "Removes an existing replica of a prefix shard from this node via the RemoveServer mechanism as
-                     described in the Raft paper.";
-    }
-
     rpc add-replicas-for-all-shards {
         output {
             uses shard-result-output;
@@ -285,30 +242,6 @@ module cluster-admin {
                 }
             }
         }
-    }
-
-    rpc get-prefix-shard-role {
-        input {
-            leaf shard-prefix {
-                mandatory true;
-                type instance-identifier;
-            }
-
-            leaf data-store-type {
-                mandatory true;
-                type data-store-type;
-                description "The type of the data store to which the replica belongs";
-            }
-        }
-
-        output {
-            leaf role {
-                type string;
-                description "Current role for the given shard, if not present the shard currently does not have a role";
-            }
-        }
-
-        description "Returns the current role for the requested module shard.";
     }
 
     rpc get-known-clients-for-all-shards {

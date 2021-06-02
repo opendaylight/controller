@@ -76,7 +76,6 @@ import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -105,21 +104,11 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                     public String findShard(final YangInstanceIdentifier path) {
                         return TestModel.JUNK_QNAME.getLocalName();
                     }
-
-                    @Override
-                    public YangInstanceIdentifier getPrefixForPath(final YangInstanceIdentifier path) {
-                        return YangInstanceIdentifier.empty();
-                    }
                 }).put(
                 CarsModel.BASE_QNAME.getLocalName(), new ShardStrategy() {
                     @Override
                     public String findShard(final YangInstanceIdentifier path) {
                         return CarsModel.BASE_QNAME.getLocalName();
-                    }
-
-                    @Override
-                    public YangInstanceIdentifier getPrefixForPath(final YangInstanceIdentifier path) {
-                        return YangInstanceIdentifier.empty();
                     }
                 }).build();
 
@@ -178,8 +167,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
         doReturn(MemberName.forName(memberName)).when(mockActorContext).getCurrentMemberName();
-        doReturn(new ShardStrategyFactory(configuration,
-                LogicalDatastoreType.CONFIGURATION)).when(mockActorContext).getShardStrategyFactory();
+        doReturn(new ShardStrategyFactory(configuration)).when(mockActorContext).getShardStrategyFactory();
         doReturn(SCHEMA_CONTEXT).when(mockActorContext).getSchemaContext();
         doReturn(new Timeout(operationTimeoutInSeconds, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();

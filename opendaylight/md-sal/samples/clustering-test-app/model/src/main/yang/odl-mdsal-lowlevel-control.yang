@@ -290,83 +290,6 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
-    rpc produce-transactions {
-        description "Upon receiving this, the member shall make sure the outer list item
-            of llt:in-ints exists for the given id, make sure a shard for
-            the whole (config) id-ints is created (by creating and closing producer
-            for the whole id-ints), and create a DOMDataTreeProducer for that item (using that shard).
-
-            FIXME: Is the above the normal way of creating prefix-based chards?
-
-            Then start creating (one by one) and submitting transactions
-            to randomly add or delete items on the inner list for that id.
-            To ensure balanced number of deletes, the first write can create
-            a random set of random numbers. Other writes shall be one per number.
-            The writes shall use DOMDataTreeProducer API, as opposed to transaction (chains)
-            created directly on datastore.
-            .get with a timeout on currently earliest non-complete Future (from .submit)
-            shall be used as the primary wait method to throttle the submission rate.
-            This RPC shall not return until all transactions are confirmed successful,
-            or an exception is raised (the exception should propagate to restconf response).
-            OptimisticLockException is always considered an error.
-            In either case, the producer should be closed before returning,
-            but the shard and the whole id item shall be kept as they are.";
-        input {
-            uses llc:id-grouping;
-            uses transactions-params;
-            leaf isolated-transactions {
-                description "The value for DOMDataTreeProducer#createTransaction argument.";
-                mandatory true;
-                type boolean;
-            }
-        }
-        output {
-            uses transactions-result;
-        }
-    }
-
-    rpc create-prefix-shard {
-        description "Upon receiving this, the member creates a prefix shard at the instance-identifier, with replicas
-                on the required members.";
-        input {
-
-            leaf prefix {
-                mandatory true;
-                type instance-identifier;
-            }
-            leaf-list replicas {
-                min-elements 1;
-                type string;
-            }
-        }
-    }
-
-    rpc remove-prefix-shard {
-        description "Upon receiving this, the member removes the prefix based shard identifier by this prefix.
-                This must be called from the same node that created the shard.";
-
-        input {
-            leaf prefix {
-                mandatory true;
-                type instance-identifier;
-            }
-        }
-    }
-
-
-    rpc become-prefix-leader {
-        description "Upon receiving this, the member shall ask the appropriate API
-            to become Leader of the given shard (presumably the llt:list-ints one,
-            created by produce-transactions) and return immediatelly.";
-        input {
-            leaf prefix {
-                mandatory true;
-                type instance-identifier;
-            }
-        }
-        // No output.
-    }
-
     rpc remove-shard-replica {
         description "A specialised copy of cluster-admin:remove-shard-replica.
 
@@ -469,17 +392,6 @@ module odl-mdsal-lowlevel-control {
 
     // The following calls are not required for Carbon testing.
 
-    rpc deconfigure-id-ints-shard {
-        description "Upon receiving this, the member shall ask the appropriate API
-            to remove the llt:id-ints shard (presumably created by produce-transactions)
-            and return immediatelly.
-            It is expected the data would move to the root prefix shard seamlessly.
-
-            TODO: Make shard name configurable by input?";
-        // No input.
-        // No output.
-    }
-
     rpc register-default-constant {
         description "Upon receiving this, the member has to create and register
             a default llt:get-contexted-constant implementation (routed RPC).
@@ -506,19 +418,6 @@ module odl-mdsal-lowlevel-control {
                 type string;
                 description "The name of the configuration data store module-based shard to be shutdown
                     gracefully.";
-            }
-        }
-    }
-
-    rpc shutdown-prefix-shard-replica {
-        description "Upon receiving this, the member will try to gracefully shutdown local configuration
-            data store prefix-based shard replica.";
-        input {
-            leaf prefix {
-                description "The prefix of the configuration data store prefix-based shard to be shutdown
-                    gracefully.";
-                mandatory true;
-                type instance-identifier;
             }
         }
     }
