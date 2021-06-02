@@ -25,11 +25,4 @@ public interface ShardStrategy {
      * @return the corresponding shard name.
      */
     String findShard(YangInstanceIdentifier path);
-
-    /**
-     * Get the prefix of the shard that contains the data pointed to by the specified path.
-     * @param path the location of the data in the logical tree.
-     * @return the corresponding shards prefix.
-     */
-    YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path);
 }

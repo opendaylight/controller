@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,22 +18,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.PrefixShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
-import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-// TODO clean this up once we get rid of module based configuration, prefix one should be alot simpler
 public class ConfigurationImpl implements Configuration {
     private volatile Map<String, ModuleConfig> moduleConfigMap;
-
-    // TODO should this be initialized with something? on restart we should restore the shards from configuration?
-    private volatile Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixConfigMap = Collections.emptyMap();
 
     // Look up maps to speed things up
 
@@ -121,24 +111,6 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public String getShardNameForPrefix(final DOMDataTreeIdentifier prefix) {
-        requireNonNull(prefix, "prefix should not be null");
-
-        Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry = new SimpleEntry<>(
-                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.empty()), null);
-
-        for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
-            if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()
-                    > bestMatchEntry.getKey().getRootIdentifier().getPathArguments().size()) {
-                bestMatchEntry = entry;
-            }
-        }
-
-        //TODO we really should have mapping based on prefix instead of Strings
-        return ClusterUtils.getCleanShardName(bestMatchEntry.getKey().getRootIdentifier());
-    }
-
-    @Override
     public Collection<MemberName> getMembersFromShardName(final String shardName) {
         checkNotNullShardName(shardName);
 
@@ -146,12 +118,6 @@ public class ConfigurationImpl implements Configuration {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if (shardConfig != null) {
                 return shardConfig.getReplicas();
-            }
-        }
-
-        for (final PrefixShardConfiguration prefixConfig : prefixConfigMap.values()) {
-            if (shardName.equals(ClusterUtils.getCleanShardName(prefixConfig.getPrefix().getRootIdentifier()))) {
-                return prefixConfig.getShardMemberNames();
             }
         }
 
@@ -191,40 +157,6 @@ public class ConfigurationImpl implements Configuration {
         namespaceToModuleName = ImmutableMap.<String, String>builder().putAll(namespaceToModuleName)
                 .put(moduleConfig.getNamespace(), moduleConfig.getName()).build();
         allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(config.getShardName()).build();
-    }
-
-    @Override
-    public void addPrefixShardConfiguration(final PrefixShardConfiguration config) {
-        addPrefixConfig(requireNonNull(config, "PrefixShardConfiguration cannot be null"));
-        allShardNames = ImmutableSet.<String>builder().addAll(allShardNames)
-                .add(ClusterUtils.getCleanShardName(config.getPrefix().getRootIdentifier())).build();
-    }
-
-    @Override
-    public void removePrefixShardConfiguration(final DOMDataTreeIdentifier prefix) {
-        removePrefixConfig(requireNonNull(prefix, "Prefix cannot be null"));
-
-        final HashSet<String> temp = new HashSet<>(allShardNames);
-        temp.remove(ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
-
-        allShardNames = ImmutableSet.copyOf(temp);
-    }
-
-    @Override
-    public Map<DOMDataTreeIdentifier, PrefixShardConfiguration> getAllPrefixShardConfigurations() {
-        return ImmutableMap.copyOf(prefixConfigMap);
-    }
-
-    private void addPrefixConfig(final PrefixShardConfiguration config) {
-        final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newPrefixConfigMap = new HashMap<>(prefixConfigMap);
-        newPrefixConfigMap.put(config.getPrefix(), config);
-        prefixConfigMap = ImmutableMap.copyOf(newPrefixConfigMap);
-    }
-
-    private void removePrefixConfig(final DOMDataTreeIdentifier prefix) {
-        final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newPrefixConfigMap = new HashMap<>(prefixConfigMap);
-        newPrefixConfigMap.remove(prefix);
-        prefixConfigMap = ImmutableMap.copyOf(newPrefixConfigMap);
     }
 
     private ShardStrategy createShardStrategy(final String moduleName, final String shardStrategyName) {
@@ -267,28 +199,6 @@ public class ConfigurationImpl implements Configuration {
                 return;
             }
         }
-    }
-
-    @Override
-    public ShardStrategy getStrategyForPrefix(final DOMDataTreeIdentifier prefix) {
-        requireNonNull(prefix, "Prefix cannot be null");
-        // FIXME using prefix tables like in mdsal will be better
-        Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> bestMatchEntry = new SimpleEntry<>(
-                new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.empty()), null);
-
-        for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
-            if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()
-                    > bestMatchEntry.getKey().getRootIdentifier().getPathArguments().size()) {
-                bestMatchEntry = entry;
-            }
-        }
-
-        if (bestMatchEntry.getValue() == null) {
-            return null;
-        }
-        return new PrefixShardStrategy(ClusterUtils
-                .getCleanShardName(bestMatchEntry.getKey().getRootIdentifier()),
-                bestMatchEntry.getKey().getRootIdentifier());
     }
 
     private void updateModuleConfigMap(final ModuleConfig moduleConfig) {

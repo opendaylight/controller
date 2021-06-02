@@ -1399,7 +1399,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 .put("astronauts", Collections.<String>emptyList()).build());
 
         ShardManagerSnapshot snapshot =
-                new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"), Collections.emptyMap());
+                new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"));
         DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix, snapshot,
                 Collections.<ShardSnapshot>emptyList());
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig)
@@ -1497,7 +1497,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         // persisted.
         String[] restoredShards = { "default", "people" };
         ShardManagerSnapshot snapshot =
-                new ShardManagerSnapshot(Arrays.asList(restoredShards), Collections.emptyMap());
+                new ShardManagerSnapshot(Arrays.asList(restoredShards));
         InMemorySnapshotStore.addSnapshot(shardManagerID, snapshot);
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.MILLISECONDS);
 
@@ -1924,7 +1924,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                     .put("people", Arrays.asList("member-1", "member-2")).build());
         String[] restoredShards = {"default", "astronauts"};
         ShardManagerSnapshot snapshot =
-                new ShardManagerSnapshot(Arrays.asList(restoredShards), Collections.emptyMap());
+                new ShardManagerSnapshot(Arrays.asList(restoredShards));
         InMemorySnapshotStore.addSnapshot("shard-manager-" + shardMrgIDSuffix, snapshot);
 
         // create shardManager to come up with restored data

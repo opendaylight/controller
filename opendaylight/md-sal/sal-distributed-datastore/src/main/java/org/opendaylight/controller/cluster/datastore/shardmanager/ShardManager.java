@@ -55,19 +55,16 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersisten
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
-import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
-import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.exceptions.AlreadyExistsException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
-import org.opendaylight.controller.cluster.datastore.messages.AddPrefixShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
@@ -81,13 +78,11 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemoteFindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
-import org.opendaylight.controller.cluster.datastore.messages.RemovePrefixShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
-import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.CompositeOnComplete;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -108,9 +103,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,8 +240,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onCreateShard((CreateShard)message);
         } else if (message instanceof AddShardReplica) {
             onAddShardReplica((AddShardReplica) message);
-        } else if (message instanceof AddPrefixShardReplica) {
-            onAddPrefixShardReplica((AddPrefixShardReplica) message);
         } else if (message instanceof ForwardedAddServerReply) {
             ForwardedAddServerReply msg = (ForwardedAddServerReply)message;
             onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(), msg.leaderPath,
@@ -258,8 +249,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onAddServerFailure(msg.shardName, msg.failureMessage, msg.failure, getSender(), msg.removeShardOnFailure);
         } else if (message instanceof RemoveShardReplica) {
             onRemoveShardReplica((RemoveShardReplica) message);
-        } else if (message instanceof RemovePrefixShardReplica) {
-            onRemovePrefixShardReplica((RemovePrefixShardReplica) message);
         } else if (message instanceof WrappedShardResponse) {
             onWrappedShardResponse((WrappedShardResponse) message);
         } else if (message instanceof GetSnapshot) {
@@ -393,49 +382,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             Exception failure = getServerChangeException(RemoveServer.class, replyMsg.getStatus(), leaderPath, shardId);
             originalSender.tell(new Status.Failure(failure), getSelf());
         }
-    }
-
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private void removePrefixShardReplica(final RemovePrefixShardReplica contextMessage, final String shardName,
-                                          final String primaryPath, final ActorRef sender) {
-        if (isShardReplicaOperationInProgress(shardName, sender)) {
-            return;
-        }
-
-        shardReplicaOperationsInProgress.add(shardName);
-
-        final ShardIdentifier shardId = getShardIdentifier(contextMessage.getMemberName(), shardName);
-
-        final DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName).build();
-
-        //inform ShardLeader to remove this shard as a replica by sending an RemoveServer message
-        LOG.debug("{}: Sending RemoveServer message to peer {} for shard {}", persistenceId(),
-                primaryPath, shardId);
-
-        Timeout removeServerTimeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration());
-        Future<Object> futureObj = ask(getContext().actorSelection(primaryPath),
-                new RemoveServer(shardId.toString()), removeServerTimeout);
-
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
-                if (failure != null) {
-                    shardReplicaOperationsInProgress.remove(shardName);
-
-                    LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", persistenceId(), primaryPath,
-                        shardName, failure);
-
-                    // FAILURE
-                    sender.tell(new Status.Failure(new RuntimeException(
-                        String.format("RemoveServer request to leader %s for shard %s failed", primaryPath, shardName),
-                        failure)), self());
-                } else {
-                    // SUCCESS
-                    self().tell(new WrappedShardResponse(shardId, response, primaryPath), sender);
-                }
-            }
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
@@ -1263,41 +1209,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return false;
     }
 
-    private void onAddPrefixShardReplica(final AddPrefixShardReplica message) {
-        LOG.debug("{}: onAddPrefixShardReplica: {}", persistenceId(), message);
-
-        final ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
-                ClusterUtils.getCleanShardName(message.getShardPrefix()));
-        final String shardName = shardId.getShardName();
-
-        // Create the localShard
-        if (schemaContext == null) {
-            LOG.debug("{}: No SchemaContext is available in order to create a local shard instance for {}",
-                persistenceId(), shardName);
-            getSender().tell(new Status.Failure(new IllegalStateException(
-                "No SchemaContext is available in order to create a local shard instance for " + shardName)),
-                getSelf());
-            return;
-        }
-
-        findPrimary(shardName, new AutoFindPrimaryFailureResponseHandler(getSender(), shardName, persistenceId(),
-                getSelf()) {
-            @Override
-            public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
-                final RunnableMessage runnable = (RunnableMessage) () -> addPrefixShard(getShardName(),
-                        message.getShardPrefix(), response, getSender());
-                if (!isPreviousShardActorStopInProgress(getShardName(), runnable)) {
-                    getSelf().tell(runnable, getTargetActor());
-                }
-            }
-
-            @Override
-            public void onLocalPrimaryFound(final LocalPrimaryShardFound message) {
-                sendLocalReplicaAlreadyExistsReply(getShardName(), getTargetActor());
-            }
-        });
-    }
-
     private void onAddShardReplica(final AddShardReplica shardReplicaMsg) {
         final String shardName = shardReplicaMsg.getShardName();
 
@@ -1345,42 +1256,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: Local shard {} already exists", persistenceId(), shardName);
         sender.tell(new Status.Failure(new AlreadyExistsException(
             String.format("Local shard %s already exists", shardName))), getSelf());
-    }
-
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private void addPrefixShard(final String shardName, final YangInstanceIdentifier shardPrefix,
-                                final RemotePrimaryShardFound response, final ActorRef sender) {
-        if (isShardReplicaOperationInProgress(shardName, sender)) {
-            return;
-        }
-
-        shardReplicaOperationsInProgress.add(shardName);
-
-        final ShardInformation shardInfo;
-        final boolean removeShardOnFailure;
-        ShardInformation existingShardInfo = localShards.get(shardName);
-        if (existingShardInfo == null) {
-            removeShardOnFailure = true;
-            ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), shardName);
-
-            final Builder builder = newShardDatastoreContextBuilder(shardName);
-            builder.storeRoot(shardPrefix).customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
-
-            DatastoreContext datastoreContext = builder.build();
-
-            shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
-            shardInfo.setActiveMember(false);
-            shardInfo.setSchemaContext(schemaContext);
-            localShards.put(shardName, shardInfo);
-            shardInfo.setActor(newShardActor(shardInfo));
-        } else {
-            removeShardOnFailure = false;
-            shardInfo = existingShardInfo;
-        }
-
-        execAddShard(shardName, shardInfo, response, removeShardOnFailure, sender);
     }
 
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
@@ -1537,32 +1412,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         });
     }
 
-    private void onRemovePrefixShardReplica(final RemovePrefixShardReplica message) {
-        LOG.debug("{}: onRemovePrefixShardReplica: {}", persistenceId(), message);
-
-        final ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
-                ClusterUtils.getCleanShardName(message.getShardPrefix()));
-        final String shardName = shardId.getShardName();
-
-        findPrimary(shardName, new AutoFindPrimaryFailureResponseHandler(getSender(),
-                shardName, persistenceId(), getSelf()) {
-            @Override
-            public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
-                doRemoveShardReplicaAsync(response.getPrimaryPath());
-            }
-
-            @Override
-            public void onLocalPrimaryFound(final LocalPrimaryShardFound response) {
-                doRemoveShardReplicaAsync(response.getPrimaryPath());
-            }
-
-            private void doRemoveShardReplicaAsync(final String primaryPath) {
-                getSelf().tell((RunnableMessage) () -> removePrefixShardReplica(message, getShardName(),
-                        primaryPath, getSender()), getTargetActor());
-            }
-        });
-    }
-
     private void persistShardList() {
         List<String> shardList = new ArrayList<>(localShards.keySet());
         for (ShardInformation shardInfo : localShards.values()) {
@@ -1571,13 +1420,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
         LOG.debug("{}: persisting the shard list {}", persistenceId(), shardList);
-        saveSnapshot(updateShardManagerSnapshot(shardList, configuration.getAllPrefixShardConfigurations()));
+        saveSnapshot(updateShardManagerSnapshot(shardList));
     }
 
-    private ShardManagerSnapshot updateShardManagerSnapshot(
-            final List<String> shardList,
-            final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> allPrefixShardConfigurations) {
-        currentSnapshot = new ShardManagerSnapshot(shardList, allPrefixShardConfigurations);
+    private ShardManagerSnapshot updateShardManagerSnapshot(final List<String> shardList) {
+        currentSnapshot = new ShardManagerSnapshot(shardList);
         return currentSnapshot;
     }
 

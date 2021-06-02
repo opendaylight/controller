@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 public class MockConfiguration extends ConfigurationImpl {
     public MockConfiguration() {
@@ -36,10 +34,5 @@ public class MockConfiguration extends ConfigurationImpl {
 
             return retMap;
         });
-    }
-
-    @Override
-    public ShardStrategy getStrategyForPrefix(final DOMDataTreeIdentifier prefix) {
-        return null;
     }
 }
