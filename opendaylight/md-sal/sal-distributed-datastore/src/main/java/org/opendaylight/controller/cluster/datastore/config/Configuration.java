@@ -8,13 +8,11 @@
 package org.opendaylight.controller.cluster.datastore.config;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 public interface Configuration {
 
@@ -32,11 +30,6 @@ public interface Configuration {
      * Returns the first shard name corresponding to the given module name or null if none is configured.
      */
     @Nullable String getShardNameForModule(@NonNull String moduleName);
-
-    /**
-     * Return the shard name corresponding to the prefix, or null if none is configured.
-     */
-    @Nullable String getShardNameForPrefix(@NonNull DOMDataTreeIdentifier prefix);
 
     /**
      * Returns the member replicas for the given shard name.
@@ -59,23 +52,6 @@ public interface Configuration {
     void addModuleShardConfiguration(@NonNull ModuleShardConfiguration config);
 
     /**
-     * Adds a new configuration for a shard based on prefix.
-     */
-    void addPrefixShardConfiguration(@NonNull PrefixShardConfiguration config);
-
-    /**
-     * Removes a shard configuration for the specified prefix.
-     */
-    void removePrefixShardConfiguration(@NonNull DOMDataTreeIdentifier prefix);
-
-    /**
-     * Returns the configuration for all configured prefix shards.
-     *
-     * @return An immutable copy of the currently configured prefix shards.
-     */
-    Map<DOMDataTreeIdentifier, PrefixShardConfiguration> getAllPrefixShardConfigurations();
-
-    /**
      * Returns a unique set of all member names configured for all shards.
      */
     Collection<MemberName> getUniqueMemberNamesForAllShards();
@@ -94,9 +70,4 @@ public interface Configuration {
      * Removes the given member as a replica for the given shardName.
      */
     void removeMemberReplicaForShard(String shardName, MemberName memberName);
-
-    /**
-     * Returns the ShardStrategy for the given prefix or null if the prefix is not found.
-     */
-    @Nullable ShardStrategy getStrategyForPrefix(@NonNull DOMDataTreeIdentifier prefix);
 }

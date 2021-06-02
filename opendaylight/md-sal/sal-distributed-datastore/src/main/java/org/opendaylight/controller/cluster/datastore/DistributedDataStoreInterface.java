@@ -24,10 +24,6 @@ public interface DistributedDataStoreInterface extends DOMStore {
     ActorUtils getActorUtils();
 
     @Beta
-    <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerShardConfigListener(
-            YangInstanceIdentifier internalPath, DOMDataTreeChangeListener delegate);
-
-    @Beta
     <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
             YangInstanceIdentifier shardLookup, YangInstanceIdentifier insideShard,
             DOMDataTreeChangeListener delegate);

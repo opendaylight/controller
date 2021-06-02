@@ -44,11 +44,4 @@ public final class SchemaContextHelper {
     public static EffectiveModelContext select(final String... schemaFiles) {
         return YangParserTestUtils.parseYangResources(SchemaContextHelper.class, schemaFiles);
     }
-
-    public static EffectiveModelContext distributedShardedDOMDataTreeSchemaContext() {
-        // we need prefix-shard-configuration and odl-datastore-test models
-        // for DistributedShardedDOMDataTree tests
-        return YangParserTestUtils.parseYangResources(SchemaContextHelper.class, ODL_DATASTORE_TEST_YANG,
-            "/META-INF/yang/prefix-shard-configuration@2017-01-10.yang");
-    }
 }

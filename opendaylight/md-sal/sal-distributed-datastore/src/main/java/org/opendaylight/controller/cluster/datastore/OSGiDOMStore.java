@@ -56,12 +56,6 @@ public final class OSGiDOMStore
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerShardConfigListener(
-            final YangInstanceIdentifier internalPath, final DOMDataTreeChangeListener delegate) {
-        return datastore.registerShardConfigListener(internalPath, delegate);
-    }
-
-    @Override
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
             final YangInstanceIdentifier shardLookup, final YangInstanceIdentifier insideShard,
             final DOMDataTreeChangeListener delegate) {
