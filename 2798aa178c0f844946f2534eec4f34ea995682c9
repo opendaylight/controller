@@ -46,6 +46,30 @@
       "revId": "2798aa178c0f844946f2534eec4f34ea995682c9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84bbd760_6ddea716",
+        "filename": "opendaylight/md-sal/sal-distributed-eos-native/src/main/java/org/opendaylight/controller/cluster/akka/eos/service/NativeEosService.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-06-07T12:24:36Z",
+      "side": 1,
+      "message": "So they should result in ListenableFuture and be correctly composed in admin-impl RPCs...",
+      "parentUuid": "6ff9875c_993ab462",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 8
+      },
+      "revId": "2798aa178c0f844946f2534eec4f34ea995682c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
