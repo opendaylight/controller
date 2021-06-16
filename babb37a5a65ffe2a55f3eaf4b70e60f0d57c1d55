@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a4bd3cdb_7c49e2a8",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 66
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-16T09:53:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c45fdab1_63926253",
+      "range": {
+        "startLine": 135,
+        "startChar": 41,
+        "endLine": 135,
+        "endChar": 45
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fd03752_1a5ea42f",
         "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
         "patchSetId": 66
@@ -45,6 +69,30 @@
       "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eee36b97_cb6856bb",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 66
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-16T09:53:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fd03752_1a5ea42f",
+      "range": {
+        "startLine": 136,
+        "startChar": 20,
+        "endLine": 136,
+        "endChar": 24
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3c1608ac_c88bf4d4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 66
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-16T09:53:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da468c2e_89cbd75a",
+      "range": {
+        "startLine": 218,
+        "startChar": 4,
+        "endLine": 218,
+        "endChar": 41
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "29662606_055c8fcd",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 66
@@ -91,6 +163,30 @@
       "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5de476a1_db5c57db",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 66
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-16T09:53:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "29662606_055c8fcd",
+      "range": {
+        "startLine": 220,
+        "startChar": 12,
+        "endLine": 220,
+        "endChar": 41
+      },
+      "revId": "babb37a5a65ffe2a55f3eaf4b70e60f0d57c1d55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
