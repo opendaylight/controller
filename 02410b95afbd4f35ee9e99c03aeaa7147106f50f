@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56d09f1c_bbb4f7d0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "I would prefer Locale.ROOT",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99dde0a1_4a700a58",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "final",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b9868a4_ac95219c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "final",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83f2e1fa_8e4e7d5c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "final",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b46799d1_4524d935",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "It looks that every switch branch is the same..\nI would suggest to create a method with node.getModificationType() as a parameter.",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7564d78_e0611c9c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "The following code looks too much similar to the code above.\nWhy we need this again?",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b37628a3_f2ffa527",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "Again, you can create one method with node.getModificationType() value as parameter",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb38b989_5026df94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "I prefer in tests to just throw Exception.",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3814b2bf_2c1e1e8f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerSupportTest.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "Again, Exception covers all we need in tests.",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7551e06e_692fe9ed",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-17T13:07:32Z",
+      "side": 1,
+      "message": "throws Exception, everywhere..",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
