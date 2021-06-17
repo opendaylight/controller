@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8f6dea0d_c2a8ae7f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-17T11:59:53Z",
+      "side": 1,
+      "message": "getModifications() return unmodifiable list of modifications",
+      "parentUuid": "048f438b_cb787378",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cd894124_b418535b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
         "patchSetId": 8
@@ -33,6 +51,24 @@
       "revId": "ac590209831412454e35bddae21bfc32137c9676",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2953b663_ecc52a3d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-17T11:59:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd894124_b418535b",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "4d103f07_d8d696ee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-17T11:59:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7440b718_7faeb430",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6008a554_117bf424",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
         "patchSetId": 8
@@ -67,6 +121,24 @@
       "revId": "ac590209831412454e35bddae21bfc32137c9676",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3ee7921_6150f9d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-17T11:59:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6008a554_117bf424",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "a0cee8ec_d71f778e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationV1.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-17T11:59:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17bfc132_be6cb44b",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6690ff55_d202322b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationTestV1.java",
         "patchSetId": 8
@@ -98,6 +188,24 @@
       "writtenOn": "2021-06-17T11:36:47Z",
       "side": 1,
       "message": "Somehow, I think this is not necessary.",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9415f462_d98d7b12",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationTestV1.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-17T11:59:53Z",
+      "side": 1,
+      "message": "I don`t quite understand why? This is done to avoid code duplication",
+      "parentUuid": "6690ff55_d202322b",
       "revId": "ac590209831412454e35bddae21bfc32137c9676",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
