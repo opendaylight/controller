@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "58e72c2a_a16e76ed",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56d09f1c_bbb4f7d0",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99dde0a1_4a700a58",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
         "patchSetId": 74
@@ -33,6 +51,24 @@
       "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bb80b372_1bb15cd9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "That way it doesn`t pass checkstyle (RedundantModifier: Redundant \u0027final\u0027 modifier)",
+      "parentUuid": "99dde0a1_4a700a58",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a4e1f21_de0277e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "That way it doesn`t pass checkstyle (RedundantModifier: Redundant \u0027final\u0027 modifier)",
+      "parentUuid": "1b9868a4_ac95219c",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83f2e1fa_8e4e7d5c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
         "patchSetId": 74
@@ -67,6 +121,24 @@
       "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0b0918b_2ca58687",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83f2e1fa_8e4e7d5c",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ef316918_f841183c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b46799d1_4524d935",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7564d78_e0611c9c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
         "patchSetId": 74
@@ -101,6 +191,24 @@
       "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c246367_e68a7256",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7564d78_e0611c9c",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "55f104d2_8a62f68f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b37628a3_f2ffa527",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb38b989_5026df94",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
         "patchSetId": 74
@@ -135,6 +261,24 @@
       "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ef389df_bf04b63c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb38b989_5026df94",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "2feda580_7c9c218f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerSupportTest.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3814b2bf_2c1e1e8f",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7551e06e_692fe9ed",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
         "patchSetId": 74
@@ -169,6 +331,24 @@
       "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dea63dff_4f777efb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-06-18T05:32:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7551e06e_692fe9ed",
+      "revId": "02410b95afbd4f35ee9e99c03aeaa7147106f50f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
