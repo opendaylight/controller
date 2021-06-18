@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1c43170_4c001210",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 75
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T06:34:53Z",
+      "side": 1,
+      "message": "This line is too long.\nPlease split into two lines with 72 chars max.",
+      "revId": "4247978832c0e6b6c8bc7312f43c2a4813bb65a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aad1d099_9b93b1f1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 75
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T06:34:53Z",
+      "side": 1,
+      "message": "I think @NonNull annotation should be here.\nAnd id can be null?\n\nThis applies for another public cases as well.",
+      "revId": "4247978832c0e6b6c8bc7312f43c2a4813bb65a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ac9f914_fa6ef88b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/JsonExportActor.java",
+        "patchSetId": 75
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T06:34:53Z",
+      "side": 1,
+      "message": "IMO: We do not need commented lines.",
+      "revId": "4247978832c0e6b6c8bc7312f43c2a4813bb65a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "226e2878_ace315bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
+        "patchSetId": 75
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T06:34:53Z",
+      "side": 1,
+      "message": "static\n\nApply to another methods as well.",
+      "revId": "4247978832c0e6b6c8bc7312f43c2a4813bb65a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
