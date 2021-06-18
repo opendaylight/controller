@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00340007_1d13c5a1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T14:47:57Z",
+      "side": 1,
+      "message": "First if",
+      "revId": "80bb45c76eeadf8c10023674c411e930d12f0467",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a66b659_93cdc5b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T14:47:57Z",
+      "side": 1,
+      "message": "another, another if for the same thing\n\nPlease rewrite this code to be more readable for me 😄\n\nHow to begin?\n\nfinal TransactionContextWrapper contextWrapper;\nfinal TransactionContext localContext;\n\nand then eliminate the number of if statements.",
+      "revId": "80bb45c76eeadf8c10023674c411e930d12f0467",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a72ecd42_d4b183be",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T14:47:57Z",
+      "side": 1,
+      "message": "What is the meaning of direct?",
+      "revId": "80bb45c76eeadf8c10023674c411e930d12f0467",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
