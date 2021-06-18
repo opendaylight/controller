@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ae388e29_cb2b776c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T09:50:47Z",
+      "side": 1,
+      "message": "Yes, and you do not need to modify it.\nWhat is the purpose of MutableCompositeModificationV1#doReadExternal?\nIt looks be a copy of MutableCompositeModification#doReadExternal\nJust remove MutableCompositeModificationV1#doReadExternal and return this back to private then.\n\nDo I miss something?",
+      "parentUuid": "8f6dea0d_c2a8ae7f",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cd894124_b418535b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModification.java",
         "patchSetId": 8
@@ -206,6 +224,24 @@
       "side": 1,
       "message": "I don`t quite understand why? This is done to avoid code duplication",
       "parentUuid": "6690ff55_d202322b",
+      "revId": "ac590209831412454e35bddae21bfc32137c9676",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c9a9c8a_26d0f1e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/modification/MutableCompositeModificationTestV1.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-18T09:50:47Z",
+      "side": 1,
+      "message": "IMO: new MutableCompositeModificationV1() is not duplication at all and it is not worth to create another class.\n\nIn addition I think that MutableCompositeModificationV1 deserves its own test class - not just use MutableCompositeModificationV1 instance instead of MutableCompositeModification in test class for MutableCompositeModification.",
+      "parentUuid": "9415f462_d98d7b12",
       "revId": "ac590209831412454e35bddae21bfc32137c9676",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
