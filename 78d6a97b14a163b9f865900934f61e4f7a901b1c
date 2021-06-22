@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ee77c9f5_931e63eb",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/main/java/org/opendaylight/controller/eos/akka/owner/supervisor/IdleSupervisor.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2021-06-22T10:32:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5427e2c_83c00ba4",
+      "range": {
+        "startLine": 65,
+        "startChar": 37,
+        "endLine": 65,
+        "endChar": 45
+      },
+      "revId": "78d6a97b14a163b9f865900934f61e4f7a901b1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4dca7646_214638fa",
         "filename": "opendaylight/md-sal/eos-dom-akka/src/main/java/org/opendaylight/controller/eos/akka/owner/supervisor/OwnerSupervisor.java",
         "patchSetId": 16
@@ -45,6 +69,30 @@
       "revId": "78d6a97b14a163b9f865900934f61e4f7a901b1c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "357f0c7f_2bf51776",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/main/java/org/opendaylight/controller/eos/akka/owner/supervisor/OwnerSupervisor.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2021-06-22T10:32:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4dca7646_214638fa",
+      "range": {
+        "startLine": 362,
+        "startChar": 0,
+        "endLine": 362,
+        "endChar": 8
+      },
+      "revId": "78d6a97b14a163b9f865900934f61e4f7a901b1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "963b95de_ea7f53b6",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/test/java/org/opendaylight/controller/eos/akka/AbstractNativeEosTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2021-06-22T10:32:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34897701_b669e65c",
+      "range": {
+        "startLine": 247,
+        "startChar": 47,
+        "endLine": 247,
+        "endChar": 69
+      },
+      "revId": "78d6a97b14a163b9f865900934f61e4f7a901b1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9981eb6_04efeb90",
         "filename": "opendaylight/md-sal/eos-dom-akka/src/test/java/org/opendaylight/controller/eos/akka/AbstractNativeEosTest.java",
         "patchSetId": 16
@@ -91,6 +163,30 @@
       "revId": "78d6a97b14a163b9f865900934f61e4f7a901b1c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46acb40c_080ac061",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/test/java/org/opendaylight/controller/eos/akka/AbstractNativeEosTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2021-06-22T10:32:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9981eb6_04efeb90",
+      "range": {
+        "startLine": 251,
+        "startChar": 50,
+        "endLine": 251,
+        "endChar": 60
+      },
+      "revId": "78d6a97b14a163b9f865900934f61e4f7a901b1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
