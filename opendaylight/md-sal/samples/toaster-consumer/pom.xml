@@ -14,7 +14,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.controller.samples</groupId>
       <artifactId>sample-toaster</artifactId>
     </dependency>
     <dependency>
@@ -23,11 +23,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi.core</artifactId>
+      <artifactId>yang-binding</artifactId>
     </dependency>
   </dependencies>
 
