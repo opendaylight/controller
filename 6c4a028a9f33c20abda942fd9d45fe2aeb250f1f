@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ba69ca6_983110c7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActorContext.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-06-24T12:06:20Z",
+      "side": 1,
+      "message": "Please make the fields final. The state of this class should be finite.",
+      "revId": "6c4a028a9f33c20abda942fd9d45fe2aeb250f1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
