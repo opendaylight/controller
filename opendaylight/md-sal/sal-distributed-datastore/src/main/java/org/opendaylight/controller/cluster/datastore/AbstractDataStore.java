@@ -20,6 +20,7 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.slf4j.Logger;
@@ -348,11 +350,20 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}, path inside shard: {}",
                 delegate,shardLookup, shardName, insideShard);
 
+        // wrap this in the ClusteredDOMDataTreeChangeLister interface
+        // since we always want clustered registration
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorUtils,
-                        // wrap this in the ClusteredDOMDataTreeChangeLister interface
-                        // since we always want clustered registration
-                        (ClusteredDOMDataTreeChangeListener) delegate::onDataTreeChanged, insideShard);
+                new DataTreeChangeListenerProxy<>(actorUtils, new ClusteredDOMDataTreeChangeListener() {
+                    @Override
+                    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
+                        delegate.onDataTreeChanged(changes);
+                    }
+
+                    @Override
+                    public void onInitialData() {
+                        delegate.onInitialData();
+                    }
+                }, insideShard);
         listenerRegistrationProxy.init(shardName);
 
         return (ListenerRegistration<L>) listenerRegistrationProxy;
