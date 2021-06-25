@@ -62,6 +62,11 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
     }
 
     @Override
+    public void onInitialData() {
+        // No-op
+    }
+
+    @Override
     public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
         for (DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();

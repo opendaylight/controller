@@ -28,11 +28,15 @@ import tech.pantheon.triemap.TrieMap;
  * finding out how many entities of a given type are owned by a given candidate is not an efficient query.
  */
 class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
-
     private final TrieMap<String, TrieMap<String, Long>> statistics = TrieMap.create();
 
     EntityOwnershipStatistics() {
         // Hidden on purpose
+    }
+
+    @Override
+    public void onInitialData() {
+        // No-op
     }
 
     @Override

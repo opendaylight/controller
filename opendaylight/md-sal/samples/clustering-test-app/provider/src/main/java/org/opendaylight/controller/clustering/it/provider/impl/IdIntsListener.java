@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
-
     private static final Logger LOG = LoggerFactory.getLogger(IdIntsListener.class);
     private static final long SECOND_AS_NANO = 1000000000;
 
@@ -40,6 +39,11 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private final AtomicLong lastNotifTimestamp = new AtomicLong(0);
     private ScheduledExecutorService executorService;
     private ScheduledFuture<?> scheduledFuture;
+
+    @Override
+    public void onInitialData() {
+        // Intentional no-op
+    }
 
     @Override
     public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
