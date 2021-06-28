@@ -10,24 +10,13 @@ package org.opendaylight.controller.config.yang.netty.threadgroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import java.util.concurrent.TimeUnit;
 
-public final class NioEventLoopGroupCloseable extends NioEventLoopGroup implements AutoCloseable {
-    private NioEventLoopGroupCloseable(final int threadCount) {
-        super(threadCount);
-    }
-
-    private NioEventLoopGroupCloseable() {
+abstract class AbstractGlobalGroup extends NioEventLoopGroup implements AutoCloseable {
+    AbstractGlobalGroup(final int threadCount) {
+        super(threadCount < 0 ? 0 : threadCount);
     }
 
     @Override
-    public void close() {
+    public final void close() {
         shutdownGracefully(0, 1, TimeUnit.SECONDS);
-    }
-
-    public static NioEventLoopGroupCloseable newInstance(final Integer threadCount) {
-        if (threadCount == null || threadCount <= 0) {
-            return new NioEventLoopGroupCloseable();
-        }
-
-        return new NioEventLoopGroupCloseable(threadCount);
     }
 }
