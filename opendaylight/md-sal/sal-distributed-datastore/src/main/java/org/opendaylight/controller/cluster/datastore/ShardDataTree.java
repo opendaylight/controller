@@ -104,7 +104,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <p>
  * This class is not part of the API contract and is subject to change at any time. It is NOT thread-safe.
  */
-public class ShardDataTree extends ShardDataTreeTransactionParent {
+public final class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final class CommitEntry {
         final SimpleShardDataTreeCohort cohort;
         long lastAccess;
@@ -199,18 +199,19 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 new DefaultShardDataTreeChangeListenerPublisher(""), "");
     }
 
-    final String logContext() {
+    String logContext() {
         return logContext;
     }
 
-    final long readTime() {
+    long readTime() {
         return shard.ticker().read();
     }
 
-    public DataTree getDataTree() {
+    DataTree getDataTree() {
         return dataTree;
     }
 
+    @VisibleForTesting
     SchemaContext getSchemaContext() {
         return schemaContext;
     }
@@ -619,7 +620,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @VisibleForTesting
-    public void notifyListeners(final DataTreeCandidate candidate) {
+    void notifyListeners(final DataTreeCandidate candidate) {
         treeChangeListenerPublisher.publishChanges(candidate);
     }
 
@@ -697,7 +698,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), state));
     }
 
-    public void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
+    void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
             final Optional<DataTreeCandidate> initialState,
             final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         treeChangeListenerPublisher.registerTreeChangeListener(path, listener, initialState, onRegistration);
@@ -718,7 +719,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @Override
     void abortFromTransactionActor(final AbstractShardDataTreeTransaction<?> transaction) {
         // No-op for free-standing transactions
-
     }
 
     @Override
@@ -739,6 +739,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
+    @VisibleForTesting
     public Optional<NormalizedNode> readNode(final YangInstanceIdentifier path) {
         return dataTree.takeSnapshot().readNode(path);
     }
@@ -748,11 +749,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @VisibleForTesting
-    public DataTreeModification newModification() {
+    DataTreeModification newModification() {
         return dataTree.takeSnapshot().newModification();
     }
 
-    public Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
+    Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
         Collection<ShardDataTreeCohort> ret = new ArrayList<>(getQueueSize());
 
         for (CommitEntry entry: pendingFinishCommits) {
