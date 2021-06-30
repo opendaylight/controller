@@ -138,10 +138,6 @@
       <artifactId>yang-data-codec-gson</artifactId>
     </dependency>
     <dependency>
-      <groupId>tech.pantheon.triemap</groupId>
-      <artifactId>triemap</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
