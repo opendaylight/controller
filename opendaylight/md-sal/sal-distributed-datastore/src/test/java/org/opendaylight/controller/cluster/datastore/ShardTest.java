@@ -372,7 +372,7 @@ public class ShardTest extends AbstractShardTest {
 
         // Add some ModificationPayload entries
         for (int i = 1; i <= nListEntries; i++) {
-            listEntryKeys.add(Integer.valueOf(i));
+            listEntryKeys.add(i);
 
             final YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
@@ -1704,9 +1704,9 @@ public class ShardTest extends AbstractShardTest {
 
         dataStoreContextBuilder.persistent(persistent);
 
-        class TestShard extends Shard {
+        final class TestShard extends Shard {
 
-            protected TestShard(final AbstractBuilder<?, ?> builder) {
+            TestShard(final AbstractBuilder<?, ?> builder) {
                 super(builder);
                 setPersistence(new TestPersistentDataProvider(super.persistence()));
             }
