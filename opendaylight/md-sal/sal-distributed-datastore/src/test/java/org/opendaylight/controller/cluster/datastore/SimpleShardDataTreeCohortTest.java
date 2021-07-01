@@ -23,8 +23,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -37,6 +38,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private ShardDataTree mockShardDataTree;
@@ -54,8 +56,6 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
         doReturn(Optional.empty()).when(mockUserCohorts).commit();
         doReturn(Optional.empty()).when(mockUserCohorts).abort();
 
