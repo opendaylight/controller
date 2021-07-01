@@ -25,8 +25,9 @@ import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class DirectTransactionCommitCohortTest {
 
     private static final String PERSISTENCE_ID = "per-1";
@@ -48,7 +50,6 @@ public class DirectTransactionCommitCohortTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
         final ClientActorContext context =

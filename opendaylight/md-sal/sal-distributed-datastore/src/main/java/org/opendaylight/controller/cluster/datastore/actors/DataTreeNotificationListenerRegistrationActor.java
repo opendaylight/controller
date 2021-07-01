@@ -26,6 +26,7 @@ import scala.concurrent.duration.FiniteDuration;
  * asked to do so via {@link CloseDataTreeNotificationListenerRegistration}.
  */
 public final class DataTreeNotificationListenerRegistrationActor extends AbstractUntypedActor {
+    // FIXME: rework this constant to a duration and its injection
     @VisibleForTesting
     static long killDelay = TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS);
 

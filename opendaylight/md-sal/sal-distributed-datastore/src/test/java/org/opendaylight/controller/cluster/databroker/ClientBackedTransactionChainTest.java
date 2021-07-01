@@ -7,12 +7,16 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -23,6 +27,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHist
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedTransactionChainTest {
     private ClientBackedTransactionChain chain;
 
@@ -35,47 +40,44 @@ public class ClientBackedTransactionChainTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         final FrontendIdentifier frontendId = FrontendIdentifier.create(
                 MemberName.forName("member"), FrontendType.forName("frontend"));
         final ClientIdentifier clientId = ClientIdentifier.create(frontendId, 0);
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(clientId, 0);
         final TransactionIdentifier transactionId = new TransactionIdentifier(historyId, 0);
 
-        Mockito.when(history.getIdentifier()).thenReturn(historyId);
-        Mockito.when(transaction.getIdentifier()).thenReturn(transactionId);
-        Mockito.when(snapshot.getIdentifier()).thenReturn(transactionId);
-        Mockito.when(history.takeSnapshot()).thenReturn(snapshot);
-        Mockito.when(history.createTransaction()).thenReturn(transaction);
+        doReturn(transactionId).when(transaction).getIdentifier();
+        doReturn(transactionId).when(snapshot).getIdentifier();
+        doReturn(snapshot).when(history).takeSnapshot();
+        doReturn(transaction).when(history).createTransaction();
 
         chain = new ClientBackedTransactionChain(history, false);
     }
 
     @Test
     public void testNewReadOnlyTransaction() {
-        Assert.assertNotNull(chain.newReadOnlyTransaction());
-        Mockito.verify(history).takeSnapshot();
+        assertNotNull(chain.newReadOnlyTransaction());
+        verify(history).takeSnapshot();
     }
 
     @Test
     public void testNewReadWriteTransaction() {
-        Assert.assertNotNull(chain.newReadWriteTransaction());
-        Mockito.verify(history).createTransaction();
+        assertNotNull(chain.newReadWriteTransaction());
+        verify(history).createTransaction();
     }
 
     @Test
     public void testNewWriteOnlyTransaction() {
-        Assert.assertNotNull(chain.newWriteOnlyTransaction());
-        Mockito.verify(history).createTransaction();
+        assertNotNull(chain.newWriteOnlyTransaction());
+        verify(history).createTransaction();
     }
 
     @Test
     public void testClose() {
         chain.newReadOnlyTransaction();
         chain.close();
-        Mockito.verify(snapshot).abort();
-        Mockito.verify(history).close();
+        verify(snapshot).abort();
+        verify(history).close();
     }
 
     @Test
@@ -83,7 +85,7 @@ public class ClientBackedTransactionChainTest {
         chain.snapshotClosed(snapshot);
         // snap is removed, so cannot be aborted
         chain.close();
-        Mockito.verify(snapshot, Mockito.never()).abort();
-        Mockito.verify(history).close();
+        verify(snapshot, never()).abort();
+        verify(history).close();
     }
 }

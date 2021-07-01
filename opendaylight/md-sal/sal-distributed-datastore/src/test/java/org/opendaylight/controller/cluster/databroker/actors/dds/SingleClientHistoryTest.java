@@ -7,23 +7,28 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleClientHistory> {
     private ActorSystem system;
     private AbstractDataStoreClientBehavior behavior;
@@ -35,14 +40,12 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         system = ActorSystem.apply();
 
         final TestProbe clientContextProbe = new TestProbe(system, "client");
         final TestProbe actorContextProbe = new TestProbe(system, "actor-context");
         clientActorContext = AccessClientUtil.createClientActorContext(
-                system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
+                system, clientContextProbe.ref(), TestUtils.CLIENT_ID, PERSISTENCE_ID);
         final ActorUtils actorUtilsMock = createActorUtilsMock(system, actorContextProbe.ref());
         behavior = new SimpleDataStoreClientBehavior(clientActorContext, actorUtilsMock, SHARD_NAME);
 
@@ -68,7 +71,7 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     @Test
     public void testDoCreateTransaction() {
         final ClientTransaction clientTransaction = object().doCreateTransaction();
-        Assert.assertEquals(object().getIdentifier(), clientTransaction.getIdentifier().getHistoryId());
+        assertEquals(object().getIdentifier(), clientTransaction.getIdentifier().getHistoryId());
     }
 
     @Override
@@ -76,14 +79,14 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     public void testCreateHistoryProxy() {
         final AbstractClientConnection<ShardBackendInfo> clientConnection = behavior.getConnection(0L);
         final ProxyHistory historyProxy = object().createHistoryProxy(HISTORY_ID, clientConnection);
-        Assert.assertEquals(object().getIdentifier(), historyProxy.getIdentifier());
+        assertEquals(object().getIdentifier(), historyProxy.getIdentifier());
     }
 
     @Override
     @Test
     public void testDoCreateSnapshot() {
         final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
-        Assert.assertEquals(new TransactionIdentifier(object().getIdentifier(), object().nextTx()).getHistoryId(),
+        assertEquals(new TransactionIdentifier(object().getIdentifier(), object().nextTx()).getHistoryId(),
                 clientSnapshot.getIdentifier().getHistoryId());
     }
 
@@ -97,14 +100,14 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
         object().onTransactionComplete(transaction.getIdentifier());
         // it is possible to make transaction ready again
         final AbstractTransactionCommitCohort result = object().onTransactionReady(transaction, cohort);
-        Assert.assertEquals(result, cohort);
+        assertEquals(result, cohort);
     }
 
     @Override
     @Test
     public void testOnTransactionAbort() {
         final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
-        Assert.assertTrue(clientSnapshot.abort());
+        assertTrue(clientSnapshot.abort());
     }
 
     @Override
@@ -112,14 +115,16 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     public void testOnTransactionReady() {
         final AbstractTransactionCommitCohort result = object().onTransactionReady(
                 object().createTransaction(), cohort);
-        Assert.assertEquals(result, cohort);
+        assertEquals(result, cohort);
     }
 
     @Override
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnTransactionReadyDuplicate() {
         final ClientTransaction transaction = object().createTransaction();
         object().onTransactionReady(transaction, cohort);
-        object().onTransactionReady(transaction, cohort);
+        final IllegalStateException ise = assertThrows(IllegalStateException.class,
+            () -> object().onTransactionReady(transaction, cohort));
+        assertThat(ise.getMessage(), startsWith("Duplicate cohort "));
     }
 }

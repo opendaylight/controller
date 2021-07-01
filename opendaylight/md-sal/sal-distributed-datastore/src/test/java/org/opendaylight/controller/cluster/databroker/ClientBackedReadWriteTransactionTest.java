@@ -17,13 +17,14 @@ import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedReadWriteTransactionTest
         extends ClientBackedTransactionTest<ClientBackedReadWriteTransaction> {
     private ClientBackedReadWriteTransaction object;
@@ -32,8 +33,6 @@ public class ClientBackedReadWriteTransactionTest
     private ClientTransaction delegate;
     @Mock
     private NormalizedNode data;
-    @Mock
-    private DOMStoreThreePhaseCommitCohort readyCohort;
 
     @Override
     ClientBackedReadWriteTransaction object() {
@@ -42,10 +41,7 @@ public class ClientBackedReadWriteTransactionTest
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
-        doReturn(readyCohort).when(delegate).ready();
 
         doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.empty());
         doReturn(immediateFluentFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.empty());

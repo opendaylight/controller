@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
@@ -27,11 +28,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
@@ -48,6 +49,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitS
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientTransactionCommitCohortTest {
 
     private static final String PERSISTENCE_ID = "per-1";
@@ -61,7 +63,6 @@ public class ClientTransactionCommitCohortTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
         final ClientActorContext context =
@@ -126,8 +127,7 @@ public class ClientTransactionCommitCohortTest {
 
     private void expectCanCommit(final TransactionTester<RemoteProxyTransaction> tester) {
         final ModifyTransactionRequest request = tester.expectTransactionRequest(ModifyTransactionRequest.class);
-        Assert.assertTrue(request.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.THREE_PHASE, request.getPersistenceProtocol().get());
+        assertEquals(Optional.of(PersistenceProtocol.THREE_PHASE), request.getPersistenceProtocol());
     }
 
     void expectPreCommit(final TransactionTester<?> tester) {
@@ -205,7 +205,7 @@ public class ClientTransactionCommitCohortTest {
                                    final T expectedResult) throws Exception {
         final ListenableFuture<T> result = operation.apply(cohort);
         replySuccess(transactions, expectFunction, replyFunction);
-        Assert.assertEquals(expectedResult, getWithTimeout(result));
+        assertEquals(expectedResult, getWithTimeout(result));
     }
 
     /**
@@ -234,7 +234,7 @@ public class ClientTransactionCommitCohortTest {
         //check future fail
         final ExecutionException exception =
                 assertOperationThrowsException(() -> getWithTimeout(canCommit), ExecutionException.class);
-        Assert.assertEquals(e, exception.getCause());
+        assertEquals(e, exception.getCause());
     }
 
 }
