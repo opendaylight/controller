@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a45d30f_7fa9d7eb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActorContext.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-01T08:19:21Z",
+      "side": 1,
+      "message": "I think that id cannot be null?",
+      "revId": "cfd6a51f2217876b9e221bb72d7b163a6b858183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
