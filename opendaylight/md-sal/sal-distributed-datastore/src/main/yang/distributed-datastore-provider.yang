@@ -39,30 +39,6 @@ module distributed-datastore-provider {
     }
 
     grouping data-store-properties {
-        leaf max-shard-data-change-executor-queue-size {
-            default 1000;
-            type non-zero-uint32-type;
-            description "The maximum queue size for each shard's data store data change notification executor.";
-        }
-
-        leaf max-shard-data-change-executor-pool-size {
-            default 20;
-            type non-zero-uint32-type;
-            description "The maximum thread pool size for each shard's data store data change notification executor.";
-        }
-
-        leaf max-shard-data-change-listener-queue-size {
-            default 1000;
-            type non-zero-uint32-type;
-            description "The maximum queue size for each shard's data store data change listener.";
-        }
-
-        leaf max-shard-data-store-executor-queue-size {
-            default 5000;
-            type non-zero-uint32-type;
-            description "The maximum queue size for each shard's data store executor.";
-        }
-
         leaf shard-transaction-idle-timeout-in-minutes {
             default 10;
             type non-zero-uint32-type;

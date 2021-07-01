@@ -71,10 +71,6 @@ public class DatastoreContextIntrospectorTest {
         properties.put("shard-election-timeout-factor", "21");
         properties.put("shard-batched-modification-count", "901");
         properties.put("transactionCreationInitialRateLimit", "200");
-        properties.put("MaxShardDataChangeExecutorPoolSize", "41");
-        properties.put("Max-Shard-Data-Change Executor-Queue Size", "1111");
-        properties.put(" max shard data change listener queue size", "2222");
-        properties.put("mAx-shaRd-data-STORE-executor-quEUe-size", "3333");
         properties.put("persistent", "false");
         properties.put("initial-payload-serialized-buffer-capacity", "600");
         properties.put("export-on-recovery", "json");
@@ -159,7 +155,6 @@ public class DatastoreContextIntrospectorTest {
         properties.put("shard-snapshot-data-threshold-percentage", "101"); // bad - must be 0-100
         properties.put("shard-snapshot-data-threshold", "-1"); // bad - must be > 0
         properties.put("shard-initialization-timeout-in-seconds", "-1"); // bad - must be > 0
-        properties.put("max-shard-data-change-executor-pool-size", "bogus"); // bad - NaN
         properties.put("unknownProperty", "1"); // bad - invalid property name
 
         final boolean updated = introspector.update(properties);

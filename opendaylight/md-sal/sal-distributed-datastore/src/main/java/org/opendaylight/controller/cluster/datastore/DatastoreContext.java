@@ -602,26 +602,6 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
-        @Deprecated(forRemoval = true)
-        public Builder maxShardDataChangeExecutorPoolSize(final int newMaxShardDataChangeExecutorPoolSize) {
-            return this;
-        }
-
-        @Deprecated(forRemoval = true)
-        public Builder maxShardDataChangeExecutorQueueSize(final int newMaxShardDataChangeExecutorQueueSize) {
-            return this;
-        }
-
-        @Deprecated(forRemoval = true)
-        public Builder maxShardDataChangeListenerQueueSize(final int newMaxShardDataChangeListenerQueueSize) {
-            return this;
-        }
-
-        @Deprecated(forRemoval = true)
-        public Builder maxShardDataStoreExecutorQueueSize(final int newMaxShardDataStoreExecutorQueueSize) {
-            return this;
-        }
-
         public Builder useTellBasedProtocol(final boolean value) {
             datastoreContext.useTellBasedProtocol = value;
             return this;
