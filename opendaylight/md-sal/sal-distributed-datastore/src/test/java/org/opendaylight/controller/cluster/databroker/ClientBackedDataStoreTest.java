@@ -8,16 +8,15 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -30,13 +29,12 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransacti
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
-import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedDataStoreTest {
 
     private static final ClientIdentifier UNKNOWN_ID = ClientIdentifier.create(
@@ -46,10 +44,8 @@ public class ClientBackedDataStoreTest {
             MemberName.forName("member"), FrontendType.forName("frontend"));
     private static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
 
-    private static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_IDENTIFIER, 0);
-    private static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(HISTORY_ID, 0);
-
-    private static EffectiveModelContext SCHEMA_CONTEXT;
+    private static final TransactionIdentifier TRANSACTION_IDENTIFIER =
+        new TransactionIdentifier(new LocalHistoryIdentifier(CLIENT_IDENTIFIER, 0), 0);
 
     @Mock
     private DataStoreClient clientActor;
@@ -66,29 +62,15 @@ public class ClientBackedDataStoreTest {
     @Mock
     private ClientSnapshot clientSnapshot;
 
-    @BeforeClass
-    public static void beforeClass() {
-        SCHEMA_CONTEXT = TestModel.createTestContext();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        SCHEMA_CONTEXT = null;
-    }
-
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
+        doReturn(TRANSACTION_IDENTIFIER).when(clientTransaction).getIdentifier();
+        doReturn(TRANSACTION_IDENTIFIER).when(clientSnapshot).getIdentifier();
 
-        when(actorUtils.getSchemaContext()).thenReturn(SCHEMA_CONTEXT);
-        when(actorUtils.getDatastoreContext()).thenReturn(DatastoreContext.newBuilder().build());
-        when(clientTransaction.getIdentifier()).thenReturn(TRANSACTION_IDENTIFIER);
-        when(clientSnapshot.getIdentifier()).thenReturn(TRANSACTION_IDENTIFIER);
-
-        when(clientActor.getIdentifier()).thenReturn(CLIENT_IDENTIFIER);
-        when(clientActor.createTransaction()).thenReturn(clientTransaction);
-        when(clientActor.createLocalHistory()).thenReturn(clientLocalHistory);
-        when(clientActor.createSnapshot()).thenReturn(clientSnapshot);
+        doReturn(clientTransaction).when(clientActor).createTransaction();
+        doReturn(clientLocalHistory).when(clientActor).createLocalHistory();
+        doReturn(clientSnapshot).when(clientActor).createSnapshot();
     }
 
     @Test
@@ -97,7 +79,7 @@ public class ClientBackedDataStoreTest {
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreTransactionChain txChain = clientBackedDataStore.createTransactionChain();
             assertNotNull(txChain);
-            verify(clientActor, Mockito.times(1)).createLocalHistory();
+            verify(clientActor, times(1)).createLocalHistory();
         }
     }
 
@@ -107,7 +89,7 @@ public class ClientBackedDataStoreTest {
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadTransaction tx = clientBackedDataStore.newReadOnlyTransaction();
             assertNotNull(tx);
-            verify(clientActor, Mockito.times(1)).createSnapshot();
+            verify(clientActor, times(1)).createSnapshot();
         }
     }
 
@@ -117,7 +99,7 @@ public class ClientBackedDataStoreTest {
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreWriteTransaction tx = clientBackedDataStore.newWriteOnlyTransaction();
             assertNotNull(tx);
-            verify(clientActor, Mockito.times(1)).createTransaction();
+            verify(clientActor, times(1)).createTransaction();
         }
     }
 
@@ -127,7 +109,7 @@ public class ClientBackedDataStoreTest {
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadWriteTransaction tx = clientBackedDataStore.newReadWriteTransaction();
             assertNotNull(tx);
-            verify(clientActor, Mockito.times(1)).createTransaction();
+            verify(clientActor, times(1)).createTransaction();
         }
     }
 }

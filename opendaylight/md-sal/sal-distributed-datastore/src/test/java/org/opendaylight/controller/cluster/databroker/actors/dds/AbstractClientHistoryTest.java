@@ -7,22 +7,22 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
-import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
@@ -38,7 +38,7 @@ import scala.concurrent.impl.Promise.DefaultPromise;
 public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory> {
     protected static final String SHARD_NAME = "default";
     protected static final String PERSISTENCE_ID = "per-1";
-    protected static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 1L);
+    protected static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(TestUtils.CLIENT_ID, 1L);
 
     @Mock
     private DataTree tree;
@@ -70,62 +70,63 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
 
     @Test
     public void testCreateSnapshotProxy() {
-        final AbstractProxyTransaction snapshotProxy = object().createSnapshotProxy(TRANSACTION_ID, 0L);
-        Assert.assertNotNull(snapshotProxy);
-        Assert.assertNotEquals(TRANSACTION_ID, snapshotProxy.getIdentifier());
+        final AbstractProxyTransaction snapshotProxy = object().createSnapshotProxy(TestUtils.TRANSACTION_ID, 0L);
+        assertNotNull(snapshotProxy);
+        assertNotEquals(TestUtils.TRANSACTION_ID, snapshotProxy.getIdentifier());
     }
 
     @Test
     public void testCreateTransactionProxy() {
-        AbstractProxyTransaction transactionProxy = object().createTransactionProxy(TRANSACTION_ID, 0L);
-        Assert.assertNotNull(transactionProxy);
-        Assert.assertNotEquals(TRANSACTION_ID, transactionProxy.getIdentifier());
+        AbstractProxyTransaction transactionProxy = object().createTransactionProxy(TestUtils.TRANSACTION_ID, 0L);
+        assertNotNull(transactionProxy);
+        assertNotEquals(TestUtils.TRANSACTION_ID, transactionProxy.getIdentifier());
     }
 
     @Test
     public void testState() {
-        Assert.assertEquals(AbstractClientHistory.State.IDLE, object().state());
+        assertEquals(AbstractClientHistory.State.IDLE, object().state());
     }
 
     @Test
     public void testUpdateState() {
         object().updateState(AbstractClientHistory.State.IDLE, AbstractClientHistory.State.CLOSED);
-        Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
+        assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Test
     public void testDoClose() {
-        object().createTransactionProxy(TRANSACTION_ID, 0L);
+        object().createTransactionProxy(TestUtils.TRANSACTION_ID, 0L);
         object().doClose();
-        Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
+        assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Test
     public void testGetIdentifier() {
-        Assert.assertEquals(HISTORY_ID, object().getIdentifier());
+        assertEquals(HISTORY_ID, object().getIdentifier());
     }
 
     @Test
     public void testNextTx() {
-        Assert.assertTrue(object().nextTx() + 1 == object().nextTx());
+        assertEquals(object().nextTx() + 1, object().nextTx());
     }
 
     @Test
     public void testResolveShardForPath() {
         final Long shardForPath = object().resolveShardForPath(YangInstanceIdentifier.empty());
-        Assert.assertEquals(0L, shardForPath.longValue());
+        assertNotNull(shardForPath);
+        assertEquals(0L, (long) shardForPath);
     }
 
     @Test
     public void testLocalAbort() {
         object().localAbort(new Throwable());
-        Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
+        assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Test
     public void testOnProxyDestroyed() {
-        final ProxyHistory proxyHistory = Mockito.mock(ProxyHistory.class);
-        when(proxyHistory.getIdentifier()).thenReturn(HISTORY_ID);
+        final ProxyHistory proxyHistory = mock(ProxyHistory.class);
+        doReturn(HISTORY_ID).when(proxyHistory).getIdentifier();
 
         object().onProxyDestroyed(proxyHistory);
         verify(proxyHistory).getIdentifier();
@@ -134,13 +135,13 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
     @Test
     public void testCreateTransaction() {
         final ClientTransaction transaction = object().createTransaction();
-        Assert.assertNotNull(transaction);
+        assertNotNull(transaction);
     }
 
     @Test
     public void testTakeSnapshot() {
         final ClientSnapshot clientSnapshot = object().takeSnapshot();
-        Assert.assertEquals(object().getIdentifier(), clientSnapshot.getIdentifier().getHistoryId());
+        assertEquals(object().getIdentifier(), clientSnapshot.getIdentifier().getHistoryId());
     }
 
     @Test
@@ -153,10 +154,10 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
                 SHARD_NAME, UnsignedLong.ZERO, Optional.of(tree), 10);
         final ConnectedClientConnection<ShardBackendInfo> newConn = AccessClientUtil.createConnectedConnection(
                 clientActorContext(), cookie, info);
-        object().createSnapshotProxy(TRANSACTION_ID, shard);
+        object().createSnapshotProxy(TestUtils.TRANSACTION_ID, shard);
 
         final HistoryReconnectCohort reconnectCohort = object().startReconnect(newConn);
-        Assert.assertNotNull(reconnectCohort);
+        assertNotNull(reconnectCohort);
     }
 
     @Test
@@ -169,10 +170,10 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
                 SHARD_NAME, UnsignedLong.ZERO, Optional.of(tree), 10);
         final ConnectedClientConnection<ShardBackendInfo> newConn = AccessClientUtil.createConnectedConnection(
                 clientActorContext(), cookie, info);
-        object().createSnapshotProxy(TRANSACTION_ID, shard);
+        object().createSnapshotProxy(TestUtils.TRANSACTION_ID, shard);
 
         final HistoryReconnectCohort reconnectCohort = object().startReconnect(newConn);
-        Assert.assertNull(reconnectCohort);
+        assertNull(reconnectCohort);
     }
 
     protected static ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
@@ -181,7 +182,7 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
         promise.success(shardInfo);
-        when(mock.findPrimaryShardAsync(any())).thenReturn(promise.future());
+        doReturn(promise.future()).when(mock).findPrimaryShardAsync(any());
         return mock;
     }
 }

@@ -16,13 +16,15 @@ import akka.testkit.javadsl.TestKit;
 import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class DataTreeNotificationListenerRegistrationActorTest extends AbstractActorTest {
     @Mock
     private ListenerRegistration<?> mockListenerReg;
@@ -34,7 +36,6 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         DataTreeNotificationListenerRegistrationActor.killDelay = 100;
         kit = new TestKit(getSystem());
     }

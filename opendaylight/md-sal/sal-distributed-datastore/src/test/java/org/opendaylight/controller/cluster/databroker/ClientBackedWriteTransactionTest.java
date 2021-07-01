@@ -7,17 +7,21 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTest<ClientBackedWriteTransaction> {
     private ClientBackedWriteTransaction object;
 
@@ -32,10 +36,8 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        Mockito.doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
-        Mockito.doReturn(readyCohort).when(delegate).ready();
+        doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
+        doReturn(readyCohort).when(delegate).ready();
 
         object = new ClientBackedWriteTransaction(delegate, null);
     }
@@ -48,25 +50,25 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
     @Test
     public void testWrite() {
         object().write(path, data);
-        Mockito.verify(delegate).write(path, data);
+        verify(delegate).write(path, data);
     }
 
     @Test
     public void testMerge() {
         object().merge(path, data);
-        Mockito.verify(delegate).merge(path, data);
+        verify(delegate).merge(path, data);
     }
 
     @Test
     public void testDelete() {
         object().delete(path);
-        Mockito.verify(delegate).delete(path);
+        verify(delegate).delete(path);
     }
 
     @Test
     public void testReady() {
         final DOMStoreThreePhaseCommitCohort result = object().ready();
-        Assert.assertNotNull(result);
-        Mockito.verify(delegate).ready();
+        assertNotNull(result);
+        verify(delegate).ready();
     }
 }

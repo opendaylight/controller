@@ -18,8 +18,9 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -30,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class LocalTransactionContextTest {
 
     @Mock
@@ -45,7 +47,6 @@ public class LocalTransactionContextTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter.getIdentifier(),
                 mockReadySupport) {
             @Override

@@ -14,14 +14,14 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class EmptyTransactionCommitCohortTest {
-
     @Mock
     private AbstractClientHistory history;
 
@@ -29,7 +29,6 @@ public class EmptyTransactionCommitCohortTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         cohort = new EmptyTransactionCommitCohort(history, TRANSACTION_ID);
     }
 
@@ -56,7 +55,7 @@ public class EmptyTransactionCommitCohortTest {
     public void testCommit() throws Exception {
         final ListenableFuture<Void> commit = cohort.commit();
         verify(history).onTransactionComplete(TRANSACTION_ID);
-        Assert.assertNull(getWithTimeout(commit));
+        assertNull(getWithTimeout(commit));
     }
 
 }

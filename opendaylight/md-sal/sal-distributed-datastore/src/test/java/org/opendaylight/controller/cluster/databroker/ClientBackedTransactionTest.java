@@ -20,11 +20,11 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 
 public abstract class ClientBackedTransactionTest<T extends ClientBackedTransaction<?>> {
-    private static FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(
+    private static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(
             MemberName.forName("member"), FrontendType.forName("frontend"));
     protected static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
 
-    private static LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0);
+    private static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0);
     protected static final TransactionIdentifier TRANSACTION_ID = new TransactionIdentifier(HISTORY_ID, 0);
 
     abstract T object();

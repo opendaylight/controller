@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
@@ -14,10 +13,12 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class TransactionContextWrapperTest {
     @Mock
     private ActorUtils actorUtils;
@@ -29,7 +30,6 @@ public class TransactionContextWrapperTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
         transactionContextWrapper = new TransactionContextWrapper(MockIdentifiers.transactionIdentifier(
             TransactionContextWrapperTest.class, "mock"), actorUtils, "mock");

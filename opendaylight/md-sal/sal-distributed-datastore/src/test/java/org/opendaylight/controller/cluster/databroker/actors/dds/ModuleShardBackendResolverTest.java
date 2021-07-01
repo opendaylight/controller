@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -21,17 +22,17 @@ import akka.actor.Status;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientFailure;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
@@ -52,6 +53,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import scala.concurrent.Promise;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ModuleShardBackendResolverTest {
 
     private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
@@ -73,20 +75,19 @@ public class ModuleShardBackendResolverTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         contextProbe = new TestProbe(system, "context");
 
         shardManagerProbe = new TestProbe(system, "ShardManager");
 
         final ActorUtils actorUtils = createActorUtilsMock(system, contextProbe.ref());
-        when(actorUtils.getShardManager()).thenReturn(shardManagerProbe.ref());
+        doReturn(shardManagerProbe.ref()).when(actorUtils).getShardManager();
 
         moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorUtils);
-        when(actorUtils.getShardStrategyFactory()).thenReturn(shardStrategyFactory);
-        when(shardStrategyFactory.getStrategy(YangInstanceIdentifier.empty())).thenReturn(shardStrategy);
+        doReturn(shardStrategyFactory).when(actorUtils).getShardStrategyFactory();
+        doReturn(shardStrategy).when(shardStrategyFactory).getStrategy(YangInstanceIdentifier.empty());
         final PrimaryShardInfoFutureCache cache = new PrimaryShardInfoFutureCache();
-        when(actorUtils.getPrimaryShardInfoCache()).thenReturn(cache);
+        doReturn(cache).when(actorUtils).getPrimaryShardInfoCache();
     }
 
     @After
@@ -96,16 +97,16 @@ public class ModuleShardBackendResolverTest {
 
     @Test
     public void testResolveShardForPathNonNullCookie() {
-        when(shardStrategy.findShard(YangInstanceIdentifier.empty())).thenReturn(DefaultShardStrategy.DEFAULT_SHARD);
+        doReturn(DefaultShardStrategy.DEFAULT_SHARD).when(shardStrategy).findShard(YangInstanceIdentifier.empty());
         final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.empty());
-        Assert.assertEquals(0L, cookie.longValue());
+        assertEquals(0L, (long) cookie);
     }
 
     @Test
     public void testResolveShardForPathNullCookie() {
-        when(shardStrategy.findShard(YangInstanceIdentifier.empty())).thenReturn("foo");
+        doReturn("foo").when(shardStrategy).findShard(YangInstanceIdentifier.empty());
         final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.empty());
-        Assert.assertEquals(1L, cookie.longValue());
+        assertEquals(1L, (long) cookie);
     }
 
     @Test
@@ -114,13 +115,13 @@ public class ModuleShardBackendResolverTest {
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final TestProbe backendProbe = new TestProbe(system, "backend");
         final ConnectClientSuccess msg = new ConnectClientSuccess(CLIENT_ID, 0L, backendProbe.ref(),
-                Collections.emptyList(), dataTree, 3);
+                List.of(), dataTree, 3);
         contextProbe.reply(msg);
         final CompletionStage<ShardBackendInfo> stage = moduleShardBackendResolver.getBackendInfo(0L);
         final ShardBackendInfo shardBackendInfo = TestUtils.getWithTimeout(stage.toCompletableFuture());
-        Assert.assertEquals(0L, shardBackendInfo.getCookie().longValue());
-        Assert.assertEquals(dataTree, shardBackendInfo.getDataTree().get());
-        Assert.assertEquals(DefaultShardStrategy.DEFAULT_SHARD, shardBackendInfo.getName());
+        assertEquals(0L, shardBackendInfo.getCookie().longValue());
+        assertEquals(dataTree, shardBackendInfo.getDataTree().get());
+        assertEquals(DefaultShardStrategy.DEFAULT_SHARD, shardBackendInfo.getName());
     }
 
     @Test
@@ -134,7 +135,7 @@ public class ModuleShardBackendResolverTest {
         final ExecutionException caught =
                 TestUtils.assertOperationThrowsException(() -> TestUtils.getWithTimeout(stage.toCompletableFuture()),
                         ExecutionException.class);
-        Assert.assertEquals(cause, caught.getCause());
+        assertEquals(cause, caught.getCause());
     }
 
     @Test
@@ -144,7 +145,7 @@ public class ModuleShardBackendResolverTest {
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final TestProbe staleBackendProbe = new TestProbe(system, "staleBackend");
         final ConnectClientSuccess msg = new ConnectClientSuccess(CLIENT_ID, 0L, staleBackendProbe.ref(),
-                Collections.emptyList(), dataTree, 3);
+                List.of(), dataTree, 3);
         contextProbe.reply(msg);
         //get backend info
         final ShardBackendInfo staleBackendInfo = TestUtils.getWithTimeout(backendInfo.toCompletableFuture());
@@ -155,11 +156,11 @@ public class ModuleShardBackendResolverTest {
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final TestProbe refreshedBackendProbe = new TestProbe(system, "refreshedBackend");
         final ConnectClientSuccess msg2 = new ConnectClientSuccess(CLIENT_ID, 1L, refreshedBackendProbe.ref(),
-                Collections.emptyList(), dataTree, 3);
+                List.of(), dataTree, 3);
         contextProbe.reply(msg2);
         final ShardBackendInfo refreshedBackendInfo = TestUtils.getWithTimeout(refreshed.toCompletableFuture());
-        Assert.assertEquals(staleBackendInfo.getCookie(), refreshedBackendInfo.getCookie());
-        Assert.assertEquals(refreshedBackendProbe.ref(), refreshedBackendInfo.getActor());
+        assertEquals(staleBackendInfo.getCookie(), refreshedBackendInfo.getCookie());
+        assertEquals(refreshedBackendProbe.ref(), refreshedBackendInfo.getActor());
     }
 
     @SuppressWarnings("unchecked")
@@ -174,7 +175,7 @@ public class ModuleShardBackendResolverTest {
         final Registration callbackReg = moduleShardBackendResolver.notifyWhenBackendInfoIsStale(mockCallback);
 
         regMessage.getCallback().accept(DefaultShardStrategy.DEFAULT_SHARD);
-        verify(mockCallback, timeout(5000)).accept(Long.valueOf(0));
+        verify(mockCallback, timeout(5000)).accept((long) 0);
 
         reset(mockCallback);
         callbackReg.close();
@@ -190,8 +191,7 @@ public class ModuleShardBackendResolverTest {
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
         promise.success(shardInfo);
-        when(mock.findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD)).thenReturn(promise.future());
-        when(mock.getClientDispatcher()).thenReturn(system.dispatchers().defaultGlobalDispatcher());
+        doReturn(promise.future()).when(mock).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
         return mock;
     }
 }
