@@ -12,34 +12,20 @@ import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
-
 /**
  * Persisted data of the ShardManager.
  *
  * @deprecated Use {@link org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot} instead.
  */
+// FIXME: 5.0.0: remove this class
 @Deprecated(forRemoval = true)
-public final class ShardManagerSnapshot implements Serializable {
+final class ShardManagerSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private final List<String> shardList;
 
     ShardManagerSnapshot(final @NonNull List<String> shardList) {
         this.shardList = ImmutableList.copyOf(shardList);
-    }
-
-    public List<String> getShardList() {
-        return this.shardList;
-    }
-
-    /**
-     * Creates a ShardManagerSnapshot.
-     *
-     * @deprecated This method is for migration only and should me removed once
-     *             org.opendaylight.controller.cluster.datastore.ShardManagerSnapshot is removed.
-     */
-    @Deprecated
-    public static ShardManagerSnapshot forShardList(final @NonNull List<String> shardList) {
-        return new ShardManagerSnapshot(shardList);
     }
 
     private Object readResolve() {
