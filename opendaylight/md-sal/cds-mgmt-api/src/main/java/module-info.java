@@ -12,6 +12,6 @@ module org.opendaylight.controller.cluster.mgmt.api {
     exports org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
     // Annotation-only dependencies
-    requires static java.management;
-    requires static org.eclipse.jdt.annotation;
+    requires static transitive java.management;
+    requires static transitive org.eclipse.jdt.annotation;
 }
