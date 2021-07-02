@@ -42,10 +42,8 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
             return NormalizedNodeStreamVersion.MAGNESIUM;
         } else if (version == DataStoreVersions.SODIUM_SR1_VERSION) {
             return NormalizedNodeStreamVersion.SODIUM_SR1;
-        } else if (version == DataStoreVersions.NEON_SR2_VERSION) {
-            return NormalizedNodeStreamVersion.NEON_SR2;
         } else {
-            return NormalizedNodeStreamVersion.LITHIUM;
+            throw new IllegalStateException("Unsupported version " + version);
         }
     }
 
@@ -62,9 +60,9 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     @Override
     public final Object toSerializable() {
         final short ver = getVersion();
-        if (ver < DataStoreVersions.BORON_VERSION) {
+        if (ver < DataStoreVersions.SODIUM_SR1_VERSION) {
             throw new UnsupportedOperationException("Version " + ver
-                + " is older than the oldest version supported version " + DataStoreVersions.BORON_VERSION);
+                + " is older than the oldest version supported version " + DataStoreVersions.SODIUM_SR1_VERSION);
         }
 
         return this;

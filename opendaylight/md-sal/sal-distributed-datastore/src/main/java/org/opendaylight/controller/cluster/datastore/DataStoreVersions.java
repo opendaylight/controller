@@ -21,8 +21,11 @@ public final class DataStoreVersions {
     public static final short HELIUM_2_VERSION    =  2;
     @Deprecated
     public static final short LITHIUM_VERSION     =  3;
+    @Deprecated
     public static final short BORON_VERSION       =  5;
+    @Deprecated
     public static final short FLUORINE_VERSION    =  9;
+    @Deprecated
     public static final short NEON_SR2_VERSION    = 10;
     public static final short SODIUM_SR1_VERSION  = 11;
     public static final short PHOSPHORUS_VERSION  = 12;

@@ -100,8 +100,7 @@ public class BatchedModificationsTest extends AbstractTest {
         assertEquals("getTransactionID", tx2, clone.getTransactionId());
         assertTrue("isReady", clone.isReady());
         assertTrue("isDoCommitOnReady", clone.isDoCommitOnReady());
-        assertTrue("participatingShardNames present", clone.getParticipatingShardNames().isPresent());
-        assertEquals("participatingShardNames", shardNames, clone.getParticipatingShardNames().get());
+        assertEquals("participatingShardNames", Optional.of(shardNames), clone.getParticipatingShardNames());
         assertEquals("getModifications size", 0, clone.getModifications().size());
 
         // Test not ready.
@@ -114,20 +113,6 @@ public class BatchedModificationsTest extends AbstractTest {
         assertEquals("getTransactionID", tx2, clone.getTransactionId());
         assertFalse("isReady", clone.isReady());
         assertEquals("getModifications size", 0, clone.getModifications().size());
-
-        // Test pre-Flourine
-
-        batched = new BatchedModifications(tx2, DataStoreVersions.BORON_VERSION);
-        batched.addModification(new WriteModification(writePath, writeData));
-        batched.setReady(Optional.of(ImmutableSortedSet.of("one", "two")));
-
-        clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
-
-        assertEquals("getVersion", DataStoreVersions.BORON_VERSION, clone.getVersion());
-        assertEquals("getTransactionID", tx2, clone.getTransactionId());
-        assertTrue("isReady", clone.isReady());
-        assertFalse("participatingShardNames present", clone.getParticipatingShardNames().isPresent());
-        assertEquals("getModifications size", 1, clone.getModifications().size());
     }
 
     @Test
