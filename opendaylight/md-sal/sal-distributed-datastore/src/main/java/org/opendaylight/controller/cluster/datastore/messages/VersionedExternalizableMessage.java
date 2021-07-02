@@ -26,14 +26,14 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     private short version = DataStoreVersions.CURRENT_VERSION;
 
     public VersionedExternalizableMessage() {
-
+        // Required for externalizable
     }
 
     public VersionedExternalizableMessage(final short version) {
         this.version = version <= DataStoreVersions.CURRENT_VERSION ? version : DataStoreVersions.CURRENT_VERSION;
     }
 
-    public short getVersion() {
+    public final short getVersion() {
         return version;
     }
 
