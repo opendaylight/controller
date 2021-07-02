@@ -50,30 +50,8 @@ public enum PayloadVersion implements WritableObject {
     },
 
     /**
-     * Initial ABI version, as shipped with Boron Simultaneous release.
-     */
-    // We seed the initial version to be the same as DataStoreVersions.BORON_VERSION for compatibility reasons.
-    BORON(5) {
-        @Override
-        public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.LITHIUM;
-        }
-    },
-
-    /**
-     * Revised payload version. Payloads remain the same as {@link #BORON}, but messages bearing QNames in any shape
-     * are using {@link NormalizedNodeStreamVersion#NEON_SR2}, which improves encoding.
-     */
-    NEON_SR2(6) {
-        @Override
-        public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.NEON_SR2;
-        }
-    },
-
-    /**
-     * Revised payload version. Payloads remain the same as {@link #NEON_SR2}, but messages bearing QNames in any shape
-     * are using {@link NormalizedNodeStreamVersion#SODIUM_SR1}, which improves encoding.
+     * ABI version as shipped in Sodium SR1 Simultaneous Release. QName-bearing messages are using
+     * {@link NormalizedNodeStreamVersion#SODIUM_SR1}, which improves encoding.
      */
     SODIUM_SR1(7) {
         @Override
@@ -154,11 +132,9 @@ public enum PayloadVersion implements WritableObject {
             case 2:
             case 3:
             case 4:
-                throw new PastVersionException(version, BORON);
             case 5:
-                return BORON;
             case 6:
-                return NEON_SR2;
+                throw new PastVersionException(version, SODIUM_SR1);
             case 7:
                 return SODIUM_SR1;
             case 8:

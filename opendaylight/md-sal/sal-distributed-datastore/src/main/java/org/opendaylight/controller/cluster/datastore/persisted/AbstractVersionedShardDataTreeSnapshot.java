@@ -31,8 +31,6 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     static @NonNull ShardSnapshotState versionedDeserialize(final ObjectInput in) throws IOException {
         final PayloadVersion version = PayloadVersion.readFrom(in);
         switch (version) {
-            case BORON:
-            case NEON_SR2:
             case SODIUM_SR1:
                 return new ShardSnapshotState(readSnapshot(in), true);
             case MAGNESIUM:
@@ -42,7 +40,7 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
                 // These versions are never returned and this code is effectively dead
             default:
                 // Not included as default in above switch to ensure we get warnings when new versions are added
-                throw new IOException("Encountered unhandled version" + version);
+                throw new IOException("Encountered unhandled version " + version);
         }
     }
 
@@ -77,11 +75,9 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
 
     private void versionedSerialize(final ObjectOutput out, final PayloadVersion version) throws IOException {
         switch (version) {
-            case BORON:
-            case NEON_SR2:
             case SODIUM_SR1:
             case MAGNESIUM:
-                // Boron, NeonSR2, Sodium and Magnesium snapshots use Java Serialization, but differ in stream format
+                // Sodium and Magnesium snapshots use Java Serialization, but differ in stream format
                 out.writeObject(this);
                 return;
             case TEST_FUTURE_VERSION:
