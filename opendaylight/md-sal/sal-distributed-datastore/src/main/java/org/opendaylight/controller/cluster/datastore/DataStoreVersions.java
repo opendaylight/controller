@@ -26,7 +26,7 @@ public final class DataStoreVersions {
     public static final short NEON_SR2_VERSION    = 10;
     public static final short SODIUM_SR1_VERSION  = 11;
     public static final short PHOSPHORUS_VERSION  = 12;
-    public static final short CURRENT_VERSION     = SODIUM_SR1_VERSION;
+    public static final short CURRENT_VERSION     = PHOSPHORUS_VERSION;
 
     private DataStoreVersions() {
 
