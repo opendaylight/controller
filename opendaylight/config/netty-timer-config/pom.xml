@@ -11,7 +11,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>netty-timer-config</artifactId>
-  <version>0.14.9-SNAPSHOT</version>
+  <version>0.14.10-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Configuration Wrapper around netty's timer</description>
