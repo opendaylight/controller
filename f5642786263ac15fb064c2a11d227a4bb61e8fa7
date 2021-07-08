@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7c891dd_598b0306",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 35
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-08T15:27:38Z",
+      "side": 1,
+      "message": "final",
+      "revId": "f5642786263ac15fb064c2a11d227a4bb61e8fa7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49f3d39f_340c9b5c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 35
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-08T15:27:38Z",
+      "side": 1,
+      "message": "If I understand correctly transactionContextWrapper is returned when (localContext \u003d\u003d null), please move return statement to that if-else branch.",
+      "revId": "f5642786263ac15fb064c2a11d227a4bb61e8fa7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3abafe1_6c0d5113",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 35
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-08T15:27:38Z",
+      "side": 1,
+      "message": "final",
+      "revId": "f5642786263ac15fb064c2a11d227a4bb61e8fa7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
