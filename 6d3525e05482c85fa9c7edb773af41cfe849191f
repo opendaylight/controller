@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7e29a4f_047ac8ff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "This is not correct message here.",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e4a7a34a_06246750",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "\u003cpackage protected\u003e final class",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39df76ba_eff70bb5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "@NonNull final (all parameters)",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0bfde0d7_1ef14ae9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "what about to place override methods more close together and move private methods after them?",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31e89c62_77103aba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "final",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1d6b61f_256ea221",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "\u003cpackage protected\u003e final class",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9a69eb3_39ccb51d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "final",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f21dedc6_17701116",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "@NonNull final (all parameters)",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c129f622_0b412d65",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "final",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c2eaf6e_e7242fd0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "final",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c45a9d4_8ba45b3e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "why so many lines?",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9cd03f7_14c35cad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:25:26Z",
+      "side": 1,
+      "message": "what have you changed here?",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
