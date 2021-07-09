@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea64030_192be2c7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T13:47:52Z",
+      "side": 1,
+      "message": "where do you check for identifier?\n\nWhat is meaning of \"local\" transaction?",
+      "revId": "c292e6366b361d1622e6eadfffcf01a046443480",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
