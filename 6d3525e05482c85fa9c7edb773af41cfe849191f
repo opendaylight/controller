@@ -203,6 +203,23 @@
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e834448_2bb48244",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-09T11:27:24Z",
+      "side": 1,
+      "message": "why do not we have test also for DirectTransactionContextWrapper?",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
