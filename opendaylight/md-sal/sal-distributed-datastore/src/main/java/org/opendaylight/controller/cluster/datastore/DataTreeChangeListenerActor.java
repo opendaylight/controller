@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
@@ -88,8 +89,9 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         // TODO: do we really need this?
         // It seems the sender is never null but it doesn't hurt to check. If the caller passes in
         // a null sender (ActorRef.noSender()), akka translates that to the deadLetters actor.
-        if (getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
-            getSender().tell(DataTreeChangedReply.getInstance(), getSelf());
+        final ActorRef sender = getSender();
+        if (sender != null && !sender.equals(getContext().system().deadLetters())) {
+            sender.tell(DataTreeChangedReply.getInstance(), getSelf());
         }
     }
 
