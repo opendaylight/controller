@@ -16,6 +16,24 @@
       "revId": "c292e6366b361d1622e6eadfffcf01a046443480",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00cd7cd7_1e75aa56",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T16:25:20Z",
+      "side": 1,
+      "message": "1. if (payload instanceof IdentifiablePayload) (435)\n2. if i remember correctly its transaction created locally, while remote is one that came from another node of cluster, i didn`t actually added this part, that`s how it used to work, i just removed ClientRequestTracker",
+      "parentUuid": "8ea64030_192be2c7",
+      "revId": "c292e6366b361d1622e6eadfffcf01a046443480",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
