@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0994f3de_3058c6ea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "This method is invoked only in case of findPrimaryShard was success",
+      "parentUuid": "e7e29a4f_047ac8ff",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e4a7a34a_06246750",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
         "patchSetId": 36
@@ -33,6 +51,24 @@
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6aa84f6_d4e458b6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4a7a34a_06246750",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "cf489154_2c10c930",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39df76ba_eff70bb5",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0bfde0d7_1ef14ae9",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
         "patchSetId": 36
@@ -67,6 +121,24 @@
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "024405f7_f9d26867",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0bfde0d7_1ef14ae9",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "dc9765e8_3f3264ee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31e89c62_77103aba",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1d6b61f_256ea221",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
         "patchSetId": 36
@@ -101,6 +191,24 @@
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3db13546_45ef5287",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1d6b61f_256ea221",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "9fbb2c01_bd4a596c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9a69eb3_39ccb51d",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f21dedc6_17701116",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
         "patchSetId": 36
@@ -135,6 +261,24 @@
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e406488f_356a44f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f21dedc6_17701116",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "efa5d4e3_1efa7a98",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c129f622_0b412d65",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c2eaf6e_e7242fd0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
         "patchSetId": 36
@@ -169,6 +331,24 @@
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "249d709d_b7ccf1ee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c2eaf6e_e7242fd0",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     },
     {
       "key": {
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "6d509f32_5afb80d5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c45a9d4_8ba45b3e",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9cd03f7_14c35cad",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
         "patchSetId": 36
@@ -206,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "33f48132_16555094",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c9cd03f7_14c35cad",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e834448_2bb48244",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
         "patchSetId": 36
@@ -217,6 +433,24 @@
       "writtenOn": "2021-07-09T11:27:24Z",
       "side": 1,
       "message": "why do not we have test also for DirectTransactionContextWrapper?",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc111716_bebd77ff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-14T09:52:35Z",
+      "side": 1,
+      "message": "there is not much sense in such test, in case of DirectTransactionContextWrapper limiter is not used",
+      "parentUuid": "5e834448_2bb48244",
       "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
