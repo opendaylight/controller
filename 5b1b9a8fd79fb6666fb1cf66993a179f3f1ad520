@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3a079f0_e63fc09f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-19T11:41:58Z",
+      "side": 1,
+      "message": "Did you forget to add final?",
+      "revId": "5b1b9a8fd79fb6666fb1cf66993a179f3f1ad520",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d681f1d_da9a91d1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-19T11:41:58Z",
+      "side": 1,
+      "message": "Unusual formatting :D",
+      "revId": "5b1b9a8fd79fb6666fb1cf66993a179f3f1ad520",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

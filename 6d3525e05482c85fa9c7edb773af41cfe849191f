@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "4438dfa6_d5c36364",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 36
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-19T11:41:58Z",
+      "side": 1,
+      "message": "Anyway I think that we have the same message used two times - it can be confusing to read the log file...",
+      "parentUuid": "0994f3de_3058c6ea",
+      "revId": "6d3525e05482c85fa9c7edb773af41cfe849191f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e4a7a34a_06246750",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
         "patchSetId": 36
