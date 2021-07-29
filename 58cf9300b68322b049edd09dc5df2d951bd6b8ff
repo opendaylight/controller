@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ee4e913_7797ead6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-29T14:41:22Z",
+      "side": 1,
+      "message": "I think this will be better with original copyright:\n\n/*\n * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v1.0 which accompanies this distribution,\n * and is available at http://www.eclipse.org/legal/epl-v10.html\n */",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19ec6753_37a9886b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-29T14:41:22Z",
+      "side": 1,
+      "message": "Write what means direct:\nIts executed on local shard, always has complete context, operations are not queued.",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dc4361f_2dc3afeb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-29T14:41:22Z",
+      "side": 1,
+      "message": "Write test also for DirectTransactionContextWrapper.",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
