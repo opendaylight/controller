@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b72174f2_e1ec9d7d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapper.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-30T07:49:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7ee4e913_7797ead6",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19ec6753_37a9886b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
         "patchSetId": 40
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "8bef0083_77b8f356",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-30T07:49:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19ec6753_37a9886b",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0dc4361f_2dc3afeb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
         "patchSetId": 40
@@ -47,6 +83,24 @@
       "writtenOn": "2021-07-29T14:41:22Z",
       "side": 1,
       "message": "Write test also for DirectTransactionContextWrapper.",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40df1b15_fcfadb1d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-30T07:49:56Z",
+      "side": 1,
+      "message": "I don`t think there is something to be tested in DirectTransactionWrapper, there is no queue and operations are directly executed. And even check for transaction context is not needed because there is requireNonNull() in constructor.",
+      "parentUuid": "0dc4361f_2dc3afeb",
       "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true

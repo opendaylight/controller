@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3f2820f2_e81875e9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-30T07:49:56Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "9e404ead_9b7eb1ce",
+      "revId": "b8241d771e09e854bfcdd4ae9bd756bfd9329fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d48039d_2154c7eb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
         "patchSetId": 40
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba5e939b_08271ffa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-30T07:49:56Z",
+      "side": 0,
+      "message": "Comment updated, but i don`t see any javadoc for this class",
+      "parentUuid": "2d48039d_2154c7eb",
+      "revId": "b8241d771e09e854bfcdd4ae9bd756bfd9329fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad33e62_4861e38a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextWrapper.java",
         "patchSetId": 40
@@ -50,6 +86,24 @@
       "revId": "b8241d771e09e854bfcdd4ae9bd756bfd9329fa4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "264bb9b8_332969dd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextWrapper.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 8548
+      },
+      "writtenOn": "2021-07-30T07:49:56Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "3ad33e62_4861e38a",
+      "revId": "b8241d771e09e854bfcdd4ae9bd756bfd9329fa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
