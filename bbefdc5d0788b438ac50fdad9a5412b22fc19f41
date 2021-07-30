@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2e82406_d4db44d6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 43
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-30T14:28:38Z",
+      "side": 1,
+      "message": "IMHO: too much casting. I think that this method is solely for DelayedTransactionContextWrapper",
+      "revId": "bbefdc5d0788b438ac50fdad9a5412b22fc19f41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1910b77a_50dec919",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 43
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-30T14:28:38Z",
+      "side": 1,
+      "message": ".. the same as above. We need to rethink logic to make it more clear.\nI go into this method and its difficult to understand why you cast all the time.",
+      "revId": "bbefdc5d0788b438ac50fdad9a5412b22fc19f41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86f75c4f_5c3b731d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapper.java",
+        "patchSetId": 43
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-30T14:28:38Z",
+      "side": 1,
+      "message": "perfect :D",
+      "revId": "bbefdc5d0788b438ac50fdad9a5412b22fc19f41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8bdc291c_14327879",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 43
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-30T14:28:38Z",
+      "side": 1,
+      "message": "..are cached..",
+      "revId": "bbefdc5d0788b438ac50fdad9a5412b22fc19f41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b97e714_365e5c9a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DirectTransactionContextWrapperTest.java",
+        "patchSetId": 43
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-30T14:28:38Z",
+      "side": 1,
+      "message": "in this simple case not necessary empty line..",
+      "revId": "bbefdc5d0788b438ac50fdad9a5412b22fc19f41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
