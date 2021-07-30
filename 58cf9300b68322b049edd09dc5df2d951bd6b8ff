@@ -104,6 +104,24 @@
       "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7377879c_cfc8a4cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DelayedTransactionContextWrapperTest.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-07-30T10:43:38Z",
+      "side": 1,
+      "message": "Maybe you can try to check that there was some interaction with context in maybeExecuteTransactionOperation()..",
+      "parentUuid": "40df1b15_fcfadb1d",
+      "revId": "58cf9300b68322b049edd09dc5df2d951bd6b8ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
