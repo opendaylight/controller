@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "062832cb_4e8b8b99",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-08-02T11:50:03Z",
+      "side": 1,
+      "message": "Why the following equivalent to the previous logic is not used?\n\nserviceConfigPayloadIdentifiers.putAll(initializeFromLeader.serviceConfigPayloadIdentifiers);",
+      "revId": "9c73a8cc79e62b9cd03f3fc6f30d1e10dd75bdde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6615efb8_942a5aa4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2021-08-02T11:50:03Z",
+      "side": 1,
+      "message": "final",
+      "revId": "9c73a8cc79e62b9cd03f3fc6f30d1e10dd75bdde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
