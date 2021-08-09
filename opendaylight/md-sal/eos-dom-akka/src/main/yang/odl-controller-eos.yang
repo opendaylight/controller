@@ -1,0 +1,71 @@
+module odl-controller-eos {
+  namespace urn:opendaylight:params:xml:ns:yang:controller:eos;
+  prefix eos;
+
+  typedef entity-name {
+    type string {
+      length 1..max;
+    }
+  }
+
+  typedef entity-type {
+    type string {
+      length 1..max;
+    }
+  }
+
+  typedef node-name {
+    type string {
+      length 1..max;
+    }
+  }
+
+  grouping entity-id {
+    leaf type {
+      type entity-type;
+      mandatory true;
+    }
+    leaf name {
+      type entity-name;
+      mandatory true;
+    }
+  }
+   
+  rpc get-entity-owner {
+    input {
+      uses entity-id;
+    }
+
+    output {
+      leaf owner-node {
+        type node-name;
+      }
+    }
+  }
+
+  rpc get-entity-details {
+    input {
+      uses entity-id;
+    }
+
+    output {
+      leaf-list candidate-nodes {
+        type node-name;
+      }
+
+      leaf owner-node {
+        type node-name;
+      }
+    }
+  }
+
+  rpc get-all-entities {
+    output {
+      list entities {
+        uses entity-id;
+        key "type name";
+      }
+    }
+  }
+}
+
