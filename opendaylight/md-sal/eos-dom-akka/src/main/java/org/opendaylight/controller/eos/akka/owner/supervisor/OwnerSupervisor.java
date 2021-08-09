@@ -40,9 +40,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.AbstractEntityRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterDeactivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberDownEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberReachableEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberUnreachableEvent;
@@ -155,6 +162,9 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                 .onMessage(MemberDownEvent.class, this::onPeerDown)
                 .onMessage(MemberReachableEvent.class, this::onPeerReachable)
                 .onMessage(MemberUnreachableEvent.class, this::onPeerUnreachable)
+                .onMessage(GetEntitiesRequest.class, this::onGetEntities)
+                .onMessage(GetEntityRequest.class, this::onGetEntity)
+                .onMessage(GetEntityOwnerRequest.class, this::onGetEntityOwner)
                 .build();
     }
 
@@ -269,8 +279,6 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                                        final BiPredicate<DOMEntity, String> predicate) {
         LOG.debug("Reassigning owners for {}", entities);
         for (final DOMEntity entity : entities) {
-
-
             if (predicate.test(entity, oldOwner)) {
                 ownerToEntity.remove(oldOwner, entity);
                 assignOwnerFor(entity);
@@ -350,6 +358,22 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         return this;
     }
 
+    private Behavior<OwnerSupervisorCommand> onGetEntities(final GetEntitiesRequest request) {
+        request.getReplyTo().tell(new GetEntitiesReply(currentOwners, currentCandidates));
+        return this;
+    }
+
+    private Behavior<OwnerSupervisorCommand> onGetEntity(final GetEntityRequest request) {
+        final DOMEntity entity = extractEntity(request);
+        request.getReplyTo().tell(new GetEntityReply(currentOwners.get(entity), currentCandidates.get(entity)));
+        return this;
+    }
+
+    private Behavior<OwnerSupervisorCommand> onGetEntityOwner(final GetEntityOwnerRequest request) {
+        request.getReplyTo().tell(new GetEntityOwnerReply(currentOwners.get(extractEntity(request))));
+        return this;
+    }
+
     private void handleReachableEvent(final Set<String> roles) {
         if (roles.contains(dataCenter)) {
             activeMembers.add(extractRole(roles));
@@ -398,6 +422,10 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         });
 
         return members;
+    }
+
+    private static DOMEntity extractEntity(final AbstractEntityRequest<?> request) {
+        return new DOMEntity(request.getType().getValue(), request.getName().getValue());
     }
 
     private static String extractRole(final Member member) {
