@@ -44,6 +44,7 @@ import org.opendaylight.controller.eos.akka.registry.candidate.command.Unregiste
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.RegisterListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.UnregisterListener;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -51,7 +52,16 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistratio
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.OdlEntityOwnersService;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -66,7 +76,8 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @Component(immediate = true, service = { DOMEntityOwnershipService.class, DataCenterControl.class })
-public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable {
+public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable,
+        OdlEntityOwnersService {
     private static final Logger LOG = LoggerFactory.getLogger(AkkaEntityOwnershipService.class);
     private static final String DATACENTER_PREFIX = "dc";
     private static final Duration DATACENTER_OP_TIMEOUT = Duration.ofSeconds(20);
@@ -82,6 +93,8 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     private final ActorRef<TypeListenerRegistryCommand> listenerRegistry;
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
     protected final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
+
+    private Registration reg;
 
     @VisibleForTesting
     protected AkkaEntityOwnershipService(final ActorSystem actorSystem)
@@ -111,15 +124,20 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
 
     @Inject
     @Activate
-    public AkkaEntityOwnershipService(@Reference final ActorSystemProvider provider)
-            throws ExecutionException, InterruptedException {
-        this(provider.getActorSystem());
+    public AkkaEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
+            @Reference final RpcProviderService rpcProvider) throws ExecutionException, InterruptedException {
+        this(actorProvider.getActorSystem());
+        reg = rpcProvider.registerRpcImplementation(OdlEntityOwnersService.class, this);
     }
 
     @PreDestroy
     @Deactivate
     @Override
     public void close() throws InterruptedException, ExecutionException {
+        if (reg != null) {
+            reg.close();
+            reg = null;
+        }
         AskPattern.ask(bootstrap, Terminate::new, Duration.ofSeconds(5), scheduler).toCompletableFuture().get();
     }
 
@@ -183,6 +201,24 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
         LOG.debug("Deactivating datacenter: {}", datacenter);
         return toListenableFuture("Deactivate",
             AskPattern.ask(ownerSupervisor, DeactivateDataCenter::new, DATACENTER_OP_TIMEOUT, scheduler));
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<GetEntitiesOutput>> getEntities(final GetEntitiesInput input) {
+        // FIXME: implement this method
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<GetEntityOutput>> getEntity(final GetEntityInput input) {
+        // FIXME: implement this method
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<GetEntityOwnerOutput>> getEntityOwner(final GetEntityOwnerInput input) {
+        // FIXME: implement this method
+        throw new UnsupportedOperationException();
     }
 
     void unregisterCandidate(final DOMEntity entity) {
