@@ -1,0 +1,91 @@
+module odl-entity-owners {
+  namespace urn:opendaylight:params:xml:ns:yang:controller:entity-owners;
+  prefix entity-owners;
+
+  organization 'OpenDaylight Project';
+  description "An initial cut at modeling entity ownership status information
+               in a way which is not dependent on the datastore.
+
+               This model is considered experimental and
+               implementation-specific. It can change incompatibly between
+               OpenDaylight releases.";
+
+  typedef entity-type {
+    type string {
+      length 1..max;
+      // FIXME: it would be nice to have a pattern here, or even better
+      //        if we turn this into an extensible enum (i.e. identityref)
+    }
+  }
+
+  typedef entity-instance {
+    type instance-identifier;
+  }
+
+  typedef node-name {
+    type string {
+      length 1..max;
+    }
+  }
+
+  grouping entity-id {
+    leaf type {
+      type entity-type;
+      mandatory true;
+    }
+    leaf instance {
+      type entity-instance;
+      mandatory true;
+    }
+  }
+
+  grouping owner {
+    leaf owner-node {
+      type node-name;
+    }
+  }
+
+  grouping candidates {
+    leaf-list candidate-nodes {
+      type node-name;
+      ordered-by user;
+      min-elements 1;
+    }
+  }
+
+  grouping details {
+     uses owner;
+     uses candidates;
+  }
+
+  rpc get-entities {
+    output {
+      list entities {
+        key 'type instance';
+        uses entity-id;
+        uses details;
+      }
+    }
+  }
+
+  rpc get-entity {
+    input {
+      uses entity-id;
+    }
+
+    output {
+      uses details;
+    }
+  }
+
+  rpc get-entity-owner {
+    input {
+      uses entity-id;
+    }
+
+    output {
+      uses owner;
+    }
+  }
+}
+
