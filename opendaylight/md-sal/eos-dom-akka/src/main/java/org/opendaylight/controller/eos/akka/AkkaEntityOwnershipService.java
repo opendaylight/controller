@@ -38,7 +38,6 @@ import org.opendaylight.controller.eos.akka.owner.checker.command.StateCheckerCo
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterCandidate;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.UnregisterCandidate;
@@ -52,6 +51,7 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistratio
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -65,8 +65,8 @@ import org.slf4j.LoggerFactory;
  * the appropriate owners.
  */
 @Singleton
-@Component(immediate = true, service = { DOMEntityOwnershipService.class, NativeEosService.class })
-public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, NativeEosService, AutoCloseable {
+@Component(immediate = true, service = { DOMEntityOwnershipService.class, DataCenterControl.class })
+public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AkkaEntityOwnershipService.class);
     private static final String DATACENTER_PREFIX = "dc";
     private static final Duration DATACENTER_OP_TIMEOUT = Duration.ofSeconds(20);
@@ -171,45 +171,18 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Na
     }
 
     @Override
-    public ListenableFuture<Void> activateDataCenter() {
+    public ListenableFuture<Empty> activateDataCenter() {
         LOG.debug("Activating datacenter: {}", datacenter);
-        final SettableFuture<Void> future = SettableFuture.create();
-        final CompletionStage<OwnerSupervisorReply> ask =
-                AskPattern.ask(ownerSupervisor, ActivateDataCenter::new, DATACENTER_OP_TIMEOUT, scheduler);
 
-        ask.whenComplete((reply, failure) -> {
-            if (failure != null) {
-                LOG.warn("Activate DataCenter has failed.", failure);
-                future.setException(failure);
-                return;
-            }
-
-            LOG.debug("Activate DataCenter successful.");
-            future.set(null);
-        });
-
-        return future;
+        return toListenableFuture("Activate",
+            AskPattern.ask(ownerSupervisor, ActivateDataCenter::new, DATACENTER_OP_TIMEOUT, scheduler));
     }
 
     @Override
-    public ListenableFuture<Void> deactivateDataCenter() {
+    public ListenableFuture<Empty> deactivateDataCenter() {
         LOG.debug("Deactivating datacenter: {}", datacenter);
-        final SettableFuture<Void> future = SettableFuture.create();
-        final CompletionStage<OwnerSupervisorReply> ask =
-                AskPattern.ask(ownerSupervisor, DeactivateDataCenter::new, DATACENTER_OP_TIMEOUT, scheduler);
-
-        ask.whenComplete((reply, failure) -> {
-            if (failure != null) {
-                LOG.warn("Deactivate DataCenter has failed.", failure);
-                future.setException(failure);
-                return;
-            }
-
-            LOG.debug("Deactivate DataCenter successful.");
-            future.set(null);
-        });
-
-        return future;
+        return toListenableFuture("Deactivate",
+            AskPattern.ask(ownerSupervisor, DeactivateDataCenter::new, DATACENTER_OP_TIMEOUT, scheduler));
     }
 
     void unregisterCandidate(final DOMEntity entity) {
@@ -229,5 +202,19 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Na
     @VisibleForTesting
     RunningContext getRunningContext() {
         return runningContext;
+    }
+
+    private static ListenableFuture<Empty> toListenableFuture(final String op, final CompletionStage<?> stage) {
+        final SettableFuture<Empty> future = SettableFuture.create();
+        stage.whenComplete((reply, failure) -> {
+            if (failure != null) {
+                LOG.warn("{} DataCenter has failed", op, failure);
+                future.setException(failure);
+            } else {
+                LOG.debug("{} DataCenter successful", op);
+                future.set(Empty.getInstance());
+            }
+        });
+        return future;
     }
 }

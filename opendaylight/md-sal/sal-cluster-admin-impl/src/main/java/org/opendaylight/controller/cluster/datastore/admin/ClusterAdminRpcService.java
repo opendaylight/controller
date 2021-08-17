@@ -54,7 +54,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
-import org.opendaylight.controller.eos.akka.NativeEosService;
+import org.opendaylight.controller.eos.akka.DataCenterControl;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterOutput;
@@ -135,12 +135,12 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private final DistributedDataStoreInterface operDataStore;
     private final BindingNormalizedNodeSerializer serializer;
     private final Timeout makeLeaderLocalTimeout;
-    private final NativeEosService nativeEosService;
+    private final DataCenterControl dataCenterControl;
 
     public ClusterAdminRpcService(final DistributedDataStoreInterface configDataStore,
                                   final DistributedDataStoreInterface operDataStore,
                                   final BindingNormalizedNodeSerializer serializer,
-                                  final NativeEosService nativeEosService) {
+                                  final DataCenterControl dataCenterControl) {
         this.configDataStore = configDataStore;
         this.operDataStore = operDataStore;
         this.serializer = serializer;
@@ -149,7 +149,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 new Timeout(configDataStore.getActorUtils().getDatastoreContext()
                         .getShardLeaderElectionTimeout().duration().$times(2));
 
-        this.nativeEosService = nativeEosService;
+        this.dataCenterControl = dataCenterControl;
     }
 
     @Override
@@ -528,9 +528,9 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             final ActivateEosDatacenterInput input) {
         LOG.debug("Activating EOS Datacenter");
         final SettableFuture<RpcResult<ActivateEosDatacenterOutput>> future = SettableFuture.create();
-        Futures.addCallback(nativeEosService.activateDataCenter(), new FutureCallback<>() {
+        Futures.addCallback(dataCenterControl.activateDataCenter(), new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Empty result) {
                 LOG.debug("Successfully activated datacenter.");
                 future.set(RpcResultBuilder.<ActivateEosDatacenterOutput>success().build());
             }
@@ -550,9 +550,9 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             final DeactivateEosDatacenterInput input) {
         LOG.debug("Deactivating EOS Datacenter");
         final SettableFuture<RpcResult<DeactivateEosDatacenterOutput>> future = SettableFuture.create();
-        Futures.addCallback(nativeEosService.deactivateDataCenter(), new FutureCallback<>() {
+        Futures.addCallback(dataCenterControl.deactivateDataCenter(), new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Empty result) {
                 LOG.debug("Successfully deactivated datacenter.");
                 future.set(RpcResultBuilder.<DeactivateEosDatacenterOutput>success().build());
             }
