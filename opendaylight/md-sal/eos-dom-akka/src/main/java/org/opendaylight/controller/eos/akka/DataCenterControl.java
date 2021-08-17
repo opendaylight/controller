@@ -9,6 +9,8 @@ package org.opendaylight.controller.eos.akka;
 
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 /**
  * Service used to bring up/down the NativeEos service in individual datacenters.
@@ -22,15 +24,16 @@ import com.google.common.util.concurrent.ListenableFuture;
  * datacenter or multiple datacenters.
  */
 @Beta
-public interface NativeEosService {
-
+public interface DataCenterControl {
     /**
      * Activates the native eos service in the datacenter that this method is called.
      */
-    ListenableFuture<Void> activateDataCenter();
+    @NonNull ListenableFuture<Empty> activateDataCenter();
 
     /**
      * Deactivates the native eos service in the datacenter that this method is called.
+     *
+     * @return Completion future
      */
-    ListenableFuture<Void> deactivateDataCenter();
+    @NonNull ListenableFuture<Empty> deactivateDataCenter();
 }
