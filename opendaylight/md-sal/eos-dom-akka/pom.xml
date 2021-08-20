@@ -21,10 +21,6 @@
     <artifactId>eos-dom-akka</artifactId>
     <packaging>bundle</packaging>
 
-    <properties>
-        <odlparent.dependency.enforce>true</odlparent.dependency.enforce>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
