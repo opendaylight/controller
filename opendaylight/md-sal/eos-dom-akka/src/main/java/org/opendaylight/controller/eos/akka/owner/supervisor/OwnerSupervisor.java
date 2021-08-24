@@ -151,6 +151,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         return newReceiveBuilder()
                 .onMessage(CandidatesChanged.class, this::onCandidatesChanged)
                 .onMessage(DeactivateDataCenter.class, this::onDeactivateDatacenter)
+                .onMessage(OwnerChanged.class, this::onOwnerChanged)
                 .onMessage(MemberUpEvent.class, this::onPeerUp)
                 .onMessage(MemberDownEvent.class, this::onPeerDown)
                 .onMessage(MemberReachableEvent.class, this::onPeerReachable)
@@ -162,6 +163,11 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         LOG.debug("Deactivating Owner Supervisor on {}", cluster.selfMember());
         command.getReplyTo().tell(DataCenterDeactivated.INSTANCE);
         return IdleSupervisor.create();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onOwnerChanged(final OwnerChanged command) {
+        LOG.debug("Owner has changed for {}", command.getResponse().key());
+        return this;
     }
 
     private void reassignUnreachableOwners() {
