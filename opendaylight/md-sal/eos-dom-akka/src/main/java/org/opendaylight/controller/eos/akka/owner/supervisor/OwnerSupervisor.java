@@ -14,6 +14,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.cluster.ClusterEvent;
+import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.ddata.LWWRegister;
 import akka.cluster.ddata.LWWRegisterKey;
@@ -33,13 +34,13 @@ import com.google.common.collect.Sets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterDeactivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
@@ -224,7 +225,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
             return;
         }
 
-        final Set<String> currentlyPresent = currentCandidates.getOrDefault(entity, Collections.emptySet());
+        final Set<String> currentlyPresent = currentCandidates.getOrDefault(entity, Set.of());
         final Set<String> difference = ImmutableSet.copyOf(Sets.symmetricDifference(currentlyPresent, candidates));
 
         LOG.debug("currently present candidates: {}", currentlyPresent);
@@ -289,7 +290,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     }
 
     private boolean isCandidateFor(final DOMEntity entity, final String candidate) {
-        return currentCandidates.getOrDefault(entity, Collections.emptySet()).contains(candidate);
+        return currentCandidates.getOrDefault(entity, Set.of()).contains(candidate);
     }
 
     private void assignOwnerFor(final DOMEntity entity) {
@@ -389,21 +390,21 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     }
 
     private Set<String> getActiveMembers() {
-        final Set<String> members = new HashSet<>();
-        cluster.state().getMembers().forEach(member -> members.add(extractRole(member)));
-        // filter out unreachable
-        members.removeAll(cluster.state().getUnreachable().stream()
-                .map(OwnerSupervisor::extractRole)
-                .collect(Collectors.toSet()));
+        final CurrentClusterState clusterState = cluster.state();
+        final Set<String> unreachableRoles = clusterState.getUnreachable().stream()
+            .map(OwnerSupervisor::extractRole)
+            .collect(Collectors.toSet());
 
-        // filter out members not from our datacenter
-        cluster.state().getMembers().forEach(member -> {
-            if (!member.roles().contains(dataCenter)) {
-                members.remove(extractRole(member));
-            }
-        });
-
-        return members;
+        return StreamSupport.stream(clusterState.getMembers().spliterator(), false)
+            // We are evaluating the set of roles for each member
+            .map(Member::getRoles)
+            // Filter out any members which do not share our dataCenter
+            .filter(roles -> roles.contains(dataCenter))
+            // Find first legal role
+            .map(OwnerSupervisor::extractRole)
+            // filter out unreachable roles
+            .filter(role -> !unreachableRoles.contains(role))
+            .collect(Collectors.toSet());
     }
 
     private static String extractRole(final Member member) {
@@ -415,7 +416,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("No valid role found."));
     }
 
-    private String extractDatacenterRole(final Member member) {
+    private static String extractDatacenterRole(final Member member) {
         return member.getRoles().stream().filter(role -> role.startsWith(DATACENTER_PREFIX))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("No valid role found."));
     }
