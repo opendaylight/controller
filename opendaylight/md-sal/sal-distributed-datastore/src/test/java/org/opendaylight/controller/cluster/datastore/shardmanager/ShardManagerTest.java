@@ -91,8 +91,6 @@ import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
-import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
-import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
@@ -737,15 +735,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             kit.getRef());
 
         shardManager1.underlyingActor().waitForUnreachableMember();
-
-        PeerDown peerDown = MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerDown.class);
-        assertEquals("getMemberName", MEMBER_2, peerDown.getMemberName());
         MessageCollectorActor.clearMessages(mockShardActor1);
 
         shardManager1.tell(MockClusterWrapper.createMemberRemoved("member-2", "akka://cluster-test@127.0.0.1:2558"),
             kit.getRef());
-
-        MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerDown.class);
 
         shardManager1.tell(new FindPrimary("default", true), kit.getRef());
 
@@ -756,10 +749,6 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         shardManager1.underlyingActor().waitForReachableMember();
 
-        PeerUp peerUp = MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
-        assertEquals("getMemberName", MEMBER_2, peerUp.getMemberName());
-        MessageCollectorActor.clearMessages(mockShardActor1);
-
         shardManager1.tell(new FindPrimary("default", true), kit.getRef());
 
         RemotePrimaryShardFound found1 = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
@@ -768,8 +757,6 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         shardManager1.tell(MockClusterWrapper.createMemberUp("member-2", "akka://cluster-test@127.0.0.1:2558"),
             kit.getRef());
-
-        MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
 
         // Test FindPrimary wait succeeds after reachable member event.
 

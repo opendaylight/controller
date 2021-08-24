@@ -841,10 +841,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 message.member().address());
 
         peerAddressResolver.removePeerAddress(memberName);
-
-        for (ShardInformation info : localShards.values()) {
-            info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
-        }
     }
 
     private void memberExited(final ClusterEvent.MemberExited message) {
@@ -854,10 +850,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 message.member().address());
 
         peerAddressResolver.removePeerAddress(memberName);
-
-        for (ShardInformation info : localShards.values()) {
-            info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
-        }
     }
 
     private void memberUp(final ClusterEvent.MemberUp message) {
@@ -890,8 +882,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             String shardName = info.getShardName();
             String peerId = getShardIdentifier(memberName, shardName).toString();
             info.updatePeerAddress(peerId, peerAddressResolver.getShardActorAddress(shardName, memberName), getSelf());
-
-            info.peerUp(memberName, peerId, getSelf());
         }
     }
 
@@ -922,8 +912,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 notifyShardAvailabilityCallbacks(info);
             }
-
-            info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
         }
     }
 
@@ -934,8 +922,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 LOG.debug("Marking Leader {} as available.", leaderId);
                 info.setLeaderAvailable(true);
             }
-
-            info.peerUp(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
         }
     }
 
@@ -1010,7 +996,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     String peerId = getShardIdentifier(memberName, shardName).toString() ;
                     String peerAddress = peerAddressResolver.getShardActorAddress(shardName, memberName);
                     info.updatePeerAddress(peerId, peerAddress, getSelf());
-                    info.peerUp(memberName, peerId, getSelf());
                     LOG.debug("{}: updated peer {} on member {} with address {} on shard {} whose actor address is {}",
                             persistenceId(), peerId, memberName, peerAddress, info.getShardId(), info.getActor());
                 }
