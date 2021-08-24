@@ -21,13 +21,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
-import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
-import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -134,18 +131,6 @@ public final class ShardInformation {
         }
 
         notifyOnShardInitializedCallbacks();
-    }
-
-    void peerDown(final MemberName memberName, final String peerId, final ActorRef sender) {
-        if (actor != null) {
-            actor.tell(new PeerDown(memberName, peerId), sender);
-        }
-    }
-
-    void peerUp(final MemberName memberName, final String peerId, final ActorRef sender) {
-        if (actor != null) {
-            actor.tell(new PeerUp(memberName, peerId), sender);
-        }
     }
 
     boolean isShardReady() {
