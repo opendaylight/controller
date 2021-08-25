@@ -15,7 +15,7 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-parent</artifactId>
         <version>4.0.2-SNAPSHOT</version>
-        <relativePath>../bundle-parent</relativePath>
+        <relativePath>../parent</relativePath>
     </parent>
 
     <artifactId>eos-dom-akka</artifactId>
