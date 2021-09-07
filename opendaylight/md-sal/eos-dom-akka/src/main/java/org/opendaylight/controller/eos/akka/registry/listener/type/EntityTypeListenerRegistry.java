@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.RegisterListener;
+import org.opendaylight.controller.eos.akka.registry.listener.type.command.TerminateListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.UnregisterListener;
@@ -65,7 +66,7 @@ public class EntityTypeListenerRegistry extends AbstractBehavior<TypeListenerReg
     private Behavior<TypeListenerRegistryCommand> onUnregisterListener(final UnregisterListener command) {
         LOG.debug("Stopping entity type listener actor for: {}", command.getEntityType());
 
-        getContext().stop(spawnedListenerActors.remove(command.getDelegateListener()));
+        spawnedListenerActors.remove(command.getDelegateListener()).tell(TerminateListener.INSTANCE);
         return this;
     }
 

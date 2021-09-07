@@ -33,6 +33,7 @@ import org.opendaylight.controller.eos.akka.registry.listener.owner.SingleEntity
 import org.opendaylight.controller.eos.akka.registry.listener.owner.command.ListenerCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.CandidatesChanged;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.EntityOwnerChanged;
+import org.opendaylight.controller.eos.akka.registry.listener.type.command.TerminateListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerCommand;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
@@ -69,6 +70,7 @@ public class EntityTypeListenerActor extends AbstractBehavior<TypeListenerComman
         return newReceiveBuilder()
                 .onMessage(CandidatesChanged.class, this::onCandidatesChanged)
                 .onMessage(EntityOwnerChanged.class, this::onOwnerChanged)
+                .onMessage(TerminateListener.class, this::onTerminate)
                 .build();
     }
 
@@ -111,6 +113,11 @@ public class EntityTypeListenerActor extends AbstractBehavior<TypeListenerComman
 
         listener.ownershipChanged(rsp.getOwnershipChange());
         return this;
+    }
+
+    private Behavior<TypeListenerCommand> onTerminate(final TerminateListener command) {
+        LOG.debug("Terminating listener for type: {}, listener: {}", entityType, listener);
+        return Behaviors.stopped();
     }
 
     private static String encodeEntityToActorName(final DOMEntity entity) {
