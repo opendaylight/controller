@@ -22,5 +22,6 @@
         <module>configuration</module>
         <module>model</module>
         <module>provider</module>
+        <module>karaf-cli</module>
     </modules>
 </project>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mdsal-parent</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <version>4.0.3-SNAPSHOT</version>
+        <relativePath>../../../parent/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.opendaylight.controller.samples</groupId>
+    <artifactId>clustering-it-karaf-cli</artifactId>
+    <packaging>bundle</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>karaf-bom</artifactId>
+                <version>4.3.3-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <version>4.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opendaylight.controller.samples</groupId>
+            <artifactId>clustering-it-model</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+                <version>4.3.3-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>service-metadata-generate</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>service-metadata-generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Private-Package>
+                            org.opendaylight.clustering.it.karaf.cli.command.car
+                        </Private-Package>
+                        <Import-Package>
+                            org.apache.karaf.shell*;version="[4,5)",
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

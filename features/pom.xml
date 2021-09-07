@@ -40,6 +40,7 @@
     <module>features-controller-testing</module>
     <module>odl-clustering-test-app</module>
     <module>odl-mdsal-benchmark</module>
+    <module>odl-controller-test-cli</module>
 
     <!-- Scala/Akka features -->
     <module>odl-controller-scala</module>

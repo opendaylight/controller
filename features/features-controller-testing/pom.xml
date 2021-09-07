@@ -47,5 +47,12 @@
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-controller-test-cli</artifactId>
+            <version>4.0.3-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
     </dependencies>
 </project>
