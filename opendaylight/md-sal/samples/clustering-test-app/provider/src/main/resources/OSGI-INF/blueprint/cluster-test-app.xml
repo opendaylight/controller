@@ -64,4 +64,15 @@
     <argument ref="actorSystemProvider"/>
   </bean>
 
+  <service
+          ref="lowLevelTestProvider"
+          interface="org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService" />
+  <service
+          ref="peopleProvider"
+          interface="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PeopleService" />
+  <service
+          ref="basicTestProvider"
+          interface="org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicRpcTestService" />
+
+
 </blueprint>
