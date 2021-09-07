@@ -20,6 +20,7 @@
 
     <modules>
         <module>configuration</module>
+        <module>karaf-cli</module>
         <module>model</module>
         <module>provider</module>
     </modules>
