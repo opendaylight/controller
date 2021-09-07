@@ -198,6 +198,11 @@
                 <artifactId>clustering-it-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller.samples</groupId>
+                <artifactId>clustering-it-karaf-cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Config files -->
             <dependency>
