@@ -177,6 +177,29 @@
       "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c6ef7ae_230387d8",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:06:22Z",
+      "side": 1,
+      "message": "alpha-sort",
+      "range": {
+        "startLine": 25,
+        "startChar": 16,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }
