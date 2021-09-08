@@ -1,0 +1,182 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b50ef4fd_62219d3b",
+        "filename": "features/features-controller-testing/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "this should be declared in dependencyManagement in artifacts/pom.xml",
+      "range": {
+        "startLine": 53,
+        "startChar": 12,
+        "endLine": 53,
+        "endChar": 45
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "113b5c7a_1207accb",
+        "filename": "features/odl-controller-test-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "missing copyright header",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "272e65f5_52d6dc41",
+        "filename": "features/odl-controller-test-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "also in artifacts",
+      "range": {
+        "startLine": 36,
+        "startChar": 12,
+        "endLine": 36,
+        "endChar": 45
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82da9103_ec957eff",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "move this below test-app (alphasort)",
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb0262c5_a9e569b7",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/karaf-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "definitely not snapshot, and we should be getting this from upstreams already",
+      "range": {
+        "startLine": 22,
+        "startChar": 16,
+        "endLine": 22,
+        "endChar": 49
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1bc4fa7_0e096e11",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/karaf-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "this should be superfluous",
+      "range": {
+        "startLine": 33,
+        "startChar": 12,
+        "endLine": 33,
+        "endChar": 36
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8118ff92_f8f9551d",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/karaf-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "Imports should be generated automatically, why is this needed?",
+      "range": {
+        "startLine": 66,
+        "startChar": 24,
+        "endLine": 66,
+        "endChar": 40
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7661ddd_21819628",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/karaf-cli/src/main/java/org/opendaylight/clustering/it/karaf/cli/command/car/purchase/BuyCarCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2021-09-08T11:05:59Z",
+      "side": 1,
+      "message": "just inline this variable",
+      "range": {
+        "startLine": 40,
+        "startChar": 26,
+        "endLine": 40,
+        "endChar": 31
+      },
+      "revId": "e839f5ff6223f17eee045fd7e8d918e7b64f327f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
