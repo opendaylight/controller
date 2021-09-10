@@ -138,6 +138,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-cluster-admin-karaf-cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-dom-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -350,6 +355,13 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-clustering-test-app</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>odl-controller-test-cli</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>

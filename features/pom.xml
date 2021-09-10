@@ -39,6 +39,7 @@
     <!-- CSIT features -->
     <module>features-controller-testing</module>
     <module>odl-clustering-test-app</module>
+    <module>odl-controller-test-cli</module>
     <module>odl-mdsal-benchmark</module>
 
     <!-- Scala/Akka features -->
