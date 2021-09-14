@@ -25,7 +25,7 @@ public class CheckPublishNotificationsCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "id", required = true)
-    String id;
+    private String id;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

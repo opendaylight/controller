@@ -25,13 +25,13 @@ public class WriteTransactionsCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "id", required = true)
-    String id;
+    private String id;
     @Argument(index = 1, name = "seconds", required = true)
-    long seconds;
+    private long seconds;
     @Argument(index = 2, name = "trasactions-per-second", required = true)
-    long transactionsPerSecond;
+    private long transactionsPerSecond;
     @Argument(index = 3, name = "chained-transations", required = true)
-    boolean chainedTransactions;
+    private boolean chainedTransactions;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

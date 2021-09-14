@@ -24,7 +24,7 @@ public class RegisterDefaultConstantCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index =  0, name = "constant", required = true)
-    String constant;
+    private String constant;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

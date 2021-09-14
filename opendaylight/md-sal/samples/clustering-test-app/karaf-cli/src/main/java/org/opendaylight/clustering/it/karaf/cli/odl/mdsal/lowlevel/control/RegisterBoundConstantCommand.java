@@ -27,9 +27,9 @@ public class RegisterBoundConstantCommand extends AbstractRpcAction {
     @Reference
     private InstanceIdentifierSupport iidSupport;
     @Argument(index =  0, name = "context", required = true)
-    String context;
+    private String context;
     @Argument(index =  1, name = "constant", required = true)
-    String constant;
+    private String constant;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
