@@ -68,7 +68,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
     @After
     public void tearDown() throws InterruptedException, ExecutionException {
         service.close();
-        ActorTestKit.shutdown(Adapter.toTyped(system));
+        ActorTestKit.shutdown(Adapter.toTyped(system), Duration.ofSeconds(20));
     }
 
     @Test

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.eos.akka;
 
 import akka.actor.testkit.typed.javadsl.ActorTestKit;
+import java.time.Duration;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +29,7 @@ public class SingleNodeTest extends AbstractNativeEosTest {
 
     @After
     public void tearDown() {
-        ActorTestKit.shutdown(clusterNode.getActorSystem());
+        ActorTestKit.shutdown(clusterNode.getActorSystem(), Duration.ofSeconds(20));
     }
 
     @Test
