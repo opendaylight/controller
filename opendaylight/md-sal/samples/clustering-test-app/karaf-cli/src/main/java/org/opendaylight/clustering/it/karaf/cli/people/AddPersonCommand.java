@@ -26,15 +26,15 @@ public class AddPersonCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "id", required = true)
-    PersonId id;
+    private PersonId id;
     @Argument(index = 1, name = "gender", required = true)
-    String gender;
+    private String gender;
     @Argument(index = 2, name = "age", required = true)
-    long age;
+    private long age;
     @Argument(index = 3, name = "address", required = true)
-    String address;
+    private String address;
     @Argument(index = 4, name = "contactNo", required = true)
-    String contactNo;
+    private String contactNo;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

@@ -25,7 +25,7 @@ public class UnregisterOwnershipCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "car-id", required = true)
-    String carId;
+    private String carId;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

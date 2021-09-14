@@ -24,7 +24,7 @@ public class RemoveShardReplicaCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "shard-name", required = true)
-    String shardName;
+    private String shardName;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

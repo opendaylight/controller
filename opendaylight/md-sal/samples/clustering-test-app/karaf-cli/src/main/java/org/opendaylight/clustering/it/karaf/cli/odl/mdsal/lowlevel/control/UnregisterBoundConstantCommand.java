@@ -27,7 +27,7 @@ public class UnregisterBoundConstantCommand extends AbstractRpcAction {
     @Reference
     private InstanceIdentifierSupport iidSupport;
     @Argument(index = 0, name = "context", required = true)
-    String context;
+    private String context;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

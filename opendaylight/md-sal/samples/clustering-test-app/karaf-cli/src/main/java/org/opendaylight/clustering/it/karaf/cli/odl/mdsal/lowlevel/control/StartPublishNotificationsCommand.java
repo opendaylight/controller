@@ -26,11 +26,11 @@ public class StartPublishNotificationsCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "id", required = true)
-    String id;
+    private String id;
     @Argument(index = 1, name = "seconds", required = true)
-    long seconds;
+    private long seconds;
     @Argument(index = 2, name = "notifications-per-second", required = true)
-    long notificationsPerSecond;
+    private long notificationsPerSecond;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

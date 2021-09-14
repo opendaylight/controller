@@ -32,9 +32,9 @@ public class BuyCarCommand extends AbstractRpcAction {
     @Argument(index = 0, name = "person-ref", required = true)
     String personRef;
     @Argument(index = 1, name = "car-id", required = true)
-    CarId carId;
+    private CarId carId;
     @Argument(index = 2, name = "person-id", required = true)
-    PersonId personId;
+    private PersonId personId;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {

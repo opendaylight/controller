@@ -26,9 +26,9 @@ public class StressTestCommand extends AbstractRpcAction {
     @Reference
     private RpcConsumerRegistry rpcService;
     @Argument(index = 0, name = "rate", required = true)
-    int rate;
+    private int rate;
     @Argument(index = 1, name = "count", required = true)
-    long count;
+    private long count;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
