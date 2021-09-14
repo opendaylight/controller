@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "754120f7_7d9ae754",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-karaf-cli/src/main/java/org/opendaylight/controller/cluster/datastore/admin/command/BackupDatastoreCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2021-09-14T11:38:29Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we have index \u003d1 here?",
+      "range": {
+        "startLine": 28,
+        "startChar": 22,
+        "endLine": 28,
+        "endChar": 23
+      },
+      "revId": "7a06eded42c8d63d00913a5baa7d813c80448598",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
