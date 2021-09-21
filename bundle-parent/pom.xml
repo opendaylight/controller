@@ -96,6 +96,10 @@
                     </exclusion>
                     <exclusion>
                         <groupId>com.typesafe.akka</groupId>
+                        <artifactId>akka-persistence-typed_2.13</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.typesafe.akka</groupId>
                         <artifactId>akka-slf4j_2.13</artifactId>
                     </exclusion>
                 </exclusions>
