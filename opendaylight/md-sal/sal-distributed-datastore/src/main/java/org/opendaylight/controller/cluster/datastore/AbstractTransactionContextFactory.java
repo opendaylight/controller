@@ -155,7 +155,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                         contextWrapper);
             }
         } else {
-            findPrimaryFuture.onComplete((result) -> {
+            findPrimaryFuture.onComplete(result -> {
                 if (result.isSuccess()) {
                     onFindPrimaryShardSuccess(result.get(), parent, shardName, contextWrapper);
                 } else {
@@ -240,12 +240,12 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                 final DOMStoreReadTransaction readOnly = factory.newReadOnlyTransaction(parent.getIdentifier());
                 return new LocalTransactionContext(readOnly, parent.getIdentifier(), factory) {
                     @Override
-                    protected DOMStoreWriteTransaction getWriteDelegate() {
+                    DOMStoreWriteTransaction getWriteDelegate() {
                         throw new UnsupportedOperationException();
                     }
 
                     @Override
-                    protected DOMStoreReadTransaction getReadDelegate() {
+                    DOMStoreReadTransaction getReadDelegate() {
                         return readOnly;
                     }
                 };
@@ -253,12 +253,12 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                 final DOMStoreReadWriteTransaction readWrite = factory.newReadWriteTransaction(parent.getIdentifier());
                 return new LocalTransactionContext(readWrite, parent.getIdentifier(), factory) {
                     @Override
-                    protected DOMStoreWriteTransaction getWriteDelegate() {
+                    DOMStoreWriteTransaction getWriteDelegate() {
                         return readWrite;
                     }
 
                     @Override
-                    protected DOMStoreReadTransaction getReadDelegate() {
+                    DOMStoreReadTransaction getReadDelegate() {
                         return readWrite;
                     }
                 };
@@ -266,12 +266,12 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                 final DOMStoreWriteTransaction writeOnly = factory.newWriteOnlyTransaction(parent.getIdentifier());
                 return new LocalTransactionContext(writeOnly, parent.getIdentifier(), factory) {
                     @Override
-                    protected DOMStoreWriteTransaction getWriteDelegate() {
+                    DOMStoreWriteTransaction getWriteDelegate() {
                         return writeOnly;
                     }
 
                     @Override
-                    protected DOMStoreReadTransaction getReadDelegate() {
+                    DOMStoreReadTransaction getReadDelegate() {
                         throw new UnsupportedOperationException();
                     }
                 };
