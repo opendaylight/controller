@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -70,7 +69,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     private final File snapshotDir;
 
     public LocalSnapshotStore(final Config config) {
-        this.executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
+        executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
         snapshotDir = new File(config.getString("dir"));
 
         final int localMaxLoadAttempts = config.getInt("max-load-attempts");
@@ -331,23 +330,11 @@ public class LocalSnapshotStore extends SnapshotStore {
     }
 
     private static String encode(final String str) {
-        try {
-            return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            // Shouldn't happen
-            LOG.warn("Error encoding {}", str, e);
-            return str;
-        }
+        return URLEncoder.encode(str, StandardCharsets.UTF_8);
     }
 
     private static String decode(final String str) {
-        try {
-            return URLDecoder.decode(str, StandardCharsets.UTF_8.name());
-        } catch (final UnsupportedEncodingException e) {
-            // Shouldn't happen
-            LOG.warn("Error decoding {}", str, e);
-            return str;
-        }
+        return URLDecoder.decode(str, StandardCharsets.UTF_8);
     }
 
     @VisibleForTesting

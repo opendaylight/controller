@@ -21,7 +21,6 @@ import com.typesafe.config.ConfigMemorySize;
 import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.SegmentedJournal;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -117,7 +116,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     }
 
     private ActorRef createHandler(final String persistenceId) {
-        final String directoryName = encode(persistenceId);
+        final String directoryName = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8);
         final File directory = new File(rootDir, directoryName);
         LOG.debug("Creating handler for {} in directory {}", persistenceId, directory);
 
@@ -140,16 +139,6 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         LOG.trace("Delegating {} to {}", message, handler);
         handler.tell(message, noSender());
         return message.promise.future();
-    }
-
-    private static String encode(final String str) {
-        try {
-            return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            // Shouldn't happen
-            LOG.warn("Error encoding {}", str, e);
-            return str;
-        }
     }
 
     private static int getBytes(final Config config, final String path, final int defaultValue) {

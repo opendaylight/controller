@@ -11,11 +11,6 @@
   <artifactId>sal-clustering-commons</artifactId>
   <packaging>bundle</packaging>
 
-  <properties>
-    <!-- FIXME: Remove this -->
-    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
-  </properties>
-
   <dependencies>
     <!-- Java -->
     <dependency>

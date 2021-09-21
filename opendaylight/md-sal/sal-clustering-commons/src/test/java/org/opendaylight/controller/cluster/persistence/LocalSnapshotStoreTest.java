@@ -32,7 +32,6 @@ import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
@@ -196,9 +195,7 @@ public class LocalSnapshotStoreTest {
         }
     }
 
-    private static String toSnapshotName(final String persistenceId, final int seqNr, final int timestamp)
-            throws UnsupportedEncodingException {
-        final String encodedPersistenceId = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8.name());
-        return "snapshot-" + encodedPersistenceId + "-" + seqNr + "-" + timestamp;
+    private static String toSnapshotName(final String persistenceId, final int seqNr, final int timestamp) {
+        return "snapshot-" + URLEncoder.encode(persistenceId, StandardCharsets.UTF_8) + "-" + seqNr + "-" + timestamp;
     }
 }
