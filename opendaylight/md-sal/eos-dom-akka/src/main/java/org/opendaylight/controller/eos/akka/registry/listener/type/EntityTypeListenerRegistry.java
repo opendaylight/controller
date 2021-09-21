@@ -66,7 +66,10 @@ public class EntityTypeListenerRegistry extends AbstractBehavior<TypeListenerReg
     private Behavior<TypeListenerRegistryCommand> onUnregisterListener(final UnregisterListener command) {
         LOG.debug("Stopping entity type listener actor for: {}", command.getEntityType());
 
-        spawnedListenerActors.remove(command.getDelegateListener()).tell(TerminateListener.INSTANCE);
+        final ActorRef<TypeListenerCommand> actor = spawnedListenerActors.remove(command.getDelegateListener());
+        if (actor != null) {
+            actor.tell(TerminateListener.INSTANCE);
+        }
         return this;
     }
 
