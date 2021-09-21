@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -40,7 +41,7 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
-public class RemoteTransactionContext extends AbstractTransactionContext {
+final class RemoteTransactionContext extends TransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteTransactionContext.class);
 
     private final ActorUtils actorUtils;
@@ -59,7 +60,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
      */
     private volatile Throwable failedModification;
 
-    protected RemoteTransactionContext(final TransactionIdentifier identifier, final ActorSelection actor,
+    RemoteTransactionContext(final TransactionIdentifier identifier, final ActorSelection actor,
             final ActorUtils actorUtils, final short remoteTransactionVersion, final OperationLimiter limiter) {
         super(identifier, remoteTransactionVersion);
         this.limiter = requireNonNull(limiter);
@@ -76,7 +77,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void closeTransaction() {
+    void closeTransaction() {
         LOG.debug("Tx {} closeTransaction called", getIdentifier());
         TransactionContextCleanup.untrack(this);
 
@@ -84,7 +85,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<Object> directCommit(final Boolean havePermit) {
+    Future<Object> directCommit(final Boolean havePermit) {
         LOG.debug("Tx {} directCommit called", getIdentifier());
 
         // Send the remaining batched modifications, if any, with the ready flag set.
@@ -93,7 +94,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction(final Boolean havePermit,
+    Future<ActorSelection> readyTransaction(final Boolean havePermit,
             final Optional<SortedSet<String>> participatingShardNames) {
         logModificationCount();
 
@@ -104,20 +105,15 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         bumpPermits(havePermit);
         Future<Object> lastModificationsFuture = sendBatchedModifications(true, false, participatingShardNames);
 
-        return transformReadyReply(lastModificationsFuture);
+        // Transform the last reply Future into a Future that returns the cohort actor path from
+        // the last reply message. That's the end result of the ready operation.
+        return TransactionReadyReplyMapper.transform(lastModificationsFuture, actorUtils, getIdentifier());
     }
 
     private void bumpPermits(final Boolean havePermit) {
         if (Boolean.TRUE.equals(havePermit)) {
             ++batchPermits;
         }
-    }
-
-    protected Future<ActorSelection> transformReadyReply(final Future<Object> readyReplyFuture) {
-        // Transform the last reply Future into a Future that returns the cohort actor path from
-        // the last reply message. That's the end result of the ready operation.
-
-        return TransactionReadyReplyMapper.transform(readyReplyFuture, actorUtils, getIdentifier());
     }
 
     private BatchedModifications newBatchedModifications() {
@@ -142,11 +138,12 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         }
     }
 
-    protected Future<Object> sendBatchedModifications() {
+    @VisibleForTesting
+    Future<Object> sendBatchedModifications() {
         return sendBatchedModifications(false, false, Optional.empty());
     }
 
-    protected Future<Object> sendBatchedModifications(final boolean ready, final boolean doCommitOnReady,
+    private Future<Object> sendBatchedModifications(final boolean ready, final boolean doCommitOnReady,
             final Optional<SortedSet<String>> participatingShardNames) {
         Future<Object> sent = null;
         if (ready || batchedModifications != null && !batchedModifications.getModifications().isEmpty()) {
@@ -202,19 +199,19 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+    void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
         LOG.debug("Tx {} executeDelete called path = {}", getIdentifier(), path);
         executeModification(new DeleteModification(path), havePermit);
     }
 
     @Override
-    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
+    void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeMerge called path = {}", getIdentifier(), path);
         executeModification(new MergeModification(path, data), havePermit);
     }
 
     @Override
-    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
+    void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeWrite called path = {}", getIdentifier(), path);
         executeModification(new WriteModification(path, data), havePermit);
     }
@@ -231,7 +228,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> returnFuture,
+    <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> returnFuture,
             final Boolean havePermit) {
         LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(),
                 readCmd.getPath());
@@ -298,7 +295,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public boolean usesOperationLimiting() {
+    boolean usesOperationLimiting() {
         return true;
     }
 }
