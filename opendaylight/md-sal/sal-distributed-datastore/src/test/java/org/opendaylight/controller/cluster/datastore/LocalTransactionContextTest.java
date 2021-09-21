@@ -50,12 +50,12 @@ public class LocalTransactionContextTest {
         localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter.getIdentifier(),
                 mockReadySupport) {
             @Override
-            protected DOMStoreWriteTransaction getWriteDelegate() {
+            DOMStoreWriteTransaction getWriteDelegate() {
                 return readWriteTransaction;
             }
 
             @Override
-            protected DOMStoreReadTransaction getReadDelegate() {
+            DOMStoreReadTransaction getReadDelegate() {
                 return readWriteTransaction;
             }
         };

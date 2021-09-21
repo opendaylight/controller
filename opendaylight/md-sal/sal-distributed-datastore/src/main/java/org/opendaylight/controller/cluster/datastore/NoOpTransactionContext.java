@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
-final class NoOpTransactionContext extends AbstractTransactionContext {
+final class NoOpTransactionContext extends TransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
 
     private final Throwable failure;
@@ -33,26 +33,25 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void closeTransaction() {
+    void closeTransaction() {
         LOG.debug("NoOpTransactionContext {} closeTransaction called", getIdentifier());
     }
 
     @Override
-    public Future<Object> directCommit(final Boolean havePermit) {
+    Future<Object> directCommit(final Boolean havePermit) {
         LOG.debug("Tx {} directCommit called, failure", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction(final Boolean havePermit,
+    Future<ActorSelection> readyTransaction(final Boolean havePermit,
             final Optional<SortedSet<String>> participatingShardNamess) {
         LOG.debug("Tx {} readyTransaction called, failure", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
-    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture,
-            final Boolean havePermit) {
+    <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture, final Boolean havePermit) {
         LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(),
                 readCmd.getPath());
 
@@ -67,17 +66,17 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+    void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
         LOG.debug("Tx {} executeDelete called path = {}", getIdentifier(), path);
     }
 
     @Override
-    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
+    void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeMerge called path = {}", getIdentifier(), path);
     }
 
     @Override
-    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
+    void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         LOG.debug("Tx {} executeWrite called path = {}", getIdentifier(), path);
     }
 }

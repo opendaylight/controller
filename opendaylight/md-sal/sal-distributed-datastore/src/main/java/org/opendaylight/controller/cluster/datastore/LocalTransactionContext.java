@@ -33,7 +33,7 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
-abstract class LocalTransactionContext extends AbstractTransactionContext {
+abstract class LocalTransactionContext extends TransactionContext {
     private final DOMStoreTransaction txDelegate;
     private final LocalTransactionReadySupport readySupport;
     private Exception operationError;
@@ -45,9 +45,9 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
         this.readySupport = readySupport;
     }
 
-    protected abstract DOMStoreWriteTransaction getWriteDelegate();
+    abstract DOMStoreWriteTransaction getWriteDelegate();
 
-    protected abstract DOMStoreReadTransaction getReadDelegate();
+    abstract DOMStoreReadTransaction getReadDelegate();
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void executeModification(final Consumer<DOMStoreWriteTransaction> consumer) {
@@ -62,22 +62,22 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
+    void executeDelete(final YangInstanceIdentifier path, final Boolean havePermit) {
         executeModification(transaction -> transaction.delete(path));
     }
 
     @Override
-    public void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
+    void executeMerge(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         executeModification(transaction -> transaction.merge(path, data));
     }
 
     @Override
-    public void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
+    void executeWrite(final YangInstanceIdentifier path, final NormalizedNode data, final Boolean havePermit) {
         executeModification(transaction -> transaction.write(path, data));
     }
 
     @Override
-    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture,
+    <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture,
             final Boolean havePermit) {
         Futures.addCallback(readCmd.apply(getReadDelegate()), new FutureCallback<T>() {
             @Override
@@ -93,26 +93,26 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
         }, MoreExecutors.directExecutor());
     }
 
-    private LocalThreePhaseCommitCohort ready() {
-        logModificationCount();
-        return readySupport.onTransactionReady(getWriteDelegate(), operationError);
-    }
-
     @Override
-    public Future<ActorSelection> readyTransaction(final Boolean havePermit,
+    Future<ActorSelection> readyTransaction(final Boolean havePermit,
             final Optional<SortedSet<String>> participatingShardNames) {
         final LocalThreePhaseCommitCohort cohort = ready();
         return cohort.initiateCoordinatedCommit(participatingShardNames);
     }
 
     @Override
-    public Future<Object> directCommit(final Boolean havePermit) {
+    Future<Object> directCommit(final Boolean havePermit) {
         final LocalThreePhaseCommitCohort cohort = ready();
         return cohort.initiateDirectCommit();
     }
 
     @Override
-    public void closeTransaction() {
+    void closeTransaction() {
         txDelegate.close();
+    }
+
+    private LocalThreePhaseCommitCohort ready() {
+        logModificationCount();
+        return readySupport.onTransactionReady(getWriteDelegate(), operationError);
     }
 }
