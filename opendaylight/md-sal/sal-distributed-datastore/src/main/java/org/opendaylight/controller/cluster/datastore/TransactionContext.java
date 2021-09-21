@@ -11,29 +11,43 @@ import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
+import org.opendaylight.yangtools.concepts.AbstractSimpleIdentifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
-/*
- * FIXME: why do we need this interface? It should be possible to integrate it with
- *        AbstractTransactionContext, which is the only implementation anyway.
- */
-interface TransactionContext {
-    void closeTransaction();
+abstract class TransactionContext extends AbstractSimpleIdentifiable<TransactionIdentifier> {
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionContext.class);
 
-    Future<ActorSelection> readyTransaction(Boolean havePermit, Optional<SortedSet<String>> participatingShardNames);
+    private final short transactionVersion;
 
-    <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise, Boolean havePermit);
+    private long modificationCount = 0;
+    private boolean handOffComplete;
 
-    void executeDelete(YangInstanceIdentifier path, Boolean havePermit);
+    TransactionContext(final TransactionIdentifier transactionIdentifier) {
+        this(transactionIdentifier, DataStoreVersions.CURRENT_VERSION);
+    }
 
-    void executeMerge(YangInstanceIdentifier path, NormalizedNode data, Boolean havePermit);
+    TransactionContext(final TransactionIdentifier transactionIdentifier, final short transactionVersion) {
+        super(transactionIdentifier);
+        this.transactionVersion = transactionVersion;
+    }
 
-    void executeWrite(YangInstanceIdentifier path, NormalizedNode data, Boolean havePermit);
+    final short getTransactionVersion() {
+        return transactionVersion;
+    }
 
-    Future<Object> directCommit(Boolean havePermit);
+    final void incrementModificationCount() {
+        modificationCount++;
+    }
+
+    final void logModificationCount() {
+        LOG.debug("Total modifications on Tx {} = [ {} ]", getIdentifier(), modificationCount);
+    }
 
     /**
      * Invoked by {@link AbstractTransactionContextWrapper} when it has finished handing
@@ -44,14 +58,35 @@ interface TransactionContext {
      * Implementations can rely on the wrapper calling this operation in a synchronized
      * block, so they do not need to ensure visibility of this state transition themselves.
      */
-    void operationHandOffComplete();
+    final void operationHandOffComplete() {
+        handOffComplete = true;
+    }
+
+    final boolean isOperationHandOffComplete() {
+        return handOffComplete;
+    }
 
     /**
      * A TransactionContext that uses operation limiting should return true else false.
      *
      * @return true if operation limiting is used, false otherwise
      */
-    boolean usesOperationLimiting();
+    boolean usesOperationLimiting() {
+        return false;
+    }
 
-    short getTransactionVersion();
+    abstract void executeDelete(YangInstanceIdentifier path, Boolean havePermit);
+
+    abstract void executeMerge(YangInstanceIdentifier path, NormalizedNode data, Boolean havePermit);
+
+    abstract void executeWrite(YangInstanceIdentifier path, NormalizedNode data, Boolean havePermit);
+
+    abstract <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> proxyFuture, Boolean havePermit);
+
+    abstract Future<ActorSelection> readyTransaction(Boolean havePermit,
+            Optional<SortedSet<String>> participatingShardNames);
+
+    abstract Future<Object> directCommit(Boolean havePermit);
+
+    abstract void closeTransaction();
 }
