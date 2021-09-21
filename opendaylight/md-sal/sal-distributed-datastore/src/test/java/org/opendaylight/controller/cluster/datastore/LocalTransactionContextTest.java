@@ -21,6 +21,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -33,13 +39,8 @@ import scala.concurrent.Future;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class LocalTransactionContextTest {
-
-    @Mock
-    private OperationLimiter limiter;
-
     @Mock
     private DOMStoreReadWriteTransaction readWriteTransaction;
-
     @Mock
     private LocalTransactionReadySupport mockReadySupport;
 
@@ -47,15 +48,17 @@ public class LocalTransactionContextTest {
 
     @Before
     public void setUp() {
-        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter.getIdentifier(),
-                mockReadySupport) {
+        final TransactionIdentifier txId = new TransactionIdentifier(new LocalHistoryIdentifier(ClientIdentifier.create(
+            FrontendIdentifier.create(MemberName.forName("member"), FrontendType.forName("type")), 0), 0), 0);
+
+        localTransactionContext = new LocalTransactionContext(readWriteTransaction, txId, mockReadySupport) {
             @Override
-            protected DOMStoreWriteTransaction getWriteDelegate() {
+            DOMStoreWriteTransaction getWriteDelegate() {
                 return readWriteTransaction;
             }
 
             @Override
-            protected DOMStoreReadTransaction getReadDelegate() {
+            DOMStoreReadTransaction getReadDelegate() {
                 return readWriteTransaction;
             }
         };
