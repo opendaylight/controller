@@ -7,11 +7,16 @@
  */
 package org.opendaylight.dsbenchmark;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.dsbenchmark.listener.DsbenchmarkListenerProvider;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaDelete;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaRead;
@@ -26,6 +31,7 @@ import org.opendaylight.dsbenchmark.txchain.TxchainDomDelete;
 import org.opendaylight.dsbenchmark.txchain.TxchainDomRead;
 import org.opendaylight.dsbenchmark.txchain.TxchainDomWrite;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
@@ -41,15 +47,23 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatus.ExecStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatusBuilder;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.RequireServiceComponentRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
-
+@Singleton
+@Component(service = { })
+@RequireServiceComponentRuntime
+public final class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
             InstanceIdentifier.builder(TestExec.class).build();
@@ -57,34 +71,39 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
             InstanceIdentifier.builder(TestStatus.class).build();
 
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
-    private final DsbenchmarkListenerProvider listenerProvider = new DsbenchmarkListenerProvider();
+    private final DsbenchmarkListenerProvider listenerProvider;
     private final DOMDataBroker domDataBroker;  // Async DOM Broker for use with all DOM operations
     private final DataBroker dataBroker; // Async Binding-Aware Broker for use in tx chains
+    private final Registration rpcReg;
 
     private long testsCompleted = 0;
 
-    public DsbenchmarkProvider(final DOMDataBroker domDataBroker, final DataBroker dataBroker) {
-        this.domDataBroker = domDataBroker;
-        this.dataBroker = dataBroker;
-    }
-
+    @Inject
+    @Activate
     @SuppressWarnings("checkstyle:illegalCatch")
-    public void init() {
-        listenerProvider.setDataBroker(dataBroker);
+    public DsbenchmarkProvider(@Reference final DOMDataBroker domDataBroker, @Reference final DataBroker dataBroker,
+            @Reference final RpcProviderService rpcService) {
+        this.domDataBroker = requireNonNull(domDataBroker);
+        this.dataBroker = requireNonNull(dataBroker);
+        listenerProvider = new DsbenchmarkListenerProvider(dataBroker);
 
         try {
             // We want to set the initial operation status so users can detect we are ready to start test.
-            setTestOperData(this.execStatus.get(), testsCompleted);
+            setTestOperData(execStatus.get(), testsCompleted);
         } catch (final Exception e) {
             // TODO: Use a singleton service to make sure the initial write is performed only once.
             LOG.warn("Working around Bugs 8829 and 6793 by ignoring exception from setTestOperData", e);
         }
 
+        rpcReg = rpcService.registerRpcImplementation(DsbenchmarkService.class, this);
         LOG.info("DsbenchmarkProvider initiated");
     }
 
     @Override
+    @PreDestroy
+    @Deactivate
     public void close() {
+        rpcReg.close();
         LOG.info("DsbenchmarkProvider closed");
     }
 
@@ -131,7 +150,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
             endTime = System.nanoTime();
             execTime = (endTime - startTime) / 1000;
 
-            this.testsCompleted++;
+            testsCompleted++;
 
         } catch (final Exception e) {
             LOG.error("Test error: {}", e.toString());
@@ -221,49 +240,49 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
             if (txType == StartTestInput.TransactionType.SIMPLETX) {
                 if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
                     if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new SimpletxBaDelete(this.dataBroker, outerListElem,
+                        retVal = new SimpletxBaDelete(dataBroker, outerListElem,
                                 innerListElem,writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new SimpletxBaRead(this.dataBroker, outerListElem,
+                        retVal = new SimpletxBaRead(dataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else {
-                        retVal = new SimpletxBaWrite(this.dataBroker, oper, outerListElem,
+                        retVal = new SimpletxBaWrite(dataBroker, oper, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     }
                 } else {
                     if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new SimpletxDomDelete(this.domDataBroker, outerListElem,
+                        retVal = new SimpletxDomDelete(domDataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new SimpletxDomRead(this.domDataBroker, outerListElem,
+                        retVal = new SimpletxDomRead(domDataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else {
-                        retVal = new SimpletxDomWrite(this.domDataBroker, oper, outerListElem,
+                        retVal = new SimpletxDomWrite(domDataBroker, oper, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     }
                 }
             } else {
                 if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
                     if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new TxchainBaDelete(this.dataBroker, outerListElem,
+                        retVal = new TxchainBaDelete(dataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new TxchainBaRead(this.dataBroker, outerListElem,
+                        retVal = new TxchainBaRead(dataBroker, outerListElem,
                                 innerListElem,writesPerTx, dataStore);
                     } else {
-                        retVal = new TxchainBaWrite(this.dataBroker, oper, outerListElem,
+                        retVal = new TxchainBaWrite(dataBroker, oper, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     }
                 } else {
                     if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new TxchainDomDelete(this.domDataBroker, outerListElem,
+                        retVal = new TxchainDomDelete(domDataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new TxchainDomRead(this.domDataBroker, outerListElem,
+                        retVal = new TxchainDomRead(domDataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
 
                     } else {
-                        retVal = new TxchainDomWrite(this.domDataBroker, oper, outerListElem,
+                        retVal = new TxchainDomWrite(domDataBroker, oper, outerListElem,
                                 innerListElem,writesPerTx, dataStore);
                     }
                 }

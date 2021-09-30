@@ -7,6 +7,8 @@
  */
 package org.opendaylight.dsbenchmark.listener;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -22,12 +24,11 @@ public class DsbenchmarkListenerProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkListenerProvider.class);
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
             InstanceIdentifier.builder(TestExec.class).build();
-    private final List<ListenerRegistration<DsbenchmarkListener>> listeners =
-            new ArrayList<>();
-    private DataBroker dataBroker;
+    private final List<ListenerRegistration<DsbenchmarkListener>> listeners = new ArrayList<>();
+    private final DataBroker dataBroker;
 
-    public void setDataBroker(final DataBroker dataBroker) {
-        this.dataBroker = dataBroker;
+    public DsbenchmarkListenerProvider(final DataBroker dataBroker) {
+        this.dataBroker = requireNonNull(dataBroker);
         LOG.debug("DsbenchmarkListenerProvider created");
     }
 
