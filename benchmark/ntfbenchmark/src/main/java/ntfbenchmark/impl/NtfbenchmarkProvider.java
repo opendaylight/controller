@@ -8,6 +8,7 @@
 package ntfbenchmark.impl;
 
 import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
@@ -16,8 +17,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.NotificationService;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.NtfbenchmarkService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput.ProducerType;
@@ -26,32 +31,43 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService {
+@Singleton
+@Component(service = {})
+public final class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService {
     private static final Logger LOG = LoggerFactory.getLogger(NtfbenchmarkProvider.class);
     private static final int TEST_TIMEOUT = 5;
 
     private final NotificationService listenService;
     private final NotificationPublishService publishService;
+    private final Registration reg;
 
-    public NtfbenchmarkProvider(final NotificationService listenServiceDependency,
-            final NotificationPublishService publishServiceDependency) {
-        LOG.debug("NtfbenchmarkProvider Constructor");
-        listenService = listenServiceDependency;
-        publishService = publishServiceDependency;
-    }
-
-    public void init() {
-        LOG.info("NtfbenchmarkProvider initiated");
+    @Inject
+    @Activate
+    public NtfbenchmarkProvider(@Reference final NotificationService listenService,
+            @Reference final NotificationPublishService publishService,
+            @Reference final RpcProviderService rpcService) {
+        this.listenService = requireNonNull(listenService);
+        this.publishService = requireNonNull(publishService);
+        reg = rpcService.registerRpcImplementation(NtfbenchmarkService.class, this);
+        LOG.debug("NtfbenchmarkProvider initiated");
     }
 
     @Override
+    @PreDestroy
+    @Deactivate
     public void close() {
+        reg.close();
         LOG.info("NtfbenchmarkProvider closed");
     }
 
@@ -119,17 +135,16 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
                 allProducersError += abstractNtfbenchProducer.getNtfError();
             }
 
-            final StartTestOutput output =
-                    new StartTestOutputBuilder()
-                            .setProducerElapsedTime(Uint32.valueOf(producerElapsedTime / 1000000))
-                            .setListenerElapsedTime(Uint32.valueOf(listenerElapsedTime / 1000000))
-                            .setListenerOk(Uint32.valueOf(allListeners))
-                            .setProducerOk(Uint32.valueOf(allProducersOk))
-                            .setProducerError(Uint32.valueOf(allProducersError))
-                            .setProducerRate(Uint32.valueOf((allProducersOk + allProducersError) * 1000000000
-                                / producerElapsedTime))
-                            .setListenerRate(Uint32.valueOf(allListeners * 1000000000 / listenerElapsedTime))
-                           .build();
+            final StartTestOutput output = new StartTestOutputBuilder()
+                .setProducerElapsedTime(Uint32.valueOf(producerElapsedTime / 1000000))
+                .setListenerElapsedTime(Uint32.valueOf(listenerElapsedTime / 1000000))
+                .setListenerOk(Uint32.valueOf(allListeners))
+                .setProducerOk(Uint32.valueOf(allProducersOk))
+                .setProducerError(Uint32.valueOf(allProducersError))
+                .setProducerRate(
+                    Uint32.valueOf((allProducersOk + allProducersError) * 1000000000/ producerElapsedTime))
+                .setListenerRate(Uint32.valueOf(allListeners * 1000000000 / listenerElapsedTime))
+                .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {
             for (final ListenerRegistration<NtfbenchTestListener> listenerRegistration : listeners) {
@@ -140,8 +155,6 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
 
     @Override
     public ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not implemented");
     }
-
 }
