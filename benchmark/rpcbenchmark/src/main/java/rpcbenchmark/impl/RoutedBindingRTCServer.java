@@ -7,26 +7,21 @@
  */
 package rpcbenchmark.impl;
 
+import java.util.Set;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-final class GlobalBindingRTCServer extends AbstractRpcbenchPayloadService implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalBindingRTCServer.class);
-
+final class RoutedBindingRTCServer extends AbstractRpcbenchPayloadService implements AutoCloseable {
     private final Registration reg;
 
-    GlobalBindingRTCServer(@Reference final RpcProviderService rpcProvider) {
-        reg = rpcProvider.registerRpcImplementation(RpcbenchPayloadService.class, this);
-        LOG.debug("GlobalBindingRTCServer started");
+    RoutedBindingRTCServer(final RpcProviderService rpcProvider, final Set<InstanceIdentifier<?>> paths) {
+        reg = rpcProvider.registerRpcImplementation(RpcbenchPayloadService.class, this, paths);
     }
 
     @Override
     public void close() {
         reg.close();
-        LOG.debug("GlobalBindingRTCServer stopped");
     }
 }

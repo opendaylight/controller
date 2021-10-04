@@ -8,6 +8,7 @@
 package rpcbenchmark.impl;
 
 import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
@@ -17,9 +18,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchRpcRoutes;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.rpcbench.rpc.routes.RpcRoute;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.rpcbench.rpc.routes.RpcRouteKey;
@@ -31,38 +34,47 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput.ExecStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutputBuilder;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService {
-
+@Singleton
+@Component(service = {})
+public final class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService {
     private static final Logger LOG = LoggerFactory.getLogger(RpcbenchmarkProvider.class);
     private static final int TEST_TIMEOUT = 5;
 
-    private final GlobalBindingRTCServer globalServer;
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private final RpcProviderService providerRegistry;
     private final RpcConsumerRegistry consumerRegistry;
+    private final GlobalBindingRTCServer globalServer;
+    private final Registration reg;
 
-    public RpcbenchmarkProvider(final RpcProviderService providerRegistry, final RpcConsumerRegistry consumerRegistry,
-            final GlobalBindingRTCServer globalServer) {
-        this.providerRegistry = providerRegistry;
-        this.consumerRegistry = consumerRegistry;
-        this.globalServer = globalServer;
-    }
-
-    public void init() {
+    @Inject
+    @Activate
+    public RpcbenchmarkProvider(@Reference final RpcProviderService providerRegistry,
+            @Reference final RpcConsumerRegistry consumerRegistry) {
+        this.providerRegistry = requireNonNull(providerRegistry);
+        this.consumerRegistry = requireNonNull(consumerRegistry);
+        globalServer = new GlobalBindingRTCServer(providerRegistry);
+        reg = providerRegistry.registerRpcImplementation(RpcbenchmarkService.class, this);
         LOG.info("RpcbenchmarkProvider initiated");
     }
 
     @Override
+    @Deactivate
+    @PreDestroy
     public void close() {
+        globalServer.close();
+        reg.close();
         LOG.info("RpcbenchmarkProvider closed");
     }
 
@@ -71,24 +83,17 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
         LOG.debug("startTest {}", input);
 
         final RTCClient client;
-        final List<ObjectRegistration<?>> rpcRegs = new ArrayList<>();
+        RoutedBindingRTCServer routed = null;
 
         switch (input.getOperation()) {
             case ROUTEDRTC:
                 List<InstanceIdentifier<?>> routeIid = new ArrayList<>();
                 for (int i = 0; i < input.getNumServers().intValue(); i++) {
-                    GlobalBindingRTCServer server = new GlobalBindingRTCServer();
-                    KeyedInstanceIdentifier<RpcRoute, RpcRouteKey> iid =
-                            InstanceIdentifier.create(RpcbenchRpcRoutes.class)
-                                .child(RpcRoute.class, new RpcRouteKey(Integer.toString(i)));
-                    routeIid.add(iid);
-
-                    ObjectRegistration<?> routedReg = providerRegistry.registerRpcImplementation(
-                        RpcbenchPayloadService.class, server, Set.of(iid));
-
-                    rpcRegs.add(routedReg);
+                    routeIid.add(InstanceIdentifier.create(RpcbenchRpcRoutes.class)
+                        .child(RpcRoute.class, new RpcRouteKey(Integer.toString(i))));
                 }
 
+                routed = new RoutedBindingRTCServer(providerRegistry, Set.copyOf(routeIid));
                 client = new RoutedBindingRTClient(consumerRegistry, input.getPayloadSize().intValue(), routeIid);
                 break;
 
@@ -136,7 +141,9 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
                                             .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {
-            rpcRegs.forEach(ObjectRegistration::close);
+            if (routed != null) {
+                routed.close();
+            }
         }
     }
 
