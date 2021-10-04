@@ -34,18 +34,13 @@ public class RoutedBindingRTClient implements RTCClient {
     private final RpcbenchPayloadService service;
     private final AtomicLong rpcOk = new AtomicLong(0);
     private final AtomicLong rpcError = new AtomicLong(0);
-    private final List<RoutedRpcBenchInput> inVal;
+    private final List<RoutedRpcBenchInput> inVal = new ArrayList<>();
     private final int inSize;
 
     public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize,
             final List<InstanceIdentifier<?>> routeIid) {
-        if (registry != null) {
-            this.service = registry.getRpcService(RpcbenchPayloadService.class);
-        } else {
-            this.service = null;
-        }
+        service = registry.getRpcService(RpcbenchPayloadService.class);
         this.inSize = inSize;
-        this.inVal = new ArrayList<>();
 
         Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
         for (int i = 0; i < inSize; i++) {
