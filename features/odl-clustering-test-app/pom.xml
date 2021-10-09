@@ -32,6 +32,12 @@
             <classifier>features</classifier>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-controller-blueprint</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.controller.samples</groupId>
             <artifactId>clustering-it-model</artifactId>
         </dependency>
