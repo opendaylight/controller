@@ -33,52 +33,52 @@
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor-typed_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-cluster_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-cluster-typed_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-osgi_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-persistence_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-protobuf_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-remote_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-slf4j_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-stream_2.13</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.17</version>
         </dependency>
     </dependencies>
 
