@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
@@ -13,20 +12,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by kramesha on 7/16/14.
  */
 public class LogGenerator {
+    private static final Logger LOG = LoggerFactory.getLogger(LogGenerator.class);
+
     private final Map<ActorRef, LoggingThread> clientToLoggingThread = new HashMap<>();
 
-    public void startLoggingForClient(ActorRef client) {
+    public void startLoggingForClient(final ActorRef client) {
         LoggingThread lt = new LoggingThread(client);
         clientToLoggingThread.put(client, lt);
         new Thread(lt).start();
     }
 
-    public void stopLoggingForClient(ActorRef client) {
+    public void stopLoggingForClient(final ActorRef client) {
         clientToLoggingThread.get(client).stopLogging();
         clientToLoggingThread.remove(client);
     }
@@ -36,26 +39,26 @@ public class LogGenerator {
         private final ActorRef clientActor;
         private volatile boolean stopLogging = false;
 
-        public LoggingThread(ActorRef clientActor) {
+        public LoggingThread(final ActorRef clientActor) {
             this.clientActor = clientActor;
         }
 
         @Override
-        @SuppressWarnings("checkstyle:RegexpSingleLineJava")
         public void run() {
             Random random = new Random();
             while (true) {
                 if (stopLogging) {
-                    System.out.println("Logging stopped for client:" + clientActor.path());
+                    LOG.info("Logging stopped for client: {}", clientActor.path());
                     break;
                 }
                 String key = clientActor.path().name();
                 int randomInt = random.nextInt(100);
                 clientActor.tell(new KeyValue(key + "-key-" + randomInt, "value-" + randomInt), null);
+
                 try {
                     Thread.sleep(randomInt % 10 * 1000L);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.info("Interrupted while sleeping", e);
                 }
             }
         }
