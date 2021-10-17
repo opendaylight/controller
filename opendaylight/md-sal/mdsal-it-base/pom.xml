@@ -93,6 +93,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
         <groupId>org.apache.geronimo.specs</groupId>
         <artifactId>geronimo-atinject_1.0_spec</artifactId>
+        <!-- FIXME: remove this override once pax-exam is aligned with pax-web -->
+        <version>1.0</version>
     </dependency>
 
     <dependency>
