@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.akka.eos.service;
+package org.opendaylight.controller.eos.akka.service;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertFalse;
@@ -27,7 +27,7 @@ import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.akka.eos.AbstractNativeEosTest;
+import org.opendaylight.controller.eos.akka.AbstractNativeEosTest;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
@@ -40,7 +40,7 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterSingletonIntegrationTest.class);
 
-    private MockNativeEntityOwnershipService node1;
+    private AbstractNativeEosTest.MockNativeEntityOwnershipService node1;
     private MockNativeEntityOwnershipService node2;
     private MockNativeEntityOwnershipService node3;
 
