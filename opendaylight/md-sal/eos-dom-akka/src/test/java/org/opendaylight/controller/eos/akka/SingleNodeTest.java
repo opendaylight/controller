@@ -53,6 +53,7 @@ public class SingleNodeTest extends AbstractNativeEosTest {
 
         registerCandidates(clusterNode, ENTITY_1, "member-2", "member-3");
         verifyListenerState(listener, ENTITY_1, true, true, false);
+        verifyNoAdditionalNotifications(listener, 5);
 
         unregisterCandidates(clusterNode, ENTITY_1, "member-1");
         verifyListenerState(listener, ENTITY_1, true, false, true);
@@ -68,6 +69,7 @@ public class SingleNodeTest extends AbstractNativeEosTest {
 
         final MockEntityOwnershipListener listener = registerListener(clusterNode, ENTITY_1);
         verifyListenerState(listener, ENTITY_1, true, true, false);
+        verifyNoAdditionalNotifications(listener, 5);
 
         unregisterCandidates(clusterNode, ENTITY_1, "member-1", "member-2");
         verifyListenerState(listener, ENTITY_1, true, false, true);
