@@ -288,7 +288,17 @@ public abstract class AbstractNativeEosTest {
     }
 
     protected static void verifyNoNotifications(final MockEntityOwnershipListener listener) {
-        await().pollDelay(2, TimeUnit.SECONDS).until(() -> listener.getChanges().isEmpty());
+        verifyNoNotifications(listener, 2);
+    }
+
+    protected static void verifyNoNotifications(final MockEntityOwnershipListener listener, long delaySeconds) {
+        await().pollDelay(delaySeconds, TimeUnit.SECONDS).until(() -> listener.getChanges().isEmpty());
+    }
+
+    protected static void verifyNoAdditionalNotifications(
+            final MockEntityOwnershipListener listener, long delaySeconds) {
+        listener.resetListener();
+        verifyNoNotifications(listener, delaySeconds);
     }
 
     protected static final class ClusterNode {
@@ -366,6 +376,10 @@ public abstract class AbstractNativeEosTest {
 
         public List<DOMEntityOwnershipChange> getChanges() {
             return changes;
+        }
+
+        public void resetListener() {
+            changes.clear();
         }
     }
 
