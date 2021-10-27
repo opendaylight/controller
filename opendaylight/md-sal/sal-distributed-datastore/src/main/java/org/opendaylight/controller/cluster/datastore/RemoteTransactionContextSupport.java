@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import akka.actor.ActorNotFound;
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
@@ -169,7 +170,8 @@ final class RemoteTransactionContextSupport {
         // An AskTimeoutException will occur if the local shard forwards to an unavailable remote leader or
         // the cached remote leader actor is no longer available.
         boolean retryCreateTransaction = primaryShardInfo != null
-                && (failure instanceof NoShardLeaderException || failure instanceof AskTimeoutException);
+                && (failure instanceof NoShardLeaderException || failure instanceof AskTimeoutException
+                || failure instanceof ActorNotFound);
 
         // Schedule a retry unless we're out of retries. Note: totalCreateTxTimeout is volatile as it may
         // be written by different threads however not concurrently, therefore decrementing it
@@ -216,7 +218,7 @@ final class RemoteTransactionContextSupport {
                 resultingEx = new ShardLeaderNotRespondingException(String.format(
                         "Could not create a %s transaction on shard %s. The shard leader isn't responding.",
                         parent.getType(), shardName), failure);
-            } else if (!(failure instanceof NoShardLeaderException)) {
+            } else if (!(failure instanceof ActorNotFound) && !(failure instanceof NoShardLeaderException)) {
                 resultingEx = new Exception(String.format(
                     "Error creating %s transaction on shard %s", parent.getType(), shardName), failure);
             }

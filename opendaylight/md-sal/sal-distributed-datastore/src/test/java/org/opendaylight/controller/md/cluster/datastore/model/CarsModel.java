@@ -105,4 +105,22 @@ public final class CarsModel {
     public static YangInstanceIdentifier newCarPath(final String name) {
         return YangInstanceIdentifier.builder(CAR_LIST_PATH).nodeWithKey(CAR_QNAME, CAR_NAME_QNAME, name).build();
     }
+
+    public static ContainerNode createLargePayload(int amount) {
+        CollectionNodeBuilder<MapEntryNode, SystemMapNode> cars =
+                ImmutableMapNodeBuilder.create().withNodeIdentifier(
+                        new YangInstanceIdentifier.NodeIdentifier(CAR_QNAME));
+
+        for (int i = 0; i < amount; i++) {
+            cars.withChild(ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "car" + i)
+                    .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "car" + i))
+                    .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf(1000)))
+                    .build());
+        }
+
+        return ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
+                .withChild(cars.build())
+                .build();
+    }
 }

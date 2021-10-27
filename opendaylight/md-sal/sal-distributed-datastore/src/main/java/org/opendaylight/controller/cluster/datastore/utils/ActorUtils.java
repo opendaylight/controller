@@ -60,6 +60,7 @@ import scala.concurrent.Await;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+import scala.concurrent.impl.Promise;
 
 /**
  * The ActorUtils class contains utility methods which could be used by non-actors (like DistributedDataStore) to work
@@ -390,7 +391,23 @@ public class ActorUtils {
 
         LOG.debug("Sending message {} to {}", message.getClass(), actor);
 
-        return doAsk(actor, message, timeout);
+        final Promise.DefaultPromise<Object> ret = new Promise.DefaultPromise<>();
+
+        // need to resolve the selection to an actor ref due to large-message-destinations
+        actor.resolveOne(timeout).onComplete(new OnComplete<>() {
+            @Override
+            public void onComplete(Throwable failure, ActorRef success) {
+                if (failure != null) {
+                    LOG.debug("Failed to resolve actor ref for: {}", actor, failure);
+                    ret.failure(failure);
+                    return;
+                }
+
+                ret.completeWith(doAsk(success, message, timeout));
+            }
+        }, getClientDispatcher());
+
+        return ret;
     }
 
     /**
@@ -577,10 +594,6 @@ public class ActorUtils {
     }
 
     protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-        return ask(actorRef, message, timeout);
-    }
-
-    protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
         final Future<Object> ret = ask(actorRef, message, timeout);
         ret.onComplete(askTimeoutCounter, askTimeoutCounter);
         return ret;

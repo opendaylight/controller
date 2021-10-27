@@ -18,6 +18,7 @@ import com.google.common.cache.RemovalNotification;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -163,7 +164,15 @@ public class MessageSlicer implements AutoCloseable {
         if (options.getSendToRef() != null) {
             options.getSendToRef().tell(message, sender);
         } else {
-            options.getSendToSelection().tell(message, sender);
+            options.getSendToSelection().resolveOne(Duration.ofSeconds(5))
+                    .whenComplete((actorRef, throwable) -> {
+                        if (throwable != null) {
+                            LOG.warn("Unable to resolve actorRef for {} during message slicing.", actorRef, throwable);
+                            return;
+                        }
+
+                        actorRef.tell(message, sender);
+                    });
         }
     }
 
