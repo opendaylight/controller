@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
@@ -28,11 +29,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.get.entities.output.EntitiesBuilder;
 import org.opendaylight.yangtools.yang.binding.util.BindingMap;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
 public final class GetEntitiesReply extends OwnerSupervisorReply implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    static final QName GENERAL_ENTITY = QName.create(
+            "urn:opendaylight:params:xml:ns:yang:mdsal:core:general-entity", "2015-09-30", "entity").intern();
 
     private final ImmutableSetMultimap<DOMEntity, String> candidates;
     private final ImmutableMap<DOMEntity, String> owners;
@@ -46,7 +51,7 @@ public final class GetEntitiesReply extends OwnerSupervisorReply implements Seri
         this.owners = ImmutableMap.copyOf(owners);
     }
 
-    public @NonNull GetEntitiesOutput toOutput() {
+    public @NonNull GetEntitiesOutput toOutput(final BindingInstanceIdentifierCodec iidCodec) {
         final Set<DOMEntity> entities = new HashSet<>();
         entities.addAll(owners.keySet());
         entities.addAll(candidates.keySet());
@@ -56,7 +61,7 @@ public final class GetEntitiesReply extends OwnerSupervisorReply implements Seri
                 .map(entity -> {
                     final EntitiesBuilder eb = new EntitiesBuilder()
                         .setType(new EntityType(entity.getType()))
-                        .setName(extractName(entity))
+                        .setName(extractName(entity, iidCodec))
                         .setCandidateNodes(candidates.get(entity).stream()
                             .map(NodeName::new).collect(Collectors.toUnmodifiableList()));
 
@@ -70,11 +75,23 @@ public final class GetEntitiesReply extends OwnerSupervisorReply implements Seri
             .build();
     }
 
-    private static EntityName extractName(final DOMEntity entity) {
-        final PathArgument last = entity.getIdentifier().getLastPathArgument();
-        verify(last instanceof NodeIdentifierWithPredicates, "Unexpected last argument %s", last);
-        final Object value = Iterables.getOnlyElement(((NodeIdentifierWithPredicates) last).values());
-        verify(value instanceof String, "Unexpected predicate value %s", value);
-        return new EntityName((String) value);
+    /**
+     * if the entity is general entity then shorthand the name to only the last path argument, otherwise return
+     * full YIID path encoded as string.
+     *
+     * @param entity Entity to extract the name from
+     * @param iidCodec codec to encode entity name back to InstanceIdentifier if needed
+     * @return Extracted name
+     */
+    private static EntityName extractName(final DOMEntity entity, final BindingInstanceIdentifierCodec iidCodec) {
+        if (entity.getIdentifier().getPathArguments().get(0).getNodeType().equals(GENERAL_ENTITY)) {
+            final PathArgument last = entity.getIdentifier().getLastPathArgument();
+            verify(last instanceof NodeIdentifierWithPredicates, "Unexpected last argument %s", last);
+            final Object value = Iterables.getOnlyElement(((NodeIdentifierWithPredicates) last).values());
+            verify(value instanceof String, "Unexpected predicate value %s", value);
+            return new EntityName((String) value);
+        }
+
+        return new EntityName(iidCodec.toBinding(entity.getIdentifier()));
     }
 }
