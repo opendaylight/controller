@@ -53,6 +53,7 @@ import org.opendaylight.controller.eos.akka.registry.listener.type.command.Regis
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.UnregisterListener;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTree;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -108,8 +109,8 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     private Registration reg;
 
     @VisibleForTesting
-    protected AkkaEntityOwnershipService(final ActorSystem actorSystem)
-            throws ExecutionException, InterruptedException {
+    protected AkkaEntityOwnershipService(final ActorSystem actorSystem,
+             final BindingCodecTree codecTree) throws ExecutionException, InterruptedException {
         final var typedActorSystem = Adapter.toTyped(actorSystem);
         scheduler = typedActorSystem.scheduler();
 
@@ -121,7 +122,8 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No valid role found."));
 
-        bootstrap = Adapter.spawn(actorSystem, Behaviors.setup(context -> EOSMain.create()), "EOSBootstrap");
+        bootstrap = Adapter.spawn(actorSystem, Behaviors.setup(
+                context -> EOSMain.create(codecTree.getInstanceIdentifierCodec())), "EOSBootstrap");
 
         final CompletionStage<RunningContext> ask = AskPattern.ask(bootstrap,
                 GetRunningContext::new, Duration.ofSeconds(5), scheduler);
@@ -136,8 +138,10 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     @Inject
     @Activate
     public AkkaEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
-            @Reference final RpcProviderService rpcProvider) throws ExecutionException, InterruptedException {
-        this(actorProvider.getActorSystem());
+            @Reference final RpcProviderService rpcProvider,
+            @Reference final BindingCodecTree codecTree)
+            throws ExecutionException, InterruptedException {
+        this(actorProvider.getActorSystem(), codecTree);
 
         reg = rpcProvider.registerRpcImplementation(OdlEntityOwnersService.class, this);
     }

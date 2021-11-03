@@ -28,11 +28,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.get.entities.output.EntitiesBuilder;
 import org.opendaylight.yangtools.yang.binding.util.BindingMap;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
 public final class GetEntitiesReply extends OwnerSupervisorReply implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    static final QName GENERAL_ENTITY = QName.create(
+            "urn:opendaylight:params:xml:ns:yang:mdsal:core:general-entity", "2015-09-30", "entity").intern();
 
     private final ImmutableSetMultimap<DOMEntity, String> candidates;
     private final ImmutableMap<DOMEntity, String> owners;
@@ -70,11 +74,22 @@ public final class GetEntitiesReply extends OwnerSupervisorReply implements Seri
             .build();
     }
 
+    /**
+     * if the entity is general entity then shorthand the name to only the last path argument, otherwise return
+     * full YIID path encoded as string.
+     *
+     * @param entity Entity to extract the name from
+     * @return Extracted name
+     */
     private static EntityName extractName(final DOMEntity entity) {
-        final PathArgument last = entity.getIdentifier().getLastPathArgument();
-        verify(last instanceof NodeIdentifierWithPredicates, "Unexpected last argument %s", last);
-        final Object value = Iterables.getOnlyElement(((NodeIdentifierWithPredicates) last).values());
-        verify(value instanceof String, "Unexpected predicate value %s", value);
-        return new EntityName((String) value);
+        if (entity.getIdentifier().getPathArguments().get(0).getNodeType().equals(GENERAL_ENTITY)) {
+            final PathArgument last = entity.getIdentifier().getLastPathArgument();
+            verify(last instanceof NodeIdentifierWithPredicates, "Unexpected last argument %s", last);
+            final Object value = Iterables.getOnlyElement(((NodeIdentifierWithPredicates) last).values());
+            verify(value instanceof String, "Unexpected predicate value %s", value);
+            return new EntityName((String) value);
+        }
+
+        return new EntityName(entity.getIdentifier().toString());
     }
 }

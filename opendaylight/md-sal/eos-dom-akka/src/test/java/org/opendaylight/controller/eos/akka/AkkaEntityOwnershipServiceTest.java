@@ -11,6 +11,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -42,14 +43,23 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 
 public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
     static final String ENTITY_TYPE = "test";
     static final String ENTITY_TYPE2 = "test2";
     static final QName QNAME = QName.create("test", "2015-08-11", "foo");
-    static int ID_COUNTER = 1;
 
     private ActorSystem system;
     private akka.actor.typed.ActorSystem<Void> typedSystem;
@@ -62,7 +72,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         typedSystem = Adapter.toTyped(this.system);
         replicator = DistributedData.get(typedSystem).replicator();
 
-        service = new AkkaEntityOwnershipService(system);
+        service = new AkkaEntityOwnershipService(system, CODEC_CONTEXT);
     }
 
     @After
@@ -173,6 +183,47 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         service.registerCandidate(test);
 
         assertTrue(service.isCandidateRegistered(test));
+    }
+
+    @Test
+    public void testEntityRetrievalWithYiid() throws Exception {
+        final YangInstanceIdentifier entityId = YangInstanceIdentifier.create(new NodeIdentifier(NetworkTopology.QNAME),
+                new NodeIdentifier(Topology.QNAME),
+                NodeIdentifierWithPredicates.of(Topology.QNAME, QName.create(Topology.QNAME, "topology-id"), "test"),
+                new NodeIdentifier(Node.QNAME),
+                NodeIdentifierWithPredicates.of(Node.QNAME, QName.create(Node.QNAME, "node-id"), "test://test-node"));
+
+        final DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
+
+        final DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+
+        verifyEntityOwnershipCandidateRegistration(entity, reg);
+        verifyEntityCandidateRegistered(ENTITY_TYPE, entityId, "member-1");
+
+        RpcResult<GetEntityOutput> getEntityResult = service.getEntity(new GetEntityInputBuilder()
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setType(new EntityType(ENTITY_TYPE))
+                .build())
+                .get();
+
+        assertEquals(getEntityResult.getResult().getOwnerNode().getValue(), "member-1");
+        assertEquals(getEntityResult.getResult().getCandidateNodes().get(0).getValue(), "member-1");
+
+        // we should not be able to retrieve the entity when using string
+        final String entityPathEncoded =
+                "/(urn:TBD:params:xml:ns:yang:network-topology?revision=2013-10-21)network-topology" +
+                        "/topology/topology[{(urn:TBD:params:xml:ns:yang:network-topology?revision=2013-10-21" +
+                        ")topology-id=test}]/node/node[{(urn:TBD:params:xml:ns:yang:network-topology" +
+                        "?revision=2013-10-21)node-id=test://test-node}]";
+
+        getEntityResult = service.getEntity(new GetEntityInputBuilder()
+                .setName(new EntityName(entityPathEncoded))
+                .setType(new EntityType(ENTITY_TYPE))
+                .build())
+                .get();
+
+        assertNull(getEntityResult.getResult().getOwnerNode());
+        assertTrue(getEntityResult.getResult().getCandidateNodes().isEmpty());
     }
 
     private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,
