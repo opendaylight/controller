@@ -28,6 +28,7 @@ import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.EntityTypeListenerRegistry;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.common.Empty;
 
 public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
@@ -36,7 +37,7 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
     private final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
 
-    private EOSMain(final ActorContext<BootstrapCommand> context) {
+    private EOSMain(final ActorContext<BootstrapCommand> context, final BindingInstanceIdentifierCodec iidCodec) {
         super(context);
 
         final String role = Cluster.get(context.getSystem()).selfMember().getRoles().iterator().next();
@@ -47,11 +48,12 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
 
         final ClusterSingleton clusterSingleton = ClusterSingleton.get(context.getSystem());
         // start the initial sync behavior that switches to the regular one after syncing
-        ownerSupervisor = clusterSingleton.init(SingletonActor.of(IdleSupervisor.create(), "OwnerSupervisor"));
+        ownerSupervisor = clusterSingleton.init(
+                SingletonActor.of(IdleSupervisor.create(iidCodec), "OwnerSupervisor"));
     }
 
-    public static Behavior<BootstrapCommand> create() {
-        return Behaviors.setup(EOSMain::new);
+    public static Behavior<BootstrapCommand> create(final BindingInstanceIdentifierCodec iidCodec) {
+        return Behaviors.setup(context -> new EOSMain(context, iidCodec));
     }
 
     @Override

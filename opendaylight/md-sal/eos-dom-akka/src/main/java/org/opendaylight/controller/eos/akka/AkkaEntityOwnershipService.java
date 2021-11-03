@@ -38,7 +38,6 @@ import org.opendaylight.controller.eos.akka.owner.checker.command.GetOwnershipSt
 import org.opendaylight.controller.eos.akka.owner.checker.command.StateCheckerCommand;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerRequest;
@@ -53,6 +52,8 @@ import org.opendaylight.controller.eos.akka.registry.listener.type.command.Regis
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.UnregisterListener;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTree;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -105,10 +106,12 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     private final ActorRef<StateCheckerCommand> ownerStateChecker;
     protected final ActorRef<OwnerSupervisorCommand> ownerSupervisor;
 
+    private final BindingInstanceIdentifierCodec iidCodec;
+
     private Registration reg;
 
     @VisibleForTesting
-    protected AkkaEntityOwnershipService(final ActorSystem actorSystem)
+    protected AkkaEntityOwnershipService(final ActorSystem actorSystem, final BindingCodecTree codecTree)
             throws ExecutionException, InterruptedException {
         final var typedActorSystem = Adapter.toTyped(actorSystem);
         scheduler = typedActorSystem.scheduler();
@@ -121,7 +124,9 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No valid role found."));
 
-        bootstrap = Adapter.spawn(actorSystem, Behaviors.setup(context -> EOSMain.create()), "EOSBootstrap");
+        iidCodec = codecTree.getInstanceIdentifierCodec();
+        bootstrap = Adapter.spawn(actorSystem, Behaviors.setup(
+                context -> EOSMain.create(iidCodec)), "EOSBootstrap");
 
         final CompletionStage<RunningContext> ask = AskPattern.ask(bootstrap,
                 GetRunningContext::new, Duration.ofSeconds(5), scheduler);
@@ -136,8 +141,9 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     @Inject
     @Activate
     public AkkaEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
-            @Reference final RpcProviderService rpcProvider) throws ExecutionException, InterruptedException {
-        this(actorProvider.getActorSystem());
+            @Reference final RpcProviderService rpcProvider, @Reference final BindingCodecTree codecTree)
+            throws ExecutionException, InterruptedException {
+        this(actorProvider.getActorSystem(), codecTree);
 
         reg = rpcProvider.registerRpcImplementation(OdlEntityOwnersService.class, this);
     }
@@ -219,7 +225,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     @Override
     public ListenableFuture<RpcResult<GetEntitiesOutput>> getEntities(final GetEntitiesInput input) {
         return toRpcFuture(AskPattern.ask(ownerSupervisor, GetEntitiesRequest::new, QUERY_TIMEOUT, scheduler),
-            GetEntitiesReply::toOutput);
+                reply -> reply.toOutput(iidCodec));
     }
 
     @Override

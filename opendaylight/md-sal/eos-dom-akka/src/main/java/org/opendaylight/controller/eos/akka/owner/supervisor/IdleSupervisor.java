@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -16,6 +18,7 @@ import akka.cluster.Member;
 import akka.cluster.typed.Cluster;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +33,12 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
     private static final String DATACENTER_PREFIX = "dc-";
     private static final String DEFAULT_DATACENTER = "dc-default";
 
-    private IdleSupervisor(final ActorContext<OwnerSupervisorCommand> context) {
+    private final BindingInstanceIdentifierCodec iidCodec;
+
+    private IdleSupervisor(final ActorContext<OwnerSupervisorCommand> context,
+                           final BindingInstanceIdentifierCodec iidCodec) {
         super(context);
+        this.iidCodec = requireNonNull(iidCodec);
         final Cluster cluster = Cluster.get(context.getSystem());
 
         final String datacenterRole = extractDatacenterRole(cluster.selfMember());
@@ -43,9 +50,9 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
         LOG.debug("Idle supervisor started on {}.", cluster.selfMember());
     }
 
-    public static Behavior<OwnerSupervisorCommand> create() {
+    public static Behavior<OwnerSupervisorCommand> create(final BindingInstanceIdentifierCodec iidCodec) {
 
-        return Behaviors.setup(IdleSupervisor::new);
+        return Behaviors.setup(context -> new IdleSupervisor(context, iidCodec));
     }
 
     @Override
@@ -57,7 +64,7 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
 
     private Behavior<OwnerSupervisorCommand> onActivateDataCenter(final ActivateDataCenter message) {
         LOG.debug("Received ActivateDataCenter command switching to syncer behavior,");
-        return OwnerSyncer.create(message.getReplyTo());
+        return OwnerSyncer.create(message.getReplyTo(), iidCodec);
     }
 
     private String extractDatacenterRole(final Member selfMember) {

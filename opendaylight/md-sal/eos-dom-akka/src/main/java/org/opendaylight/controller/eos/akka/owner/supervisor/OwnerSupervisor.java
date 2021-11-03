@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -58,6 +61,7 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberUpEve
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerChanged;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,10 +101,14 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     private final BiPredicate<DOMEntity, String> reassignPredicate = (entity, candidate) ->
             !isActiveCandidate(candidate) || !isCandidateFor(entity, candidate);
 
+    private final BindingInstanceIdentifierCodec iidCodec;
+
     private OwnerSupervisor(final ActorContext<OwnerSupervisorCommand> context,
                             final Map<DOMEntity, Set<String>> currentCandidates,
-                            final Map<DOMEntity, String> currentOwners) {
+                            final Map<DOMEntity, String> currentOwners,
+                            final BindingInstanceIdentifierCodec iidCodec) {
         super(context);
+        this.iidCodec = requireNonNull(iidCodec);
 
         final DistributedData distributedData = DistributedData.get(context.getSystem());
         final ActorRef<Replicator.Command> replicator = distributedData.replicator();
@@ -150,8 +158,8 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     }
 
     public static Behavior<OwnerSupervisorCommand> create(final Map<DOMEntity, Set<String>> currentCandidates,
-                                                          final Map<DOMEntity, String> currentOwners) {
-        return Behaviors.setup(ctx -> new OwnerSupervisor(ctx, currentCandidates, currentOwners));
+            final Map<DOMEntity, String> currentOwners, final BindingInstanceIdentifierCodec iidCodec) {
+        return Behaviors.setup(ctx -> new OwnerSupervisor(ctx, currentCandidates, currentOwners, iidCodec));
     }
 
     @Override
@@ -173,7 +181,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     private Behavior<OwnerSupervisorCommand> onDeactivateDatacenter(final DeactivateDataCenter command) {
         LOG.debug("Deactivating Owner Supervisor on {}", cluster.selfMember());
         command.getReplyTo().tell(DataCenterDeactivated.INSTANCE);
-        return IdleSupervisor.create();
+        return IdleSupervisor.create(iidCodec);
     }
 
     private Behavior<OwnerSupervisorCommand> onOwnerChanged(final OwnerChanged command) {
@@ -431,8 +439,14 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
             .collect(Collectors.toSet());
     }
 
-    private static DOMEntity extractEntity(final AbstractEntityRequest<?> request) {
-        return new DOMEntity(request.getType().getValue(), request.getName().getValue());
+    private DOMEntity extractEntity(final AbstractEntityRequest<?> request) {
+        final var name = request.getName();
+        final var iid = name.getInstanceIdentifier();
+        if (iid != null) {
+            return new DOMEntity(request.getType().getValue(), iidCodec.fromBinding(iid));
+        }
+        final var str = verifyNotNull(name.getString(), "Unhandled entity name %s", name);
+        return new DOMEntity(request.getType().getValue(), str);
     }
 
     private static String extractRole(final Member member) {

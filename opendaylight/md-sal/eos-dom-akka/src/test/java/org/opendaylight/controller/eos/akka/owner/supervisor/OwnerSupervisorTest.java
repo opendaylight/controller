@@ -139,7 +139,7 @@ public class OwnerSupervisorTest extends AbstractNativeEosTest {
         }
 
         private Behavior<OwnerSupervisorCommand> switchToSupervisor(final InitialCandidateSync message) {
-            return OwnerSupervisor.create(currentCandidates, currentOwners);
+            return OwnerSupervisor.create(currentCandidates, currentOwners, CODEC_CONTEXT.getInstanceIdentifierCodec());
         }
     }
 

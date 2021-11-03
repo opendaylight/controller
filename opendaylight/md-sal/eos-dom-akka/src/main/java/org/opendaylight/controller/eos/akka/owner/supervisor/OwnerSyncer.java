@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -32,6 +34,7 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.InitialOwne
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,17 +52,20 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
 
     // String representation of Entity to DOMEntity
     private final Map<String, DOMEntity> entityLookup = new HashMap<>();
+    private final BindingInstanceIdentifierCodec iidCodec;
 
     private int toSync = -1;
 
     private OwnerSyncer(final ActorContext<OwnerSupervisorCommand> context,
-                        @Nullable final ActorRef<OwnerSupervisorReply> notifyDatacenterStarted) {
+                        final @Nullable ActorRef<OwnerSupervisorReply> notifyDatacenterStarted,
+                        final BindingInstanceIdentifierCodec iidCodec) {
         super(context);
+        this.iidCodec = requireNonNull(iidCodec);
         LOG.debug("Starting candidate and owner sync");
 
         final ActorRef<Replicator.Command> replicator = DistributedData.get(context.getSystem()).replicator();
 
-        this.ownerReplicator = new ReplicatorMessageAdapter<>(context, replicator, Duration.ofSeconds(5));
+        ownerReplicator = new ReplicatorMessageAdapter<>(context, replicator, Duration.ofSeconds(5));
 
         new ReplicatorMessageAdapter<OwnerSupervisorCommand, ORMap<DOMEntity, ORSet<String>>>(context, replicator,
             Duration.ofSeconds(5)).askGet(
@@ -71,9 +77,9 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
         }
     }
 
-    public static Behavior<OwnerSupervisorCommand> create(
-            final ActorRef<OwnerSupervisorReply> notifyDatacenterStarted) {
-        return Behaviors.setup(ctx -> new OwnerSyncer(ctx, notifyDatacenterStarted));
+    public static Behavior<OwnerSupervisorCommand> create(final ActorRef<OwnerSupervisorReply> notifyDatacenterStarted,
+            final BindingInstanceIdentifierCodec iidCodec) {
+        return Behaviors.setup(ctx -> new OwnerSyncer(ctx, notifyDatacenterStarted, iidCodec));
     }
 
     @Override
@@ -142,8 +148,7 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
     private Behavior<OwnerSupervisorCommand> switchToSupervisor() {
         LOG.debug("Initial sync done, switching to supervisor. candidates: {}, owners: {}",
                 currentCandidates, currentOwners);
-        return Behaviors.setup(ctx ->
-                OwnerSupervisor.create(currentCandidates, currentOwners));
+        return Behaviors.setup(ctx -> OwnerSupervisor.create(currentCandidates, currentOwners, iidCodec));
     }
 
     private void handleOwnerRsp(final Replicator.GetSuccess<LWWRegister<String>> rsp) {
