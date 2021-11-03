@@ -49,6 +49,10 @@ import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterC
 import org.opendaylight.controller.eos.akka.registry.candidate.command.UnregisterCandidate;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.RegisterListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
+import org.opendaylight.mdsal.binding.dom.codec.impl.BindingCodecContext;
+import org.opendaylight.mdsal.binding.generator.impl.DefaultBindingRuntimeGenerator;
+import org.opendaylight.mdsal.binding.runtime.api.BindingRuntimeGenerator;
+import org.opendaylight.mdsal.binding.runtime.spi.BindingRuntimeHelpers;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
@@ -76,6 +80,11 @@ public abstract class AbstractNativeEosTest {
                     "akka://ClusterSystem@127.0.0.1:2551",
                     "akka://ClusterSystem@127.0.0.1:2552",
                     "akka://ClusterSystem@127.0.0.1:2553");
+
+    private static final BindingRuntimeGenerator BINDING_RUNTIME_GENERATOR = new DefaultBindingRuntimeGenerator();
+
+    protected static BindingCodecContext CODEC_CONTEXT
+            = new BindingCodecContext(BindingRuntimeHelpers.createRuntimeContext());
 
     private static final String REMOTE_PROTOCOL = "akka";
     private static final String PORT_PARAM = "akka.remote.artery.canonical.port";
@@ -168,7 +177,7 @@ public abstract class AbstractNativeEosTest {
         // Create a classic Akka system since thats what we will have in osgi
         final akka.actor.ActorSystem system = akka.actor.ActorSystem.create("ClusterSystem", config);
         final ActorRef<BootstrapCommand> eosBootstrap =
-                Adapter.spawn(system, EOSMain.create(), "EOSBootstrap");
+                Adapter.spawn(system, EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()), "EOSBootstrap");
 
         final CompletionStage<RunningContext> ask = AskPattern.ask(eosBootstrap,
                 GetRunningContext::new,
@@ -181,7 +190,7 @@ public abstract class AbstractNativeEosTest {
     }
 
     private static Behavior<BootstrapCommand> rootBehavior() {
-        return Behaviors.setup(context -> EOSMain.create());
+        return Behaviors.setup(context -> EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()));
     }
 
     protected static void registerCandidates(final ClusterNode node, final DOMEntity entity, final String... members) {
@@ -388,7 +397,7 @@ public abstract class AbstractNativeEosTest {
 
         protected MockNativeEntityOwnershipService(ActorSystem classicActorSystem)
                 throws ExecutionException, InterruptedException {
-            super(classicActorSystem);
+            super(classicActorSystem, CODEC_CONTEXT);
             this.classicActorSystem = classicActorSystem;
         }
 

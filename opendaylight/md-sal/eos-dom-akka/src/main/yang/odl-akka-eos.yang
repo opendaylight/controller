@@ -19,8 +19,11 @@ module odl-entity-owners {
   }
 
   typedef entity-name {
-    type string {
-      length 1..max;
+    type union {
+      type instance-identifier;
+      type string {
+        length 1..max;
+      }
     }
   }
 
