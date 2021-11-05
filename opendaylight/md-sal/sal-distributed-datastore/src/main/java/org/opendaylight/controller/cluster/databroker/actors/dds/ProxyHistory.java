@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
@@ -319,9 +320,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ProxyHistory.class);
 
     private final Lock lock = new ReentrantLock();
-    private final LocalHistoryIdentifier identifier;
-    private final AbstractClientConnection<ShardBackendInfo> connection;
-    private final AbstractClientHistory parent;
+    private final @NonNull LocalHistoryIdentifier identifier;
+    private final @NonNull AbstractClientConnection<ShardBackendInfo> connection;
+    private final @NonNull AbstractClientHistory parent;
 
     @GuardedBy("lock")
     private final Map<TransactionIdentifier, AbstractProxyTransaction> proxies = new LinkedHashMap<>();
@@ -451,11 +452,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         connection.sendRequest(request, callback);
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     @SuppressWarnings("checkstyle:hiddenField")
     abstract AbstractProxyTransaction doCreateTransactionProxy(AbstractClientConnection<ShardBackendInfo> connection,
             TransactionIdentifier txId, boolean snapshotOnly, boolean isDone);
 
+    @Holding("lock")
     @SuppressWarnings("checkstyle:hiddenField")
     abstract ProxyHistory createSuccessor(AbstractClientConnection<ShardBackendInfo> connection);
 
