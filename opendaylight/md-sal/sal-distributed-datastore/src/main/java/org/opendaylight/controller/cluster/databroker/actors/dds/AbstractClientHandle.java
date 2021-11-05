@@ -43,8 +43,8 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     private static final AtomicReferenceFieldUpdater<AbstractClientHandle, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractClientHandle.class, State.class, "state");
 
-    private final TransactionIdentifier transactionId;
-    private final AbstractClientHistory parent;
+    private final @NonNull TransactionIdentifier transactionId;
+    private final @NonNull AbstractClientHistory parent;
 
     private volatile State<T> state = new State<>();
 
