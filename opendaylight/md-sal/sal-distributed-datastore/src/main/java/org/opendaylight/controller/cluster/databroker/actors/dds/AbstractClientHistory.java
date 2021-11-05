@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
 import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
@@ -62,8 +64,8 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     private final Map<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
     private final StampedLock lock = new StampedLock();
 
-    private final AbstractDataStoreClientBehavior client;
-    private final LocalHistoryIdentifier identifier;
+    private final @NonNull AbstractDataStoreClientBehavior client;
+    private final @NonNull LocalHistoryIdentifier identifier;
 
     // Used via NEXT_TX_UPDATER
     @SuppressWarnings("unused")
@@ -159,7 +161,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         LOG.debug("Create history response {}", response);
     }
 
-    private ProxyHistory ensureHistoryProxy(final TransactionIdentifier transactionId, final Long shard) {
+    private @NonNull ProxyHistory ensureHistoryProxy(final TransactionIdentifier transactionId, final Long shard) {
         while (true) {
             try {
                 // Short-lived lock to ensure exclusion of createHistoryProxy and the lookup phase in startReconnect,
@@ -178,11 +180,13 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         }
     }
 
-    final AbstractProxyTransaction createSnapshotProxy(final TransactionIdentifier transactionId, final Long shard) {
+    final @NonNull AbstractProxyTransaction createSnapshotProxy(final TransactionIdentifier transactionId,
+            final Long shard) {
         return ensureHistoryProxy(transactionId, shard).createTransactionProxy(transactionId, true);
     }
 
-    final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier transactionId, final Long shard) {
+    final @NonNull AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier transactionId,
+            final Long shard) {
         return ensureHistoryProxy(transactionId, shard).createTransactionProxy(transactionId, false);
     }
 
@@ -199,7 +203,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @throws DOMTransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
-    public ClientTransaction createTransaction() {
+    public @NonNull ClientTransaction createTransaction() {
         checkNotClosed();
 
         synchronized (this) {
@@ -226,10 +230,10 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         }
     }
 
-    @GuardedBy("this")
+    @Holding("this")
     abstract ClientSnapshot doCreateSnapshot();
 
-    @GuardedBy("this")
+    @Holding("this")
     abstract ClientTransaction doCreateTransaction();
 
     /**
