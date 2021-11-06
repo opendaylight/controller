@@ -136,13 +136,13 @@ abstract class UnsignedLongSet {
         }
     }
 
-    // The idea is rather simple, we track a TreeSet of range entries, ordered by their lower bound. This means that
-    // for a contains() operation we just need the first headSet() entry. For insert operations we just update either
-    // the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and if they
-    // are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
-    private final @NonNull TreeSet<Entry> ranges;
+    // The idea is rather simple, we track a NavigableSet of range entries, ordered by their lower bound. This means
+    // that for a contains() operation we just need the first headSet() entry. For insert operations we just update
+    // either the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and
+    // if they are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
+    private final @NonNull NavigableSet<Entry> ranges;
 
-    UnsignedLongSet(final TreeSet<Entry> ranges) {
+    UnsignedLongSet(final NavigableSet<Entry> ranges) {
         this.ranges = requireNonNull(ranges);
     }
 
