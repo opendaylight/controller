@@ -8,9 +8,12 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableSortedSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
@@ -18,14 +21,24 @@ import org.opendaylight.yangtools.concepts.WritableObject;
 
 @Beta
 public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements Immutable, WritableObject {
-    private static final @NonNull ImmutableUnsignedLongSet EMPTY = new ImmutableUnsignedLongSet(new TreeSet<>());
+    // Do not all
+    private static final int ARRAY_MAX_ELEMENTS = 4096;
 
-    private ImmutableUnsignedLongSet(final TreeSet<Entry> ranges) {
+    private static final @NonNull ImmutableUnsignedLongSet EMPTY =
+        new ImmutableUnsignedLongSet(ImmutableSortedSet.of());
+
+    private ImmutableUnsignedLongSet(final NavigableSet<Entry> ranges) {
         super(ranges);
     }
 
-    static @NonNull ImmutableUnsignedLongSet of(final TreeSet<Entry> ranges) {
-        return ranges.isEmpty() ? EMPTY : new ImmutableUnsignedLongSet(ranges);
+    static @NonNull ImmutableUnsignedLongSet copyOf(final MutableUnsignedLongSet mutable) {
+        if (mutable.isEmpty()) {
+            return of();
+        }
+        if (mutable.size() <= ARRAY_MAX_ELEMENTS) {
+            return new ImmutableUnsignedLongSet(ImmutableSortedSet.copyOfSorted(mutable.trustedRanges()));
+        }
+        return new ImmutableUnsignedLongSet(new TreeSet<>(mutable.trustedRanges()));
     }
 
     public static @NonNull ImmutableUnsignedLongSet of() {
@@ -46,9 +59,18 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
             return EMPTY;
         }
 
-        final var ranges = new TreeSet<Entry>();
-        for (int i = 0; i < size; ++i) {
-            ranges.add(Entry.readUnsigned(in));
+        final NavigableSet<Entry> ranges;
+        if (size <= ARRAY_MAX_ELEMENTS) {
+            final var entries = new ArrayList<Entry>(size);
+            for (int i = 0; i < size; ++i) {
+                entries.add(Entry.readUnsigned(in));
+            }
+            ranges = ImmutableSortedSet.copyOf(entries);
+        } else {
+            ranges = new TreeSet<>();
+            for (int i = 0; i < size; ++i) {
+                ranges.add(Entry.readUnsigned(in));
+            }
         }
         return new ImmutableUnsignedLongSet(ranges);
     }
