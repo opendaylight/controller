@@ -23,7 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Mutable;
@@ -136,13 +136,13 @@ abstract class UnsignedLongSet {
         }
     }
 
-    // The idea is rather simple, we track a TreeSet of range entries, ordered by their lower bound. This means that
-    // for a contains() operation we just need the first headSet() entry. For insert operations we just update either
-    // the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and if they
-    // are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
-    private final @NonNull TreeSet<Entry> ranges;
+    // The idea is rather simple, we track a NavigableSet of range entries, ordered by their lower bound. This means
+    // that for a contains() operation we just need the first headSet() entry. For insert operations we just update
+    // either the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and
+    // if they are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
+    private final @NonNull NavigableSet<Entry> ranges;
 
-    UnsignedLongSet(final TreeSet<Entry> ranges) {
+    UnsignedLongSet(final NavigableSet<Entry> ranges) {
         this.ranges = requireNonNull(ranges);
     }
 
@@ -204,11 +204,11 @@ abstract class UnsignedLongSet {
         return new TreeSet<>(Collections2.transform(ranges, Entry::copy));
     }
 
-    public final @NonNull Set<Entry> ranges() {
-        return Collections.unmodifiableSet(ranges);
+    public final @NonNull NavigableSet<Entry> ranges() {
+        return Collections.unmodifiableNavigableSet(ranges);
     }
 
-    final @NonNull Set<Entry> trustedRanges() {
+    final @NonNull NavigableSet<Entry> trustedRanges() {
         return ranges;
     }
 
