@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -23,11 +24,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -36,27 +36,27 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class FrontendShardDataTreeSnapshotMetadataTest {
 
-    @Test(expected = NullPointerException.class)
-    public final void testCreateMetadataSnapshotNullInput() {
-        new FrontendShardDataTreeSnapshotMetadata(null);
+    @Test
+    public void testCreateMetadataSnapshotNullInput() {
+        assertThrows(NullPointerException.class, () -> new FrontendShardDataTreeSnapshotMetadata(null));
     }
 
     @Test
-    public final void testCreateMetadataSnapshotEmptyInput() throws Exception {
+    public void testCreateMetadataSnapshotEmptyInput() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata emptyOrigSnapshot = createEmptyMetadataSnapshot();
         final FrontendShardDataTreeSnapshotMetadata emptyCopySnapshot = copy(emptyOrigSnapshot, 127);
         testMetadataSnapshotEqual(emptyOrigSnapshot, emptyCopySnapshot);
     }
 
     @Test
-    public final void testSerializeMetadataSnapshotWithOneClient() throws Exception {
+    public void testSerializeMetadataSnapshotWithOneClient() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(1);
         final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 162);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
     @Test
-    public final void testSerializeMetadataSnapshotWithMoreClients() throws Exception {
+    public void testSerializeMetadataSnapshotWithMoreClients() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(5);
         final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 314);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
@@ -68,7 +68,7 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         final List<FrontendClientMetadata> origClientList = origSnapshot.getClients();
         final List<FrontendClientMetadata> copyClientList = copySnapshot.getClients();
 
-        assertTrue(origClientList.size() == copyClientList.size());
+        assertEquals(origClientList.size(), copyClientList.size());
 
         final Map<ClientIdentifier, FrontendClientMetadata> origIdent = new HashMap<>();
         final Map<ClientIdentifier, FrontendClientMetadata> copyIdent = new HashMap<>();
@@ -81,13 +81,13 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         origIdent.values().forEach(client -> {
             final FrontendClientMetadata copyClient = copyIdent.get(client.getIdentifier());
             testObject(client.getIdentifier(), copyClient.getIdentifier());
-            assertTrue(client.getPurgedHistories().equals(copyClient.getPurgedHistories()));
-            assertTrue(client.getCurrentHistories().equals(copyClient.getCurrentHistories()));
+            assertEquals(client.getPurgedHistories(), copyClient.getPurgedHistories());
+            assertEquals(client.getCurrentHistories(), copyClient.getCurrentHistories());
         });
     }
 
     private static FrontendShardDataTreeSnapshotMetadata createEmptyMetadataSnapshot() {
-        return new FrontendShardDataTreeSnapshotMetadata(Collections.<FrontendClientMetadata>emptyList());
+        return new FrontendShardDataTreeSnapshotMetadata(List.of());
     }
 
     private static FrontendShardDataTreeSnapshotMetadata createMetadataSnapshot(final int size) {
@@ -106,9 +106,9 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         final ClientIdentifier clientIdentifier = ClientIdentifier.create(frontendIdentifier, num);
 
         final RangeSet<UnsignedLong> purgedHistories = TreeRangeSet.create();
-        purgedHistories.add(Range.closed(UnsignedLong.ZERO, UnsignedLong.ONE));
+        purgedHistories.add(Range.closedOpen(UnsignedLong.ZERO, UnsignedLong.ONE));
 
-        final Collection<FrontendHistoryMetadata> currentHistories = Collections.singleton(
+        final Set<FrontendHistoryMetadata> currentHistories = Set.of(
             new FrontendHistoryMetadata(num, num, true, ImmutableMap.of(UnsignedLong.ZERO, Boolean.TRUE),
                 purgedHistories));
 
