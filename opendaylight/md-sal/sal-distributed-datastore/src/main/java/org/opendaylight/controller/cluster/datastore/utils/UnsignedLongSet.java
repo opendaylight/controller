@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.BoundType;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -58,12 +56,6 @@ abstract class UnsignedLongSet {
 
         static Entry of(final long lowerBits, final long upperBits) {
             return new Entry(lowerBits, upperBits);
-        }
-
-        static Entry of(final Range<UnsignedLong> range) {
-            verify(range.lowerBoundType() == BoundType.CLOSED && range.upperBoundType() == BoundType.OPEN,
-                "Unexpected range %s", range);
-            return of(range.lowerEndpoint().longValue(), range.upperEndpoint().longValue() - 1);
         }
 
         @VisibleForTesting
@@ -136,13 +128,13 @@ abstract class UnsignedLongSet {
         }
     }
 
-    // The idea is rather simple, we track a TreeSet of range entries, ordered by their lower bound. This means that
-    // for a contains() operation we just need the first headSet() entry. For insert operations we just update either
-    // the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and if they
-    // are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
-    private final @NonNull TreeSet<Entry> ranges;
+    // The idea is rather simple, we track a NavigableSet of range entries, ordered by their lower bound. This means
+    // that for a contains() operation we just need the first headSet() entry. For insert operations we just update
+    // either the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and
+    // if they are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
+    private final @NonNull NavigableSet<Entry> ranges;
 
-    UnsignedLongSet(final TreeSet<Entry> ranges) {
+    UnsignedLongSet(final NavigableSet<Entry> ranges) {
         this.ranges = requireNonNull(ranges);
     }
 
@@ -197,11 +189,7 @@ abstract class UnsignedLongSet {
     public abstract @NonNull ImmutableUnsignedLongSet immutableCopy();
 
     public final @NonNull MutableUnsignedLongSet mutableCopy() {
-        return new MutableUnsignedLongSet(copyRanges());
-    }
-
-    final @NonNull TreeSet<Entry> copyRanges() {
-        return new TreeSet<>(Collections2.transform(ranges, Entry::copy));
+        return new MutableUnsignedLongSet(new TreeSet<>(Collections2.transform(ranges, Entry::copy)));
     }
 
     public final @NonNull NavigableSet<Entry> ranges() {
