@@ -78,7 +78,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
             final UnsignedLong lower = UnsignedLong.fromLongBits(WritableObjects.readFirstLong(in, header));
             final UnsignedLong upper = UnsignedLong.fromLongBits(WritableObjects.readSecondLong(in, header));
 
-            b.add(Range.closed(lower, upper));
+            b.add(Range.closedOpen(lower, upper));
         }
 
         final int currentSize = in.readInt();

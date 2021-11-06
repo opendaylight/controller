@@ -103,7 +103,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
             final byte h = WritableObjects.readLongHeader(in);
             final UnsignedLong l = UnsignedLong.fromLongBits(WritableObjects.readFirstLong(in, h));
             final UnsignedLong u = UnsignedLong.fromLongBits(WritableObjects.readSecondLong(in, h));
-            purgedTransactions.add(Range.closed(l, u));
+            purgedTransactions.add(Range.closedOpen(l, u));
         }
 
         return new FrontendHistoryMetadata(historyId, cookie, closed, closedTransactions, purgedTransactions);
