@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -23,23 +24,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendHistoryMetadata implements WritableObject {
-    private final @NonNull ImmutableRangeSet<UnsignedLong> purgedTransactions;
+    private final @NonNull ImmutableUnsignedLongSet purgedTransactions;
     private final @NonNull ImmutableMap<UnsignedLong, Boolean> closedTransactions;
     private final long historyId;
     private final long cookie;
     private final boolean closed;
 
     public FrontendHistoryMetadata(final long historyId, final long cookie, final boolean closed,
-            final Map<UnsignedLong, Boolean> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
+            final Map<UnsignedLong, Boolean> closedTransactions, final ImmutableUnsignedLongSet purgedTransactions) {
         this.historyId = historyId;
         this.cookie = cookie;
         this.closed = closed;
         this.closedTransactions = ImmutableMap.copyOf(closedTransactions);
-        this.purgedTransactions = ImmutableRangeSet.copyOf(purgedTransactions);
+        this.purgedTransactions = requireNonNull(purgedTransactions);
     }
 
     public long getHistoryId() {
@@ -54,11 +56,11 @@ public final class FrontendHistoryMetadata implements WritableObject {
         return closed;
     }
 
-    public Map<UnsignedLong, Boolean> getClosedTransactions() {
+    public ImmutableMap<UnsignedLong, Boolean> getClosedTransactions() {
         return closedTransactions;
     }
 
-    public RangeSet<UnsignedLong> getPurgedTransactions() {
+    public ImmutableUnsignedLongSet getPurgedTransactions() {
         return purgedTransactions;
     }
 

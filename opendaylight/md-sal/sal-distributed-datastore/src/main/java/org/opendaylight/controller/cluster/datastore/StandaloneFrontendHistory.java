@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
@@ -30,26 +29,26 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  * @author Robert Varga
  */
 final class StandaloneFrontendHistory extends AbstractFrontendHistory {
-    private final LocalHistoryIdentifier identifier;
-    private final ShardDataTree tree;
+    private final @NonNull LocalHistoryIdentifier identifier;
+    private final @NonNull ShardDataTree tree;
 
     private StandaloneFrontendHistory(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
-            final RangeSet<UnsignedLong> purgedTransactions) {
+            final MutableUnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
-        this.identifier = new LocalHistoryIdentifier(clientId, 0);
+        identifier = new LocalHistoryIdentifier(clientId, 0);
         this.tree = requireNonNull(tree);
     }
 
     static @NonNull StandaloneFrontendHistory create(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree) {
         return new StandaloneFrontendHistory(persistenceId, clientId, tree, ImmutableMap.of(),
-            TreeRangeSet.create());
+            MutableUnsignedLongSet.of());
     }
 
     static @NonNull StandaloneFrontendHistory recreate(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
-            final RangeSet<UnsignedLong> purgedTransactions) {
+            final MutableUnsignedLongSet purgedTransactions) {
         return new StandaloneFrontendHistory(persistenceId, clientId, tree, new HashMap<>(closedTransactions),
             purgedTransactions);
     }

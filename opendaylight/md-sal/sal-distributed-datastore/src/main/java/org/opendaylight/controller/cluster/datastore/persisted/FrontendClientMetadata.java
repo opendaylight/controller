@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.ImmutableRangeSet.Builder;
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -24,19 +23,20 @@ import java.util.Collection;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendClientMetadata implements Identifiable<ClientIdentifier>, WritableObject {
     private final @NonNull ImmutableList<FrontendHistoryMetadata> currentHistories;
-    private final @NonNull ImmutableRangeSet<UnsignedLong> purgedHistories;
+    private final @NonNull ImmutableUnsignedLongSet purgedHistories;
     private final @NonNull ClientIdentifier identifier;
 
-    public FrontendClientMetadata(final ClientIdentifier identifier, final RangeSet<UnsignedLong> purgedHistories,
+    public FrontendClientMetadata(final ClientIdentifier identifier, final ImmutableUnsignedLongSet purgedHistories,
             final Collection<FrontendHistoryMetadata> currentHistories) {
         this.identifier = requireNonNull(identifier);
-        this.purgedHistories = ImmutableRangeSet.copyOf(purgedHistories);
+        this.purgedHistories = requireNonNull(purgedHistories);
         this.currentHistories = ImmutableList.copyOf(currentHistories);
     }
 
@@ -44,7 +44,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
         return currentHistories;
     }
 
-    public RangeSet<UnsignedLong> getPurgedHistories() {
+    public ImmutableUnsignedLongSet getPurgedHistories() {
         return purgedHistories;
     }
 

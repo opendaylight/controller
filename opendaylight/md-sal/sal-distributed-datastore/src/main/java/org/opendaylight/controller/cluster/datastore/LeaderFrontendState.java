@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort.State;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +65,8 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         // Histories which have not been purged
         private final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories;
 
-        // RangeSet performs automatic merging, hence we keep minimal state tracking information
-        private final UnsignedLongSet purgedHistories;
+        // UnsignedLongSet performs automatic merging, hence we keep minimal state tracking information
+        private final MutableUnsignedLongSet purgedHistories;
 
         // Used for all standalone transactions
         private final AbstractFrontendHistory standaloneHistory;
@@ -75,12 +75,12 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         private Long lastSeenHistory = null;
 
         Enabled(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
-            this(persistenceId, clientId, tree, UnsignedLongSet.of(),
+            this(persistenceId, clientId, tree, MutableUnsignedLongSet.of(),
                 StandaloneFrontendHistory.create(persistenceId, clientId, tree), new HashMap<>());
         }
 
         Enabled(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
-                final UnsignedLongSet purgedHistories, final AbstractFrontendHistory standaloneHistory,
+                final MutableUnsignedLongSet purgedHistories, final AbstractFrontendHistory standaloneHistory,
                 final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories) {
             super(persistenceId, clientId, tree);
             this.purgedHistories = requireNonNull(purgedHistories);
