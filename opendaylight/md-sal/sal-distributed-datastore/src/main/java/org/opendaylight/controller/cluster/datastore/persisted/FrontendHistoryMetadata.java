@@ -10,33 +10,28 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Verify;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendHistoryMetadata implements WritableObject {
     private final @NonNull ImmutableUnsignedLongSet purgedTransactions;
-    private final @NonNull ImmutableMap<UnsignedLong, Boolean> closedTransactions;
+    private final @NonNull UnsignedLongBitmap closedTransactions;
     private final long historyId;
     private final long cookie;
     private final boolean closed;
 
     public FrontendHistoryMetadata(final long historyId, final long cookie, final boolean closed,
-            final Map<UnsignedLong, Boolean> closedTransactions, final ImmutableUnsignedLongSet purgedTransactions) {
+            final UnsignedLongBitmap closedTransactions, final ImmutableUnsignedLongSet purgedTransactions) {
         this.historyId = historyId;
         this.cookie = cookie;
         this.closed = closed;
-        this.closedTransactions = ImmutableMap.copyOf(closedTransactions);
+        this.closedTransactions = requireNonNull(closedTransactions);
         this.purgedTransactions = requireNonNull(purgedTransactions);
     }
 
@@ -52,7 +47,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         return closed;
     }
 
-    public ImmutableMap<UnsignedLong, Boolean> getClosedTransactions() {
+    public UnsignedLongBitmap getClosedTransactions() {
         return closedTransactions;
     }
 
@@ -65,45 +60,43 @@ public final class FrontendHistoryMetadata implements WritableObject {
         WritableObjects.writeLongs(out, historyId, cookie);
         out.writeBoolean(closed);
 
+        final int closedSize = closedTransactions.size();
         final int purgedSize = purgedTransactions.size();
-        WritableObjects.writeLongs(out, closedTransactions.size(), purgedSize);
-        for (Entry<UnsignedLong, Boolean> e : closedTransactions.entrySet()) {
-            WritableObjects.writeLong(out, e.getKey().longValue());
-            out.writeBoolean(e.getValue());
-        }
+        WritableObjects.writeLongs(out, closedSize, purgedSize);
+        closedTransactions.writeEntriesTo(out, closedSize);
         purgedTransactions.writeRangesTo(out, purgedSize);
     }
 
     public static FrontendHistoryMetadata readFrom(final DataInput in) throws IOException {
-        byte header = WritableObjects.readLongHeader(in);
-        final long historyId = WritableObjects.readFirstLong(in, header);
-        final long cookie = WritableObjects.readSecondLong(in, header);
+        final byte firstHdr = WritableObjects.readLongHeader(in);
+        final long historyId = WritableObjects.readFirstLong(in, firstHdr);
+        final long cookie = WritableObjects.readSecondLong(in, firstHdr);
         final boolean closed = in.readBoolean();
 
-        header = WritableObjects.readLongHeader(in);
-        long ls = WritableObjects.readFirstLong(in, header);
-        Verify.verify(ls >= 0 && ls <= Integer.MAX_VALUE);
-        final int csize = (int) ls;
+        final byte secondHdr = WritableObjects.readLongHeader(in);
+        final int csize = verifySize(WritableObjects.readFirstLong(in, secondHdr));
+        final int psize = verifySize(WritableObjects.readSecondLong(in, secondHdr));
 
-        ls = WritableObjects.readSecondLong(in, header);
-        Verify.verify(ls >= 0 && ls <= Integer.MAX_VALUE);
-        final int psize = (int) ls;
-
-        final Map<UnsignedLong, Boolean> closedTransactions = new HashMap<>(csize);
-        for (int i = 0; i < csize; ++i) {
-            final UnsignedLong key = UnsignedLong.fromLongBits(WritableObjects.readLong(in));
-            final Boolean value = in.readBoolean();
-            closedTransactions.put(key, value);
-        }
-        final var purgedTransactions = ImmutableUnsignedLongSet.readFrom(in, psize);
-
-        return new FrontendHistoryMetadata(historyId, cookie, closed, closedTransactions, purgedTransactions);
+        return new FrontendHistoryMetadata(historyId, cookie, closed,
+            UnsignedLongBitmap.readFrom(in, csize),
+            ImmutableUnsignedLongSet.readFrom(in, psize));
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(FrontendHistoryMetadata.class).add("historyId", historyId)
-                .add("cookie", cookie).add("closed", closed).add("closedTransactions", closedTransactions)
-                .add("purgedTransactions", purgedTransactions).toString();
+        return MoreObjects.toStringHelper(FrontendHistoryMetadata.class)
+            .add("historyId", historyId)
+            .add("cookie", cookie)
+            .add("closed", closed)
+            .add("closedTransactions", closedTransactions)
+            .add("purgedTransactions", purgedTransactions)
+            .toString();
+    }
+
+    private static int verifySize(final long size) throws IOException {
+        if (size < 0 || size > Integer.MAX_VALUE) {
+            throw new IOException("Invalid size " + size);
+        }
+        return (int) size;
     }
 }
