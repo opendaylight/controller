@@ -11,32 +11,26 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableRangeSet;
-import com.google.common.collect.ImmutableRangeSet.Builder;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.WritableObject;
-import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendClientMetadata implements Identifiable<ClientIdentifier>, WritableObject {
     private final @NonNull ImmutableList<FrontendHistoryMetadata> currentHistories;
-    private final @NonNull ImmutableRangeSet<UnsignedLong> purgedHistories;
+    private final @NonNull ImmutableUnsignedLongSet purgedHistories;
     private final @NonNull ClientIdentifier identifier;
 
-    public FrontendClientMetadata(final ClientIdentifier identifier, final RangeSet<UnsignedLong> purgedHistories,
+    public FrontendClientMetadata(final ClientIdentifier identifier, final ImmutableUnsignedLongSet purgedHistories,
             final Collection<FrontendHistoryMetadata> currentHistories) {
         this.identifier = requireNonNull(identifier);
-        this.purgedHistories = ImmutableRangeSet.copyOf(purgedHistories);
+        this.purgedHistories = requireNonNull(purgedHistories);
         this.currentHistories = ImmutableList.copyOf(currentHistories);
     }
 
@@ -44,7 +38,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
         return currentHistories;
     }
 
-    public RangeSet<UnsignedLong> getPurgedHistories() {
+    public ImmutableUnsignedLongSet getPurgedHistories() {
         return purgedHistories;
     }
 
@@ -56,12 +50,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         identifier.writeTo(out);
-
-        final Set<Range<UnsignedLong>> ranges = purgedHistories.asRanges();
-        out.writeInt(ranges.size());
-        for (final Range<UnsignedLong> r : ranges) {
-            WritableObjects.writeLongs(out, r.lowerEndpoint().longValue(), r.upperEndpoint().longValue());
-        }
+        purgedHistories.writeTo(out);
 
         out.writeInt(currentHistories.size());
         for (final FrontendHistoryMetadata h : currentHistories) {
@@ -71,24 +60,16 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
 
     public static FrontendClientMetadata readFrom(final DataInput in) throws IOException {
         final ClientIdentifier id = ClientIdentifier.readFrom(in);
-
-        final int purgedSize = in.readInt();
-        final Builder<UnsignedLong> b = ImmutableRangeSet.builder();
-        for (int i = 0; i < purgedSize; ++i) {
-            final byte header = WritableObjects.readLongHeader(in);
-            final UnsignedLong lower = UnsignedLong.fromLongBits(WritableObjects.readFirstLong(in, header));
-            final UnsignedLong upper = UnsignedLong.fromLongBits(WritableObjects.readSecondLong(in, header));
-
-            b.add(Range.closedOpen(lower, upper));
-        }
+        final var purgedHistories = ImmutableUnsignedLongSet.readFrom(in);
 
         final int currentSize = in.readInt();
-        final Collection<FrontendHistoryMetadata> currentHistories = new ArrayList<>(currentSize);
+        // FIXME: ImmutableList.builder()
+        final var currentHistories = new ArrayList<FrontendHistoryMetadata>(currentSize);
         for (int i = 0; i < currentSize; ++i) {
             currentHistories.add(FrontendHistoryMetadata.readFrom(in));
         }
 
-        return new FrontendClientMetadata(id, b.build(), currentHistories);
+        return new FrontendClientMetadata(id, purgedHistories, currentHistories);
     }
 
     @Override

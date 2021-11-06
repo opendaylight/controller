@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableRangeSet;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -21,25 +19,25 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendHistoryMetadata implements WritableObject {
-    private final @NonNull ImmutableRangeSet<UnsignedLong> purgedTransactions;
+    private final @NonNull ImmutableUnsignedLongSet purgedTransactions;
     private final @NonNull ImmutableMap<UnsignedLong, Boolean> closedTransactions;
     private final long historyId;
     private final long cookie;
     private final boolean closed;
 
     public FrontendHistoryMetadata(final long historyId, final long cookie, final boolean closed,
-            final Map<UnsignedLong, Boolean> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
+            final Map<UnsignedLong, Boolean> closedTransactions, final ImmutableUnsignedLongSet purgedTransactions) {
         this.historyId = historyId;
         this.cookie = cookie;
         this.closed = closed;
         this.closedTransactions = ImmutableMap.copyOf(closedTransactions);
-        this.purgedTransactions = ImmutableRangeSet.copyOf(purgedTransactions);
+        this.purgedTransactions = requireNonNull(purgedTransactions);
     }
 
     public long getHistoryId() {
@@ -54,11 +52,11 @@ public final class FrontendHistoryMetadata implements WritableObject {
         return closed;
     }
 
-    public Map<UnsignedLong, Boolean> getClosedTransactions() {
+    public ImmutableMap<UnsignedLong, Boolean> getClosedTransactions() {
         return closedTransactions;
     }
 
-    public RangeSet<UnsignedLong> getPurgedTransactions() {
+    public ImmutableUnsignedLongSet getPurgedTransactions() {
         return purgedTransactions;
     }
 
@@ -67,15 +65,13 @@ public final class FrontendHistoryMetadata implements WritableObject {
         WritableObjects.writeLongs(out, historyId, cookie);
         out.writeBoolean(closed);
 
-        final Set<Range<UnsignedLong>> purgedRanges = purgedTransactions.asRanges();
-        WritableObjects.writeLongs(out, closedTransactions.size(), purgedRanges.size());
+        final int purgedSize = purgedTransactions.size();
+        WritableObjects.writeLongs(out, closedTransactions.size(), purgedSize);
         for (Entry<UnsignedLong, Boolean> e : closedTransactions.entrySet()) {
             WritableObjects.writeLong(out, e.getKey().longValue());
             out.writeBoolean(e.getValue());
         }
-        for (Range<UnsignedLong> r : purgedRanges) {
-            WritableObjects.writeLongs(out, r.lowerEndpoint().longValue(), r.upperEndpoint().longValue());
-        }
+        purgedTransactions.writeRangesTo(out, purgedSize);
     }
 
     public static FrontendHistoryMetadata readFrom(final DataInput in) throws IOException {
@@ -99,13 +95,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
             final Boolean value = in.readBoolean();
             closedTransactions.put(key, value);
         }
-        final RangeSet<UnsignedLong> purgedTransactions = TreeRangeSet.create();
-        for (int i = 0; i < psize; ++i) {
-            final byte h = WritableObjects.readLongHeader(in);
-            final UnsignedLong l = UnsignedLong.fromLongBits(WritableObjects.readFirstLong(in, h));
-            final UnsignedLong u = UnsignedLong.fromLongBits(WritableObjects.readSecondLong(in, h));
-            purgedTransactions.add(Range.closedOpen(l, u));
-        }
+        final var purgedTransactions = ImmutableUnsignedLongSet.readFrom(in, psize);
 
         return new FrontendHistoryMetadata(historyId, cookie, closed, closedTransactions, purgedTransactions);
     }
