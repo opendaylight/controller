@@ -247,8 +247,8 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
 
     private static final Logger LOG = LoggerFactory.getLogger(FrontendClientMetadataBuilder.class);
 
-    private final ClientIdentifier identifier;
-    private final String shardName;
+    private final @NonNull ClientIdentifier identifier;
+    private final @NonNull String shardName;
 
     FrontendClientMetadataBuilder(final String shardName, final ClientIdentifier identifier) {
         this.shardName = requireNonNull(shardName);
