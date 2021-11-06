@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -108,11 +107,9 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         tmp.add(0);
         final ImmutableUnsignedLongSet purgedHistories = tmp.immutableCopy();
 
-        final Set<FrontendHistoryMetadata> currentHistories = Set.of(
+        return new FrontendClientMetadata(clientIdentifier, purgedHistories.immutableCopy(), List.of(
             new FrontendHistoryMetadata(num, num, true, ImmutableMap.of(UnsignedLong.ZERO, Boolean.TRUE),
-                purgedHistories));
-
-        return new FrontendClientMetadata(clientIdentifier, purgedHistories.immutableCopy(), currentHistories);
+                purgedHistories)));
     }
 
     private static <T> void testObject(final T object, final T equalObject) {
