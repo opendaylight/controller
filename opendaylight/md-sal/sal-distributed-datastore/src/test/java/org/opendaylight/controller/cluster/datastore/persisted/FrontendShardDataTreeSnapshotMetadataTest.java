@@ -14,9 +14,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,6 +30,8 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 
 public class FrontendShardDataTreeSnapshotMetadataTest {
 
@@ -105,14 +104,15 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
                 FrontendType.forName(index));
         final ClientIdentifier clientIdentifier = ClientIdentifier.create(frontendIdentifier, num);
 
-        final RangeSet<UnsignedLong> purgedHistories = TreeRangeSet.create();
-        purgedHistories.add(Range.closedOpen(UnsignedLong.ZERO, UnsignedLong.ONE));
+        final MutableUnsignedLongSet tmp = MutableUnsignedLongSet.of();
+        tmp.add(0);
+        final ImmutableUnsignedLongSet purgedHistories = tmp.immutableCopy();
 
         final Set<FrontendHistoryMetadata> currentHistories = Set.of(
             new FrontendHistoryMetadata(num, num, true, ImmutableMap.of(UnsignedLong.ZERO, Boolean.TRUE),
                 purgedHistories));
 
-        return new FrontendClientMetadata(clientIdentifier, purgedHistories, currentHistories);
+        return new FrontendClientMetadata(clientIdentifier, purgedHistories.immutableCopy(), currentHistories);
     }
 
     private static <T> void testObject(final T object, final T equalObject) {

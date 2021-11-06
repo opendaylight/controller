@@ -14,10 +14,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableRangeSet;
-import com.google.common.collect.RangeSet;
-import com.google.common.primitives.UnsignedLong;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
@@ -26,7 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
@@ -44,7 +41,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
 
         @Override
         public FrontendClientMetadata build() {
-            return new FrontendClientMetadata(getIdentifier(), ImmutableRangeSet.of(), ImmutableList.of());
+            return new FrontendClientMetadata(getIdentifier(), ImmutableUnsignedLongSet.of(), ImmutableList.of());
         }
 
         @Override
@@ -85,13 +82,13 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
 
     static final class Enabled extends FrontendClientMetadataBuilder {
         private final Map<LocalHistoryIdentifier, FrontendHistoryMetadataBuilder> currentHistories = new HashMap<>();
+        private final MutableUnsignedLongSet purgedHistories;
         private final LocalHistoryIdentifier standaloneId;
-        private final UnsignedLongSet purgedHistories;
 
         Enabled(final String shardName, final ClientIdentifier identifier) {
             super(shardName, identifier);
 
-            purgedHistories = UnsignedLongSet.of();
+            purgedHistories = MutableUnsignedLongSet.of();
 
             // History for stand-alone transactions is always present
             standaloneId = standaloneHistoryId();
@@ -101,7 +98,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         Enabled(final String shardName, final FrontendClientMetadata meta) {
             super(shardName, meta.getIdentifier());
 
-            purgedHistories = UnsignedLongSet.of(meta.getPurgedHistories());
+            purgedHistories = meta.getPurgedHistories().mutableCopy();
             for (FrontendHistoryMetadata h : meta.getCurrentHistories()) {
                 final FrontendHistoryMetadataBuilder b = new FrontendHistoryMetadataBuilder(getIdentifier(), h);
                 currentHistories.put(b.getIdentifier(), b);
@@ -118,7 +115,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
 
         @Override
         public FrontendClientMetadata build() {
-            return new FrontendClientMetadata(getIdentifier(), purgedHistories.toRangeSet(),
+            return new FrontendClientMetadata(getIdentifier(), purgedHistories.immutableCopy(),
                 Collections2.transform(currentHistories.values(), FrontendHistoryMetadataBuilder::build));
         }
 
@@ -219,7 +216,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
             }
 
             return new LeaderFrontendState.Enabled(shard.persistenceId(), getIdentifier(), shard.getDataStore(),
-                purgedHistories.copy(), singleHistory, histories);
+                purgedHistories.mutableCopy(), singleHistory, histories);
         }
 
         @Override
@@ -255,13 +252,10 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
     }
 
     static FrontendClientMetadataBuilder of(final String shardName, final FrontendClientMetadata meta) {
-        final Collection<FrontendHistoryMetadata> current = meta.getCurrentHistories();
-        final RangeSet<UnsignedLong> purged = meta.getPurgedHistories();
-
         // Completely empty histories imply disabled state, as otherwise we'd have a record of the single history --
         // either purged or active
-        return current.isEmpty() && purged.isEmpty() ? new Disabled(shardName, meta.getIdentifier())
-                : new Enabled(shardName, meta);
+        return  meta.getCurrentHistories().isEmpty() && meta.getPurgedHistories().isEmpty()
+            ? new Disabled(shardName, meta.getIdentifier()) : new Enabled(shardName, meta);
     }
 
     @Override

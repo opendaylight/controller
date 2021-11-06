@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
-    private final UnsignedLongSet purgedTransactions;
+    private final MutableUnsignedLongSet purgedTransactions;
     private final String persistenceId;
     private final ShardDataTree tree;
 
@@ -59,7 +59,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private Map<UnsignedLong, Boolean> closedTransactions;
 
     AbstractFrontendHistory(final String persistenceId, final ShardDataTree tree,
-        final Map<UnsignedLong, Boolean> closedTransactions, final UnsignedLongSet purgedTransactions) {
+            final Map<UnsignedLong, Boolean> closedTransactions, final MutableUnsignedLongSet purgedTransactions) {
         this.persistenceId = requireNonNull(persistenceId);
         this.tree = requireNonNull(tree);
         this.closedTransactions = requireNonNull(closedTransactions);
