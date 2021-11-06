@@ -11,8 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +32,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
@@ -49,7 +48,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
-    private final RangeSet<UnsignedLong> purgedTransactions;
+    private final UnsignedLongSet purgedTransactions;
     private final String persistenceId;
     private final ShardDataTree tree;
 
@@ -60,7 +59,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private Map<UnsignedLong, Boolean> closedTransactions;
 
     AbstractFrontendHistory(final String persistenceId, final ShardDataTree tree,
-        final Map<UnsignedLong, Boolean> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
+        final Map<UnsignedLong, Boolean> closedTransactions, final UnsignedLongSet purgedTransactions) {
         this.persistenceId = requireNonNull(persistenceId);
         this.tree = requireNonNull(tree);
         this.closedTransactions = requireNonNull(closedTransactions);
@@ -82,14 +81,15 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         }
 
         final TransactionIdentifier id = request.getTarget();
-        final UnsignedLong ul = UnsignedLong.fromLongBits(id.getTransactionId());
-        if (purgedTransactions.contains(ul)) {
+        final long txidBits = id.getTransactionId();
+        if (purgedTransactions.contains(txidBits)) {
             LOG.warn("{}: Request {} is contained purged transactions {}", persistenceId, request, purgedTransactions);
-            throw new DeadTransactionException(purgedTransactions);
+            throw new DeadTransactionException(purgedTransactions.toRangeSet());
         }
-        final Boolean closed = closedTransactions.get(ul);
+
+        final Boolean closed = closedTransactions.get(UnsignedLong.fromLongBits(txidBits));
         if (closed != null) {
-            final boolean successful = closed.booleanValue();
+            final boolean successful = closed;
             LOG.debug("{}: Request {} refers to a {} transaction", persistenceId, request, successful ? "successful"
                     : "failed");
             throw new ClosedTransactionException(successful);
@@ -120,8 +120,8 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private TransactionSuccess<?> handleTransactionPurgeRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) {
         final TransactionIdentifier id = request.getTarget();
-        final UnsignedLong ul = UnsignedLong.fromLongBits(id.getTransactionId());
-        if (purgedTransactions.contains(ul)) {
+        final long txidBits = id.getTransactionId();
+        if (purgedTransactions.contains(txidBits)) {
             // Retransmitted purge request: nothing to do
             LOG.debug("{}: transaction {} already purged", persistenceId, id);
             return new TransactionPurgeResponse(id, request.getSequence());
@@ -129,6 +129,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
         // We perform two lookups instead of a straight remove, because once the map becomes empty we switch it
         // to an ImmutableMap, which does not allow remove().
+        final UnsignedLong ul = UnsignedLong.fromLongBits(txidBits);
         if (closedTransactions.containsKey(ul)) {
             tree.purgeTransaction(id, () -> {
                 closedTransactions.remove(ul);
@@ -136,7 +137,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                     closedTransactions = ImmutableMap.of();
                 }
 
-                purgedTransactions.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
+                purgedTransactions.add(txidBits);
                 LOG.debug("{}: finished purging inherited transaction {}", persistenceId(), id);
                 envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
             });
@@ -149,12 +150,12 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             // purged transactions in one go. If it does, we warn about the situation and
             LOG.warn("{}: transaction {} not tracked in {}, but not present in active transactions", persistenceId,
                 id, purgedTransactions);
-            purgedTransactions.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
+            purgedTransactions.add(txidBits);
             return new TransactionPurgeResponse(id, request.getSequence());
         }
 
         tree.purgeTransaction(id, () -> {
-            purgedTransactions.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
+            purgedTransactions.add(txidBits);
             transactions.remove(id);
             LOG.debug("{}: finished purging transaction {}", persistenceId(), id);
             envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);

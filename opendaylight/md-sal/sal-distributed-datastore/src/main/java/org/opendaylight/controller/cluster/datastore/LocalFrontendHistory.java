@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +17,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
@@ -31,21 +30,21 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
     private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
             final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
-            final RangeSet<UnsignedLong> purgedTransactions) {
+            final UnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
         this.chain = requireNonNull(chain);
     }
 
     static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
             final ShardDataTreeTransactionChain chain) {
-        return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), TreeRangeSet.create());
+        return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), UnsignedLongSet.of());
     }
 
     static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
             final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
-            final RangeSet<UnsignedLong> purgedTransactions) {
+            final UnsignedLongSet purgedTransactions) {
         return new LocalFrontendHistory(persistenceId, tree, chain, new HashMap<>(closedTransactions),
-            TreeRangeSet.create(purgedTransactions));
+            purgedTransactions.copy());
     }
 
     @Override
