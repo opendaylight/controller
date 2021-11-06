@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort.State;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongRangeSet;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         private final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories;
 
         // RangeSet performs automatic merging, hence we keep minimal state tracking information
-        private final UnsignedLongRangeSet purgedHistories;
+        private final UnsignedLongSet purgedHistories;
 
         // Used for all standalone transactions
         private final AbstractFrontendHistory standaloneHistory;
@@ -75,12 +75,12 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         private Long lastSeenHistory = null;
 
         Enabled(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
-            this(persistenceId, clientId, tree, UnsignedLongRangeSet.create(),
+            this(persistenceId, clientId, tree, UnsignedLongSet.of(),
                 StandaloneFrontendHistory.create(persistenceId, clientId, tree), new HashMap<>());
         }
 
         Enabled(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
-                final UnsignedLongRangeSet purgedHistories, final AbstractFrontendHistory standaloneHistory,
+                final UnsignedLongSet purgedHistories, final AbstractFrontendHistory standaloneHistory,
                 final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories) {
             super(persistenceId, clientId, tree);
             this.purgedHistories = requireNonNull(purgedHistories);
@@ -123,7 +123,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
                     if (history == null) {
                         if (purgedHistories.contains(lhId.getHistoryId())) {
                             LOG.warn("{}: rejecting request {} to purged history", persistenceId(), request);
-                            throw new DeadHistoryException(purgedHistories.toImmutable());
+                            throw new DeadHistoryException(purgedHistories.toRangeSet());
                         }
 
                         LOG.warn("{}: rejecting unknown history request {}", persistenceId(), request);
@@ -174,7 +174,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             // not end up resurrecting a purged history.
             if (purgedHistories.contains(historyId.getHistoryId())) {
                 LOG.debug("{}: rejecting purged request {}", persistenceId(), request);
-                throw new DeadHistoryException(purgedHistories.toImmutable());
+                throw new DeadHistoryException(purgedHistories.toRangeSet());
             }
 
             // Update last history we have seen
@@ -256,7 +256,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         this.persistenceId = requireNonNull(persistenceId);
         this.clientId = requireNonNull(clientId);
         this.tree = requireNonNull(tree);
-        this.lastSeenTicks = tree.readTime();
+        lastSeenTicks = tree.readTime();
     }
 
     @Override
@@ -281,7 +281,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     }
 
     final void touch() {
-        this.lastSeenTicks = tree.readTime();
+        lastSeenTicks = tree.readTime();
     }
 
     abstract @Nullable LocalHistorySuccess handleLocalHistoryRequest(LocalHistoryRequest<?> request,
