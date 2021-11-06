@@ -22,12 +22,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendHistoryMetadata implements WritableObject {
-    private final RangeSet<UnsignedLong> purgedTransactions;
-    private final Map<UnsignedLong, Boolean> closedTransactions;
+    private final @NonNull ImmutableRangeSet<UnsignedLong> purgedTransactions;
+    private final @NonNull ImmutableMap<UnsignedLong, Boolean> closedTransactions;
     private final long historyId;
     private final long cookie;
     private final boolean closed;
@@ -70,7 +71,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         WritableObjects.writeLongs(out, closedTransactions.size(), purgedRanges.size());
         for (Entry<UnsignedLong, Boolean> e : closedTransactions.entrySet()) {
             WritableObjects.writeLong(out, e.getKey().longValue());
-            out.writeBoolean(e.getValue().booleanValue());
+            out.writeBoolean(e.getValue());
         }
         for (Range<UnsignedLong> r : purgedRanges) {
             WritableObjects.writeLongs(out, r.lowerEndpoint().longValue(), r.upperEndpoint().longValue());
@@ -95,7 +96,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         final Map<UnsignedLong, Boolean> closedTransactions = new HashMap<>(csize);
         for (int i = 0; i < csize; ++i) {
             final UnsignedLong key = UnsignedLong.fromLongBits(WritableObjects.readLong(in));
-            final Boolean value = Boolean.valueOf(in.readBoolean());
+            final Boolean value = in.readBoolean();
             closedTransactions.put(key, value);
         }
         final RangeSet<UnsignedLong> purgedTransactions = TreeRangeSet.create();

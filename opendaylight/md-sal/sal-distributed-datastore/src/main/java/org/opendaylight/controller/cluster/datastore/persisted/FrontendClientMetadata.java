@@ -22,15 +22,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendClientMetadata implements Identifiable<ClientIdentifier>, WritableObject {
-    private final Collection<FrontendHistoryMetadata> currentHistories;
-    private final RangeSet<UnsignedLong> purgedHistories;
-    private final ClientIdentifier identifier;
+    private final @NonNull ImmutableList<FrontendHistoryMetadata> currentHistories;
+    private final @NonNull ImmutableRangeSet<UnsignedLong> purgedHistories;
+    private final @NonNull ClientIdentifier identifier;
 
     public FrontendClientMetadata(final ClientIdentifier identifier, final RangeSet<UnsignedLong> purgedHistories,
             final Collection<FrontendHistoryMetadata> currentHistories) {
