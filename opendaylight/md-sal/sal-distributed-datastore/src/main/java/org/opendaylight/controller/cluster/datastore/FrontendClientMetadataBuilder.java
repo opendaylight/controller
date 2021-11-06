@@ -26,7 +26,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongRangeSet;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
@@ -84,15 +84,14 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
     }
 
     static final class Enabled extends FrontendClientMetadataBuilder {
-
         private final Map<LocalHistoryIdentifier, FrontendHistoryMetadataBuilder> currentHistories = new HashMap<>();
-        private final UnsignedLongRangeSet purgedHistories;
         private final LocalHistoryIdentifier standaloneId;
+        private final UnsignedLongSet purgedHistories;
 
         Enabled(final String shardName, final ClientIdentifier identifier) {
             super(shardName, identifier);
 
-            purgedHistories = UnsignedLongRangeSet.create();
+            purgedHistories = UnsignedLongSet.of();
 
             // History for stand-alone transactions is always present
             standaloneId = standaloneHistoryId();
@@ -102,7 +101,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         Enabled(final String shardName, final FrontendClientMetadata meta) {
             super(shardName, meta.getIdentifier());
 
-            purgedHistories = UnsignedLongRangeSet.create(meta.getPurgedHistories());
+            purgedHistories = UnsignedLongSet.of(meta.getPurgedHistories());
             for (FrontendHistoryMetadata h : meta.getCurrentHistories()) {
                 final FrontendHistoryMetadataBuilder b = new FrontendHistoryMetadataBuilder(getIdentifier(), h);
                 currentHistories.put(b.getIdentifier(), b);
@@ -119,7 +118,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
 
         @Override
         public FrontendClientMetadata build() {
-            return new FrontendClientMetadata(getIdentifier(), purgedHistories.toImmutable(),
+            return new FrontendClientMetadata(getIdentifier(), purgedHistories.toRangeSet(),
                 Collections2.transform(currentHistories.values(), FrontendHistoryMetadataBuilder::build));
         }
 
