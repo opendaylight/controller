@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +30,7 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitMap;
 
 public class FrontendShardDataTreeSnapshotMetadataTest {
 
@@ -108,8 +108,8 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         final ImmutableUnsignedLongSet purgedHistories = tmp.immutableCopy();
 
         return new FrontendClientMetadata(clientIdentifier, purgedHistories.immutableCopy(), List.of(
-            new FrontendHistoryMetadata(num, num, true, ImmutableMap.of(UnsignedLong.ZERO, Boolean.TRUE),
-                purgedHistories)));
+            new FrontendHistoryMetadata(num, num, true,
+                UnsignedLongBitMap.copyOf(Map.of(UnsignedLong.ZERO, Boolean.TRUE)), purgedHistories)));
     }
 
     private static <T> void testObject(final T object, final T equalObject) {
