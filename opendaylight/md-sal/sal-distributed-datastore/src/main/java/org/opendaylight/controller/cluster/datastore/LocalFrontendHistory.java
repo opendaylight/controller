@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
@@ -30,21 +30,21 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
     private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
             final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
-            final UnsignedLongSet purgedTransactions) {
+            final MutableUnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
         this.chain = requireNonNull(chain);
     }
 
     static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
             final ShardDataTreeTransactionChain chain) {
-        return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), UnsignedLongSet.of());
+        return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), MutableUnsignedLongSet.of());
     }
 
     static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
             final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
-            final UnsignedLongSet purgedTransactions) {
+            final MutableUnsignedLongSet purgedTransactions) {
         return new LocalFrontendHistory(persistenceId, tree, chain, new HashMap<>(closedTransactions),
-            purgedTransactions.copy());
+            purgedTransactions.mutableCopy());
     }
 
     @Override
