@@ -18,7 +18,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongSet;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
@@ -26,21 +26,21 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
         Identifiable<LocalHistoryIdentifier> {
 
     private final @NonNull Map<UnsignedLong, Boolean> closedTransactions;
-    private final @NonNull UnsignedLongSet purgedTransactions;
+    private final @NonNull MutableUnsignedLongSet purgedTransactions;
     private final @NonNull LocalHistoryIdentifier identifier;
 
     private boolean closed;
 
     FrontendHistoryMetadataBuilder(final LocalHistoryIdentifier identifier) {
         this.identifier = requireNonNull(identifier);
-        purgedTransactions = UnsignedLongSet.of();
+        purgedTransactions = MutableUnsignedLongSet.of();
         closedTransactions = new HashMap<>(2);
     }
 
     FrontendHistoryMetadataBuilder(final ClientIdentifier clientId, final FrontendHistoryMetadata meta) {
         identifier = new LocalHistoryIdentifier(clientId, meta.getHistoryId(), meta.getCookie());
         closedTransactions = new HashMap<>(meta.getClosedTransactions());
-        purgedTransactions = UnsignedLongSet.of(meta.getPurgedTransactions());
+        purgedTransactions = meta.getPurgedTransactions().mutableCopy();
         closed = meta.isClosed();
     }
 
@@ -52,7 +52,7 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     @Override
     public FrontendHistoryMetadata build() {
         return new FrontendHistoryMetadata(identifier.getHistoryId(), identifier.getCookie(), closed,
-            closedTransactions, purgedTransactions.toRangeSet());
+            closedTransactions, purgedTransactions.immutableCopy());
     }
 
     void onHistoryClosed() {
