@@ -25,7 +25,7 @@ import org.junit.Test;
 public class UnsignedLongSetTest {
     @Test
     public void testOperations() {
-        final var set = UnsignedLongSet.of();
+        final var set = MutableUnsignedLongSet.of();
         assertEquals("UnsignedLongSet{size=0}", set.toString());
         assertFalse(set.contains(0));
 
@@ -55,7 +55,7 @@ public class UnsignedLongSetTest {
 
     @Test
     public void testSerialization() throws IOException {
-        final var set = UnsignedLongSet.of();
+        final var set = MutableUnsignedLongSet.of();
         set.add(0);
         set.add(1);
         set.add(4);
@@ -69,9 +69,9 @@ public class UnsignedLongSetTest {
         final var bytes = bos.toByteArray();
         assertArrayEquals(new byte[] { 0, 0, 0, 2, 16, 1, 17, 3, 4 }, bytes);
 
-        final UnsignedLongSet read;
+        final ImmutableUnsignedLongSet read;
         try (var in = new DataInputStream(new ByteArrayInputStream(bytes))) {
-            read = UnsignedLongSet.readFrom(in);
+            read = ImmutableUnsignedLongSet.readFrom(in);
             assertEquals(0, in.available());
         }
 
@@ -90,7 +90,7 @@ public class UnsignedLongSetTest {
 
     @Test
     public void testToRangeSet() {
-        final var set = UnsignedLongSet.of();
+        final var set = MutableUnsignedLongSet.of();
         set.add(0);
         set.add(1);
         set.add(4);

@@ -10,9 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +18,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
+import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
@@ -28,21 +26,21 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
         Identifiable<LocalHistoryIdentifier> {
 
     private final Map<UnsignedLong, Boolean> closedTransactions;
-    private final RangeSet<UnsignedLong> purgedTransactions;
+    private final MutableUnsignedLongSet purgedTransactions;
     private final LocalHistoryIdentifier identifier;
 
     private boolean closed;
 
     FrontendHistoryMetadataBuilder(final LocalHistoryIdentifier identifier) {
         this.identifier = requireNonNull(identifier);
-        this.purgedTransactions = TreeRangeSet.create();
-        this.closedTransactions = new HashMap<>(2);
+        purgedTransactions = MutableUnsignedLongSet.of();
+        closedTransactions = new HashMap<>(2);
     }
 
     FrontendHistoryMetadataBuilder(final ClientIdentifier clientId, final FrontendHistoryMetadata meta) {
         identifier = new LocalHistoryIdentifier(clientId, meta.getHistoryId(), meta.getCookie());
         closedTransactions = new HashMap<>(meta.getClosedTransactions());
-        purgedTransactions = TreeRangeSet.create(meta.getPurgedTransactions());
+        purgedTransactions = meta.getPurgedTransactions().mutableCopy();
         closed = meta.isClosed();
     }
 
@@ -71,9 +69,9 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     }
 
     void onTransactionPurged(final TransactionIdentifier txId) {
-        final UnsignedLong id = UnsignedLong.fromLongBits(txId.getTransactionId());
-        closedTransactions.remove(id);
-        purgedTransactions.add(Range.closedOpen(id, UnsignedLong.ONE.plus(id)));
+        final long longBits = txId.getTransactionId();
+        closedTransactions.remove(UnsignedLong.fromLongBits(longBits));
+        purgedTransactions.add(longBits);
     }
 
     /**

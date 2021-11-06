@@ -10,11 +10,9 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
@@ -38,9 +36,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  *
  * @author Robert Varga
  */
-@Beta
-public final class UnsignedLongSet implements Mutable, WritableObject {
-    private static final class Entry implements Comparable<Entry>, Mutable, WritableObject {
+abstract class UnsignedLongSet implements WritableObject {
+    static final class Entry implements Comparable<Entry>, Mutable, WritableObject {
         // Note: mutable to allow efficient merges.
         long lowerBits;
         long upperBits;
@@ -121,7 +118,7 @@ public final class UnsignedLongSet implements Mutable, WritableObject {
     // are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
     private final TreeSet<Entry> ranges;
 
-    private UnsignedLongSet(final TreeSet<Entry> ranges) {
+    UnsignedLongSet(final TreeSet<Entry> ranges) {
         this.ranges = requireNonNull(ranges);
     }
 
@@ -132,24 +129,11 @@ public final class UnsignedLongSet implements Mutable, WritableObject {
         }
     }
 
-    public static @NonNull UnsignedLongSet of() {
-        return new UnsignedLongSet(new TreeSet<>());
-    }
+//    public static @NonNull UnsignedLongSet of(final RangeSet<UnsignedLong> rangeSet) {
+//        return new UnsignedLongSet(rangeSet);
+//    }
 
-    public static @NonNull UnsignedLongSet of(final RangeSet<UnsignedLong> rangeSet) {
-        return new UnsignedLongSet(rangeSet);
-    }
-
-    public static @NonNull UnsignedLongSet readFrom(final DataInput in) throws IOException {
-        final int size = in.readInt();
-        final var ranges = new TreeSet<Entry>();
-        for (int i = 0; i < size; ++i) {
-            ranges.add(Entry.readFrom(in));
-        }
-        return new UnsignedLongSet(ranges);
-    }
-
-    public void add(final long longBits) {
+    final void addImpl(final long longBits) {
         final var range = Entry.of(longBits);
 
         final var headIt = headIter(range);
@@ -185,21 +169,40 @@ public final class UnsignedLongSet implements Mutable, WritableObject {
         return;
     }
 
-    public boolean contains(final long longBits) {
+    public final boolean contains(final long longBits) {
         final var headIt = headIter(Entry.of(longBits));
         return headIt.hasNext() && headIt.next().contains(longBits);
     }
 
-    public UnsignedLongSet copy() {
-        return new UnsignedLongSet(new TreeSet<>(Collections2.transform(ranges, Entry::copy)));
+    public final boolean isEmpty() {
+        return ranges.isEmpty();
     }
 
-    public ImmutableRangeSet<UnsignedLong> toRangeSet() {
-        return ImmutableRangeSet.copyOf(Collections2.transform(ranges, Entry::toUnsigned));
+    public abstract @NonNull ImmutableUnsignedLongSet immutableCopy();
+
+    public final @NonNull MutableUnsignedLongSet mutableCopy() {
+        return new MutableUnsignedLongSet(copyRanges());
+    }
+
+    final @NonNull TreeSet<Entry> copyRanges() {
+        return new TreeSet<>(Collections2.transform(ranges, Entry::copy));
+    }
+
+//    public ImmutableRangeSet<UnsignedLong> toRangeSet() {
+//        return ImmutableRangeSet.copyOf(Collections2.transform(ranges, Entry::toUnsigned));
+//    }
+
+    static final @NonNull TreeSet<Entry> readRanges(final DataInput in) throws IOException {
+        final int size = in.readInt();
+        final var ranges = new TreeSet<Entry>();
+        for (int i = 0; i < size; ++i) {
+            ranges.add(Entry.readFrom(in));
+        }
+        return ranges;
     }
 
     @Override
-    public void writeTo(final DataOutput out) throws IOException {
+    public final void writeTo(final DataOutput out) throws IOException {
         final int size = ranges.size();
         out.writeInt(size);
         for (var range : ranges) {
@@ -208,17 +211,17 @@ public final class UnsignedLongSet implements Mutable, WritableObject {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return ranges.hashCode();
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public final boolean equals(final Object obj) {
         return obj == this || obj instanceof UnsignedLongSet && ranges.equals(((UnsignedLongSet) obj).ranges);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         final var helper = MoreObjects.toStringHelper(this);
 
         final int size = ranges.size();
