@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -63,13 +62,12 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
         final var purgedHistories = ImmutableUnsignedLongSet.readFrom(in);
 
         final int currentSize = in.readInt();
-        // FIXME: ImmutableList.builder()
-        final var currentHistories = new ArrayList<FrontendHistoryMetadata>(currentSize);
+        final var currentBuilder = ImmutableList.<FrontendHistoryMetadata>builderWithExpectedSize(currentSize);
         for (int i = 0; i < currentSize; ++i) {
-            currentHistories.add(FrontendHistoryMetadata.readFrom(in));
+            currentBuilder.add(FrontendHistoryMetadata.readFrom(in));
         }
 
-        return new FrontendClientMetadata(id, purgedHistories, currentHistories);
+        return new FrontendClientMetadata(id, purgedHistories, currentBuilder.build());
     }
 
     @Override
