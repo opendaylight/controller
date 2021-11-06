@@ -22,8 +22,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Range;
-import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -35,7 +33,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -296,9 +293,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 while (iterator.hasNext() && metadata.getHistoryId() != 1) {
                     metadata = iterator.next();
                 }
-                Set<Range<UnsignedLong>> ranges = metadata.getPurgedTransactions().asRanges();
-
-                assertEquals(1, ranges.size());
+                assertEquals(1, metadata.getPurgedTransactions().size());
             } else {
                 // ask based should track no metadata
                 assertTrue(frontendMetadata.getClients().get(0).getCurrentHistories().isEmpty());
