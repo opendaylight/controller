@@ -27,7 +27,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
 
     @Override
     public ImmutableUnsignedLongSet immutableCopy() {
-        return ImmutableUnsignedLongSet.of(copyRanges());
+        return ImmutableUnsignedLongSet.copyOf(this);
     }
 
     public void add(final long longBits) {

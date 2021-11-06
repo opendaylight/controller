@@ -10,15 +10,24 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class UnsignedLongSetTest {
     @Test
     public void testOperations() {
@@ -85,5 +94,43 @@ public class UnsignedLongSetTest {
         set.add(4);
         set.add(3);
         assertEquals("[[0..2), [3..5)]", set.toRangeSet().toString());
+    }
+
+    @Test
+    public void testEmptyCopy() {
+        final var orig = MutableUnsignedLongSet.of();
+        assertSame(ImmutableUnsignedLongSet.of(), orig.immutableCopy());
+        final var copy = orig.mutableCopy();
+        assertEquals(orig, copy);
+        assertNotSame(orig, copy);
+    }
+
+    @Test
+    public void testMutableCopy() {
+        final var orig = MutableUnsignedLongSet.of();
+        orig.add(-1);
+        assertEquals("MutableUnsignedLongSet{span=[18446744073709551615..18446744073709551615], size=1}",
+            orig.toString());
+
+        final var copy = orig.mutableCopy();
+        assertEquals(orig, copy);
+        assertNotSame(orig, copy);
+
+        orig.add(-2);
+        assertNotEquals(orig, copy);
+        assertEquals("MutableUnsignedLongSet{span=[18446744073709551614..18446744073709551615], size=1}",
+            orig.toString());
+    }
+
+    @Test
+    public void testWriteRangesTo() throws IOException {
+        ImmutableUnsignedLongSet.of().writeRangesTo(mock(DataOutput.class), 0);
+    }
+
+    @Test
+    public void testWriteRangesToViolation() {
+        final var ex = assertThrows(IOException.class,
+            () -> ImmutableUnsignedLongSet.of().writeRangesTo(mock(DataOutput.class), 1));
+        assertEquals("Mismatched size: expected 0, got 1", ex.getMessage());
     }
 }
