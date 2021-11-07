@@ -77,7 +77,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         if (request instanceof TransactionPurgeRequest) {
-            return handleTransactionPurgeRequest(request, envelope, now);
+            return handleTransactionPurgeRequest((TransactionPurgeRequest) request, envelope, now);
         }
 
         final TransactionIdentifier id = request.getTarget();
@@ -117,7 +117,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         return tx.handleRequest(request, envelope, now);
     }
 
-    private TransactionSuccess<?> handleTransactionPurgeRequest(final TransactionRequest<?> request,
+    private TransactionPurgeResponse handleTransactionPurgeRequest(final TransactionPurgeRequest request,
             final RequestEnvelope envelope, final long now) {
         final TransactionIdentifier id = request.getTarget();
         final long txidBits = id.getTransactionId();
@@ -203,8 +203,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id);
 
-    abstract FrontendTransaction createReadyTransaction(TransactionIdentifier id, DataTreeModification mod)
-        ;
+    abstract FrontendTransaction createReadyTransaction(TransactionIdentifier id, DataTreeModification mod);
 
     abstract ShardDataTreeCohort createFailedCohort(TransactionIdentifier id, DataTreeModification mod,
             Exception failure);
@@ -213,8 +212,11 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             Optional<SortedSet<String>> participatingShardNames);
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues().add("identifier", getIdentifier())
-                .add("persistenceId", persistenceId).add("transactions", transactions).toString();
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).omitNullValues()
+            .add("identifier", getIdentifier())
+            .add("persistenceId", persistenceId)
+            .add("transactions", transactions)
+            .toString();
     }
 }

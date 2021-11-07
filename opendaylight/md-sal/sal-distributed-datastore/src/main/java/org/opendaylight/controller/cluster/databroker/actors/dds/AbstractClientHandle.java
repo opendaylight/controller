@@ -55,7 +55,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     @Override
-    public TransactionIdentifier getIdentifier() {
+    public final TransactionIdentifier getIdentifier() {
         return transactionId;
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      *
      * @return True if this transaction became closed during this call
      */
-    public boolean abort() {
+    public final boolean abort() {
         if (commonAbort()) {
             parent.onTransactionAbort(this);
             return true;

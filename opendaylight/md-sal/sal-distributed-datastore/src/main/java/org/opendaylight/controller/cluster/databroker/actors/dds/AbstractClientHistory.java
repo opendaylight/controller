@@ -104,7 +104,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     @Override
-    public LocalHistoryIdentifier getIdentifier() {
+    public final LocalHistoryIdentifier getIdentifier() {
         return identifier;
     }
 
@@ -135,6 +135,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     /**
      * Create a new history proxy for a given shard.
      *
+     * @param shard Shard cookie
      * @throws InversibleLockException if the shard is being reconnected
      */
     @Holding("lock")
@@ -203,7 +204,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @throws DOMTransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
-    public @NonNull ClientTransaction createTransaction() {
+    public final @NonNull ClientTransaction createTransaction() {
         checkNotClosed();
 
         synchronized (this) {
@@ -220,7 +221,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @throws DOMTransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
-    public ClientSnapshot takeSnapshot() {
+    public final ClientSnapshot takeSnapshot() {
         checkNotClosed();
 
         synchronized (this) {
@@ -239,7 +240,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     /**
      * Callback invoked from {@link ClientTransaction} when a child transaction readied for submission.
      *
-     * @param txId Transaction identifier
+     * @param tx Client transaction
      * @param cohort Transaction commit cohort
      */
     synchronized AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
@@ -274,13 +275,13 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      *
      * @param txId transaction identifier
      */
-    synchronized void onTransactionComplete(final TransactionIdentifier txId) {
+    final synchronized void onTransactionComplete(final TransactionIdentifier txId) {
         if (readyTransactions.remove(txId) == null) {
             LOG.warn("Could not find completed transaction {}", txId);
         }
     }
 
-    HistoryReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn) {
+    final HistoryReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn) {
         /*
          * This looks ugly and unusual and there is a reason for that, as the locking involved is in multiple places.
          *
@@ -328,5 +329,4 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
             }
         };
     }
-
 }

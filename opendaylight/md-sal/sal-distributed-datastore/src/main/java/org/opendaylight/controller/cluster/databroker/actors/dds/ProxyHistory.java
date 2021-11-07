@@ -8,10 +8,11 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Iterator;
@@ -130,7 +131,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         void onTransactionCompleted(final AbstractProxyTransaction tx) {
-            Verify.verify(tx instanceof LocalProxyTransaction);
+            verify(tx instanceof LocalProxyTransaction, "Unexpected transaction %s", tx);
             if (tx instanceof LocalReadWriteProxyTransaction
                     && LAST_SEALED_UPDATER.compareAndSet(this, (LocalReadWriteProxyTransaction) tx, null)) {
                 LOG.debug("Completed last sealed transaction {}", tx);
@@ -229,7 +230,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 final ConnectionEntry e = it.next();
                 final Request<?, ?> req = e.getRequest();
                 if (identifier.equals(req.getTarget())) {
-                    Verify.verify(req instanceof LocalHistoryRequest);
+                    verify(req instanceof LocalHistoryRequest, "Unexpected request %s", req);
                     if (req instanceof CreateLocalHistoryRequest) {
                         successor.connection.enqueueRequest(req, e.getCallback(), e.getEnqueuedTicks());
                         it.remove();
@@ -249,7 +250,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 final ConnectionEntry e  = it.next();
                 final Request<?, ?> req = e.getRequest();
                 if (identifier.equals(req.getTarget())) {
-                    Verify.verify(req instanceof LocalHistoryRequest);
+                    verify(req instanceof LocalHistoryRequest, "Unexpected request %s", req);
                     if (req instanceof DestroyLocalHistoryRequest) {
                         successor.connection.enqueueRequest(req, e.getCallback(), e.getEnqueuedTicks());
                         it.remove();
@@ -259,10 +260,10 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             }
         }
 
-        @GuardedBy("lock")
+        @Holding("lock")
         @Override
         ProxyHistory finishReconnect() {
-            final ProxyHistory ret = Verify.verifyNotNull(successor);
+            final ProxyHistory ret = verifyNotNull(successor);
 
             for (AbstractProxyTransaction t : proxies.values()) {
                 t.finishReconnect();
@@ -352,7 +353,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     @Override
-    public LocalHistoryIdentifier getIdentifier() {
+    public final LocalHistoryIdentifier getIdentifier() {
         return identifier;
     }
 
@@ -377,7 +378,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         return createTransactionProxy(txId, snapshotOnly, false);
     }
 
-    AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId, final boolean snapshotOnly,
+    final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId, final boolean snapshotOnly,
             final boolean isDone) {
         lock.lock();
         try {
@@ -417,7 +418,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
     }
 
-    void purgeTransaction(final AbstractProxyTransaction tx) {
+    final void purgeTransaction(final AbstractProxyTransaction tx) {
         lock.lock();
         try {
             proxies.remove(tx.getIdentifier());
@@ -462,7 +463,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     abstract ProxyHistory createSuccessor(AbstractClientConnection<ShardBackendInfo> connection);
 
     @SuppressFBWarnings(value = "UL_UNRELEASED_LOCK", justification = "Lock is released asynchronously via the cohort")
-    ProxyReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConnection) {
+    final ProxyReconnectCohort startReconnect(final ConnectedClientConnection<ShardBackendInfo> newConnection) {
         lock.lock();
         if (successor != null) {
             lock.unlock();
@@ -506,6 +507,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         // No-op for most implementations
     }
 
+    @Holding("lock")
     void onTransactionSealed(final AbstractProxyTransaction tx) {
         // No-op on most implementations
     }
