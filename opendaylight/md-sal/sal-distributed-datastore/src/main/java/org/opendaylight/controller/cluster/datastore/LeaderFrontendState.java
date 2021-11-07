@@ -14,6 +14,7 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.DeadHistoryException;
@@ -99,7 +100,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
                 } else if (request instanceof DestroyLocalHistoryRequest) {
                     return handleDestroyHistory((DestroyLocalHistoryRequest) request, envelope, now);
                 } else if (request instanceof PurgeLocalHistoryRequest) {
-                    return handlePurgeHistory((PurgeLocalHistoryRequest)request, envelope, now);
+                    return handlePurgeHistory((PurgeLocalHistoryRequest) request, envelope, now);
                 } else {
                     LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
                     throw new UnsupportedRequestException(request);
@@ -236,9 +237,9 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
     private static final Logger LOG = LoggerFactory.getLogger(LeaderFrontendState.class);
 
-    private final ShardDataTree tree;
-    private final ClientIdentifier clientId;
-    private final String persistenceId;
+    private final @NonNull ClientIdentifier clientId;
+    private final @NonNull String persistenceId;
+    private final @NonNull ShardDataTree tree;
 
     private long lastConnectTicks;
     private long lastSeenTicks;
