@@ -55,6 +55,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     @Override
+    // Non-final for mocking
     public TransactionIdentifier getIdentifier() {
         return transactionId;
     }
@@ -64,6 +65,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      *
      * @return True if this transaction became closed during this call
      */
+    // Non-final for mocking
     public boolean abort() {
         if (commonAbort()) {
             parent.onTransactionAbort(this);
