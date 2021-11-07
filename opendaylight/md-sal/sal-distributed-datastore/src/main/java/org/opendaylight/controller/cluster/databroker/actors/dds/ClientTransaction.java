@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.Optional;
@@ -92,7 +92,7 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
 
     public DOMStoreThreePhaseCommitCohort ready() {
         final Collection<AbstractProxyTransaction> toReady = ensureClosed();
-        Preconditions.checkState(toReady != null, "Attempted to submit a closed transaction %s", this);
+        checkState(toReady != null, "Attempted to submit a closed transaction %s", this);
 
         toReady.forEach(AbstractProxyTransaction::seal);
         final AbstractTransactionCommitCohort cohort;
@@ -101,8 +101,7 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
                 cohort = new EmptyTransactionCommitCohort(parent(), getIdentifier());
                 break;
             case 1:
-                cohort = new DirectTransactionCommitCohort(parent(), getIdentifier(),
-                    Iterables.getOnlyElement(toReady));
+                cohort = new DirectTransactionCommitCohort(parent(), getIdentifier(), toReady.iterator().next());
                 break;
             default:
                 cohort = new ClientTransactionCommitCohort(parent(), getIdentifier(), toReady);
