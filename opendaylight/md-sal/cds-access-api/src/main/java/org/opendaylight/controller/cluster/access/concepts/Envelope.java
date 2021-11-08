@@ -11,12 +11,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final T message;
+    private final @NonNull T message;
     private final long txSequence;
     private final long sessionId;
 
@@ -31,7 +32,7 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
      *
      * @return enclose message
      */
-    public T getMessage() {
+    public @NonNull T getMessage() {
         return message;
     }
 
