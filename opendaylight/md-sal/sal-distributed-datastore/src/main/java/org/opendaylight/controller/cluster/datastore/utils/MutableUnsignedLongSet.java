@@ -38,7 +38,8 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         final var headIt = ranges.headSet(range, true).descendingIterator();
         if (headIt.hasNext()) {
             final var head = headIt.next();
-            if (head.contains(longBits)) {
+            if (Long.compareUnsigned(head.upperBits, longBits) >= 0) {
+                // Already contained, this is a no-op
                 return;
             }
 
