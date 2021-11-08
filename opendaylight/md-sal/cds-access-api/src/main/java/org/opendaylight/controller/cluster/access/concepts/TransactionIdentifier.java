@@ -62,7 +62,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
     }
 
     private static final long serialVersionUID = 1L;
-    private final LocalHistoryIdentifier historyId;
+    private final @NonNull LocalHistoryIdentifier historyId;
     private final long transactionId;
     private String shortString;
 
@@ -71,7 +71,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
         this.transactionId = transactionId;
     }
 
-    public static TransactionIdentifier readFrom(final DataInput in) throws IOException {
+    public static @NonNull TransactionIdentifier readFrom(final DataInput in) throws IOException {
         final LocalHistoryIdentifier historyId = LocalHistoryIdentifier.readFrom(in);
         return new TransactionIdentifier(historyId, WritableObjects.readLong(in));
     }
@@ -82,7 +82,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
         WritableObjects.writeLong(out, transactionId);
     }
 
-    public LocalHistoryIdentifier getHistoryId() {
+    public @NonNull LocalHistoryIdentifier getHistoryId() {
         return historyId;
     }
 
