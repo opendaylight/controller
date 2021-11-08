@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.charset.StandardCharsets;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -65,7 +66,8 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
     }
 
     private static final long serialVersionUID = 1L;
-    private final String name;
+
+    private final @NonNull String name;
 
     @SuppressFBWarnings(value = "VO_VOLATILE_REFERENCE_TO_ARRAY",
             justification = "The array elements are non-volatile but we don't access them.")
@@ -80,13 +82,13 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         this.serialized = verifyNotNull(serialized);
     }
 
-    public static MemberName forName(final String name) {
+    public static @NonNull MemberName forName(final String name) {
         checkArgument(!Strings.isNullOrEmpty(name));
         // TODO: consider caching instances here
         return new MemberName(name);
     }
 
-    public static MemberName readFrom(final DataInput in) throws IOException {
+    public static @NonNull MemberName readFrom(final DataInput in) throws IOException {
         final byte[] serialized = new byte[in.readInt()];
         in.readFully(serialized);
         return new MemberName(new String(serialized, StandardCharsets.UTF_8));
@@ -99,12 +101,12 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         out.write(local);
     }
 
-    public String getName() {
+    public @NonNull String getName() {
         return name;
     }
 
     public org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
-        .MemberName toYang() {
+        .@NonNull MemberName toYang() {
         return new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
                 .MemberName(name);
     }

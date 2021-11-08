@@ -16,6 +16,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -51,7 +52,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         }
 
         Proxy(final ClientIdentifier frontendId, final long historyId, final long cookie) {
-            this.clientId = requireNonNull(frontendId);
+            clientId = requireNonNull(frontendId);
             this.historyId = historyId;
             this.cookie = cookie;
         }
@@ -77,7 +78,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
     }
 
     private static final long serialVersionUID = 1L;
-    private final ClientIdentifier clientId;
+    private final @NonNull ClientIdentifier clientId;
     private final long historyId;
     private final long cookie;
 
@@ -86,12 +87,12 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
     }
 
     public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId, final long cookie) {
-        this.clientId = requireNonNull(frontendId);
+        clientId = requireNonNull(frontendId);
         this.historyId = historyId;
         this.cookie = cookie;
     }
 
-    public static LocalHistoryIdentifier readFrom(final DataInput in) throws IOException {
+    public static @NonNull LocalHistoryIdentifier readFrom(final DataInput in) throws IOException {
         final ClientIdentifier clientId = ClientIdentifier.readFrom(in);
 
         final byte header = WritableObjects.readLongHeader(in);
@@ -105,7 +106,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         WritableObjects.writeLongs(out, historyId, cookie);
     }
 
-    public ClientIdentifier getClientId() {
+    public @NonNull ClientIdentifier getClientId() {
         return clientId;
     }
 

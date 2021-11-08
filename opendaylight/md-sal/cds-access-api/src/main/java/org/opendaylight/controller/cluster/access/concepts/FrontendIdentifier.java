@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Objects;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -69,11 +70,11 @@ public final class FrontendIdentifier implements WritableIdentifier {
         this.memberName = requireNonNull(memberName);
     }
 
-    public static FrontendIdentifier create(final MemberName memberName, final FrontendType clientType) {
+    public static @NonNull FrontendIdentifier create(final MemberName memberName, final FrontendType clientType) {
         return new FrontendIdentifier(memberName, clientType);
     }
 
-    public static FrontendIdentifier readFrom(final DataInput in) throws IOException {
+    public static @NonNull FrontendIdentifier readFrom(final DataInput in) throws IOException {
         final MemberName memberName = MemberName.readFrom(in);
         final FrontendType clientType = FrontendType.readFrom(in);
         return new FrontendIdentifier(memberName, clientType);
@@ -85,11 +86,11 @@ public final class FrontendIdentifier implements WritableIdentifier {
         clientType.writeTo(out);
     }
 
-    public FrontendType getClientType() {
+    public @NonNull FrontendType getClientType() {
         return clientType;
     }
 
-    public MemberName getMemberName() {
+    public @NonNull MemberName getMemberName() {
         return memberName;
     }
 
@@ -111,7 +112,7 @@ public final class FrontendIdentifier implements WritableIdentifier {
         return memberName.equals(other.memberName) && clientType.equals(other.clientType);
     }
 
-    public String toPersistentId() {
+    public @NonNull String toPersistentId() {
         return memberName.getName() + "-frontend-" + clientType.getName();
     }
 
