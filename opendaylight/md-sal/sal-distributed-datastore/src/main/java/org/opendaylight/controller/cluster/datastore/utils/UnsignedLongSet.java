@@ -20,7 +20,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
@@ -141,7 +140,7 @@ abstract class UnsignedLongSet {
     final void addImpl(final long longBits) {
         final var range = Entry.of(longBits);
 
-        final var headIt = headIter(range);
+        final var headIt = ranges.headSet(range, true).descendingIterator();
         if (headIt.hasNext()) {
             final var head = headIt.next();
             if (head.contains(longBits)) {
@@ -149,9 +148,8 @@ abstract class UnsignedLongSet {
             }
             if (head.upperBits + 1 == longBits) {
                 head.upperBits = longBits;
-                final var tailSet = ranges.tailSet(range);
-                if (!tailSet.isEmpty()) {
-                    final var tail = tailSet.first();
+                final var tail = ranges.higher(range);
+                if (tail != null) {
                     if (tail.lowerBits - 1 == longBits) {
                         tail.lowerBits = head.lowerBits;
                         headIt.remove();
@@ -161,9 +159,8 @@ abstract class UnsignedLongSet {
             }
         }
 
-        final var tailSet = ranges.tailSet(range);
-        if (!tailSet.isEmpty()) {
-            final var tail = tailSet.first();
+        final var tail = ranges.higher(range);
+        if (tail != null) {
             if (tail.lowerBits - 1 == longBits) {
                 tail.lowerBits = longBits;
                 return;
@@ -174,8 +171,8 @@ abstract class UnsignedLongSet {
     }
 
     public final boolean contains(final long longBits) {
-        final var headIt = headIter(Entry.of(longBits));
-        return headIt.hasNext() && headIt.next().contains(longBits);
+        final var head = ranges.floor(Entry.of(longBits));
+        return head != null && head.contains(longBits);
     }
 
     public final boolean isEmpty() {
@@ -226,9 +223,5 @@ abstract class UnsignedLongSet {
         }
 
         return helper.add("size", size).toString();
-    }
-
-    private Iterator<Entry> headIter(final Entry range) {
-        return ranges.headSet(range, true).descendingIterator();
     }
 }
