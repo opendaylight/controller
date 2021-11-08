@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Verify;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
 import java.io.Externalizable;
@@ -32,6 +32,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         implements Serializable {
     protected abstract static class AbstractProxy<T extends Identifier> implements Externalizable {
         private static final long serialVersionUID = 1L;
+
         private byte[] serialized;
         private T identifier;
 
@@ -54,11 +55,11 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
             final int length = in.readInt();
             serialized = new byte[length];
             in.readFully(serialized);
-            identifier = Verify.verifyNotNull(readIdentifier(ByteStreams.newDataInput(serialized)));
+            identifier = verifyNotNull(readIdentifier(ByteStreams.newDataInput(serialized)));
         }
 
         protected final Object readResolve() {
-            return Verify.verifyNotNull(createObject(identifier, serialized));
+            return verifyNotNull(createObject(identifier, serialized));
         }
 
         protected abstract @NonNull T readIdentifier(@NonNull DataInput in) throws IOException;
@@ -68,8 +69,9 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
     }
 
     private static final long serialVersionUID = 1L;
-    private final byte[] serialized;
-    private final T identifier;
+
+    private final byte @NonNull [] serialized;
+    private final @NonNull T identifier;
 
     AbstractIdentifiablePayload(final @NonNull T identifier, final byte @NonNull[] serialized) {
         this.identifier = requireNonNull(identifier);
@@ -87,7 +89,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
     }
 
     protected final Object writeReplace() {
-        return Verify.verifyNotNull(externalizableProxy(serialized));
+        return verifyNotNull(externalizableProxy(serialized));
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
