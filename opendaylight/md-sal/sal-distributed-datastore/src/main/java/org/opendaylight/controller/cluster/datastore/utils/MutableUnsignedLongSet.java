@@ -31,7 +31,45 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     public void add(final long longBits) {
-        addImpl(longBits);
+        final var ranges = trustedRanges();
+        final var range = Entry.of(longBits);
+
+        // We need Iterator.remove() to perform efficient merge below
+        final var headIt = ranges.headSet(range, true).descendingIterator();
+        if (headIt.hasNext()) {
+            final var head = headIt.next();
+            if (head.contains(longBits)) {
+                return;
+            }
+
+            // Merge into head entry if possible
+            if (head.upperBits + 1 == longBits) {
+                head.upperBits = longBits;
+
+                // Potentially merge head entry and tail entry
+                final var tail = ranges.higher(range);
+                if (tail != null) {
+                    if (tail.lowerBits - 1 == longBits) {
+                        // Expand tail, remove head
+                        tail.lowerBits = head.lowerBits;
+                        headIt.remove();
+                    }
+                }
+                return;
+            }
+        }
+
+        final var tail = ranges.higher(range);
+        if (tail != null) {
+            // Merge into tail entry if possible
+            if (tail.lowerBits - 1 == longBits) {
+                tail.lowerBits = longBits;
+                return;
+            }
+        }
+
+        // No luck, store a new entry
+        ranges.add(range);
     }
 
     public ImmutableRangeSet<UnsignedLong> toRangeSet() {

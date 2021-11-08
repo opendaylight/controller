@@ -137,39 +137,6 @@ abstract class UnsignedLongSet {
         this.ranges = requireNonNull(ranges);
     }
 
-    final void addImpl(final long longBits) {
-        final var range = Entry.of(longBits);
-
-        final var headIt = ranges.headSet(range, true).descendingIterator();
-        if (headIt.hasNext()) {
-            final var head = headIt.next();
-            if (head.contains(longBits)) {
-                return;
-            }
-            if (head.upperBits + 1 == longBits) {
-                head.upperBits = longBits;
-                final var tail = ranges.higher(range);
-                if (tail != null) {
-                    if (tail.lowerBits - 1 == longBits) {
-                        tail.lowerBits = head.lowerBits;
-                        headIt.remove();
-                    }
-                }
-                return;
-            }
-        }
-
-        final var tail = ranges.higher(range);
-        if (tail != null) {
-            if (tail.lowerBits - 1 == longBits) {
-                tail.lowerBits = longBits;
-                return;
-            }
-        }
-
-        ranges.add(range);
-    }
-
     public final boolean contains(final long longBits) {
         final var head = ranges.floor(Entry.of(longBits));
         return head != null && head.contains(longBits);
