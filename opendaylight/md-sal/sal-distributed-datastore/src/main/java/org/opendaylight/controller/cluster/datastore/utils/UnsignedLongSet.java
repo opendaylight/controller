@@ -67,10 +67,6 @@ abstract class UnsignedLongSet {
             return UnsignedLong.fromLongBits(upperBits);
         }
 
-        boolean contains(final long longBits) {
-            return Long.compareUnsigned(lowerBits, longBits) <= 0 && Long.compareUnsigned(upperBits, longBits) >= 0;
-        }
-
         Entry copy() {
             return new Entry(lowerBits, upperBits);
         }
@@ -139,7 +135,9 @@ abstract class UnsignedLongSet {
 
     public final boolean contains(final long longBits) {
         final var head = ranges.floor(Entry.of(longBits));
-        return head != null && head.contains(longBits);
+        return head != null
+            && Long.compareUnsigned(head.lowerBits, longBits) <= 0
+            && Long.compareUnsigned(head.upperBits, longBits) >= 0;
     }
 
     public final boolean isEmpty() {
