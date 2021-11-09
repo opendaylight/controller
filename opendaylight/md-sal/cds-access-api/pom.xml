@@ -16,6 +16,10 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.13</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
