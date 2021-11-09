@@ -8,17 +8,19 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -30,14 +32,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameter;
 import org.mockito.Mockito;
@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
@@ -253,7 +254,6 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     }
 
     @Test
-    @Ignore("Flushes a closed tx leak in single node, needs to be handled separately")
     public void testSingleTransactionsWritesInQuickSuccession() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
@@ -281,29 +281,41 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             }
 
             // verify frontend metadata has no holes in purged transactions causing overtime memory leak
-            Optional<ActorRef> localShard = dataStore.getActorUtils().findLocalShard("cars-1");
+            final var localShard = dataStore.getActorUtils().findLocalShard("cars-1") .orElseThrow();
             FrontendShardDataTreeSnapshotMetadata frontendMetadata =
                     (FrontendShardDataTreeSnapshotMetadata) dataStore.getActorUtils()
-                            .executeOperation(localShard.get(), new RequestFrontendMetadata());
+                            .executeOperation(localShard, new RequestFrontendMetadata());
 
+            final var clientMeta = frontendMetadata.getClients().get(0);
             if (dataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                Iterator<FrontendHistoryMetadata> iterator =
-                        frontendMetadata.getClients().get(0).getCurrentHistories().iterator();
-                FrontendHistoryMetadata metadata = iterator.next();
-                while (iterator.hasNext() && metadata.getHistoryId() != 1) {
-                    metadata = iterator.next();
-                }
-                assertEquals(1, metadata.getPurgedTransactions().size());
+                assertTellMetadata(clientMeta);
             } else {
-                // ask based should track no metadata
-                assertTrue(frontendMetadata.getClients().get(0).getCurrentHistories().isEmpty());
+                assertAskMetadata(clientMeta);
             }
 
-            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
-                    .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("# cars", numCars, ((Collection<?>) optional.get().body()).size());
+            final var body = txChain.newReadOnlyTransaction().read(CarsModel.CAR_LIST_PATH)
+                .get(5, TimeUnit.SECONDS)
+                .orElseThrow()
+                .body();
+            assertThat(body, instanceOf(Collection.class));
+            assertEquals("# cars", numCars, ((Collection<?>) body).size());
         }
+    }
+
+    private static void assertAskMetadata(final FrontendClientMetadata clientMeta) {
+        // FIXME: needs to be enabled
+        assumeFalse(true);
+        // ask based should track no metadata
+        assertEquals(List.of(), clientMeta.getCurrentHistories());
+    }
+
+    private static void assertTellMetadata(final FrontendClientMetadata clientMeta) {
+        final var iterator = clientMeta.getCurrentHistories().iterator();
+        FrontendHistoryMetadata metadata = iterator.next();
+        while (iterator.hasNext() && metadata.getHistoryId() != 1) {
+            metadata = iterator.next();
+        }
+        assertEquals("[[0..7]]", metadata.getPurgedTransactions().ranges().toString());
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
