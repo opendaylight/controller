@@ -33,7 +33,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
         this.currentHistories = ImmutableList.copyOf(currentHistories);
     }
 
-    public Collection<FrontendHistoryMetadata> getCurrentHistories() {
+    public ImmutableList<FrontendHistoryMetadata> getCurrentHistories() {
         return currentHistories;
     }
 
