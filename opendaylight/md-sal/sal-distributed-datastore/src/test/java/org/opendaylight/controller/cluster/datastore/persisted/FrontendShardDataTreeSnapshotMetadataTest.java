@@ -102,12 +102,9 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         final FrontendIdentifier frontendIdentifier = FrontendIdentifier.create(MemberName.forName(indexName),
                 FrontendType.forName(index));
         final ClientIdentifier clientIdentifier = ClientIdentifier.create(frontendIdentifier, num);
+        final ImmutableUnsignedLongSet purgedHistories = MutableUnsignedLongSet.of(0).immutableCopy();
 
-        final MutableUnsignedLongSet tmp = MutableUnsignedLongSet.of();
-        tmp.add(0);
-        final ImmutableUnsignedLongSet purgedHistories = tmp.immutableCopy();
-
-        return new FrontendClientMetadata(clientIdentifier, purgedHistories.immutableCopy(), List.of(
+        return new FrontendClientMetadata(clientIdentifier, purgedHistories, List.of(
             new FrontendHistoryMetadata(num, num, true,
                 UnsignedLongBitmap.copyOf(Map.of(UnsignedLong.ZERO, Boolean.TRUE)), purgedHistories)));
     }
