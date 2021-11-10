@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
@@ -34,7 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONCodecFactorySupplier;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.util.SchemaInferenceStack;
 
 public final class JsonExportActor extends AbstractUntypedActor {
     // Internal messages
@@ -44,7 +45,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         private final DataTreeCandidate dataTreeCandidate;
 
         public ExportSnapshot(final DataTreeCandidate candidate, final String id) {
-            this.dataTreeCandidate = requireNonNull(candidate);
+            dataTreeCandidate = requireNonNull(candidate);
             this.id = requireNonNull(id);
         }
     }
@@ -66,12 +67,12 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     private final List<ReplicatedLogEntry> entries = new ArrayList<>();
-    private final EffectiveModelContext schemaContext;
-    private final Path baseDirPath;
+    private final @NonNull EffectiveModelContext schemaContext;
+    private final @NonNull Path baseDirPath;
 
     private JsonExportActor(final EffectiveModelContext schemaContext, final Path dirPath) {
         this.schemaContext = requireNonNull(schemaContext);
-        this.baseDirPath = requireNonNull(dirPath);
+        baseDirPath = requireNonNull(dirPath);
     }
 
     public static Props props(final EffectiveModelContext schemaContext, final String dirPath) {
@@ -125,7 +126,8 @@ public final class JsonExportActor extends AbstractUntypedActor {
 
             try (NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(
                 JSONNormalizedNodeStreamWriter.createNestedWriter(
-                    JSONCodecFactorySupplier.RFC7951.getShared(schemaContext), SchemaPath.ROOT, null, jsonWriter),
+                    JSONCodecFactorySupplier.RFC7951.getShared(schemaContext),
+                    SchemaInferenceStack.of(schemaContext).toInference(), null, jsonWriter),
                 true)) {
                 for (NormalizedNode node : root.body()) {
                     nnWriter.write(node);
