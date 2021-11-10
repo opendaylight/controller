@@ -37,7 +37,6 @@ import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -84,6 +83,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMet
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
@@ -370,10 +370,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             writeTx.write(CarsModel.newCarPath("car" + i), CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000)));
             followerTestKit.doCommit(writeTx.ready());
 
-            DOMStoreReadTransaction domStoreReadTransaction = txChain.newReadOnlyTransaction();
-            domStoreReadTransaction.read(CarsModel.BASE_PATH).get();
-
-            domStoreReadTransaction.close();
+            try (var tx = txChain.newReadOnlyTransaction()) {
+                tx.read(CarsModel.BASE_PATH).get();
+            }
         }
 
         // wait to let the shard catch up with purged
@@ -413,17 +412,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             metadata = iterator.next();
         }
 
-        assertEquals(0, metadata.getClosedTransactions().size());
-
-        final var purgedRanges = metadata.getPurgedTransactions().ranges();
-
         // FIXME: CONTROLLER-1991: remove this assumption
         assumeTrue(false);
 
-        assertEquals(1, purgedRanges.size());
-        final var purgedRange = purgedRanges.first();
-        assertEquals(UnsignedLong.ZERO, purgedRange.lower());
-        assertEquals(UnsignedLong.valueOf(10), purgedRange.upper());
+        assertEquals(UnsignedLongBitmap.of(), metadata.getClosedTransactions());
+        assertEquals("[[0.." + numCars * 2 + "]]", metadata.getPurgedTransactions().toString());
     }
 
     @Test
@@ -445,10 +438,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             writeTx = txChain.newWriteOnlyTransaction();
             writeTx.close();
 
-            DOMStoreReadTransaction domStoreReadTransaction = txChain.newReadOnlyTransaction();
-            domStoreReadTransaction.read(CarsModel.BASE_PATH).get();
-
-            domStoreReadTransaction.close();
+            try (var tx = txChain.newReadOnlyTransaction()) {
+                tx.read(CarsModel.BASE_PATH).get();
+            }
         }
 
         writeTx = txChain.newWriteOnlyTransaction();
