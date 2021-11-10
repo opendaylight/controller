@@ -30,8 +30,8 @@ public class ShardWriteTransaction extends ShardTransaction {
     private Exception lastBatchedModificationsException;
     private final ReadWriteShardDataTreeTransaction transaction;
 
-    public ShardWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
-            ShardStats shardStats) {
+    public ShardWriteTransaction(final ReadWriteShardDataTreeTransaction transaction, final ActorRef shardActor,
+            final ShardStats shardStats) {
         super(shardActor, shardStats, transaction.getIdentifier());
         this.transaction = transaction;
     }
@@ -42,7 +42,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     }
 
     @Override
-    public void handleReceive(Object message) {
+    public void handleReceive(final Object message) {
         if (message instanceof BatchedModifications) {
             batchedModifications((BatchedModifications)message);
         } else {
@@ -51,7 +51,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void batchedModifications(BatchedModifications batched) {
+    private void batchedModifications(final BatchedModifications batched) {
         if (checkClosed()) {
             if (batched.isReady()) {
                 getSelf().tell(PoisonPill.getInstance(), getSelf());
@@ -90,25 +90,24 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    protected final void dataExists(DataExists message) {
+    protected final void dataExists(final DataExists message) {
         super.dataExists(transaction, message);
     }
 
-    protected final void readData(ReadData message) {
+    protected final void readData(final ReadData message) {
         super.readData(transaction, message);
     }
 
     private boolean checkClosed() {
-        if (transaction.isClosed()) {
+        final boolean ret = transaction.isClosed();
+        if (ret) {
             getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
                     "Transaction is closed, no modifications allowed")), getSelf());
-            return true;
-        } else {
-            return false;
         }
+        return ret;
     }
 
-    private void readyTransaction(BatchedModifications batched) {
+    private void readyTransaction(final BatchedModifications batched) {
         TransactionIdentifier transactionID = getTransactionId();
 
         LOG.debug("readyTransaction : {}", transactionID);
