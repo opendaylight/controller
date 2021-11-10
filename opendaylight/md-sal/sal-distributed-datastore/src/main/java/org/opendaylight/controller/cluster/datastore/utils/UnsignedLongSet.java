@@ -19,6 +19,7 @@ import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -151,7 +152,7 @@ abstract class UnsignedLongSet {
     public abstract @NonNull ImmutableUnsignedLongSet immutableCopy();
 
     public final @NonNull MutableUnsignedLongSet mutableCopy() {
-        return new MutableUnsignedLongSet(new TreeSet<>(Collections2.transform(ranges, Entry::copy)));
+        return new MutableUnsignedLongSet(new TreeSet<>(copiedRanges()));
     }
 
     public final @NonNull NavigableSet<Entry> ranges() {
@@ -160,6 +161,10 @@ abstract class UnsignedLongSet {
 
     final @NonNull NavigableSet<Entry> trustedRanges() {
         return ranges;
+    }
+
+    final @NonNull Collection<Entry> copiedRanges() {
+        return Collections2.transform(ranges, Entry::copy);
     }
 
     @Override
