@@ -35,7 +35,7 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
         if (mutable.isEmpty()) {
             return of();
         }
-        if (mutable.size() <= ARRAY_MAX_ELEMENTS) {
+        if (mutable.rangeSize() <= ARRAY_MAX_ELEMENTS) {
             return new ImmutableUnsignedLongSet(ImmutableSortedSet.copyOfSorted(mutable.trustedRanges()));
         }
         return new ImmutableUnsignedLongSet(new TreeSet<>(mutable.trustedRanges()));
@@ -77,13 +77,14 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
-        out.writeInt(size());
+        out.writeInt(rangeSize());
         writeRanges(out);
     }
 
     public void writeRangesTo(final @NonNull DataOutput out, final int size) throws IOException {
-        if (size != size()) {
-            throw new IOException("Mismatched size: expected " + size() + ", got " + size);
+        final int rangeSize = rangeSize();
+        if (size != rangeSize) {
+            throw new IOException("Mismatched size: expected " + rangeSize + ", got " + size);
         }
         writeRanges(out);
     }
