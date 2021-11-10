@@ -387,7 +387,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
                     if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars);
+                        assertTellClientMetadata(clientMeta, numCars * 2);
                     } else {
                         assertAskClientMetadata(clientMeta);
                     }
@@ -405,7 +405,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals(List.of(), clientMeta.getCurrentHistories());
     }
 
-    private void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final int numCars) {
+    private void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
         final var iterator = clientMeta.getCurrentHistories().iterator();
         var metadata = iterator.next();
         while (iterator.hasNext() && metadata.getHistoryId() != 1) {
@@ -416,7 +416,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assumeTrue(false);
 
         assertEquals(UnsignedLongBitmap.of(), metadata.getClosedTransactions());
-        assertEquals("[[0.." + numCars * 2 + "]]", metadata.getPurgedTransactions().toString());
+        assertEquals("[[0.." + lastPurged + "]]", metadata.getPurgedTransactions().ranges().toString());
     }
 
     @Test
@@ -460,7 +460,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
                     if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars);
+                        assertTellClientMetadata(clientMeta, numCars * 2 + 1);
                     } else {
                         assertAskClientMetadata(clientMeta);
                     }
