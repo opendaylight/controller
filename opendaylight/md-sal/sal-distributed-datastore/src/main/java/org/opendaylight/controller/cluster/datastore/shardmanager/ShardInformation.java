@@ -104,7 +104,7 @@ public final class ShardInformation {
     }
 
     void setLocalDataTree(final Optional<ReadOnlyDataTree> dataTree) {
-        this.localShardDataTree = dataTree;
+        localShardDataTree = dataTree;
     }
 
     Optional<ReadOnlyDataTree> getLocalShardDataTree() {
@@ -116,10 +116,10 @@ public final class ShardInformation {
     }
 
     void setDatastoreContext(final DatastoreContext newDatastoreContext, final ActorRef sender) {
-        this.datastoreContext = newDatastoreContext;
+        datastoreContext = newDatastoreContext;
         if (actor != null) {
             LOG.debug("Sending new DatastoreContext to {}", shardId);
-            actor.tell(this.datastoreContext, sender);
+            actor.tell(datastoreContext, sender);
         }
     }
 
@@ -167,17 +167,13 @@ public final class ShardInformation {
     }
 
     String getSerializedLeaderActor() {
-        if (isLeader()) {
-            return Serialization.serializedActorPath(getActor());
-        } else {
-            return addressResolver.resolve(leaderId);
-        }
+        return isLeader() ? Serialization.serializedActorPath(getActor()) : addressResolver.resolve(leaderId);
     }
 
     void setActorInitialized() {
         LOG.debug("Shard {} is initialized", shardId);
 
-        this.actorInitialized = true;
+        actorInitialized = true;
 
         notifyOnShardInitializedCallbacks();
     }
@@ -212,7 +208,7 @@ public final class ShardInformation {
     }
 
     void setRole(final String newRole) {
-        this.role = newRole;
+        role = newRole;
 
         notifyOnShardInitializedCallbacks();
     }
@@ -222,13 +218,13 @@ public final class ShardInformation {
     }
 
     void setFollowerSyncStatus(final boolean syncStatus) {
-        this.followerSyncStatus = syncStatus;
+        followerSyncStatus = syncStatus;
     }
 
     boolean isInSync() {
-        if (RaftState.Follower.name().equals(this.role)) {
+        if (RaftState.Follower.name().equals(role)) {
             return followerSyncStatus;
-        } else if (RaftState.Leader.name().equals(this.role)) {
+        } else if (RaftState.Leader.name().equals(role)) {
             return true;
         }
 
@@ -236,10 +232,10 @@ public final class ShardInformation {
     }
 
     boolean setLeaderId(final String newLeaderId) {
-        final boolean changed = !Objects.equals(this.leaderId, newLeaderId);
-        this.leaderId = newLeaderId;
+        final boolean changed = !Objects.equals(leaderId, newLeaderId);
+        leaderId = newLeaderId;
         if (newLeaderId != null) {
-            this.leaderAvailable = true;
+            leaderAvailable = true;
         }
         notifyOnShardInitializedCallbacks();
 
@@ -271,7 +267,7 @@ public final class ShardInformation {
     }
 
     void setActiveMember(final boolean isActiveMember) {
-        this.activeMember = isActiveMember;
+        activeMember = isActiveMember;
     }
 
     EffectiveModelContext getSchemaContext() {
