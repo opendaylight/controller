@@ -91,7 +91,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
 
         // No luck, store a new entry
-        ranges.add(range);
+        ranges.add(range.copy());
     }
 
     private static void addRange(final NavigableSet<Entry> ranges, final Entry range) {
@@ -116,7 +116,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
 
         // No luck, insert
-        ranges.add(range);
+        ranges.add(range.copy());
     }
 
     private static void expandLower(final NavigableSet<Entry> ranges, final Entry entry, final long upperBits) {
