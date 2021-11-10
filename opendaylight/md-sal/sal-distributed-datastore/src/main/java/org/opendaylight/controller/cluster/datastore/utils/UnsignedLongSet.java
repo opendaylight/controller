@@ -12,9 +12,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
-import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -39,8 +37,8 @@ abstract class UnsignedLongSet {
     @Beta
     @VisibleForTesting
     public static final class Entry implements Comparable<Entry>, Immutable {
-        final long lowerBits;
-        final long upperBits;
+        public final long lowerBits;
+        public final long upperBits;
 
         private Entry(final long lowerBits, final long upperBits) {
             this.lowerBits = lowerBits;
@@ -55,27 +53,12 @@ abstract class UnsignedLongSet {
             return new Entry(lowerBits, upperBits);
         }
 
-        @VisibleForTesting
-        public @NonNull UnsignedLong lower() {
-            return UnsignedLong.fromLongBits(lowerBits);
-        }
-
-        @VisibleForTesting
-        public @NonNull UnsignedLong upper() {
-            return UnsignedLong.fromLongBits(upperBits);
-        }
-
         @NonNull Entry withLower(final long newLowerBits) {
             return of(newLowerBits, upperBits);
         }
 
         @NonNull Entry withUpper(final long newUpperBits) {
             return of(lowerBits, newUpperBits);
-        }
-
-        // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)
-        @NonNull Range<UnsignedLong> toUnsigned() {
-            return Range.closedOpen(UnsignedLong.fromLongBits(lowerBits), UnsignedLong.fromLongBits(upperBits + 1));
         }
 
         // These two methods provide the same serialization format as the one we've used to serialize
@@ -146,7 +129,7 @@ abstract class UnsignedLongSet {
         return ranges.isEmpty();
     }
 
-    public final int size() {
+    public final int rangeSize() {
         return ranges.size();
     }
 
