@@ -41,8 +41,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
             AtomicLongFieldUpdater.newUpdater(AbstractTransactionContextFactory.class, "nextTx");
 
     private final ConcurrentMap<String, F> knownLocal = new ConcurrentHashMap<>();
-    private final LocalHistoryIdentifier historyId;
-    private final ActorUtils actorUtils;
+    private final @NonNull LocalHistoryIdentifier historyId;
+    private final @NonNull ActorUtils actorUtils;
 
     // Used via TX_COUNTER_UPDATER
     @SuppressWarnings("unused")
@@ -94,14 +94,14 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                         parent.getIdentifier());
                 return new DirectTransactionContextWrapper(parent.getIdentifier(), actorUtils, shardName,
                         localContext);
-            } else {
-                LOG.debug("Tx {}: Local transaction context creation failed, using DelayedTransactionWrapper",
-                        parent.getIdentifier());
-                final RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(
-                        transactionContextWrapper, parent, shardName);
-                remote.setPrimaryShard(primaryShardInfo);
-                return transactionContextWrapper;
             }
+
+            LOG.debug("Tx {}: Local transaction context creation failed, using DelayedTransactionWrapper",
+                parent.getIdentifier());
+            final RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(
+                transactionContextWrapper, parent, shardName);
+            remote.setPrimaryShard(primaryShardInfo);
+            return transactionContextWrapper;
         } finally {
             onTransactionContextCreated(parent.getIdentifier());
         }
@@ -148,11 +148,9 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         if (findPrimaryFuture.isCompleted()) {
             final Try<PrimaryShardInfo> maybe = findPrimaryFuture.value().get();
             if (maybe.isSuccess()) {
-                return maybeCreateDirectTransactionContextWrapper(maybe.get(), parent, shardName,
-                        contextWrapper);
+                return maybeCreateDirectTransactionContextWrapper(maybe.get(), parent, shardName, contextWrapper);
             } else {
-                onFindPrimaryShardFailure(maybe.failed().get(), parent, shardName,
-                        contextWrapper);
+                onFindPrimaryShardFailure(maybe.failed().get(), parent, shardName, contextWrapper);
             }
         } else {
             findPrimaryFuture.onComplete(result -> {
