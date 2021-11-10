@@ -124,6 +124,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import scala.collection.Set;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -1266,9 +1267,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         Member follower2Member = follower2Cluster.readView().self();
 
         await().atMost(10, TimeUnit.SECONDS)
-                .until(() -> leaderCluster.readView().unreachableMembers().contains(follower2Member));
+                .until(() -> containsUnreachable(leaderCluster, follower2Member));
         await().atMost(10, TimeUnit.SECONDS)
-                .until(() -> followerCluster.readView().unreachableMembers().contains(follower2Member));
+                .until(() -> containsUnreachable(followerCluster, follower2Member));
 
         ActorRef followerCars = followerDistributedDataStore.getActorUtils().findLocalShard("cars").get();
 
@@ -1288,6 +1289,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals(initialState.getCurrentTerm(), followerState.getCurrentTerm());
 
         ds2.close();
+    }
+
+    private static Boolean containsUnreachable(final Cluster cluster, final Member member) {
+        // unreachableMembers() returns scala.collection.immutable.Set, but we are using scala.collection.Set to fix JDT
+        // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=468276#c32
+        final Set<Member> members = cluster.readView().unreachableMembers();
+        return members.contains(member);
     }
 
     @Test
