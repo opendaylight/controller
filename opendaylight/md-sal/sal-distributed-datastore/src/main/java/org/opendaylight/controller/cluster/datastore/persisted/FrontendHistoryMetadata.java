@@ -61,7 +61,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         out.writeBoolean(closed);
 
         final int closedSize = closedTransactions.size();
-        final int purgedSize = purgedTransactions.size();
+        final int purgedSize = purgedTransactions.rangeSize();
         WritableObjects.writeLongs(out, closedSize, purgedSize);
         closedTransactions.writeEntriesTo(out, closedSize);
         purgedTransactions.writeRangesTo(out, purgedSize);
