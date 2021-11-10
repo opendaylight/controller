@@ -40,21 +40,22 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     public void add(final long longBits) {
-        addOne(trustedRanges(), Entry.of(longBits), longBits);
+        addOne(trustedRanges(), longBits);
     }
 
     public void addAll(final UnsignedLongSet other) {
         final var ranges = trustedRanges();
         for (var range : other.trustedRanges()) {
             if (range.lowerBits == range.upperBits) {
-                addOne(ranges, range, range.lowerBits);
+                addOne(ranges, range.lowerBits);
             } else {
                 addRange(ranges, range);
             }
         }
     }
 
-    private static void addOne(final NavigableSet<Entry> ranges, final Entry range, final long longBits) {
+    private static void addOne(final NavigableSet<Entry> ranges, final long longBits) {
+        final var range = Entry.of(longBits);
         // We need Iterator.remove() to perform efficient merge below
         final var headIt = ranges.headSet(range, true).descendingIterator();
         if (headIt.hasNext()) {
@@ -116,7 +117,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
 
         // No luck, insert
-        ranges.add(range);
+        ranges.add(range.copy());
     }
 
     private static void expandLower(final NavigableSet<Entry> ranges, final Entry entry, final long upperBits) {
