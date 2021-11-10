@@ -36,9 +36,9 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
             return of();
         }
         if (mutable.size() <= ARRAY_MAX_ELEMENTS) {
-            return new ImmutableUnsignedLongSet(ImmutableSortedSet.copyOf(mutable.copiedRanges()));
+            return new ImmutableUnsignedLongSet(ImmutableSortedSet.copyOfSorted(mutable.trustedRanges()));
         }
-        return new ImmutableUnsignedLongSet(new TreeSet<>(mutable.copiedRanges()));
+        return new ImmutableUnsignedLongSet(new TreeSet<>(mutable.trustedRanges()));
     }
 
     public static @NonNull ImmutableUnsignedLongSet of() {

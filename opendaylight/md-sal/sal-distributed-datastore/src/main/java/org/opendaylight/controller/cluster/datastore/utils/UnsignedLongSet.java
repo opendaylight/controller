@@ -12,19 +12,17 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.yangtools.concepts.Mutable;
+import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -40,40 +38,43 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 abstract class UnsignedLongSet {
     @Beta
     @VisibleForTesting
-    public static final class Entry implements Comparable<Entry>, Mutable {
-        // Note: mutable to allow efficient merges.
-        long lowerBits;
-        long upperBits;
+    public static final class Entry implements Comparable<Entry>, Immutable {
+        final long lowerBits;
+        final long upperBits;
 
         private Entry(final long lowerBits, final long upperBits) {
             this.lowerBits = lowerBits;
             this.upperBits = upperBits;
         }
 
-        static Entry of(final long longBits) {
+        static @NonNull Entry of(final long longBits) {
             return of(longBits, longBits);
         }
 
-        static Entry of(final long lowerBits, final long upperBits) {
+        static @NonNull Entry of(final long lowerBits, final long upperBits) {
             return new Entry(lowerBits, upperBits);
         }
 
         @VisibleForTesting
-        public UnsignedLong lower() {
+        public @NonNull UnsignedLong lower() {
             return UnsignedLong.fromLongBits(lowerBits);
         }
 
         @VisibleForTesting
-        public UnsignedLong upper() {
+        public @NonNull UnsignedLong upper() {
             return UnsignedLong.fromLongBits(upperBits);
         }
 
-        Entry copy() {
-            return new Entry(lowerBits, upperBits);
+        @NonNull Entry withLower(final long newLowerBits) {
+            return of(newLowerBits, upperBits);
+        }
+
+        @NonNull Entry withUpper(final long newUpperBits) {
+            return of(lowerBits, newUpperBits);
         }
 
         // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)
-        Range<UnsignedLong> toUnsigned() {
+        @NonNull Range<UnsignedLong> toUnsigned() {
             return Range.closedOpen(UnsignedLong.fromLongBits(lowerBits), UnsignedLong.fromLongBits(upperBits + 1));
         }
 
@@ -152,7 +153,7 @@ abstract class UnsignedLongSet {
     public abstract @NonNull ImmutableUnsignedLongSet immutableCopy();
 
     public final @NonNull MutableUnsignedLongSet mutableCopy() {
-        return new MutableUnsignedLongSet(new TreeSet<>(copiedRanges()));
+        return new MutableUnsignedLongSet(new TreeSet<>(ranges));
     }
 
     public final @NonNull NavigableSet<Entry> ranges() {
@@ -161,10 +162,6 @@ abstract class UnsignedLongSet {
 
     final @NonNull NavigableSet<Entry> trustedRanges() {
         return ranges;
-    }
-
-    final @NonNull Collection<Entry> copiedRanges() {
-        return Collections2.transform(ranges, Entry::copy);
     }
 
     @Override
