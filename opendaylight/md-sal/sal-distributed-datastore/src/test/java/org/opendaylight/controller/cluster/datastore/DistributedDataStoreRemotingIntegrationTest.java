@@ -1411,14 +1411,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testSnapshotOnRootOverwrite() throws Exception {
-        // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
-
-        final String testName = "testSnapshotOnRootOverwrite";
-        final String[] shards = {"cars", "default"};
-        initDatastores(testName, "module-shards-default-cars-member1-and-2.conf", shards,
-                leaderDatastoreContextBuilder.snapshotOnRootOverwrite(true),
-                followerDatastoreContextBuilder.snapshotOnRootOverwrite(true));
+        initDatastores("testSnapshotOnRootOverwrite", "module-shards-default-cars-member1-and-2.conf",
+            new String[] {"cars", "default"},
+            leaderDatastoreContextBuilder.snapshotOnRootOverwrite(true),
+            followerDatastoreContextBuilder.snapshotOnRootOverwrite(true));
 
         leaderTestKit.waitForMembersUp("member-2");
         final ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
@@ -1428,6 +1424,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
 
+        // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
+        //                         the snapshot index seems to fluctuate
+        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
             state -> assertEquals(1, state.getSnapshotIndex()));
 
@@ -1465,7 +1464,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 12);
     }
 
-    private void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
+    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
                 List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
                 assertEquals(1, snap.size());
