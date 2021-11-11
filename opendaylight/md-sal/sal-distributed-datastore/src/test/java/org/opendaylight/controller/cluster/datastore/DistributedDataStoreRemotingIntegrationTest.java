@@ -900,9 +900,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionForwardedToLeaderAfterRetry() throws Exception {
-        // FIXME: remove when test passes also for ClientBackedDataStore
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
-
         followerDatastoreContextBuilder.shardBatchedModificationCount(2);
         leaderDatastoreContextBuilder.shardBatchedModificationCount(2);
         initDatastoresWithCarsAndPeople("testTransactionForwardedToLeaderAfterRetry");
@@ -972,6 +969,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         readWriteTx.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
 
+        // FIXME: CONTROLLER-2017: ClientBackedDataStore reports only 4 transactions
+        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
         IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
             stats -> assertEquals("getReadWriteTransactionCount", 5, stats.getReadWriteTransactionCount()));
 
