@@ -15,7 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -305,8 +304,6 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     }
 
     private static void assertAskMetadata(final FrontendClientMetadata clientMeta) {
-        // FIXME: needs to be enabled
-        assumeFalse(true);
         // ask based should track no metadata
         assertEquals(List.of(), clientMeta.getCurrentHistories());
     }
