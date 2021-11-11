@@ -422,8 +422,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testCloseTransactionMetadataLeak() throws Exception {
-        // FIXME: Ask-based frontend seems to have some issues with back to back close
-        assumeTrue(testParameter.isAssignableFrom(TestClientBackedDataStore.class));
+        // FIXME: CONTROLLER-2016: ask-based frontend triggers this:
+        //
+        // java.lang.IllegalStateException: Previous transaction
+        //            member-2-datastore-testCloseTransactionMetadataLeak-fe-0-chn-1-txn-1-0 is not ready yet
+        //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy$Allocated.checkReady()
+        //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy.newReadOnlyTransaction()
+        assumeTrue(testParameter.isAssignableFrom(ClientBackedDataStore.class));
 
         initDatastoresWithCars("testCloseTransactionMetadataLeak");
 
