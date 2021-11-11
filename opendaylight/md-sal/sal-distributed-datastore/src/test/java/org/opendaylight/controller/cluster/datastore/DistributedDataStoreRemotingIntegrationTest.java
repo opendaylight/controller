@@ -999,9 +999,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testLeadershipTransferOnShutdown() throws Exception {
-        // FIXME: remove when test passes also for ClientBackedDataStore
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
-
         leaderDatastoreContextBuilder.shardBatchedModificationCount(1);
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(10).customRaftPolicyImplementation(null);
         final String testName = "testLeadershipTransferOnShutdown";
@@ -1024,16 +1021,21 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
             final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
-            IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-                stats -> assertEquals("getTxCohortCacheSize", 1, stats.getTxCohortCacheSize()));
+            final var usesCohorts = DistributedDataStore.class.isAssignableFrom(testParameter);
+            if (usesCohorts) {
+                IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+                    stats -> assertEquals("getTxCohortCacheSize", 1, stats.getTxCohortCacheSize()));
+            }
 
             writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
             final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             writeTx.write(CarsModel.newCarPath("optima"), car);
             final DOMStoreThreePhaseCommitCohort cohort2 = writeTx.ready();
 
-            IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-                stats -> assertEquals("getTxCohortCacheSize", 2, stats.getTxCohortCacheSize()));
+            if (usesCohorts) {
+                IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+                    stats -> assertEquals("getTxCohortCacheSize", 2, stats.getTxCohortCacheSize()));
+            }
 
             // Gracefully stop the leader via a Shutdown message.
 
