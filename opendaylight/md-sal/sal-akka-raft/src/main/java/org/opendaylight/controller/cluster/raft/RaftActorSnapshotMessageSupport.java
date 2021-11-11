@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
@@ -47,7 +48,7 @@ class RaftActorSnapshotMessageSupport {
     RaftActorSnapshotMessageSupport(final RaftActorContext context, final RaftActorSnapshotCohort cohort) {
         this.context = context;
         this.cohort = cohort;
-        this.log = context.getLogger();
+        log = context.getLogger();
 
         context.getSnapshotManager().setCreateSnapshotConsumer(
             outputStream -> cohort.createSnapshot(context.getActor(), outputStream));
@@ -58,7 +59,7 @@ class RaftActorSnapshotMessageSupport {
         return cohort;
     }
 
-    boolean handleSnapshotMessage(Object message, ActorRef sender) {
+    boolean handleSnapshotMessage(final Object message, final ActorRef sender) {
         if (message instanceof ApplySnapshot) {
             onApplySnapshot((ApplySnapshot) message);
         } else if (message instanceof SaveSnapshotSuccess) {
@@ -71,6 +72,8 @@ class RaftActorSnapshotMessageSupport {
             context.getSnapshotManager().commit(-1, -1);
         } else if (message instanceof GetSnapshot) {
             onGetSnapshot(sender, (GetSnapshot) message);
+        } else if (message instanceof SnapshotComplete) {
+            log.debug("{}: SnapshotComplete received", context.getId());
         } else {
             return false;
         }
@@ -78,21 +81,21 @@ class RaftActorSnapshotMessageSupport {
         return true;
     }
 
-    private void onCaptureSnapshotReply(CaptureSnapshotReply reply) {
+    private void onCaptureSnapshotReply(final CaptureSnapshotReply reply) {
         log.debug("{}: CaptureSnapshotReply received by actor", context.getId());
 
         context.getSnapshotManager().persist(reply.getSnapshotState(), reply.getInstallSnapshotStream(),
                 context.getTotalMemory());
     }
 
-    private void onSaveSnapshotFailure(SaveSnapshotFailure saveSnapshotFailure) {
+    private void onSaveSnapshotFailure(final SaveSnapshotFailure saveSnapshotFailure) {
         log.error("{}: SaveSnapshotFailure received for snapshot Cause:",
                 context.getId(), saveSnapshotFailure.cause());
 
         context.getSnapshotManager().rollback();
     }
 
-    private void onSaveSnapshotSuccess(SaveSnapshotSuccess success) {
+    private void onSaveSnapshotSuccess(final SaveSnapshotSuccess success) {
         long sequenceNumber = success.metadata().sequenceNr();
 
         log.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
@@ -100,13 +103,13 @@ class RaftActorSnapshotMessageSupport {
         context.getSnapshotManager().commit(sequenceNumber, success.metadata().timestamp());
     }
 
-    private void onApplySnapshot(ApplySnapshot message) {
+    private void onApplySnapshot(final ApplySnapshot message) {
         log.info("{}: Applying snapshot on follower:  {}", context.getId(), message.getSnapshot());
 
         context.getSnapshotManager().apply(message);
     }
 
-    private void onGetSnapshot(ActorRef sender, GetSnapshot getSnapshot) {
+    private void onGetSnapshot(final ActorRef sender, final GetSnapshot getSnapshot) {
         log.debug("{}: onGetSnapshot", context.getId());
 
 
@@ -134,7 +137,7 @@ class RaftActorSnapshotMessageSupport {
     }
 
     @VisibleForTesting
-    void setSnapshotReplyActorTimeout(FiniteDuration snapshotReplyActorTimeout) {
+    void setSnapshotReplyActorTimeout(final FiniteDuration snapshotReplyActorTimeout) {
         this.snapshotReplyActorTimeout = snapshotReplyActorTimeout;
     }
 }
