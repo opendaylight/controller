@@ -1072,7 +1072,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionWithIsolatedLeader() throws Exception {
-        // FIXME: remove when test passes also for ClientBackedDataStore
+        // FIXME: CONTROLLER-2018: remove when test passes also for ClientBackedDataStore
         assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
 
         // Set the isolated leader check interval high so we can control the switch to IsolatedLeader.
