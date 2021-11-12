@@ -45,8 +45,14 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.get.entities.output.EntitiesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -221,6 +227,26 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
 
         assertNull(getEntityResult.getResult().getOwnerNode());
         assertTrue(getEntityResult.getResult().getCandidateNodes().isEmpty());
+
+        final GetEntitiesOutput getEntitiesResult =
+                service.getEntities(new GetEntitiesInputBuilder().build()).get().getResult();
+
+        assertEquals(getEntitiesResult.getEntities().size(), 1);
+        assertTrue(getEntitiesResult.getEntities().get(new EntitiesKey(
+                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)), new EntityType(ENTITY_TYPE)))
+                .getCandidateNodes().contains(new NodeName("member-1")));
+        assertTrue(getEntitiesResult.getEntities().get(new EntitiesKey(
+                        new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
+                        new EntityType(ENTITY_TYPE)))
+                .getOwnerNode().getValue().equals("member-1"));
+
+        final GetEntityOwnerOutput getOwnerResult = service.getEntityOwner(new GetEntityOwnerInputBuilder()
+                        .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                        .setType(new EntityType(ENTITY_TYPE))
+                        .build())
+                .get().getResult();
+
+        assertEquals(getOwnerResult.getOwnerNode().getValue(), "member-1");
     }
 
     private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,

@@ -8,11 +8,12 @@
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
 import akka.actor.typed.ActorRef;
+import akka.pattern.StatusReply;
 
-public final class GetEntitiesRequest extends OwnerSupervisorRequest<GetEntitiesReply> {
+public final class GetEntitiesBackendRequest extends OwnerSupervisorRequest<GetEntitiesBackendReply> {
     private static final long serialVersionUID = 1L;
 
-    public GetEntitiesRequest(final ActorRef<GetEntitiesReply> replyTo) {
+    public GetEntitiesBackendRequest(final ActorRef<StatusReply<GetEntitiesBackendReply>> replyTo) {
         super(replyTo);
     }
 }

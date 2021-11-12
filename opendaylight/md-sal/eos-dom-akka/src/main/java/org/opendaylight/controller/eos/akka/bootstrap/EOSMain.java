@@ -44,12 +44,14 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
 
         listenerRegistry = context.spawn(EntityTypeListenerRegistry.create(role), "ListenerRegistry");
         candidateRegistry = context.spawn(CandidateRegistryInit.create(), "CandidateRegistry");
-        ownerStateChecker = context.spawn(OwnerStateChecker.create(role), "OwnerStateChecker");
 
         final ClusterSingleton clusterSingleton = ClusterSingleton.get(context.getSystem());
         // start the initial sync behavior that switches to the regular one after syncing
         ownerSupervisor = clusterSingleton.init(
                 SingletonActor.of(IdleSupervisor.create(iidCodec), "OwnerSupervisor"));
+
+        ownerStateChecker = context.spawn(OwnerStateChecker.create(role, ownerSupervisor, iidCodec),
+                "OwnerStateChecker");
     }
 
     public static Behavior<BootstrapCommand> create(final BindingInstanceIdentifierCodec iidCodec) {

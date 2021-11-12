@@ -5,25 +5,30 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.eos.akka.owner.supervisor.command;
+package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import akka.actor.typed.ActorRef;
-import akka.pattern.StatusReply;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
 
-public abstract class AbstractEntityRequest<T extends OwnerSupervisorReply> extends OwnerSupervisorRequest<T> {
+public abstract class AbstractEntityRequest<T extends StateCheckerReply> extends StateCheckerRequest<T> {
     private static final long serialVersionUID = 1L;
 
     private final @NonNull EntityType type;
     private final @NonNull EntityName name;
+    private final @NonNull EntityId entity;
 
-    AbstractEntityRequest(final ActorRef<StatusReply<T>> replyTo, final EntityId entity) {
+    AbstractEntityRequest(final ActorRef<T> replyTo, final EntityId entity) {
         super(replyTo);
+        this.entity = entity;
         this.type = entity.requireType();
         this.name = entity.requireName();
+    }
+
+    public @NonNull EntityId getEntity() {
+        return entity;
     }
 
     public final @NonNull EntityType getType() {
@@ -32,5 +37,14 @@ public abstract class AbstractEntityRequest<T extends OwnerSupervisorReply> exte
 
     public final @NonNull EntityName getName() {
         return name;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractEntityRequest{"
+                + "type=" + type
+                + ", name=" + name
+                + ", entity=" + entity
+                + '}';
     }
 }

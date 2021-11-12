@@ -29,6 +29,7 @@ import akka.cluster.ddata.typed.javadsl.Replicator;
 import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import akka.cluster.typed.Cluster;
 import akka.cluster.typed.Subscribe;
+import akka.pattern.StatusReply;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -48,12 +49,12 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.AbstractEnt
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterDeactivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesReply;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesRequest;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerReply;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerRequest;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityReply;
-import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberDownEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberReachableEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberUnreachableEvent;
@@ -172,9 +173,9 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                 .onMessage(MemberDownEvent.class, this::onPeerDown)
                 .onMessage(MemberReachableEvent.class, this::onPeerReachable)
                 .onMessage(MemberUnreachableEvent.class, this::onPeerUnreachable)
-                .onMessage(GetEntitiesRequest.class, this::onGetEntities)
-                .onMessage(GetEntityRequest.class, this::onGetEntity)
-                .onMessage(GetEntityOwnerRequest.class, this::onGetEntityOwner)
+                .onMessage(GetEntitiesBackendRequest.class, this::onGetEntities)
+                .onMessage(GetEntityBackendRequest.class, this::onGetEntity)
+                .onMessage(GetEntityOwnerBackendRequest.class, this::onGetEntityOwner)
                 .build();
     }
 
@@ -373,19 +374,21 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         return this;
     }
 
-    private Behavior<OwnerSupervisorCommand> onGetEntities(final GetEntitiesRequest request) {
-        request.getReplyTo().tell(new GetEntitiesReply(currentOwners, currentCandidates));
+    private Behavior<OwnerSupervisorCommand> onGetEntities(final GetEntitiesBackendRequest request) {
+        request.getReplyTo().tell(StatusReply.success(new GetEntitiesBackendReply(currentOwners, currentCandidates)));
         return this;
     }
 
-    private Behavior<OwnerSupervisorCommand> onGetEntity(final GetEntityRequest request) {
+    private Behavior<OwnerSupervisorCommand> onGetEntity(final GetEntityBackendRequest request) {
         final DOMEntity entity = extractEntity(request);
-        request.getReplyTo().tell(new GetEntityReply(currentOwners.get(entity), currentCandidates.get(entity)));
+        request.getReplyTo().tell(StatusReply.success(
+                new GetEntityBackendReply(currentOwners.get(entity), currentCandidates.get(entity))));
         return this;
     }
 
-    private Behavior<OwnerSupervisorCommand> onGetEntityOwner(final GetEntityOwnerRequest request) {
-        request.getReplyTo().tell(new GetEntityOwnerReply(currentOwners.get(extractEntity(request))));
+    private Behavior<OwnerSupervisorCommand> onGetEntityOwner(final GetEntityOwnerBackendRequest request) {
+        request.getReplyTo().tell(
+                StatusReply.success(new GetEntityOwnerBackendReply(currentOwners.get(extractEntity(request)))));
         return this;
     }
 
