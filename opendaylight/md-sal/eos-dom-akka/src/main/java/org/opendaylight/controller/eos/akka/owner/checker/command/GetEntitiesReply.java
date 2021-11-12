@@ -5,21 +5,20 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.eos.akka.owner.supervisor.command;
+package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import static com.google.common.base.Verify.verify;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.ImmutableSetMultimap.Builder;
 import com.google.common.collect.Iterables;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendReply;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
@@ -33,15 +32,20 @@ import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
-public final class GetEntitiesReply extends OwnerSupervisorReply implements Serializable {
+public final class GetEntitiesReply extends StateCheckerReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ImmutableSetMultimap<DOMEntity, String> candidates;
     private final ImmutableMap<DOMEntity, String> owners;
 
-    public GetEntitiesReply(final Map<DOMEntity, String> owners, final Map<DOMEntity, Set<String>> candidates) {
-        final Builder<DOMEntity, String> builder = ImmutableSetMultimap.builder();
-        for (Entry<DOMEntity, Set<String>> entry : candidates.entrySet()) {
+    public GetEntitiesReply(final GetEntitiesBackendReply response) {
+        this.owners = response.getOwners();
+        this.candidates = response.getCandidates();
+    }
+
+    public GetEntitiesReply(final Map<DOMEntity, Set<String>> candidates, final Map<DOMEntity, String> owners) {
+        final ImmutableSetMultimap.Builder<DOMEntity, String> builder = ImmutableSetMultimap.builder();
+        for (Map.Entry<DOMEntity, Set<String>> entry : candidates.entrySet()) {
             builder.putAll(entry.getKey(), entry.getValue());
         }
         this.candidates = builder.build();

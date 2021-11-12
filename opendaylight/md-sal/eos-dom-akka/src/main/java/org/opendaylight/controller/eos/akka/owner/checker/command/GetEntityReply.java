@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.eos.akka.owner.supervisor.command;
+package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
@@ -13,15 +13,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendReply;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
 
-public final class GetEntityReply extends OwnerSupervisorReply implements Serializable {
+public final class GetEntityReply extends StateCheckerReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ImmutableSet<String> candidates;
     private final String owner;
+
+    public GetEntityReply(final GetEntityBackendReply backendReply) {
+        candidates = backendReply.getCandidates();
+        owner = backendReply.getOwner();
+    }
 
     public GetEntityReply(final @Nullable String owner, final @Nullable Set<String> candidates) {
         this.owner = owner;

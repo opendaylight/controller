@@ -117,8 +117,8 @@ public class OwnerSupervisorTest extends AbstractNativeEosTest {
         private final Map<DOMEntity, String> currentOwners;
 
         private MockSyncer(final ActorContext<OwnerSupervisorCommand> context,
-                          final Map<DOMEntity, Set<String>> currentCandidates,
-                          final Map<DOMEntity, String> currentOwners) {
+                           final Map<DOMEntity, Set<String>> currentCandidates,
+                           final Map<DOMEntity, String> currentOwners) {
             super(context);
             this.currentCandidates = currentCandidates;
             this.currentOwners = currentOwners;
@@ -163,12 +163,14 @@ public class OwnerSupervisorTest extends AbstractNativeEosTest {
 
             listenerRegistry = context.spawn(EntityTypeListenerRegistry.create(role), "ListenerRegistry");
             candidateRegistry = context.spawn(CandidateRegistry.create(), "CandidateRegistry");
-            ownerStateChecker = context.spawn(OwnerStateChecker.create(role), "OwnerStateChecker");
 
             final ClusterSingleton clusterSingleton = ClusterSingleton.get(context.getSystem());
             // start the initial sync behavior that switches to the regular one after syncing
             ownerSupervisor = clusterSingleton.init(SingletonActor.of(
                     MockSyncer.create(currentCandidates, currentOwners), "OwnerSupervisor"));
+
+            ownerStateChecker = context.spawn(OwnerStateChecker.create(role, ownerSupervisor, null),
+                    "OwnerStateChecker");
         }
 
         public static Behavior<BootstrapCommand> create(final Map<DOMEntity, Set<String>> currentCandidates,

@@ -8,12 +8,13 @@
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
 import akka.actor.typed.ActorRef;
+import akka.pattern.StatusReply;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityId;
 
-public final class GetEntityOwnerRequest extends AbstractEntityRequest<GetEntityOwnerReply> {
+public final class GetEntityBackendRequest extends AbstractEntityRequest<GetEntityBackendReply> {
     private static final long serialVersionUID = 1L;
 
-    public GetEntityOwnerRequest(final ActorRef<GetEntityOwnerReply> replyTo, final EntityId entity) {
+    public GetEntityBackendRequest(final ActorRef<StatusReply<GetEntityBackendReply>> replyTo, final EntityId entity) {
         super(replyTo, entity);
     }
 }

@@ -16,8 +16,13 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.cluster.Member;
 import akka.cluster.typed.Cluster;
+import akka.pattern.StatusReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorRequest;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +64,17 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
     public Receive<OwnerSupervisorCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(ActivateDataCenter.class, this::onActivateDataCenter)
+                .onMessage(GetEntitiesBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(GetEntityBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(GetEntityOwnerBackendRequest.class, this::onFailEntityRpc)
                 .build();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onFailEntityRpc(final OwnerSupervisorRequest message) {
+        LOG.debug("Failing rpc request. {}", message);
+        message.getReplyTo().tell(StatusReply.error("OwnerSupervisor is inactive so it"
+                + " cannot handle entity rpc requests."));
+        return this;
     }
 
     private Behavior<OwnerSupervisorCommand> onActivateDataCenter(final ActivateDataCenter message) {

@@ -5,26 +5,25 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.eos.akka.owner.supervisor.command;
+package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.typed.ActorRef;
-import akka.pattern.StatusReply;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 
-public abstract class OwnerSupervisorRequest<T extends OwnerSupervisorReply> extends OwnerSupervisorCommand
+public abstract class StateCheckerRequest<T extends StateCheckerReply> extends StateCheckerCommand
         implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final @NonNull ActorRef<StatusReply<T>> replyTo;
+    private final @NonNull ActorRef<T> replyTo;
 
-    OwnerSupervisorRequest(final ActorRef<StatusReply<T>> replyTo) {
+    StateCheckerRequest(final ActorRef<T> replyTo) {
         this.replyTo = requireNonNull(replyTo);
     }
 
-    public final @NonNull ActorRef<StatusReply<T>> getReplyTo() {
+    public final @NonNull ActorRef<T> getReplyTo() {
         return replyTo;
     }
 }

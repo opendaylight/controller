@@ -92,7 +92,7 @@ public abstract class AbstractNativeEosTest {
     private static final String SEED_NODES_PARAM = "akka.cluster.seed-nodes";
     private static final String DATA_CENTER_PARAM = "akka.cluster.multi-data-center.self-data-center";
 
-    protected static MockNativeEntityOwnershipService startupNativeService(final int port, List<String> roles,
+    protected static MockNativeEntityOwnershipService startupNativeService(final int port, final List<String> roles,
                                                                            final List<String> seedNodes)
             throws ExecutionException, InterruptedException {
         final Map<String, Object> overrides = new HashMap<>();
@@ -163,6 +163,38 @@ public abstract class AbstractNativeEosTest {
     protected static ClusterNode startupWithDatacenter(final int port, final List<String> roles,
                                                        final List<String> seedNodes, final String dataCenter)
             throws ExecutionException, InterruptedException {
+        final akka.actor.ActorSystem system = startupActorSystem(port, roles, seedNodes, dataCenter);
+        final ActorRef<BootstrapCommand> eosBootstrap =
+                Adapter.spawn(system, EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()), "EOSBootstrap");
+
+        final CompletionStage<RunningContext> ask = AskPattern.ask(eosBootstrap,
+                GetRunningContext::new,
+                Duration.ofSeconds(5),
+                Adapter.toTyped(system.scheduler()));
+        final RunningContext runningContext = ask.toCompletableFuture().get();
+
+        return new ClusterNode(port, roles, system, eosBootstrap, runningContext.getListenerRegistry(),
+                runningContext.getCandidateRegistry(), runningContext.getOwnerSupervisor());
+    }
+
+    protected static akka.actor.ActorSystem startupActorSystem(final int port, final List<String> roles,
+                                                               final List<String> seedNodes) {
+        final Map<String, Object> overrides = new HashMap<>();
+        overrides.put(PORT_PARAM, port);
+        overrides.put(ROLE_PARAM, roles);
+        if (!seedNodes.isEmpty()) {
+            overrides.put(SEED_NODES_PARAM, seedNodes);
+        }
+
+        final Config config = ConfigFactory.parseMap(overrides)
+                .withFallback(ConfigFactory.load());
+
+        // Create a classic Akka system since thats what we will have in osgi
+        return akka.actor.ActorSystem.create("ClusterSystem", config);
+    }
+
+    protected static akka.actor.ActorSystem startupActorSystem(final int port, final List<String> roles,
+                                                               final List<String> seedNodes, final String dataCenter) {
         final Map<String, Object> overrides = new HashMap<>();
         overrides.put(PORT_PARAM, port);
         overrides.put(ROLE_PARAM, roles);
@@ -175,18 +207,7 @@ public abstract class AbstractNativeEosTest {
                 .withFallback(ConfigFactory.load());
 
         // Create a classic Akka system since thats what we will have in osgi
-        final akka.actor.ActorSystem system = akka.actor.ActorSystem.create("ClusterSystem", config);
-        final ActorRef<BootstrapCommand> eosBootstrap =
-                Adapter.spawn(system, EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()), "EOSBootstrap");
-
-        final CompletionStage<RunningContext> ask = AskPattern.ask(eosBootstrap,
-                GetRunningContext::new,
-                Duration.ofSeconds(5),
-                Adapter.toTyped(system.scheduler()));
-        final RunningContext runningContext = ask.toCompletableFuture().get();
-
-        return new ClusterNode(port, roles, system, eosBootstrap, runningContext.getListenerRegistry(),
-                runningContext.getCandidateRegistry(), runningContext.getOwnerSupervisor());
+        return akka.actor.ActorSystem.create("ClusterSystem", config);
     }
 
     private static Behavior<BootstrapCommand> rootBehavior() {
@@ -300,12 +321,12 @@ public abstract class AbstractNativeEosTest {
         verifyNoNotifications(listener, 2);
     }
 
-    protected static void verifyNoNotifications(final MockEntityOwnershipListener listener, long delaySeconds) {
+    protected static void verifyNoNotifications(final MockEntityOwnershipListener listener, final long delaySeconds) {
         await().pollDelay(delaySeconds, TimeUnit.SECONDS).until(() -> listener.getChanges().isEmpty());
     }
 
     protected static void verifyNoAdditionalNotifications(
-            final MockEntityOwnershipListener listener, long delaySeconds) {
+            final MockEntityOwnershipListener listener, final long delaySeconds) {
         listener.resetListener();
         verifyNoNotifications(listener, delaySeconds);
     }
@@ -393,9 +414,9 @@ public abstract class AbstractNativeEosTest {
     }
 
     protected static final class MockNativeEntityOwnershipService extends AkkaEntityOwnershipService {
-        private ActorSystem classicActorSystem;
+        private final ActorSystem classicActorSystem;
 
-        protected MockNativeEntityOwnershipService(ActorSystem classicActorSystem)
+        protected MockNativeEntityOwnershipService(final ActorSystem classicActorSystem)
                 throws ExecutionException, InterruptedException {
             super(classicActorSystem, CODEC_CONTEXT);
             this.classicActorSystem = classicActorSystem;

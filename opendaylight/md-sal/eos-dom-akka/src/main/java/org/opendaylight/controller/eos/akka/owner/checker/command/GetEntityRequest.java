@@ -5,14 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.eos.akka.owner.supervisor.command;
+package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import akka.actor.typed.ActorRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityId;
 
-public final class GetEntitiesRequest extends OwnerSupervisorRequest<GetEntitiesReply> {
+public final class GetEntityRequest extends AbstractEntityRequest<GetEntityReply> {
     private static final long serialVersionUID = 1L;
 
-    public GetEntitiesRequest(final ActorRef<GetEntitiesReply> replyTo) {
-        super(replyTo);
+    public GetEntityRequest(final ActorRef<GetEntityReply> replyTo, final EntityId entity) {
+        super(replyTo, entity);
     }
 }

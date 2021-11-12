@@ -22,6 +22,7 @@ import akka.cluster.ddata.ORSet;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
 import akka.cluster.ddata.typed.javadsl.Replicator;
 import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
+import akka.pattern.StatusReply;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,10 +30,14 @@ import java.util.Map;
 import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterActivated;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.InitialCandidateSync;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.InitialOwnerSync;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorRequest;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -87,7 +92,17 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
         return newReceiveBuilder()
                 .onMessage(InitialCandidateSync.class, this::onInitialCandidateSync)
                 .onMessage(InitialOwnerSync.class, this::onInitialOwnerSync)
+                .onMessage(GetEntitiesBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(GetEntityBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(GetEntityOwnerBackendRequest.class, this::onFailEntityRpc)
                 .build();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onFailEntityRpc(final OwnerSupervisorRequest message) {
+        LOG.debug("Failing rpc request. {}", message);
+        message.getReplyTo().tell(StatusReply.error(
+            "OwnerSupervisor is inactive so it cannot handle entity rpc requests."));
+        return this;
     }
 
     private Behavior<OwnerSupervisorCommand> onInitialCandidateSync(final InitialCandidateSync rsp) {
