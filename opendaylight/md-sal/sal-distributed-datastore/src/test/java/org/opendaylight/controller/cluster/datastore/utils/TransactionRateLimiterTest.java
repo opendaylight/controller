@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -17,37 +17,35 @@ import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Stopwatch;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.time.StopWatch;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 
+// FIXME: use Strict runner
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class TransactionRateLimiterTest {
-
     @Mock
     public ActorUtils actorUtils;
-
     @Mock
     public DatastoreContext datastoreContext;
-
     @Mock
     public Timer commitTimer;
-
     @Mock
     private Timer.Context commitTimerContext;
-
     @Mock
     private Snapshot commitSnapshot;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
         doReturn(30).when(datastoreContext).getShardTransactionCommitTimeoutInSeconds();
         doReturn(100L).when(datastoreContext).getTransactionCreationInitialRateLimit();
@@ -65,18 +63,14 @@ public class TransactionRateLimiterTest {
         }
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(292));
-
         assertEquals(147, rateLimiter.getPollOnCount());
     }
 
-
     @Test
     public void testAcquirePercentileValueZero() {
-
         for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
@@ -86,17 +80,14 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(0) * 1D).when(commitSnapshot).getValue(0.1);
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(192));
-
         assertEquals(97, rateLimiter.getPollOnCount());
     }
 
     @Test
     public void testAcquireOnePercentileValueVeryHigh() {
-
         for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
@@ -107,11 +98,9 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(10000) * 1D).when(commitSnapshot).getValue(1.0);
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(282));
-
         assertEquals(142, rateLimiter.getPollOnCount());
     }
 
@@ -125,18 +114,15 @@ public class TransactionRateLimiterTest {
         }
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         // The initial rate limit will be retained here because the calculated rate limit was too small
         assertThat(rateLimiter.getTxCreationLimit(), approximately(100));
-
         assertEquals(1, rateLimiter.getPollOnCount());
     }
 
     @Test
     public void testAcquireWithRealPercentileValues() {
-
         for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
@@ -148,11 +134,9 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(200) * 1D).when(commitSnapshot).getValue(1.0);
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(101));
-
         assertEquals(51, rateLimiter.getPollOnCount());
     }
 
@@ -183,26 +167,21 @@ public class TransactionRateLimiterTest {
         DatastoreContext.getGlobalDatastoreNames().add("operational");
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(292));
-
         assertEquals(147, rateLimiter.getPollOnCount());
     }
 
     @Test
     public void testRateLimiting() {
-
         for (int i = 1; i < 11; i++) {
             doReturn(TimeUnit.SECONDS.toNanos(1) * 1D).when(commitSnapshot).getValue(i * 0.1);
         }
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
-        StopWatch watch = new StopWatch();
-
-        watch.start();
+        Stopwatch watch = Stopwatch.createStarted();
 
         rateLimiter.acquire();
         rateLimiter.acquire();
@@ -210,13 +189,12 @@ public class TransactionRateLimiterTest {
 
         watch.stop();
 
-        assertTrue("did not take as much time as expected rate limit : " + rateLimiter.getTxCreationLimit(),
-                watch.getTime() > 1000);
+        assertThat("did not take as much time as expected rate limit : " + rateLimiter.getTxCreationLimit(),
+            watch.elapsed(), greaterThan(Duration.ofSeconds(1)));
     }
 
     @Test
     public void testRateLimitNotCalculatedUntilPollCountReached() {
-
         for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
@@ -228,11 +206,9 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(200) * 1D).when(commitSnapshot).getValue(1.0);
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(101));
-
         assertEquals(51, rateLimiter.getPollOnCount());
 
         for (int i = 0; i < 49; i++) {
@@ -249,7 +225,6 @@ public class TransactionRateLimiterTest {
 
     @Test
     public void testAcquireNegativeAcquireAndPollOnCount() {
-
         for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
@@ -263,11 +238,9 @@ public class TransactionRateLimiterTest {
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
         rateLimiter.setAcquireCount(Long.MAX_VALUE - 1);
         rateLimiter.setPollOnCount(Long.MAX_VALUE);
-
         rateLimiter.acquire();
 
         assertThat(rateLimiter.getTxCreationLimit(), approximately(101));
-
         assertEquals(-9223372036854775759L, rateLimiter.getPollOnCount());
 
         for (int i = 0; i < 50; i++) {
@@ -275,7 +248,6 @@ public class TransactionRateLimiterTest {
         }
 
         verify(commitTimer, times(2)).getSnapshot();
-
     }
 
     public Matcher<Double> approximately(final double val) {
@@ -292,6 +264,4 @@ public class TransactionRateLimiterTest {
             }
         };
     }
-
-
 }
