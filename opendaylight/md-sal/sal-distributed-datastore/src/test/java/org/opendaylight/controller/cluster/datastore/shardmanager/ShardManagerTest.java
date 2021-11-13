@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.actor.Status.Failure;
@@ -45,6 +47,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.AbstractMap;
@@ -62,17 +65,22 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.AbstractShardManagerTest;
+import org.opendaylight.controller.cluster.datastore.AbstractClusterRefActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -107,6 +115,7 @@ import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
@@ -120,6 +129,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -133,12 +143,24 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-public class ShardManagerTest extends AbstractShardManagerTest {
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
+public class ShardManagerTest extends AbstractClusterRefActorTest {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerTest.class);
+    private static final MemberName MEMBER_1 = MemberName.forName("member-1");
     private static final MemberName MEMBER_2 = MemberName.forName("member-2");
     private static final MemberName MEMBER_3 = MemberName.forName("member-3");
 
+    private static int ID_COUNTER = 1;
+    private static ActorRef mockShardActor;
+    private static ShardIdentifier mockShardName;
+    private static SettableFuture<Void> ready;
     private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
+
+    private final String shardMrgIDSuffix = "config" + ID_COUNTER++;
+    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
+    private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
+            .dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
+            .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
 
     private final String shardMgrID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
@@ -152,6 +174,50 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         TEST_SCHEMA_CONTEXT = null;
     }
 
+    @Before
+    public void setUp() {
+        ready = SettableFuture.create();
+
+        InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
+
+        if (mockShardActor == null) {
+            mockShardName = ShardIdentifier.create(Shard.DEFAULT_NAME, MEMBER_1, "config");
+            mockShardActor = getSystem().actorOf(MessageCollectorActor.props(), mockShardName.toString());
+        }
+
+        MessageCollectorActor.clearMessages(mockShardActor);
+    }
+
+    @After
+    public void tearDown() {
+        InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
+
+        mockShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        await().atMost(Duration.ofSeconds(10)).until(mockShardActor::isTerminated);
+        mockShardActor = null;
+
+        actorFactory.close();
+    }
+
+    private TestShardManager.Builder newTestShardMgrBuilder() {
+        return TestShardManager.builder(datastoreContextBuilder).distributedDataStore(mock(DistributedDataStore.class));
+    }
+
+    private TestShardManager.Builder newTestShardMgrBuilder(final Configuration config) {
+        return TestShardManager.builder(datastoreContextBuilder).configuration(config)
+                .distributedDataStore(mock(DistributedDataStore.class));
+    }
+
+    private Props newShardMgrProps() {
+        return newShardMgrProps(new MockConfiguration());
+    }
+
+    private Props newShardMgrProps(final Configuration config) {
+        return newTestShardMgrBuilder(config).readinessFuture(ready).props();
+    }
+
     private ActorSystem newActorSystem(final String config) {
         return newActorSystem("cluster-test", config);
     }
@@ -163,10 +229,6 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         }
 
         return system.actorOf(MessageCollectorActor.props(), name);
-    }
-
-    private Props newShardMgrProps() {
-        return newShardMgrProps(new MockConfiguration());
     }
 
     private static DatastoreContextFactory newDatastoreContextFactory(final DatastoreContext datastoreContext) {
@@ -2202,7 +2264,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             }
 
             Builder shardActor(final ActorRef newShardActor) {
-                this.shardActor = newShardActor;
+                shardActor = newShardActor;
                 return this;
             }
 
