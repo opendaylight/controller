@@ -15,20 +15,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class AbstractDOMBrokerWriteTransactionTest {
-
     @Mock
-    private AbstractDOMTransactionFactory abstractDOMTransactionFactory;
-
+    private AbstractDOMTransactionFactory<?> abstractDOMTransactionFactory;
     @Mock
     private DOMStoreWriteTransaction domStoreWriteTransaction;
 
@@ -40,7 +39,7 @@ public class AbstractDOMBrokerWriteTransactionTest {
         }
 
         @Override
-        protected DOMStoreWriteTransaction createTransaction(LogicalDatastoreType key) {
+        protected DOMStoreWriteTransaction createTransaction(final LogicalDatastoreType key) {
             return null;
         }
 
@@ -48,11 +47,6 @@ public class AbstractDOMBrokerWriteTransactionTest {
         protected Collection<DOMStoreWriteTransaction> getSubtransactions() {
             return Collections.singletonList(domStoreWriteTransaction);
         }
-    }
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
