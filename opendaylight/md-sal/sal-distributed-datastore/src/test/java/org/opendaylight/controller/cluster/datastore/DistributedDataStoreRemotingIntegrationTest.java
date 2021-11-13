@@ -8,10 +8,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -100,6 +102,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
@@ -117,6 +120,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -140,7 +144,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { TestDistributedDataStore.class, 7}, { TestClientBackedDataStore.class, 12 }
+                { TestDistributedDataStore.class, 7 }, { TestClientBackedDataStore.class, 12 }
         });
     }
 
@@ -1072,9 +1076,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionWithIsolatedLeader() throws Exception {
-        // FIXME: CONTROLLER-2018: remove when test passes also for ClientBackedDataStore
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
-
         // Set the isolated leader check interval high so we can control the switch to IsolatedLeader.
         leaderDatastoreContextBuilder.shardIsolatedLeaderCheckIntervalInMillis(10000000);
         final String testName = "testTransactionWithIsolatedLeader";
@@ -1107,9 +1108,24 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         MemberNode.verifyRaftState(leaderDistributedDataStore, "cars",
             raftState -> assertEquals("getRaftState", "IsolatedLeader", raftState.getRaftState()));
 
-        final var ex = assertThrows(ExecutionException.class,
-            () -> leaderTestKit.doCommit(noShardLeaderWriteTx.ready()));
-        assertEquals(NoShardLeaderException.class, Throwables.getRootCause(ex).getClass());
+        final var noShardLeaderCohort = noShardLeaderWriteTx.ready();
+        final ListenableFuture<Boolean> canCommit;
+
+        // There is difference in behavior here:
+        if (!leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
+            // ask-based canCommit() times out and aborts
+            final var ex = assertThrows(ExecutionException.class,
+                () -> leaderTestKit.doCommit(noShardLeaderCohort)).getCause();
+            assertThat(ex, instanceOf(NoShardLeaderException.class));
+            assertThat(ex.getMessage(), containsString(
+                "Shard member-1-shard-cars-testTransactionWithIsolatedLeader currently has no leader."));
+            canCommit = null;
+        } else {
+            // tell-based canCommit() does not have a real timeout and hence continues
+            canCommit = noShardLeaderCohort.canCommit();
+            Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
+            assertFalse(canCommit.isDone());
+        }
 
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
@@ -1121,6 +1137,19 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         leaderTestKit.doCommit(preIsolatedLeaderTxCohort);
         leaderTestKit.doCommit(successTxCohort);
+
+        // continuation of tell-based protocol: readied transaction will complete commit, but will report an OLFE
+        if (canCommit != null) {
+            final var ex = assertThrows(ExecutionException.class,
+                () -> canCommit.get(commitTimeout, TimeUnit.SECONDS)).getCause();
+            assertThat(ex, instanceOf(OptimisticLockFailedException.class));
+            assertEquals("Optimistic lock failed for path " + CarsModel.BASE_PATH, ex.getMessage());
+            final var cause = ex.getCause();
+            assertThat(cause, instanceOf(ConflictingModificationAppliedException.class));
+            final var cmae = (ConflictingModificationAppliedException) cause;
+            assertEquals("Node was created by other transaction.", cmae.getMessage());
+            assertEquals(CarsModel.BASE_PATH, cmae.getPath());
+        }
     }
 
     @Test
