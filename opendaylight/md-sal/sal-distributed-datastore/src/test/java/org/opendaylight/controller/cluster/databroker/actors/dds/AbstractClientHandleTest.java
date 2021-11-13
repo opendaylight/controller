@@ -26,8 +26,9 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
@@ -50,8 +51,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import scala.concurrent.Promise;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<AbstractProxyTransaction>> {
-
     private static final String PERSISTENCE_ID = "per-1";
     private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
 
@@ -67,7 +68,6 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         final TestProbe contextProbe = new TestProbe(system, "context");
         final TestProbe clientContextProbe = new TestProbe(system, "client-context");
