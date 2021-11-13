@@ -7,23 +7,26 @@
  */
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public abstract class AbstractModificationTest {
     private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
+
+    static final @NonNull ContainerNode TEST_CONTAINER = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
     protected InMemoryDOMDataStore store;
 
@@ -50,9 +53,8 @@ public abstract class AbstractModificationTest {
     }
 
     protected Optional<NormalizedNode> readData(final YangInstanceIdentifier path) throws Exception {
-        // FIXME: close the transaction
-        DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
-        ListenableFuture<Optional<NormalizedNode>> future = transaction.read(path);
-        return future.get();
+        try (var transaction = store.newReadOnlyTransaction()) {
+            return transaction.read(path).get();
+        }
     }
 }
