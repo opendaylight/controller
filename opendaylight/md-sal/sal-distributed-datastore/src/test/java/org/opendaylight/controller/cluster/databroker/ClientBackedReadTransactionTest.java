@@ -17,13 +17,15 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest<ClientBackedReadTransaction> {
     private ClientBackedReadTransaction object;
 
@@ -41,9 +43,6 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        doReturn(CLIENT_ID).when(clientContext).getIdentifier();
         doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
 
         doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.empty());
