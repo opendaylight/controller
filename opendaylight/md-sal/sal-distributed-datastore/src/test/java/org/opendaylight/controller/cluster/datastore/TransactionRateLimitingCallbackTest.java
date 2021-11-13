@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -19,8 +19,9 @@ import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 /**
@@ -28,14 +29,12 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
  *
  * @author Thomas Pantelis
  */
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class TransactionRateLimitingCallbackTest {
-
     @Mock
     ActorUtils mockContext;
-
     @Mock
     Timer mockTimer;
-
     @Mock
     Ticker mockTicker;
 
@@ -43,7 +42,6 @@ public class TransactionRateLimitingCallbackTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(mockTimer).when(mockContext).getOperationTimer(ActorUtils.COMMIT);
         callback = new TransactionRateLimitingCallback(mockContext);
         TransactionRateLimitingCallback.setTicker(mockTicker);
@@ -85,12 +83,7 @@ public class TransactionRateLimitingCallbackTest {
 
     @Test
     public void testSuccessWithoutRun() {
-        try {
-            callback.success();
-            fail("Expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // expected
-        }
+        final var ex = assertThrows(IllegalStateException.class, callback::success);
 
         verify(mockTimer, never()).update(anyLong(), any(TimeUnit.class));
     }
