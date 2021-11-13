@@ -9,8 +9,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -25,10 +28,8 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.lang.reflect.Constructor;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -137,9 +138,9 @@ public class IntegrationTestKit extends ShardTestKit {
         datastoreContextBuilder.useTellBasedProtocol(ClientBackedDataStore.class.isAssignableFrom(implementation));
 
         final DatastoreContext datastoreContext = datastoreContextBuilder.build();
-        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
-        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
-        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+        final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
+        doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
         final Constructor<? extends AbstractDataStore> constructor = implementation.getDeclaredConstructor(
                 ActorSystem.class, ClusterWrapper.class, Configuration.class,
@@ -177,9 +178,9 @@ public class IntegrationTestKit extends ShardTestKit {
 
         final DatastoreContext datastoreContext = getDatastoreContextBuilder().build();
 
-        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
-        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
-        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+        final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
+        doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
         final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
                 configuration, mockContextFactory, restoreFromSnapshot);
@@ -201,9 +202,9 @@ public class IntegrationTestKit extends ShardTestKit {
         final DatastoreContext datastoreContext =
                 getDatastoreContextBuilder().logicalStoreType(storeType).build();
 
-        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
-        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
-        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+        final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
+        doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
         final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
                 configuration, mockContextFactory, restoreFromSnapshot);
@@ -349,10 +350,7 @@ public class IntegrationTestKit extends ShardTestKit {
         // 5. Verify the data in the store
 
         DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
-
-        Optional<NormalizedNode> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
-        assertTrue("isPresent", optional.isPresent());
-        assertEquals("Data node", nodeToWrite, optional.get());
+        assertEquals(Optional.of(nodeToWrite), readTx.read(nodePath).get(5, TimeUnit.SECONDS));
     }
 
     public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
@@ -370,32 +368,11 @@ public class IntegrationTestKit extends ShardTestKit {
         cohort.commit().get(5, TimeUnit.SECONDS);
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    void assertExceptionOnCall(final Callable<Void> callable, final Class<? extends Exception> expType) {
-        try {
-            callable.call();
-            fail("Expected " + expType.getSimpleName());
-        } catch (Exception e) {
-            assertEquals("Exception type", expType, e.getClass());
-        }
-    }
-
     void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
             final Class<? extends Exception> expType) {
-        assertExceptionOnCall(() -> {
-            txChain.newWriteOnlyTransaction();
-            return null;
-        }, expType);
-
-        assertExceptionOnCall(() -> {
-            txChain.newReadWriteTransaction();
-            return null;
-        }, expType);
-
-        assertExceptionOnCall(() -> {
-            txChain.newReadOnlyTransaction();
-            return null;
-        }, expType);
+        assertThrows(expType, () -> txChain.newWriteOnlyTransaction());
+        assertThrows(expType, () -> txChain.newReadWriteTransaction());
+        assertThrows(expType, () -> txChain.newReadOnlyTransaction());
     }
 
     public interface ShardStatsVerifier {
