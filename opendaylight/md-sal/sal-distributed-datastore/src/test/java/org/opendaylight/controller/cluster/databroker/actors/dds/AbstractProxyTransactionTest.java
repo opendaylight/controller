@@ -33,8 +33,9 @@ import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
@@ -66,6 +67,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeM
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransaction> {
     protected static final TransactionIdentifier TRANSACTION_ID = TestUtils.TRANSACTION_ID;
     private static final ClientIdentifier CLIENT_ID = TestUtils.CLIENT_ID;
@@ -101,7 +103,6 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         clientContextProbe = new TestProbe(system, "clientContext");
         backendProbe = new TestProbe(system, "backend");
