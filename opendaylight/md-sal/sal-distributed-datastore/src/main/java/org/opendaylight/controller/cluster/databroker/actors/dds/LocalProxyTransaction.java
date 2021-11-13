@@ -222,7 +222,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     private static void throwUnhandledRequest(final TransactionRequest<?> request) {
-        throw new IllegalArgumentException("Unhandled request" + request);
+        throw new IllegalArgumentException("Unhandled request " + request);
     }
 
     void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
