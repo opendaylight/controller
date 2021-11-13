@@ -86,13 +86,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-        this.modification = (CursorAwareDataTreeModification) snapshot.newModification();
+        modification = (CursorAwareDataTreeModification) snapshot.newModification();
     }
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
         super(parent, identifier, true);
         // This is DONE transaction, this should never be touched
-        this.modification = null;
+        modification = null;
     }
 
     @Override
@@ -325,12 +325,19 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
         if (request instanceof CommitLocalTransactionRequest) {
-            Verify.verify(successor instanceof LocalReadWriteProxyTransaction);
-            ((LocalReadWriteProxyTransaction) successor).sendRebased((CommitLocalTransactionRequest)request, callback);
-            LOG.debug("Forwarded request {} to successor {}", request, successor);
+            verifyLocalReadWrite(successor).sendRebased((CommitLocalTransactionRequest)request, callback);
+        } else if (request instanceof ModifyTransactionRequest) {
+            verifyLocalReadWrite(successor).handleForwardedRemoteRequest(request, callback);
         } else {
             super.forwardToLocal(successor, request, callback);
+            return;
         }
+        LOG.debug("Forwarded request {} to successor {}", request, successor);
+    }
+
+    private static LocalReadWriteProxyTransaction verifyLocalReadWrite(final LocalProxyTransaction successor) {
+        Verify.verify(successor instanceof LocalReadWriteProxyTransaction, "Unexpected successor %s", successor);
+        return (LocalReadWriteProxyTransaction) successor;
     }
 
     @Override
