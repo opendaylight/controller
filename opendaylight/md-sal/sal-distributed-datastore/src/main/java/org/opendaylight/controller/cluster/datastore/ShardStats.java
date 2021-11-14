@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
@@ -31,9 +31,8 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static final String JMX_CATEGORY_SHARD = "Shards";
 
-    // FIXME: migrate this to Java 8 thread-safe time
-    @GuardedBy("DATE_FORMAT")
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSS")
+        .withZone(ZoneId.systemDefault());
 
     private static final MapJoiner MAP_JOINER = Joiner.on(", ").withKeyValueSeparator(": ");
 
@@ -89,9 +88,7 @@ final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     }
 
     private static String formatMillis(final long timeMillis) {
-        synchronized (DATE_FORMAT) {
-            return DATE_FORMAT.format(new Date(timeMillis));
-        }
+        return DATE_FORMATTER.format(Instant.ofEpochMilli(timeMillis));
     }
 
     @Override
