@@ -235,8 +235,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         });
 
         // Send new payloads
-        final MockPayload payload4 = sendPayloadData(leaderActor,"newFour");
-        final MockPayload payload5 = sendPayloadData(leaderActor,"newFive");
+        final MockPayload payload4 = sendPayloadData(leaderActor, "newFour");
+        final MockPayload payload5 = sendPayloadData(leaderActor, "newFive");
 
         verifyRaftState(leaderActor, raftState -> {
             assertEquals("leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex());
@@ -245,8 +245,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         reinstateLeaderActor();
 
         assertEquals("Leader last index", 5 , leaderActor.underlyingActor().getReplicatedLog().lastIndex());
-        assertEquals(payload4 ,leaderActor.underlyingActor().getReplicatedLog().get(4).getData());
-        assertEquals(payload5 ,leaderActor.underlyingActor().getReplicatedLog().get(5).getData());
+        assertEquals(payload4, leaderActor.underlyingActor().getReplicatedLog().get(4).getData());
+        assertEquals(payload5, leaderActor.underlyingActor().getReplicatedLog().get(5).getData());
     }
 
     private void reinstateLeaderActor() {
