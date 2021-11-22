@@ -23,8 +23,10 @@ public abstract class AbstractRpcAction implements Action {
         if (!result.isSuccessful()) {
             // FIXME: is there a better way to report errors?
             System.out.println("Invocation failed: " + result.getErrors());
+            return null;
+        } else {
+            return result.getResult();
         }
-        return null;
     }
 
     protected abstract ListenableFuture<? extends RpcResult<?>> invokeRpc();
