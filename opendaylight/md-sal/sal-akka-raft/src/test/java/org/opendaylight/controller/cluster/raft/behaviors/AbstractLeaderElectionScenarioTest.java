@@ -23,6 +23,9 @@ import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -201,7 +204,7 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     protected final Logger testLog = LoggerFactory.getLogger(MockRaftActorContext.class);
-    protected final ActorSystem system = ActorSystem.create("test");
+    protected final ActorSystem system = ActorSystem.create("test", getConfig());
     protected final TestActorFactory factory = new TestActorFactory(system);
     protected TestActorRef<MemberActor> member1ActorRef;
     protected TestActorRef<MemberActor> member2ActorRef;
@@ -212,6 +215,12 @@ public class AbstractLeaderElectionScenarioTest {
     protected MockRaftActorContext member1Context;
     protected MockRaftActorContext member2Context;
     protected MockRaftActorContext member3Context;
+
+    private static Config getConfig() {
+        Map<String, String> overrides = new HashMap<>();
+        overrides.put("akka.actor.provider", "cluster");
+        return ConfigFactory.parseMap(overrides).withFallback(ConfigFactory.load());
+    }
 
     @Before
     public void setup() throws Exception {

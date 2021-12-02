@@ -10,8 +10,12 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -32,7 +36,7 @@ public abstract class AbstractActorTest {
     public static void setUpClass() throws Exception {
         deleteJournal();
         System.setProperty("shard.persistent", "false");
-        system = ActorSystem.create("test");
+        system = ActorSystem.create("test", getConfig());
     }
 
     @AfterClass
@@ -52,6 +56,12 @@ public abstract class AbstractActorTest {
         if (journal.exists()) {
             FileUtils.deleteDirectory(journal);
         }
+    }
+
+    private static Config getConfig() {
+        Map<String, String> overrides = new HashMap<>();
+        overrides.put("akka.actor.provider", "cluster");
+        return ConfigFactory.parseMap(overrides).withFallback(ConfigFactory.load());
     }
 
 }
