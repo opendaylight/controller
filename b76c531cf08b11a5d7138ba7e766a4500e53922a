@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0351d5d3_d02a3b91",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2021-12-02T11:31:55Z",
+      "side": 1,
+      "message": "multipatch-build-fast:controller\u003d34/98634/2",
+      "revId": "b76c531cf08b11a5d7138ba7e766a4500e53922a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
