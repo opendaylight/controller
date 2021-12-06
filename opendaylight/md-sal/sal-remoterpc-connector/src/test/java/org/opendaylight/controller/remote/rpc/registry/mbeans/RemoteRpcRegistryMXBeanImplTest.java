@@ -21,6 +21,7 @@ import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.collect.Lists;
+import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Before
     public void setUp() {
-        system = ActorSystem.create("test");
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("unit-test"));
 
         final DOMRpcIdentifier emptyRpcIdentifier = DOMRpcIdentifier.create(
                 REMOTE_QNAME, YangInstanceIdentifier.empty());

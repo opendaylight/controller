@@ -25,6 +25,7 @@ import akka.actor.Props;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,6 +107,11 @@ public class RaftActorRecoverySupportTest {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
+    }
+
+    @After
+    public void tearDown() {
+        TestKit.shutdownActorSystem(mockActorSystem);
     }
 
     private void sendMessageToSupport(final Object message) {

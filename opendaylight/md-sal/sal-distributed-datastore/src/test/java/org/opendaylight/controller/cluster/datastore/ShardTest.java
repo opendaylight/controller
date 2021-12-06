@@ -239,8 +239,8 @@ public class ShardTest extends AbstractShardTest {
             CreateTransactionReply.class);
 
         final String path = reply.getTransactionPath().toString();
-        assertTrue("Unexpected transaction path " + path, path.startsWith(String.format(
-            "akka://test/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
+        assertTrue("Unexpected transaction path " + path, path.contains(String.format(
+            "/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
             shardID.getShardName(), shardID.getMemberName().getName())));
     }
 
@@ -258,8 +258,8 @@ public class ShardTest extends AbstractShardTest {
             CreateTransactionReply.class);
 
         final String path = reply.getTransactionPath().toString();
-        assertTrue("Unexpected transaction path " + path, path.startsWith(String.format(
-            "akka://test/user/testCreateTransactionOnChain/shard-%s-%s:ShardTransactionTest@0:",
+        assertTrue("Unexpected transaction path " + path, path.contains(String.format(
+            "/user/testCreateTransactionOnChain/shard-%s-%s:ShardTransactionTest@0:",
             shardID.getShardName(), shardID.getMemberName().getName())));
     }
 
@@ -478,7 +478,9 @@ public class ShardTest extends AbstractShardTest {
             ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         final ReadyTransactionReply readyReply = ReadyTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, ReadyTransactionReply.class));
-        assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
+
+        String pathSuffix = shard.path().toString().replaceFirst("akka://test", "");
+        assertTrue("Cohort path", readyReply.getCohortPath().endsWith(pathSuffix));
         // Send the CanCommitTransaction message for the first Tx.
 
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
