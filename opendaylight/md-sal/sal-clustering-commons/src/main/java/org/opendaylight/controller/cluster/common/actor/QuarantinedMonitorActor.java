@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.common.actor;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.UntypedAbstractActor;
+import akka.cluster.Cluster;
+import akka.cluster.ClusterEvent;
 import akka.japi.Effect;
 import akka.remote.AssociationErrorEvent;
 import akka.remote.RemotingLifecycleEvent;
@@ -37,7 +39,7 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
     private final Effect callback;
     private boolean quarantined;
 
-    private Set<Address> addressSet = new HashSet<>();
+    private final Set<Address> addressSet = new HashSet<>();
     private int count = 0;
 
     protected QuarantinedMonitorActor(final Effect callback) {
@@ -46,6 +48,7 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
         LOG.debug("Created QuarantinedMonitorActor");
 
         getContext().system().eventStream().subscribe(getSelf(), RemotingLifecycleEvent.class);
+        getContext().system().eventStream().subscribe(getSelf(), ClusterEvent.MemberDowned.class);
     }
 
     @Override
@@ -71,10 +74,10 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
             // execute the callback
             callback.apply();
         } else  if (message instanceof AssociationErrorEvent) {
-            String errorMessage = message.toString();
+            final String errorMessage = message.toString();
             LOG.trace("errorMessage:{}", errorMessage);
             if (errorMessage.contains("The remote system has a UID that has been quarantined")) {
-                Address address = ((AssociationErrorEvent) message).getRemoteAddress();
+                final Address address = ((AssociationErrorEvent) message).getRemoteAddress();
                 addressSet.add(address);
                 count++;
                 LOG.trace("address:{} addressSet: {} count:{}", address, addressSet, count);
@@ -91,6 +94,13 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
             } else if (errorMessage.contains("The remote system explicitly disassociated")) {
                 count = 0;
                 addressSet.clear();
+            }
+        } else if (message instanceof ClusterEvent.MemberDowned) {
+            final ClusterEvent.MemberDowned event = (ClusterEvent.MemberDowned) message;
+            if (Cluster.get(getContext().system()).selfMember().equals(event.member())) {
+                LOG.warn("This member has been downed, restarting");
+
+                callback.apply();
             }
         }
     }
