@@ -5,22 +5,29 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.eos.akka.registry.candidate.command;
+package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
 import akka.cluster.ddata.ORMap;
 import akka.cluster.ddata.ORSet;
 import akka.cluster.ddata.typed.javadsl.Replicator;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 
-public class InitialCandidateSync extends CandidateRegistryCommand {
+public class ClearCandidatesWhileIdle extends OwnerSupervisorCommand {
 
     private final Replicator.GetResponse<ORMap<DOMEntity, ORSet<String>>> response;
+    private final ClearCandidatesForMember originalMessage;
 
-    public InitialCandidateSync(final Replicator.GetResponse<ORMap<DOMEntity, ORSet<String>>> response) {
+    public ClearCandidatesWhileIdle(final Replicator.GetResponse<ORMap<DOMEntity, ORSet<String>>> response,
+                                    final ClearCandidatesForMember originalMessage) {
         this.response = response;
+        this.originalMessage = originalMessage;
     }
 
     public Replicator.GetResponse<ORMap<DOMEntity, ORSet<String>>> getResponse() {
         return response;
+    }
+
+    public ClearCandidatesForMember getOriginalMessage() {
+        return originalMessage;
     }
 }
