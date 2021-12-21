@@ -42,11 +42,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.AbstractEntityRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesResponse;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesUpdateResponse;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterDeactivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendReply;
@@ -79,6 +83,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     private static final String DATACENTER_PREFIX = "dc-";
 
     private final ReplicatorMessageAdapter<OwnerSupervisorCommand, LWWRegister<String>> ownerReplicator;
+    private final ReplicatorMessageAdapter<OwnerSupervisorCommand, ORMap<DOMEntity, ORSet<String>>> candidateReplicator;
 
     // Our own clock implementation so we do not have to rely on synchronized clocks. This basically functions as an
     // increasing counter which is fine for our needs as we only ever have a single writer since t supervisor is
@@ -152,8 +157,8 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                 });
         cluster.subscriptions().tell(Subscribe.create(reachabilityEventAdapter, ClusterEvent.ReachabilityEvent.class));
 
-        new ReplicatorMessageAdapter<OwnerSupervisorCommand, ORMap<DOMEntity, ORSet<String>>>(context, replicator,
-            Duration.ofSeconds(5)).subscribe(CandidateRegistry.KEY, CandidatesChanged::new);
+        candidateReplicator = new ReplicatorMessageAdapter<>(context, replicator, Duration.ofSeconds(5));
+        candidateReplicator.subscribe(CandidateRegistry.KEY, CandidatesChanged::new);
 
         LOG.debug("Owner Supervisor started");
     }
@@ -176,7 +181,50 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                 .onMessage(GetEntitiesBackendRequest.class, this::onGetEntities)
                 .onMessage(GetEntityBackendRequest.class, this::onGetEntity)
                 .onMessage(GetEntityOwnerBackendRequest.class, this::onGetEntityOwner)
+                .onMessage(ClearCandidatesForMember.class, this::onClearCandidatesForMember)
+                .onMessage(ClearCandidatesUpdateResponse.class, this::onClearCandidatesUpdateResponse)
                 .build();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onClearCandidatesForMember(final ClearCandidatesForMember command) {
+        final Set<DOMEntity> entitiesToClear = new HashSet<>();
+        for (final Map.Entry<DOMEntity, Set<String>> entry : currentCandidates.entrySet()) {
+            if (entry.getValue().contains(command.getCandidate())) {
+                entitiesToClear.add(entry.getKey());
+            }
+        }
+
+        LOG.debug("Removing candidate: {} from entities: {}.", command.getCandidate(), entitiesToClear);
+        if (entitiesToClear.isEmpty()) {
+            LOG.debug("No need to clear any candidates, replying to: {}", command.getReplyTo());
+            command.getReplyTo().tell(new ClearCandidatesResponse());
+            return this;
+        }
+
+        final AtomicInteger responseCounter = new AtomicInteger(entitiesToClear.size());
+        for (final DOMEntity entity : entitiesToClear) {
+            candidateReplicator.askUpdate(
+                    askReplyTo -> new Replicator.Update<>(
+                            CandidateRegistry.KEY,
+                            ORMap.empty(),
+                            Replicator.writeLocal(),
+                            askReplyTo,
+                            map -> map.update(node, entity, ORSet.empty(),
+                                    value -> value.remove(node, command.getCandidate()))),
+                    updateResponse -> new ClearCandidatesUpdateResponse(updateResponse, responseCounter,
+                            command.getReplyTo()));
+        }
+
+        return this;
+    }
+
+    private Behavior<OwnerSupervisorCommand> onClearCandidatesUpdateResponse(
+            final ClearCandidatesUpdateResponse command) {
+        if (command.getResponseCounter().decrementAndGet() == 0) {
+            LOG.debug("Last update response for candidate removal received, replying to: {}", command.getReplyTo());
+            command.getReplyTo().tell(new ClearCandidatesResponse());
+        }
+        return this;
     }
 
     private Behavior<OwnerSupervisorCommand> onDeactivateDatacenter(final DeactivateDataCenter command) {
@@ -193,7 +241,7 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
     private void reassignUnreachableOwners() {
         final Set<String> ownersToReassign = new HashSet<>();
         for (final String owner : ownerToEntity.keys()) {
-            if (!activeMembers.contains(owner)) {
+            if (!isActiveCandidate(owner)) {
                 ownersToReassign.add(owner);
             }
         }
@@ -259,8 +307,10 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
                 LOG.debug("Adding new candidate for entity: {} : {}", entity, toCheck);
                 currentCandidates.get(entity).add(toCheck);
 
-                if (!currentOwners.containsKey(entity)) {
-                    // might as well assign right away when we don't have an owner
+                final String currentOwner = currentOwners.get(entity);
+
+                if (currentOwner == null || !activeMembers.contains(currentOwner)) {
+                    // might as well assign right away when we don't have an owner or its unreachable
                     assignOwnerFor(entity);
                 }
 
@@ -296,6 +346,13 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
         LOG.debug("Reassigning owners for {}", entities);
         for (final DOMEntity entity : entities) {
             if (predicate.test(entity, oldOwner)) {
+
+                if (!isActiveCandidate(oldOwner) && isCandidateFor(entity, oldOwner) && hasSingleCandidate(entity)) {
+                    // only skip new owner assignment, only if unreachable, still is a candidate and is the ONLY
+                    // candidate
+                    LOG.debug("{} is the only candidate for {}. Skipping reassignment.", oldOwner, entity);
+                    continue;
+                }
                 ownerToEntity.remove(oldOwner, entity);
                 assignOwnerFor(entity);
             }
@@ -308,6 +365,10 @@ public final class OwnerSupervisor extends AbstractBehavior<OwnerSupervisorComma
 
     private boolean isCandidateFor(final DOMEntity entity, final String candidate) {
         return currentCandidates.getOrDefault(entity, Set.of()).contains(candidate);
+    }
+
+    private boolean hasSingleCandidate(final DOMEntity entity) {
+        return currentCandidates.getOrDefault(entity, Set.of()).size() == 1;
     }
 
     private void assignOwnerFor(final DOMEntity entity) {

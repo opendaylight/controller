@@ -19,6 +19,8 @@ import akka.actor.typed.javadsl.AskPattern;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.cluster.ddata.LWWRegister;
 import akka.cluster.ddata.LWWRegisterKey;
+import akka.cluster.ddata.ORMap;
+import akka.cluster.ddata.ORSet;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
 import akka.cluster.ddata.typed.javadsl.Replicator;
 import com.typesafe.config.Config;
@@ -44,6 +46,7 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberReach
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.MemberUnreachableEvent;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
+import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterCandidate;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.UnregisterCandidate;
@@ -263,7 +266,7 @@ public abstract class AbstractNativeEosTest {
     }
 
     protected static void waitUntillOwnerPresent(final ClusterNode clusterNode, final DOMEntity entity) {
-        await().until(() -> {
+        await().atMost(Duration.ofSeconds(15)).until(() -> {
             final DistributedData distributedData = DistributedData.get(clusterNode.getActorSystem());
             final CompletionStage<Replicator.GetResponse<LWWRegister<String>>> ask =
                     AskPattern.ask(distributedData.replicator(),
@@ -280,6 +283,32 @@ public abstract class AbstractNativeEosTest {
                 return !owner.isEmpty();
             }
 
+            return false;
+        });
+    }
+
+    protected static void waitUntillCandidatePresent(final ClusterNode clusterNode, final DOMEntity entity,
+                                                     final String candidate) {
+        await().atMost(Duration.ofSeconds(15)).until(() -> {
+            final DistributedData distributedData = DistributedData.get(clusterNode.getActorSystem());
+
+            final CompletionStage<Replicator.GetResponse<ORMap<DOMEntity, ORSet<String>>>> ask =
+                    AskPattern.ask(distributedData.replicator(),
+                            replyTo -> new Replicator.Get<>(
+                                    CandidateRegistry.KEY, Replicator.readLocal(), replyTo),
+                            Duration.ofSeconds(5),
+                            clusterNode.getActorSystem().scheduler());
+
+            final Replicator.GetResponse<ORMap<DOMEntity, ORSet<String>>> response =
+                    ask.toCompletableFuture().get(5, TimeUnit.SECONDS);
+
+            if (response instanceof Replicator.GetSuccess) {
+                final Map<DOMEntity, ORSet<String>> entries =
+                        ((Replicator.GetSuccess<ORMap<DOMEntity, ORSet<String>>>) response).dataValue().getEntries();
+
+                return entries.get(entity).contains(candidate);
+
+            }
             return false;
         });
     }
@@ -306,7 +335,7 @@ public abstract class AbstractNativeEosTest {
                                               final boolean hasOwner, final boolean isOwner, final boolean wasOwner) {
         await().until(() -> !listener.getChanges().isEmpty());
 
-        await().untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             final List<DOMEntityOwnershipChange> changes = listener.getChanges();
             final DOMEntityOwnershipChange domEntityOwnershipChange = listener.getChanges().get(changes.size() - 1);
             assertEquals(entity, domEntityOwnershipChange.getEntity());
