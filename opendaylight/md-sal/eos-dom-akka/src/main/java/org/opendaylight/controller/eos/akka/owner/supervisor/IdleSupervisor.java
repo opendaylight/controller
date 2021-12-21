@@ -9,21 +9,37 @@ package org.opendaylight.controller.eos.akka.owner.supervisor;
 
 import static java.util.Objects.requireNonNull;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.cluster.Member;
+import akka.cluster.ddata.ORMap;
+import akka.cluster.ddata.ORSet;
+import akka.cluster.ddata.SelfUniqueAddress;
+import akka.cluster.ddata.typed.javadsl.DistributedData;
+import akka.cluster.ddata.typed.javadsl.Replicator;
+import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import akka.cluster.typed.Cluster;
 import akka.pattern.StatusReply;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesResponse;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesUpdateResponse;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesWhileIdle;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorRequest;
+import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +55,8 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
     private static final String DEFAULT_DATACENTER = "dc-default";
 
     private final BindingInstanceIdentifierCodec iidCodec;
+    private final ReplicatorMessageAdapter<OwnerSupervisorCommand, ORMap<DOMEntity, ORSet<String>>> candidateReplicator;
+    private final SelfUniqueAddress node;
 
     private IdleSupervisor(final ActorContext<OwnerSupervisorCommand> context,
                            final BindingInstanceIdentifierCodec iidCodec) {
@@ -46,11 +64,17 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
         this.iidCodec = requireNonNull(iidCodec);
         final Cluster cluster = Cluster.get(context.getSystem());
 
+        final ActorRef<Replicator.Command> replicator = DistributedData.get(getContext().getSystem()).replicator();
+
+        candidateReplicator = new ReplicatorMessageAdapter<>(getContext(), replicator, Duration.ofSeconds(5));
+
         final String datacenterRole = extractDatacenterRole(cluster.selfMember());
         if (datacenterRole.equals(DEFAULT_DATACENTER)) {
             LOG.debug("No datacenter configured, activating default data center");
             context.getSelf().tell(new ActivateDataCenter(null));
         }
+
+        node = DistributedData.get(context.getSystem()).selfUniqueAddress();
 
         LOG.debug("Idle supervisor started on {}.", cluster.selfMember());
     }
@@ -67,6 +91,9 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
                 .onMessage(GetEntitiesBackendRequest.class, this::onFailEntityRpc)
                 .onMessage(GetEntityBackendRequest.class, this::onFailEntityRpc)
                 .onMessage(GetEntityOwnerBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(ClearCandidatesForMember.class, this::onClearCandidatesForMember)
+                .onMessage(ClearCandidatesWhileIdle.class, this::finishClearCandidates)
+                .onMessage(ClearCandidatesUpdateResponse.class, this::onClearCandidatesUpdateResponse)
                 .build();
     }
 
@@ -87,5 +114,67 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
                 .filter(role -> role.startsWith(DATACENTER_PREFIX))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(selfMember + " does not have a valid role"));
+    }
+
+    private Behavior<OwnerSupervisorCommand> onClearCandidatesForMember(final ClearCandidatesForMember command) {
+        LOG.debug("Clearing candidates for member: {}", command.getCandidate());
+
+        candidateReplicator.askGet(
+                askReplyTo -> new Replicator.Get<>(CandidateRegistry.KEY,
+                        new Replicator.ReadMajority(Duration.ofSeconds(15)), askReplyTo),
+                response -> new ClearCandidatesWhileIdle(response, command));
+
+        return this;
+    }
+
+    private Behavior<OwnerSupervisorCommand> finishClearCandidates(final ClearCandidatesWhileIdle command) {
+        if (command.getResponse() instanceof Replicator.GetSuccess) {
+            LOG.debug("Retrieved candidate data, clearing candidates for {}",
+                    command.getOriginalMessage().getCandidate());
+            final ORMap<DOMEntity, ORSet<String>> candidates =
+                    ((Replicator.GetSuccess<ORMap<DOMEntity, ORSet<String>>>) command.getResponse())
+                            .get(CandidateRegistry.KEY);
+
+            final AtomicInteger responseCounter = new AtomicInteger(0);
+            for (final Map.Entry<DOMEntity, ORSet<String>> entry : candidates.getEntries().entrySet()) {
+                if (entry.getValue().contains(command.getOriginalMessage().getCandidate())) {
+                    LOG.debug("Removing {} from {}", command.getOriginalMessage().getCandidate(), entry.getKey());
+
+                    responseCounter.incrementAndGet();
+                    candidateReplicator.askUpdate(
+                            askReplyTo -> new Replicator.Update<>(
+                                    CandidateRegistry.KEY,
+                                    ORMap.empty(),
+                                    Replicator.writeLocal(),
+                                    askReplyTo,
+                                    map -> map.update(node, entry.getKey(), ORSet.empty(),
+                                            value -> value.remove(node, command.getOriginalMessage().getCandidate()))),
+                            updateResponse -> new ClearCandidatesUpdateResponse(updateResponse, responseCounter,
+                                    command.getOriginalMessage().getReplyTo()));
+                }
+            }
+
+            if (responseCounter.get() == 0) {
+                LOG.debug("Did not clear any candidates for {}", command.getOriginalMessage().getCandidate());
+                command.getOriginalMessage().getReplyTo().tell(new ClearCandidatesResponse());
+            }
+        } else {
+            LOG.debug("Unable to retrieve candidate data for {}, no candidates present sending empty reply",
+                    command.getOriginalMessage().getCandidate());
+            command.getOriginalMessage().getReplyTo().tell(new ClearCandidatesResponse());
+        }
+
+        return this;
+    }
+
+    private Behavior<OwnerSupervisorCommand> onClearCandidatesUpdateResponse(
+            final ClearCandidatesUpdateResponse command) {
+        if (command.getResponseCounter().decrementAndGet() == 0) {
+            LOG.debug("Last update response for candidate removal received, replying to: {}", command.getReplyTo());
+            command.getReplyTo().tell(new ClearCandidatesResponse());
+        } else {
+            LOG.debug("Bla {}", command.getResponse());
+        }
+        return this;
     }
 }
