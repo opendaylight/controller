@@ -223,6 +223,39 @@ public class ThreeNodeReachabilityTest extends AbstractNativeEosTest {
         verifyListenerState(node1Listener, ENTITY_1, true, false, false);
     }
 
+    @Test
+    public void testOwnerNotReassignedWhenOnlyCandidate() throws Exception {
+        startNode3();
+        final MockEntityOwnershipListener listener1 = registerListener(node1, ENTITY_1);
+        final MockEntityOwnershipListener listener2 = registerListener(node2, ENTITY_1);
+        verifyNoNotifications(listener1);
+        verifyNoNotifications(listener2);
+
+        registerCandidates(node3, ENTITY_1, "member-3");
+        waitUntillOwnerPresent(node1, ENTITY_1);
+
+        MockEntityOwnershipListener listener3 = registerListener(node3, ENTITY_1);
+        verifyListenerState(listener1, ENTITY_1, true, false, false);
+        verifyListenerState(listener3, ENTITY_1, true, true, false);
+
+        ActorTestKit.shutdown(node3.getActorSystem(), Duration.ofSeconds(20));
+
+        verifyListenerState(listener1, ENTITY_1, true, false, false);
+        verifyListenerState(listener2, ENTITY_1, true, false, false);
+
+        startNode3();
+        verifyListenerState(listener1, ENTITY_1, false, false, false);
+
+        listener3 = registerListener(node3, ENTITY_1);
+        verifyListenerState(listener3, ENTITY_1, false, false, false);
+
+        registerCandidates(node1, ENTITY_1, "member-1");
+
+        verifyListenerState(listener1, ENTITY_1, true, true, false);
+        verifyListenerState(listener3, ENTITY_1, true, false, false);
+
+    }
+
     private void startNode3() throws Exception {
         startNode3(3);
     }
@@ -232,7 +265,7 @@ public class ThreeNodeReachabilityTest extends AbstractNativeEosTest {
 
         // need to wait until all nodes are ready
         final Cluster cluster = Cluster.get(node2.getActorSystem());
-        await().atMost(Duration.ofSeconds(20)).until(() -> {
+        await().atMost(Duration.ofSeconds(30)).until(() -> {
             final List<Member> members = ImmutableList.copyOf(cluster.state().getMembers());
             if (members.size() != membersPresent) {
                 return false;

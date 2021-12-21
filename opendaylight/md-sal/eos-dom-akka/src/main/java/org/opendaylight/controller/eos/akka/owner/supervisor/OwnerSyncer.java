@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
@@ -29,6 +28,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidates;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterActivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendRequest;
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * Behavior that retrieves current candidates/owners from distributed-data and switches to OwnerSupervisor when the
  * sync has finished.
  */
-public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> {
+public final class OwnerSyncer extends AbstractSupervisor {
     private static final Logger LOG = LoggerFactory.getLogger(OwnerSyncer.class);
 
     private final ReplicatorMessageAdapter<OwnerSupervisorCommand, LWWRegister<String>> ownerReplicator;
@@ -72,8 +73,7 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
 
         ownerReplicator = new ReplicatorMessageAdapter<>(context, replicator, Duration.ofSeconds(5));
 
-        new ReplicatorMessageAdapter<OwnerSupervisorCommand, ORMap<DOMEntity, ORSet<String>>>(context, replicator,
-            Duration.ofSeconds(5)).askGet(
+        candidateReplicator.askGet(
                 askReplyTo -> new Replicator.Get<>(CandidateRegistry.KEY, Replicator.readLocal(), askReplyTo),
                 InitialCandidateSync::new);
 
@@ -95,6 +95,8 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
                 .onMessage(GetEntitiesBackendRequest.class, this::onFailEntityRpc)
                 .onMessage(GetEntityBackendRequest.class, this::onFailEntityRpc)
                 .onMessage(GetEntityOwnerBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(ClearCandidatesForMember.class, this::onClearCandidatesForMember)
+                .onMessage(ClearCandidates.class, this::finishClearCandidates)
                 .build();
     }
 
@@ -175,5 +177,10 @@ public final class OwnerSyncer extends AbstractBehavior<OwnerSupervisorCommand> 
 
     private static void handleNotFoundOwnerRsp(final Replicator.NotFound<LWWRegister<String>> rsp) {
         LOG.debug("Owner not found. {}", rsp);
+    }
+
+    @Override
+    Logger getLogger() {
+        return LOG;
     }
 }

@@ -10,7 +10,6 @@ package org.opendaylight.controller.eos.akka.owner.supervisor;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
@@ -18,6 +17,8 @@ import akka.cluster.Member;
 import akka.cluster.typed.Cluster;
 import akka.pattern.StatusReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidates;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendRequest;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * in the primary datacenter, or is activated on demand. Once the supervisor instance is no longer needed in the
  * secondary datacenter it needs to be deactivated manually.
  */
-public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorCommand> {
+public final class IdleSupervisor extends AbstractSupervisor {
     private static final Logger LOG = LoggerFactory.getLogger(IdleSupervisor.class);
 
     private static final String DATACENTER_PREFIX = "dc-";
@@ -56,7 +57,6 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
     }
 
     public static Behavior<OwnerSupervisorCommand> create(final BindingInstanceIdentifierCodec iidCodec) {
-
         return Behaviors.setup(context -> new IdleSupervisor(context, iidCodec));
     }
 
@@ -67,6 +67,8 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
                 .onMessage(GetEntitiesBackendRequest.class, this::onFailEntityRpc)
                 .onMessage(GetEntityBackendRequest.class, this::onFailEntityRpc)
                 .onMessage(GetEntityOwnerBackendRequest.class, this::onFailEntityRpc)
+                .onMessage(ClearCandidatesForMember.class, this::onClearCandidatesForMember)
+                .onMessage(ClearCandidates.class, this::finishClearCandidates)
                 .build();
     }
 
@@ -82,10 +84,15 @@ public final class IdleSupervisor extends AbstractBehavior<OwnerSupervisorComman
         return OwnerSyncer.create(message.getReplyTo(), iidCodec);
     }
 
-    private String extractDatacenterRole(final Member selfMember) {
+    private static String extractDatacenterRole(final Member selfMember) {
         return selfMember.getRoles().stream()
                 .filter(role -> role.startsWith(DATACENTER_PREFIX))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(selfMember + " does not have a valid role"));
+    }
+
+    @Override
+    Logger getLogger() {
+        return LOG;
     }
 }
