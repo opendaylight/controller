@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -239,8 +242,7 @@ public class ShardTest extends AbstractShardTest {
             CreateTransactionReply.class);
 
         final String path = reply.getTransactionPath().toString();
-        assertTrue("Unexpected transaction path " + path, path.contains(String.format(
-            "/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
+        assertThat(path, containsString(String.format("/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
             shardID.getShardName(), shardID.getMemberName().getName())));
     }
 
@@ -258,7 +260,7 @@ public class ShardTest extends AbstractShardTest {
             CreateTransactionReply.class);
 
         final String path = reply.getTransactionPath().toString();
-        assertTrue("Unexpected transaction path " + path, path.contains(String.format(
+        assertThat(path, containsString(String.format(
             "/user/testCreateTransactionOnChain/shard-%s-%s:ShardTransactionTest@0:",
             shardID.getShardName(), shardID.getMemberName().getName())));
     }
@@ -480,7 +482,7 @@ public class ShardTest extends AbstractShardTest {
                 .fromSerializable(testKit.expectMsgClass(duration, ReadyTransactionReply.class));
 
         String pathSuffix = shard.path().toString().replaceFirst("akka://test", "");
-        assertTrue("Cohort path", readyReply.getCohortPath().endsWith(pathSuffix));
+        assertThat(readyReply.getCohortPath(), endsWith(pathSuffix));
         // Send the CanCommitTransaction message for the first Tx.
 
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
