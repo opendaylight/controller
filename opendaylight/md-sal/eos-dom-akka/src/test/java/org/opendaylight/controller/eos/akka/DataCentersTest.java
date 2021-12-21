@@ -60,7 +60,6 @@ public class DataCentersTest extends AbstractNativeEosTest {
     public void testDatacenterActivation() throws Exception {
         registerCandidates(node1, ENTITY_1, "member-1");
         registerCandidates(node3, ENTITY_1, "member-3");
-        registerCandidates(node4, ENTITY_1, "member-4");
 
         activateDatacenter(node1).get();
 
@@ -82,18 +81,15 @@ public class DataCentersTest extends AbstractNativeEosTest {
         verifyListenerState(listener1, ENTITY_1, true, false, false);
         verifyListenerState(listener2, ENTITY_1, true, true, false);
 
+        registerCandidates(node4, ENTITY_1, "member-4");
         unregisterCandidates(node3, ENTITY_1, "member-3");
 
         // checking index after notif so current + 1
         verifyListenerState(listener1, ENTITY_1, true, false, false);
-        verifyListenerState(listener2, ENTITY_1, true, false, true);
+        verifyListenerState(listener2, ENTITY_1, true, false, false);
 
         deactivateDatacenter(node3).get();
         activateDatacenter(node2).get();
-
-        // no candidate in dc-primary so no owners after datacenter activation
-        verifyListenerState(listener1, ENTITY_1, false, false, false);
-        verifyListenerState(listener2, ENTITY_1, false, false, false);
     }
 
     @Test
@@ -102,9 +98,13 @@ public class DataCentersTest extends AbstractNativeEosTest {
         registerCandidates(node3, ENTITY_1, "member-3");
         registerCandidates(node4, ENTITY_1, "member-4");
 
+        waitUntillCandidatePresent(node1, ENTITY_1, "member-1");
+        waitUntillCandidatePresent(node1, ENTITY_1, "member-3");
+        waitUntillCandidatePresent(node1, ENTITY_1, "member-4");
+
         activateDatacenter(node1).get();
 
-        waitUntillOwnerPresent(node1, ENTITY_1);
+        waitUntillOwnerPresent(node4, ENTITY_1);
         final MockEntityOwnershipListener listener1 = registerListener(node1, ENTITY_1);
         verifyListenerState(listener1, ENTITY_1, true, true, false);
 
@@ -122,6 +122,7 @@ public class DataCentersTest extends AbstractNativeEosTest {
         activateDatacenter(node3).get();
         verifyListenerState(listener2, ENTITY_1, true, true, false);
 
+        waitUntillOwnerPresent(node3, ENTITY_1);
         unregisterCandidates(node3, ENTITY_1, "member-3");
         verifyListenerState(listener2, ENTITY_1, true, false, true);
     }
