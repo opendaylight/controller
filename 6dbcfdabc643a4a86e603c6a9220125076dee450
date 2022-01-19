@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "636f2aad_fb5e1073",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/main/java/org/opendaylight/controller/eos/akka/owner/supervisor/IdleSupervisor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-01-19T09:32:41Z",
+      "side": 1,
+      "message": "this is part of behaviour state, i.e. while we have this non-zero, we should have a different subclass",
+      "range": {
+        "startLine": 137,
+        "startChar": 13,
+        "endLine": 137,
+        "endChar": 71
+      },
+      "revId": "6dbcfdabc643a4a86e603c6a9220125076dee450",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b079181f_13f6eae3",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/main/java/org/opendaylight/controller/eos/akka/owner/supervisor/command/ClearCandidatesUpdateResponse.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-01-19T09:32:41Z",
+      "side": 1,
+      "message": "leaking mutable state!",
+      "range": {
+        "startLine": 19,
+        "startChar": 18,
+        "endLine": 19,
+        "endChar": 48
+      },
+      "revId": "6dbcfdabc643a4a86e603c6a9220125076dee450",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
