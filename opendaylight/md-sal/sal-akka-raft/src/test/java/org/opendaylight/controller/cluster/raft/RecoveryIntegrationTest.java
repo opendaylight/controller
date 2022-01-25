@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
 import akka.actor.ActorRef;
@@ -41,7 +42,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
                 newFollowerConfigParams());
 
-        Map<String, String> leaderPeerAddresses = new HashMap<>();
+        final Map<String, String> leaderPeerAddresses = new HashMap<>();
         leaderPeerAddresses.put(follower1Id, follower1Actor.path().toString());
         leaderPeerAddresses.put(follower2Id, "");
 
@@ -79,7 +80,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
 
         // Now deliver the CaptureSnapshotReply to the leader.
-        CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(
+        final CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(
                 leaderCollectorActor, CaptureSnapshotReply.class);
         leaderActor.underlyingActor().stopDropMessages(CaptureSnapshotReply.class);
         leaderActor.tell(captureSnapshotReply, leaderActor);
@@ -236,7 +237,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         // Send new payloads
         final MockPayload payload4 = sendPayloadData(leaderActor, "newFour");
+        await().untilAsserted(() -> assertEquals(
+                "leader journal last index", 4, leaderContext.getReplicatedLog().lastIndex()));
+
         final MockPayload payload5 = sendPayloadData(leaderActor, "newFive");
+        await().untilAsserted(() -> assertEquals(
+                "leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex()));
 
         verifyRaftState(leaderActor, raftState -> {
             assertEquals("leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex());
