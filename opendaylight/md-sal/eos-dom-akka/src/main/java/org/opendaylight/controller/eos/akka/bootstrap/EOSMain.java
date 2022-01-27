@@ -74,7 +74,7 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
     }
 
     private Behavior<BootstrapCommand> onTerminate(final Terminate request) {
-        request.getReplyTo().tell(Empty.getInstance());
+        request.getReplyTo().tell(Empty.value());
         return Behaviors.stopped();
     }
 }

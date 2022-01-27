@@ -282,7 +282,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
                 future.setException(failure);
             } else {
                 LOG.debug("{} DataCenter successful", op);
-                future.set(Empty.getInstance());
+                future.set(Empty.value());
             }
         });
         return future;

@@ -127,7 +127,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
     private static final @NonNull RpcResult<LocateShardOutput> LOCAL_SHARD_RESULT =
             RpcResultBuilder.success(new LocateShardOutputBuilder()
-                .setMemberNode(new LocalBuilder().setLocal(Empty.getInstance()).build())
+                .setMemberNode(new LocalBuilder().setLocal(Empty.value()).build())
                 .build())
             .build();
 
