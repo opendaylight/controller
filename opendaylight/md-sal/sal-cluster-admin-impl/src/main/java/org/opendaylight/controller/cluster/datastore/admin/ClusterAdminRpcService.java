@@ -108,7 +108,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
 import org.opendaylight.yangtools.yang.common.Empty;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -145,7 +145,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         this.operDataStore = operDataStore;
         this.serializer = serializer;
 
-        this.makeLeaderLocalTimeout =
+        makeLeaderLocalTimeout =
                 new Timeout(configDataStore.getActorUtils().getDatastoreContext()
                         .getShardLeaderElectionTimeout().duration().$times(2));
 
@@ -696,8 +696,6 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return ask(shardManager, message, SHARD_MGR_TIMEOUT);
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void saveSnapshotsToFile(final DatastoreSnapshotList snapshots, final String fileName,
             final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture) {

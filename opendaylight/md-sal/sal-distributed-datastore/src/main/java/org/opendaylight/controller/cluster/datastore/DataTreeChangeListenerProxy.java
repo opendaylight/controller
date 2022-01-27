@@ -14,7 +14,6 @@ import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
 import com.google.common.annotations.VisibleForTesting;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -87,8 +86,6 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         }, actorUtils.getClientDispatcher());
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void setListenerRegistrationActor(final ActorSelection actor) {
         if (actor == null) {
             LOG.debug("{}: Ignoring null actor on {}", logContext(), this);
@@ -106,8 +103,6 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         actor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), null);
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void doRegistration(final ActorRef shard) {
 
         Future<Object> future = actorUtils.executeOperationAsync(shard,
@@ -115,7 +110,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                         getInstance() instanceof ClusteredDOMDataTreeChangeListener),
                 actorUtils.getDatastoreContext().getShardInitializationTimeout());
 
-        future.onComplete(new OnComplete<Object>() {
+        future.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object result) {
                 if (failure != null) {

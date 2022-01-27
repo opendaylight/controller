@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorSelection;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
  * Local message DTO that contains information about the primary shard.
@@ -24,17 +24,17 @@ public class PrimaryShardInfo {
     private final short primaryShardVersion;
     private final ReadOnlyDataTree localShardDataTree;
 
-    public PrimaryShardInfo(@NonNull ActorSelection primaryShardActor, short primaryShardVersion,
-            @NonNull ReadOnlyDataTree localShardDataTree) {
+    public PrimaryShardInfo(final @NonNull ActorSelection primaryShardActor, final short primaryShardVersion,
+            final @NonNull ReadOnlyDataTree localShardDataTree) {
         this.primaryShardActor = requireNonNull(primaryShardActor);
         this.primaryShardVersion = primaryShardVersion;
         this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    public PrimaryShardInfo(@NonNull ActorSelection primaryShardActor, short primaryShardVersion) {
+    public PrimaryShardInfo(final @NonNull ActorSelection primaryShardActor, final short primaryShardVersion) {
         this.primaryShardActor = requireNonNull(primaryShardActor);
         this.primaryShardVersion = primaryShardVersion;
-        this.localShardDataTree = null;
+        localShardDataTree = null;
     }
 
     /**

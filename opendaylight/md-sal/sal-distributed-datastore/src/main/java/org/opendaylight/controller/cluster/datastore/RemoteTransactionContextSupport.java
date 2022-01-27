@@ -14,7 +14,6 @@ import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -100,7 +99,7 @@ final class RemoteTransactionContextSupport {
      * Sets the target primary shard and initiates a CreateTransaction try.
      */
     void setPrimaryShard(final PrimaryShardInfo newPrimaryShardInfo) {
-        this.primaryShardInfo = newPrimaryShardInfo;
+        primaryShardInfo = newPrimaryShardInfo;
 
         if (getTransactionType() == TransactionType.WRITE_ONLY
                 && getActorUtils().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
@@ -131,7 +130,7 @@ final class RemoteTransactionContextSupport {
         Future<Object> createTxFuture = getActorUtils().executeOperationAsync(
                 primaryShardInfo.getPrimaryShardActor(), serializedCreateMessage, createTxMessageTimeout);
 
-        createTxFuture.onComplete(new OnComplete<Object>() {
+        createTxFuture.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 onCreateTransactionComplete(failure, response);
@@ -142,7 +141,7 @@ final class RemoteTransactionContextSupport {
     private void tryFindPrimaryShard() {
         LOG.debug("Tx {} Retrying findPrimaryShardAsync for shard {}", getIdentifier(), shardName);
 
-        this.primaryShardInfo = null;
+        primaryShardInfo = null;
         Future<PrimaryShardInfo> findPrimaryFuture = getActorUtils().findPrimaryShardAsync(shardName);
         findPrimaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
             @Override
@@ -152,11 +151,9 @@ final class RemoteTransactionContextSupport {
         }, getActorUtils().getClientDispatcher());
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void onFindPrimaryShardComplete(final Throwable failure, final PrimaryShardInfo newPrimaryShardInfo) {
         if (failure == null) {
-            this.primaryShardInfo = newPrimaryShardInfo;
+            primaryShardInfo = newPrimaryShardInfo;
             tryCreateTransaction();
         } else {
             LOG.debug("Tx {}: Find primary for shard {} failed", getIdentifier(), shardName, failure);

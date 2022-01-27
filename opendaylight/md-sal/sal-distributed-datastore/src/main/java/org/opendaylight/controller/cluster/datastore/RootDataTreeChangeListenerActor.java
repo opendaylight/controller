@@ -14,10 +14,12 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.google.common.collect.Iterables;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
@@ -27,10 +29,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidateNodes;
+import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor {
@@ -95,7 +97,10 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
          * Construct an overall NormalizedNode view of the entire datastore by combining first-level children from all
          * reported initial state reports, report that node as written and then report any additional deltas.
          */
-        final Deque<DataTreeCandidate> initialChanges = new ArrayDeque<>();
+        final List<DataTreeCandidate> initialChanges = new ArrayList<>();
+        // Reserve first item
+        initialChanges.add(null);
+
         final DataContainerNodeBuilder<NodeIdentifier, ContainerNode> rootBuilder = Builders.containerBuilder()
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME));
         for (Object message : initialMessages.values()) {
@@ -106,7 +111,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
                     final Iterator<DataTreeCandidate> it = changes.iterator();
                     initial = it.next();
                     // Append to changes to report as initial. This should not be happening (often?).
-                    it.forEachRemaining(initialChanges::addLast);
+                    it.forEachRemaining(initialChanges::add);
                 } else {
                     initial = Iterables.get(changes, 0);
                 }
@@ -119,8 +124,8 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
         // We will not be intercepting any other messages, allow initial state to be reclaimed as soon as possible
         initialMessages = null;
 
-        // Prepend combined initial changed and report initial changes and clear the map
-        initialChanges.addFirst(DataTreeCandidates.newDataTreeCandidate(YangInstanceIdentifier.empty(),
+        // Replace first element with the combined initial change, report initial changes and clear the map
+        initialChanges.set(0, DataTreeCandidates.newDataTreeCandidate(YangInstanceIdentifier.empty(),
             DataTreeCandidateNodes.written(rootBuilder.build())));
         super.dataTreeChanged(new DataTreeChanged(initialChanges));
 

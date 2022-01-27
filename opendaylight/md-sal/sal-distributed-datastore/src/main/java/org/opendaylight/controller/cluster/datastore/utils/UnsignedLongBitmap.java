@@ -14,7 +14,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.UnsignedLong;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -262,14 +261,10 @@ public abstract class UnsignedLongBitmap implements Immutable {
         return isEmpty() ? "{}" : appendEntries(new StringBuilder().append('{')).append('}').toString();
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-        justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static StringBuilder appendEntry(final StringBuilder sb, final long key, final boolean value) {
         return sb.append(Long.toUnsignedString(key)).append('=').append(value);
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-        justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static void writeEntry(final @NonNull DataOutput out, final long key, final boolean value)
             throws IOException {
         // FIXME: This serialization format is what we inherited. We could do better by storing the boolean in

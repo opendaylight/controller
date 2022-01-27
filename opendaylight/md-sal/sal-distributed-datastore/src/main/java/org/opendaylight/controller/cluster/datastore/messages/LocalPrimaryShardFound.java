@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
  * Local message sent in reply to FindPrimaryShard to indicate the primary shard is local to the caller.
@@ -19,11 +19,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
  * @author Thomas Pantelis
  */
 public class LocalPrimaryShardFound {
-
     private final String primaryPath;
     private final ReadOnlyDataTree localShardDataTree;
 
-    public LocalPrimaryShardFound(@NonNull  String primaryPath, @NonNull ReadOnlyDataTree localShardDataTree) {
+    public LocalPrimaryShardFound(final @NonNull String primaryPath,
+            final @NonNull ReadOnlyDataTree localShardDataTree) {
         this.primaryPath = requireNonNull(primaryPath);
         this.localShardDataTree = requireNonNull(localShardDataTree);
     }

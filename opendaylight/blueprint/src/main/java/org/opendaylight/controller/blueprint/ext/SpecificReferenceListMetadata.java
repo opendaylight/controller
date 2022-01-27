@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import org.osgi.framework.Bundle;
@@ -110,8 +109,6 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         serviceTracker.open();
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void bundleAdded(final Bundle bundle) {
         URL resource = bundle.getEntry(serviceResourcePath);
         if (resource == null) {
@@ -142,8 +139,6 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         }
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private Object serviceAdded(final ServiceReference<Object> reference) {
         Object service = container().getBundleContext().getService(reference);
         String serviceType = (String) reference.getProperty(OpendaylightNamespaceHandler.TYPE_ATTR);
@@ -196,7 +191,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         LOG.debug("{}: create returning service list {}", logName(), retrievedServices);
 
         synchronized (retrievedServices) {
-            return ImmutableList.copyOf(retrievedServices);
+            return List.copyOf(retrievedServices);
         }
     }
 
@@ -217,9 +212,9 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("SpecificReferenceListMetadata [interfaceName=").append(interfaceName)
-                .append(", serviceResourcePath=").append(serviceResourcePath).append("]");
-        return builder.toString();
+        return new StringBuilder()
+            .append("SpecificReferenceListMetadata [interfaceName=").append(interfaceName)
+            .append(", serviceResourcePath=").append(serviceResourcePath).append("]")
+            .toString();
     }
 }

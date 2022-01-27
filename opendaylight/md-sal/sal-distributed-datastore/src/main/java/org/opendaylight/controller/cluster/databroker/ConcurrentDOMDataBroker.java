@@ -69,7 +69,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores,
             final Executor listenableFutureExecutor, final DurationStatisticsTracker commitStatsTracker) {
         super(datastores);
-        this.clientFutureCallbackExecutor = requireNonNull(listenableFutureExecutor);
+        clientFutureCallbackExecutor = requireNonNull(listenableFutureExecutor);
         this.commitStatsTracker = requireNonNull(commitStatsTracker);
     }
 
@@ -107,7 +107,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Boolean> futureCallback = new FutureCallback<Boolean>() {
+        FutureCallback<Boolean> futureCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Boolean result) {
                 if (result == null || !result) {
@@ -130,8 +130,6 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(cohortIterator.next().canCommit(), futureCallback, MoreExecutors.directExecutor());
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void doPreCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
@@ -139,7 +137,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
+        FutureCallback<Void> futureCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Void notUsed) {
                 if (!cohortIterator.hasNext()) {
@@ -161,8 +159,6 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(preCommitFuture, futureCallback, MoreExecutors.directExecutor());
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void doCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
@@ -170,7 +166,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
+        FutureCallback<Void> futureCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Void notUsed) {
                 if (!cohortIterator.hasNext()) {
@@ -194,11 +190,10 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(commitFuture, futureCallback, MoreExecutors.directExecutor());
     }
 
-    @SuppressFBWarnings(value = { "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE", "UPM_UNCALLED_PRIVATE_METHOD" },
+    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
             justification = "Pertains to the assignment of the 'clientException' var. FindBugs flags this as an "
                 + "uncomfirmed cast but the generic type in TransactionCommitFailedExceptionMapper is "
-                + "TransactionCommitFailedException and thus should be deemed as confirmed."
-                + "Also https://github.com/spotbugs/spotbugs/issues/811")
+                + "TransactionCommitFailedException and thus should be deemed as confirmed.")
     private static void handleException(final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
