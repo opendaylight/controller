@@ -20,8 +20,8 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
  * {@link LocalTransactionFactory} for instantiating backing transactions which are
@@ -47,17 +47,17 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     }
 
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadTransaction newReadOnlyTransaction(final TransactionIdentifier identifier) {
         return SnapshotBackedTransactions.newReadTransaction(identifier, false, dataTree.takeSnapshot());
     }
 
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadWriteTransaction newReadWriteTransaction(final TransactionIdentifier identifier) {
         return SnapshotBackedTransactions.newReadWriteTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(final TransactionIdentifier identifier) {
         return SnapshotBackedTransactions.newWriteTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
@@ -74,9 +74,10 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
         return new LocalThreePhaseCommitCohort(actorUtils, leader, tx, tree, readyError);
     }
 
-    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
+    @SuppressWarnings("unchecked")
     @Override
-    public LocalThreePhaseCommitCohort onTransactionReady(DOMStoreWriteTransaction tx, Exception operationError) {
+    public LocalThreePhaseCommitCohort onTransactionReady(final DOMStoreWriteTransaction tx,
+            final Exception operationError) {
         checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalThreePhaseCommitCohort(actorUtils, leader,
