@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -59,7 +59,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         this.leader = requireNonNull(leader);
         this.transaction = requireNonNull(transaction);
         this.operationError = requireNonNull(operationError);
-        this.modification = null;
+        modification = null;
     }
 
     private Future<Object> initiateCommit(final boolean immediate,
@@ -95,7 +95,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
 
     Future<Object> initiateDirectCommit() {
         final Future<Object> messageFuture = initiateCommit(true, Optional.empty());
-        messageFuture.onComplete(new OnComplete<Object>() {
+        messageFuture.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object message) {
                 if (failure != null) {

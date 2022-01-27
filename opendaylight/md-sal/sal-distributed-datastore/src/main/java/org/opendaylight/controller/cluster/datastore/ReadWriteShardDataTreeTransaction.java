@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
 
@@ -20,7 +20,7 @@ public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTr
         super(parent, id, modification);
     }
 
-    ShardDataTreeCohort ready(Optional<SortedSet<String>> participatingShardNames) {
+    ShardDataTreeCohort ready(final Optional<SortedSet<String>> participatingShardNames) {
         Preconditions.checkState(close(), "Transaction is already closed");
         return getParent().finishTransaction(this, participatingShardNames);
     }

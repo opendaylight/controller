@@ -166,15 +166,15 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final String persistenceId;
 
     ShardManager(final AbstractShardManagerCreator<?> builder) {
-        this.cluster = builder.getCluster();
-        this.configuration = builder.getConfiguration();
-        this.datastoreContextFactory = builder.getDatastoreContextFactory();
-        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
-        this.shardDispatcherPath =
+        cluster = builder.getCluster();
+        configuration = builder.getConfiguration();
+        datastoreContextFactory = builder.getDatastoreContextFactory();
+        type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
+        shardDispatcherPath =
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
-        this.readinessFuture = builder.getReadinessFuture();
-        this.primaryShardInfoCache = builder.getPrimaryShardInfoCache();
-        this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
+        readinessFuture = builder.getReadinessFuture();
+        primaryShardInfoCache = builder.getPrimaryShardInfoCache();
+        restoreFromSnapshot = builder.getRestoreFromSnapshot();
 
         String possiblePersistenceId = datastoreContextFactory.getBaseDatastoreContext().getShardManagerPersistenceId();
         persistenceId = possiblePersistenceId != null ? possiblePersistenceId : "shard-manager-" + type;
@@ -185,7 +185,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         cluster.subscribeToMemberEvents(getSelf());
 
         shardManagerMBean = new ShardManagerInfo(getSelf(), cluster.getCurrentMemberName(),
-                "shard-manager-" + this.type,
+                "shard-manager-" + type,
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
         shardManagerMBean.registerMBean();
     }
@@ -1105,8 +1105,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * Create shards that are local to the member on which the ShardManager runs.
      */
     private void createLocalShards() {
-        MemberName memberName = this.cluster.getCurrentMemberName();
-        Collection<String> memberShardNames = this.configuration.getMemberShardNames(memberName);
+        MemberName memberName = cluster.getCurrentMemberName();
+        Collection<String> memberShardNames = configuration.getMemberShardNames(memberName);
 
         Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots = new HashMap<>();
         if (restoreFromSnapshot != null) {
@@ -1151,7 +1151,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private Map<String, String> getPeerAddresses(final String shardName, final Collection<MemberName> members) {
         Map<String, String> peerAddresses = new HashMap<>();
-        MemberName currentMemberName = this.cluster.getCurrentMemberName();
+        MemberName currentMemberName = cluster.getCurrentMemberName();
 
         for (MemberName memberName : members) {
             if (!currentMemberName.equals(memberName)) {
@@ -1200,7 +1200,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: onAddShardReplica: {}", persistenceId(), shardReplicaMsg);
 
         // verify the shard with the specified name is present in the cluster configuration
-        if (!this.configuration.isShardConfigured(shardName)) {
+        if (!configuration.isShardConfigured(shardName)) {
             LOG.debug("{}: No module configuration exists for shard {}", persistenceId(), shardName);
             getSender().tell(new Status.Failure(new IllegalArgumentException(
                 "No module configuration exists for shard " + shardName)), getSelf());

@@ -19,8 +19,8 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 final class CohortEntry {
     private final ReadWriteShardDataTreeTransaction transaction;
@@ -36,16 +36,16 @@ final class CohortEntry {
     private Shard shard;
 
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
-        this.cohort = null;
+        cohort = null;
         this.transaction = requireNonNull(transaction);
-        this.transactionId = transaction.getIdentifier();
+        transactionId = transaction.getIdentifier();
         this.clientVersion = clientVersion;
     }
 
     private CohortEntry(final ShardDataTreeCohort cohort, final short clientVersion) {
         this.cohort = requireNonNull(cohort);
-        this.transactionId = cohort.getIdentifier();
-        this.transaction = null;
+        transactionId = cohort.getIdentifier();
+        transaction = null;
         this.clientVersion = clientVersion;
     }
 

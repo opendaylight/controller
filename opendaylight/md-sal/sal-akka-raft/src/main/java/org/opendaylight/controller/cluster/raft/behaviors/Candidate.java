@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
@@ -44,7 +43,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <li> If election timeout elapses: start new election
  * </ul>
  */
-public class Candidate extends AbstractRaftActorBehavior {
+public final class Candidate extends AbstractRaftActorBehavior {
 
     private int voteCount;
 
@@ -75,12 +74,12 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public final String getLeaderId() {
+    public String getLeaderId() {
         return null;
     }
 
     @Override
-    public final short getLeaderPayloadVersion() {
+    public short getLeaderPayloadVersion() {
         return -1;
     }
 
@@ -134,7 +133,7 @@ public class Candidate extends AbstractRaftActorBehavior {
 
 
     @Override
-    final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
+    ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
         throw new IllegalStateException("A candidate should never attempt to apply " + entry);
     }
 

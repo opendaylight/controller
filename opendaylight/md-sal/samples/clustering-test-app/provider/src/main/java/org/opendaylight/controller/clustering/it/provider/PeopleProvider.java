@@ -31,7 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.PersonBuilder;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -85,7 +85,7 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
             public void onFailure(final Throwable ex) {
                 LOG.error("RPC addPerson : person addition failed [{}]", person, ex);
                 futureResult.set(RpcResultBuilder.<AddPersonOutput>failed()
-                        .withError(RpcError.ErrorType.APPLICATION, ex.getMessage()).build());
+                        .withError(ErrorType.APPLICATION, ex.getMessage()).build());
             }
         }, MoreExecutors.directExecutor());
         return futureResult;

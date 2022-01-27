@@ -35,8 +35,9 @@ public class LogGenerator {
     }
 
     public static class LoggingThread implements Runnable {
-
+        private final Random random = new Random();
         private final ActorRef clientActor;
+
         private volatile boolean stopLogging = false;
 
         public LoggingThread(final ActorRef clientActor) {
@@ -45,7 +46,6 @@ public class LogGenerator {
 
         @Override
         public void run() {
-            Random random = new Random();
             while (true) {
                 if (stopLogging) {
                     LOG.info("Logging stopped for client: {}", clientActor.path());
