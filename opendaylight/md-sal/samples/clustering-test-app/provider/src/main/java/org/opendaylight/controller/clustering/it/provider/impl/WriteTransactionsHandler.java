@@ -32,7 +32,7 @@ import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutputBuilder;
-import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -150,7 +150,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | TimeoutException e) {
             LOG.error("Error writing top-level path {}: {}", ID_INTS_YID, containerNode, e);
-            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
                 String.format("Could not start write transactions - error writing top-level path %s:  %s",
                     ID_INTS_YID, containerNode), e).buildFuture();
         } catch (ExecutionException e) {
@@ -161,7 +161,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
                 LOG.debug("Got an optimistic lock when writing initial top level list element.", e);
             } else {
                 LOG.error("Error writing top-level path {}: {}", ID_INTS_YID, containerNode, e);
-                return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+                return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
                     String.format("Could not start write transactions - error writing top-level path %s:  %s",
                         ID_INTS_YID, containerNode), e).buildFuture();
             }
@@ -174,7 +174,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Error writing top-level path {}: {}", idListItem, entry, e);
-            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
                 String.format("Could not start write transactions - error writing list entry path %s: %s",
                     idListItem, entry), e).buildFuture();
         }
@@ -192,7 +192,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Error filling initial item list path {}: {}", itemListId, itemListNode, e);
-            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
                 String.format("Could not start write transactions - error filling initial item list path %s: %s",
                     itemListId, itemListNode), e).buildFuture();
         }
@@ -239,7 +239,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     @Override
     void runFailed(final Throwable cause, final long txId) {
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-            .withError(RpcError.ErrorType.APPLICATION, "Commit failed for tx # " + txId, cause).build());
+            .withError(ErrorType.APPLICATION, "Commit failed for tx # " + txId, cause).build());
     }
 
     @Override
@@ -257,7 +257,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     @Override
     void runTimedOut(final String cause) {
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-            .withError(RpcError.ErrorType.APPLICATION, cause).build());
+            .withError(ErrorType.APPLICATION, cause).build());
     }
 
     abstract DOMDataTreeWriteTransaction createTransaction();

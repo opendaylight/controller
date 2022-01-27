@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Collection;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import java.util.List;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 /**
  * A message about a DataTree having been changed. The message is not
@@ -19,9 +19,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * candidate.
  */
 public final class DataTreeChanged {
-    private final Collection<DataTreeCandidate> changes;
+    private final List<DataTreeCandidate> changes;
 
-    public DataTreeChanged(final Collection<DataTreeCandidate> changes) {
+    public DataTreeChanged(final List<DataTreeCandidate> changes) {
         this.changes = requireNonNull(changes);
     }
 
@@ -30,7 +30,7 @@ public final class DataTreeChanged {
      *
      * @return Change events
      */
-    public Collection<DataTreeCandidate> getChanges() {
+    public List<DataTreeCandidate> getChanges() {
         return changes;
     }
 }

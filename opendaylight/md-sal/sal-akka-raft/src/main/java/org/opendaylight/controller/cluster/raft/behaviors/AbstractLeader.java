@@ -166,7 +166,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         followerToLog.remove(followerId);
     }
 
-    public void updateMinReplicaCount() {
+    public final void updateMinReplicaCount() {
         int numVoting = 0;
         for (PeerInfo peer: context.getPeers()) {
             if (peer.isVoting()) {
@@ -1124,8 +1124,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         private final ByteSource snapshotBytes;
 
         SnapshotHolder(final Snapshot snapshot, final ByteSource snapshotBytes) {
-            this.lastIncludedTerm = snapshot.getLastAppliedTerm();
-            this.lastIncludedIndex = snapshot.getLastAppliedIndex();
+            lastIncludedTerm = snapshot.getLastAppliedTerm();
+            lastIncludedIndex = snapshot.getLastAppliedIndex();
             this.snapshotBytes = snapshotBytes;
         }
 

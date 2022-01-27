@@ -7,6 +7,7 @@
  */
 package org.opendaylight.dsbenchmark;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Random;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
@@ -27,6 +28,7 @@ public abstract class DatastoreAbstractWriter {
     protected int txOk = 0;
     protected int txError = 0;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "'this' passed to logging")
     public DatastoreAbstractWriter(final StartTestInput.Operation oper,
             final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         this.outerListElem = outerListElem;
@@ -53,14 +55,10 @@ public abstract class DatastoreAbstractWriter {
         final LogicalDatastoreType dsType;
         if (dataStore == DataStore.CONFIG) {
             dsType = LogicalDatastoreType.CONFIGURATION;
-        } else if (dataStore == DataStore.OPERATIONAL) {
+        } else if ((dataStore == DataStore.OPERATIONAL) || (rn.nextBoolean() == true)) {
             dsType = LogicalDatastoreType.OPERATIONAL;
         } else {
-            if (rn.nextBoolean() == true) {
-                dsType = LogicalDatastoreType.OPERATIONAL;
-            } else {
-                dsType = LogicalDatastoreType.CONFIGURATION;
-            }
+            dsType = LogicalDatastoreType.CONFIGURATION;
         }
         return dsType;
     }

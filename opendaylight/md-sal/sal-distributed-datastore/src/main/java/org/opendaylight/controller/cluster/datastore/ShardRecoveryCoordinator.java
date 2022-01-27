@@ -46,7 +46,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
         WithSnapshot(final ShardDataTree store, final String shardName, final Logger log, final Snapshot snapshot) {
             super(store, shardName, log);
-            this.restoreFromSnapshot = requireNonNull(snapshot);
+            restoreFromSnapshot = requireNonNull(snapshot);
         }
 
         @Override

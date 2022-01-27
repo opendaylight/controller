@@ -17,6 +17,7 @@ import akka.cluster.typed.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
@@ -140,6 +141,8 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
 
     @Inject
     @Activate
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
+        justification = "Non-final for testing 'this' reference is expected to be stable at registration time")
     public AkkaEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
             @Reference final RpcProviderService rpcProvider, @Reference final BindingCodecTree codecTree)
             throws ExecutionException, InterruptedException {

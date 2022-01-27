@@ -43,8 +43,8 @@ import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestExcepti
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +100,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         Ready(final ShardDataTreeCohort readyCohort) {
             this.readyCohort = requireNonNull(readyCohort);
-            this.stage = CommitStage.READY;
+            stage = CommitStage.READY;
         }
 
         @Override
@@ -163,13 +163,13 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private FrontendReadWriteTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id,
             final ReadWriteShardDataTreeTransaction transaction) {
         super(history, id);
-        this.state = new Open(transaction);
+        state = new Open(transaction);
     }
 
     private FrontendReadWriteTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id,
             final DataTreeModification mod) {
         super(history, id);
-        this.state = new Sealed(mod);
+        state = new Sealed(mod);
     }
 
     static FrontendReadWriteTransaction createOpen(final AbstractFrontendHistory history,

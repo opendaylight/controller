@@ -19,6 +19,7 @@ public interface Configuration {
     /**
      * Returns all the shard names that belong on the member by the given name.
      */
+    // FIXME: return Set here
     @NonNull Collection<String> getMemberShardNames(@NonNull MemberName memberName);
 
     /**
@@ -34,6 +35,7 @@ public interface Configuration {
     /**
      * Returns the member replicas for the given shard name.
      */
+    // FIXME: return Set here
     @NonNull Collection<MemberName> getMembersFromShardName(@NonNull String shardName);
 
     /**
@@ -54,6 +56,7 @@ public interface Configuration {
     /**
      * Returns a unique set of all member names configured for all shards.
      */
+    // FIXME: return Set here
     Collection<MemberName> getUniqueMemberNamesForAllShards();
 
     /*

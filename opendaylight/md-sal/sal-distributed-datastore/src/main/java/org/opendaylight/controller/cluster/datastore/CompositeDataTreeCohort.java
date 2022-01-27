@@ -36,7 +36,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ class CompositeDataTreeCohort {
         ABORTED
     }
 
-    static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<Object>() {
+    static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<>() {
         @Override
         public Failure recover(final Throwable error) {
             return new Failure(error);
@@ -111,7 +111,7 @@ class CompositeDataTreeCohort {
     CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
         final SchemaContext schema, final Executor callbackExecutor, final Timeout timeout) {
         this.registry = requireNonNull(registry);
-        this.txId = requireNonNull(transactionID);
+        txId = requireNonNull(transactionID);
         this.schema = requireNonNull(schema);
         this.callbackExecutor = requireNonNull(callbackExecutor);
         this.timeout = requireNonNull(timeout);
