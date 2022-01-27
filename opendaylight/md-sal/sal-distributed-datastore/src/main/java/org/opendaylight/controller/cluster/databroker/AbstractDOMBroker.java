@@ -12,7 +12,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -124,8 +123,6 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
         return new DOMBrokerTransactionChain(chainId, backingChains, this, listener);
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private DOMStore getDOMStore(final LogicalDatastoreType type) {
         DOMStore store = getTxFactories().get(type);
         checkState(store != null, "Requested logical data store is not available.");

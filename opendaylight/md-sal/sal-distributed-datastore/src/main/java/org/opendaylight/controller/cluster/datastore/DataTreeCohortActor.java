@@ -14,7 +14,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -208,15 +207,11 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             }, callbackExecutor);
         }
 
-        @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-                justification = "https://github.com/spotbugs/spotbugs/issues/811")
         private void failed(final TransactionIdentifier txId, final ActorRef sender, final Throwable failure) {
             currentStateMap.remove(txId);
             sender.tell(new Status.Failure(failure), getSelf());
         }
 
-        @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-                justification = "https://github.com/spotbugs/spotbugs/issues/811")
         private void success(final TransactionIdentifier txId, final ActorRef sender, final S nextStep) {
             currentStateMap.computeIfPresent(txId, (key, behaviour) -> nextBehaviour(txId, nextStep));
             sender.tell(new Success(getSelf(), txId), getSelf());

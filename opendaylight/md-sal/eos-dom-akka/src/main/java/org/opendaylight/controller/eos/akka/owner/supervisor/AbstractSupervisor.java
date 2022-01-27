@@ -16,6 +16,7 @@ import akka.cluster.ddata.ORSet;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
 import akka.cluster.ddata.typed.javadsl.Replicator;
 import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Duration;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidates;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
@@ -29,6 +30,8 @@ abstract class AbstractSupervisor extends AbstractBehavior<OwnerSupervisorComman
 
     final ReplicatorMessageAdapter<OwnerSupervisorCommand, ORMap<DOMEntity, ORSet<String>>> candidateReplicator;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
+        justification = "getContext() is non-final")
     AbstractSupervisor(final ActorContext<OwnerSupervisorCommand> context) {
         super(context);
 

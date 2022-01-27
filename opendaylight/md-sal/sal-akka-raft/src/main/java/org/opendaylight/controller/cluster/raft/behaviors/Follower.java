@@ -16,6 +16,7 @@ import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,6 +54,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * convert to candidate
  * </ul>
  */
+// Non-final for testing
 public class Follower extends AbstractRaftActorBehavior {
     private static final long MAX_ELECTION_TIMEOUT_FACTOR = 18;
 
@@ -69,11 +71,13 @@ public class Follower extends AbstractRaftActorBehavior {
         this(context, null, (short)-1);
     }
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
+        justification = "electionDuration() is not final for Candidate override")
     public Follower(final RaftActorContext context, final String initialLeaderId,
             final short initialLeaderPayloadVersion) {
         super(context, RaftState.Follower);
-        this.leaderId = initialLeaderId;
-        this.leaderPayloadVersion = initialLeaderPayloadVersion;
+        leaderId = initialLeaderId;
+        leaderPayloadVersion = initialLeaderPayloadVersion;
 
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), context.getConfigParams()
             .getSyncIndexThreshold());

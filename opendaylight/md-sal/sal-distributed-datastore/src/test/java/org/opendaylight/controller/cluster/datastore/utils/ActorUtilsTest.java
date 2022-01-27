@@ -59,7 +59,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShard
 import org.opendaylight.controller.cluster.raft.utils.EchoActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -122,8 +122,8 @@ public class ActorUtilsTest extends AbstractActorTest {
             final ActorRef actorRef;
 
             MockShardManagerCreator() {
-                this.found = false;
-                this.actorRef = null;
+                found = false;
+                actorRef = null;
             }
 
             MockShardManagerCreator(final boolean found, final ActorRef actorRef) {

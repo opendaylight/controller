@@ -15,8 +15,8 @@ import akka.cluster.Cluster;
 import akka.cluster.Member;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -70,7 +70,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     AbstractRaftActorBehavior(final RaftActorContext context, final RaftState state) {
         this.context = requireNonNull(context);
         this.state = requireNonNull(state);
-        this.log = context.getLogger();
+        log = context.getLogger();
 
         logName = String.format("%s (%s)", context.getId(), state);
     }
@@ -212,9 +212,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             // the log with the later term is more up-to-date. If the logs
             // end with the same term, then whichever log is longer is
             // more up-to-date.
-            if (requestVote.getLastLogTerm() > lastTerm()) {
-                candidateLatest = true;
-            } else if (requestVote.getLastLogTerm() == lastTerm()
+            if (requestVote.getLastLogTerm() > lastTerm() || requestVote.getLastLogTerm() == lastTerm()
                     && requestVote.getLastLogIndex() >= lastIndex()) {
                 candidateLatest = true;
             }
@@ -247,7 +245,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return a random election duration
      */
     protected FiniteDuration electionDuration() {
-        long variance = new Random().nextInt(context.getConfigParams().getElectionTimeVariance());
+        long variance = ThreadLocalRandom.current().nextInt(context.getConfigParams().getElectionTimeVariance());
         return context.getConfigParams().getElectionTimeOutInterval().$plus(
                 new FiniteDuration(variance, TimeUnit.MILLISECONDS));
     }
@@ -270,6 +268,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param interval the duration after which we should trigger a new election
      */
+    // Non-final for testing
     protected void scheduleElection(final FiniteDuration interval) {
         stopElection();
 
@@ -301,7 +300,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @return the actor
      */
-    protected ActorRef actor() {
+    protected final ActorRef actor() {
         return context.getActor();
     }
 
@@ -496,7 +495,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
     }
 
-    protected String getId() {
+    protected final String getId() {
         return context.getId();
     }
 

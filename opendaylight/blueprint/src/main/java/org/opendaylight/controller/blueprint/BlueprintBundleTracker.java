@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.blueprint;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -131,8 +130,6 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         quiesceParticipantTracker.open();
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private QuiesceParticipant onQuiesceParticipantAdded(final ServiceReference<QuiesceParticipant> reference) {
         quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
 
@@ -143,8 +140,6 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         return quiesceParticipant;
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private BlueprintExtenderService onBlueprintExtenderServiceAdded(
             final ServiceReference<BlueprintExtenderService> reference) {
         blueprintExtenderService = reference.getBundle().getBundleContext().getService(reference);
@@ -274,13 +269,12 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         return !paths.isEmpty() ? paths : findBlueprintPaths(bundle, ODL_CUSTOM_BLUEPRINT_FILE_PATH);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static List<Object> findBlueprintPaths(final Bundle bundle, final String path) {
         Enumeration<?> rntries = bundle.findEntries(path, BLUEPRINT_FLE_PATTERN, false);
         if (rntries == null) {
-            return Collections.emptyList();
+            return List.of();
         } else {
-            return Collections.list((Enumeration)rntries);
+            return List.copyOf(Collections.list(rntries));
         }
     }
 

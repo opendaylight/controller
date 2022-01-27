@@ -10,7 +10,7 @@ package org.opendaylight.controller.dummy.datastore;
 import akka.actor.Props;
 import akka.actor.UntypedAbstractActor;
 
-public class DummyShardManager extends UntypedAbstractActor {
+public final class DummyShardManager extends UntypedAbstractActor {
     public DummyShardManager(final Configuration configuration, final String memberName, final String[] shardNames,
             final String type) {
         new DummyShardsCreator(configuration, getContext(), memberName, shardNames, type).create();

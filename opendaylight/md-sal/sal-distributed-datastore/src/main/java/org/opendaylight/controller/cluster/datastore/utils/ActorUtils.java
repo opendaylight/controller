@@ -23,7 +23,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
@@ -52,7 +51,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,9 +157,9 @@ public class ActorUtils {
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
-        this.dispatchers = new Dispatchers(actorSystem.dispatchers());
+        dispatchers = new Dispatchers(actorSystem.dispatchers());
         this.primaryShardInfoCache = primaryShardInfoCache;
-        this.shardStrategyFactory = new ShardStrategyFactory(configuration);
+        shardStrategyFactory = new ShardStrategyFactory(configuration);
 
         setCachedProperties();
 
@@ -214,7 +213,7 @@ public class ActorUtils {
     }
 
     public void setDatastoreContext(final DatastoreContextFactory contextFactory) {
-        this.datastoreContext = contextFactory.getBaseDatastoreContext();
+        datastoreContext = contextFactory.getBaseDatastoreContext();
         setCachedProperties();
 
         // We write the 'updated' volatile to trigger a write memory barrier so that the writes above
@@ -269,8 +268,6 @@ public class ActorUtils {
         }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private PrimaryShardInfo onPrimaryShardFound(final String shardName, final String primaryActorPath,
             final short primaryVersion, final ReadOnlyDataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
@@ -561,11 +558,11 @@ public class ActorUtils {
      * @return the dispatcher
      */
     public ExecutionContext getClientDispatcher() {
-        return this.dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
+        return dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
     }
 
     public String getNotificationDispatcherPath() {
-        return this.dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Notification);
+        return dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Notification);
     }
 
     public Configuration getConfiguration() {

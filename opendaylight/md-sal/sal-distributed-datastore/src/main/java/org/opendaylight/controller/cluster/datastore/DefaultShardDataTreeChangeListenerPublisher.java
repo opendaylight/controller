@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -15,7 +15,7 @@ import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistrat
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
 
     @Override
     protected void notifyListener(final AbstractDOMDataTreeChangeListenerRegistration<?> registration,
-            final Collection<DataTreeCandidate> changes) {
+            final List<DataTreeCandidate> changes) {
         LOG.debug("{}: notifyListener: listener: {}", logContext, registration.getInstance());
         registration.getInstance().onDataTreeChanged(changes);
     }

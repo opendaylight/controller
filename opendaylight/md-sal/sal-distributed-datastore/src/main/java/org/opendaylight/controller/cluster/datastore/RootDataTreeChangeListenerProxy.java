@@ -16,7 +16,6 @@ import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
 import com.google.common.collect.Maps;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,8 +101,6 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         }
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private synchronized void onFindLocalShardComplete(final String shardName, final Throwable failure,
             final ActorRef shard) {
         if (state instanceof ResolveShards) {
@@ -172,8 +169,6 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         }
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private synchronized void onShardSubscribed(final String shardName, final Throwable failure, final Object result) {
         if (state instanceof Subscribed) {
             final Subscribed current = (Subscribed) state;
