@@ -13,9 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.opendaylight.mdsal.dom.api.DOMRpcException;
+import org.opendaylight.yangtools.yang.common.ErrorSeverity;
+import org.opendaylight.yangtools.yang.common.ErrorTag;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 /**
@@ -32,13 +33,13 @@ public class RpcErrorsException extends DOMRpcException {
 
         final ErrorSeverity severity;
         final ErrorType errorType;
-        final String tag;
+        final ErrorTag tag;
         final String applicationTag;
         final String message;
         final String info;
         final Throwable cause;
 
-        RpcErrorData(final ErrorSeverity severity, final ErrorType errorType, final String tag,
+        RpcErrorData(final ErrorSeverity severity, final ErrorType errorType, final ErrorTag tag,
                 final String applicationTag, final String message, final String info, final Throwable cause) {
             this.severity = severity;
             this.errorType = errorType;

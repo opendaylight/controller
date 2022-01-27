@@ -225,8 +225,8 @@
                         <link>https://commons.apache.org/proper/commons-codec/apidocs/</link>
 
                         <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/9.0.12/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/7.0.12/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/8.0.10/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/8.0.0-SNAPSHOT/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/9.0.0-SNAPSHOT/</link>
                     </links>
                     <groups>
                         <group>

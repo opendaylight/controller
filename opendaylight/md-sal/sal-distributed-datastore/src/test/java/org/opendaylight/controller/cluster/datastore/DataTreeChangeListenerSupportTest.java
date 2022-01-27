@@ -40,8 +40,8 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
 

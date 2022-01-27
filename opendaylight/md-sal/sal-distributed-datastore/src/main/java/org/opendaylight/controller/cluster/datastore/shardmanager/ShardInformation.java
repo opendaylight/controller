@@ -28,7 +28,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
