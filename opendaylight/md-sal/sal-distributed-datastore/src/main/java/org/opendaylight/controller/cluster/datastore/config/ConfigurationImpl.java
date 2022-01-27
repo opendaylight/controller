@@ -11,18 +11,20 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 
+// FIXME: Non-final for testing
 public class ConfigurationImpl implements Configuration {
     private volatile Map<String, ModuleConfig> moduleConfigMap;
 
@@ -35,16 +37,17 @@ public class ConfigurationImpl implements Configuration {
         this(new FileModuleShardConfigProvider(moduleShardsConfigPath, modulesConfigPath));
     }
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Subclassed for testing")
     public ConfigurationImpl(final ModuleShardConfigProvider provider) {
         ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
-        for (Map.Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
+        for (Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
             mapBuilder.put(e.getKey(), e.getValue().build());
         }
 
-        this.moduleConfigMap = mapBuilder.build();
+        moduleConfigMap = mapBuilder.build();
 
-        this.allShardNames = createAllShardNames(moduleConfigMap.values());
-        this.namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
+        allShardNames = createAllShardNames(moduleConfigMap.values());
+        namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
     }
 
     private static Set<String> createAllShardNames(final Iterable<ModuleConfig> moduleConfigs) {
@@ -121,7 +124,7 @@ public class ConfigurationImpl implements Configuration {
             }
         }
 
-        return Collections.emptyList();
+        return List.of();
     }
 
     private static void checkNotNullShardName(final String shardName) {

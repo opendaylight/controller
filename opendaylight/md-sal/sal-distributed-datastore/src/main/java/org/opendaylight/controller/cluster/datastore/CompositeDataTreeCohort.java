@@ -24,7 +24,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -36,7 +35,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,6 @@ import scala.concurrent.Future;
  * <p/>
  * It tracks current operation and list of cohorts which successfuly finished previous phase in
  * case, if abort is necessary to invoke it only on cohort steps which are still active.
- *
  */
 class CompositeDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(CompositeDataTreeCohort.class);
@@ -92,7 +90,7 @@ class CompositeDataTreeCohort {
         ABORTED
     }
 
-    static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<Object>() {
+    static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<>() {
         @Override
         public Failure recover(final Throwable error) {
             return new Failure(error);
@@ -105,13 +103,13 @@ class CompositeDataTreeCohort {
     private final Executor callbackExecutor;
     private final Timeout timeout;
 
-    private @NonNull List<Success> successfulFromPrevious = Collections.emptyList();
+    private @NonNull List<Success> successfulFromPrevious = List.of();
     private State state = State.IDLE;
 
     CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
         final SchemaContext schema, final Executor callbackExecutor, final Timeout timeout) {
         this.registry = requireNonNull(registry);
-        this.txId = requireNonNull(transactionID);
+        txId = requireNonNull(transactionID);
         this.schema = requireNonNull(schema);
         this.callbackExecutor = requireNonNull(callbackExecutor);
         this.timeout = requireNonNull(timeout);
@@ -135,7 +133,7 @@ class CompositeDataTreeCohort {
                 throw new IllegalStateException("Unhandled state " + state);
         }
 
-        successfulFromPrevious = Collections.emptyList();
+        successfulFromPrevious = List.of();
         state = State.IDLE;
     }
 
@@ -149,7 +147,7 @@ class CompositeDataTreeCohort {
         final List<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
         LOG.debug("{}: canCommit - messages: {}", txId, messages);
         if (messages.isEmpty()) {
-            successfulFromPrevious = Collections.emptyList();
+            successfulFromPrevious = List.of();
             changeStateFrom(State.IDLE, State.CAN_COMMIT_SUCCESSFUL);
             return Optional.empty();
         }
@@ -242,12 +240,11 @@ class CompositeDataTreeCohort {
 
     // FB issues violation for passing null to CompletableFuture#complete but it is valid and necessary when the
     // generic type is Void.
-    @SuppressFBWarnings(value = { "NP_NONNULL_PARAM_VIOLATION", "UPM_UNCALLED_PRIVATE_METHOD" },
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
+    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     private void processResponses(final Throwable failure, final Iterable<Object> results,
             final State currentState, final State afterState, final CompletableFuture<Void> resultFuture) {
         if (failure != null) {
-            successfulFromPrevious = Collections.emptyList();
+            successfulFromPrevious = List.of();
             resultFuture.completeExceptionally(failure);
             return;
         }
@@ -274,7 +271,7 @@ class CompositeDataTreeCohort {
                 firstEx.addSuppressed(it.next().cause());
             }
 
-            successfulFromPrevious = Collections.emptyList();
+            successfulFromPrevious = List.of();
             resultFuture.completeExceptionally(firstEx);
         } else {
             successfulFromPrevious = successful;

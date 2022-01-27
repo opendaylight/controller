@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static akka.pattern.Patterns.ask;
@@ -39,7 +38,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -165,16 +163,17 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final String persistenceId;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     ShardManager(final AbstractShardManagerCreator<?> builder) {
-        this.cluster = builder.getCluster();
-        this.configuration = builder.getConfiguration();
-        this.datastoreContextFactory = builder.getDatastoreContextFactory();
-        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
-        this.shardDispatcherPath =
-                new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
-        this.readinessFuture = builder.getReadinessFuture();
-        this.primaryShardInfoCache = builder.getPrimaryShardInfoCache();
-        this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
+        cluster = builder.getCluster();
+        configuration = builder.getConfiguration();
+        datastoreContextFactory = builder.getDatastoreContextFactory();
+        type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
+        shardDispatcherPath = new Dispatchers(context().system().dispatchers())
+            .getDispatcherPath(Dispatchers.DispatcherType.Shard);
+        readinessFuture = builder.getReadinessFuture();
+        primaryShardInfoCache = builder.getPrimaryShardInfoCache();
+        restoreFromSnapshot = builder.getRestoreFromSnapshot();
 
         String possiblePersistenceId = datastoreContextFactory.getBaseDatastoreContext().getShardManagerPersistenceId();
         persistenceId = possiblePersistenceId != null ? possiblePersistenceId : "shard-manager-" + type;
@@ -185,7 +184,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         cluster.subscribeToMemberEvents(getSelf());
 
         shardManagerMBean = new ShardManagerInfo(getSelf(), cluster.getCurrentMemberName(),
-                "shard-manager-" + this.type,
+                "shard-manager-" + type,
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
         shardManagerMBean.registerMBean();
     }
@@ -384,8 +383,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void removeShardReplica(final RemoveShardReplica contextMessage, final String shardName,
             final String primaryPath, final ActorRef sender) {
         if (isShardReplicaOperationInProgress(shardName, sender)) {
@@ -531,8 +528,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-        justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private boolean isPreviousShardActorStopInProgress(final String shardName, final Object messageToDefer) {
         final CompositeOnComplete<Boolean> stopOnComplete = shardActorsStopping.get(shardName);
         if (stopOnComplete == null) {
@@ -584,7 +579,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             // the shard with no peers and with elections disabled so it stays as follower. A
             // subsequent AddServer request will be needed to make it an active member.
             isActiveMember = false;
-            peerAddresses = Collections.emptyMap();
+            peerAddresses = Map.of();
             shardDatastoreContext = DatastoreContext.newBuilderFrom(shardDatastoreContext)
                     .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
         }
@@ -1105,8 +1100,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * Create shards that are local to the member on which the ShardManager runs.
      */
     private void createLocalShards() {
-        MemberName memberName = this.cluster.getCurrentMemberName();
-        Collection<String> memberShardNames = this.configuration.getMemberShardNames(memberName);
+        MemberName memberName = cluster.getCurrentMemberName();
+        Collection<String> memberShardNames = configuration.getMemberShardNames(memberName);
 
         Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots = new HashMap<>();
         if (restoreFromSnapshot != null) {
@@ -1151,7 +1146,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private Map<String, String> getPeerAddresses(final String shardName, final Collection<MemberName> members) {
         Map<String, String> peerAddresses = new HashMap<>();
-        MemberName currentMemberName = this.cluster.getCurrentMemberName();
+        MemberName currentMemberName = cluster.getCurrentMemberName();
 
         for (MemberName memberName : members) {
             if (!currentMemberName.equals(memberName)) {
@@ -1200,7 +1195,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: onAddShardReplica: {}", persistenceId(), shardReplicaMsg);
 
         // verify the shard with the specified name is present in the cluster configuration
-        if (!this.configuration.isShardConfigured(shardName)) {
+        if (!configuration.isShardConfigured(shardName)) {
             LOG.debug("{}: No module configuration exists for shard {}", persistenceId(), shardName);
             getSender().tell(new Status.Failure(new IllegalArgumentException(
                 "No module configuration exists for shard " + shardName)), getSelf());
@@ -1235,16 +1230,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         });
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void sendLocalReplicaAlreadyExistsReply(final String shardName, final ActorRef sender) {
         LOG.debug("{}: Local shard {} already exists", persistenceId(), shardName);
         sender.tell(new Status.Failure(new AlreadyExistsException(
             String.format("Local shard %s already exists", shardName))), getSelf());
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void addShard(final String shardName, final RemotePrimaryShardFound response, final ActorRef sender) {
         if (isShardReplicaOperationInProgress(shardName, sender)) {
             return;

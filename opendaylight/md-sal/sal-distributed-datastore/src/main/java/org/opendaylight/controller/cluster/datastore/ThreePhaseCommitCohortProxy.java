@@ -17,7 +17,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -143,8 +142,6 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         return returnFuture;
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void finishCanCommit(final SettableFuture<Boolean> returnFuture) {
         LOG.debug("Tx {} finishCanCommit", transactionId);
 
@@ -160,7 +157,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         final Iterator<CohortInfo> iterator = cohorts.iterator();
 
-        final OnComplete<Object> onComplete = new OnComplete<Object>() {
+        final OnComplete<Object> onComplete = new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
@@ -195,7 +192,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                     sendCanCommitTransaction(iterator.next(), this);
                 } else {
                     LOG.debug("Tx {}: canCommit returning result: {}", transactionId, result);
-                    returnFuture.set(Boolean.valueOf(result));
+                    returnFuture.set(result);
                 }
 
             }

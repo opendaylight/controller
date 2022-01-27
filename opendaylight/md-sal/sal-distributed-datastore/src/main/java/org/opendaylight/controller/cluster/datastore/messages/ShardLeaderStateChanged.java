@@ -13,7 +13,7 @@ import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
  * A local message derived from LeaderStateChanged containing additional Shard-specific info that is sent
@@ -25,16 +25,16 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
 public class ShardLeaderStateChanged extends LeaderStateChanged {
     private final ReadOnlyDataTree localShardDataTree;
 
-    public ShardLeaderStateChanged(@NonNull String memberId, @Nullable String leaderId,
-            @NonNull ReadOnlyDataTree localShardDataTree, short leaderPayloadVersion) {
+    public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
+            final @NonNull ReadOnlyDataTree localShardDataTree, final short leaderPayloadVersion) {
         super(memberId, leaderId, leaderPayloadVersion);
         this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    public ShardLeaderStateChanged(@NonNull String memberId, @Nullable String leaderId,
-            short leaderPayloadVersion) {
+    public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
+            final short leaderPayloadVersion) {
         super(memberId, leaderId, leaderPayloadVersion);
-        this.localShardDataTree = null;
+        localShardDataTree = null;
     }
 
     public @NonNull Optional<ReadOnlyDataTree> getLocalShardDataTree() {

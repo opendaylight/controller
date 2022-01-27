@@ -18,9 +18,9 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
  * Transaction chain instantiated on top of a locally-available DataTree. It does not instantiate
@@ -68,23 +68,24 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     }
 
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadTransaction newReadOnlyTransaction(final TransactionIdentifier identifier) {
         return super.newReadOnlyTransaction(identifier);
     }
 
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadWriteTransaction newReadWriteTransaction(final TransactionIdentifier identifier) {
         return super.newReadWriteTransaction(identifier);
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(final TransactionIdentifier identifier) {
         return super.newWriteOnlyTransaction(identifier);
     }
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
-    public LocalThreePhaseCommitCohort onTransactionReady(DOMStoreWriteTransaction tx, Exception operationError) {
+    public LocalThreePhaseCommitCohort onTransactionReady(final DOMStoreWriteTransaction tx,
+            final Exception operationError) {
         checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx,
@@ -102,23 +103,25 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
     private class LocalChainThreePhaseCommitCohort extends LocalThreePhaseCommitCohort {
 
-        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-                DataTreeModification modification, Exception operationError) {
+        protected LocalChainThreePhaseCommitCohort(
+                final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+                final DataTreeModification modification, final Exception operationError) {
             super(parent.getActorUtils(), leader, transaction, modification, operationError);
         }
 
-        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-                Exception operationError) {
+        protected LocalChainThreePhaseCommitCohort(
+                final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+                final Exception operationError) {
             super(parent.getActorUtils(), leader, transaction, operationError);
         }
 
         @Override
-        protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+        protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
             onTransactionFailed(transaction, ABORTED);
         }
 
         @Override
-        protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+        protected void transactionCommitted(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
             onTransactionCommited(transaction);
         }
     }

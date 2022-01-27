@@ -28,7 +28,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ReadOnlyDataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,10 +168,10 @@ public final class ShardInformation {
             return;
         }
 
-        boolean ready = isShardReadyWithLeaderId();
-
-        LOG.debug("Shard {} is {} - notifying {} OnShardInitialized callbacks", shardId,
-            ready ? "ready" : "initialized", onShardInitializedSet.size());
+        final boolean ready = isShardReadyWithLeaderId();
+        final String readyStr = ready ? "ready" : "initialized";
+        LOG.debug("Shard {} is {} - notifying {} OnShardInitialized callbacks", shardId, readyStr,
+            onShardInitializedSet.size());
 
         Iterator<OnShardInitialized> iter = onShardInitializedSet.iterator();
         while (iter.hasNext()) {
