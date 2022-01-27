@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.yangtools.yang.common.ErrorTag;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
@@ -24,10 +26,9 @@ public class RpcErrorsExceptionTest {
 
     @Before
     public void setUp() {
-        final RpcError rpcError = RpcResultBuilder.newError(
-                RpcError.ErrorType.RPC, "error", "error message");
-        final RpcError rpcWarning = RpcResultBuilder.newWarning(
-                RpcError.ErrorType.RPC, "warning", "warning message");
+        final RpcError rpcError = RpcResultBuilder.newError(ErrorType.RPC, new ErrorTag("error"), "error message");
+        final RpcError rpcWarning = RpcResultBuilder.newWarning(ErrorType.RPC, new ErrorTag("warning"),
+            "warning message");
 
         rpcErrors = new ArrayList<>();
         rpcErrors.add(rpcError);

@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -27,7 +27,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public class DataTreeChangeListenerActorTest extends AbstractActorTest {
     private TestKit testKit;
@@ -68,7 +68,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
         testKit.within(Duration.ofSeconds(1), () -> {
             testKit.expectNoMessage();
-            verify(mockListener, never()).onDataTreeChanged(anyCollection());
+            verify(mockListener, never()).onDataTreeChanged(anyList());
             return null;
         });
     }

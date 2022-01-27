@@ -23,8 +23,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BasicRpcTestProvider implements ClusterSingletonService, BasicRpcTestService {
-
+public final class BasicRpcTestProvider implements ClusterSingletonService, BasicRpcTestService {
     private static final Logger LOG = LoggerFactory.getLogger(BasicRpcTestProvider.class);
     private static final ServiceGroupIdentifier IDENTIFIER = ServiceGroupIdentifier.create("Basic-rpc-test");
 

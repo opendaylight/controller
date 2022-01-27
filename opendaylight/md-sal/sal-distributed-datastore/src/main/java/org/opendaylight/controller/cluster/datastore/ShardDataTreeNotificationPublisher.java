@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 /**
  * Interface for a class the publishes data tree notifications.

@@ -35,8 +35,8 @@ import org.opendaylight.controller.cluster.access.commands.ReadTransactionSucces
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
+import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModificationCursor;
 
 public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         extends AbstractProxyTransactionTest<T> {

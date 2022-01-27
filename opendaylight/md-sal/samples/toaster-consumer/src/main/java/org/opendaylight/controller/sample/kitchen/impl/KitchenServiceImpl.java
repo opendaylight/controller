@@ -31,8 +31,9 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
+import org.opendaylight.yangtools.yang.common.ErrorTag;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -86,8 +87,7 @@ public class KitchenServiceImpl extends AbstractMXBean
                 }
             }
 
-            return Futures.immediateFuture(RpcResultBuilder.<Void>status(atLeastOneSucceeded)
-                    .withRpcErrors(errorList.build()).build());
+            return RpcResultBuilder.<Void>status(atLeastOneSucceeded).withRpcErrors(errorList.build()).buildFuture();
         }, MoreExecutors.directExecutor());
     }
 
@@ -100,9 +100,10 @@ public class KitchenServiceImpl extends AbstractMXBean
 
         if (toasterOutOfBread) {
             LOG.info("We're out of toast but we can make eggs");
-            return Futures.immediateFuture(RpcResultBuilder.success(EMPTY_MAKE_OUTPUT)
-                .withWarning(ErrorType.APPLICATION, "partial-operation",
-                    "Toaster is out of bread but we can make you eggs").build());
+            return RpcResultBuilder.success(EMPTY_MAKE_OUTPUT)
+                .withWarning(ErrorType.APPLICATION, ErrorTag.PARTIAL_OPERATION,
+                    "Toaster is out of bread but we can make you eggs")
+                .buildFuture();
         }
 
         // Access the ToasterService to make the toast.

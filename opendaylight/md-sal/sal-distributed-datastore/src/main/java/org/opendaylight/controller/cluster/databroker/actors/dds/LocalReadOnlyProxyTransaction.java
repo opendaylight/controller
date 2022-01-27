@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
 /**
  * A read-only specialization of {@link LocalProxyTransaction}. This class is NOT thread-safe.
@@ -39,7 +39,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
         super(parent, identifier, true);
         // It is an error to touch snapshot once we are DONE
-        this.snapshot = null;
+        snapshot = null;
     }
 
     @Override
