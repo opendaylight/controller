@@ -29,7 +29,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-class GetSnapshotReplyActor extends UntypedAbstractActor {
+final class GetSnapshotReplyActor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(GetSnapshotReplyActor.class);
 
     private final Params params;
@@ -88,7 +88,7 @@ class GetSnapshotReplyActor extends UntypedAbstractActor {
             this.replyToActor = requireNonNull(replyToActor);
             this.receiveTimeout = requireNonNull(receiveTimeout);
             this.id = requireNonNull(id);
-            this.peerInformation = peerInfo;
+            peerInformation = peerInfo;
         }
     }
 }

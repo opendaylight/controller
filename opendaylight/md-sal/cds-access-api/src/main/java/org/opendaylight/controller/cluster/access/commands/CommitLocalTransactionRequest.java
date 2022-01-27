@@ -17,7 +17,7 @@ import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**
  * Request to commit a local transaction. Since local transactions do not introduce state on the backend until they

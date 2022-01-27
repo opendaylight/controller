@@ -14,7 +14,7 @@ import java.util.SortedSet;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**
  * Message notifying the shard leader to apply modifications which have been
@@ -33,7 +33,7 @@ public final class ReadyLocalTransaction {
     private short remoteVersion = DataStoreVersions.CURRENT_VERSION;
 
     public ReadyLocalTransaction(final TransactionIdentifier transactionId, final DataTreeModification modification,
-            final boolean doCommitOnReady, Optional<SortedSet<String>> participatingShardNames) {
+            final boolean doCommitOnReady, final Optional<SortedSet<String>> participatingShardNames) {
         this.transactionId = requireNonNull(transactionId);
         this.modification = requireNonNull(modification);
         this.doCommitOnReady = doCommitOnReady;
@@ -56,7 +56,7 @@ public final class ReadyLocalTransaction {
         return remoteVersion;
     }
 
-    public void setRemoteVersion(short remoteVersion) {
+    public void setRemoteVersion(final short remoteVersion) {
         this.remoteVersion = remoteVersion;
     }
 

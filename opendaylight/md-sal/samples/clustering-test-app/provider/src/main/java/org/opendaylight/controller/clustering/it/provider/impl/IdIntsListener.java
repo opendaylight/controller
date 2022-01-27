@@ -12,8 +12,8 @@ import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTr
 
 import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     }
 
     @Override
-    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final List<DataTreeCandidate> changes) {
 
         // There should only be one candidate reported
         checkState(changes.size() == 1);

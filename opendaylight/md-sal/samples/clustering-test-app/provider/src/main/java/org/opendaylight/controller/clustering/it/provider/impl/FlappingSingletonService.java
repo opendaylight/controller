@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.util.concurrent.Futures;
@@ -19,10 +18,8 @@ import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlappingSingletonService implements ClusterSingletonService {
-
+public final class FlappingSingletonService implements ClusterSingletonService {
     private static final Logger LOG = LoggerFactory.getLogger(FlappingSingletonService.class);
-
     private static final ServiceGroupIdentifier SERVICE_GROUP_IDENTIFIER =
             ServiceGroupIdentifier.create("flapping-singleton-service");
 

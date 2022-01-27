@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**
  * Represents a modification to the data store.

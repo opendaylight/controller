@@ -34,8 +34,8 @@ import org.opendaylight.controller.cluster.io.ChunkedOutputStream;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Either;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
