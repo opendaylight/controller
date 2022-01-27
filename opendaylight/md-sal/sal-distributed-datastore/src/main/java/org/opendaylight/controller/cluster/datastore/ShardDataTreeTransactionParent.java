@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 abstract class ShardDataTreeTransactionParent {
 

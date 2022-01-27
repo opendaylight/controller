@@ -17,6 +17,7 @@ import akka.japi.Effect;
 import akka.remote.AssociationErrorEvent;
 import akka.remote.RemotingLifecycleEvent;
 import akka.remote.artery.ThisActorSystemQuarantinedEvent;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
     private final Set<Address> addressSet = new HashSet<>();
     private int count = 0;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected QuarantinedMonitorActor(final Effect callback) {
         this.callback = callback;
 
