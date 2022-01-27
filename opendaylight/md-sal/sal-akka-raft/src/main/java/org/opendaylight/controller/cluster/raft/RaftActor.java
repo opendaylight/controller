@@ -16,6 +16,7 @@ import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.actor.Status;
 import com.google.common.annotations.VisibleForTesting;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -123,6 +124,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private boolean shuttingDown;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected RaftActor(final String id, final Map<String, String> peerAddresses,
          final Optional<ConfigParams> configParams, final short payloadVersion) {
 
@@ -963,7 +965,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             this.lastValidLeaderId = lastValidLeaderId;
             this.lastLeaderId = lastLeaderId;
             this.behavior = requireNonNull(behavior);
-            this.leaderPayloadVersion = behavior.getLeaderPayloadVersion();
+            leaderPayloadVersion = behavior.getLeaderPayloadVersion();
         }
 
         @Override

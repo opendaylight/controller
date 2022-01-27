@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
 
                     LOG.info("year is {}", year);
 
-                    if ((year.longValue() < 1990)) {
+                    if (year.longValue() < 1990) {
                         return FluentFutures.immediateFailedFluentFuture(new DataValidationFailedException(
                                 DOMDataTreeIdentifier.class, candidate.getRootPath(),
                                 String.format("Invalid year %d - year must be >= 1990", year)));

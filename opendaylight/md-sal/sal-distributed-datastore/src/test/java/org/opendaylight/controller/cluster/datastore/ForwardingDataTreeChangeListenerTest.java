@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+
 import akka.actor.ActorRef;
-import java.util.Arrays;
-import java.util.Collection;
-import org.junit.Assert;
+import java.util.List;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
 
@@ -26,10 +26,10 @@ public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
         ForwardingDataTreeChangeListener forwardingListener = new ForwardingDataTreeChangeListener(
                 getSystem().actorSelection(actorRef.path()), ActorRef.noSender());
 
-        Collection<DataTreeCandidate> expected = Arrays.asList(Mockito.mock(DataTreeCandidate.class));
+        List<DataTreeCandidate> expected = List.of(mock(DataTreeCandidate.class));
         forwardingListener.onDataTreeChanged(expected);
 
         DataTreeChanged actual = MessageCollectorActor.expectFirstMatching(actorRef, DataTreeChanged.class, 5000);
-        Assert.assertSame(expected, actual.getChanges());
+        assertSame(expected, actual.getChanges());
     }
 }

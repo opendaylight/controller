@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.Cancellable;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -27,10 +28,12 @@ abstract class TimedRunnable implements Runnable {
     private final Cancellable cancelTimer;
     private boolean canRun = true;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
+        justification = "https://github.com/spotbugs/spotbugs/issues/1867")
     TimedRunnable(final FiniteDuration timeout, final RaftActor actor) {
         cancelTimer = requireNonNull(actor).getContext().system().scheduler()
-                .scheduleOnce(requireNonNull(timeout), actor.self(), (Runnable) this::cancel,
-                    actor.getContext().system().dispatcher(), actor.self());
+            .scheduleOnce(requireNonNull(timeout), actor.self(), (Runnable) this::cancel,
+                actor.getContext().system().dispatcher(), actor.self());
     }
 
     @Override

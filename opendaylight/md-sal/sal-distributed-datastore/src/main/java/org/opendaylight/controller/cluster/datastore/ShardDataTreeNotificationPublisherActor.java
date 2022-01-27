@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 /**
  * Actor used to generate and publish data tree notifications. This is used to offload the potentially
@@ -40,7 +40,7 @@ public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNoti
     }
 
     @Override
-    protected void handleReceive(Object message) {
+    protected void handleReceive(final Object message) {
         if (message instanceof PublishNotifications) {
             PublishNotifications toPublish = (PublishNotifications)message;
             timer.start();
@@ -65,7 +65,7 @@ public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNoti
     static class PublishNotifications {
         private final DataTreeCandidate candidate;
 
-        PublishNotifications(DataTreeCandidate candidate) {
+        PublishNotifications(final DataTreeCandidate candidate) {
             this.candidate = candidate;
         }
     }
