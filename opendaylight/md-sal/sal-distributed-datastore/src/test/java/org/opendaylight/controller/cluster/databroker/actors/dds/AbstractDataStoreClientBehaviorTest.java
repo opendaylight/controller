@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,10 +21,9 @@ import akka.actor.ActorSystem;
 import akka.actor.Status;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
@@ -33,9 +35,9 @@ import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import scala.concurrent.Promise;
 
 public abstract class AbstractDataStoreClientBehaviorTest {
@@ -71,7 +73,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @Test
     public void testResolveShardForPath() {
-        Assert.assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.empty()).longValue());
+        assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.empty()).longValue());
     }
 
     @Test
@@ -85,32 +87,32 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final GetClientRequest request = new GetClientRequest(probe.ref());
         final AbstractDataStoreClientBehavior nextBehavior = behavior.onCommand(request);
         final Status.Success success = probe.expectMsgClass(Status.Success.class);
-        Assert.assertEquals(behavior, success.status());
-        Assert.assertSame(behavior, nextBehavior);
+        assertEquals(behavior, success.status());
+        assertSame(behavior, nextBehavior);
     }
 
     @Test
     public void testOnCommandUnhandled() {
         final AbstractDataStoreClientBehavior nextBehavior = behavior.onCommand("unhandled");
-        Assert.assertSame(behavior, nextBehavior);
+        assertSame(behavior, nextBehavior);
     }
 
     @Test
     public void testCreateLocalHistory() {
         final ClientLocalHistory history = behavior.createLocalHistory();
-        Assert.assertEquals(behavior.getIdentifier(), history.getIdentifier().getClientId());
+        assertEquals(behavior.getIdentifier(), history.getIdentifier().getClientId());
     }
 
     @Test
     public void testCreateTransaction() {
         final ClientTransaction transaction = behavior.createTransaction();
-        Assert.assertEquals(behavior.getIdentifier(), transaction.getIdentifier().getHistoryId().getClientId());
+        assertEquals(behavior.getIdentifier(), transaction.getIdentifier().getHistoryId().getClientId());
     }
 
     @Test
     public void testCreateSnapshot() {
         final ClientSnapshot snapshot = behavior.createSnapshot();
-        Assert.assertEquals(behavior.getIdentifier(), snapshot.getIdentifier().getHistoryId().getClientId());
+        assertEquals(behavior.getIdentifier(), snapshot.getIdentifier().getHistoryId().getClientId());
     }
 
     @Test
@@ -119,17 +121,13 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final InternalCommand<ShardBackendInfo> internalCommand =
                 clientActorProbe.expectMsgClass(InternalCommand.class);
         internalCommand.execute(behavior);
-        try {
-            behavior.createLocalHistory();
-            Assert.fail("Behavior is closed and shouldn't allow to create new history.");
-        } catch (final IllegalStateException e) {
-            //ok
-        }
+
+        assertThrows(IllegalStateException.class, () -> behavior.createLocalHistory());
     }
 
     @Test
     public void testGetIdentifier() {
-        Assert.assertEquals(CLIENT_ID, behavior.getIdentifier());
+        assertEquals(CLIENT_ID, behavior.getIdentifier());
     }
 
     @Test
@@ -147,15 +145,15 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         behavior.createTransaction().read(YangInstanceIdentifier.empty());
         final AbstractClientConnection<ShardBackendInfo> connection = behavior.getConnection(shard);
         //check cached connection for same shard
-        Assert.assertSame(connection, behavior.getConnection(shard));
+        assertSame(connection, behavior.getConnection(shard));
 
         final ConnectClientRequest connectClientRequest = actorContextProbe.expectMsgClass(ConnectClientRequest.class);
-        Assert.assertEquals(CLIENT_ID, connectClientRequest.getTarget());
+        assertEquals(CLIENT_ID, connectClientRequest.getTarget());
         final long sequence = 0L;
-        Assert.assertEquals(sequence, connectClientRequest.getSequence());
-        actorContextProbe.reply(new ConnectClientSuccess(CLIENT_ID, sequence, backendProbe.ref(),
-                Collections.emptyList(), dataTree, 3));
-        Assert.assertEquals(clientActorProbe.ref(), connection.localActor());
+        assertEquals(sequence, connectClientRequest.getSequence());
+        actorContextProbe.reply(new ConnectClientSuccess(CLIENT_ID, sequence, backendProbe.ref(), List.of(), dataTree,
+                3));
+        assertEquals(clientActorProbe.ref(), connection.localActor());
         //capture and execute command passed to client context
         final InternalCommand<ShardBackendInfo> command = clientActorProbe.expectMsgClass(InternalCommand.class);
         command.execute(behavior);

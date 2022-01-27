@@ -15,7 +15,6 @@ import static org.junit.Assert.fail;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DistinctNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
@@ -46,14 +45,14 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     public void reset(final int newExpChangeEventCount) {
         changeLatch = new CountDownLatch(newExpChangeEventCount);
-        this.expChangeEventCount = newExpChangeEventCount;
+        expChangeEventCount = newExpChangeEventCount;
         synchronized (changeList) {
             changeList.clear();
         }
     }
 
     @Override
-    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final List<DataTreeCandidate> changes) {
         if (changeLatch.getCount() > 0) {
             synchronized (changeList) {
                 changeList.addAll(changes);

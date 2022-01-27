@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
@@ -19,9 +19,9 @@ import java.util.SortedSet;
 import java.util.concurrent.CompletionStage;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +54,8 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         this.dataTree = requireNonNull(dataTree);
         this.transaction = requireNonNull(transaction);
         this.transactionId = requireNonNull(transactionId);
-        this.userCohorts = null;
-        this.participatingShardNames = null;
+        userCohorts = null;
+        participatingShardNames = null;
         this.nextFailure = requireNonNull(nextFailure);
     }
 
@@ -91,7 +91,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
 
         checkState(State.READY);
-        this.callback = requireNonNull(newCallback);
+        callback = requireNonNull(newCallback);
         state = State.CAN_COMMIT_PENDING;
 
         if (nextFailure == null) {
@@ -104,7 +104,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
         checkState(State.CAN_COMMIT_COMPLETE);
-        this.callback = requireNonNull(newCallback);
+        callback = requireNonNull(newCallback);
         state = State.PRE_COMMIT_PENDING;
 
         if (nextFailure == null) {
@@ -142,7 +142,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public void commit(final FutureCallback<UnsignedLong> newCallback) {
         checkState(State.PRE_COMMIT_COMPLETE);
-        this.callback = requireNonNull(newCallback);
+        callback = requireNonNull(newCallback);
         state = State.COMMIT_PENDING;
 
         if (nextFailure == null) {
@@ -154,16 +154,16 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     private <T> FutureCallback<T> switchState(final State newState) {
         @SuppressWarnings("unchecked")
-        final FutureCallback<T> ret = (FutureCallback<T>) this.callback;
-        this.callback = null;
+        final FutureCallback<T> ret = (FutureCallback<T>) callback;
+        callback = null;
         LOG.debug("Transaction {} changing state from {} to {}", transactionId, state, newState);
-        this.state = newState;
+        state = newState;
         return ret;
     }
 
     void setNewCandidate(final DataTreeCandidateTip dataTreeCandidate) {
         checkState(State.PRE_COMMIT_COMPLETE);
-        this.candidate = Verify.verifyNotNull(dataTreeCandidate);
+        candidate = verifyNotNull(dataTreeCandidate);
     }
 
     void successfulCanCommit() {
@@ -217,7 +217,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
         LOG.trace("Transaction {} prepared candidate {}", transaction, dataTreeCandidate);
-        this.candidate = Verify.verifyNotNull(dataTreeCandidate);
+        candidate = verifyNotNull(dataTreeCandidate);
         switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
     }
 
@@ -271,7 +271,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     void reportFailure(final Exception cause) {
         if (nextFailure == null) {
-            this.nextFailure = requireNonNull(cause);
+            nextFailure = requireNonNull(cause);
         } else {
             LOG.debug("Transaction {} already has a set failure, not updating it", transactionId, cause);
         }

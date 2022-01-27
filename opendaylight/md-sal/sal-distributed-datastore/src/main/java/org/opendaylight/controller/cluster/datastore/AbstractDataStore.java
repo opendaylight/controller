@@ -20,7 +20,7 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +45,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.slf4j.Logger;
@@ -128,7 +128,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     @VisibleForTesting
     protected AbstractDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {
         this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
-        this.client = null;
+        client = null;
         this.identifier = requireNonNull(identifier);
     }
 
@@ -136,7 +136,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     protected AbstractDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
                                 final DataStoreClient clientActor) {
         this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
-        this.client = clientActor;
+        client = clientActor;
         this.identifier = requireNonNull(identifier);
     }
 
@@ -355,7 +355,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
                 new DataTreeChangeListenerProxy<>(actorUtils, new ClusteredDOMDataTreeChangeListener() {
                     @Override
-                    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
+                    public void onDataTreeChanged(final List<DataTreeCandidate> changes) {
                         delegate.onDataTreeChanged(changes);
                     }
 

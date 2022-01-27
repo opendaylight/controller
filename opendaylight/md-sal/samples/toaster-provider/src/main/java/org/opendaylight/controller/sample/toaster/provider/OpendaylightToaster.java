@@ -12,7 +12,7 @@ import static org.opendaylight.mdsal.binding.api.DataObjectModification.Modifica
 import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.WRITE;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
-import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICATION;
+import static org.opendaylight.yangtools.yang.common.ErrorType.APPLICATION;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -62,8 +62,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfigBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.ErrorTag;
+import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint16;
@@ -112,7 +113,7 @@ public class OpendaylightToaster extends AbstractMXBean
     }
 
     public void setNotificationProvider(final NotificationPublishService notificationPublishService) {
-        this.notificationProvider = notificationPublishService;
+        notificationProvider = notificationPublishService;
     }
 
     public void setDataBroker(final DataBroker dataBroker) {
@@ -226,12 +227,12 @@ public class OpendaylightToaster extends AbstractMXBean
     }
 
     private static RpcError makeToasterOutOfBreadError() {
-        return RpcResultBuilder.newError(APPLICATION, "resource-denied", "Toaster is out of bread", "out-of-stock",
-                null, null);
+        return RpcResultBuilder.newError(APPLICATION, ErrorTag.RESOURCE_DENIED, "Toaster is out of bread",
+            "out-of-stock", null, null);
     }
 
     private static RpcError makeToasterInUseError() {
-        return RpcResultBuilder.newWarning(APPLICATION, "in-use", "Toaster is busy", null, null, null);
+        return RpcResultBuilder.newWarning(APPLICATION, ErrorTag.IN_USE, "Toaster is busy", null, null, null);
     }
 
     private void checkStatusAndMakeToast(final MakeToastInput input,
@@ -400,7 +401,7 @@ public class OpendaylightToaster extends AbstractMXBean
         public Void call() {
             try {
                 // make toast just sleeps for n seconds per doneness level.
-                Thread.sleep(OpendaylightToaster.this.darknessFactor.get()
+                Thread.sleep(darknessFactor.get()
                         * toastRequest.getToasterDoneness().toJava());
 
             } catch (InterruptedException e) {
