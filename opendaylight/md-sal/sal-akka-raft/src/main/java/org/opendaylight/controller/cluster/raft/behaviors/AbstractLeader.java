@@ -110,7 +110,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         super(context, state);
 
         appendEntriesMessageSlicer = MessageSlicer.builder().logContext(logName())
-            .messageSliceSize(context.getConfigParams().getSnapshotChunkSize())
+            .messageSliceSize(context.getConfigParams().getMaxAppendEntriesMessageSize())
             .expireStateAfterInactivity(context.getConfigParams().getElectionTimeOutInterval().toMillis() * 3,
                     TimeUnit.MILLISECONDS).build();
 
@@ -771,12 +771,17 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
+    private long getMaxDataSize() {
+        long maxAppendEntries = context.getConfigParams().getMaxAppendEntriesMessageSize();
+        return maxAppendEntries;// > 0 ? maxAppendEntries : context.getConfigParams().getSnapshotChunkSize();
+    }
+
     private List<ReplicatedLogEntry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
             final ActorSelection followerActor) {
         // Try to get all the entries in the journal but not exceeding the max data size for a single AppendEntries
         // message.
         int maxEntries = (int) context.getReplicatedLog().size();
-        final int maxDataSize = context.getConfigParams().getSnapshotChunkSize();
+        final long maxDataSize = getMaxDataSize();
         final long followerNextIndex = followerLogInfo.getNextIndex();
         List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex,
                 maxEntries, maxDataSize);
