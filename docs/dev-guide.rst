@@ -1910,3 +1910,47 @@ It can be acquired from, for example, environment variables. After the
 creation of a default instance, it acts as a regular instance and fully
 participates in the configuration subsystem (It can be reconfigured or
 deleted in following transactions.).
+
+Alternative mailbox configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ODL runs on persistent actors which use unbounded mailboxes by default.
+This might pose a problem in clusters, where there's a significant
+difference in performance (disk or CPU) between the Leader's and
+Follower's machines. If the Follower can't cope with the frequency of
+messages flowing from the Leader, these can build up in the unbounded
+mailbox to the point when the Follower fails with OOM error.
+There is an alternative implementation of mailbox, which can be used
+in this situations:
+
+org.opendaylight.controller.cluster.common.actor.SelectivelyBoundedDequeBasedControlAwareMailbox
+
+This mailbox allows user to specify the max capacity of the ControlQueue and NormalQueue using config knobs:
+
+-  limit-control-queue-capacity
+-  limit-normal-queue-capacity
+
+Omitting these values or setting them to 0 means INFINITE capacity.
+
+To use this mailbox edit your akka.conf/application.conf file and change:
+
+::
+
+    mailbox-type="org.opendaylight.controller.cluster.common.actor.UnboundedDequeBasedControlAwareMailbox"
+
+to:
+
+::
+
+    mailbox-type="org.opendaylight.controller.cluster.common.actor.SelectivelyBoundedDequeBasedControlAwareMailbox"
+
+| **Example:**
+
+::
+
+    default-mailbox {
+        mailbox-type="org.opendaylight.controller.cluster.common.actor.SelectivelyBoundedDequeBasedControlAwareMailbox"
+        limit-control-queue-capacity=2000
+        limit-normal-queue-capacity=1000
+    }
+
