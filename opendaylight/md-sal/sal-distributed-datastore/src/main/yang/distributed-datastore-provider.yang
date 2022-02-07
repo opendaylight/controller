@@ -217,6 +217,12 @@ module distributed-datastore-provider {
                          a chunk of data.";
         }
 
+        leaf max-append-entries-message-size-kib {
+            default 128;
+            type non-zero-uint32-type;
+            description "The maximum size in KiB of the AppendEntries messages sent to followers.";
+        }
+
         leaf maximum-message-slice-size {
             default 2048000;
             type non-zero-uint32-type;

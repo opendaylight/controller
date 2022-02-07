@@ -154,4 +154,11 @@ public interface ConfigParams {
      * @return the threshold in terms of number of journal entries.
      */
     long getSyncIndexThreshold();
+
+    /**
+     * Returns the maximum size of AppendEntries messages in bytes sent to followers.
+     *
+     * @return the the maximum size of AppendEntries messages in bytes.
+     */
+    int getMaxAppendEntriesMessageSize();
 }
