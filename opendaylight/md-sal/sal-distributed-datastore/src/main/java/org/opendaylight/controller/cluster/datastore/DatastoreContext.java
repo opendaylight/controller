@@ -72,6 +72,9 @@ public class DatastoreContext implements ClientActorConfig {
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
+    public static final int DEFAULT_REPEATED_REPLICATION_TIMEOUT_MULTIPLIER = 2;
+    public static final int DEFAULT_REPEATED_REPLICATION_MAX_TIMEOUT_SECONDS = 15;
+
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContext.class);
 
     private static final Set<String> GLOBAL_DATASTORE_NAMES = ConcurrentHashMap.newKeySet();
@@ -124,6 +127,8 @@ public class DatastoreContext implements ClientActorConfig {
         setCandidateElectionTimeoutDivisor(DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
         setMaximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE);
+        setRepeatedReplicationTimeoutMultiplier(DEFAULT_REPEATED_REPLICATION_TIMEOUT_MULTIPLIER);
+        setRepeatedReplicationMaxTimeoutSeconds(DEFAULT_REPEATED_REPLICATION_MAX_TIMEOUT_SECONDS);
     }
 
     private DatastoreContext(final DatastoreContext other) {
@@ -168,10 +173,13 @@ public class DatastoreContext implements ClientActorConfig {
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
         setMaximumMessageSliceSize(other.getMaximumMessageSliceSize());
         setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
+        setMaxAppendEntriesMessageSize(other.raftConfig.getMaxAppendEntriesMessageSize());
         setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
         setTempFileDirectory(other.getTempFileDirectory());
         setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
         setSyncIndexThreshold(other.raftConfig.getSyncIndexThreshold());
+        setRepeatedReplicationTimeoutMultiplier(other.raftConfig.getRepeatedReplicationTimeoutMultiplier());
+        setRepeatedReplicationMaxTimeoutSeconds(other.raftConfig.getRepeatedReplicationMaxTimeoutSeconds());
     }
 
     public static Builder newBuilder() {
@@ -340,6 +348,10 @@ public class DatastoreContext implements ClientActorConfig {
         }
     }
 
+    private void setMaxAppendEntriesMessageSize(final int maxAppendEntriesMessageSize) {
+        raftConfig.setMaxAppendEntriesMessageSize(maxAppendEntriesMessageSize);
+    }
+
     private void setMaximumMessageSliceSize(final int maximumMessageSliceSize) {
         raftConfig.setSnapshotChunkSize(maximumMessageSliceSize);
         this.maximumMessageSliceSize = maximumMessageSliceSize;
@@ -347,6 +359,14 @@ public class DatastoreContext implements ClientActorConfig {
 
     private void setSyncIndexThreshold(final long syncIndexThreshold) {
         raftConfig.setSyncIndexThreshold(syncIndexThreshold);
+    }
+
+    private void setRepeatedReplicationTimeoutMultiplier(final int repeatedReplicationTimeoutMultiplier) {
+        raftConfig.setRepeatedReplicationTimeoutMultiplier(repeatedReplicationTimeoutMultiplier);
+    }
+
+    private void setRepeatedReplicationMaxTimeoutSeconds(final int repeatedReplicationMaxTimeoutSeconds) {
+        raftConfig.setRepeatedReplicationMaxTimeoutSeconds(repeatedReplicationMaxTimeoutSeconds);
     }
 
     public int getShardBatchedModificationCount() {
@@ -399,6 +419,14 @@ public class DatastoreContext implements ClientActorConfig {
     @Override
     public long getNoProgressTimeout() {
         return noProgressTimeout;
+    }
+
+    public int getRepeatedReplicationTimeoutMultiplier() {
+        return raftConfig.getRepeatedReplicationTimeoutMultiplier();
+    }
+
+    public int getRepeatedReplicationMaxTimeoutSeconds() {
+        return raftConfig.getRepeatedReplicationMaxTimeoutSeconds();
     }
 
     public int getInitialPayloadSerializedBufferCapacity() {
@@ -542,6 +570,16 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
+        public Builder repeatedReplicationTimeoutMultiplier(final int repeatedReplicationTimeoutMultiplier) {
+            datastoreContext.setRepeatedReplicationTimeoutMultiplier(repeatedReplicationTimeoutMultiplier);
+            return this;
+        }
+
+        public Builder repeatedReplicationMaxTimeoutSeconds(final int repeatedReplicationMaxTimeoutSeconds) {
+            datastoreContext.setRepeatedReplicationMaxTimeoutSeconds(repeatedReplicationMaxTimeoutSeconds);
+            return this;
+        }
+
         public Builder transactionCreationInitialRateLimit(final long initialRateLimit) {
             datastoreContext.transactionCreationInitialRateLimit = initialRateLimit;
             return this;
@@ -641,6 +679,11 @@ public class DatastoreContext implements ClientActorConfig {
             LOG.warn("The shard-snapshot-chunk-size configuration parameter is deprecated - "
                     + "use maximum-message-slice-size instead");
             datastoreContext.setShardSnapshotChunkSize(shardSnapshotChunkSize);
+            return this;
+        }
+
+        public Builder maxAppendEntriesMessageSizeKib(final int maxAppendEntriesMessageSizeKib) {
+            datastoreContext.setMaxAppendEntriesMessageSize(maxAppendEntriesMessageSizeKib * 1024);
             return this;
         }
 
