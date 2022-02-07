@@ -43,6 +43,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private static final int SNAPSHOT_CHUNK_SIZE = 2048 * 1000; //2MB
 
+    private static final int MAX_APPEND_ENTRIES_MESSAGE_SIZE = 1024 * 100; //100KB
+
 
     /**
      * The interval at which a heart beat message will be sent to the remote
@@ -73,6 +75,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int snapshotDataThreshold = 0;
 
     private int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
+    private int maxAppendEntriesMessageSize = MAX_APPEND_ENTRIES_MESSAGE_SIZE;
 
     private long electionTimeoutFactor = 2;
     private long candidateElectionTimeoutDivisor = 1;
@@ -112,6 +115,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.snapshotChunkSize = snapshotChunkSize;
     }
 
+    public void setMaxAppendEntriesMessageSize(final int maxAppendEntriesMessageSize) {
+        this.maxAppendEntriesMessageSize = maxAppendEntriesMessageSize;
+    }
+
     public void setJournalRecoveryLogBatchSize(final int journalRecoveryLogBatchSize) {
         this.journalRecoveryLogBatchSize = journalRecoveryLogBatchSize;
     }
@@ -149,6 +156,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public long getSnapshotBatchCount() {
         return snapshotBatchCount;
+    }
+
+    @Override
+    public int getMaxAppendEntriesMessageSize() {
+        return this.maxAppendEntriesMessageSize;
     }
 
     @Override
