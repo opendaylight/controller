@@ -168,6 +168,7 @@ public class DatastoreContext implements ClientActorConfig {
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
         setMaximumMessageSliceSize(other.getMaximumMessageSliceSize());
         setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
+        setMaxAppendEntriesMessageSize(other.raftConfig.getMaxAppendEntriesMessageSize());
         setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
         setTempFileDirectory(other.getTempFileDirectory());
         setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
@@ -338,6 +339,10 @@ public class DatastoreContext implements ClientActorConfig {
         if (shardSnapshotChunkSize < maximumMessageSliceSize) {
             raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
         }
+    }
+
+    private void setMaxAppendEntriesMessageSize(final int appendEntriesMessageSize) {
+        raftConfig.setMaxAppendEntriesMessageSize(appendEntriesMessageSize);
     }
 
     private void setMaximumMessageSliceSize(final int maximumMessageSliceSize) {
@@ -641,6 +646,11 @@ public class DatastoreContext implements ClientActorConfig {
             LOG.warn("The shard-snapshot-chunk-size configuration parameter is deprecated - "
                     + "use maximum-message-slice-size instead");
             datastoreContext.setShardSnapshotChunkSize(shardSnapshotChunkSize);
+            return this;
+        }
+
+        public Builder maxAppendEntriesMessageSize(final int maxAppendEntriesMessageSize) {
+            datastoreContext.setMaxAppendEntriesMessageSize(maxAppendEntriesMessageSize);
             return this;
         }
 
