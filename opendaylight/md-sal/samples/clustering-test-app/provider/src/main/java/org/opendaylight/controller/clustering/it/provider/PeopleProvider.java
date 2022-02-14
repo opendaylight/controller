@@ -53,7 +53,7 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
         this.rpcImplementation = requireNonNull(rpcImplementation);
 
         // Add global registration
-        regs.add(rpcProviderService.registerRpcImplementation(CarPurchaseService.class, rpcImplementation));
+        //regs.add(rpcProviderService.registerRpcImplementation(CarPurchaseService.class, rpcImplementation));
     }
 
     @Override

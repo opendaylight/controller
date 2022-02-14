@@ -21,10 +21,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PersonId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PersonRef;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Command(scope = "test-app", name = "buy-car", description = "Run a buy-car test")
 public class BuyCarCommand extends AbstractRpcAction {
+    private static final Logger LOG = LoggerFactory.getLogger(BuyCarCommand.class);
     @Reference
     private RpcConsumerRegistry rpcService;
     @Reference
@@ -38,6 +41,10 @@ public class BuyCarCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
+        LOG.info("String = {}" , personRef);
+
+        LOG.info("InstanceIdentifier = {}", iidSupport.parseArgument(personRef).toString());
+
         return rpcService.getRpcService(CarPurchaseService.class).buyCar(new BuyCarInputBuilder()
             .setPerson(new PersonRef(iidSupport.parseArgument(personRef)))
             .setCarId(carId)
