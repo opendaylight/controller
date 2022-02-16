@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08f04730_6e3bf371",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:39:21Z",
+      "side": 1,
+      "message": "What\u0027s the JIRA issue?",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2a2c010a_8850df2e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:39:21Z",
+      "side": 1,
+      "message": "I would call also parameter max..",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "af0955f6_35f29ef8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:39:21Z",
+      "side": 1,
+      "message": "I would not use this. here.",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c26edb1_b3f842eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:39:21Z",
+      "side": 1,
+      "message": "I would call parameter: MaxAppendEntriesMessageSize",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
