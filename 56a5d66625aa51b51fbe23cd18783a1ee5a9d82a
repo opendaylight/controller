@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0b76a847_19e8e83a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:55:43Z",
+      "side": 1,
+      "message": "What\u0027s the JIRA issue?",
+      "revId": "56a5d66625aa51b51fbe23cd18783a1ee5a9d82a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c1027616_c65d01dc",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/SelectivelyBoundedDequeBasedControlAwareMailbox.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:55:43Z",
+      "side": 1,
+      "message": "public final class",
+      "revId": "56a5d66625aa51b51fbe23cd18783a1ee5a9d82a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db633dd1_e1eea572",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/SelectivelyBoundedDequeBasedControlAwareMailbox.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:55:43Z",
+      "side": 1,
+      "message": "You are missing ODL favorite final keyword :)",
+      "revId": "56a5d66625aa51b51fbe23cd18783a1ee5a9d82a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "542090d8_937ae1a8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/SelectivelyBoundedDequeBasedControlAwareMailbox.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-02-16T10:55:43Z",
+      "side": 1,
+      "message": "Can we really just drop the messages? Are they resend later or lost on forever?",
+      "revId": "56a5d66625aa51b51fbe23cd18783a1ee5a9d82a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
