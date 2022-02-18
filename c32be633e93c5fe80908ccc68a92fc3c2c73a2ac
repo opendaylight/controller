@@ -16,6 +16,75 @@
       "message": "recheck",
       "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d9e2f0b_74e30161",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-02-18T11:17:47Z",
+      "side": 1,
+      "message": "I believe KiB is a much better unit here",
+      "range": {
+        "startLine": 141,
+        "startChar": 27,
+        "endLine": 141,
+        "endChar": 32
+      },
+      "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bef940c2_85e4dfb0",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-02-18T11:17:47Z",
+      "side": 1,
+      "message": "\"set\"",
+      "range": {
+        "startLine": 141,
+        "startChar": 2,
+        "endLine": 141,
+        "endChar": 6
+      },
+      "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "90717e97_8c272c32",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-02-18T11:17:47Z",
+      "side": 1,
+      "message": "why not a power-of-two?",
+      "range": {
+        "startLine": 144,
+        "startChar": 34,
+        "endLine": 144,
+        "endChar": 39
+      },
+      "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
