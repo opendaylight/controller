@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "70f8fd47_5a6295fb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/resources/application.conf",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-02-18T11:15:11Z",
+      "side": 1,
+      "message": "please add end user documentation about the options here and in the user guide.\nalso very specifically document interactions with ask-based protocol",
+      "range": {
+        "startLine": 15,
+        "startChar": 74,
+        "endLine": 15,
+        "endChar": 85
+      },
+      "revId": "7560f1e6a5418b0eb1a408e630f266be9dfdd21b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "519b13b3_02428e59",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/resources/application.conf",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-02-18T11:15:11Z",
+      "side": 1,
+      "message": "this should have its own containment (it is only valid for one subclass) and explicitly document these",
+      "range": {
+        "startLine": 16,
+        "startChar": 11,
+        "endLine": 16,
+        "endChar": 43
+      },
+      "revId": "7560f1e6a5418b0eb1a408e630f266be9dfdd21b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
