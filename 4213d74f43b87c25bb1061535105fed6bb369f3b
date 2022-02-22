@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a54b3efd_da08d59f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9022
+      },
+      "writtenOn": "2022-02-22T11:03:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28c9b346_eb050569",
+      "revId": "4213d74f43b87c25bb1061535105fed6bb369f3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "083dae7f_f997c75e",
@@ -31,6 +49,24 @@
       "writtenOn": "2022-02-17T13:21:42Z",
       "side": 1,
       "message": "Maybe we can just encode the errors into something that we can interpret on RobotFramework side?",
+      "revId": "4213d74f43b87c25bb1061535105fed6bb369f3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "01c23f38_c0eba6cb",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/karaf-cli/src/main/java/org/opendaylight/clustering/it/karaf/cli/AbstractDOMRpcAction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9022
+      },
+      "writtenOn": "2022-02-22T11:03:46Z",
+      "side": 1,
+      "message": "Errors will be interpreted on RobotFramework side in this way: Robot tests execute this karaf command, load a output of the command from console and then\ncheck if the output contains token \"Invocation failed\" which indicates some error. If yes, It fails and we have the output in logs so we can see an entire error message.",
+      "parentUuid": "083dae7f_f997c75e",
       "revId": "4213d74f43b87c25bb1061535105fed6bb369f3b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
