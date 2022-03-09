@@ -23,6 +23,7 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public final class ShardDataTreeMocking {
@@ -37,18 +38,18 @@ public final class ShardDataTreeMocking {
     }
 
     public static ShardDataTreeCohort immediateCanCommit(final ShardDataTreeCohort cohort) {
-        final FutureCallback<Void> callback = mockCallback();
-        doNothing().when(callback).onSuccess(null);
+        final FutureCallback<Empty> callback = mockCallback();
+        doNothing().when(callback).onSuccess(Empty.value());
         cohort.canCommit(callback);
 
-        verify(callback).onSuccess(null);
+        verify(callback).onSuccess(Empty.value());
         verifyNoMoreInteractions(callback);
         return cohort;
     }
 
-    public static FutureCallback<Void> coordinatedCanCommit(final ShardDataTreeCohort cohort) {
-        final FutureCallback<Void> callback = mockCallback();
-        doNothing().when(callback).onSuccess(null);
+    public static FutureCallback<Empty> coordinatedCanCommit(final ShardDataTreeCohort cohort) {
+        final FutureCallback<Empty> callback = mockCallback();
+        doNothing().when(callback).onSuccess(Empty.value());
         doNothing().when(callback).onFailure(any(Throwable.class));
         cohort.canCommit(callback);
         return callback;
@@ -102,11 +103,11 @@ public final class ShardDataTreeMocking {
         }).when(preCommitCallback).onSuccess(any(DataTreeCandidate.class));
         doNothing().when(preCommitCallback).onFailure(any(Throwable.class));
 
-        final FutureCallback<Void> canCommit = mockCallback();
+        final FutureCallback<Empty> canCommit = mockCallback();
         doAnswer(invocation -> {
             cohort.preCommit(preCommitCallback);
             return null;
-        }).when(canCommit).onSuccess(null);
+        }).when(canCommit).onSuccess(Empty.value());
         doNothing().when(canCommit).onFailure(any(Throwable.class));
 
         cohort.canCommit(canCommit);

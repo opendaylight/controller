@@ -76,6 +76,7 @@ import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
@@ -1034,9 +1035,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        cohort.userPreCommit(candidate, new FutureCallback<Void>() {
+        cohort.userPreCommit(candidate, new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void noop) {
+            public void onSuccess(final Empty result) {
                 // Set the tip of the data tree.
                 tip = verifyNotNull(candidate);
 
