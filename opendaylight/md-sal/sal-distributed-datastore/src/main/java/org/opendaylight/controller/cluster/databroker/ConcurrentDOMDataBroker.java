@@ -20,7 +20,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -186,10 +185,6 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Futures.addCallback(cohortIterator.next().commit(), futureCallback, MoreExecutors.directExecutor());
     }
 
-    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
-            justification = "Pertains to the assignment of the 'clientException' var. FindBugs flags this as an "
-                + "uncomfirmed cast but the generic type in TransactionCommitFailedExceptionMapper is "
-                + "TransactionCommitFailedException and thus should be deemed as confirmed.")
     private static void handleException(final AsyncNotifyingSettableFuture clientSubmitFuture,
             final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
