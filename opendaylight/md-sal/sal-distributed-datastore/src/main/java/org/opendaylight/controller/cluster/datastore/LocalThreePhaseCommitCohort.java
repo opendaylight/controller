@@ -19,8 +19,10 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,19 +124,19 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     }
 
     @Override
-    public final ListenableFuture<Void> preCommit() {
+    public final ListenableFuture<Empty> preCommit() {
         // Intended no-op
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final ListenableFuture<Void> abort() {
+    public final ListenableFuture<Empty> abort() {
         // Intended no-op
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final ListenableFuture<Void> commit() {
+    public final ListenableFuture<CommitInfo> commit() {
         // Intended no-op
         throw new UnsupportedOperationException();
     }

@@ -60,6 +60,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -232,11 +233,11 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
-    protected <R extends TransactionRequest<R>> void testRequestResponse(final Consumer<VotingFuture<Void>> consumer,
+    protected <R extends TransactionRequest<R>> void testRequestResponse(final Consumer<VotingFuture<Empty>> consumer,
             final Class<R> expectedRequest,
             final BiFunction<TransactionIdentifier, Long, TransactionSuccess<?>> replySupplier) {
         final TransactionTester<T> tester = getTester();
-        final VotingFuture<Void> future = mock(VotingFuture.class);
+        final VotingFuture<Empty> future = mock(VotingFuture.class);
         transaction.seal();
         consumer.accept(future);
         final TransactionRequest<?> req = tester.expectTransactionRequest(expectedRequest);

@@ -23,7 +23,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -99,8 +101,8 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     public void testReadyEmpty() throws Exception {
         final DOMStoreThreePhaseCommitCohort cohort = getHandle().ready();
         assertFutureEquals(Boolean.TRUE, cohort.canCommit());
-        assertFutureEquals(null, cohort.preCommit());
-        assertFutureEquals(null, cohort.commit());
+        assertFutureEquals(Empty.value(), cohort.preCommit());
+        assertFutureEquals(CommitInfo.empty(), cohort.commit());
     }
 
     @Test
@@ -113,8 +115,8 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
                 backendRespondToRequest(CommitLocalTransactionRequest.class, response);
         assertEquals(modification, request.getModification());
         assertFutureEquals(Boolean.TRUE, actual);
-        assertFutureEquals(null, cohort.preCommit());
-        assertFutureEquals(null, cohort.commit());
+        assertFutureEquals(Empty.value(), cohort.preCommit());
+        assertFutureEquals(CommitInfo.empty(), cohort.commit());
     }
 
     @Test

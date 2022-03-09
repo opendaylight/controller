@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -45,8 +46,8 @@ final class TestUtils {
      * @param <T>      type
      * @throws Exception exception
      */
-    static <T> void assertFutureEquals(final T expected, final Future<T> actual) throws Exception {
-        Assert.assertEquals(expected, getWithTimeout(actual));
+    static <T> void assertFutureEquals(final T expected, final Future<? extends T> actual) throws Exception {
+        assertEquals(expected, getWithTimeout(actual));
     }
 
     /**

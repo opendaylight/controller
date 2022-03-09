@@ -30,6 +30,8 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -67,7 +69,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private final ActorUtils actorUtils;
     private final List<CohortInfo> cohorts;
-    private final SettableFuture<Void> cohortsResolvedFuture = SettableFuture.create();
+    private final SettableFuture<Empty> cohortsResolvedFuture = SettableFuture.create();
     private final TransactionIdentifier transactionId;
     private volatile OperationCallback commitOperationCallback;
 
@@ -78,11 +80,11 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         this.transactionId = requireNonNull(transactionId);
 
         if (cohorts.isEmpty()) {
-            cohortsResolvedFuture.set(null);
+            cohortsResolvedFuture.set(Empty.value());
         }
     }
 
-    private ListenableFuture<Void> resolveCohorts() {
+    private ListenableFuture<Empty> resolveCohorts() {
         if (cohortsResolvedFuture.isDone()) {
             return cohortsResolvedFuture;
         }
@@ -104,7 +106,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                             info.setResolvedActor(actor);
                             if (done) {
                                 LOG.debug("Tx {}: successfully resolved all cohort actors", transactionId);
-                                cohortsResolvedFuture.set(null);
+                                cohortsResolvedFuture.set(Empty.value());
                             }
                         }
                     }
@@ -127,9 +129,9 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         // extracted from ReadyTransactionReply messages by the Futures that were obtained earlier
         // and passed to us from upstream processing. If any one fails then  we'll fail canCommit.
 
-        Futures.addCallback(resolveCohorts(), new FutureCallback<Void>() {
+        Futures.addCallback(resolveCohorts(), new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void notUsed) {
+            public void onSuccess(final Empty result) {
                 finishCanCommit(returnFuture);
             }
 
@@ -226,35 +228,34 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        // We don't need to do anything here - preCommit is done atomically with the commit phase
-        // by the shard.
-        return IMMEDIATE_VOID_SUCCESS;
+    public ListenableFuture<Empty> preCommit() {
+        // We don't need to do anything here - preCommit is done atomically with the commit phase by the shard.
+        return IMMEDIATE_EMPTY_SUCCESS;
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
+    public ListenableFuture<Empty> abort() {
         // Note - we pass false for propagateException. In the front-end data broker, this method
         // is called when one of the 3 phases fails with an exception. We'd rather have that
         // original exception propagated to the client. If our abort fails and we propagate the
         // exception then that exception will supersede and suppress the original exception. But
         // it's the original exception that is the root cause and of more interest to the client.
 
-        return voidOperation("abort", ABORT_MESSAGE_SUPPLIER,
-                AbortTransactionReply.class, false, OperationCallback.NO_OP_CALLBACK);
+        return operation("abort", Empty.value(), ABORT_MESSAGE_SUPPLIER, AbortTransactionReply.class, false,
+            OperationCallback.NO_OP_CALLBACK);
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
+    public ListenableFuture<? extends CommitInfo> commit() {
         OperationCallback operationCallback = commitOperationCallback != null ? commitOperationCallback :
             OperationCallback.NO_OP_CALLBACK;
 
-        return voidOperation("commit", COMMIT_MESSAGE_SUPPLIER,
-                CommitTransactionReply.class, true, operationCallback);
+        return operation("commit", CommitInfo.empty(), COMMIT_MESSAGE_SUPPLIER, CommitTransactionReply.class, true,
+            operationCallback);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static boolean successfulFuture(final ListenableFuture<Void> future) {
+    private static boolean successfulFuture(final ListenableFuture<?> future) {
         if (!future.isDone()) {
             return false;
         }
@@ -267,26 +268,26 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         }
     }
 
-    private ListenableFuture<Void> voidOperation(final String operationName,
+    private <T> ListenableFuture<T> operation(final String operationName, final T futureValue,
             final MessageSupplier messageSupplier, final Class<?> expectedResponseClass,
             final boolean propagateException, final OperationCallback callback) {
         LOG.debug("Tx {} {}", transactionId, operationName);
 
-        final SettableFuture<Void> returnFuture = SettableFuture.create();
+        final SettableFuture<T> returnFuture = SettableFuture.create();
 
         // The cohort actor list should already be built at this point by the canCommit phase but,
         // if not for some reason, we'll try to build it here.
 
-        ListenableFuture<Void> future = resolveCohorts();
+        ListenableFuture<Empty> future = resolveCohorts();
         if (successfulFuture(future)) {
-            finishVoidOperation(operationName, messageSupplier, expectedResponseClass, propagateException,
-                    returnFuture, callback);
+            finishOperation(operationName, messageSupplier, expectedResponseClass, propagateException, returnFuture,
+                futureValue, callback);
         } else {
-            Futures.addCallback(future, new FutureCallback<Void>() {
+            Futures.addCallback(future, new FutureCallback<>() {
                 @Override
-                public void onSuccess(final Void notUsed) {
-                    finishVoidOperation(operationName, messageSupplier, expectedResponseClass,
-                            propagateException, returnFuture, callback);
+                public void onSuccess(final Empty result) {
+                    finishOperation(operationName, messageSupplier, expectedResponseClass, propagateException,
+                        returnFuture, futureValue, callback);
                 }
 
                 @Override
@@ -296,7 +297,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                     if (propagateException) {
                         returnFuture.setException(failure);
                     } else {
-                        returnFuture.set(null);
+                        returnFuture.set(futureValue);
                     }
                 }
             }, MoreExecutors.directExecutor());
@@ -305,9 +306,10 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         return returnFuture;
     }
 
-    private void finishVoidOperation(final String operationName, final MessageSupplier messageSupplier,
+    private <T> void finishOperation(final String operationName, final MessageSupplier messageSupplier,
                                      final Class<?> expectedResponseClass, final boolean propagateException,
-                                     final SettableFuture<Void> returnFuture, final OperationCallback callback) {
+                                     final SettableFuture<T> returnFuture, final T futureValue,
+                                     final OperationCallback callback) {
         LOG.debug("Tx {} finish {}", transactionId, operationName);
 
         callback.resume();
@@ -338,14 +340,14 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                         // Since the caller doesn't want us to propagate the exception we'll also
                         // not log it normally. But it's usually not good to totally silence
                         // exceptions so we'll log it to debug level.
-                        returnFuture.set(null);
+                        returnFuture.set(futureValue);
                     }
 
                     callback.failure();
                 } else {
                     LOG.debug("Tx {}: {} succeeded", transactionId, operationName);
 
-                    returnFuture.set(null);
+                    returnFuture.set(futureValue);
 
                     callback.success();
                 }

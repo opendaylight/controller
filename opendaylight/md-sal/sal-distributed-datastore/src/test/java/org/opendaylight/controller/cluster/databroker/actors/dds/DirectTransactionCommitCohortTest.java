@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
@@ -79,22 +79,22 @@ public class DirectTransactionCommitCohortTest {
 
     @Test
     public void testPreCommit() throws Exception {
-        final ListenableFuture<Void> preCommit = cohort.preCommit();
-        assertNull(getWithTimeout(preCommit));
+        final ListenableFuture<?> preCommit = cohort.preCommit();
+        assertNotNull(getWithTimeout(preCommit));
     }
 
     @Test
     public void testAbort() throws Exception {
-        final ListenableFuture<Void> abort = cohort.abort();
+        final ListenableFuture<?> abort = cohort.abort();
         verify(history).onTransactionComplete(transaction.getTransaction().getIdentifier());
-        assertNull(getWithTimeout(abort));
+        assertNotNull(getWithTimeout(abort));
     }
 
     @Test
     public void testCommit() throws Exception {
-        final ListenableFuture<Void> commit = cohort.commit();
+        final ListenableFuture<?> commit = cohort.commit();
         verify(history).onTransactionComplete(transaction.getTransaction().getIdentifier());
-        assertNull(getWithTimeout(commit));
+        assertNotNull(getWithTimeout(commit));
     }
 
     private static TransactionTester<?> createTransactionTester(final TestProbe backendProbe,

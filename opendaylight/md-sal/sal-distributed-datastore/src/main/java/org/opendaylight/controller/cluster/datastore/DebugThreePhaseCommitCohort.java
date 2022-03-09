@@ -17,6 +17,8 @@ import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -67,17 +69,17 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
+    public ListenableFuture<Empty> preCommit() {
         return addFutureCallback(delegate.preCommit());
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
+    public ListenableFuture<? extends CommitInfo> commit() {
         return addFutureCallback(delegate.commit());
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
+    public ListenableFuture<Empty> abort() {
         return delegate.abort();
     }
 
@@ -89,6 +91,6 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
 
     @VisibleForTesting
     void setLogger(final Logger logger) {
-        this.log = logger;
+        log = logger;
     }
 }

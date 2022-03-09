@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -446,7 +447,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     public static class CapturingShardDataTreeCohort extends ShardDataTreeCohort {
         private volatile ShardDataTreeCohort delegate;
-        private FutureCallback<Void> canCommit;
+        private FutureCallback<Empty> canCommit;
         private FutureCallback<DataTreeCandidate> preCommit;
         private FutureCallback<UnsignedLong> commit;
 
@@ -454,7 +455,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             this.delegate = delegate;
         }
 
-        public FutureCallback<Void> getCanCommit() {
+        public FutureCallback<Empty> getCanCommit() {
             assertNotNull("canCommit was not invoked", canCommit);
             return canCommit;
         }
@@ -485,7 +486,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @Override
-        public void canCommit(final FutureCallback<Void> callback) {
+        public void canCommit(final FutureCallback<Empty> callback) {
             canCommit = mockFutureCallback(callback);
             delegate.canCommit(canCommit);
         }
@@ -519,7 +520,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @Override
-        public void abort(final FutureCallback<Void> callback) {
+        public void abort(final FutureCallback<Empty> callback) {
             delegate.abort(callback);
         }
 

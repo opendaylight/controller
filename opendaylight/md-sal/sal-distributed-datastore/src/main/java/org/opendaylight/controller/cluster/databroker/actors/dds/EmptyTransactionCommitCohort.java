@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 /**
  * An {@link AbstractTransactionCommitCohort} for use with empty transactions. This relies on the fact that no backends
@@ -30,19 +32,19 @@ final class EmptyTransactionCommitCohort extends AbstractTransactionCommitCohort
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        return VOID_FUTURE;
+    public ListenableFuture<Empty> preCommit() {
+        return EMPTY_FUTURE;
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
+    public ListenableFuture<Empty> abort() {
         complete();
-        return VOID_FUTURE;
+        return EMPTY_FUTURE;
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
+    public ListenableFuture<CommitInfo> commit() {
         complete();
-        return VOID_FUTURE;
+        return CommitInfo.emptyFluentFuture();
     }
 }

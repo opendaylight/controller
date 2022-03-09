@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
@@ -75,10 +76,10 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         }).when(mockShardDataTree).startCanCommit(cohort);
 
         @SuppressWarnings("unchecked")
-        final FutureCallback<Void> callback = mock(FutureCallback.class);
+        final FutureCallback<Empty> callback = mock(FutureCallback.class);
         cohort.canCommit(callback);
 
-        verify(callback).onSuccess(null);
+        verify(callback).onSuccess(Empty.value());
         verifyNoMoreInteractions(callback);
     }
 
@@ -89,7 +90,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         }).when(mockShardDataTree).startCanCommit(cohort);
 
         @SuppressWarnings("unchecked")
-        final FutureCallback<Void> callback = mock(FutureCallback.class);
+        final FutureCallback<Empty> callback = mock(FutureCallback.class);
         cohort.canCommit(callback);
 
         verify(callback).onFailure(cause);
@@ -209,11 +210,11 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     private static Future<?> abort(final ShardDataTreeCohort cohort) {
-        final CompletableFuture<Void> f = new CompletableFuture<>();
-        cohort.abort(new FutureCallback<Void>() {
+        final CompletableFuture<Empty> f = new CompletableFuture<>();
+        cohort.abort(new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void result) {
-                f.complete(null);
+            public void onSuccess(final Empty result) {
+                f.complete(result);
             }
 
             @Override

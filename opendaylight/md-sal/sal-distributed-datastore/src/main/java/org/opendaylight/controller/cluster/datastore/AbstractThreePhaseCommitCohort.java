@@ -10,7 +10,9 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.yang.common.Empty;
 import scala.concurrent.Future;
 
 /**
@@ -19,8 +21,10 @@ import scala.concurrent.Future;
  * futures.
  */
 public abstract class AbstractThreePhaseCommitCohort<T> implements DOMStoreThreePhaseCommitCohort {
-    protected static final ListenableFuture<Void> IMMEDIATE_VOID_SUCCESS = Futures.immediateFuture(null);
-    protected static final ListenableFuture<Boolean> IMMEDIATE_BOOLEAN_SUCCESS = Futures.immediateFuture(Boolean.TRUE);
+    protected static final @NonNull ListenableFuture<Empty> IMMEDIATE_EMPTY_SUCCESS =
+        Futures.immediateFuture(Empty.value());
+    protected static final @NonNull ListenableFuture<Boolean> IMMEDIATE_BOOLEAN_SUCCESS =
+        Futures.immediateFuture(Boolean.TRUE);
 
     abstract List<Future<T>> getCohortFutures();
 }

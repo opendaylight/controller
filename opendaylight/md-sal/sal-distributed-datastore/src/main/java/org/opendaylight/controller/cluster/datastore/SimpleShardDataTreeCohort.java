@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.concurrent.CompletionStage;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -85,7 +86,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public void canCommit(final FutureCallback<Void> newCallback) {
+    public void canCommit(final FutureCallback<Empty> newCallback) {
         if (state == State.CAN_COMMIT_PENDING) {
             return;
         }
@@ -115,9 +116,9 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public void abort(final FutureCallback<Void> abortCallback) {
+    public void abort(final FutureCallback<Empty> abortCallback) {
         if (!dataTree.startAbort(this)) {
-            abortCallback.onSuccess(null);
+            abortCallback.onSuccess(Empty.value());
             return;
         }
 
@@ -126,7 +127,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
         final Optional<CompletionStage<?>> maybeAborts = userCohorts.abort();
         if (!maybeAborts.isPresent()) {
-            abortCallback.onSuccess(null);
+            abortCallback.onSuccess(Empty.value());
             return;
         }
 
@@ -134,7 +135,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             if (failure != null) {
                 abortCallback.onFailure(failure);
             } else {
-                abortCallback.onSuccess(null);
+                abortCallback.onSuccess(Empty.value());
             }
         });
     }
@@ -167,7 +168,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     void successfulCanCommit() {
-        switchState(State.CAN_COMMIT_COMPLETE).onSuccess(null);
+        switchState(State.CAN_COMMIT_COMPLETE).onSuccess(Empty.value());
     }
 
     void failedCanCommit(final Exception cause) {
@@ -181,10 +182,10 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
      * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
      * @param futureCallback the callback to invoke on completion, which may be immediate or async.
      */
-    void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Void> futureCallback) {
+    void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
         userCohorts.reset();
 
-        final Optional<CompletionStage<Void>> maybeCanCommitFuture = userCohorts.canCommit(dataTreeCandidate);
+        final Optional<CompletionStage<Empty>> maybeCanCommitFuture = userCohorts.canCommit(dataTreeCandidate);
         if (!maybeCanCommitFuture.isPresent()) {
             doUserPreCommit(futureCallback);
             return;
@@ -199,10 +200,10 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         });
     }
 
-    private void doUserPreCommit(final FutureCallback<Void> futureCallback) {
-        final Optional<CompletionStage<Void>> maybePreCommitFuture = userCohorts.preCommit();
+    private void doUserPreCommit(final FutureCallback<Empty> futureCallback) {
+        final Optional<CompletionStage<Empty>> maybePreCommitFuture = userCohorts.preCommit();
         if (!maybePreCommitFuture.isPresent()) {
-            futureCallback.onSuccess(null);
+            futureCallback.onSuccess(Empty.value());
             return;
         }
 
@@ -210,7 +211,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             if (failure != null) {
                 futureCallback.onFailure(failure);
             } else {
-                futureCallback.onSuccess(null);
+                futureCallback.onSuccess(Empty.value());
             }
         });
     }
@@ -233,7 +234,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
-        final Optional<CompletionStage<Void>> maybeCommitFuture = userCohorts.commit();
+        final Optional<CompletionStage<Empty>> maybeCommitFuture = userCohorts.commit();
         if (!maybeCommitFuture.isPresent()) {
             finishSuccessfulCommit(journalIndex, onComplete);
             return;

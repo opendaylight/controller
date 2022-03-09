@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.AbstractFuture;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,11 +46,10 @@ class VotingFuture<T> extends AbstractFuture<T> {
     private volatile int neededVotes;
 
     VotingFuture(final T result, final int requiredVotes) {
-        Preconditions.checkArgument(requiredVotes > 0);
+        this.result = requireNonNull(result);
+        checkArgument(requiredVotes > 0);
         this.neededVotes = requiredVotes;
 
-        // null is okay to allow Void type
-        this.result = result;
     }
 
     void voteYes() {
@@ -70,7 +71,7 @@ class VotingFuture<T> extends AbstractFuture<T> {
 
     private boolean castVote() {
         final int votes = VOTES_UPDATER.decrementAndGet(this);
-        Verify.verify(votes >= 0);
+        verify(votes >= 0);
         return votes == 0;
     }
 

@@ -12,11 +12,12 @@ import static java.util.Objects.requireNonNull;
 import akka.dispatch.OnComplete;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.Arrays;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -37,8 +38,8 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
     private volatile DOMStoreThreePhaseCommitCohort delegateCohort = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
     private final OperationCallback.Reference operationCallbackRef;
 
-    SingleCommitCohortProxy(ActorUtils actorUtils, Future<Object> cohortFuture, TransactionIdentifier transactionId,
-            OperationCallback.Reference operationCallbackRef) {
+    SingleCommitCohortProxy(final ActorUtils actorUtils, final Future<Object> cohortFuture,
+            final TransactionIdentifier transactionId, final OperationCallback.Reference operationCallbackRef) {
         this.actorUtils = actorUtils;
         this.cohortFuture = cohortFuture;
         this.transactionId = requireNonNull(transactionId);
@@ -51,9 +52,9 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
 
         final SettableFuture<Boolean> returnFuture = SettableFuture.create();
 
-        cohortFuture.onComplete(new OnComplete<Object>() {
+        cohortFuture.onComplete(new OnComplete<>() {
             @Override
-            public void onComplete(Throwable failure, Object cohortResponse) {
+            public void onComplete(final Throwable failure, final Object cohortResponse) {
                 if (failure != null) {
                     operationCallbackRef.get().failure();
                     returnFuture.setException(failure);
@@ -77,22 +78,22 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
+    public ListenableFuture<Empty> preCommit() {
         return delegateCohort.preCommit();
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
+    public ListenableFuture<Empty> abort() {
         return delegateCohort.abort();
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
+    public ListenableFuture<? extends CommitInfo> commit() {
         return delegateCohort.commit();
     }
 
     @Override
     List<Future<Object>> getCohortFutures() {
-        return Arrays.asList(cohortFuture);
+        return List.of(cohortFuture);
     }
 }

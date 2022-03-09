@@ -49,6 +49,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -157,7 +158,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     this.prevState);
             this.prevState = requireNonNull(prevState);
             // We cannot have duplicate successor states, so this check is sufficient
-            this.done = DONE.equals(prevState);
+            done = DONE.equals(prevState);
         }
 
         // To be called from safe contexts, where successor is known to be completed
@@ -448,7 +449,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
-    final void abort(final VotingFuture<Void> ret) {
+    final void abort(final VotingFuture<Empty> ret) {
         checkSealed();
 
         sendDoAbort(t -> {

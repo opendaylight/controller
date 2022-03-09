@@ -48,6 +48,8 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitR
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientTransactionCommitCohortTest {
@@ -97,7 +99,7 @@ public class ClientTransactionCommitCohortTest {
     @Test
     public void testPreCommit() throws Exception {
         testOpSuccess(ClientTransactionCommitCohort::preCommit, this::expectPreCommit, this::replyPreCommitSuccess,
-                null);
+            Empty.value());
     }
 
     @Test
@@ -107,7 +109,8 @@ public class ClientTransactionCommitCohortTest {
 
     @Test
     public void testCommit() throws Exception {
-        testOpSuccess(ClientTransactionCommitCohort::commit, this::expectCommit, this::replyCommitSuccess, null);
+        testOpSuccess(ClientTransactionCommitCohort::commit, this::expectCommit, this::replyCommitSuccess,
+            CommitInfo.empty());
     }
 
     @Test
@@ -117,7 +120,7 @@ public class ClientTransactionCommitCohortTest {
 
     @Test
     public void testAbort() throws Exception {
-        testOpSuccess(ClientTransactionCommitCohort::abort, this::expectAbort, this::replyAbortSuccess, null);
+        testOpSuccess(ClientTransactionCommitCohort::abort, this::expectAbort, this::replyAbortSuccess, Empty.value());
     }
 
     @Test

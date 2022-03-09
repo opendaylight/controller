@@ -37,6 +37,7 @@ import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,15 +138,14 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Void> futureCallback = new FutureCallback<>() {
+        FutureCallback<Empty> futureCallback = new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void notUsed) {
+            public void onSuccess(final Empty result) {
                 if (!cohortIterator.hasNext()) {
                     // All cohorts completed successfully - we can move on to the commit phase
                     doCommit(startTime, clientSubmitFuture, transaction, cohorts);
                 } else {
-                    ListenableFuture<Void> preCommitFuture = cohortIterator.next().preCommit();
-                    Futures.addCallback(preCommitFuture, this, MoreExecutors.directExecutor());
+                    Futures.addCallback(cohortIterator.next().preCommit(), this, MoreExecutors.directExecutor());
                 }
             }
 
@@ -155,8 +155,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             }
         };
 
-        ListenableFuture<Void> preCommitFuture = cohortIterator.next().preCommit();
-        Futures.addCallback(preCommitFuture, futureCallback, MoreExecutors.directExecutor());
+        Futures.addCallback(cohortIterator.next().preCommit(), futureCallback, MoreExecutors.directExecutor());
     }
 
     private void doCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
@@ -166,17 +165,16 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
 
         // Not using Futures.allAsList here to avoid its internal overhead.
-        FutureCallback<Void> futureCallback = new FutureCallback<>() {
+        final FutureCallback<CommitInfo> futureCallback = new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void notUsed) {
+            public void onSuccess(final CommitInfo result) {
                 if (!cohortIterator.hasNext()) {
                     // All cohorts completed successfully - we're done.
                     commitStatsTracker.addDuration(System.nanoTime() - startTime);
 
                     clientSubmitFuture.set();
                 } else {
-                    ListenableFuture<Void> commitFuture = cohortIterator.next().commit();
-                    Futures.addCallback(commitFuture, this, MoreExecutors.directExecutor());
+                    Futures.addCallback(cohortIterator.next().commit(), this, MoreExecutors.directExecutor());
                 }
             }
 
@@ -186,8 +184,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             }
         };
 
-        ListenableFuture<Void> commitFuture = cohortIterator.next().commit();
-        Futures.addCallback(commitFuture, futureCallback, MoreExecutors.directExecutor());
+        Futures.addCallback(cohortIterator.next().commit(), futureCallback, MoreExecutors.directExecutor());
     }
 
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
@@ -210,7 +207,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
         // Transaction failed - tell all cohorts to abort.
         @SuppressWarnings("unchecked")
-        ListenableFuture<Void>[] canCommitFutures = new ListenableFuture[cohorts.size()];
+        ListenableFuture<Empty>[] canCommitFutures = new ListenableFuture[cohorts.size()];
         int index = 0;
         for (DOMStoreThreePhaseCommitCohort cohort : cohorts) {
             canCommitFutures[index++] = cohort.abort();
@@ -227,10 +224,10 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         }
         clientSubmitFuture.setException(exMapper.apply(e));
 
-        ListenableFuture<List<Void>> combinedFuture = Futures.allAsList(canCommitFutures);
-        Futures.addCallback(combinedFuture, new FutureCallback<List<Void>>() {
+        ListenableFuture<List<Empty>> combinedFuture = Futures.allAsList(canCommitFutures);
+        Futures.addCallback(combinedFuture, new FutureCallback<List<Empty>>() {
             @Override
-            public void onSuccess(final List<Void> notUsed) {
+            public void onSuccess(final List<Empty> result) {
                 // Propagate the original exception to the client.
                 LOG.debug("Tx: {} aborted successfully", transaction.getIdentifier());
             }

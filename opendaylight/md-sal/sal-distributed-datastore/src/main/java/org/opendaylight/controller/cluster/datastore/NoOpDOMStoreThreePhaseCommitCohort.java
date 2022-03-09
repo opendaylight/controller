@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.List;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 import scala.concurrent.Future;
 
 /**
@@ -29,18 +31,18 @@ final class NoOpDOMStoreThreePhaseCommitCohort extends AbstractThreePhaseCommitC
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        return IMMEDIATE_VOID_SUCCESS;
+    public ListenableFuture<Empty> preCommit() {
+        return IMMEDIATE_EMPTY_SUCCESS;
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
-        return IMMEDIATE_VOID_SUCCESS;
+    public ListenableFuture<Empty> abort() {
+        return IMMEDIATE_EMPTY_SUCCESS;
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
-        return IMMEDIATE_VOID_SUCCESS;
+    public ListenableFuture<CommitInfo> commit() {
+        return CommitInfo.emptyFluentFuture();
     }
 
     @Override

@@ -12,6 +12,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohort {
     private final Collection<AbstractProxyTransaction> proxies;
@@ -35,14 +37,14 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
         return ret;
     }
 
-    private ListenableFuture<Void> addComplete(final ListenableFuture<Void> future) {
+    private <T> ListenableFuture<T> addComplete(final ListenableFuture<T> future) {
         future.addListener(this::complete, MoreExecutors.directExecutor());
         return future;
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        final VotingFuture<Void> ret = new VotingFuture<>(null, proxies.size());
+    public ListenableFuture<Empty> preCommit() {
+        final var ret = new VotingFuture<>(Empty.value(), proxies.size());
         for (AbstractProxyTransaction proxy : proxies) {
             proxy.preCommit(ret);
         }
@@ -51,8 +53,8 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
-        final VotingFuture<Void> ret = new VotingFuture<>(null, proxies.size());
+    public ListenableFuture<CommitInfo> commit() {
+        final var ret = new VotingFuture<>(CommitInfo.empty(), proxies.size());
         for (AbstractProxyTransaction proxy : proxies) {
             proxy.doCommit(ret);
         }
@@ -61,8 +63,8 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
-        final VotingFuture<Void> ret = new VotingFuture<>(null, proxies.size());
+    public ListenableFuture<Empty> abort() {
+        final var ret = new VotingFuture<>(Empty.value(), proxies.size());
         for (AbstractProxyTransaction proxy : proxies) {
             proxy.abort(ret);
         }

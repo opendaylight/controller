@@ -11,6 +11,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 /**
  * An {@link AbstractTransactionCommitCohort} implementation for transactions which contain a single proxy. Since there
@@ -33,19 +35,19 @@ final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohor
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        return VOID_FUTURE;
+    public ListenableFuture<Empty> preCommit() {
+        return EMPTY_FUTURE;
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
+    public ListenableFuture<Empty> abort() {
         complete();
-        return VOID_FUTURE;
+        return EMPTY_FUTURE;
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
+    public ListenableFuture<CommitInfo> commit() {
         complete();
-        return VOID_FUTURE;
+        return CommitInfo.emptyFluentFuture();
     }
 }
