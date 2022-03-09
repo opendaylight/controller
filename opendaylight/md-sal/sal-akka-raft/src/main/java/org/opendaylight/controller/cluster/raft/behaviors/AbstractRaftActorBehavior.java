@@ -212,8 +212,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             // the log with the later term is more up-to-date. If the logs
             // end with the same term, then whichever log is longer is
             // more up-to-date.
-            if (requestVote.getLastLogTerm() > lastTerm() || requestVote.getLastLogTerm() == lastTerm()
-                    && requestVote.getLastLogIndex() >= lastIndex()) {
+            if (requestVote.getLastLogTerm() > lastTerm()
+                || requestVote.getLastLogTerm() == lastTerm() && requestVote.getLastLogIndex() >= lastIndex()) {
                 candidateLatest = true;
             }
 
