@@ -95,8 +95,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
         doCanCommit(clientSubmitFuture, transaction, cohorts);
 
-        return FluentFuture.from(clientSubmitFuture).transform(ignored -> CommitInfo.empty(),
-                MoreExecutors.directExecutor());
+        return FluentFuture.from(clientSubmitFuture);
     }
 
     private void doCanCommit(final AsyncNotifyingSettableFuture clientSubmitFuture,
@@ -249,8 +248,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
      * FIXME: This class should probably be moved to yangtools common utils for re-usability and
      * unified with AsyncNotifyingListenableFutureTask.
      */
-    private static class AsyncNotifyingSettableFuture extends AbstractFuture<Void> {
-
+    private static class AsyncNotifyingSettableFuture extends AbstractFuture<CommitInfo> {
         /**
          * ThreadLocal used to detect if the task completion thread is running the future listener Runnables.
          */
@@ -279,7 +277,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         boolean set() {
             ON_TASK_COMPLETION_THREAD_TL.set(Boolean.TRUE);
             try {
-                return super.set(null);
+                return super.set(CommitInfo.empty());
             } finally {
                 ON_TASK_COMPLETION_THREAD_TL.set(null);
             }
