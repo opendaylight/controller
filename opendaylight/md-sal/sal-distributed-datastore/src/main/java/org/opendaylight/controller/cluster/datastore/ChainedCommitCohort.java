@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -57,7 +58,7 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public void canCommit(final FutureCallback<Void> callback) {
+    public void canCommit(final FutureCallback<Empty> callback) {
         delegate.canCommit(callback);
     }
 
@@ -67,7 +68,7 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public void abort(final FutureCallback<Void> callback) {
+    public void abort(final FutureCallback<Empty> callback) {
         delegate.abort(callback);
     }
 

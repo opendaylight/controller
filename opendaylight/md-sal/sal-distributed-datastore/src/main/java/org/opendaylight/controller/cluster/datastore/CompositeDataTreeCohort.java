@@ -20,7 +20,6 @@ import akka.dispatch.Recover;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.collect.Lists;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -137,7 +137,7 @@ class CompositeDataTreeCohort {
         state = State.IDLE;
     }
 
-    Optional<CompletionStage<Void>> canCommit(final DataTreeCandidate tip) {
+    Optional<CompletionStage<Empty>> canCommit(final DataTreeCandidate tip) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("{}: canCommit - candidate: {}", txId, tip);
         } else {
@@ -165,7 +165,7 @@ class CompositeDataTreeCohort {
         return Optional.of(processResponses(futures, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL));
     }
 
-    Optional<CompletionStage<Void>> preCommit() {
+    Optional<CompletionStage<Empty>> preCommit() {
         LOG.debug("{}: preCommit - successfulFromPrevious: {}", txId, successfulFromPrevious);
 
         if (successfulFromPrevious.isEmpty()) {
@@ -179,7 +179,7 @@ class CompositeDataTreeCohort {
         return Optional.of(processResponses(futures, State.PRE_COMMIT_SENT, State.PRE_COMMIT_SUCCESSFUL));
     }
 
-    Optional<CompletionStage<Void>> commit() {
+    Optional<CompletionStage<Empty>> commit() {
         LOG.debug("{}: commit - successfulFromPrevious: {}", txId, successfulFromPrevious);
         if (successfulFromPrevious.isEmpty()) {
             changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMITED);
@@ -220,10 +220,10 @@ class CompositeDataTreeCohort {
         return ret;
     }
 
-    private @NonNull CompletionStage<Void> processResponses(final List<Entry<ActorRef, Future<Object>>> futures,
+    private @NonNull CompletionStage<Empty> processResponses(final List<Entry<ActorRef, Future<Object>>> futures,
             final State currentState, final State afterState) {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
-        final CompletableFuture<Void> returnFuture = new CompletableFuture<>();
+        final CompletableFuture<Empty> returnFuture = new CompletableFuture<>();
         Future<Iterable<Object>> aggregateFuture = Futures.sequence(Lists.transform(futures, Entry::getValue),
                 ExecutionContexts.global());
 
@@ -238,11 +238,8 @@ class CompositeDataTreeCohort {
         return returnFuture;
     }
 
-    // FB issues violation for passing null to CompletableFuture#complete but it is valid and necessary when the
-    // generic type is Void.
-    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     private void processResponses(final Throwable failure, final Iterable<Object> results,
-            final State currentState, final State afterState, final CompletableFuture<Void> resultFuture) {
+            final State currentState, final State afterState, final CompletableFuture<Empty> resultFuture) {
         if (failure != null) {
             successfulFromPrevious = List.of();
             resultFuture.completeExceptionally(failure);
@@ -276,7 +273,7 @@ class CompositeDataTreeCohort {
         } else {
             successfulFromPrevious = successful;
             changeStateFrom(currentState, afterState);
-            resultFuture.complete(null);
+            resultFuture.complete(Empty.value());
         }
     }
 

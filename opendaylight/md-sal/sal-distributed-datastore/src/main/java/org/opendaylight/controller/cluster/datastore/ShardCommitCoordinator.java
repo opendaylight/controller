@@ -38,6 +38,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModificationsCursor;
 import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
 
@@ -236,9 +237,9 @@ final class ShardCommitCoordinator {
     }
 
     private void handleCanCommit(final CohortEntry cohortEntry) {
-        cohortEntry.canCommit(new FutureCallback<Void>() {
+        cohortEntry.canCommit(new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Empty result) {
                 log.debug("{}: canCommit for {}: success", name, cohortEntry.getTransactionId());
 
                 if (cohortEntry.isDoImmediateCommit()) {
@@ -371,9 +372,9 @@ final class ShardCommitCoordinator {
         log.debug("{}: Aborting transaction {}", name, transactionID);
 
         final ActorRef self = shard.getSelf();
-        cohortEntry.abort(new FutureCallback<Void>() {
+        cohortEntry.abort(new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Empty result) {
                 if (sender != null) {
                     sender.tell(AbortTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), self);
                 }
