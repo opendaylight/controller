@@ -18,9 +18,10 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 public abstract class AbstractShardManagerCreator<T extends AbstractShardManagerCreator<T>> {
-    private SettableFuture<Void> readinessFuture;
+    private SettableFuture<Empty> readinessFuture;
     private ClusterWrapper cluster;
     private Configuration configuration;
     private DatastoreContextFactory datastoreContextFactory;
@@ -82,11 +83,11 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return self();
     }
 
-    SettableFuture<Void> getReadinessFuture() {
+    SettableFuture<Empty> getReadinessFuture() {
         return readinessFuture;
     }
 
-    public T readinessFuture(final SettableFuture<Void> newReadinessFuture) {
+    public T readinessFuture(final SettableFuture<Empty> newReadinessFuture) {
         checkSealed();
         this.readinessFuture = newReadinessFuture;
         return self();

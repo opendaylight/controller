@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -124,7 +125,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
             Executors.newSingleThreadExecutor().submit(() -> {
                 Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-                distributedDataStore.readinessFuture().set(null);
+                distributedDataStore.readinessFuture().set(Empty.value());
             });
 
             long start = System.currentTimeMillis();

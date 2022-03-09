@@ -45,6 +45,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -62,7 +63,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStore.class);
 
-    private final SettableFuture<Void> readinessFuture = SettableFuture.create();
+    private final SettableFuture<Empty> readinessFuture = SettableFuture.create();
     private final ClientIdentifier identifier;
     private final DataStoreClient client;
     private final ActorUtils actorUtils;
@@ -334,7 +335,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @VisibleForTesting
-    SettableFuture<Void> readinessFuture() {
+    SettableFuture<Empty> readinessFuture() {
         return readinessFuture;
     }
 

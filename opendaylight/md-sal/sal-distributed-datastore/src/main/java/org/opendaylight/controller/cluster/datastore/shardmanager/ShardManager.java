@@ -102,6 +102,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private DatastoreContextFactory datastoreContextFactory;
 
-    private final SettableFuture<Void> readinessFuture;
+    private final SettableFuture<Empty> readinessFuture;
 
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
@@ -611,7 +612,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void checkReady() {
         if (isReadyWithLeaderId()) {
             LOG.info("{}: All Shards are ready - data store {} is ready", persistenceId(), type);
-            readinessFuture.set(null);
+            readinessFuture.set(Empty.value());
         }
     }
 

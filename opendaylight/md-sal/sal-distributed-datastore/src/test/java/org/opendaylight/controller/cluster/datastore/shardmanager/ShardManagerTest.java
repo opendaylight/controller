@@ -134,6 +134,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -153,7 +154,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     private static int ID_COUNTER = 1;
     private static ActorRef mockShardActor;
     private static ShardIdentifier mockShardName;
-    private static SettableFuture<Void> ready;
+    private static SettableFuture<Empty> ready;
     private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
 
     private final String shardMrgIDSuffix = "config" + ID_COUNTER++;
