@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -49,13 +50,13 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
 
     // FIXME: Should return rebased DataTreeCandidateTip
     @VisibleForTesting
-    public abstract void canCommit(FutureCallback<Void> callback);
+    public abstract void canCommit(FutureCallback<Empty> callback);
 
     @VisibleForTesting
     public abstract void preCommit(FutureCallback<DataTreeCandidate> callback);
 
     @VisibleForTesting
-    public abstract void abort(FutureCallback<Void> callback);
+    public abstract void abort(FutureCallback<Empty> callback);
 
     @VisibleForTesting
     public abstract void commit(FutureCallback<UnsignedLong> callback);

@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
@@ -105,7 +106,7 @@ final class CohortEntry {
         }
     }
 
-    void canCommit(final FutureCallback<Void> callback) {
+    void canCommit(final FutureCallback<Empty> callback) {
         cohort.canCommit(callback);
     }
 
@@ -117,7 +118,7 @@ final class CohortEntry {
         cohort.commit(callback);
     }
 
-    void abort(final FutureCallback<Void> callback) {
+    void abort(final FutureCallback<Empty> callback) {
         cohort.abort(callback);
     }
 
