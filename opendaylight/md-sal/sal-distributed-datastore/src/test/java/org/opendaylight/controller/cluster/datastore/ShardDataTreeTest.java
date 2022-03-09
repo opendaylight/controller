@@ -57,6 +57,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -244,21 +245,21 @@ public class ShardDataTreeTest extends AbstractTest {
         final ShardDataTreeCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         immediateCanCommit(cohort1);
-        final FutureCallback<Void> canCommitCallback2 = coordinatedCanCommit(cohort2);
-        final FutureCallback<Void> canCommitCallback3 = coordinatedCanCommit(cohort3);
-        final FutureCallback<Void> canCommitCallback4 = coordinatedCanCommit(cohort4);
+        final FutureCallback<Empty> canCommitCallback2 = coordinatedCanCommit(cohort2);
+        final FutureCallback<Empty> canCommitCallback3 = coordinatedCanCommit(cohort3);
+        final FutureCallback<Empty> canCommitCallback4 = coordinatedCanCommit(cohort4);
 
         final FutureCallback<DataTreeCandidate> preCommitCallback1 = coordinatedPreCommit(cohort1);
         verify(preCommitCallback1).onSuccess(cohort1.getCandidate());
-        verify(canCommitCallback2).onSuccess(null);
+        verify(canCommitCallback2).onSuccess(Empty.value());
 
         final FutureCallback<DataTreeCandidate> preCommitCallback2 = coordinatedPreCommit(cohort2);
         verify(preCommitCallback2).onSuccess(cohort2.getCandidate());
-        verify(canCommitCallback3).onSuccess(null);
+        verify(canCommitCallback3).onSuccess(Empty.value());
 
         final FutureCallback<DataTreeCandidate> preCommitCallback3 = coordinatedPreCommit(cohort3);
         verify(preCommitCallback3).onSuccess(cohort3.getCandidate());
-        verify(canCommitCallback4).onSuccess(null);
+        verify(canCommitCallback4).onSuccess(Empty.value());
 
         final FutureCallback<DataTreeCandidate> preCommitCallback4 = coordinatedPreCommit(cohort4);
         verify(preCommitCallback4).onSuccess(cohort4.getCandidate());
@@ -293,7 +294,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         final ShardDataTreeCohort cohort5 = newShardDataTreeCohort(snapshot ->
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
-        final FutureCallback<Void> canCommitCallback5 = coordinatedCanCommit(cohort5);
+        final FutureCallback<Empty> canCommitCallback5 = coordinatedCanCommit(cohort5);
 
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
         CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
@@ -309,7 +310,7 @@ public class ShardDataTreeTest extends AbstractTest {
         inOrder.verify(commitCallback3).onSuccess(any(UnsignedLong.class));
         inOrder.verify(commitCallback4).onSuccess(any(UnsignedLong.class));
 
-        verify(canCommitCallback5).onSuccess(null);
+        verify(canCommitCallback5).onSuccess(Empty.value());
 
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
@@ -418,10 +419,10 @@ public class ShardDataTreeTest extends AbstractTest {
         coordinatedPreCommit(cohort2);
         coordinatedPreCommit(cohort3);
 
-        FutureCallback<Void> mockAbortCallback = mock(FutureCallback.class);
-        doNothing().when(mockAbortCallback).onSuccess(null);
+        FutureCallback<Empty> mockAbortCallback = mock(FutureCallback.class);
+        doNothing().when(mockAbortCallback).onSuccess(Empty.value());
         cohort2.abort(mockAbortCallback);
-        verify(mockAbortCallback).onSuccess(null);
+        verify(mockAbortCallback).onSuccess(Empty.value());
 
         coordinatedPreCommit(cohort4);
         coordinatedCommit(cohort1);
@@ -466,15 +467,15 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, peopleNode));
 
         immediateCanCommit(cohort1);
-        FutureCallback<Void> canCommitCallback2 = coordinatedCanCommit(cohort2);
+        FutureCallback<Empty> canCommitCallback2 = coordinatedCanCommit(cohort2);
 
         coordinatedPreCommit(cohort1);
-        verify(canCommitCallback2).onSuccess(null);
+        verify(canCommitCallback2).onSuccess(Empty.value());
 
-        FutureCallback<Void> mockAbortCallback = mock(FutureCallback.class);
-        doNothing().when(mockAbortCallback).onSuccess(null);
+        FutureCallback<Empty> mockAbortCallback = mock(FutureCallback.class);
+        doNothing().when(mockAbortCallback).onSuccess(Empty.value());
         cohort1.abort(mockAbortCallback);
-        verify(mockAbortCallback).onSuccess(null);
+        verify(mockAbortCallback).onSuccess(Empty.value());
 
         FutureCallback<DataTreeCandidate> preCommitCallback2 = coordinatedPreCommit(cohort2);
         verify(preCommitCallback2).onFailure(any(Throwable.class));

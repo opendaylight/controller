@@ -42,6 +42,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -349,9 +350,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final Ready ready = checkReady();
         startAbort();
-        ready.readyCohort.abort(new FutureCallback<Void>() {
+        ready.readyCohort.abort(new FutureCallback<>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Empty result) {
                 recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(), sequence));
                 finishAbort();
             }
@@ -377,9 +378,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY:
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
-                checkReady().readyCohort.canCommit(new FutureCallback<Void>() {
+                checkReady().readyCohort.canCommit(new FutureCallback<>() {
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final Empty result) {
                         successfulCanCommit(envelope, now);
                     }
 
@@ -429,9 +430,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY:
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<Void>() {
+                ready.readyCohort.canCommit(new FutureCallback<>() {
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final Empty result) {
                         successfulDirectCanCommit(envelope, now);
                     }
 
