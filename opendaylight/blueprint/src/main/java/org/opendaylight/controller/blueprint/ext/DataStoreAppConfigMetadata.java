@@ -34,6 +34,7 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaTreeInference;
@@ -86,7 +87,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         this.defaultAppConfigFileName = defaultAppConfigFileName;
         this.appConfigBindingClassName = appConfigBindingClassName;
         this.appConfigListKeyValue = appConfigListKeyValue;
-        this.appConfigUpdateStrategy = updateStrategyValue;
+        appConfigUpdateStrategy = updateStrategyValue;
     }
 
     @Override
@@ -97,10 +98,10 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         Class<DataObject> appConfigBindingClass;
         try {
             Class<?> bindingClass = container.getBundleContext().getBundle().loadClass(appConfigBindingClassName);
-            if (!DataObject.class.isAssignableFrom(bindingClass)) {
+            if (!ChildOf.class.isAssignableFrom(bindingClass)) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: Specified app config binding class %s does not extend %s",
-                        logName(), appConfigBindingClassName, DataObject.class.getName()));
+                        logName(), appConfigBindingClassName, ChildOf.class.getName()));
             }
 
             appConfigBindingClass = (Class<DataObject>) bindingClass;
