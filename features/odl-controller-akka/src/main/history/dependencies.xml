@@ -2,8 +2,8 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-akka">
     <feature version="0.0.0">
         <feature>odl-controller-scala</feature>
-        <bundle>mvn:com.typesafe/config/1.4.0</bundle>
-        <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.4.2</bundle>
+        <bundle>mvn:com.typesafe/config/1.4.2</bundle>
+        <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.4.3</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.37.0</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.37.0</bundle>
         <bundle>mvn:io.netty/netty/3.10.6.Final</bundle>
