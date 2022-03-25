@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7c616275_54f00418",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-03-25T16:13:51Z",
+      "side": 1,
+      "message": "This breakes when new Entry enters journal between the last SnapshotChunkReply and InstallSnapshotFinished. Adding test to show this issue.",
+      "revId": "9a4ad6125316ee0097205d7dcaf2e807e8a27ed4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
