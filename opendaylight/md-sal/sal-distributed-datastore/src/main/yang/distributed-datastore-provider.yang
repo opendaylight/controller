@@ -296,6 +296,24 @@ module distributed-datastore-provider {
             type string;
             description "Directory name for snapshot and journal dumps.";
         }
+
+        leaf repeated-replication-timeout-multiplier {
+            default 2;
+            type non-zero-uint32-type;
+            description "If Leader keeps repeatedly sending AppendEntries message containing the same entries
+                         a timeout is inserted between replications. This timeout keeps increasing by this
+                         multiplicator. The initial timeout is 100ms. This means the next AppendEntries with the same
+                         selection of Entries will be sent after 50ms, then 100ms, then 200ms, 400, 800, 1600, etc.";
+        }
+
+        leaf repeated-replication-max-timeout-seconds {
+            default 15;
+            type non-zero-uint32-type;
+            description "The maximum time to wait when trying to send AppendEntries message containing the same
+                         selection of entries as the last one. The timeout starts at 50ms and gradually increases
+                         by repeated-replication-timeout-multiplier up to this value.";
+        }
+
     }
 
     container data-store-properties-container {
