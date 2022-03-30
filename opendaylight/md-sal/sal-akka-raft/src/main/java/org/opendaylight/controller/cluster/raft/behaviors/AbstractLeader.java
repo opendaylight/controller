@@ -758,7 +758,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                     if (followerLogInformation.okToReplicate(context.getCommitIndex())) {
                         entries = getEntriesToSend(followerLogInformation, followerActor);
-                        sendAppendEntries = true;
+                        if (shouldReplicateEntriesToFollower(followerLogInformation, entries)) {
+                            sendAppendEntries = true;
+                        } else {
+                            final FollowerLogInformation.LastReplication lastReplication =
+                                followerLogInformation.getLastReplication();
+                            log.debug("{}: Not sending AppendEntries containing entries from index {} to {} for "
+                                    + "follower {}. These entries will not be sent again before timeout({}ms) elapses",
+                                logName(), lastReplication.getFromIndex(), lastReplication.getToIndex(), followerId,
+                                lastReplication.getLastTimeoutMs());
+                        }
                     }
                 } else if (isFollowerActive && followerNextIndex >= 0
                         && leaderLastIndex > followerNextIndex && !context.getSnapshotManager().isCapturing()) {
@@ -796,6 +805,17 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 sendAppendEntriesToFollower(followerActor, entries, followerLogInformation);
             }
         }
+    }
+
+    private boolean shouldReplicateEntriesToFollower(final FollowerLogInformation followerLogInformation,
+        final List<ReplicatedLogEntry> entries) {
+
+        final FollowerLogInformation.LastReplication lastReplication = followerLogInformation.getLastReplication();
+        if (lastReplication.shouldReplicateEntries(entries)) {
+            lastReplication.update(entries);
+            return true;
+        }
+        return false;
     }
 
     private List<ReplicatedLogEntry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
