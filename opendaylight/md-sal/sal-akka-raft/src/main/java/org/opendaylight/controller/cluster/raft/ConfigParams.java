@@ -161,4 +161,22 @@ public interface ConfigParams {
      * @return the the maximum size of AppendEntries messages in bytes.
      */
     int getMaxAppendEntriesMessageSize();
+
+    /**
+     * If the Leader keeps repeatedly sending AppendEntries message containing the same entries, a timeout is inserted
+     * between replications. The timeout keeps increasing by this multiplier each time the AppendEntry is sent.
+     * The initial timeout is 100ms. Meaning the next AppendEntries with the same list of Entries will be sent
+     * after 100ms, then 200ms, then 400, 800, 1600 etc. The timeout is reset back to 0 when sending different list
+     * of entries.
+     *
+     * @return multiplier for repeated AppendEntries replication
+     */
+    int getRepeatedReplicationTimeoutMultiplier();
+
+    /**
+     * The maximum time to wait when trying to send AppendEntries message containing the same selection of entries.
+     *
+     * @return the maximum time to wait before replicating the same entries again.
+     */
+    int getRepeatedReplicationMaxTimeoutSeconds();
 }
