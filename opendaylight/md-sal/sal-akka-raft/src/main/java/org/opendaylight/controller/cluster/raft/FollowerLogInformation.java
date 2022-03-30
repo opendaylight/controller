@@ -12,6 +12,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -56,6 +58,8 @@ public final class FollowerLogInformation {
 
     private boolean needsLeaderAddress;
 
+    private final LastReplication lastReplication;
+
     /**
      * Constructs an instance.
      *
@@ -69,6 +73,7 @@ public final class FollowerLogInformation {
         this.matchIndex = matchIndex;
         this.context = context;
         this.peerInfo = requireNonNull(peerInfo);
+        this.lastReplication = new LastReplication(context);
     }
 
     /**
@@ -373,5 +378,91 @@ public final class FollowerLogInformation {
                 + ", votingState=" + peerInfo.getVotingState()
                 + ", stopwatch=" + stopwatch.elapsed(TimeUnit.MILLISECONDS)
                 + ", followerTimeoutMillis=" + context.getConfigParams().getElectionTimeOutInterval().toMillis() + "]";
+    }
+
+    public LastReplication getLastReplication() {
+        return this.lastReplication;
+    }
+
+    public static class LastReplication {
+
+        private static final long INITIAL_REPLICATION_TIMEOUT = 50;
+
+        private long fromIndex;
+        private long toIndex;
+        private Stopwatch replicationSW;
+        private long lastTimeoutMs;
+        private final int timeoutMultiplier;
+        private final long maxTimeoutMs;
+
+        LastReplication(final RaftActorContext context) {
+            final ConfigParams config = context.getConfigParams();
+            timeoutMultiplier = config.getRepeatedReplicationTimeoutMultiplier();
+            maxTimeoutMs = Duration.ofSeconds(config.getRepeatedReplicationMaxTimeoutSeconds()).toMillis();
+            replicationSW = Stopwatch.createUnstarted();
+            reset();
+        }
+
+        public void update(final List<ReplicatedLogEntry> entries) {
+            if (entries.isEmpty()) {
+                reset();
+                return;
+            }
+
+            final long newFromIndex = entries.get(0).getIndex();
+            final long newToIndex = entries.get(entries.size() - 1).getIndex();
+
+            if (fromIndex == newFromIndex && toIndex == newToIndex) {
+                increaseLastTimeout();
+            } else {
+                fromIndex = newFromIndex;
+                toIndex = newToIndex;
+                lastTimeoutMs = 0;
+            }
+
+            replicationSW.reset().start();
+        }
+
+        private void reset() {
+            fromIndex = -1;
+            toIndex = -1;
+            replicationSW.reset();
+            lastTimeoutMs = 0;
+        }
+
+        private void increaseLastTimeout() {
+            if (lastTimeoutMs == 0) {
+                lastTimeoutMs = INITIAL_REPLICATION_TIMEOUT;
+                return;
+            }
+            if (lastTimeoutMs * timeoutMultiplier < maxTimeoutMs) {
+                lastTimeoutMs *= timeoutMultiplier;
+            } else {
+                lastTimeoutMs = maxTimeoutMs;
+            }
+        }
+
+        public boolean shouldReplicateEntries(final List<ReplicatedLogEntry> entries) {
+            if (entries.isEmpty()) {
+                return true;
+            }
+
+            if (entries.get(0).getIndex() == fromIndex && entries.get(entries.size() - 1).getIndex() == toIndex) {
+                return replicationSW.elapsed(TimeUnit.MILLISECONDS) >= lastTimeoutMs;
+            }
+            return true;
+        }
+
+        public long getFromIndex() {
+            return fromIndex;
+        }
+
+        public long getToIndex() {
+            return toIndex;
+        }
+
+        public long getLastTimeoutMs() {
+            return lastTimeoutMs;
+        }
     }
 }

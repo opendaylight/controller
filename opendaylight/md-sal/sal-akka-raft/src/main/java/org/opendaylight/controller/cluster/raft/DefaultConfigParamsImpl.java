@@ -85,6 +85,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int fileBackedStreamingThreshold = 128 * MEGABYTE;
 
     private long syncIndexThreshold = 10;
+    private int repeatedReplicationTimeoutMultiplier = 2;
+    private int repeatedReplicationMaxTimeoutSeconds = 15;
 
     public void setHeartBeatInterval(final FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -139,6 +141,14 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setCustomRaftPolicyImplementationClass(final String customRaftPolicyImplementationClass) {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
+    }
+
+    public void setRepeatedReplicationTimeoutMultiplier(final int repeatedReplicationTimeoutMultiplier) {
+        this.repeatedReplicationTimeoutMultiplier = repeatedReplicationTimeoutMultiplier;
+    }
+
+    public void setRepeatedReplicationMaxTimeoutSeconds(int repeatedReplicationMaxTimeoutSeconds) {
+        this.repeatedReplicationMaxTimeoutSeconds = repeatedReplicationMaxTimeoutSeconds;
     }
 
     @Override
@@ -225,6 +235,15 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         return fileBackedStreamingThreshold;
     }
 
+    @Override
+    public int getRepeatedReplicationTimeoutMultiplier() {
+        return repeatedReplicationTimeoutMultiplier;
+    }
+
+    @Override
+    public int getRepeatedReplicationMaxTimeoutSeconds() {
+        return repeatedReplicationMaxTimeoutSeconds;
+    }
 
     @Override
     public PeerAddressResolver getPeerAddressResolver() {
@@ -239,6 +258,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public long getSyncIndexThreshold() {
         return syncIndexThreshold;
     }
+
+
 
     public void setSyncIndexThreshold(final long syncIndexThreshold) {
         checkArgument(syncIndexThreshold >= 0);
