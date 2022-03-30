@@ -19,6 +19,8 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_RECOVERY_EXPORT_BASE_DIR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_RECOVERY_SNAPSHOT_INTERVAL_SECONDS;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_REPEATED_REPLICATION_MAX_TIMEOUT_SECONDS;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_REPEATED_REPLICATION_TIMEOUT_MULTIPLIER;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
@@ -71,6 +73,10 @@ public class DatastoreContextTest {
                 context.getShardBatchedModificationCount());
         assertEquals(DEFAULT_MAX_MESSAGE_SLICE_SIZE, context.getMaximumMessageSliceSize());
         assertEquals(DEFAULT_RECOVERY_EXPORT_BASE_DIR, context.getRecoveryExportBaseDir());
+        assertEquals(DEFAULT_REPEATED_REPLICATION_TIMEOUT_MULTIPLIER,
+            context.getRepeatedReplicationTimeoutMultiplier());
+        assertEquals(DEFAULT_REPEATED_REPLICATION_MAX_TIMEOUT_SECONDS,
+            context.getRepeatedReplicationMaxTimeoutSeconds());
     }
 
     @Test
@@ -104,6 +110,8 @@ public class DatastoreContextTest {
         builder.initialPayloadSerializedBufferCapacity(DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY + 1);
         builder.exportOnRecovery(ExportOnRecovery.Json);
         builder.recoveryExportBaseDir(DEFAULT_RECOVERY_EXPORT_BASE_DIR + "-new");
+        builder.repeatedReplicationTimeoutMultiplier(DEFAULT_REPEATED_REPLICATION_TIMEOUT_MULTIPLIER + 1);
+        builder.repeatedReplicationMaxTimeoutSeconds(DEFAULT_REPEATED_REPLICATION_MAX_TIMEOUT_SECONDS + 1);
 
         DatastoreContext context = builder.build();
 
@@ -158,5 +166,9 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_RECOVERY_EXPORT_BASE_DIR + "-new",
                 context.getRecoveryExportBaseDir());
         assertEquals(ExportOnRecovery.Json, context.getExportOnRecovery());
+        assertEquals(DEFAULT_REPEATED_REPLICATION_TIMEOUT_MULTIPLIER + 1,
+            context.getRepeatedReplicationTimeoutMultiplier());
+        assertEquals(DEFAULT_REPEATED_REPLICATION_MAX_TIMEOUT_SECONDS + 1,
+            context.getRepeatedReplicationMaxTimeoutSeconds());
     }
 }

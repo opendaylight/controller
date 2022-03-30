@@ -19,7 +19,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Assert;
@@ -95,6 +98,40 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         testLog.info("Leader created and elected");
     }
 
+    private void setupLeaderWithSingleFollower(final DefaultConfigParamsImpl leaderConfig) {
+        leaderId = factory.generateActorId("leader");
+        follower1Id = factory.generateActorId("follower");
+
+        // Setup the persistent journal for the leader - just an election term and no journal/snapshots.
+        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(initialTerm, leaderId));
+
+        // Create the leader and 2 follower actors.
+        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+            newFollowerConfigParams());
+
+        Map<String, String> leaderPeerAddresses = ImmutableMap.<String, String>builder()
+            .put(follower1Id, follower1Actor.path().toString()).build();
+
+        leaderConfigParams = leaderConfig;
+        leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
+
+        waitUntilLeader(leaderActor);
+
+        leaderContext = leaderActor.underlyingActor().getRaftActorContext();
+        leader = leaderActor.underlyingActor().getCurrentBehavior();
+
+        follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
+        follower1 = follower1Actor.underlyingActor().getCurrentBehavior();
+
+        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        assertEquals("Current term > " + initialTerm, true, currentTerm > initialTerm);
+
+        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
+
+        testLog.info("Leader created and elected");
+    }
+
     private void setupFollower2() {
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), newFollowerConfigParams());
@@ -103,6 +140,50 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2 = follower2Actor.underlyingActor().getCurrentBehavior();
 
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
+    }
+
+    @Test
+    public void testLimitRepeatedAppendEntriesReplication() throws InterruptedException {
+        testLog.info("testLimitRepeatedAppendEntriesReplication starting");
+
+        leaderConfigParams = newLeaderConfigParams();
+        leaderConfigParams.setMaxAppendEntriesMessageSize(3);
+        leaderConfigParams.setRepeatedReplicationTimeoutMultiplier(2);
+        leaderConfigParams.setSnapshotBatchCount(50);
+        setupLeaderWithSingleFollower(leaderConfigParams);
+
+        // act as if the follower is having difficulty processing the AppendEntries.
+        leaderActor.underlyingActor().startDropMessages(AppendEntriesReply.class);
+
+        MessageCollectorActor.clearMessages(follower1Actor);
+
+        // start adding more entries in the Leader's journal. Having set the MaxAppendEntriesMessageSize to 3, the
+        // Leader will try to replicate the first 3 entries over and over again. Normally he would send those 3
+        // entries 300 times. However by adding the RepeatedReplicationTimeout, this senseless replication is reduced
+        // to just 10 AppendEntries messages.
+        int maxReplications = 300;
+        AtomicInteger replication = new AtomicInteger();
+        replication.set(0);
+        ScheduledExecutorService replicator = Executors.newSingleThreadScheduledExecutor();
+        replicator.scheduleWithFixedDelay(() -> {
+            sendPayloadData(leaderActor, "" + replication.getAndIncrement());
+            if (replication.get() >= maxReplications) {
+                replicator.shutdown();
+            }
+        }, 10, 10, TimeUnit.MILLISECONDS);
+
+        replicator.awaitTermination(20, TimeUnit.SECONDS);
+
+        //make sure the follower only received 10 of these AppendEntries messages
+        try {
+            MessageCollectorActor.expectMatching(follower1CollectorActor,
+                AppendEntries.class, 11, (ae) -> ae.getEntries().size() == 3);
+        } catch (AssertionError ae) {
+            final String errMessage = ae.getMessage();
+            Assert.assertTrue(errMessage.contains("Expected 11 messages of type class "
+                + "org.opendaylight.controller.cluster.raft.messages.AppendEntries. Actual received was 10"));
+        }
+        testLog.info("testLimitRepeatedAppendEntriesReplication complete");
     }
 
     /**
