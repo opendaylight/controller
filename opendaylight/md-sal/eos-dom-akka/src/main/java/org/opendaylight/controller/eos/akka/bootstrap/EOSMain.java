@@ -9,6 +9,7 @@ package org.opendaylight.controller.eos.akka.bootstrap;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
+import akka.actor.typed.SupervisorStrategy;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
@@ -47,8 +48,8 @@ public final class EOSMain extends AbstractBehavior<BootstrapCommand> {
         final ClusterSingleton clusterSingleton = ClusterSingleton.get(context.getSystem());
         // start the initial sync behavior that switches to the regular one after syncing
         ownerSupervisor = clusterSingleton.init(
-                SingletonActor.of(IdleSupervisor.create(iidCodec), "OwnerSupervisor"));
-
+                SingletonActor.of(Behaviors.supervise(IdleSupervisor.create(iidCodec))
+                        .onFailure(SupervisorStrategy.restart()), "OwnerSupervisor"));
         candidateRegistry = context.spawn(CandidateRegistryInit.create(ownerSupervisor), "CandidateRegistry");
 
         ownerStateChecker = context.spawn(OwnerStateChecker.create(role, ownerSupervisor, iidCodec),
