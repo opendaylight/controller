@@ -64,6 +64,54 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a16ec7a_173704fc",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-01T13:18:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d9e2f0b_74e30161",
+      "range": {
+        "startLine": 141,
+        "startChar": 27,
+        "endLine": 141,
+        "endChar": 32
+      },
+      "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f66527a_6c70e05c",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-01T13:18:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bef940c2_85e4dfb0",
+      "range": {
+        "startLine": 141,
+        "startChar": 2,
+        "endLine": 141,
+        "endChar": 6
+      },
+      "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "90717e97_8c272c32",
@@ -77,6 +125,30 @@
       "writtenOn": "2022-02-18T11:17:47Z",
       "side": 1,
       "message": "why not a power-of-two?",
+      "range": {
+        "startLine": 144,
+        "startChar": 34,
+        "endLine": 144,
+        "endChar": 39
+      },
+      "revId": "c32be633e93c5fe80908ccc68a92fc3c2c73a2ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "26992b21_a32ce95d",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-01T13:18:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90717e97_8c272c32",
       "range": {
         "startLine": 144,
         "startChar": 34,
