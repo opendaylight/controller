@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "534ef031_7a79dae3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-06T10:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08f04730_6e3bf371",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2a2c010a_8850df2e",
@@ -31,6 +49,24 @@
       "writtenOn": "2022-02-16T10:39:21Z",
       "side": 1,
       "message": "I would call also parameter max..",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2071101_8a265fee",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-06T10:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a2c010a_8850df2e",
       "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -52,6 +88,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "38c79990_8d4d6990",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-06T10:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af0955f6_35f29ef8",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1c26edb1_b3f842eb",
@@ -65,6 +119,24 @@
       "writtenOn": "2022-02-16T10:39:21Z",
       "side": 1,
       "message": "I would call parameter: MaxAppendEntriesMessageSize",
+      "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c0c6815f_bbaac7a5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2022-04-06T10:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c26edb1_b3f842eb",
       "revId": "49c5122eefcd9589f68e600ae85e06357ae39108",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
