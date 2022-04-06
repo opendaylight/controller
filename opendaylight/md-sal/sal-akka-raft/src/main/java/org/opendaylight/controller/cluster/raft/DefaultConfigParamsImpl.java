@@ -41,7 +41,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      */
     private static final int ELECTION_TIME_MAX_VARIANCE = 100;
 
-    private static final int SNAPSHOT_CHUNK_SIZE = 2048 * 1000; //2MB
+    private static final int SNAPSHOT_CHUNK_SIZE = 480 * 1024; // 480KiB
 
 
     /**
@@ -95,9 +95,9 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.snapshotBatchCount = snapshotBatchCount;
     }
 
-    public void setRecoverySnapshotIntervalSeconds(int recoverySnapshotInterval) {
+    public void setRecoverySnapshotIntervalSeconds(final int recoverySnapshotInterval) {
         checkArgument(recoverySnapshotInterval >= 0);
-        this.recoverySnapshotIntervalSeconds = recoverySnapshotInterval;
+        recoverySnapshotIntervalSeconds = recoverySnapshotInterval;
     }
 
     public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
@@ -163,7 +163,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public int getRecoverySnapshotIntervalSeconds() {
-        return this.recoverySnapshotIntervalSeconds;
+        return recoverySnapshotIntervalSeconds;
     }
 
     @Override

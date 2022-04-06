@@ -65,7 +65,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS =
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
-    public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
+    public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 480 * 1024; // 480KiB
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
     public static final ExportOnRecovery DEFAULT_EXPORT_ON_RECOVERY = ExportOnRecovery.Off;
     public static final String DEFAULT_RECOVERY_EXPORT_BASE_DIR = "persistence-export";
@@ -127,34 +127,34 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private DatastoreContext(final DatastoreContext other) {
-        this.shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
-        this.operationTimeoutInMillis = other.operationTimeoutInMillis;
-        this.dataStoreMXBeanType = other.dataStoreMXBeanType;
-        this.shardTransactionCommitTimeoutInSeconds = other.shardTransactionCommitTimeoutInSeconds;
-        this.shardTransactionCommitQueueCapacity = other.shardTransactionCommitQueueCapacity;
-        this.shardInitializationTimeout = other.shardInitializationTimeout;
-        this.shardLeaderElectionTimeout = other.shardLeaderElectionTimeout;
-        this.initialSettleTimeoutMultiplier = other.initialSettleTimeoutMultiplier;
-        this.persistent = other.persistent;
-        this.snapshotOnRootOverwrite = other.snapshotOnRootOverwrite;
-        this.configurationReader = other.configurationReader;
-        this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
-        this.dataStoreName = other.dataStoreName;
-        this.logicalStoreType = other.logicalStoreType;
-        this.storeRoot = other.storeRoot;
-        this.shardBatchedModificationCount = other.shardBatchedModificationCount;
-        this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
-        this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
-        this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
-        this.shardManagerPersistenceId = other.shardManagerPersistenceId;
-        this.useTellBasedProtocol = other.useTellBasedProtocol;
-        this.backendAlivenessTimerInterval = other.backendAlivenessTimerInterval;
-        this.requestTimeout = other.requestTimeout;
-        this.noProgressTimeout = other.noProgressTimeout;
-        this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
-        this.useLz4Compression = other.useLz4Compression;
-        this.exportOnRecovery = other.exportOnRecovery;
-        this.recoveryExportBaseDir = other.recoveryExportBaseDir;
+        shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
+        operationTimeoutInMillis = other.operationTimeoutInMillis;
+        dataStoreMXBeanType = other.dataStoreMXBeanType;
+        shardTransactionCommitTimeoutInSeconds = other.shardTransactionCommitTimeoutInSeconds;
+        shardTransactionCommitQueueCapacity = other.shardTransactionCommitQueueCapacity;
+        shardInitializationTimeout = other.shardInitializationTimeout;
+        shardLeaderElectionTimeout = other.shardLeaderElectionTimeout;
+        initialSettleTimeoutMultiplier = other.initialSettleTimeoutMultiplier;
+        persistent = other.persistent;
+        snapshotOnRootOverwrite = other.snapshotOnRootOverwrite;
+        configurationReader = other.configurationReader;
+        transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
+        dataStoreName = other.dataStoreName;
+        logicalStoreType = other.logicalStoreType;
+        storeRoot = other.storeRoot;
+        shardBatchedModificationCount = other.shardBatchedModificationCount;
+        writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
+        shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
+        transactionDebugContextEnabled = other.transactionDebugContextEnabled;
+        shardManagerPersistenceId = other.shardManagerPersistenceId;
+        useTellBasedProtocol = other.useTellBasedProtocol;
+        backendAlivenessTimerInterval = other.backendAlivenessTimerInterval;
+        requestTimeout = other.requestTimeout;
+        noProgressTimeout = other.noProgressTimeout;
+        initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
+        useLz4Compression = other.useLz4Compression;
+        exportOnRecovery = other.exportOnRecovery;
+        recoveryExportBaseDir = other.recoveryExportBaseDir;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -229,7 +229,7 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     public boolean isSnapshotOnRootOverwrite() {
-        return this.snapshotOnRootOverwrite;
+        return snapshotOnRootOverwrite;
     }
 
     public AkkaConfigurationReader getConfigurationReader() {
