@@ -17,13 +17,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
-import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
+import java.util.stream.Stream;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.client.ReconnectForwarder;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     private volatile Throwable aborted;
 
     AbstractDataStoreClientBehavior(final ClientActorContext context,
-            final BackendInfoResolver<ShardBackendInfo> resolver) {
+            final AbstractShardBackendResolver resolver) {
         super(context, resolver);
         singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
     }
@@ -224,4 +225,10 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     }
 
     abstract Long resolveShardForPath(YangInstanceIdentifier path);
+
+    abstract Stream<Long> resolveAllShards();
+
+    final ActorUtils actorUtils() {
+        return ((AbstractShardBackendResolver) resolver()).actorUtils();
+    }
 }

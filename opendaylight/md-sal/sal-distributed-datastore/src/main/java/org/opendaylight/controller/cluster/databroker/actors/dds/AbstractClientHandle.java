@@ -15,6 +15,7 @@ import com.google.common.base.MoreObjects;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -107,10 +108,16 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     final T ensureProxy(final YangInstanceIdentifier path) {
-        final State<T> local = getState();
-        final Long shard = parent.resolveShardForPath(path);
+        return ensureProxy(getState(), parent.resolveShardForPath(path));
+    }
 
-        return local.computeIfAbsent(shard, this::createProxy);
+    private T ensureProxy(final State<T> localState, final Long shard) {
+        return localState.computeIfAbsent(shard, this::createProxy);
+    }
+
+    final Stream<T> ensureAllProxies() {
+        final var local = getState();
+        return parent.resolveAllShards().map(shard -> ensureProxy(local, shard));
     }
 
     final AbstractClientHistory parent() {

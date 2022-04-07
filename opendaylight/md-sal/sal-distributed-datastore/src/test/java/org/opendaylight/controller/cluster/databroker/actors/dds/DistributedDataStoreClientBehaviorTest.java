@@ -8,10 +8,12 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import java.util.Set;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
+import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -20,11 +22,16 @@ public class DistributedDataStoreClientBehaviorTest extends AbstractDataStoreCli
     @Override
     protected AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
                                                              final ActorUtils context) {
-        final ShardStrategyFactory factory = mock(ShardStrategyFactory.class);
         final ShardStrategy strategy = mock(ShardStrategy.class);
-        when(strategy.findShard(any())).thenReturn(SHARD);
-        when(factory.getStrategy(any())).thenReturn(strategy);
-        when(context.getShardStrategyFactory()).thenReturn(factory);
+        doReturn(SHARD).when(strategy).findShard(any());
+        final ShardStrategyFactory factory = mock(ShardStrategyFactory.class);
+        doReturn(strategy).when(factory).getStrategy(any());
+        doReturn(factory).when(context).getShardStrategyFactory();
+
+        final Configuration config = mock(Configuration.class);
+        doReturn(Set.of(SHARD)).when(config).getAllShardNames();
+        doReturn(config).when(context).getConfiguration();
+
         return new DistributedDataStoreClientBehavior(clientContext, context);
     }
 }

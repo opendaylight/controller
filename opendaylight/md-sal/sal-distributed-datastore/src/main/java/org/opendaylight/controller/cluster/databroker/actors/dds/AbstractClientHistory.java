@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
+import java.util.stream.Stream;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -31,6 +32,7 @@ import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryReq
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainClosedException;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -115,6 +117,14 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     final Long resolveShardForPath(final YangInstanceIdentifier path) {
         return client.resolveShardForPath(path);
+    }
+
+    final Stream<Long> resolveAllShards() {
+        return client.resolveAllShards();
+    }
+
+    final ActorUtils actorUtils() {
+        return client.actorUtils();
     }
 
     @Override
