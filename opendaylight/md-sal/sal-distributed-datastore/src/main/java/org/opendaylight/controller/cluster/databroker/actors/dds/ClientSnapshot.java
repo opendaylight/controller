@@ -32,7 +32,12 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
     }
 
     public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
-        return ensureSnapshotProxy(path).read(path);
+        return path.isEmpty() ? readRoot() : ensureSnapshotProxy(path).read(path);
+    }
+
+    private FluentFuture<Optional<NormalizedNode>> readRoot() {
+        // FIXME: implement this
+        throw new UnsupportedOperationException();
     }
 
     @Override

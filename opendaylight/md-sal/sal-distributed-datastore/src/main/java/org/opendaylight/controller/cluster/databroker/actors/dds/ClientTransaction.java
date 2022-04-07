@@ -8,15 +8,18 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -55,28 +58,69 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         super(parent, transactionId);
     }
 
-    private AbstractProxyTransaction ensureTransactionProxy(final YangInstanceIdentifier path) {
-        return ensureProxy(path);
-    }
-
     public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
         return ensureTransactionProxy(path).exists(path);
     }
 
     public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
-        return ensureTransactionProxy(path).read(path);
+        return path.isEmpty() ? readRoot() : ensureTransactionProxy(path).read(path);
+    }
+
+    private FluentFuture<Optional<NormalizedNode>> readRoot() {
+        // FIXME: implement this
+        throw new UnsupportedOperationException();
     }
 
     public void delete(final YangInstanceIdentifier path) {
-        ensureTransactionProxy(path).delete(path);
+        if (path.isEmpty()) {
+            deleteRoot();
+        } else {
+            ensureTransactionProxy(path).delete(path);
+        }
+    }
+
+    private void deleteRoot() {
+        // FIXME: implement this
+        throw new UnsupportedOperationException();
     }
 
     public void merge(final YangInstanceIdentifier path, final NormalizedNode data) {
-        ensureTransactionProxy(path).merge(path, data);
+        if (path.isEmpty()) {
+            mergeRoot(checkRootContainer(data));
+        } else {
+            ensureTransactionProxy(path).merge(path, data);
+        }
+    }
+
+    private void mergeRoot(final @NonNull ContainerNode data) {
+        // FIXME: implement this
+        throw new UnsupportedOperationException();
     }
 
     public void write(final YangInstanceIdentifier path, final NormalizedNode data) {
-        ensureTransactionProxy(path).write(path, data);
+        if (path.isEmpty()) {
+            writeRoot(checkRootContainer(data));
+        } else {
+            ensureTransactionProxy(path).write(path, data);
+        }
+    }
+
+    private void writeRoot(final @NonNull ContainerNode data) {
+        // FIXME: implement this
+        throw new UnsupportedOperationException();
+    }
+
+    private static @NonNull ContainerNode checkRootContainer(final NormalizedNode data) {
+        final var nonnull = requireNonNull(data);
+        if (!(nonnull instanceof ContainerNode)) {
+            throw new IllegalArgumentException("Datastore root must be a ContainerNode, not "
+                + data.contract().getSimpleName());
+        }
+        return (ContainerNode) nonnull;
+    }
+
+    private AbstractProxyTransaction ensureTransactionProxy(final YangInstanceIdentifier path) {
+        return ensureProxy(path);
     }
 
     public DOMStoreThreePhaseCommitCohort ready() {
