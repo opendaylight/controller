@@ -13,14 +13,13 @@ import static com.google.common.base.Verify.verifyNotNull;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.OnComplete;
 import akka.util.Timeout;
-import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableBiMap.Builder;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForShardAvailabilityChanges;
@@ -52,7 +51,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     @GuardedBy("this")
     private long nextShard = 1;
 
-    private volatile BiMap<String, Long> shards = ImmutableBiMap.of(DefaultShardStrategy.DEFAULT_SHARD, 0L);
+    private volatile ImmutableBiMap<String, Long> shards = ImmutableBiMap.of(DefaultShardStrategy.DEFAULT_SHARD, 0L);
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     ModuleShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
@@ -64,7 +63,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
 
         shardAvailabilityChangesRegFuture.onComplete(new OnComplete<Registration>() {
             @Override
-            public void onComplete(Throwable failure, Registration reply) {
+            public void onComplete(final Throwable failure, final Registration reply) {
                 if (failure != null) {
                     LOG.error("RegisterForShardAvailabilityChanges failed", failure);
                 }
@@ -72,7 +71,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
         }, ExecutionContexts.global());
     }
 
-    private void onShardAvailabilityChange(String shardName) {
+    private void onShardAvailabilityChange(final String shardName) {
         LOG.debug("onShardAvailabilityChange for {}", shardName);
 
         Long cookie = shards.get(shardName);
@@ -86,21 +85,16 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
 
     Long resolveShardForPath(final YangInstanceIdentifier path) {
         final String shardName = actorUtils().getShardStrategyFactory().getStrategy(path).findShard(path);
+        final Long cookie = shards.get(shardName);
+        return cookie != null ? cookie : populateShard(shardName);
+    }
+
+    private synchronized @NonNull Long populateShard(final String shardName) {
         Long cookie = shards.get(shardName);
         if (cookie == null) {
-            synchronized (this) {
-                cookie = shards.get(shardName);
-                if (cookie == null) {
-                    cookie = nextShard++;
-
-                    Builder<String, Long> builder = ImmutableBiMap.builder();
-                    builder.putAll(shards);
-                    builder.put(shardName, cookie);
-                    shards = builder.build();
-                }
-            }
+            cookie = nextShard++;
+            shards = ImmutableBiMap.<String, Long>builder().putAll(shards).put(shardName, cookie).build();
         }
-
         return cookie;
     }
 
@@ -174,14 +168,14 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     public void close() {
         shardAvailabilityChangesRegFuture.onComplete(new OnComplete<Registration>() {
             @Override
-            public void onComplete(Throwable failure, Registration reply) {
+            public void onComplete(final Throwable failure, final Registration reply) {
                 reply.close();
             }
         }, ExecutionContexts.global());
     }
 
     @Override
-    public String resolveCookieName(Long cookie) {
+    public String resolveCookieName(final Long cookie) {
         return verifyNotNull(shards.inverse().get(cookie), "Unexpected null cookie: %s", cookie);
     }
 }
