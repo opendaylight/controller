@@ -46,26 +46,26 @@ public final class NormalizedNodeAggregator {
     }
 
     private Optional<NormalizedNode> aggregate() throws DataValidationFailedException {
-        return combine().getRootNode();
-    }
-
-    private NormalizedNodeAggregator combine() throws DataValidationFailedException {
         final DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        boolean nodePresent = false;
 
         for (final Optional<NormalizedNode> node : nodes) {
             if (node.isPresent()) {
-                mod.merge(rootIdentifier, node.get());
+                mod.merge(rootIdentifier, node.orElseThrow());
+                nodePresent = true;
             }
         }
+
+        if (!nodePresent) {
+            return Optional.empty();
+        }
+
+
         mod.ready();
         dataTree.validate(mod);
         final DataTreeCandidate candidate = dataTree.prepare(mod);
         dataTree.commit(candidate);
 
-        return this;
-    }
-
-    private Optional<NormalizedNode> getRootNode() {
         return dataTree.takeSnapshot().readNode(rootIdentifier);
     }
 }
