@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 
 import akka.actor.ActorRef;
@@ -136,14 +136,15 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     public void testGetConnection() {
         //set up data tree mock
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
-        when(modification.readNode(YangInstanceIdentifier.empty())).thenReturn(Optional.empty());
+        doReturn(Optional.empty()).when(modification).readNode(YangInstanceIdentifier.empty());
         final DataTreeSnapshot snapshot = mock(DataTreeSnapshot.class);
-        when(snapshot.newModification()).thenReturn(modification);
+        doReturn(modification).when(snapshot).newModification();
         final DataTree dataTree = mock(DataTree.class);
-        when(dataTree.takeSnapshot()).thenReturn(snapshot);
+        doReturn(snapshot).when(dataTree).takeSnapshot();
 
         final TestProbe backendProbe = new TestProbe(system, "backend");
         final long shard = 0L;
+
         behavior.createTransaction().read(YangInstanceIdentifier.empty());
         final AbstractClientConnection<ShardBackendInfo> connection = behavior.getConnection(shard);
         //check cached connection for same shard
@@ -169,8 +170,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
         promise.success(shardInfo);
-        when(mock.findPrimaryShardAsync(SHARD)).thenReturn(promise.future());
+        doReturn(promise.future()).when(mock).findPrimaryShardAsync(SHARD);
         return mock;
     }
-
 }

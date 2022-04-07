@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionCommitSucc
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
@@ -37,7 +38,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
             .node(QName.create("ns-1", "node-1"))
             .build();
     private static final ContainerNode DATA = Builders.containerBuilder()
-            .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(PATH.getLastPathArgument().getNodeType()))
+            .withNodeIdentifier(NodeIdentifier.create(PATH.getLastPathArgument().getNodeType()))
             .build();
 
     @Mock

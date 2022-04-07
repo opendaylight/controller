@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import java.util.stream.Stream;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -18,7 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 final class SimpleDataStoreClientBehavior extends AbstractDataStoreClientBehavior {
     // Pre-boxed instance
-    private static final Long ZERO = Long.valueOf(0);
+    private static final Long ZERO = 0L;
 
     private SimpleDataStoreClientBehavior(final ClientActorContext context,
             final SimpleShardBackendResolver resolver) {
@@ -33,5 +34,10 @@ final class SimpleDataStoreClientBehavior extends AbstractDataStoreClientBehavio
     @Override
     Long resolveShardForPath(final YangInstanceIdentifier path) {
         return ZERO;
+    }
+
+    @Override
+    Stream<Long> resolveAllShards() {
+        return Stream.of(ZERO);
     }
 }
