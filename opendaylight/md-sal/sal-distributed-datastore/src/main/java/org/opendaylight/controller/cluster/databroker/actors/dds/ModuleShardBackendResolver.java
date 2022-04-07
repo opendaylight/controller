@@ -18,6 +18,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
@@ -84,7 +85,16 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     }
 
     Long resolveShardForPath(final YangInstanceIdentifier path) {
-        final String shardName = actorUtils().getShardStrategyFactory().getStrategy(path).findShard(path);
+        return resolveCookie(actorUtils().getShardStrategyFactory().getStrategy(path).findShard(path));
+    }
+
+    Stream<Long> resolveAllShards() {
+        return actorUtils().getConfiguration().getAllShardNames().stream()
+            .sorted()
+            .map(this::resolveCookie);
+    }
+
+    private @NonNull Long resolveCookie(final String shardName) {
         final Long cookie = shards.get(shardName);
         return cookie != null ? cookie : populateShard(shardName);
     }

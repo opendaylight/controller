@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import java.util.function.Function;
+import java.util.stream.Stream;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -18,12 +18,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * @author Robert Varga
  */
 final class DistributedDataStoreClientBehavior extends AbstractDataStoreClientBehavior {
-    private final Function<YangInstanceIdentifier, Long> pathToShard;
+    private final ModuleShardBackendResolver resolver;
 
     private DistributedDataStoreClientBehavior(final ClientActorContext context,
             final ModuleShardBackendResolver resolver) {
         super(context, resolver);
-        pathToShard = resolver::resolveShardForPath;
+        this.resolver = resolver;
     }
 
     DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorUtils actorUtils) {
@@ -32,7 +32,12 @@ final class DistributedDataStoreClientBehavior extends AbstractDataStoreClientBe
 
     @Override
     Long resolveShardForPath(final YangInstanceIdentifier path) {
-        return pathToShard.apply(path);
+        return resolver.resolveShardForPath(path);
+    }
+
+    @Override
+    Stream<Long> resolveAllShards() {
+        return resolver.resolveAllShards();
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.RootScatterGather;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -28,19 +29,20 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
     }
 
     public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
-        return ensureSnapshotProxy(path).exists(path);
+        return ensureProxy(path).exists(path);
     }
 
     public FluentFuture<Optional<NormalizedNode>> read(final YangInstanceIdentifier path) {
-        return ensureSnapshotProxy(path).read(path);
+        return path.isEmpty() ? readRoot() : ensureProxy(path).read(path);
+    }
+
+    private FluentFuture<Optional<NormalizedNode>> readRoot() {
+        return RootScatterGather.gather(parent().actorUtils(), ensureAllProxies()
+            .map(proxy -> proxy.read(YangInstanceIdentifier.empty())));
     }
 
     @Override
     final AbstractProxyTransaction createProxy(final Long shard) {
         return parent().createSnapshotProxy(getIdentifier(), shard);
-    }
-
-    private AbstractProxyTransaction ensureSnapshotProxy(final YangInstanceIdentifier path) {
-        return ensureProxy(path);
     }
 }
