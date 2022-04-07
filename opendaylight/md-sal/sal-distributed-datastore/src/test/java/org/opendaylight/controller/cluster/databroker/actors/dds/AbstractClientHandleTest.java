@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
@@ -44,11 +45,13 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import scala.concurrent.Promise;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
@@ -87,7 +90,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         final InternalCommand<ShardBackendInfo> command = clientContextProbe.expectMsgClass(InternalCommand.class);
         command.execute(client);
         //data tree mock
-        when(dataTree.takeSnapshot()).thenReturn(dataTreeSnapshot);
+        doReturn(dataTreeSnapshot).when(dataTree).takeSnapshot();
 
         handle = createHandle(parent);
     }
@@ -201,7 +204,13 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
         promise.success(shardInfo);
-        when(mock.findPrimaryShardAsync(any())).thenReturn(promise.future());
+        doReturn(promise.future()).when(mock).findPrimaryShardAsync(any());
+
+        final EffectiveModelContext context = mock(EffectiveModelContext.class);
+        doCallRealMethod().when(context).getQName();
+        doReturn(context).when(mock).getSchemaContext();
+        doReturn(DatastoreContext.newBuilder().build()).when(mock).getDatastoreContext();
+
         return mock;
     }
 
