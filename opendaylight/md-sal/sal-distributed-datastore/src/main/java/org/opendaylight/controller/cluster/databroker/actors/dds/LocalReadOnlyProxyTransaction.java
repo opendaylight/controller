@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -18,6 +19,7 @@ import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequ
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
@@ -50,6 +52,16 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     @Override
     DataTreeSnapshot readOnlyView() {
         return checkNotNull(snapshot, "Transaction %s is DONE", getIdentifier());
+    }
+
+    @Override
+    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+        return FluentFutures.immediateBooleanFluentFuture(readOnlyView().readNode(path).isPresent());
+    }
+
+    @Override
+    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+        return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path));
     }
 
     @Override

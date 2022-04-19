@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -28,7 +27,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
-import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -74,16 +72,6 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     abstract void replayModifyTransactionRequest(ModifyTransactionRequest request,
             @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
-
-    @Override
-    final FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateBooleanFluentFuture(readOnlyView().readNode(path).isPresent());
-    }
-
-    @Override
-    final FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path));
-    }
 
     @Override
     final AbortLocalTransactionRequest abortRequest() {

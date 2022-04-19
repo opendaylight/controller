@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
@@ -33,6 +34,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -86,7 +88,16 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-        modification = (CursorAwareDataTreeModification) snapshot.newModification();
+
+        DataTreeModification mod;
+        try {
+            mod = snapshot.newModification();
+        } catch (IllegalArgumentException e) {
+            LOG.debug("Failed to instantiate modification for {}", identifier, e);
+            mod = null;
+            recordedFailure = e;
+        }
+        modification = (CursorAwareDataTreeModification) mod;
     }
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
@@ -103,6 +114,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     CursorAwareDataTreeSnapshot readOnlyView() {
         return getModification();
+    }
+
+    @Override
+    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+        return recordedFailure != null ? FluentFutures.immediateFailedFluentFuture(recordedFailure)
+            : FluentFutures.immediateBooleanFluentFuture(getModification().readNode(path).isPresent());
+    }
+
+    @Override
+    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+        return recordedFailure != null ? FluentFutures.immediateFailedFluentFuture(recordedFailure)
+            : FluentFutures.immediateFluentFuture(getModification().readNode(path));
     }
 
     @Override
