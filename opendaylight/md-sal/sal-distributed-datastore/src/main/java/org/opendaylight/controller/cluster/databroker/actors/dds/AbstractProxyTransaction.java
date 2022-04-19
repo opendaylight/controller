@@ -68,6 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
+// FIXME: sealed when we have JDK17+
 abstract class AbstractProxyTransaction implements Identifiable<TransactionIdentifier> {
     /**
      * Marker object used instead of read-type of requests, which are satisfied only once. This has a lower footprint
