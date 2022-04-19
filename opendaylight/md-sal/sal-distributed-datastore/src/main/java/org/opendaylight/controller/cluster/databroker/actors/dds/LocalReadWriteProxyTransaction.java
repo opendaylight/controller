@@ -91,10 +91,26 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
      */
     private Exception recordedFailure;
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
             final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-        modification = (CursorAwareDataTreeModification) snapshot.newModification();
+
+        if (snapshot instanceof FailedDataTreeModification) {
+            final var failed = (FailedDataTreeModification) snapshot;
+            recordedFailure = failed.cause();
+            modification = failed;
+        } else {
+            CursorAwareDataTreeModification mod;
+            try {
+                mod = (CursorAwareDataTreeModification) snapshot.newModification();
+            } catch (Exception e) {
+                LOG.debug("Failed to instantiate modification for {}", identifier, e);
+                recordedFailure = e;
+                mod = new FailedDataTreeModification(snapshot.getEffectiveModelContext(), e);
+            }
+            modification = mod;
+        }
     }
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
@@ -406,8 +422,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         // Rebase old modification on new data tree.
         final CursorAwareDataTreeModification mod = getModification();
 
-        try (DataTreeModificationCursor cursor = mod.openCursor()) {
-            request.getModification().applyToCursor(cursor);
+        if (!(mod instanceof FailedDataTreeModification)) {
+            request.getDelayedFailure().ifPresentOrElse(failure -> {
+                if (recordedFailure == null) {
+                    recordedFailure = failure;
+                } else {
+                    recordedFailure.addSuppressed(failure);
+                }
+            }, () -> {
+                try (DataTreeModificationCursor cursor = mod.openCursor()) {
+                    request.getModification().applyToCursor(cursor);
+                }
+            });
         }
 
         if (markSealed()) {
