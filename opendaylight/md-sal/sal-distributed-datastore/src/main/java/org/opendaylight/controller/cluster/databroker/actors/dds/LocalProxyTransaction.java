@@ -77,7 +77,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     final FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path).isPresent());
+        return FluentFutures.immediateBooleanFluentFuture(readOnlyView().readNode(path).isPresent());
     }
 
     @Override
