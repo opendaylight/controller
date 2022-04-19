@@ -220,7 +220,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         return Optional.of(b.build());
     }
 
-    DataTreeSnapshot getSnapshot() {
+    CursorAwareDataTreeSnapshot getSnapshot() {
         Preconditions.checkState(sealedModification != null, "Proxy %s is not sealed yet", getIdentifier());
         return sealedModification;
     }
