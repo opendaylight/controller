@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.access.commands.ReadTransactionSucces
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
+// FIXME: sealed when we have JDK17+
 abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalProxyTransaction.class);
 
@@ -77,12 +79,24 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateBooleanFluentFuture(readOnlyView().readNode(path).isPresent());
+        final boolean result;
+        try {
+            result = readOnlyView().readNode(path).isPresent();
+        } catch (FailedDataTreeModificationException e) {
+            return FluentFutures.immediateFailedFluentFuture(e);
+        }
+        return FluentFutures.immediateBooleanFluentFuture(result);
     }
 
     @Override
     FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path));
+        final Optional<NormalizedNode> result;
+        try {
+            result = readOnlyView().readNode(path);
+        } catch (FailedDataTreeModificationException e) {
+            return FluentFutures.immediateFailedFluentFuture(e);
+        }
+        return FluentFutures.immediateFluentFuture(result);
     }
 
     @Override
@@ -105,18 +119,28 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         // listeners, which we do not want to execute while we are reconnecting.
         if (request instanceof ReadTransactionRequest) {
             if (callback != null) {
-                final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
-                final Optional<NormalizedNode> result = readOnlyView().readNode(path);
-                executeInActor(() -> callback.accept(new ReadTransactionSuccess(request.getTarget(),
-                    request.getSequence(), result)));
+                Response<?, ?> response;
+                try {
+                    response = new ReadTransactionSuccess(request.getTarget(), request.getSequence(),
+                        readOnlyView().readNode(((ReadTransactionRequest) request).getPath()));
+                } catch (FailedDataTreeModificationException ex) {
+                    response = request.toRequestFailure(new RuntimeRequestException("Failed to access data", ex));
+                }
+                final var resp = response;
+                executeInActor(() -> callback.accept(resp));
             }
             return true;
         } else if (request instanceof ExistsTransactionRequest) {
             if (callback != null) {
-                final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
-                final boolean result = readOnlyView().readNode(path).isPresent();
-                executeInActor(() -> callback.accept(new ExistsTransactionSuccess(request.getTarget(),
-                    request.getSequence(), result)));
+                Response<?, ?> response;
+                try {
+                    response = new ExistsTransactionSuccess(request.getTarget(), request.getSequence(),
+                        readOnlyView().readNode(((ReadTransactionRequest) request).getPath()).isPresent());
+                } catch (FailedDataTreeModificationException ex) {
+                    response = request.toRequestFailure(new RuntimeRequestException("Failed to access data", ex));
+                }
+                final var resp = response;
+                executeInActor(() -> callback.accept(resp));
             }
             return true;
         } else {

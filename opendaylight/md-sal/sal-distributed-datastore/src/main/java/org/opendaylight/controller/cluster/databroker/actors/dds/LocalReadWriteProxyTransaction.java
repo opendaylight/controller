@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -85,10 +87,26 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
      */
     private Exception recordedFailure;
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
-        final DataTreeSnapshot snapshot) {
+            final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-        modification = (CursorAwareDataTreeModification) snapshot.newModification();
+
+        if (snapshot instanceof FailedDataTreeModification) {
+            final var failed = (FailedDataTreeModification) snapshot;
+            recordedFailure = failed.cause();
+            modification = failed;
+        } else {
+            CursorAwareDataTreeModification mod;
+            try {
+                mod = (CursorAwareDataTreeModification) snapshot.newModification();
+            } catch (Exception e) {
+                LOG.debug("Failed to instantiate modification for {}", identifier, e);
+                recordedFailure = e;
+                mod = new FailedDataTreeModification(snapshot.getEffectiveModelContext(), e);
+            }
+            modification = mod;
+        }
     }
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
@@ -191,7 +209,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     private void sealModification() {
-        Preconditions.checkState(sealedModification == null, "Transaction %s is already sealed", this);
+        checkState(sealedModification == null, "Transaction %s is already sealed", this);
         final CursorAwareDataTreeModification mod = getModification();
         mod.ready();
         sealedModification = mod;
@@ -235,7 +253,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     CursorAwareDataTreeSnapshot getSnapshot() {
-        Preconditions.checkState(sealedModification != null, "Proxy %s is not sealed yet", getIdentifier());
+        checkState(sealedModification != null, "Proxy %s is not sealed yet", getIdentifier());
         return sealedModification;
     }
 
@@ -268,7 +286,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
         final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
-            Verify.verify(callback != null, "Request %s has null callback", request);
+            verify(callback != null, "Request %s has null callback", request);
             if (markSealed()) {
                 sealOnly();
             }
@@ -350,7 +368,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     private static LocalReadWriteProxyTransaction verifyLocalReadWrite(final LocalProxyTransaction successor) {
-        Verify.verify(successor instanceof LocalReadWriteProxyTransaction, "Unexpected successor %s", successor);
+        verify(successor instanceof LocalReadWriteProxyTransaction, "Unexpected successor %s", successor);
         return (LocalReadWriteProxyTransaction) successor;
     }
 
@@ -371,8 +389,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         if (closedException != null) {
             throw closedException.get();
         }
-
-        return Preconditions.checkNotNull(modification, "Transaction %s is DONE", getIdentifier());
+        return checkNotNull(modification, "Transaction %s is DONE", getIdentifier());
     }
 
     private void sendRebased(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
