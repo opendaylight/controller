@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.access.commands.ReadTransactionSucces
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
+// FIXME: sealed when we have JDK17+
 abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalProxyTransaction.class);
 
@@ -77,12 +79,24 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateBooleanFluentFuture(readOnlyView().readNode(path).isPresent());
+        final boolean result;
+        try {
+            result = readOnlyView().readNode(path).isPresent();
+        } catch (FailedDataTreeModificationException e) {
+            return FluentFutures.immediateFailedFluentFuture(e);
+        }
+        return FluentFutures.immediateBooleanFluentFuture(result);
     }
 
     @Override
     FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
-        return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path));
+        final Optional<NormalizedNode> result;
+        try {
+            result = readOnlyView().readNode(path);
+        } catch (FailedDataTreeModificationException e) {
+            return FluentFutures.immediateFailedFluentFuture(e);
+        }
+        return FluentFutures.immediateFluentFuture(result);
     }
 
     @Override
@@ -140,14 +154,22 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @NonNull Response<?, ?> handleExistsRequest(final @NonNull DataTreeSnapshot readOnlyView,
             final @NonNull ExistsTransactionRequest request) {
-        return new ExistsTransactionSuccess(request.getTarget(), request.getSequence(),
-            readOnlyView.readNode(request.getPath()).isPresent());
+        try {
+            return new ExistsTransactionSuccess(request.getTarget(), request.getSequence(),
+                readOnlyView.readNode(request.getPath()).isPresent());
+        } catch (FailedDataTreeModificationException ex) {
+            return request.toRequestFailure(new RuntimeRequestException("Failed to access data", ex));
+        }
     }
 
     @NonNull Response<?, ?> handleReadRequest(final @NonNull DataTreeSnapshot readOnlyView,
             final @NonNull ReadTransactionRequest request) {
-        return new ReadTransactionSuccess(request.getTarget(), request.getSequence(),
-            readOnlyView.readNode(request.getPath()));
+        try {
+            return new ReadTransactionSuccess(request.getTarget(), request.getSequence(),
+                readOnlyView.readNode(request.getPath()));
+        } catch (FailedDataTreeModificationException ex) {
+            return request.toRequestFailure(new RuntimeRequestException("Failed to access data", ex));
+        }
     }
 
     private boolean handleReadRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {

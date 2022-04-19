@@ -90,10 +90,26 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
      */
     private Exception recordedFailure;
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
-        final DataTreeSnapshot snapshot) {
+            final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-        modification = (CursorAwareDataTreeModification) snapshot.newModification();
+
+        if (snapshot instanceof FailedDataTreeModification) {
+            final var failed = (FailedDataTreeModification) snapshot;
+            recordedFailure = failed.cause();
+            modification = failed;
+        } else {
+            CursorAwareDataTreeModification mod;
+            try {
+                mod = (CursorAwareDataTreeModification) snapshot.newModification();
+            } catch (Exception e) {
+                LOG.debug("Failed to instantiate modification for {}", identifier, e);
+                recordedFailure = e;
+                mod = new FailedDataTreeModification(snapshot.getEffectiveModelContext(), e);
+            }
+            modification = mod;
+        }
     }
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
