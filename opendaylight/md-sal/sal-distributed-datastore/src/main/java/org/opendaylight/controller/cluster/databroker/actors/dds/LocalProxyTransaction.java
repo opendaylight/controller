@@ -107,9 +107,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
             final Optional<NormalizedNode> result = readOnlyView().readNode(path);
             if (callback != null) {
-                // XXX: FB does not see that callback is final, on stack and has be check for non-null.
-                final Consumer<Response<?, ?>> fbIsStupid = requireNonNull(callback);
-                executeInActor(() -> fbIsStupid.accept(new ReadTransactionSuccess(request.getTarget(),
+                executeInActor(() -> callback.accept(new ReadTransactionSuccess(request.getTarget(),
                     request.getSequence(), result)));
             }
             return true;
@@ -117,9 +115,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
             final boolean result = readOnlyView().readNode(path).isPresent();
             if (callback != null) {
-                // XXX: FB does not see that callback is final, on stack and has be check for non-null.
-                final Consumer<Response<?, ?>> fbIsStupid = requireNonNull(callback);
-                executeInActor(() -> fbIsStupid.accept(new ExistsTransactionSuccess(request.getTarget(),
+                executeInActor(() -> callback.accept(new ExistsTransactionSuccess(request.getTarget(),
                     request.getSequence(), result)));
             }
             return true;
