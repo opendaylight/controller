@@ -11,16 +11,19 @@ import static java.util.Objects.requireNonNull;
 
 import akka.japi.Procedure;
 import akka.persistence.AbstractPersistentActor;
+import akka.persistence.DeleteMessagesSuccess;
+import akka.persistence.DeleteSnapshotsSuccess;
+import akka.persistence.JournalProtocol;
+import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
 
 /**
  * A DataPersistenceProvider implementation with persistence enabled.
  */
 public class PersistentDataProvider implements DataPersistenceProvider {
-
     private final AbstractPersistentActor persistentActor;
 
-    public PersistentDataProvider(AbstractPersistentActor persistentActor) {
+    public PersistentDataProvider(final AbstractPersistentActor persistentActor) {
         this.persistentActor = requireNonNull(persistentActor, "persistentActor can't be null");
     }
 
@@ -30,32 +33,42 @@ public class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(T entry, Procedure<T> procedure) {
+    public <T> void persist(final T entry, final Procedure<T> procedure) {
         persistentActor.persist(entry, procedure);
     }
 
     @Override
-    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
         persistentActor.persistAsync(entry, procedure);
     }
 
     @Override
-    public void saveSnapshot(Object snapshot) {
+    public void saveSnapshot(final Object snapshot) {
         persistentActor.saveSnapshot(snapshot);
     }
 
     @Override
-    public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
         persistentActor.deleteSnapshots(criteria);
     }
 
     @Override
-    public void deleteMessages(long sequenceNumber) {
+    public void deleteMessages(final long sequenceNumber) {
         persistentActor.deleteMessages(sequenceNumber);
     }
 
     @Override
     public long getLastSequenceNumber() {
         return persistentActor.lastSequenceNr();
+    }
+
+    @Override
+    public boolean handleJournalResponse(final JournalProtocol.Response response) {
+        return response instanceof DeleteMessagesSuccess;
+    }
+
+    @Override
+    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
+        return response instanceof DeleteSnapshotsSuccess;
     }
 }

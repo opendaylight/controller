@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster;
 
 import akka.japi.Procedure;
+import akka.persistence.JournalProtocol;
+import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
 
 /**
@@ -18,11 +20,11 @@ import akka.persistence.SnapshotSelectionCriteria;
 public class DelegatingPersistentDataProvider implements DataPersistenceProvider {
     private DataPersistenceProvider delegate;
 
-    public DelegatingPersistentDataProvider(DataPersistenceProvider delegate) {
+    public DelegatingPersistentDataProvider(final DataPersistenceProvider delegate) {
         this.delegate = delegate;
     }
 
-    public void setDelegate(DataPersistenceProvider delegate) {
+    public void setDelegate(final DataPersistenceProvider delegate) {
         this.delegate = delegate;
     }
 
@@ -36,32 +38,42 @@ public class DelegatingPersistentDataProvider implements DataPersistenceProvider
     }
 
     @Override
-    public <T> void persist(T entry, Procedure<T> procedure) {
+    public <T> void persist(final T entry, final Procedure<T> procedure) {
         delegate.persist(entry, procedure);
     }
 
     @Override
-    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
         delegate.persistAsync(entry, procedure);
     }
 
     @Override
-    public void saveSnapshot(Object entry) {
+    public void saveSnapshot(final Object entry) {
         delegate.saveSnapshot(entry);
     }
 
     @Override
-    public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
         delegate.deleteSnapshots(criteria);
     }
 
     @Override
-    public void deleteMessages(long sequenceNumber) {
+    public void deleteMessages(final long sequenceNumber) {
         delegate.deleteMessages(sequenceNumber);
     }
 
     @Override
     public long getLastSequenceNumber() {
         return delegate.getLastSequenceNumber();
+    }
+
+    @Override
+    public boolean handleJournalResponse(final JournalProtocol.Response response) {
+        return delegate.handleJournalResponse(response);
+    }
+
+    @Override
+    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
+        return delegate.handleSnapshotResponse(response);
     }
 }
