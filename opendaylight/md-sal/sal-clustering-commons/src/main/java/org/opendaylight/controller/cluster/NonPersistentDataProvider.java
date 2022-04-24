@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster;
 import static java.util.Objects.requireNonNull;
 
 import akka.japi.Procedure;
+import akka.persistence.JournalProtocol;
+import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.slf4j.Logger;
@@ -69,5 +71,15 @@ public class NonPersistentDataProvider implements DataPersistenceProvider {
         } catch (Exception e) {
             LOG.error("An unexpected error occurred", e);
         }
+    }
+
+    @Override
+    public boolean handleJournalResponse(final JournalProtocol.Response response) {
+        return false;
+    }
+
+    @Override
+    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
+        return false;
     }
 }

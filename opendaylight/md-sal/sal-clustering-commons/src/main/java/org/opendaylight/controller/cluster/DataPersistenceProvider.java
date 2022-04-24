@@ -9,7 +9,10 @@
 package org.opendaylight.controller.cluster;
 
 import akka.japi.Procedure;
+import akka.persistence.JournalProtocol;
+import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * DataPersistenceProvider provides methods to persist data and is an abstraction of the akka-persistence persistence
@@ -70,4 +73,20 @@ public interface DataPersistenceProvider {
      * @return the last sequence number
      */
     long getLastSequenceNumber();
+
+    /**
+     * Receive and potentially handle a {@link JournalProtocol} response.
+     *
+     * @param response A {@link JournalProtocol} response
+     * @return {@code true} if the response was handled
+     */
+    boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
+
+    /**
+     * Receive and potentially handle a {@link SnapshotProtocol} response.
+     *
+     * @param response A {@link SnapshotProtocol} response
+     * @return {@code true} if the response was handled
+     */
+    boolean handleSnapshotResponse(SnapshotProtocol.@NonNull Response response);
 }
