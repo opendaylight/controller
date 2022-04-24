@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
 import java.io.Externalizable;
@@ -86,6 +87,11 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
     @Override
     public final int size() {
         return serialized.length;
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("identifier", identifier).add("size", size()).toString();
     }
 
     protected final Object writeReplace() {
