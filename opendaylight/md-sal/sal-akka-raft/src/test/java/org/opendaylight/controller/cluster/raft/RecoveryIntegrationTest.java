@@ -244,9 +244,9 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         reinstateLeaderActor();
 
-        assertEquals("Leader last index", 5 , leaderActor.underlyingActor().getReplicatedLog().lastIndex());
-        assertEquals(payload4, leaderActor.underlyingActor().getReplicatedLog().get(4).getData());
-        assertEquals(payload5, leaderActor.underlyingActor().getReplicatedLog().get(5).getData());
+        final var log = leaderActor.underlyingActor().getReplicatedLog();
+        assertEquals("Leader last index", 5, log.lastIndex());
+        assertEquals(List.of(payload4, payload5), List.of(log.get(4).getData(), log.get(5).getData()));
     }
 
     private void reinstateLeaderActor() {
