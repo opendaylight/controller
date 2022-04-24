@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
@@ -57,7 +58,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
 
     CommitTransactionPayload() {
-
+        // hidden on purpose
     }
 
     public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
@@ -124,6 +125,16 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> localCandidate = getCandidate();
         candidate = null;
         return localCandidate;
+    }
+
+    @Override
+    public final String toString() {
+        final var helper = MoreObjects.toStringHelper(this);
+        final var localCandidate = candidate;
+        if (localCandidate != null) {
+            helper.add("identifier", candidate.getKey());
+        }
+        return helper.add("size", size()).toString();
     }
 
     abstract void writeBytes(ObjectOutput out) throws IOException;
