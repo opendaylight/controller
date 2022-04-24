@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -17,7 +19,6 @@ import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
@@ -64,7 +65,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     @SuppressWarnings("unchecked")
     private void setupExecuteInActor() {
         doAnswer(inv -> {
-            inv.<InternalCommand<?>>getArgument(0).execute(mock(ClientActorBehavior.class));
+            inv.getArgument(0, InternalCommand.class).execute(mock(ClientActorBehavior.class));
             return null;
         }).when(context).executeInActor(any(InternalCommand.class));
     }
@@ -81,10 +82,10 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final ArgumentCaptor<Response<?, ?>> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
         final Response<?, ?> value = captor.getValue();
-        Assert.assertTrue(value instanceof ReadTransactionSuccess);
+        assertTrue(value instanceof ReadTransactionSuccess);
         final ReadTransactionSuccess success = (ReadTransactionSuccess) value;
-        Assert.assertTrue(success.getData().isPresent());
-        Assert.assertEquals(DATA_1, success.getData().get());
+        assertTrue(success.getData().isPresent());
+        assertEquals(DATA_1, success.getData().get());
     }
 
     @Test
@@ -99,16 +100,15 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final ArgumentCaptor<Response<?, ?>> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
         final Response<?, ?> value = captor.getValue();
-        Assert.assertTrue(value instanceof ExistsTransactionSuccess);
+        assertTrue(value instanceof ExistsTransactionSuccess);
         final ExistsTransactionSuccess success = (ExistsTransactionSuccess) value;
-        Assert.assertTrue(success.getExists());
+        assertTrue(success.getExists());
     }
 
     @Test
     public void testHandleForwardedRemotePurgeRequest() {
         final TestProbe probe = createProbe();
-        final TransactionPurgeRequest request =
-                new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
+        final TransactionPurgeRequest request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
         testHandleForwardedRemoteRequest(request);
     }
 
@@ -118,8 +118,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final TestProbe probe = createProbe();
         final AbortLocalTransactionRequest request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
-        Assert.assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.ABORT, modifyRequest.getPersistenceProtocol().get());
+        assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
+        assertEquals(PersistenceProtocol.ABORT, modifyRequest.getPersistenceProtocol().get());
     }
 
     @Override
@@ -132,8 +132,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
         verify(modification).applyToCursor(any());
-        Assert.assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.THREE_PHASE, modifyRequest.getPersistenceProtocol().get());
+        assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
+        assertEquals(PersistenceProtocol.THREE_PHASE, modifyRequest.getPersistenceProtocol().get());
         checkModifications(modifyRequest);
     }
 
@@ -152,7 +152,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     protected <R extends TransactionRequest<R>> R testForwardToLocal(final TransactionRequest<?> toForward,
-                                                                  final Class<R> expectedMessageClass) {
+                                                                     final Class<R> expectedMessageClass) {
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         final TransactionTester<LocalReadWriteProxyTransaction> transactionTester = createLocalProxy();
         final LocalReadWriteProxyTransaction successor = transactionTester.getTransaction();
