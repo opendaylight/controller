@@ -21,6 +21,7 @@ import io.atomix.storage.journal.SegmentedJournalWriter;
 import io.atomix.utils.serializer.Namespace;
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
@@ -110,15 +111,23 @@ final class DataJournalV0 extends DataJournal {
         for (int i = 0; i < count; ++i) {
             final long mark = writer.getLastIndex();
             final AtomicWrite request = message.getRequest(i);
+
+            final List<PersistentRepr> reprs = CollectionConverters.asJava(request.payload());
+            LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, mark, reprs.size());
             try {
-                for (PersistentRepr repr : CollectionConverters.asJava(request.payload())) {
+                for (PersistentRepr repr : reprs) {
                     final Object payload = repr.payload();
                     if (!(payload instanceof Serializable)) {
                         throw new UnsupportedOperationException("Non-serializable payload encountered "
                                 + payload.getClass());
                     }
 
-                    recordMessageSize(writer.append(new ToPersistence(repr)).size());
+                    LOG.trace("{}: starting append of {}", persistenceId, payload);
+                    final Indexed<ToPersistence> entry = writer.append(new ToPersistence(repr));
+                    final int size = entry.size();
+                    LOG.trace("{}: finished append of {} with {} bytes at {}", persistenceId, payload, size,
+                        entry.index());
+                    recordMessageSize(size);
                 }
             } catch (Exception e) {
                 LOG.warn("{}: failed to write out request", persistenceId, e);
