@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
@@ -177,7 +179,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     private void sealModification() {
-        Preconditions.checkState(sealedModification == null, "Transaction %s is already sealed", this);
+        checkState(sealedModification == null, "Transaction %s is already sealed", this);
         final CursorAwareDataTreeModification mod = getModification();
         mod.ready();
         sealedModification = mod;
@@ -221,7 +223,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     CursorAwareDataTreeSnapshot getSnapshot() {
-        Preconditions.checkState(sealedModification != null, "Proxy %s is not sealed yet", getIdentifier());
+        checkState(sealedModification != null, "Proxy %s is not sealed yet", getIdentifier());
         return sealedModification;
     }
 
@@ -254,23 +256,23 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
         final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
-            Verify.verify(callback != null, "Request %s has null callback", request);
+            final var cb = verifyNotNull(callback, "Request %s has null callback", request);
             if (markSealed()) {
                 sealOnly();
             }
 
             switch (maybeProtocol.get()) {
                 case ABORT:
-                    sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), callback);
+                    sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), cb);
                     break;
                 case READY:
                     // No-op, as we have already issued a sealOnly() and we are not transmitting anything
                     break;
                 case SIMPLE:
-                    sendMethod.accept(commitRequest(false), callback);
+                    sendMethod.accept(commitRequest(false), cb);
                     break;
                 case THREE_PHASE:
-                    sendMethod.accept(commitRequest(true), callback);
+                    sendMethod.accept(commitRequest(true), cb);
                     break;
                 default:
                     throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.get());
@@ -336,7 +338,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     private static LocalReadWriteProxyTransaction verifyLocalReadWrite(final LocalProxyTransaction successor) {
-        Verify.verify(successor instanceof LocalReadWriteProxyTransaction, "Unexpected successor %s", successor);
+        verify(successor instanceof LocalReadWriteProxyTransaction, "Unexpected successor %s", successor);
         return (LocalReadWriteProxyTransaction) successor;
     }
 
@@ -357,8 +359,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         if (closedException != null) {
             throw closedException.get();
         }
-
-        return Preconditions.checkNotNull(modification, "Transaction %s is DONE", getIdentifier());
+        return verifyNotNull(modification, "Transaction %s is DONE", getIdentifier());
     }
 
     private void sendRebased(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {

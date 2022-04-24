@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
@@ -49,7 +49,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
 
     @Override
     DataTreeSnapshot readOnlyView() {
-        return checkNotNull(snapshot, "Transaction %s is DONE", getIdentifier());
+        return verifyNotNull(snapshot, "Transaction %s is DONE", getIdentifier());
     }
 
     @Override
