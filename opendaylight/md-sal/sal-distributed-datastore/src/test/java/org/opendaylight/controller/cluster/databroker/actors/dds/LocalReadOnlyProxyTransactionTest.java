@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
@@ -14,7 +17,6 @@ import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
@@ -39,74 +41,76 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
 
     @Test
     public void testIsSnapshotOnly() {
-        Assert.assertTrue(transaction.isSnapshotOnly());
+        assertTrue(transaction.isSnapshotOnly());
     }
 
     @Test
     public void testReadOnlyView() {
-        Assert.assertEquals(snapshot, transaction.readOnlyView());
+        assertEquals(snapshot, transaction.readOnlyView());
     }
 
+    @Test
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testDirectCommit() {
-        transaction.directCommit();
+        assertThrows(UnsupportedOperationException.class, () -> transaction.directCommit());
     }
 
+    @Test
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testCanCommit() {
-        transaction.canCommit(new VotingFuture<>(new Object(), 1));
+        assertThrows(UnsupportedOperationException.class,
+            () -> transaction.canCommit(new VotingFuture<>(new Object(), 1)));
     }
 
+    @Test
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testPreCommit() {
-        transaction.preCommit(new VotingFuture<>(new Object(), 1));
+        assertThrows(UnsupportedOperationException.class,
+            () -> transaction.preCommit(new VotingFuture<>(new Object(), 1)));
     }
 
+    @Test
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testDoCommit() {
-        transaction.doCommit(new VotingFuture<>(new Object(), 1));
+        assertThrows(UnsupportedOperationException.class,
+            () -> transaction.doCommit(new VotingFuture<>(new Object(), 1)));
     }
 
+    @Test
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testDelete() {
-        transaction.delete(PATH_1);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.delete(PATH_1));
     }
 
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testMerge() {
-        transaction.merge(PATH_1, DATA_1);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.merge(PATH_1, DATA_1));
     }
 
+    @Test
     @Override
-    @Test(expected = UnsupportedOperationException.class)
     public void testWrite() {
-        transaction.write(PATH_1, DATA_1);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.write(PATH_1, DATA_1));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testDoDelete() {
-        transaction.doDelete(PATH_1);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.doDelete(PATH_1));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testDoMerge() {
-        transaction.doMerge(PATH_1, DATA_1);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.doMerge(PATH_1, DATA_1));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testDoWrite() {
-        transaction.doWrite(PATH_1, DATA_1);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.doWrite(PATH_1, DATA_1));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testCommitRequest() {
-        transaction.commitRequest(true);
+        assertThrows(UnsupportedOperationException.class, () -> transaction.commitRequest(true));
     }
 
     @Test

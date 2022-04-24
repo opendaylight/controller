@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -20,7 +22,6 @@ import com.google.common.base.Ticker;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -60,12 +61,12 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     @Test
     public void testIsSnapshotOnly() {
-        Assert.assertFalse(transaction.isSnapshotOnly());
+        assertFalse(transaction.isSnapshotOnly());
     }
 
     @Test
     public void testReadOnlyView() {
-        Assert.assertEquals(modification, transaction.readOnlyView());
+        assertEquals(modification, transaction.readOnlyView());
     }
 
     @Test
@@ -125,8 +126,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         transaction.doWrite(PATH_1, DATA_1);
         final boolean coordinated = true;
         final CommitLocalTransactionRequest request = transaction.commitRequest(coordinated);
-        Assert.assertEquals(coordinated, request.isCoordinated());
-        Assert.assertEquals(modification, request.getModification());
+        assertEquals(coordinated, request.isCoordinated());
+        assertEquals(modification, request.getModification());
     }
 
     @Test
@@ -141,7 +142,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     public void testSealOnly() throws Exception {
         assertOperationThrowsException(() -> transaction.getSnapshot(), IllegalStateException.class);
         transaction.sealOnly();
-        Assert.assertEquals(modification, transaction.getSnapshot());
+        assertEquals(modification, transaction.getSnapshot());
     }
 
     @Test
@@ -244,8 +245,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         verify(modification).delete(PATH_3);
         final CommitLocalTransactionRequest commitRequest =
                 getTester().expectTransactionRequest(CommitLocalTransactionRequest.class);
-        Assert.assertEquals(modification, commitRequest.getModification());
-        Assert.assertEquals(coordinated, commitRequest.isCoordinated());
+        assertEquals(modification, commitRequest.getModification());
+        assertEquals(coordinated, commitRequest.isCoordinated());
     }
 
 }
