@@ -336,7 +336,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof TransactionPurgeRequest) {
             enqueuePurge(callback);
         } else {
-            throw new IllegalArgumentException("Unhandled request {}" + request);
+            throw unhandledRequest(request);
         }
     }
 
@@ -404,7 +404,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof AbortLocalTransactionRequest) {
             enqueueRequest(abortRequest(), callback, enqueuedTicks);
         } else {
-            throw new IllegalStateException("Unhandled request " + request);
+            throw unhandledRequest(request);
         }
     }
 
@@ -479,7 +479,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
                 snapshotOnly, req.getIncrement()), callback, enqueuedTicks);
             incrementSequence(req.getIncrement());
         } else {
-            throw new IllegalArgumentException("Unhandled request {}" + request);
+            throw unhandledRequest(request);
         }
     }
 

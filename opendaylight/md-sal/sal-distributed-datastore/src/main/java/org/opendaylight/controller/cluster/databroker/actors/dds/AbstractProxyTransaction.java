@@ -855,7 +855,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract void handleReplayedRemoteRequest(TransactionRequest<?> request,
             @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
 
-    private static IllegalStateException unhandledResponseException(final Response<?, ?> resp) {
+    static final @NonNull IllegalArgumentException unhandledRequest(final TransactionRequest<?> request) {
+        return new IllegalArgumentException("Unhandled request " + request);
+    }
+
+    private static @NonNull IllegalStateException unhandledResponseException(final Response<?, ?> resp) {
         return new IllegalStateException("Unhandled response " + resp.getClass());
     }
 
