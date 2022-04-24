@@ -76,11 +76,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final long MAX_DELAY_NANOS = TimeUnit.SECONDS.toNanos(MAX_DELAY_SECONDS);
 
     private final Lock lock = new ReentrantLock();
-    private final ClientActorContext context;
-    @GuardedBy("lock")
-    private final TransmitQueue queue;
+    private final @NonNull ClientActorContext context;
     private final @NonNull Long cookie;
     private final String backendName;
+    @GuardedBy("lock")
+    private final TransmitQueue queue;
 
     @GuardedBy("lock")
     private boolean haveTimer;
@@ -95,8 +95,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // Private constructor to avoid code duplication.
     private AbstractClientConnection(final AbstractClientConnection<T> oldConn, final TransmitQueue newQueue,
             final String backendName) {
-        this.context = requireNonNull(oldConn.context);
-        this.cookie = requireNonNull(oldConn.cookie);
+        this.context = oldConn.context;
+        this.cookie = oldConn.cookie;
         this.backendName = requireNonNull(backendName);
         this.queue = requireNonNull(newQueue);
         // Will be updated in finishReplay if needed.
@@ -128,7 +128,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             requireNonNull(oldConn.context).messageSlicer()), newBackend.getName());
     }
 
-    public final ClientActorContext context() {
+    public final @NonNull ClientActorContext context() {
         return context;
     }
 
@@ -136,7 +136,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         return cookie;
     }
 
-    public final ActorRef localActor() {
+    public final @NonNull ActorRef localActor() {
         return context.self();
     }
 
