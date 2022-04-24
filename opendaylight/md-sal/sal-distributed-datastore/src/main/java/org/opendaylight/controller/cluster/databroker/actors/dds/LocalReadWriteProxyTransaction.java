@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
@@ -21,9 +22,11 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
+import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
@@ -33,8 +36,10 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitR
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -86,7 +91,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private Exception recordedFailure;
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
-        final DataTreeSnapshot snapshot) {
+            final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
         modification = (CursorAwareDataTreeModification) snapshot.newModification();
     }
@@ -105,6 +110,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     CursorAwareDataTreeSnapshot readOnlyView() {
         return getModification();
+    }
+
+    @Override
+    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+        final var ex = recordedFailure;
+        return ex != null ? FluentFutures.immediateFailedFluentFuture(ex) : super.doExists(path);
+    }
+
+    @Override
+    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+        final var ex = recordedFailure;
+        return ex != null ? FluentFutures.immediateFailedFluentFuture(ex) : super.doRead(path);
     }
 
     @Override
@@ -321,6 +338,20 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         } else {
             super.handleForwardedRemoteRequest(request, callback);
         }
+    }
+
+    @Override
+    Response<?, ?> handleExistsRequest(final DataTreeSnapshot snapshot, final ExistsTransactionRequest request) {
+        final var ex = recordedFailure;
+        return ex == null ? super.handleExistsRequest(snapshot, request)
+            : request.toRequestFailure(new RuntimeRequestException("Previous modification failed", ex));
+    }
+
+    @Override
+    Response<?, ?> handleReadRequest(final DataTreeSnapshot snapshot, final ReadTransactionRequest request) {
+        final var ex = recordedFailure;
+        return ex == null ? super.handleReadRequest(snapshot, request)
+            : request.toRequestFailure(new RuntimeRequestException("Previous modification failed", ex));
     }
 
     @Override
