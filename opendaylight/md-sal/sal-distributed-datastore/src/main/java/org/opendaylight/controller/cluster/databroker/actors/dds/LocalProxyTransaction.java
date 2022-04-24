@@ -96,7 +96,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         if (request instanceof AbortLocalTransactionRequest) {
             enqueueAbort(request, callback, enqueuedTicks);
         } else {
-            throw new IllegalArgumentException("Unhandled request" + request);
+            throw unhandledRequest(request);
         }
     }
 
@@ -138,7 +138,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             // hence we can skip sequence increments.
             LOG.debug("Not replaying {}", request);
         } else {
-            throw new IllegalArgumentException("Unhandled request " + request);
+            throw unhandledRequest(request);
         }
     }
 
@@ -158,7 +158,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof TransactionPurgeRequest) {
             enqueuePurge(callback);
         } else {
-            throw new IllegalArgumentException("Unhandled request " + request);
+            throw unhandledRequest(request);
         }
     }
 
@@ -199,7 +199,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof ModifyTransactionRequest) {
             successor.handleForwardedRequest(request, callback);
         } else {
-            throwUnhandledRequest(request);
+            throw unhandledRequest(request);
         }
     }
 
@@ -211,14 +211,10 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof TransactionPurgeRequest) {
             successor.enqueuePurge(callback);
         } else {
-            throwUnhandledRequest(request);
+            throw unhandledRequest(request);
         }
 
         LOG.debug("Forwarded request {} to successor {}", request, successor);
-    }
-
-    private static void throwUnhandledRequest(final TransactionRequest<?> request) {
-        throw new IllegalArgumentException("Unhandled request " + request);
     }
 
     void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
