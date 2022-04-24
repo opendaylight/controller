@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
@@ -35,6 +36,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -105,6 +107,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     CursorAwareDataTreeSnapshot readOnlyView() {
         return getModification();
+    }
+
+    @Override
+    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+        final var ex = recordedFailure;
+        return ex != null ? FluentFutures.immediateFailedFluentFuture(ex) : super.doExists(path);
+    }
+
+    @Override
+    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+        final var ex = recordedFailure;
+        return ex != null ? FluentFutures.immediateFailedFluentFuture(ex) : super.doRead(path);
     }
 
     @Override

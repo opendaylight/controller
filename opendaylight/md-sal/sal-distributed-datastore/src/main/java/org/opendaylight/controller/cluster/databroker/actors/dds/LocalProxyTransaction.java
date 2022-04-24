@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalProxyTransaction.class);
 
-    private final TransactionIdentifier identifier;
+    private final @NonNull TransactionIdentifier identifier;
 
     LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier, final boolean isDone) {
         super(parent, isDone);
@@ -76,12 +76,12 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
 
     @Override
-    final FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
         return FluentFutures.immediateBooleanFluentFuture(readOnlyView().readNode(path).isPresent());
     }
 
     @Override
-    final FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
         return FluentFutures.immediateFluentFuture(readOnlyView().readNode(path));
     }
 
