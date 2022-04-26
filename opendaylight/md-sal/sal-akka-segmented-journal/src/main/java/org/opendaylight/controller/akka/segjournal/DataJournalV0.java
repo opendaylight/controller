@@ -113,7 +113,7 @@ final class DataJournalV0 extends DataJournal {
             final AtomicWrite request = message.getRequest(i);
 
             final List<PersistentRepr> reprs = CollectionConverters.asJava(request.payload());
-            LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, mark, reprs.size());
+            LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, reprs.size(), mark);
             try {
                 for (PersistentRepr repr : reprs) {
                     final Object payload = repr.payload();
