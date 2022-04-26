@@ -73,7 +73,7 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
     @Ignore //ignored because it is not a test right now. Illustrative purposes only.
     public void testSomething() throws Exception {
         MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness(Uint32.valueOf(1))
-                .setToasterToastType(WheatBread.class).build();
+                .setToasterToastType(WheatBread.VALUE).build();
 
         // NOTE: In a real test we would want to override the Thread.sleep() to
         // prevent our junit test

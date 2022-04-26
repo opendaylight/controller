@@ -8,6 +8,6 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-toaster-${project.version}">
     <feature name="odl-toaster" version="${project.version}">
-        <feature version="[9,10)">odl-mdsal-binding-runtime</feature>
+        <feature version="[10,11)">odl-mdsal-binding-runtime</feature>
     </feature>
 </features>

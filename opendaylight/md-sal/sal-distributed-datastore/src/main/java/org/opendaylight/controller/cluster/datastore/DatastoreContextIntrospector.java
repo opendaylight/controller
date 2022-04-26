@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.management.ConstructorParameters;
@@ -84,7 +83,7 @@ public class DatastoreContextIntrospector {
     private static void introspectPrimitiveTypes() {
         final Set<Class<?>> primitives = ImmutableSet.<Class<?>>builder().addAll(
                 Primitives.allWrapperTypes()).add(String.class).build();
-        for (final Class<?> primitive: primitives) {
+        for (final Class<?> primitive : primitives) {
             try {
                 processPropertyType(primitive);
             } catch (final NoSuchMethodException e) {
@@ -382,9 +381,8 @@ public class DatastoreContextIntrospector {
         if (propertyType.isEnum()) {
             try {
                 final Method enumConstructor = propertyType.getDeclaredMethod("forName", String.class);
-                final Object optional =  enumConstructor.invoke(null, from.toString().toLowerCase(Locale.ROOT));
-                if (optional instanceof Optional) {
-                    return ((Optional<Object>)optional).orElseThrow();
+                if (enumConstructor.getReturnType().equals(propertyType)) {
+                    return enumConstructor.invoke(null, from.toString().toLowerCase(Locale.ROOT));
                 }
             } catch (NoSuchMethodException e) {
                 LOG.error("Error constructing value ({}) for enum {}", from, propertyType);

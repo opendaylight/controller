@@ -30,8 +30,6 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
     @Mock
     private NormalizedNode data;
     @Mock
-    private YangInstanceIdentifier path;
-    @Mock
     private DOMStoreThreePhaseCommitCohort readyCohort;
 
     @Before
@@ -49,20 +47,20 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
 
     @Test
     public void testWrite() {
-        object().write(path, data);
-        verify(delegate).write(path, data);
+        object().write(YangInstanceIdentifier.empty(), data);
+        verify(delegate).write(YangInstanceIdentifier.empty(), data);
     }
 
     @Test
     public void testMerge() {
-        object().merge(path, data);
-        verify(delegate).merge(path, data);
+        object().merge(YangInstanceIdentifier.empty(), data);
+        verify(delegate).merge(YangInstanceIdentifier.empty(), data);
     }
 
     @Test
     public void testDelete() {
-        object().delete(path);
-        verify(delegate).delete(path);
+        object().delete(YangInstanceIdentifier.empty());
+        verify(delegate).delete(YangInstanceIdentifier.empty());
     }
 
     @Test
