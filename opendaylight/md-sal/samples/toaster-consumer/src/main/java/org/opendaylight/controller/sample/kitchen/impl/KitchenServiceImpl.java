@@ -16,7 +16,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
@@ -58,7 +57,7 @@ public class KitchenServiceImpl extends AbstractMXBean
     }
 
     @Override
-    public Future<RpcResult<Void>> makeBreakfast(final EggsType eggsType, final Class<? extends ToastType> toastType,
+    public ListenableFuture<RpcResult<Void>> makeBreakfast(final EggsType eggsType, final ToastType toastType,
             final int toastDoneness) {
         // Call makeToast, The OpendaylightToaster impl already returns a ListenableFuture so the conversion is
         // actually a no-op.
@@ -95,9 +94,7 @@ public class KitchenServiceImpl extends AbstractMXBean
         return executor.submit(() -> RpcResultBuilder.<Void>success().build());
     }
 
-    private ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final Class<? extends ToastType> toastType,
-            final int toastDoneness) {
-
+    private ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final ToastType toastType, final int toastDoneness) {
         if (toasterOutOfBread) {
             LOG.info("We're out of toast but we can make eggs");
             return RpcResultBuilder.success(EMPTY_MAKE_OUTPUT)
@@ -118,7 +115,7 @@ public class KitchenServiceImpl extends AbstractMXBean
     public Boolean makeScrambledWithWheat() {
         try {
             // This call has to block since we must return a result to the JMX client.
-            RpcResult<Void> result = makeBreakfast(EggsType.SCRAMBLED, WheatBread.class, 2).get();
+            RpcResult<Void> result = makeBreakfast(EggsType.SCRAMBLED, WheatBread.VALUE, 2).get();
             if (result.isSuccessful()) {
                 LOG.info("makeBreakfast succeeded");
             } else {
