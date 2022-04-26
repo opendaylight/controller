@@ -33,7 +33,7 @@ public class AddShardReplicaCommand extends AbstractRpcAction {
         return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
                 .addShardReplica(new AddShardReplicaInputBuilder()
                         .setShardName(shardName)
-                        .setDataStoreType(DataStoreType.forName(dataStoreType).orElse(null))
+                        .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .build());
     }
 }

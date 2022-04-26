@@ -47,7 +47,7 @@ public class ChangeMemberVotingStatesForShardCommand extends AbstractRpcAction {
         return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName(shardName)
-                        .setDataStoreType(DataStoreType.forName(dataStoreType).orElse(null))
+                        .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .setMemberVotingState(List.of(memberVotingState))
                         .build());
     }

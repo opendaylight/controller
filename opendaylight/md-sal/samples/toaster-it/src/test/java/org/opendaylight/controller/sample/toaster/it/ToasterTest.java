@@ -55,8 +55,8 @@ public class ToasterTest extends AbstractMdsalTestBase {
         boolean success = true;
 
         // Make toasts using OSGi service
-        success &= kitchenService.makeBreakfast(EggsType.SCRAMBLED, HashBrown.class, 4).get().isSuccessful();
-        success &= kitchenService.makeBreakfast(EggsType.POACHED, WhiteBread.class, 8).get().isSuccessful();
+        success &= kitchenService.makeBreakfast(EggsType.SCRAMBLED, HashBrown.VALUE, 4).get().isSuccessful();
+        success &= kitchenService.makeBreakfast(EggsType.POACHED, WhiteBread.VALUE, 8).get().isSuccessful();
 
         assertTrue("Not all breakfasts succeeded", success);
 

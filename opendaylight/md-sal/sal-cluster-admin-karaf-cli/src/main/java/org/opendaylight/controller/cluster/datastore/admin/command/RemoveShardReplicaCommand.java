@@ -35,7 +35,7 @@ public class RemoveShardReplicaCommand extends AbstractRpcAction {
         return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
                 .removeShardReplica(new RemoveShardReplicaInputBuilder()
                         .setShardName(shardName)
-                        .setDataStoreType(DataStoreType.forName(dataStoreType).orElse(null))
+                        .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .setMemberName(memberName)
                         .build());
     }

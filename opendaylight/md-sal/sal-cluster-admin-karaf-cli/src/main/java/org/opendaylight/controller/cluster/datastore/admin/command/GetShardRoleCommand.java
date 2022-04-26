@@ -33,7 +33,7 @@ public class GetShardRoleCommand extends AbstractRpcAction {
         return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
                 .getShardRole(new GetShardRoleInputBuilder()
                         .setShardName(shardName)
-                        .setDataStoreType(DataStoreType.forName(dataStoreType).orElse(null))
+                        .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .build());
     }
 }

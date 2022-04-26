@@ -33,7 +33,7 @@ public class LocateShardCommand extends AbstractRpcAction {
         return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
                 .locateShard(new LocateShardInputBuilder()
                         .setShardName(shardName)
-                        .setDataStoreType(DataStoreType.forName(dataStoreType).orElse(null))
+                        .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .build());
     }
 }
