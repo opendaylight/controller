@@ -19,6 +19,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Stopwatch;
 import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.SegmentedJournal;
@@ -289,13 +290,16 @@ final class SegmentedJournalActor extends AbstractActor {
     private void handleWriteMessages(final WriteMessages message) {
         ensureOpen();
 
-        final long startTicks = System.nanoTime();
+        final Stopwatch sw = Stopwatch.createStarted();
         final long start = dataJournal.lastWrittenSequenceNr();
+        final long bytes = dataJournal.handleWriteMessages(message);
+        sw.stop();
 
-        dataJournal.handleWriteMessages(message);
-
-        batchWriteTime.update(System.nanoTime() - startTicks, TimeUnit.NANOSECONDS);
+        batchWriteTime.update(sw.elapsed(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
         messageWriteCount.mark(dataJournal.lastWrittenSequenceNr() - start);
+
+        // log message after statistics are updated
+        LOG.debug("{}: write of {} bytes completed in {}", persistenceId, bytes, sw);
     }
 
     private void handleUnknown(final Object message) {
@@ -308,6 +312,7 @@ final class SegmentedJournalActor extends AbstractActor {
             return;
         }
 
+        final Stopwatch sw = Stopwatch.createStarted();
         deleteJournal = SegmentedJournal.<Long>builder().withDirectory(directory).withName("delete")
                 .withNamespace(DELETE_NAMESPACE).withMaxSegmentSize(DELETE_SEGMENT_SIZE).build();
         final Indexed<Long> lastEntry = deleteJournal.writer().getLastEntry();
@@ -316,7 +321,7 @@ final class SegmentedJournalActor extends AbstractActor {
         dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
             maxEntrySize, maxSegmentSize);
         dataJournal.deleteTo(lastDelete);
-        LOG.debug("{}: journal open with last index {}, deleted to {}", persistenceId,
+        LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
             dataJournal.lastWrittenSequenceNr(), lastDelete);
     }
 }

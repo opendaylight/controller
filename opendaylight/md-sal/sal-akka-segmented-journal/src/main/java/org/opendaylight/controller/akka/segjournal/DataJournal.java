@@ -80,6 +80,7 @@ abstract class DataJournal {
      * Handle a request to store some messages.
      *
      * @param message Request message
+     * @return number of bytes written
      */
-    abstract void handleWriteMessages(@NonNull WriteMessages message);
+    abstract long handleWriteMessages(@NonNull WriteMessages message);
 }
