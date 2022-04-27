@@ -405,7 +405,7 @@ public class DatastoreContext implements ClientActorConfig {
         return initialPayloadSerializedBufferCapacity;
     }
 
-    public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
+    public static class Builder {
         private final DatastoreContext datastoreContext;
 
         Builder(final DatastoreContext datastoreContext) {
@@ -689,7 +689,6 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
-        @Override
         public DatastoreContext build() {
             if (datastoreContext.dataStoreName != null) {
                 GLOBAL_DATASTORE_NAMES.add(datastoreContext.dataStoreName);

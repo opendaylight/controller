@@ -21,12 +21,9 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMe
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
-import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
-final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMetadata>,
-        Identifiable<LocalHistoryIdentifier> {
-
+final class FrontendHistoryMetadataBuilder implements Identifiable<LocalHistoryIdentifier> {
     private final @NonNull Map<UnsignedLong, Boolean> closedTransactions;
     private final @NonNull MutableUnsignedLongSet purgedTransactions;
     private final @NonNull LocalHistoryIdentifier identifier;
@@ -51,7 +48,6 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
         return identifier;
     }
 
-    @Override
     public FrontendHistoryMetadata build() {
         return new FrontendHistoryMetadata(identifier.getHistoryId(), identifier.getCookie(), closed,
             UnsignedLongBitmap.copyOf(closedTransactions), purgedTransactions.immutableCopy());

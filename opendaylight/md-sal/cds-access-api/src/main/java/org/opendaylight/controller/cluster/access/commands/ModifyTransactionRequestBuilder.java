@@ -14,20 +14,18 @@ import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
 /**
- * A reusable {@link Builder} for creating {@link ModifyTransactionRequest} message instances. Its internal state is
- * reset when {@link #build()} is invoked, hence it can be used to create a sequence of messages. This class is NOT
- * thread-safe.
+ * A reusable builder for creating {@link ModifyTransactionRequest} message instances. Its internal state is reset when
+ * {@link #build()} is invoked, hence it can be used to create a sequence of messages. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
 @Beta
-public final class ModifyTransactionRequestBuilder implements Builder<ModifyTransactionRequest>,
-        Identifiable<TransactionIdentifier> {
+public final class ModifyTransactionRequestBuilder implements Identifiable<TransactionIdentifier> {
     private final List<TransactionModification> modifications = new ArrayList<>(1);
     private final TransactionIdentifier identifier;
     private final ActorRef replyTo;
@@ -82,8 +80,7 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         return modifications.size();
     }
 
-    @Override
-    public ModifyTransactionRequest build() {
+    public @NonNull ModifyTransactionRequest build() {
         checkState(haveSequence, "Request sequence has not been set");
 
         final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, replyTo, modifications,

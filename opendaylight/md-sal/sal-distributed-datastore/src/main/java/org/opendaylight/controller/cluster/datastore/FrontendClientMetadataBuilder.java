@@ -24,7 +24,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMet
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
-import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +31,15 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is NOT thread-safe.
  */
-abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMetadata>,
-        Identifiable<ClientIdentifier> {
+// FIXME: sealed when we have JDK17+
+abstract class FrontendClientMetadataBuilder implements Identifiable<ClientIdentifier> {
     static final class Disabled extends FrontendClientMetadataBuilder {
         Disabled(final String shardName, final ClientIdentifier identifier) {
             super(shardName, identifier);
         }
 
         @Override
-        public FrontendClientMetadata build() {
+        FrontendClientMetadata build() {
             return new FrontendClientMetadata(getIdentifier(), ImmutableUnsignedLongSet.of(), ImmutableList.of());
         }
 
@@ -119,7 +118,7 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
         }
 
         @Override
-        public FrontendClientMetadata build() {
+        FrontendClientMetadata build() {
             return new FrontendClientMetadata(getIdentifier(), purgedHistories.immutableCopy(),
                 Collections2.transform(currentHistories.values(), FrontendHistoryMetadataBuilder::build));
         }
@@ -288,6 +287,8 @@ abstract class FrontendClientMetadataBuilder implements Builder<FrontendClientMe
     final String shardName() {
         return shardName;
     }
+
+    abstract FrontendClientMetadata build();
 
     abstract void onHistoryCreated(LocalHistoryIdentifier historyId);
 
