@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.blueprint.tests;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader;
@@ -21,26 +22,26 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
  * @author Michael Vorburger.ch
  */
 public class DataStoreAppConfigDefaultXMLReaderTest extends AbstractConcurrentDataBrokerTest {
-
     @Test
     public void testConfigXML() throws Exception {
-        Lists lists = new DataStoreAppConfigDefaultXMLReader<>(
-                getClass(), "/opendaylight-sal-test-store-config.xml",
-                getDataBrokerTestCustomizer().getSchemaService(),
-                getDataBrokerTestCustomizer().getAdapterContext().currentSerializer(),
-                Lists.class).createDefaultInstance();
+        Lists lists = new DataStoreAppConfigDefaultXMLReader<>(getClass(), "/opendaylight-sal-test-store-config.xml",
+            getDataBrokerTestCustomizer().getSchemaService(),
+            getDataBrokerTestCustomizer().getAdapterContext().currentSerializer(), Lists.class)
+            .createDefaultInstance();
 
         UnorderedList element = lists.getUnorderedContainer().getUnorderedList().values().iterator().next();
-        assertThat(element.getName()).isEqualTo("someName");
-        assertThat(element.getValue()).isEqualTo("someValue");
+        assertEquals("someName", element.getName());
+        assertEquals("someValue", element.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBadXMLName() throws Exception {
-        new DataStoreAppConfigDefaultXMLReader<>(
-                getClass(), "/badname.xml",
-                getDataBrokerTestCustomizer().getSchemaService(),
-                getDataBrokerTestCustomizer().getAdapterContext().currentSerializer(),
-                Lists.class).createDefaultInstance();
+        final var reader = new DataStoreAppConfigDefaultXMLReader<>(getClass(), "/badname.xml",
+            getDataBrokerTestCustomizer().getSchemaService(),
+            getDataBrokerTestCustomizer().getAdapterContext().currentSerializer(), Lists.class);
+
+        final String message = assertThrows(IllegalArgumentException.class, reader::createDefaultInstance).getMessage();
+        assertEquals("resource /badname.xml relative to " + DataStoreAppConfigDefaultXMLReaderTest.class.getName()
+            + " not found.", message);
     }
 }
