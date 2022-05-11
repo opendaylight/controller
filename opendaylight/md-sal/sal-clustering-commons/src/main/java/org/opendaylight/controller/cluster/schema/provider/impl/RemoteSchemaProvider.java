@@ -38,7 +38,7 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchema
 
     @Override
     public ListenableFuture<YangTextSchemaSource> getSource(final SourceIdentifier sourceIdentifier) {
-        LOG.trace("Getting yang schema source for {}", sourceIdentifier.getName());
+        LOG.trace("Getting yang schema source for {}", sourceIdentifier.name().getLocalName());
 
         Future<YangTextSchemaSourceSerializationProxy> result = remoteRepo.getYangTextSchemaSource(sourceIdentifier);
 

@@ -20,20 +20,17 @@ import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.yangtools.yang.common.Revision;
-import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 public class YangTextSourceSerializationProxyTest {
-
     private YangTextSchemaSource schemaSource;
 
     @Before
     public void setUp() {
         String source = "Test source.";
-        schemaSource = YangTextSchemaSource.delegateForByteSource(
-                RevisionSourceIdentifier.create("test", Revision.of("2015-10-30")),
-                ByteSource.wrap(source.getBytes(StandardCharsets.UTF_8)));
+        schemaSource = YangTextSchemaSource.delegateForByteSource(new SourceIdentifier("test", "2015-10-30"),
+            ByteSource.wrap(source.getBytes(StandardCharsets.UTF_8)));
     }
 
 
