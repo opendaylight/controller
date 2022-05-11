@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -27,14 +26,12 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
-import org.opendaylight.yangtools.yang.common.Revision;
-import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 public class RemoteSchemaProviderTest {
-    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Revision.of("2015-10-30"));
+    private static final SourceIdentifier ID = new SourceIdentifier("Test", "2015-10-30");
 
     private RemoteSchemaProvider remoteSchemaProvider;
     private RemoteYangTextSourceProvider mockedRemoteSchemaRepository;
@@ -60,16 +57,13 @@ public class RemoteSchemaProviderTest {
 
     @Test
     public void getNonExistingSchemaSource() throws InterruptedException {
-        doReturn(Futures.failed(new SchemaSourceException("Source not provided")))
-            .when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
+        final var exception = new SchemaSourceException("Source not provided");
+        doReturn(Futures.failed(exception)).when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
 
         ListenableFuture<YangTextSchemaSource> sourceFuture = remoteSchemaProvider.getSource(ID);
         assertTrue(sourceFuture.isDone());
-        try {
-            sourceFuture.get();
-            fail("Expected a failure to occur");
-        } catch (ExecutionException e) {
-            assertThat(e.getCause(), instanceOf(SchemaSourceException.class));
-        }
+
+        final var cause = assertThrows(ExecutionException.class, sourceFuture::get).getCause();
+        assertSame(exception, cause);
     }
 }
