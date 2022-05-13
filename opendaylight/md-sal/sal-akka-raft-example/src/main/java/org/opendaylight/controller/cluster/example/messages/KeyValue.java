@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.example.messages;
 
 import java.io.Serializable;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 public class KeyValue extends Payload implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -47,7 +46,6 @@ public class KeyValue extends Payload implements Serializable {
 
     @Override
     public int size() {
-        return this.value.length() + this.key.length();
+        return value.length() + key.length();
     }
-
 }

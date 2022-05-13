@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
  * Interface for a class that participates in raft actor persistence recovery.

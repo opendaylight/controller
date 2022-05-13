@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
@@ -145,7 +144,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
             jsonWriter.beginObject().name("Entries");
             jsonWriter.beginArray();
             for (ReplicatedLogEntry entry : entries) {
-                final Payload data = entry.getData();
+                final var data = entry.getData();
                 if (data instanceof CommitTransactionPayload) {
                     final CommitTransactionPayload payload = (CommitTransactionPayload) entry.getData();
                     final DataTreeCandidate candidate = payload.getCandidate().getValue().getCandidate();
