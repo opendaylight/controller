@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
  * Represents one entry in the replicated log.
