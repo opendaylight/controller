@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
-package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
+package org.opendaylight.controller.cluster.raft.messages;
 
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public abstract class IdentifiablePayload<T extends Identifier> extends Payload implements Identifiable<T> {
+
 }

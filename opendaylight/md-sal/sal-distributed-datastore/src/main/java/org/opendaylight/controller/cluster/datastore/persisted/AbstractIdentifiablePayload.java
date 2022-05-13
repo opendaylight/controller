@@ -19,13 +19,12 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.IdentifiablePayload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
- * Abstract base class for {@link Payload}s which hold a single {@link Identifier}.
+ * Abstract base class for {@link IdentifiablePayload}s which hold a single {@link Identifier}.
  *
  * @author Robert Varga
  */

@@ -19,8 +19,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
