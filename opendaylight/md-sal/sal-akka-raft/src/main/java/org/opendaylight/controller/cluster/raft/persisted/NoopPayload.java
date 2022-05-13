@@ -17,7 +17,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-public final class NoopPayload extends Payload implements Serializable, ControlMessage {
+public final class NoopPayload extends Payload implements ControlMessage {
     public static final NoopPayload INSTANCE = new NoopPayload();
 
     // There is no need for Externalizable
@@ -40,7 +40,8 @@ public final class NoopPayload extends Payload implements Serializable, ControlM
         return 0;
     }
 
-    private Object writeReplace() {
+    @Override
+    protected Object writeReplace() {
         return PROXY;
     }
 }

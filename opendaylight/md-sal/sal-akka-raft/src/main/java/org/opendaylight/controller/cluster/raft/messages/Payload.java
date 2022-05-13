@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.Serializable;
+
 /**
  * An instance of a {@link Payload} class is meant to be used as the Payload for {@link AppendEntries}.
  *
@@ -14,11 +16,20 @@ package org.opendaylight.controller.cluster.raft.messages;
  * When an actor which is derived from RaftActor attempts to persistData it must pass an instance of the Payload class.
  * Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the Payload class.
  */
-public abstract class Payload {
+public abstract class Payload implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * Return the estimate of in-memory size of this payload.
      *
      * @return An estimate of the in-memory size of this payload.
      */
     public abstract int size();
+
+    /**
+     * Return the serialization proxy for this object.
+     *
+     * @return Serialization proxy
+     */
+    protected abstract Object writeReplace();
 }
