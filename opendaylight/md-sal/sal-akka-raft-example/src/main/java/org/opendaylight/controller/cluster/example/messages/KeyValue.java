@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.example.messages;
 
-import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
-public class KeyValue extends Payload implements Serializable {
+public final class KeyValue extends Payload {
     private static final long serialVersionUID = 1L;
+
     private String key;
     private String value;
 
@@ -31,14 +31,6 @@ public class KeyValue extends Payload implements Serializable {
         return value;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
     @Override
     public String toString() {
         return "KeyValue{" + "key='" + key + '\'' + ", value='" + value + '\'' + '}';
@@ -47,5 +39,10 @@ public class KeyValue extends Payload implements Serializable {
     @Override
     public int size() {
         return value.length() + key.length();
+    }
+
+    @Override
+    protected Object writeReplace() {
+        return new KVv1(value, key);
     }
 }
