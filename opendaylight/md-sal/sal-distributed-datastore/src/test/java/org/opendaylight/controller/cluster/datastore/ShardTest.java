@@ -93,13 +93,13 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -1263,8 +1263,7 @@ public class ShardTest extends AbstractShardTest {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
             @Override
-            void persistPayload(final Identifier id, final Payload payload,
-                    final boolean batchHint) {
+            void persistPayload(final Identifier id, final Payload payload, final boolean batchHint) {
                 // Simulate an AbortTransaction message occurring during
                 // replication, after
                 // persisting and before finishing the commit to the
