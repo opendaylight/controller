@@ -29,8 +29,8 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
@@ -68,10 +68,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         if (message instanceof KeyValue) {
             if (isLeader()) {
                 persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message, false);
-            } else {
-                if (getLeader() != null) {
-                    getLeader().forward(message, getContext());
-                }
+            } else if (getLeader() != null) {
+                getLeader().forward(message, getContext());
             }
 
         } else if (message instanceof PrintState) {
@@ -83,7 +81,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         } else if (message instanceof PrintRole) {
             if (LOG.isDebugEnabled()) {
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
-                    final String followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
+                    final String followers = ((Leader)getCurrentBehavior()).printFollowerStates();
                     LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
                         getRaftActorContext().getPeerIds(), followers);
                 } else {
@@ -106,7 +104,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     public Optional<ActorRef> createRoleChangeNotifier(final String actorId) {
-        ActorRef exampleRoleChangeNotifier = this.getContext().actorOf(
+        ActorRef exampleRoleChangeNotifier = getContext().actorOf(
             RoleChangeNotifier.getProps(actorId), actorId + "-notifier");
         return Optional.<ActorRef>of(exampleRoleChangeNotifier);
     }
@@ -118,8 +116,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @Override
     protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
-        if (data instanceof KeyValue) {
-            KeyValue kv = (KeyValue) data;
+        if (data instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
             if (clientActor != null) {
                 clientActor.tell(new KeyValueSaved(), getSelf());
