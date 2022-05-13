@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public final class ServerConfigurationPayload extends Payload implements PersistentPayload, Serializable {
+public final class ServerConfigurationPayload extends Payload implements PersistentPayload {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -43,7 +42,7 @@ public final class ServerConfigurationPayload extends Payload implements Persist
         }
 
         Proxy(final ServerConfigurationPayload payload) {
-            this.serverConfig = payload.getServerConfig();
+            serverConfig = payload.getServerConfig();
         }
 
         @Override
@@ -134,7 +133,8 @@ public final class ServerConfigurationPayload extends Payload implements Persist
         return "ServerConfigurationPayload [serverConfig=" + serverConfig + "]";
     }
 
-    private Object writeReplace() {
+    @Override
+    protected Object writeReplace() {
         return new Proxy(this);
     }
 }
