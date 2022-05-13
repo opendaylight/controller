@@ -141,7 +141,8 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
 
     abstract DataInput newDataInput();
 
-    final Object writeReplace() {
+    @Override
+    protected final Object writeReplace() {
         return new Proxy(this);
     }
 
