@@ -13,8 +13,8 @@ import akka.japi.Procedure;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 
 /**
  * The DelegatingPersistentDataProvider used by RaftActor to override the configured persistent provider to
