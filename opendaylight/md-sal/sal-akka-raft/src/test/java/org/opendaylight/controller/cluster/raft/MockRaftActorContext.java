@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -19,6 +21,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -56,8 +59,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
             @Override
             public void update(final long newTerm, final String newVotedFor) {
-                this.currentTerm = newTerm;
-                this.votedFor = newVotedFor;
+                currentTerm = newTerm;
+                votedFor = newVotedFor;
 
                 // TODO : Write to some persistent state
             }
@@ -109,7 +112,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     @Override public ActorSystem getActorSystem() {
-        return this.system;
+        return system;
     }
 
     @Override public ActorSelection getPeerActorSelection(final String peerId) {
@@ -200,21 +203,22 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static class MockPayload extends Payload implements Serializable {
+    public static final class MockPayload extends Payload {
         private static final long serialVersionUID = 3121380393130864247L;
-        private String value = "";
-        private int size;
+
+        private final String data;
+        private final int size;
 
         public MockPayload() {
+            this("");
         }
 
         public MockPayload(final String data) {
-            this.value = data;
-            size = value.length();
+            this(data, data.length());
         }
 
         public MockPayload(final String data, final int size) {
-            this(data);
+            this.data = requireNonNull(data);
             this.size = size;
         }
 
@@ -225,37 +229,39 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         @Override
         public String toString() {
-            return value;
+            return data;
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (value == null ? 0 : value.hashCode());
-            return result;
+            return data.hashCode();
         }
 
         @Override
         public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            MockPayload other = (MockPayload) obj;
-            if (value == null) {
-                if (other.value != null) {
-                    return false;
-                }
-            } else if (!value.equals(other.value)) {
-                return false;
-            }
-            return true;
+            return this == obj || obj instanceof MockPayload other && Objects.equals(data, other.data)
+                && size == other.size;
+        }
+
+        @Override
+        protected Object writeReplace() {
+            return new MockPayloadProxy(data, size);
+        }
+    }
+
+    private static final class MockPayloadProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final String value;
+        private final int size;
+
+        MockPayloadProxy(String value, int size) {
+            this.value = value;
+            this.size = size;
+        }
+
+        Object readResolve() {
+            return new MockPayload(value, size);
         }
     }
 
@@ -264,19 +270,19 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         public  MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {
-                this.mockLog.append(new SimpleReplicatedLogEntry(i, term,
+                mockLog.append(new SimpleReplicatedLogEntry(i, term,
                         new MockRaftActorContext.MockPayload(Integer.toString(i))));
             }
             return this;
         }
 
         public  MockReplicatedLogBuilder addEntry(final int index, final int term, final MockPayload payload) {
-            this.mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
+            mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
             return this;
         }
 
         public ReplicatedLog build() {
-            return this.mockLog;
+            return mockLog;
         }
     }
 
