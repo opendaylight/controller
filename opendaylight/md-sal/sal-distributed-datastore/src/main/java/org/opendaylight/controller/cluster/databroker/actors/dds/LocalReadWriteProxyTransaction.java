@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
 import com.google.common.util.concurrent.FluentFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
@@ -96,8 +97,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
 
-        if (snapshot instanceof FailedDataTreeModification) {
-            final var failed = (FailedDataTreeModification) snapshot;
+        if (snapshot instanceof FailedDataTreeModification failed) {
             recordedFailure = failed.cause();
             modification = failed;
         } else {
@@ -407,6 +407,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         closedException = this::abortedException;
     }
 
+    @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Replay of recorded failure")
     private @NonNull CursorAwareDataTreeModification getModification() {
         if (closedException != null) {
             throw closedException.get();

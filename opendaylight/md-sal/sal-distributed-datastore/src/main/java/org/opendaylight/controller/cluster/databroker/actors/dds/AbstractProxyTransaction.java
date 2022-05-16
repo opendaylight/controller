@@ -141,7 +141,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                 latch.await();
             } catch (InterruptedException e) {
                 LOG.warn("Interrupted while waiting for latch of {}", successor);
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
             return successor;
         }

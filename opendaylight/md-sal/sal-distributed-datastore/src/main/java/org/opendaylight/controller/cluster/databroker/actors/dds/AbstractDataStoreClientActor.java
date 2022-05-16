@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.util.Timeout;
+import com.google.common.base.Throwables;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
@@ -53,10 +54,9 @@ public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
         try {
             return (DataStoreClient) Await.result(ExplicitAsk.ask(actor, GET_CLIENT_FACTORY,
                 Timeout.apply(timeout, unit)), Duration.Inf());
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Throwables.throwIfUnchecked(e);
+            throw new IllegalStateException(e);
         }
     }
 }

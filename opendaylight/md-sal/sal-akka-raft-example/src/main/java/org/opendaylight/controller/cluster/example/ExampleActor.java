@@ -202,7 +202,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         try {
             return new MapState((Map<String, String>) SerializationUtils.deserialize(snapshotBytes.read()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

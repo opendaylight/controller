@@ -195,7 +195,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         try {
             if (aborted != null) {
                 Throwables.throwIfUnchecked(aborted);
-                throw new RuntimeException(aborted);
+                throw new IllegalStateException(aborted);
             }
 
             final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
