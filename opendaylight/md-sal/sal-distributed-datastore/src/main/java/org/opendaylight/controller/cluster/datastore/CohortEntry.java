@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -91,6 +92,7 @@ final class CohortEntry {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Re-thrown")
     void applyModifications(final List<Modification> modifications) {
         totalBatchedModificationsReceived++;
         if (lastBatchedModificationsException == null) {

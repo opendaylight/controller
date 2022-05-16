@@ -62,7 +62,7 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {}", transactionId, e);
-            throw new RuntimeException("Failed to serialize " + transactionId, e);
+            throw new IllegalStateException("Failed to serialize " + transactionId, e);
         }
         return new PurgeTransactionPayload(transactionId, out.toByteArray());
     }

@@ -62,7 +62,7 @@ public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {}", historyId, e);
-            throw new RuntimeException("Failed to serialize " + historyId, e);
+            throw new IllegalStateException("Failed to serialize " + historyId, e);
         }
         return new CreateLocalHistoryPayload(historyId, out.toByteArray());
     }

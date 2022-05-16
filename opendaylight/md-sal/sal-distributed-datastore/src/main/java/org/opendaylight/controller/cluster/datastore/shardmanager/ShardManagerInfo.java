@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
+import com.google.common.base.Throwables;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -47,10 +48,9 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
         try {
             return (List<String>) Await.result(
                 Patterns.ask(shardManager, GetLocalShardIds.INSTANCE, ASK_TIMEOUT_MILLIS), Duration.Inf());
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Throwables.throwIfUnchecked(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -80,10 +80,9 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
                 try {
                     Await.result(Patterns.ask(shardManager, new SwitchShardBehavior(shardId, state, term),
                         ASK_TIMEOUT_MILLIS), Duration.Inf());
-                } catch (RuntimeException e) {
-                    throw e;
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    Throwables.throwIfUnchecked(e);
+                    throw new IllegalStateException(e);
                 }
                 break;
             case Candidate:

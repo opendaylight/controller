@@ -54,7 +54,7 @@ public final class DataTreeModificationOutput {
                 output.write(current().node(child).toString().getBytes(StandardCharsets.UTF_8));
                 output.writeByte('\n');
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
 
@@ -78,7 +78,7 @@ public final class DataTreeModificationOutput {
                 NormalizedNodeXMLOutput.toStream(output, data);
                 output.writeByte('\n');
             } catch (IOException | XMLStreamException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
     }

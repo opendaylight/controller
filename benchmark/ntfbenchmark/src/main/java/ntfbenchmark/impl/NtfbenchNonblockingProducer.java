@@ -28,9 +28,9 @@ public class NtfbenchNonblockingProducer extends AbstractNtfbenchProducer {
         int ntfOk = 0;
         int ntfError = 0;
         ListenableFuture<?> lastOkFuture = null;
-        for (int i = 0; i < this.iterations; i++) {
+        for (int i = 0; i < iterations; i++) {
             try {
-                final ListenableFuture<?> result = this.publishService.offerNotification(this.ntf);
+                final ListenableFuture<?> result = publishService.offerNotification(ntf);
                 if (NotificationPublishService.REJECTED == result) {
                     ntfError++;
                 } else {
@@ -50,9 +50,8 @@ public class NtfbenchNonblockingProducer extends AbstractNtfbenchProducer {
             try {
                 lastOkFuture.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
     }
-
 }

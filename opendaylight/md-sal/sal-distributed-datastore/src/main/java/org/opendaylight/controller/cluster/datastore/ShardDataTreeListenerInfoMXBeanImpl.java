@@ -58,7 +58,7 @@ final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implement
             return stateCache.get();
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -67,7 +67,7 @@ final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implement
     private static List<DataTreeListenerInfo> getListenerActorsInfo(final Collection<ActorSelection> actors) {
         final Timeout timeout = new Timeout(20, TimeUnit.SECONDS);
         final List<Future<Object>> futureList = new ArrayList<>(actors.size());
-        for (ActorSelection actor: actors) {
+        for (ActorSelection actor : actors) {
             futureList.add(Patterns.ask(actor, GetInfo.INSTANCE, timeout));
         }
 

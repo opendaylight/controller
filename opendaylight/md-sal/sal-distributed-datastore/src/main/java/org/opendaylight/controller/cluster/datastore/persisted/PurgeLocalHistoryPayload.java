@@ -63,7 +63,7 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {}", historyId, e);
-            throw new RuntimeException("Failed to serialize " + historyId, e);
+            throw new IllegalStateException("Failed to serialize " + historyId, e);
         }
         return new PurgeLocalHistoryPayload(historyId, out.toByteArray());
     }

@@ -53,7 +53,7 @@ public final class DisableTrackingPayload extends AbstractIdentifiablePayload<Cl
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {}", clientId, e);
-            throw new RuntimeException("Failed to serialize " + clientId, e);
+            throw new IllegalStateException("Failed to serialize " + clientId, e);
         }
         return new DisableTrackingPayload(clientId, out.toByteArray());
     }

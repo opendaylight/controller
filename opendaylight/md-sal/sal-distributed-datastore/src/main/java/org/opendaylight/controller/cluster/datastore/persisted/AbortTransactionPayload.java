@@ -62,7 +62,7 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {}", transactionId, e);
-            throw new RuntimeException("Failed to serialized " + transactionId, e);
+            throw new IllegalStateException("Failed to serialized " + transactionId, e);
         }
         return new AbortTransactionPayload(transactionId, out.toByteArray());
     }

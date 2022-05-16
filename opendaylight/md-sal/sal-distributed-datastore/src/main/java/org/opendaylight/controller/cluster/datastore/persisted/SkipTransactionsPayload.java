@@ -77,7 +77,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {} ids {}", historyId, transactionIds, e);
-            throw new RuntimeException("Failed to serialize " + historyId + " ids " + transactionIds, e);
+            throw new IllegalStateException("Failed to serialize " + historyId + " ids " + transactionIds, e);
         }
 
         return new SkipTransactionsPayload(historyId, out.toByteArray(), transactionIds);
