@@ -1793,7 +1793,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
                 new FiniteDuration(1000, TimeUnit.SECONDS));
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnapshotChunkSize(2);
+        // Note: the size here depends on estimate
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnapshotChunkSize(246);
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 4, 1).build());
@@ -2462,7 +2463,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }
 
-    private class MockConfigParamsImpl extends DefaultConfigParamsImpl {
+    private static class MockConfigParamsImpl extends DefaultConfigParamsImpl {
 
         private final long electionTimeOutIntervalMillis;
         private final int snapshotChunkSize;

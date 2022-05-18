@@ -228,6 +228,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
+        public int serializedSize() {
+            return size;
+        }
+
+        @Override
         public String toString() {
             return data;
         }
