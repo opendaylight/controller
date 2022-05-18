@@ -49,7 +49,7 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
         checkArgument(obj instanceof SimpleReplicatedLogEntry, "Unsupported object type %s", obj.getClass());
 
         SimpleReplicatedLogEntry replicatedLogEntry = (SimpleReplicatedLogEntry)obj;
-        final int estimatedSerializedSize = replicatedLogEntry.estimatedSerializedSize();
+        final int estimatedSerializedSize = replicatedLogEntry.serializedSize();
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(estimatedSerializedSize);
         SerializationUtils.serialize(replicatedLogEntry, bos);
