@@ -58,6 +58,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
     private static final long serialVersionUID = 1L;
+    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
@@ -90,5 +91,10 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     @Override
     protected Proxy externalizableProxy(final byte[] serialized) {
         return new Proxy(serialized);
+    }
+
+    @Override
+    protected int externalizableProxySize() {
+        return PROXY_SIZE;
     }
 }

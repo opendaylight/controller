@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
+import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
@@ -116,6 +117,12 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         }
     }
 
+    @Override
+    public final int serializedSize() {
+        // TODO: this is not entirely accurate as the the byte[] can be chunked by the serialization stream
+        return ProxySizeHolder.PROXY_SIZE + size();
+    }
+
     /**
      * The cached candidate needs to be cleared after it is done applying to the DataTree, otherwise it would be keeping
      * deserialized in memory which are not needed anymore leading to wasted memory. This lets the payload know that
@@ -194,6 +201,15 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         @Override
         DataInput newDataInput() {
             return new DataInputStream(source.openStream());
+        }
+    }
+
+    // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
+    private static final class ProxySizeHolder {
+        static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy(new Simple(new byte[0]))).length;
+
+        private ProxySizeHolder() {
+            // Hidden on purpose
         }
     }
 
