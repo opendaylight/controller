@@ -27,6 +27,15 @@ public abstract class Payload implements Serializable {
     public abstract int size();
 
     /**
+     * Return the estimate of serialized size of this payload when passed through serialization. The estimate needs to
+     * be reasonably accurate and should err on the side of caution and report a slightly-higher size in face of
+     * uncertainty.
+     *
+     * @return An estimate of serialized size.
+     */
+    public abstract int serializedSize();
+
+    /**
      * Return the serialization proxy for this object.
      *
      * @return Serialization proxy
