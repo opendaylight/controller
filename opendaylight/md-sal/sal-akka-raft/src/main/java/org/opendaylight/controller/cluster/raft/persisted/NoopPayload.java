@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
@@ -31,13 +32,21 @@ public final class NoopPayload extends Payload implements ControlMessage {
 
     private static final long serialVersionUID = 1L;
     private static final Proxy PROXY = new Proxy();
+    // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative
+    private static final int PROXY_SIZE = SerializationUtils.serialize(PROXY).length;
 
     private NoopPayload() {
+        // Hidden on purpose
     }
 
     @Override
     public int size() {
         return 0;
+    }
+
+    @Override
+    public int serializedSize() {
+        return PROXY_SIZE;
     }
 
     @Override

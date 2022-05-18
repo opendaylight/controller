@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
+import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
@@ -26,7 +27,9 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
-        private ReplicatedLogEntry replicatedLogEntry;
+        private long index;
+        private long term;
+        private Payload data;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
@@ -35,33 +38,34 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
             // For Externalizable
         }
 
-        Proxy(final ReplicatedLogEntry replicatedLogEntry) {
-            this.replicatedLogEntry = replicatedLogEntry;
-        }
-
-        static int estimatedSerializedSize(final ReplicatedLogEntry replicatedLogEntry) {
-            return 8 /* index */ + 8 /* term */ + replicatedLogEntry.getData().size()
-                    + 400 /* estimated extra padding for class info */;
+        Proxy(final SimpleReplicatedLogEntry replicatedLogEntry) {
+            index = replicatedLogEntry.getIndex();
+            term = replicatedLogEntry.getTerm();
+            data = replicatedLogEntry.getData();
         }
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(replicatedLogEntry.getIndex());
-            out.writeLong(replicatedLogEntry.getTerm());
-            out.writeObject(replicatedLogEntry.getData());
+            out.writeLong(index);
+            out.writeLong(term);
+            out.writeObject(data);
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            replicatedLogEntry = new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject());
+            index = in.readLong();
+            term = in.readLong();
+            data = (Payload) in.readObject();
         }
 
         private Object readResolve() {
-            return replicatedLogEntry;
+            return new SimpleReplicatedLogEntry(index, term, data);
         }
     }
 
     private static final long serialVersionUID = 1L;
+    // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative
+    private static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy()).length;
 
     private final long index;
     private final long term;
@@ -98,7 +102,12 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     @Override
     public int size() {
-        return getData().size();
+        return payload.size();
+    }
+
+    @Override
+    public int serializedSize() {
+        return PROXY_SIZE + payload.serializedSize();
     }
 
     @Override
@@ -113,10 +122,6 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     private Object writeReplace() {
         return new Proxy(this);
-    }
-
-    public int estimatedSerializedSize() {
-        return Proxy.estimatedSerializedSize(this);
     }
 
     @Override
