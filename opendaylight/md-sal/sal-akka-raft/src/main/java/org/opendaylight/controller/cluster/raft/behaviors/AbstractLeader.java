@@ -781,7 +781,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // If the first entry's size exceeds the max data size threshold, it will be returned from the call above. If
         // that is the case, then we need to slice it into smaller chunks.
-        if (entries.size() != 1 || entries.get(0).getData().size() <= maxDataSize) {
+        if (entries.size() != 1 || entries.get(0).getData().serializedSize() <= maxDataSize) {
             // Don't need to slice.
             return entries;
         }

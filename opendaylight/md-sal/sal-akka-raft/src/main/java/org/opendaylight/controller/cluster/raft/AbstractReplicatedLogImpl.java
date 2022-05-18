@@ -43,7 +43,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         this.snapshotTerm = snapshotTerm;
         this.logContext = logContext;
 
-        this.journal = new ArrayList<>(unAppliedEntries.size());
+        journal = new ArrayList<>(unAppliedEntries.size());
         for (ReplicatedLogEntry entry: unAppliedEntries) {
             append(entry);
         }
@@ -168,7 +168,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         long totalSize = 0;
         for (int i = fromIndex; i < toIndex; i++) {
             ReplicatedLogEntry entry = journal.get(i);
-            totalSize += entry.size();
+            totalSize += entry.serializedSize();
             if (totalSize <= maxDataSize) {
                 retList.add(entry);
             } else {
