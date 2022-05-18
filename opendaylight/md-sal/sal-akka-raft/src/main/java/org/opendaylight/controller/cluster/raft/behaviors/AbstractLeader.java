@@ -493,8 +493,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (message instanceof RaftRPC) {
-            RaftRPC rpc = (RaftRPC) message;
+        if (message instanceof RaftRPC rpc) {
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
@@ -525,8 +524,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             beforeSendHeartbeat();
             sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
-        } else if (message instanceof SendInstallSnapshot) {
-            SendInstallSnapshot sendInstallSnapshot = (SendInstallSnapshot) message;
+        } else if (message instanceof SendInstallSnapshot sendInstallSnapshot) {
             setSnapshotHolder(new SnapshotHolder(sendInstallSnapshot.getSnapshot(),
                 sendInstallSnapshot.getSnapshotBytes()));
             sendInstallSnapshot();
