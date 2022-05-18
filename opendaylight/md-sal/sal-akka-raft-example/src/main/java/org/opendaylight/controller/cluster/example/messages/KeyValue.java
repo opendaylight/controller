@@ -18,7 +18,7 @@ public final class KeyValue extends Payload {
     public KeyValue() {
     }
 
-    public KeyValue(String key, String value) {
+    public KeyValue(final String key, final String value) {
         this.key = key;
         this.value = value;
     }
@@ -32,13 +32,19 @@ public final class KeyValue extends Payload {
     }
 
     @Override
-    public String toString() {
-        return "KeyValue{" + "key='" + key + '\'' + ", value='" + value + '\'' + '}';
+    public int size() {
+        return value.length() + key.length();
     }
 
     @Override
-    public int size() {
-        return value.length() + key.length();
+    public int serializedSize() {
+        // Should be a better estimate
+        return size();
+    }
+
+    @Override
+    public String toString() {
+        return "KeyValue{" + "key='" + key + '\'' + ", value='" + value + '\'' + '}';
     }
 
     @Override
