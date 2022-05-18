@@ -40,7 +40,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
         }
 
         static int estimatedSerializedSize(final ReplicatedLogEntry replicatedLogEntry) {
-            return 8 /* index */ + 8 /* term */ + replicatedLogEntry.getData().size()
+            return 8 /* index */ + 8 /* term */ + replicatedLogEntry.getData().serializedSize()
                     + 400 /* estimated extra padding for class info */;
         }
 
@@ -102,6 +102,11 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
+    public int serializedSize() {
+        return Proxy.estimatedSerializedSize(this);
+    }
+
+    @Override
     public boolean isPersistencePending() {
         return persistencePending;
     }
@@ -113,10 +118,6 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     private Object writeReplace() {
         return new Proxy(this);
-    }
-
-    public int estimatedSerializedSize() {
-        return Proxy.estimatedSerializedSize(this);
     }
 
     @Override

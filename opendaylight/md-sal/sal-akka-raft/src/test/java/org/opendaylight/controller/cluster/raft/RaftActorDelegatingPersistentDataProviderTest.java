@@ -106,6 +106,11 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         }
 
         @Override
+        public int serializedSize() {
+            return 0;
+        }
+
+        @Override
         protected Object writeReplace() {
             // Not needed
             throw new UnsupportedOperationException();

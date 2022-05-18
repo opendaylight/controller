@@ -43,6 +43,15 @@ public interface ReplicatedLogEntry {
     int size();
 
     /**
+     * Return the estimate of serialized size of this entry when passed through serialization. The estimate needs to
+     * be reasonably accurate and should err on the side of caution and report a slightly-higher size in face of
+     * uncertainty.
+     *
+     * @return An estimate of serialized size.
+     */
+    int serializedSize();
+
+    /**
      * Checks if persistence is pending for this entry.
      *
      * @return true if persistence is pending, false otherwise.
