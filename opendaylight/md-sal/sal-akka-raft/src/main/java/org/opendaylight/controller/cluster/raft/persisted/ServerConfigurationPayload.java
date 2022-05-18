@@ -89,6 +89,11 @@ public final class ServerConfigurationPayload extends Payload implements Persist
 
     @Override
     public int size() {
+        return serializedSize();
+    }
+
+    @Override
+    public int serializedSize() {
         if (serializedSize < 0) {
             try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
                 try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
