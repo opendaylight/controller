@@ -145,25 +145,32 @@ public class AbstractReplicatedLogImplTest {
         from = replicatedLogImpl.getFrom(0, 20, ReplicatedLog.NO_MAX_SIZE);
         assertEquals(4, from.size());
         assertEquals("A", from.get(0).getData().toString());
+        assertEquals("B", from.get(1).getData().toString());
+        assertEquals("C", from.get(2).getData().toString());
         assertEquals("D", from.get(3).getData().toString());
+
+        // Pre-calculate sizing information for use with capping
+        final int sizeB = from.get(1).serializedSize();
+        final int sizeC = from.get(2).serializedSize();
+        final int sizeD = from.get(3).serializedSize();
 
         from = replicatedLogImpl.getFrom(1, 2, ReplicatedLog.NO_MAX_SIZE);
         assertEquals(2, from.size());
         assertEquals("B", from.get(0).getData().toString());
         assertEquals("C", from.get(1).getData().toString());
 
-        from = replicatedLogImpl.getFrom(1, 3, 2);
+        from = replicatedLogImpl.getFrom(1, 3, sizeB + sizeC);
         assertEquals(2, from.size());
         assertEquals("B", from.get(0).getData().toString());
         assertEquals("C", from.get(1).getData().toString());
 
-        from = replicatedLogImpl.getFrom(1, 3, 3);
+        from = replicatedLogImpl.getFrom(1, 3, sizeB + sizeC + sizeD);
         assertEquals(3, from.size());
         assertEquals("B", from.get(0).getData().toString());
         assertEquals("C", from.get(1).getData().toString());
         assertEquals("D", from.get(2).getData().toString());
 
-        from = replicatedLogImpl.getFrom(1, 2, 3);
+        from = replicatedLogImpl.getFrom(1, 2, sizeB + sizeC + sizeD);
         assertEquals(2, from.size());
         assertEquals("B", from.get(0).getData().toString());
         assertEquals("C", from.get(1).getData().toString());

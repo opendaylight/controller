@@ -452,7 +452,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         setupFollower2();
 
-        MessageCollectorActor.expectMatching(follower2CollectorActor, InstallSnapshot.class, 5);
+        MessageCollectorActor.expectMatching(follower2CollectorActor, InstallSnapshot.class, 1);
 
         follower2Actor.stop();
 
@@ -613,8 +613,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
     /**
      * Resume the lagging follower 2 and verify it receives an install snapshot from the leader.
      */
-    private void verifyInstallSnapshotToLaggingFollower(long lastAppliedIndex,
-            @Nullable ServerConfigurationPayload expServerConfig) {
+    private void verifyInstallSnapshotToLaggingFollower(final long lastAppliedIndex,
+            final @Nullable ServerConfigurationPayload expServerConfig) {
         testLog.info("verifyInstallSnapshotToLaggingFollower starting");
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -811,8 +811,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
     /**
      * Kill the leader actor, reinstate it and verify the recovered journal.
      */
-    private void verifyLeaderRecoveryAfterReinstatement(long lastIndex, long snapshotIndex,
-            long firstJournalEntryIndex) {
+    private void verifyLeaderRecoveryAfterReinstatement(final long lastIndex, final long snapshotIndex,
+            final long firstJournalEntryIndex) {
         testLog.info("verifyLeaderRecoveryAfterReinstatement starting: lastIndex: {}, snapshotIndex: {}, "
             + "firstJournalEntryIndex: {}", lastIndex, snapshotIndex, firstJournalEntryIndex);
 
@@ -845,7 +845,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         testLog.info("verifyLeaderRecoveryAfterReinstatement ending");
     }
 
-    private void sendInitialPayloadsReplicatedToAllFollowers(String... data) {
+    private void sendInitialPayloadsReplicatedToAllFollowers(final String... data) {
 
         // Send the payloads.
         for (String d: data) {
