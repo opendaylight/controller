@@ -126,7 +126,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
         TestRaftActor(final Builder builder) {
             super(builder);
-            this.collectorActor = builder.collectorActor;
+            collectorActor = builder.collectorActor;
         }
 
         public void startDropMessages(final Class<?> msgClass) {
@@ -148,8 +148,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:IllegalCatch" })
         @Override
         public void handleCommand(final Object message) {
-            if (message instanceof MockPayload) {
-                MockPayload payload = (MockPayload) message;
+            if (message instanceof MockPayload payload) {
                 super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload, false);
                 return;
             }
@@ -214,13 +213,14 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             }
 
             public Builder collectorActor(final ActorRef newCollectorActor) {
-                this.collectorActor = newCollectorActor;
+                collectorActor = newCollectorActor;
                 return this;
             }
         }
     }
 
-    protected static final int SNAPSHOT_CHUNK_SIZE = 100;
+    // FIXME: this is an arbitrary limit. Document interactions and/or improve them to improve maintainability
+    protected static final int SNAPSHOT_CHUNK_SIZE = 700;
 
     protected final Logger testLog = LoggerFactory.getLogger(getClass());
 

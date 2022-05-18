@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
+import java.util.function.Function;
+import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -89,6 +91,11 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
     }
 
     @Override
+    public final int serializedSize() {
+        return size() + externalizableProxySize();
+    }
+
+    @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("identifier", identifier).add("size", size()).toString();
     }
@@ -100,4 +107,10 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
 
     @SuppressWarnings("checkstyle:hiddenField")
     protected abstract @NonNull AbstractProxy<T> externalizableProxy(byte @NonNull[] serialized);
+
+    protected abstract int externalizableProxySize();
+
+    protected static final int externalizableProxySize(final Function<byte[], ? extends AbstractProxy<?>> constructor) {
+        return SerializationUtils.serialize(constructor.apply(new byte[0])).length;
+    }
 }
