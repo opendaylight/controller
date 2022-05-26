@@ -153,20 +153,18 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                 return;
             }
 
-            if (message instanceof ServerConfigurationPayload) {
-                super.persistData(collectorActor, new MockIdentifier("serverConfig"), (Payload) message, false);
+            if (message instanceof ServerConfigurationPayload payload) {
+                super.persistData(collectorActor, new MockIdentifier("serverConfig"), payload, false);
                 return;
             }
 
-            if (message instanceof SetPeerAddress) {
-                setPeerAddress(((SetPeerAddress) message).getPeerId(),
-                        ((SetPeerAddress) message).getPeerAddress());
+            if (message instanceof SetPeerAddress setPeerAddress) {
+                setPeerAddress(setPeerAddress.getPeerId(), setPeerAddress.getPeerAddress());
                 return;
             }
 
-            if (message instanceof TestPersist) {
-                persistData(((TestPersist) message).getActorRef(), ((TestPersist) message).getIdentifier(),
-                        ((TestPersist) message).getPayload(), false);
+            if (message instanceof TestPersist testPersist) {
+                persistData(testPersist.getActorRef(), testPersist.getIdentifier(), testPersist.getPayload(), false);
                 return;
             }
 
