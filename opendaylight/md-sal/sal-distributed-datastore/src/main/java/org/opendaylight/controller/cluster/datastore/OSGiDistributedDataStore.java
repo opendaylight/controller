@@ -53,7 +53,7 @@ public final class OSGiDistributedDataStore {
         private final String serviceType;
 
         @GuardedBy("this")
-        private ComponentInstance component;
+        private ComponentInstance<OSGiDOMStore> component;
         @GuardedBy("this")
         private boolean stopped;
 
@@ -122,7 +122,7 @@ public final class OSGiDistributedDataStore {
     @Reference
     ModuleShardConfigProvider configProvider = null;
     @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
-    ComponentFactory datastoreFactory = null;
+    ComponentFactory<OSGiDOMStore> datastoreFactory = null;
 
     private DatastoreState configDatastore;
     private DatastoreState operDatastore;
