@@ -94,6 +94,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         return MoreObjects.toStringHelper(this).add("identifier", identifier).add("size", size()).toString();
     }
 
+    @Override
     protected final Object writeReplace() {
         return verifyNotNull(externalizableProxy(serialized));
     }
