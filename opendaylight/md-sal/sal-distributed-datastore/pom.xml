@@ -114,12 +114,27 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-common-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-dom-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-dom-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-dom-broker</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>concepts</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>util</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
@@ -139,7 +154,23 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-tree-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-tree-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-tree-ri</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-codec-binfmt</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -148,6 +179,18 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-codec-gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-model-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-model-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-model-util</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
