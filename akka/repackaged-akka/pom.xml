@@ -211,6 +211,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Automatic-Module-Name>org.opendaylight.controller.repackaged.akka</Automatic-Module-Name>
                         <Export-Package>
                             akka.*,
                             com.typesafe.sslconfig.akka.*,
