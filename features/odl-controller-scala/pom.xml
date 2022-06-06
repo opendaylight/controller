@@ -42,9 +42,5 @@
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-java8-compat_2.13</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-parser-combinators_2.13</artifactId>
-        </dependency>
     </dependencies>
 </project>
