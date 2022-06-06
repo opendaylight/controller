@@ -3,13 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-parent</artifactId>
+        <artifactId>bnd-parent</artifactId>
         <version>12.0.0-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
+        <relativePath>../../../bnd-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>cds-access-client</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>Clustered Data Store client substrate</description>
 
     <dependencies>
         <dependency>
@@ -99,25 +101,7 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Automatic-Module-Name>org.opendaylight.controller.cluster.access.client</Automatic-Module-Name>
-                    </instructions>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>

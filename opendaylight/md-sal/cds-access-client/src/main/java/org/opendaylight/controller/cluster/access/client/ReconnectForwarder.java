@@ -12,15 +12,20 @@ import static java.util.Objects.requireNonNull;
 /**
  * Forwarder class responsible for routing requests from the previous connection incarnation back to the originator,
  * which can then convert them as appropriate.
- *
- * @author Robert Varga
- */
+*/
 public abstract class ReconnectForwarder {
-    // Visible for subclass method handle
     private final AbstractReceivingClientConnection<?> successor;
 
-    protected ReconnectForwarder(final AbstractReceivingClientConnection<?> successor) {
+    ReconnectForwarder(final AbstractReceivingClientConnection<?> successor) {
         this.successor = requireNonNull(successor);
+    }
+
+    protected ReconnectForwarder(final ConnectedClientConnection<?> successor) {
+        this((AbstractReceivingClientConnection<?>) successor);
+    }
+
+    protected ReconnectForwarder(final ReconnectingClientConnection<?> successor) {
+        this((AbstractReceivingClientConnection<?>) successor);
     }
 
     protected final void sendToSuccessor(final ConnectionEntry entry) {

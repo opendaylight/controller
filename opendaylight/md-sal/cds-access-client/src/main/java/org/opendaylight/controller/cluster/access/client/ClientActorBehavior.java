@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
@@ -329,7 +328,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
      * @param newConn New connection
      * @return ConnectionConnectCohort which will be used to complete the process of bringing the connection up.
      */
-    @Holding("connectionsLock")
+    // Called with connectionsLock write-locked
     protected abstract @NonNull ConnectionConnectCohort connectionUp(@NonNull ConnectedClientConnection<T> newConn);
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,
