@@ -13,17 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-akka</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>concepts</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>mdsal-dom-api</artifactId>
         </dependency>
     </dependencies>
 
