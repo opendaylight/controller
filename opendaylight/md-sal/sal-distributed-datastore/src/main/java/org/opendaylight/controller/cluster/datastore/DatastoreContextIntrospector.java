@@ -175,7 +175,7 @@ public class DatastoreContextIntrospector {
             // This must be a yang-defined type. We need to find the constructor that takes a
             // primitive as the only argument. This will be used to construct instances to perform
             // validation (eg range checking). The yang-generated types have a couple single-argument
-            // constructors but the one we want has the bean ConstructorProperties annotation.
+            // constructors but the one we want has the ConstructorParameters annotation.
             for (final Constructor<?> ctor: propertyType.getConstructors()) {
                 final ConstructorParameters ctorParAnnotation = ctor.getAnnotation(ConstructorParameters.class);
                 if (ctor.getParameterCount() == 1 && ctorParAnnotation != null) {
