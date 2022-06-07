@@ -13,21 +13,32 @@
 
     <dependencies>
         <dependency>
+           <groupId>com.google.guava</groupId>
+           <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>cds-access-api</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>repackaged-akka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-clustering-commons</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>concepts</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>yang-data-api</artifactId>
+            <artifactId>yang-common</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-clustering-commons</artifactId>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-data-api</artifactId>
         </dependency>
 
         <dependency>
@@ -39,17 +50,26 @@
             <artifactId>akka-testkit_2.13</artifactId>
         </dependency>
         <dependency>
-           <groupId>com.google.guava</groupId>
-           <artifactId>guava-testlib</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava-testlib</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-clustering-commons</artifactId>
-          <type>test-jar</type>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-clustering-commons</artifactId>
+            <type>test-jar</type>
         </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
