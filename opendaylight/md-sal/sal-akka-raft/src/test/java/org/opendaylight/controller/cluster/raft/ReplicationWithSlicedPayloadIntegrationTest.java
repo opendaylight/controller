@@ -29,7 +29,7 @@ public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftAct
 
         // Create the leader and 2 follower actors.
 
-        snapshotChunkSize = 20;
+        maximumMessageSliceSize = 20;
 
         DefaultConfigParamsImpl followerConfigParams = newFollowerConfigParams();
         followerConfigParams.setSnapshotBatchCount(snapshotBatchCount);
@@ -58,11 +58,11 @@ public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftAct
 
         // Send a large payload that exceeds the size threshold and needs to be sliced.
 
-        MockPayload largePayload = sendPayloadData(leaderActor, "large", snapshotChunkSize + 1);
+        MockPayload largePayload = sendPayloadData(leaderActor, "large", maximumMessageSliceSize + 1);
 
         // Then send a small payload that does not need to be sliced.
 
-        MockPayload smallPayload = sendPayloadData(leaderActor, "normal", snapshotChunkSize - 1);
+        MockPayload smallPayload = sendPayloadData(leaderActor, "normal", maximumMessageSliceSize - 1);
 
         final List<ApplyState> leaderApplyState = expectMatching(leaderCollectorActor, ApplyState.class, 2);
         verifyApplyState(leaderApplyState.get(0), leaderCollectorActor,

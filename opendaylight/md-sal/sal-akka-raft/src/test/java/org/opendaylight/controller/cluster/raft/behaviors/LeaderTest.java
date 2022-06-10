@@ -612,7 +612,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
+                actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName());
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
@@ -976,7 +976,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
+                actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName());
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while (!fts.isLastChunk(fts.getChunkIndex())) {
@@ -1014,7 +1014,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl() {
             @Override
-            public int getSnapshotChunkSize() {
+            public int getMaximumMessageSliceSize() {
                 return 50;
             }
         };
@@ -1091,7 +1091,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public int getSnapshotChunkSize() {
+            public int getMaximumMessageSliceSize() {
                 return 50;
             }
         });
@@ -1155,7 +1155,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public int getSnapshotChunkSize() {
+            public int getMaximumMessageSliceSize() {
                 return 50;
             }
         });
@@ -1783,7 +1783,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
                 new FiniteDuration(1000, TimeUnit.SECONDS));
         // Note: the size here depends on estimate
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnapshotChunkSize(246);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(246);
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 4, 1).build());
@@ -2266,7 +2266,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
                 new FiniteDuration(300, TimeUnit.MILLISECONDS));
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnapshotChunkSize(serializedSize - 50);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(serializedSize - 50);
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         leaderActorContext.setCommitIndex(-1);
         leaderActorContext.setLastApplied(-1);
@@ -2350,7 +2350,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
                 new FiniteDuration(100, TimeUnit.MILLISECONDS));
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnapshotChunkSize(10);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(10);
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         leaderActorContext.setCommitIndex(-1);
         leaderActorContext.setLastApplied(-1);
@@ -2365,7 +2365,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.clearMessages(followerActor);
 
         sendReplicate(leaderActorContext, term, 0, new MockRaftActorContext.MockPayload("large",
-                leaderActorContext.getConfigParams().getSnapshotChunkSize() + 1));
+                leaderActorContext.getConfigParams().getMaximumMessageSliceSize() + 1));
         MessageCollectorActor.expectFirstMatching(followerActor, MessageSlice.class);
 
         // Sleep for at least 3 * election timeout so the slicing state expires.
@@ -2455,11 +2455,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     private static class MockConfigParamsImpl extends DefaultConfigParamsImpl {
 
         private final long electionTimeOutIntervalMillis;
-        private final int snapshotChunkSize;
+        private final int maximumMessageSliceSize;
 
-        MockConfigParamsImpl(final long electionTimeOutIntervalMillis, final int snapshotChunkSize) {
+        MockConfigParamsImpl(final long electionTimeOutIntervalMillis, final int maximumMessageSliceSize) {
             this.electionTimeOutIntervalMillis = electionTimeOutIntervalMillis;
-            this.snapshotChunkSize = snapshotChunkSize;
+            this.maximumMessageSliceSize = maximumMessageSliceSize;
         }
 
         @Override
@@ -2468,8 +2468,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         }
 
         @Override
-        public int getSnapshotChunkSize() {
-            return snapshotChunkSize;
+        public int getMaximumMessageSliceSize() {
+            return maximumMessageSliceSize;
         }
     }
 }
