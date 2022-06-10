@@ -216,7 +216,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     // FIXME: this is an arbitrary limit. Document interactions and/or improve them to improve maintainability
-    protected static final int SNAPSHOT_CHUNK_SIZE = 700;
+    protected static final int MAXIMUM_MESSAGE_SLICE_SIZE = 700;
 
     protected final Logger testLog = LoggerFactory.getLogger(getClass());
 
@@ -247,7 +247,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected long currentTerm;
 
     protected int snapshotBatchCount = 4;
-    protected int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
+    protected int maximumMessageSliceSize = MAXIMUM_MESSAGE_SLICE_SIZE;
 
     protected List<MockPayload> expSnapshotState = new ArrayList<>();
 
@@ -265,7 +265,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         configParams.setSnapshotBatchCount(snapshotBatchCount);
         configParams.setSnapshotDataThresholdPercentage(70);
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
-        configParams.setSnapshotChunkSize(snapshotChunkSize);
+        configParams.setMaximumMessageSliceSize(maximumMessageSliceSize);
         return configParams;
     }
 

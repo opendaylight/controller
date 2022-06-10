@@ -19,7 +19,7 @@ public class ExampleConfigParamsImpl extends DefaultConfigParamsImpl {
     }
 
     @Override
-    public int getSnapshotChunkSize() {
+    public int getMaximumMessageSliceSize() {
         return 50;
     }
 }

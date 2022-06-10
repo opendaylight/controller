@@ -87,7 +87,7 @@ public interface ConfigParams {
      *
      * @return the maximum size (in bytes).
      */
-    int getSnapshotChunkSize();
+    int getMaximumMessageSliceSize();
 
     /**
      * Returns the maximum number of journal log entries to batch on recovery before applying.
