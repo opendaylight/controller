@@ -9,7 +9,7 @@ module distributed-datastore-provider {
          the distributed datastore provider implementation";
 
     revision "2023-12-29" {
-        description "Remote use-tell-based-protocol leaf";
+        description "Remote use-tell-based-protocol and shard-snapshot-chunk-size leaves";
     }
 
     revision "2014-06-12" {
@@ -210,14 +210,6 @@ module distributed-datastore-provider {
                          reflection. For now let's assume that these classes to customize raft behaviors should be
                          present in the distributed data store module itself. If this property is set to a class which
                          cannot be found then the default raft behavior will be applied";
-        }
-
-        leaf shard-snapshot-chunk-size {
-            status deprecated;
-            default 491520;
-            type non-zero-uint32-type;
-            description "When sending a snapshot to a follower, this is the maximum size in bytes for
-                         a chunk of data.";
         }
 
         leaf maximum-message-slice-size {

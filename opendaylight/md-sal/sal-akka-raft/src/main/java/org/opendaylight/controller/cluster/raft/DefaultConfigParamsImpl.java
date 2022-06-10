@@ -41,7 +41,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      */
     private static final int ELECTION_TIME_MAX_VARIANCE = 100;
 
-    private static final int SNAPSHOT_CHUNK_SIZE = 480 * 1024; // 480KiB
+    private static final int MAXIMUM_MESSAGE_SLICE_SIZE = 480 * 1024; // 480KiB
 
 
     /**
@@ -72,7 +72,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // 0 means direct threshold if disabled
     private int snapshotDataThreshold = 0;
 
-    private int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
+    private int maximumMessageSliceSize = MAXIMUM_MESSAGE_SLICE_SIZE;
 
     private long electionTimeoutFactor = 2;
     private long candidateElectionTimeoutDivisor = 1;
@@ -108,8 +108,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.snapshotDataThreshold = snapshotDataThreshold;
     }
 
-    public void setSnapshotChunkSize(final int snapshotChunkSize) {
-        this.snapshotChunkSize = snapshotChunkSize;
+    public void setMaximumMessageSliceSize(final int maximumMessageSliceSize) {
+        this.maximumMessageSliceSize = maximumMessageSliceSize;
     }
 
     public void setJournalRecoveryLogBatchSize(final int journalRecoveryLogBatchSize) {
@@ -191,8 +191,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     @Override
-    public int getSnapshotChunkSize() {
-        return snapshotChunkSize;
+    public int getMaximumMessageSliceSize() {
+        return maximumMessageSliceSize;
     }
 
     @Override
