@@ -638,8 +638,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         assertEquals("Persisted Snapshot getUnAppliedEntries size", 0, unAppliedEntry.size());
 
         int snapshotSize = SerializationUtils.serialize(persistedSnapshot.getState()).length;
-        final int expTotalChunks = snapshotSize / SNAPSHOT_CHUNK_SIZE
-                + (snapshotSize % SNAPSHOT_CHUNK_SIZE > 0 ? 1 : 0);
+        final int expTotalChunks = snapshotSize / MAXIMUM_MESSAGE_SLICE_SIZE
+                + (snapshotSize % MAXIMUM_MESSAGE_SLICE_SIZE > 0 ? 1 : 0);
 
         InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
                 InstallSnapshot.class);

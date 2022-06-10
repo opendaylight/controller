@@ -110,7 +110,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         super(context, state);
 
         appendEntriesMessageSlicer = MessageSlicer.builder().logContext(logName())
-            .messageSliceSize(context.getConfigParams().getSnapshotChunkSize())
+            .messageSliceSize(context.getConfigParams().getMaximumMessageSliceSize())
             .expireStateAfterInactivity(context.getConfigParams().getElectionTimeOutInterval().toMillis() * 3,
                     TimeUnit.MILLISECONDS).build();
 
@@ -774,7 +774,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // Try to get all the entries in the journal but not exceeding the max data size for a single AppendEntries
         // message.
         int maxEntries = (int) context.getReplicatedLog().size();
-        final int maxDataSize = context.getConfigParams().getSnapshotChunkSize();
+        final int maxDataSize = context.getConfigParams().getMaximumMessageSliceSize();
         final long followerNextIndex = followerLogInfo.getNextIndex();
         List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex,
                 maxEntries, maxDataSize);
@@ -905,7 +905,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             getReplicatedToAllIndex(), followerId);
         if (captureInitiated) {
             followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
-                context.getConfigParams().getSnapshotChunkSize(), logName()));
+                context.getConfigParams().getMaximumMessageSliceSize(), logName()));
         }
 
         return captureInitiated;
@@ -947,7 +947,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         if (snapshotHolder.isPresent()) {
             LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
             if (installSnapshotState == null) {
-                installSnapshotState = new LeaderInstallSnapshotState(context.getConfigParams().getSnapshotChunkSize(),
+                installSnapshotState = new LeaderInstallSnapshotState(context.getConfigParams().getMaximumMessageSliceSize(),
                         logName());
                 followerLogInfo.setLeaderInstallSnapshotState(installSnapshotState);
             }

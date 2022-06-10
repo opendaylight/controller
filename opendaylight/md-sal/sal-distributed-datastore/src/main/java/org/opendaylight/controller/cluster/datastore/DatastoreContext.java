@@ -168,7 +168,6 @@ public class DatastoreContext implements ClientActorConfig {
         setCandidateElectionTimeoutDivisor(other.raftConfig.getCandidateElectionTimeoutDivisor());
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
         setMaximumMessageSliceSize(other.getMaximumMessageSliceSize());
-        setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
         setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
         setTempFileDirectory(other.getTempFileDirectory());
         setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
@@ -332,17 +331,8 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
     }
 
-    @Deprecated
-    private void setShardSnapshotChunkSize(final int shardSnapshotChunkSize) {
-        // We'll honor the shardSnapshotChunkSize setting for backwards compatibility but only if it doesn't exceed
-        // maximumMessageSliceSize.
-        if (shardSnapshotChunkSize < maximumMessageSliceSize) {
-            raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
-        }
-    }
-
     private void setMaximumMessageSliceSize(final int maximumMessageSliceSize) {
-        raftConfig.setSnapshotChunkSize(maximumMessageSliceSize);
+        raftConfig.setMaximumMessageSliceSize(maximumMessageSliceSize);
         this.maximumMessageSliceSize = maximumMessageSliceSize;
     }
 
@@ -636,14 +626,6 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder customRaftPolicyImplementation(final String customRaftPolicyImplementation) {
             datastoreContext.setCustomRaftPolicyImplementation(customRaftPolicyImplementation);
-            return this;
-        }
-
-        @Deprecated
-        public Builder shardSnapshotChunkSize(final int shardSnapshotChunkSize) {
-            LOG.warn("The shard-snapshot-chunk-size configuration parameter is deprecated - "
-                    + "use maximum-message-slice-size instead");
-            datastoreContext.setShardSnapshotChunkSize(shardSnapshotChunkSize);
             return this;
         }
 
