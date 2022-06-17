@@ -42,9 +42,10 @@ final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implement
 
     private final OnDemandShardStateCache stateCache;
 
-    ShardDataTreeListenerInfoMXBeanImpl(final String shardName, final String mxBeanType, final ActorRef shardActor) {
+    ShardDataTreeListenerInfoMXBeanImpl(final String shardName, final String mxBeanType, final ActorRef shardActor,
+        final long shardStateRetrievalTimeout) {
         super(shardName, mxBeanType, JMX_CATEGORY);
-        stateCache = new OnDemandShardStateCache(shardName, requireNonNull(shardActor));
+        stateCache = new OnDemandShardStateCache(shardName, requireNonNull(shardActor), shardStateRetrievalTimeout);
     }
 
     @Override

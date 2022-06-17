@@ -30,6 +30,7 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
  */
 final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static final String JMX_CATEGORY_SHARD = "Shards";
+    public static final long DEFAULT_SHARD_STATE_RETRIEVAL_TIMEOUT_S = 10;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSS")
         .withZone(ZoneId.systemDefault());
@@ -65,7 +66,13 @@ final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     ShardStats(final String shardName, final String mxBeanType, final @Nullable Shard shard) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
         this.shard = shard;
-        stateCache = new OnDemandShardStateCache(shardName, shard != null ? shard.self() : null);
+        if (shard != null) {
+            stateCache = new OnDemandShardStateCache(shardName, shard.self(),
+                shard.getShardStateRetrievalTimeoutSeconds());
+        } else {
+            stateCache = new OnDemandShardStateCache(shardName, null,
+                DEFAULT_SHARD_STATE_RETRIEVAL_TIMEOUT_S);
+        }
     }
 
     static ShardStats create(final String shardName, final String mxBeanType, final @NonNull Shard shard) {

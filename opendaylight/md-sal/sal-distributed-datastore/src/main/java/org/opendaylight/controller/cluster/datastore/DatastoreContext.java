@@ -69,6 +69,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
     public static final ExportOnRecovery DEFAULT_EXPORT_ON_RECOVERY = ExportOnRecovery.Off;
     public static final String DEFAULT_RECOVERY_EXPORT_BASE_DIR = "persistence-export";
+    public static final long DEFAULT_SHARD_RAFT_STATE_RETRIEVAL_TIMEOUT_S = 10;
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
@@ -107,6 +108,7 @@ public class DatastoreContext implements ClientActorConfig {
     private boolean useLz4Compression = false;
     private ExportOnRecovery exportOnRecovery = DEFAULT_EXPORT_ON_RECOVERY;
     private String recoveryExportBaseDir = DEFAULT_RECOVERY_EXPORT_BASE_DIR;
+    private long shardRaftStateRetrievalTimeoutSeconds = DEFAULT_SHARD_RAFT_STATE_RETRIEVAL_TIMEOUT_S;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -155,6 +157,7 @@ public class DatastoreContext implements ClientActorConfig {
         useLz4Compression = other.useLz4Compression;
         exportOnRecovery = other.exportOnRecovery;
         recoveryExportBaseDir = other.recoveryExportBaseDir;
+        shardRaftStateRetrievalTimeoutSeconds = other.shardRaftStateRetrievalTimeoutSeconds;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -403,6 +406,10 @@ public class DatastoreContext implements ClientActorConfig {
 
     public int getInitialPayloadSerializedBufferCapacity() {
         return initialPayloadSerializedBufferCapacity;
+    }
+
+    public long getShardRaftStateRetrievalTimeoutSeconds() {
+        return shardRaftStateRetrievalTimeoutSeconds;
     }
 
     public static class Builder {
@@ -686,6 +693,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder initialPayloadSerializedBufferCapacity(final int capacity) {
             datastoreContext.initialPayloadSerializedBufferCapacity = capacity;
+            return this;
+        }
+
+        public Builder shardRaftStateRetrievalTimeoutSeconds(final long shardStateRetrievalTimeout) {
+            datastoreContext.shardRaftStateRetrievalTimeoutSeconds = shardStateRetrievalTimeout;
             return this;
         }
 

@@ -23,6 +23,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_RAFT_STATE_RETRIEVAL_TIMEOUT_S;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -71,6 +72,8 @@ public class DatastoreContextTest {
                 context.getShardBatchedModificationCount());
         assertEquals(DEFAULT_MAX_MESSAGE_SLICE_SIZE, context.getMaximumMessageSliceSize());
         assertEquals(DEFAULT_RECOVERY_EXPORT_BASE_DIR, context.getRecoveryExportBaseDir());
+        assertEquals(DEFAULT_SHARD_RAFT_STATE_RETRIEVAL_TIMEOUT_S,
+            context.getShardRaftStateRetrievalTimeoutSeconds());
     }
 
     @Test
@@ -104,6 +107,7 @@ public class DatastoreContextTest {
         builder.initialPayloadSerializedBufferCapacity(DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY + 1);
         builder.exportOnRecovery(ExportOnRecovery.Json);
         builder.recoveryExportBaseDir(DEFAULT_RECOVERY_EXPORT_BASE_DIR + "-new");
+        builder.shardRaftStateRetrievalTimeoutSeconds(DEFAULT_SHARD_RAFT_STATE_RETRIEVAL_TIMEOUT_S + 1);
 
         DatastoreContext context = builder.build();
 
@@ -158,5 +162,7 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_RECOVERY_EXPORT_BASE_DIR + "-new",
                 context.getRecoveryExportBaseDir());
         assertEquals(ExportOnRecovery.Json, context.getExportOnRecovery());
+        assertEquals(DEFAULT_SHARD_RAFT_STATE_RETRIEVAL_TIMEOUT_S + 1,
+            context.getShardRaftStateRetrievalTimeoutSeconds());
     }
 }

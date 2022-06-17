@@ -51,4 +51,6 @@ public interface DatastoreConfigurationMXBean {
     boolean getTransactionContextDebugEnabled();
 
     int getMaximumMessageSliceSize();
+
+    long getShardRaftStateRetrievalTimeoutSeconds();
 }

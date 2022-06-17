@@ -32,10 +32,13 @@ final class OnDemandShardStateCache {
     private final ActorRef shardActor;
     private final String shardName;
     private volatile String stateRetrievalTime;
+    private final long shardStateTimeoutSeconds;
 
-    OnDemandShardStateCache(final String shardName, final ActorRef shardActor) {
+    OnDemandShardStateCache(final String shardName, final ActorRef shardActor,
+        final long shardStateRetrievalTimeoutSeconds) {
         this.shardName = requireNonNull(shardName);
         this.shardActor = shardActor;
+        this.shardStateTimeoutSeconds = shardStateRetrievalTimeoutSeconds;
     }
 
     OnDemandShardState get() throws Exception {
@@ -52,7 +55,7 @@ final class OnDemandShardStateCache {
 
     private OnDemandShardState retrieveState() throws Exception {
         stateRetrievalTime = null;
-        Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
+        Timeout timeout = new Timeout(shardStateTimeoutSeconds, TimeUnit.SECONDS);
         Stopwatch timer = Stopwatch.createStarted();
 
         OnDemandShardState state = (OnDemandShardState) Await.result(Patterns.ask(shardActor,

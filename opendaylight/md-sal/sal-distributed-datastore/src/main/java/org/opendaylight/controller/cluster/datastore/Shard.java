@@ -187,6 +187,8 @@ public class Shard extends RaftActor {
 
     private long transactionCommitTimeout;
 
+    private final long shardStateRetrievalTimeoutSeconds;
+
     private Cancellable txCommitTimeoutCheckSchedule;
 
     private final Optional<ActorRef> roleChangeNotifier;
@@ -229,6 +231,8 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
         frontendMetadata = new FrontendMetadata(name);
         exportOnRecovery = datastoreContext.getExportOnRecovery();
+        shardStateRetrievalTimeoutSeconds = builder.getDatastoreContext()
+            .getShardRaftStateRetrievalTimeoutSeconds();
 
         exportActor = switch (exportOnRecovery) {
             case Json -> getContext().actorOf(JsonExportActor.props(builder.getSchemaContext(),
@@ -289,7 +293,7 @@ public class Shard extends RaftActor {
                 .expireStateAfterInactivity(datastoreContext.getRequestTimeout(), TimeUnit.NANOSECONDS).build();
 
         listenerInfoMXBean = new ShardDataTreeListenerInfoMXBeanImpl(name, datastoreContext.getDataStoreMXBeanType(),
-                self());
+                self(), shardStateRetrievalTimeoutSeconds);
         listenerInfoMXBean.register();
     }
 
@@ -1148,6 +1152,10 @@ public class Shard extends RaftActor {
     // non-final for mocking
     ShardStats getShardMBean() {
         return shardMBean;
+    }
+
+    public long getShardStateRetrievalTimeoutSeconds() {
+        return shardStateRetrievalTimeoutSeconds;
     }
 
     public static Builder builder() {

@@ -118,4 +118,9 @@ final class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements D
     public int getMaximumMessageSliceSize() {
         return context.getMaximumMessageSliceSize();
     }
+
+    @Override
+    public long getShardRaftStateRetrievalTimeoutSeconds() {
+        return context.getShardRaftStateRetrievalTimeoutSeconds();
+    }
 }

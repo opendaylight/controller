@@ -296,6 +296,12 @@ module distributed-datastore-provider {
             type string;
             description "Directory name for snapshot and journal dumps.";
         }
+
+        leaf shard-raft-state-retrieval-timeout-seconds {
+            default 10;
+            type non-zero-uint32-type;
+            description "Timeout for the retrieval of RaftState from a Shard actor";
+        }
     }
 
     container data-store-properties-container {
