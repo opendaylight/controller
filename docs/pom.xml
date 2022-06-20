@@ -230,7 +230,7 @@
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-release/</link>
 
                         <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/11.0.0/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/9.0.0-SNAPSHOT/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/9.0.0/</link>
                         <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/10.0.0-SNAPSHOT/</link>
                     </links>
                     <groups>
