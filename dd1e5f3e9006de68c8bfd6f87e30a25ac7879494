@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a79b6620_f716e84d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-06-27T11:49:20Z",
+      "side": 1,
+      "message": "part of datastoreContext",
+      "range": {
+        "startLine": 190,
+        "startChar": 4,
+        "endLine": 190,
+        "endChar": 57
+      },
+      "revId": "dd1e5f3e9006de68c8bfd6f87e30a25ac7879494",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "99d8b693_4be8d6cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-06-27T11:49:20Z",
+      "side": 1,
+      "message": "why is this needed?",
+      "range": {
+        "startLine": 1157,
+        "startChar": 16,
+        "endLine": 1157,
+        "endChar": 52
+      },
+      "revId": "dd1e5f3e9006de68c8bfd6f87e30a25ac7879494",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
