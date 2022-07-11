@@ -11,23 +11,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.eclipse.jdt.annotation.Nullable;
-import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
@@ -158,18 +157,13 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     private void registerNamespaceHandler(final BundleContext context) {
-        Dictionary<String, Object> props = emptyDict();
-        props.put("osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0);
-        namespaceReg = context.registerService(NamespaceHandler.class, new OpendaylightNamespaceHandler(), props);
+        namespaceReg = context.registerService(NamespaceHandler.class, new OpendaylightNamespaceHandler(),
+            FrameworkUtil.asDictionary(Map.of(
+                "osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0)));
     }
 
     private void registerBlueprintEventHandler(final BundleContext context) {
         eventHandlerReg = context.registerService(BlueprintListener.class, this, null);
-    }
-
-    @SuppressModernizer
-    private static Dictionary<String, Object> emptyDict() {
-        return new Hashtable<>();
     }
 
     /**

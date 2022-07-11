@@ -10,8 +10,8 @@ package org.opendaylight.controller.blueprint.ext;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.aries.blueprint.ComponentDefinitionRegistry;
@@ -24,6 +24,7 @@ import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.blueprint.reflect.BeanProperty;
 import org.osgi.service.blueprint.reflect.ComponentMetadata;
@@ -55,7 +56,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     }
 
     public void setBlueprintContainerRestartService(final BlueprintContainerRestartService restartService) {
-        this.blueprintContainerRestartService = restartService;
+        blueprintContainerRestartService = restartService;
     }
 
     public void setRestartDependentsOnUpdates(final boolean restartDependentsOnUpdates) {
@@ -156,11 +157,11 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
             }
         };
 
-        Dictionary<String, Object> props = new Hashtable<>();
-        props.put(Constants.SERVICE_PID, persistentId);
-        props.put(Constants.BUNDLE_SYMBOLICNAME, bundle.getSymbolicName());
-        props.put(Constants.BUNDLE_VERSION, bundle.getHeaders().get(Constants.BUNDLE_VERSION));
-        managedServiceRegs.add(bundle.getBundleContext().registerService(ManagedService.class, managedService, props));
+        managedServiceRegs.add(bundle.getBundleContext().registerService(ManagedService.class, managedService,
+            FrameworkUtil.asDictionary(Map.of(
+                Constants.SERVICE_PID, persistentId,
+                Constants.BUNDLE_SYMBOLICNAME, bundle.getSymbolicName(),
+                Constants.BUNDLE_VERSION, bundle.getHeaders().get(Constants.BUNDLE_VERSION)))));
     }
 
     private String logName() {

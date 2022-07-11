@@ -12,17 +12,15 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.component.annotations.Activate;
@@ -87,17 +85,15 @@ public final class OSGiDistributedDataStore {
         }
 
         @Override
-        @SuppressModernizer
         public void onSuccess(final Object result) {
             LOG.debug("Distributed Datastore type {} reached initial settle", datastoreType);
 
             synchronized (this) {
                 if (!stopped) {
-                    final Dictionary<String, Object> dict = new Hashtable<>();
-                    dict.put(OSGiDOMStore.DATASTORE_TYPE_PROP, datastoreType);
-                    dict.put(OSGiDOMStore.DATASTORE_INST_PROP, datastore);
-                    dict.put("type", serviceType);
-                    component = datastoreFactory.newInstance(dict);
+                    component = datastoreFactory.newInstance(FrameworkUtil.asDictionary(Map.of(
+                        OSGiDOMStore.DATASTORE_TYPE_PROP, datastoreType,
+                        OSGiDOMStore.DATASTORE_INST_PROP, datastore,
+                        "type", serviceType)));
                     LOG.info("Distributed Datastore type {} started", datastoreType);
                 }
             }
