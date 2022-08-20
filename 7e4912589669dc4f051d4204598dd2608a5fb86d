@@ -52,6 +52,24 @@
       "parentUuid": "6265639d_a3b35a49",
       "revId": "7e4912589669dc4f051d4204598dd2608a5fb86d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b00c666d_a437ff5e",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2043Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-08-20T00:01:30Z",
+      "side": 1,
+      "message": "Also, assertTrue() is ugly -- use Matchers.that() to express the \u0027\u003c 5\u0027 expression",
+      "parentUuid": "fe44af4d_fabfee6c",
+      "revId": "7e4912589669dc4f051d4204598dd2608a5fb86d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
