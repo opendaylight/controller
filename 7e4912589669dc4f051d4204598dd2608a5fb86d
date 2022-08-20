@@ -34,6 +34,24 @@
       "parentUuid": "e5808dc2_4148e48d",
       "revId": "7e4912589669dc4f051d4204598dd2608a5fb86d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fe44af4d_fabfee6c",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2043Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-08-20T00:00:27Z",
+      "side": 1,
+      "message": "Ah, but we need to know how long the request took: this would be okay one line lower, where we would have had synchronized with the response.",
+      "parentUuid": "6265639d_a3b35a49",
+      "revId": "7e4912589669dc4f051d4204598dd2608a5fb86d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
