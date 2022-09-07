@@ -92,7 +92,7 @@
 
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor-testkit-typed_2.13</artifactId>
+            <artifactId>akka-actor-testkit-typed_3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>

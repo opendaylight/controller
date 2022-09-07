@@ -3,7 +3,7 @@
     <feature version="0.0.0">
         <feature>odl-controller-scala</feature>
         <bundle>mvn:com.typesafe/config/1.4.2</bundle>
-        <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.4.3</bundle>
+        <bundle>mvn:com.typesafe/ssl-config-core_3/0.4.3</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.38.1</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.38.1</bundle>
         <bundle>mvn:io.netty/netty/3.10.6.Final</bundle>
