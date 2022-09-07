@@ -39,11 +39,11 @@
     <!-- Akka -->
     <dependency>
       <groupId>org.scala-lang.modules</groupId>
-      <artifactId>scala-java8-compat_2.13</artifactId>
+      <artifactId>scala-java8-compat_3</artifactId>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
+      <artifactId>akka-testkit_3</artifactId>
     </dependency>
 
     <!-- Scala -->

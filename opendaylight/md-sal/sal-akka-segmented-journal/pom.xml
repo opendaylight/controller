@@ -27,11 +27,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_2.13</artifactId>
+            <artifactId>akka-testkit_3</artifactId>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-persistence-tck_2.13</artifactId>
+            <artifactId>akka-persistence-tck_3</artifactId>
         </dependency>
 
         <!-- Codahale -->
@@ -103,7 +103,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         </dependency>
         <dependency>
             <groupId>org.scalatestplus</groupId>
-            <artifactId>junit-4-13_2.13</artifactId>
+            <artifactId>junit-4-13_3</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
