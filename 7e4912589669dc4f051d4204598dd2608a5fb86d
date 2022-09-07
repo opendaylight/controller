@@ -70,6 +70,24 @@
       "parentUuid": "fe44af4d_fabfee6c",
       "revId": "7e4912589669dc4f051d4204598dd2608a5fb86d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dc12723f_c985b975",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2043Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2022-09-07T15:15:52Z",
+      "side": 1,
+      "message": "I believe assertFalse(getFuture(requests).isPresent());\ndo not synchronize with the response only check if future.isCompleted()\nwhich is true thanks to the whole test running in single thread\n\nin local testing after removing withDispatcher(CallingThreadDispatcher.Id() \nthe assertTrue(future.isCompleted()); (line 92) was failing \nonly after adding await the test passed.",
+      "parentUuid": "b00c666d_a437ff5e",
+      "revId": "7e4912589669dc4f051d4204598dd2608a5fb86d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
