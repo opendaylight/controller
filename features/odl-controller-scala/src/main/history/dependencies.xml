@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-scala">
     <feature version="0.0.0">
-        <bundle>mvn:org.scala-lang.modules/scala-java8-compat_2.13/1.0.2</bundle>
-        <bundle>mvn:org.scala-lang.modules/scala-parser-combinators_2.13/1.1.2</bundle>
+        <bundle>mvn:org.scala-lang.modules/scala-java8-compat_3/1.0.2</bundle>
+        <bundle>mvn:org.scala-lang.modules/scala-parser-combinators_3/1.1.2</bundle>
         <bundle>mvn:org.scala-lang/scala-library/2.13.8</bundle>
         <bundle>mvn:org.scala-lang/scala-reflect/2.13.8</bundle>
     </feature>

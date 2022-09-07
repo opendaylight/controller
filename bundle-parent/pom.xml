@@ -34,26 +34,26 @@
             <dependency>
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-library</artifactId>
-                <version>2.13.8</version>
+                <version>3.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-reflect</artifactId>
-                <version>2.13.8</version>
+                <version>3.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang.modules</groupId>
-                <artifactId>scala-java8-compat_2.13</artifactId>
+                <artifactId>scala-java8-compat_3</artifactId>
                 <version>1.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang.modules</groupId>
-                <artifactId>scala-parser-combinators_2.13</artifactId>
-                <version>1.1.2</version>
+                <artifactId>scala-parser-combinators_3</artifactId>
+                <version>2.1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.scalatestplus</groupId>
-                <artifactId>junit-4-13_2.13</artifactId>
+                <artifactId>junit-4-13_3</artifactId>
                 <version>3.2.13.0</version>
                 <scope>test</scope>
             </dependency>
@@ -67,48 +67,48 @@
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
-                <artifactId>ssl-config-core_2.13</artifactId>
-                <version>0.4.3</version>
+                <artifactId>ssl-config-core_3</artifactId>
+                <version>0.6.1</version>
             </dependency>
 
             <!-- Akka testkit -->
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-testkit_2.13</artifactId>
+                <artifactId>akka-testkit_3</artifactId>
                 <version>2.6.20</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-actor_2.13</artifactId>
+                        <artifactId>akka-actor_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-actor-testkit-typed_2.13</artifactId>
+                <artifactId>akka-actor-testkit-typed_3</artifactId>
                 <version>2.6.20</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-actor-typed_2.13</artifactId>
+                        <artifactId>akka-actor-typed_3</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-slf4j_2.13</artifactId>
+                        <artifactId>akka-slf4j_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-persistence-tck_2.13</artifactId>
+                <artifactId>akka-persistence-tck_3</artifactId>
                 <version>2.6.20</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-persistence_2.13</artifactId>
+                        <artifactId>akka-persistence_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
