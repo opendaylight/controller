@@ -82,11 +82,14 @@ public class DataCentersTest extends AbstractNativeEosTest {
         verifyListenerState(listener2, ENTITY_1, true, true, false);
 
         registerCandidates(node4, ENTITY_1, "member-4");
+        waitUntillCandidatePresent(node4, ENTITY_1, "member-4");
+
         unregisterCandidates(node3, ENTITY_1, "member-3");
+        waitUntillOwnerPresent(node3, ENTITY_1);
 
         // checking index after notif so current + 1
         verifyListenerState(listener1, ENTITY_1, true, false, false);
-        verifyListenerState(listener2, ENTITY_1, true, false, false);
+        verifyListenerState(listener2, ENTITY_1, true, false, true);
 
         deactivateDatacenter(node3).get();
         activateDatacenter(node2).get();
