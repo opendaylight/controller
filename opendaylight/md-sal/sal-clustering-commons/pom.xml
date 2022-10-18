@@ -54,9 +54,12 @@
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-testkit_2.13</artifactId>
     </dependency>
+<!--    TODO: added because of IDEAs issue with dependency resolution.-->
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-persistence-tck_2.13</artifactId>
+      <version>2.6.20</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.scalatestplus</groupId>
