@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka;
 
+import static org.awaitility.Awaitility.await;
+
 import akka.actor.testkit.typed.javadsl.ActorTestKit;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
@@ -15,7 +17,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class DataCentersTest extends AbstractNativeEosTest {
 
         // need to wait until all nodes are ready
         final Cluster cluster = Cluster.get(node4.getActorSystem());
-        Awaitility.await().atMost(Duration.ofSeconds(20)).until(() -> {
+        await().atMost(Duration.ofSeconds(20)).until(() -> {
             final List<Member> members = new ArrayList<>();
             cluster.state().getMembers().forEach(members::add);
             if (members.size() != 4) {
@@ -81,8 +82,9 @@ public class DataCentersTest extends AbstractNativeEosTest {
         verifyListenerState(listener1, ENTITY_1, true, false, false);
         verifyListenerState(listener2, ENTITY_1, true, true, false);
 
-        registerCandidates(node4, ENTITY_1, "member-4");
         unregisterCandidates(node3, ENTITY_1, "member-3");
+        registerCandidates(node4, ENTITY_1, "member-4");
+        waitUntillCandidatePresent(node4, ENTITY_1, "member-4");
 
         // checking index after notif so current + 1
         verifyListenerState(listener1, ENTITY_1, true, false, false);
