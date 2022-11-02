@@ -47,10 +47,11 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
@@ -166,14 +167,15 @@ public class ShardTransactionTest extends AbstractActorTest {
         final ActorRef transaction = newTransactionActor(RW, mockWriteTx, "testOnReceiveBatchedModifications");
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode writeData = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
+            .build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        NormalizedNode mergeData = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME))
-                .build();
+        NormalizedNode mergeData = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
+            .build();
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
@@ -204,9 +206,10 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode writeData = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
+            .build();
 
         final TransactionIdentifier tx1 = nextTransactionId();
         BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
@@ -235,9 +238,10 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode writeData = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
+            .build();
 
         BatchedModifications batched = new BatchedModifications(nextTransactionId(),
             DataStoreVersions.CURRENT_VERSION);

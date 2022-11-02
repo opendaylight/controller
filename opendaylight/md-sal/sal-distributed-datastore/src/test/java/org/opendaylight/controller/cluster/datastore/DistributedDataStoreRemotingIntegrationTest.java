@@ -115,13 +115,14 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
@@ -654,11 +655,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
-        final ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
-                    .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
-
-        writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
+        writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
+            .build());
 
         final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
             .getCause();
@@ -686,13 +686,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-        final ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
-                    .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
-
         // Note that merge will validate the data and fail but put succeeds b/c deep validation is not
         // done for put for performance reasons.
-        writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
+        writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
+            .build());
 
         final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
             .getCause();
@@ -1444,8 +1443,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             followerDatastoreContextBuilder.snapshotOnRootOverwrite(true));
 
         leaderTestKit.waitForMembersUp("member-2");
-        final ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(SchemaContext.NAME))
+        final ContainerNode rootNode = Builders.containerBuilder()
+                .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME))
                 .withChild(CarsModel.create())
                 .build();
 

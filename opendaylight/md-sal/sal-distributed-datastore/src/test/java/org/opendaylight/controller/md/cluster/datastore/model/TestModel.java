@@ -9,14 +9,13 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
@@ -65,7 +64,7 @@ public final class TestModel {
     }
 
     public static DataContainerChild outerNode(final int... ids) {
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
+        var outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
         for (int id: ids) {
             outer.addChild(ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
         }
@@ -74,7 +73,7 @@ public final class TestModel {
     }
 
     public static DataContainerChild outerNode(final MapEntryNode... entries) {
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
+        var outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
         for (MapEntryNode e: entries) {
             outer.addChild(e);
         }
@@ -83,7 +82,7 @@ public final class TestModel {
     }
 
     public static DataContainerChild innerNode(final String... names) {
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> outer = ImmutableNodes.mapNodeBuilder(INNER_LIST_QNAME);
+        var outer = ImmutableNodes.mapNodeBuilder(INNER_LIST_QNAME);
         for (String name: names) {
             outer.addChild(ImmutableNodes.mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
         }
@@ -95,13 +94,15 @@ public final class TestModel {
         return ImmutableNodes.mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, id).addChild(inner).build();
     }
 
-    public static NormalizedNode testNodeWithOuter(final int... ids) {
+    public static ContainerNode testNodeWithOuter(final int... ids) {
         return testNodeWithOuter(outerNode(ids));
     }
 
-    public static NormalizedNode testNodeWithOuter(final DataContainerChild outer) {
-        return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outer).build();
+    public static ContainerNode testNodeWithOuter(final DataContainerChild outer) {
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .withChild(outer)
+            .build();
     }
 
     public static NodeIdentifierWithPredicates outerEntryKey(final int id) {

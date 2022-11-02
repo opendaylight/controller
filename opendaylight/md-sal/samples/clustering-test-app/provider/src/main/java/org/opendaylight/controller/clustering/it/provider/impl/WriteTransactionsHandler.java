@@ -40,10 +40,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +136,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
                 .build();
         final YangInstanceIdentifier idListItem = ID_INT_YID.node(entry.getIdentifier());
 
-        final ContainerNode containerNode = ImmutableContainerNodeBuilder.create()
+        final ContainerNode containerNode = Builders.containerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(ID_INTS))
                 .withChild(ImmutableNodes.mapNodeBuilder(ID_INT).build())
                 .build();
@@ -181,11 +179,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
         LOG.debug("Filling the item list with initial values.");
 
-        final CollectionNodeBuilder<MapEntryNode, SystemMapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ITEM);
-
         final YangInstanceIdentifier itemListId = idListItem.node(ITEM);
         tx = domDataBroker.newWriteOnlyTransaction();
-        final MapNode itemListNode = mapBuilder.build();
+        final MapNode itemListNode = ImmutableNodes.mapNodeBuilder(ITEM).build();
         tx.put(LogicalDatastoreType.CONFIGURATION, itemListId, itemListNode);
 
         try {

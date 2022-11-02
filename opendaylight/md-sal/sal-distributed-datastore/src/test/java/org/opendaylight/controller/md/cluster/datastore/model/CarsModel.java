@@ -10,15 +10,14 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 
 public final class CarsModel {
     public static final QName BASE_QNAME = QName.create(
@@ -33,38 +32,26 @@ public final class CarsModel {
     public static final YangInstanceIdentifier CAR_LIST_PATH = BASE_PATH.node(CAR_QNAME);
 
     private CarsModel() {
-
+        // Hidden on purpose
     }
 
     public static ContainerNode create() {
-
-        // Create a list builder
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> cars =
-            ImmutableMapNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(CAR_QNAME));
-
-        // Create an entry for the car altima
-        MapEntryNode altima =
-            ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
-                .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "altima"))
-                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf(1000)))
-                .build();
-
-        // Create an entry for the car accord
-        MapEntryNode honda =
-            ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
-                .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "accord"))
-                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf("2000")))
-                .build();
-
-        cars.withChild(altima);
-        cars.withChild(honda);
-
-        return ImmutableContainerNodeBuilder.create()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
-            .withChild(cars.build())
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(BASE_QNAME))
+            .withChild(Builders.mapBuilder()
+                .withNodeIdentifier(new NodeIdentifier(CAR_QNAME))
+                // Create an entry for the car altima
+                .withChild(ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
+                    .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "altima"))
+                    .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf(1000)))
+                    .build())
+                // Create an entry for the car accord
+                .withChild(ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
+                    .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "accord"))
+                    .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf("2000")))
+                    .build())
+                .build())
             .build();
-
     }
 
     public static NormalizedNode createEmptyCarsList() {
@@ -72,13 +59,14 @@ public final class CarsModel {
     }
 
     public static ContainerNode newCarsNode(final MapNode carsList) {
-        return ImmutableContainerNodeBuilder.create().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(
-                BASE_QNAME)).withChild(carsList).build();
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(BASE_QNAME))
+            .withChild(carsList)
+            .build();
     }
 
     public static MapNode newCarsMapNode(final MapEntryNode... carEntries) {
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> builder = ImmutableMapNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CAR_QNAME));
+        var builder = Builders.mapBuilder().withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
         for (MapEntryNode e : carEntries) {
             builder.withChild(e);
         }
@@ -87,9 +75,7 @@ public final class CarsModel {
     }
 
     public static ContainerNode emptyContainer() {
-        return ImmutableContainerNodeBuilder.create()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
-            .build();
+        return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(BASE_QNAME)).build();
     }
 
     public static SystemMapNode newCarMapNode() {

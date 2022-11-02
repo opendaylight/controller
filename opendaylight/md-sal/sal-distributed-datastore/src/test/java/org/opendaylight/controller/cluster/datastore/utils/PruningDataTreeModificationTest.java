@@ -41,11 +41,12 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
@@ -145,14 +146,16 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testMergeWithInvalidChildNodeNames() throws DataValidationFailedException {
-        ContainerNode augContainer = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(AUG_CONTAINER)).withChild(
-                        ImmutableNodes.containerNode(AUG_INNER_CONTAINER)).build();
-
         DataContainerChild outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
-        ContainerNode normalizedNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode)
-                .withChild(augContainer).withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug")).build();
+        ContainerNode normalizedNode = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .withChild(outerNode)
+            .withChild(Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(AUG_CONTAINER))
+                .withChild(ImmutableNodes.containerNode(AUG_INNER_CONTAINER))
+                .build())
+            .withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug"))
+            .build();
 
         YangInstanceIdentifier path = TestModel.TEST_PATH;
 
@@ -160,8 +163,10 @@ public class PruningDataTreeModificationTest {
 
         dataTree.commit(getCandidate());
 
-        ContainerNode prunedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode).build();
+        ContainerNode prunedNode = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .withChild(outerNode)
+            .build();
 
         Optional<NormalizedNode> actual = dataTree.takeSnapshot().readNode(path);
         assertTrue("After pruning present", actual.isPresent());
@@ -217,9 +222,10 @@ public class PruningDataTreeModificationTest {
         ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
         NormalizedNode root = shardDataTree.readNode(YangInstanceIdentifier.empty()).get();
 
-        NormalizedNode normalizedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(root.getIdentifier().getNodeType())).withChild(
-                        ImmutableNodes.containerNode(AUG_CONTAINER)).build();
+        NormalizedNode normalizedNode = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(root.getIdentifier().getNodeType()))
+            .withChild(ImmutableNodes.containerNode(AUG_CONTAINER))
+            .build();
         pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
         dataTree.commit(getCandidate());
 
@@ -244,15 +250,17 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testWriteWithInvalidChildNodeNames() throws DataValidationFailedException {
-        ContainerNode augContainer = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(AUG_CONTAINER)).withChild(
-                        ImmutableNodes.containerNode(AUG_INNER_CONTAINER)).build();
-
         DataContainerChild outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
-        ContainerNode normalizedNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode)
-                .withChild(augContainer).withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug"))
-                .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
+        ContainerNode normalizedNode = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .withChild(outerNode)
+            .withChild(Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(AUG_CONTAINER))
+                .withChild(ImmutableNodes.containerNode(AUG_INNER_CONTAINER))
+                .build())
+            .withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug"))
+            .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name"))
+            .build();
 
         YangInstanceIdentifier path = TestModel.TEST_PATH;
 
@@ -260,9 +268,11 @@ public class PruningDataTreeModificationTest {
 
         dataTree.commit(getCandidate());
 
-        ContainerNode prunedNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode)
-                .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
+        ContainerNode prunedNode = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .withChild(outerNode)
+            .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name"))
+            .build();
 
         Optional<NormalizedNode> actual = dataTree.takeSnapshot().readNode(path);
         assertTrue("After pruning present", actual.isPresent());

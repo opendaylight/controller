@@ -37,8 +37,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
@@ -372,17 +370,22 @@ public class NormalizedNodePrunerTest {
 
     private static NormalizedNode createTestContainer() {
         byte[] bytes1 = {1, 2, 3};
-        LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
-                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).withValue(bytes1).build();
+        LeafSetEntryNode<Object> entry1 = Builders.leafSetEntryBuilder()
+            .withNodeIdentifier(new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1))
+            .withValue(bytes1)
+            .build();
 
         byte[] bytes2 = {};
-        LeafSetEntryNode<Object> entry2 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
-                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).withValue(bytes2).build();
+        LeafSetEntryNode<Object> entry2 = Builders.leafSetEntryBuilder()
+            .withNodeIdentifier(new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes2))
+            .withValue(bytes2).build();
 
         return TestModel.createBaseTestContainerBuilder()
-                .withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
-                        new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
-                        .withChild(entry1).withChild(entry2).build())
+                .withChild(Builders.leafSetBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
+                    .withChild(entry1)
+                    .withChild(entry2)
+                    .build())
                 .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1, 2, 3, 4}))
                 .build();
     }

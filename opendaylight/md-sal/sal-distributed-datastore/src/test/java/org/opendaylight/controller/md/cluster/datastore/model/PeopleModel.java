@@ -9,13 +9,12 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 
 public final class PeopleModel {
     public static final QName BASE_QNAME = QName.create(
@@ -30,45 +29,31 @@ public final class PeopleModel {
     public static final YangInstanceIdentifier PERSON_LIST_PATH = BASE_PATH.node(PERSON_QNAME);
 
     private PeopleModel() {
-
+        // Hidden on purpose
     }
 
     public static ContainerNode create() {
-
-        // Create a list builder
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> cars =
-            ImmutableMapNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(
-                    PERSON_QNAME));
-
-        // Create an entry for the person jack
-        MapEntryNode jack =
-            ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jack")
-                .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jack"))
-                .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 100L))
-                .build();
-
-        // Create an entry for the person jill
-        MapEntryNode jill =
-            ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jill")
-                .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jill"))
-                .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 200L))
-                .build();
-
-        cars.withChild(jack);
-        cars.withChild(jill);
-
-        return ImmutableContainerNodeBuilder.create()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
-            .withChild(cars.build())
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(BASE_QNAME))
+            .withChild(Builders.mapBuilder()
+                .withNodeIdentifier(new NodeIdentifier(PERSON_QNAME))
+                // Create an entry for the person jack
+                .withChild(ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jack")
+                    .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jack"))
+                    .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 100L))
+                    .build())
+                // Create an entry for the person jill
+                .withChild(ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jill")
+                    .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jill"))
+                    .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 200L))
+                    .build())
+                .build())
             .build();
-
     }
 
     public static ContainerNode emptyContainer() {
-        return ImmutableContainerNodeBuilder.create()
-            .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(BASE_QNAME))
             .build();
     }
 
@@ -78,11 +63,13 @@ public final class PeopleModel {
 
     public static MapEntryNode newPersonEntry(final String name) {
         return ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, name)
-                .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, name)).build();
+            .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, name))
+            .build();
     }
 
     public static YangInstanceIdentifier newPersonPath(final String name) {
         return YangInstanceIdentifier.builder(PERSON_LIST_PATH)
-                .nodeWithKey(PERSON_QNAME, PERSON_NAME_QNAME, name).build();
+            .nodeWithKey(PERSON_QNAME, PERSON_NAME_QNAME, name)
+            .build();
     }
 }

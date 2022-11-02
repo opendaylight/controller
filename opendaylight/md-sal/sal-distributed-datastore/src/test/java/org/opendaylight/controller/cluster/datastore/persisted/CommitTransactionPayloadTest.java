@@ -23,13 +23,11 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
@@ -100,11 +98,10 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     @Before
     public void setUp() {
         setUpStatic();
-        final YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        final NormalizedNode writeData = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
-        candidate = DataTreeCandidates.fromNormalizedNode(writePath, writeData);
+        candidate = DataTreeCandidates.fromNormalizedNode(TestModel.TEST_PATH, Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
+            .build());
     }
 
     @Test
@@ -125,49 +122,46 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate().getValue());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testLeafSetEntryNodeCandidate() throws Exception {
-        YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
+        NodeWithValue<String> entryPathArg = new NodeWithValue<>(LEAF_SET, "one");
         YangInstanceIdentifier leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
                 .node(entryPathArg).build();
 
-        NormalizedNode leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
-                .withValue("one").build();
-
-        candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, Builders.leafSetEntryBuilder()
+            .withNodeIdentifier(entryPathArg)
+            .withValue("one")
+            .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate().getValue());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testLeafSetNodeCandidate() throws Exception {
-        YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
         YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
-        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
-                .withValue("one").build();
-        NormalizedNode leafSetNode = Builders.leafSetBuilder().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
-
-        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, Builders.leafSetBuilder()
+            .withNodeIdentifier(new NodeIdentifier(LEAF_SET))
+            .withChild(Builders.leafSetEntryBuilder()
+                .withNodeIdentifier(new NodeWithValue<>(LEAF_SET, "one"))
+                .withValue("one")
+                .build())
+            .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate().getValue());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testOrderedLeafSetNodeCandidate() throws Exception {
-        YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
         YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
-        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().withNodeIdentifier(entryPathArg)
-                .withValue("one").build();
-        NormalizedNode leafSetNode = Builders.orderedLeafSetBuilder().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
-
-        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, Builders.orderedLeafSetBuilder()
+            .withNodeIdentifier(new NodeIdentifier(LEAF_SET))
+            .withChild(Builders.leafSetEntryBuilder()
+                .withNodeIdentifier(new NodeWithValue<>(LEAF_SET, "one"))
+                .withValue("one")
+                .build())
+            .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate().getValue());
     }
@@ -176,10 +170,9 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     public void testLeafNodeCandidate() throws Exception {
         YangInstanceIdentifier leafPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
                 .node(TestModel.DESC_QNAME).build();
-        LeafNode<Object> leafNode = Builders.leafBuilder().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
 
-        candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafPath,
+            ImmutableNodes.leafNode(TestModel.DESC_QNAME, "test"));
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate().getValue());
     }

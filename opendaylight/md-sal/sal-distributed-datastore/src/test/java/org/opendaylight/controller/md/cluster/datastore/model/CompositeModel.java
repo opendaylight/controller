@@ -7,31 +7,20 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.leafNode;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
-import java.util.HashSet;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
-import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
@@ -99,14 +88,14 @@ public final class CompositeModel {
     private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
     private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID)
-            .withChild(mapNodeBuilder(INNER_LIST_QNAME)
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME))
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME))
-                    .build())
-            .build();
+        .withChild(mapNodeBuilder(INNER_LIST_QNAME)
+            .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME))
+            .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME))
+            .build())
+        .build();
 
     private CompositeModel() {
-
+        // Hidden on purpose
     }
 
     public static SchemaContext createTestContext() {
@@ -115,75 +104,63 @@ public final class CompositeModel {
     }
 
     public static ContainerNode createTestContainer() {
-        final LeafSetEntryNode<Object> nike = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "nike"))
-                .withValue("nike").build();
-        final LeafSetEntryNode<Object> puma = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "puma"))
-                .withValue("puma").build();
-        final LeafSetNode<Object> shoes = ImmutableLeafSetNodeBuilder.create()
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .withChild(leafNode(DESC_QNAME, DESC))
+            .withChild(Builders.augmentationBuilder()
+                .withNodeIdentifier(new AugmentationIdentifier(Set.of(AUG_QNAME)))
+                .withChild(leafNode(AUG_QNAME, "First Test"))
+                .build())
+            .withChild(Builders.leafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "shoe")))
-                .withChild(nike).withChild(puma).build();
-
-        final LeafSetEntryNode<Object> five = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 5))
-                .withValue(5).build();
-        final LeafSetEntryNode<Object> fifteen = ImmutableLeafSetEntryNodeBuilder.create()
-                .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 15))
-                .withValue(15).build();
-        final LeafSetNode<Object> numbers = ImmutableLeafSetNodeBuilder.create()
+                .withChild(Builders.leafSetEntryBuilder()
+                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "nike"))
+                    .withValue("nike")
+                    .build())
+                .withChild(Builders.leafSetEntryBuilder()
+                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "puma"))
+                    .withValue("puma")
+                    .build())
+                .build())
+            .withChild(Builders.leafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "number")))
-                .withChild(five).withChild(fifteen).build();
-
-        Set<QName> childAugmentations = new HashSet<>();
-        childAugmentations.add(AUG_QNAME);
-        final AugmentationIdentifier augmentationIdentifier = new AugmentationIdentifier(childAugmentations);
-        final AugmentationNode augmentationNode = Builders.augmentationBuilder()
-                .withNodeIdentifier(augmentationIdentifier).withChild(ImmutableNodes.leafNode(AUG_QNAME, "First Test"))
-                .build();
-        return ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(DESC_QNAME, DESC)).withChild(augmentationNode).withChild(shoes)
-                .withChild(numbers).withChild(mapNodeBuilder(OUTER_LIST_QNAME)
-                        .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID)).withChild(BAR_NODE).build())
-                .build();
+                .withChild(Builders.leafSetEntryBuilder()
+                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 5))
+                    .withValue(5)
+                    .build())
+                .withChild(Builders.leafSetEntryBuilder()
+                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 15))
+                    .withValue(15)
+                    .build())
+                .build())
+            .withChild(mapNodeBuilder(OUTER_LIST_QNAME)
+                .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                .withChild(BAR_NODE)
+                .build())
+            .build();
     }
 
     public static ContainerNode createFamily() {
-        final DataContainerNodeBuilder<NodeIdentifier, ContainerNode> familyContainerBuilder =
-            ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(FAMILY_QNAME));
+        final var firstGrandChild =
+            mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID)
+                .withChild(leafNode(GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID))
+                .withChild(leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME))
+                .build();
 
-        final CollectionNodeBuilder<MapEntryNode, SystemMapNode> childrenBuilder = mapNodeBuilder(CHILDREN_QNAME);
-
-        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
-            firstChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
-        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
-            secondChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
-
-        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
-            firstGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
-                    FIRST_GRAND_CHILD_ID);
-        final DataContainerNodeBuilder<NodeIdentifierWithPredicates, MapEntryNode>
-            secondGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
-                    SECOND_GRAND_CHILD_ID);
-
-        firstGrandChildBuilder.withChild(ImmutableNodes.leafNode(GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID))
-                .withChild(ImmutableNodes.leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME));
-
-        secondGrandChildBuilder.withChild(ImmutableNodes.leafNode(GRAND_CHILD_NUMBER_QNAME, SECOND_GRAND_CHILD_ID))
-                .withChild(ImmutableNodes.leafNode(GRAND_CHILD_NAME_QNAME, SECOND_GRAND_CHILD_NAME));
-
-        firstChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
-                .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, FIRST_CHILD_NAME))
-                .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChildBuilder.build()).build());
-
-        secondChildBuilder.withChild(ImmutableNodes.leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
-                .withChild(ImmutableNodes.leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
-                .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChildBuilder.build()).build());
-
-        childrenBuilder.withChild(firstChildBuilder.build());
-        childrenBuilder.withChild(secondChildBuilder.build());
-
-        return familyContainerBuilder.withChild(childrenBuilder.build()).build();
+        return Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(FAMILY_QNAME))
+            .withChild(mapNodeBuilder(CHILDREN_QNAME)
+                .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID)
+                    .withChild(leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
+                    .withChild(leafNode(CHILD_NAME_QNAME, FIRST_CHILD_NAME))
+                    .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChild).build())
+                    .build())
+                .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID)
+                    .withChild(leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
+                    .withChild(leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
+                    .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME).withChild(firstGrandChild).build())
+                    .build())
+                .build())
+            .build();
     }
 }

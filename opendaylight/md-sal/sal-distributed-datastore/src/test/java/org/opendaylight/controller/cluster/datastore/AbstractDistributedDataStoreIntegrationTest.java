@@ -73,12 +73,13 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
@@ -750,9 +751,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH,
                 PeopleModel.emptyContainer());
 
-            final ContainerNode invalidData = ImmutableContainerNodeBuilder.create()
-                    .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
-                    .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
+            final ContainerNode invalidData = Builders.containerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
+                    .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
+                    .build();
 
             writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
@@ -790,9 +792,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH,
                 PeopleModel.emptyContainer());
 
-            final ContainerNode invalidData = ImmutableContainerNodeBuilder.create()
-                    .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
-                    .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
+            final ContainerNode invalidData = Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
+                .build();
 
             writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
@@ -929,10 +932,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 testParameter, "testRootOverwrite", "module-shards-default-cars-member1.conf",
                 true, "cars", "default")) {
 
-            ContainerNode rootNode = ImmutableContainerNodeBuilder.create()
-                    .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(SchemaContext.NAME))
-                    .withChild(CarsModel.create())
-                    .build();
+            ContainerNode rootNode = Builders.containerBuilder()
+                .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME))
+                .withChild(CarsModel.create())
+                .build();
 
             testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
             IntegrationTestKit.verifyShardState(dataStore, "cars",

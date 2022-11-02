@@ -16,10 +16,10 @@ import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
 /**
  * Unit tests for ReadDataReply.
@@ -30,9 +30,9 @@ public class ReadDataReplyTest {
 
     @Test
     public void testSerialization() {
-        NormalizedNode data = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        ContainerNode data = Builders.containerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+            .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         ReadDataReply expected = new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION);
 
