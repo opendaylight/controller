@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.getBucketsByMembersMessage;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.getLocalDataMessage;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.getRemoteBucketsMessage;
@@ -18,21 +19,16 @@ import akka.actor.Address;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
 /**
  * Convenience access to {@link BucketStoreActor}. Used mostly by {@link Gossiper}.
- *
- * @author Robert Varga
  */
-@Beta
 @VisibleForTesting
 public final class BucketStoreAccess {
     private final ActorRef actorRef;
@@ -40,15 +36,15 @@ public final class BucketStoreAccess {
     private final Timeout timeout;
 
     public BucketStoreAccess(final ActorRef actorRef, final ExecutionContext dispatcher, final Timeout timeout) {
-        this.actorRef = Objects.requireNonNull(actorRef);
-        this.dispatcher = Objects.requireNonNull(dispatcher);
-        this.timeout = Objects.requireNonNull(timeout);
+        this.actorRef = requireNonNull(actorRef);
+        this.dispatcher = requireNonNull(dispatcher);
+        this.timeout = requireNonNull(timeout);
     }
 
     <T extends BucketData<T>> void getBucketsByMembers(final Collection<Address> members,
             final Consumer<Map<Address, Bucket<T>>> callback) {
         Patterns.ask(actorRef, getBucketsByMembersMessage(members), timeout)
-            .onComplete(new OnComplete<Object>() {
+            .onComplete(new OnComplete<>() {
                 @SuppressWarnings("unchecked")
                 @Override
                 public void onComplete(final Throwable failure, final Object success) {
@@ -60,7 +56,7 @@ public final class BucketStoreAccess {
     }
 
     void getBucketVersions(final Consumer<Map<Address, Long>> callback) {
-        Patterns.ask(actorRef, Singletons.GET_BUCKET_VERSIONS, timeout).onComplete(new OnComplete<Object>() {
+        Patterns.ask(actorRef, Singletons.GET_BUCKET_VERSIONS, timeout).onComplete(new OnComplete<>() {
             @SuppressWarnings("unchecked")
             @Override
             public void onComplete(final Throwable failure, final Object success) {
@@ -85,9 +81,9 @@ public final class BucketStoreAccess {
         actorRef.tell(removeBucketMessage(addr), ActorRef.noSender());
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public <T extends BucketData<T>> Future<T> getLocalData() {
-        return (Future) Patterns.ask(actorRef, getLocalDataMessage(), timeout);
+        return (Future<T>) Patterns.ask(actorRef, getLocalDataMessage(), timeout);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -96,9 +92,13 @@ public final class BucketStoreAccess {
     }
 
     public enum Singletons {
-        // Sent from Gossiper to BucketStore, response is an immutable Map<Address, Bucket<?>>
+        /**
+         * Sent from Gossiper to BucketStore, response is an immutable Map<Address, Bucket<?>>
+         */
         GET_ALL_BUCKETS,
-        // Sent from Gossiper to BucketStore, response is an immutable Map<Address, Long>
+        /**
+         * Sent from Gossiper to BucketStore, response is an immutable Map<Address, Long>
+         */
         GET_BUCKET_VERSIONS,
     }
 }
