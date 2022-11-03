@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 
 /**
  * Exception thrown from {@link ABIVersion#valueOf(short)} when the specified version is too old and no longer
@@ -15,8 +15,8 @@ import com.google.common.annotations.Beta;
  *
  * @author Robert Varga
  */
-@Beta
 public final class PastVersionException extends AbstractVersionException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     PastVersionException(final short version, final ABIVersion closest) {
