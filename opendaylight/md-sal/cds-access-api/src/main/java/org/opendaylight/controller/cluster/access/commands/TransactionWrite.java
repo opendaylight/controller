@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * Modification to write (and replace) a subtree at specified path with another subtree.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionWrite extends TransactionDataModification {
     public TransactionWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
         super(path, data);
