@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
-@Beta
+/**
+ * A connected connection.
+ *
+ * @param <T> Backend info type
+ */
 public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
-
     ConnectedClientConnection(final AbstractClientConnection<T> oldConnection, final T newBackend) {
         super(oldConnection, newBackend);
     }

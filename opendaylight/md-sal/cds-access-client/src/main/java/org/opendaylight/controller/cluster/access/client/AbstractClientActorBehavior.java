@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.access.client;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -18,10 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Base behavior attached to {@link AbstractClientActor}.
  *
  * @param <C> Type of associated context
- *
- * @author Robert Varga
  */
-@Beta
 public abstract class AbstractClientActorBehavior<C extends AbstractClientActorContext> implements AutoCloseable {
     private final @NonNull C context;
 
@@ -60,6 +56,7 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
 
     @Override
     public void close() {
+        // No-op
     }
 
     /**
