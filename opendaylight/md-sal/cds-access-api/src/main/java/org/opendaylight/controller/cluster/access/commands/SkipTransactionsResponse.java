@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Successful reply to a {@link SkipTransactionsRequest}.
  */
-@Beta
 public final class SkipTransactionsResponse extends TransactionSuccess<SkipTransactionsResponse> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public SkipTransactionsResponse(final TransactionIdentifier identifier, final long sequence) {

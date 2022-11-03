@@ -7,18 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * A {@link RequestException} indicating that the backend has received a RequestEnvelope whose sequence does not match
  * the next expected sequence. This can happen during leader transitions, when a part of the stream is rejected because
  * the backend is not the leader and it transitions to being a leader with old stream messages still being present.
- *
- * @author Robert Varga
  */
-@Beta
 public final class OutOfSequenceEnvelopeException extends RequestException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public OutOfSequenceEnvelopeException(final long expectedEnvelope) {

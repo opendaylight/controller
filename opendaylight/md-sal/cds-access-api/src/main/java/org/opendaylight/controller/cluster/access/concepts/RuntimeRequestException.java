@@ -10,16 +10,14 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Strings;
+import java.io.Serial;
 
 /**
  * General error raised when the recipient of a {@link Request} fails to process a request.
- *
- * @author Robert Varga
  */
-@Beta
 public final class RuntimeRequestException extends RequestException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public RuntimeRequestException(final String message, final Throwable cause) {

@@ -9,26 +9,25 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * A cluster-wide unique identifier of a frontend type located at a cluster member.
- *
- * @author Robert Varga
  */
-@Beta
 public final class FrontendIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
+        @Serial
         private static final long serialVersionUID = 1L;
+
         private MemberName memberName;
         private FrontendType clientType;
 
@@ -61,7 +60,9 @@ public final class FrontendIdentifier implements WritableIdentifier {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final MemberName memberName;
     private final FrontendType clientType;
 
@@ -104,11 +105,10 @@ public final class FrontendIdentifier implements WritableIdentifier {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof FrontendIdentifier)) {
+        if (!(obj instanceof FrontendIdentifier other)) {
             return false;
         }
 
-        final FrontendIdentifier other = (FrontendIdentifier) obj;
         return memberName.equals(other.memberName) && clientType.equals(other.clientType);
     }
 

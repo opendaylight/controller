@@ -8,17 +8,15 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
  * Request to destroy a local history.
- *
- * @author Robert Varga
  */
-@Beta
 public final class DestroyLocalHistoryRequest extends LocalHistoryRequest<DestroyLocalHistoryRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public DestroyLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence,

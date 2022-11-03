@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -18,14 +18,12 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 /**
  * A failure response to a {@link Request}. Contains a {@link RequestException} detailing the cause for this failure.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  * @param <C> Message class
  */
-@Beta
 public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>>
         extends Response<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull RequestException cause;

@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * Merge a {@link NormalizedNode} tree onto a specific path.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionMerge extends TransactionDataModification {
     public TransactionMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
         super(path, data);

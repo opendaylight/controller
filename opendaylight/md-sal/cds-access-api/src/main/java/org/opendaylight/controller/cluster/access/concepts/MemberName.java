@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -21,19 +20,19 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * Type-safe encapsulation of a cluster member name.
- *
- * @author Robert Varga
  */
-@Beta
 public final class MemberName implements Comparable<MemberName>, WritableIdentifier {
     private static final class Proxy implements Externalizable {
+        @Serial
         private static final long serialVersionUID = 1L;
+
         private byte[] serialized;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -65,6 +64,7 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull String name;

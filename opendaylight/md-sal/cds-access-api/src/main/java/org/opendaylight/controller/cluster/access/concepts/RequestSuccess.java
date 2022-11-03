@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -15,13 +15,11 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 /**
  * A successful reply to a {@link Request}.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  */
-@Beta
 public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>> extends
         Response<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     protected RequestSuccess(final @NonNull C success,  final @NonNull ABIVersion version) {

@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -17,10 +16,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutpu
 
 /**
  * A {@link TransactionModification} which has a data component.
- *
- * @author Robert Varga
  */
-@Beta
 public abstract class TransactionDataModification extends TransactionModification {
     private final NormalizedNode data;
 

@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Verify;
 import java.util.Collection;
@@ -45,10 +44,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 /**
  * A behavior, which handles messages sent to a {@link AbstractClientActor}.
- *
- * @author Robert Varga
  */
-@Beta
 public abstract class ClientActorBehavior<T extends BackendInfo> extends
         RecoveredClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
     /**

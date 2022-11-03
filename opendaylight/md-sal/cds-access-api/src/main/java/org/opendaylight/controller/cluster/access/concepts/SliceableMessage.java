@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.annotations.Beta;
-
 /**
  * A tagging interface that specifies a message whose serialized size can be large and thus should be sliced into
  * smaller chunks when transporting over the wire.
  *
  * @author Thomas Pantelis
  */
-@Beta
 public interface SliceableMessage {
+    // Marker interface
 }

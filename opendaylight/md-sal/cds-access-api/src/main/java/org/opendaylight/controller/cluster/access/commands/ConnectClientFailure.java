@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -16,11 +16,9 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 
 /**
  * A {@link RequestFailure} reported when {@link ConnectClientRequest} fails.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ConnectClientFailure extends RequestFailure<ClientIdentifier, ConnectClientFailure> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     ConnectClientFailure(final ClientIdentifier target, final long sequence, final RequestException cause) {
