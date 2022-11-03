@@ -8,18 +8,16 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
  * Request to purge a local history. This request is sent by the client once it receives a successful reply to
  * {@link DestroyLocalHistoryRequest} and indicates it has removed all state attached to a particular local history.
- *
- * @author Robert Varga
  */
-@Beta
 public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLocalHistoryRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public PurgeLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {

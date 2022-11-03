@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.access.commands;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
@@ -26,10 +25,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  *
  * <p>
  * It also includes request stream sequencing information.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ConnectClientRequest extends Request<ClientIdentifier, ConnectClientRequest> {
     private static final long serialVersionUID = 1L;
 
@@ -50,8 +46,8 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     private ConnectClientRequest(final ConnectClientRequest request, final ABIVersion version) {
         super(request, version);
-        this.minVersion = request.minVersion;
-        this.maxVersion = request.maxVersion;
+        minVersion = request.minVersion;
+        maxVersion = request.maxVersion;
     }
 
     public ABIVersion getMinVersion() {

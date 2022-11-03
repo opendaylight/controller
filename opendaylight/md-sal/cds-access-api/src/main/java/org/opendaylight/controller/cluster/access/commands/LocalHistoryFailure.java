@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -15,11 +15,9 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 
 /**
  * Generic {@link RequestFailure} involving a {@link LocalHistoryRequest}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class LocalHistoryFailure extends RequestFailure<LocalHistoryIdentifier, LocalHistoryFailure> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     LocalHistoryFailure(final LocalHistoryIdentifier target, final long sequence, final RequestException cause) {

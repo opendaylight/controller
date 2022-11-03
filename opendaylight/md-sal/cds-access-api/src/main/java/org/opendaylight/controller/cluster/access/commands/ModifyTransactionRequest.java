@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -21,12 +21,10 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * A transaction request to apply a particular set of operations on top of the current transaction. This message is
  * used to also finish a transaction by specifying a {@link PersistenceProtocol}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ModifyTransactionRequest extends TransactionRequest<ModifyTransactionRequest>
         implements SliceableMessage {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
