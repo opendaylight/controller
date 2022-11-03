@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
@@ -21,13 +20,10 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 /**
  * A reusable builder for creating {@link ModifyTransactionRequest} message instances. Its internal state is reset when
  * {@link #build()} is invoked, hence it can be used to create a sequence of messages. This class is NOT thread-safe.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ModifyTransactionRequestBuilder implements Identifiable<TransactionIdentifier> {
     private final List<TransactionModification> modifications = new ArrayList<>(1);
-    private final TransactionIdentifier identifier;
+    private final @NonNull TransactionIdentifier identifier;
     private final ActorRef replyTo;
 
     private PersistenceProtocol protocol;

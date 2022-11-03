@@ -9,16 +9,14 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A failure cause behind a {@link RequestFailure} to process a {@link Request}.
- *
- * @author Robert Varga
  */
-@Beta
 public abstract class RequestException extends Exception {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     protected RequestException(final @NonNull String message) {

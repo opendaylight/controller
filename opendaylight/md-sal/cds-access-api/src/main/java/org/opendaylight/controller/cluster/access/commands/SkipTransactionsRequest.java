@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
@@ -27,8 +27,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * This request is sent by the frontend to inform the backend that a set of {@link TransactionIdentifier}s are
  * explicitly retired and are guaranteed to never be used by the frontend.
  */
-@Beta
 public final class SkipTransactionsRequest extends TransactionRequest<SkipTransactionsRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Note: UnsignedLong is arbitrary, yang.common.Uint64 would work just as well, we really want an immutable

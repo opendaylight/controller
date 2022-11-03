@@ -9,26 +9,25 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Globally-unique identifier of a transaction.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
+        @Serial
         private static final long serialVersionUID = 1L;
+
         private LocalHistoryIdentifier historyId;
         private long transactionId;
 
@@ -61,7 +60,9 @@ public final class TransactionIdentifier implements WritableIdentifier {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final @NonNull LocalHistoryIdentifier historyId;
     private final long transactionId;
     private String shortString;
@@ -97,15 +98,8 @@ public final class TransactionIdentifier implements WritableIdentifier {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof TransactionIdentifier)) {
-            return false;
-        }
-
-        final TransactionIdentifier other = (TransactionIdentifier) obj;
-        return transactionId == other.transactionId && historyId.equals(other.historyId);
+        return this == obj || obj instanceof TransactionIdentifier other && transactionId == other.transactionId
+            && historyId.equals(other.historyId);
     }
 
     public String toShortString() {

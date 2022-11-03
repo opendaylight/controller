@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -22,10 +21,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Enumeration of all ABI versions supported by this implementation of the client access API.
- *
- * @author Robert Varga
  */
-@Beta
 public enum ABIVersion implements WritableObject {
     // NOTE: enumeration values need to be sorted in ascending order of their version to keep Comparable working
 
@@ -130,24 +126,14 @@ public enum ABIVersion implements WritableObject {
      * @throws PastVersionException if the specified integer identifies a past version which is no longer supported
      */
     public static @NonNull ABIVersion valueOf(final short value) throws FutureVersionException, PastVersionException {
-        switch (Short.toUnsignedInt(value)) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                throw new PastVersionException(value, BORON);
-            case 5:
-                return BORON;
-            case 6:
-                return NEON_SR2;
-            case 7:
-                return SODIUM_SR1;
-            case 8:
-                return MAGNESIUM;
-            default:
-                throw new FutureVersionException(value, MAGNESIUM);
-        }
+        return switch (Short.toUnsignedInt(value)) {
+            case 0, 1, 2, 3, 4 -> throw new PastVersionException(value, BORON);
+            case 5 -> BORON;
+            case 6 -> NEON_SR2;
+            case 7 -> SODIUM_SR1;
+            case 8 -> MAGNESIUM;
+            default -> throw new FutureVersionException(value, MAGNESIUM);
+        };
     }
 
     @Override

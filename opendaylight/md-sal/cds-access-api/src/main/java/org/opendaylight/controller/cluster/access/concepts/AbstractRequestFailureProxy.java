@@ -7,24 +7,23 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * Abstract Externalizable proxy for use with {@link RequestFailure} subclasses.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  */
-@Beta
 public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, C extends RequestFailure<T, C>>
         extends AbstractResponseProxy<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private RequestException cause;
 
     protected AbstractRequestFailureProxy() {

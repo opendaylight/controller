@@ -8,17 +8,15 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
  * Request to create a new local history.
- *
- * @author Robert Varga
  */
-@Beta
 public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateLocalHistoryRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public CreateLocalHistoryRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {

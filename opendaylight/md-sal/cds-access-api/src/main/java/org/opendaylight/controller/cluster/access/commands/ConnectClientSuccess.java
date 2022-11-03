@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -28,17 +27,11 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  * Successful reply to an {@link ConnectClientRequest}. Client actor which initiated this connection should use
  * the version reported via {@link #getVersion()} of this message to communicate with this backend. Should this backend
  * fail, the client can try accessing the provided alternates.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier, ConnectClientSuccess> {
     private static final long serialVersionUID = 1L;
 
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
-            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
-            + "aren't serialized. FindBugs does not recognize this.")
-    private final @NonNull List<ActorSelection> alternates;
+    private final @NonNull ImmutableList<ActorSelection> alternates;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See justification above.")
     private final ReadOnlyDataTree dataTree;
