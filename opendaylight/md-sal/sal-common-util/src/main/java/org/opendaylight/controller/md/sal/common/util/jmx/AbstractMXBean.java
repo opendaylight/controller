@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
-import com.google.common.annotations.Beta;
 import java.lang.management.ManagementFactory;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -32,9 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-@Beta
 public abstract class AbstractMXBean {
-
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMXBean.class);
 
     public static final String BASE_JMX_PREFIX = "org.opendaylight.controller:";
@@ -89,7 +86,7 @@ public abstract class AbstractMXBean {
         boolean registered = false;
         try {
             // Object to identify MBean
-            final ObjectName mbeanName = this.getMBeanObjectName();
+            final ObjectName mbeanName = getMBeanObjectName();
 
             LOG.debug("Register MBean {}", mbeanName);
 
@@ -129,16 +126,13 @@ public abstract class AbstractMXBean {
      * @return true is successfully unregistered, false otherwise.
      */
     public boolean unregisterMBean() {
-        boolean unregister = false;
         try {
-            ObjectName mbeanName = this.getMBeanObjectName();
-            unregisterMBean(mbeanName);
-            unregister = true;
+            unregisterMBean(getMBeanObjectName());
+            return true;
         } catch (MBeanRegistrationException | InstanceNotFoundException | MalformedObjectNameException e) {
             LOG.debug("Failed when unregistering MBean", e);
+            return false;
         }
-
-        return unregister;
     }
 
     private void unregisterMBean(ObjectName mbeanName) throws MBeanRegistrationException,
