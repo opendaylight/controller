@@ -7,14 +7,9 @@
  */
 package org.opendaylight.controller.cluster.dom.api;
 
-import com.google.common.annotations.Beta;
-
 /**
  * Enumeration of possible shard leader locations relative to the local node.
- *
- * @author Robert Varga
  */
-@Beta
 public enum LeaderLocation {
     /**
      * The leader is co-located on this node.
