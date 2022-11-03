@@ -10,11 +10,13 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import java.io.Serial;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull T message;
@@ -60,6 +62,7 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
                 .add("txSequence", Long.toHexString(txSequence)).add("message", message).toString();
     }
 
+    @Serial
     final Object writeReplace() {
         return createProxy();
     }

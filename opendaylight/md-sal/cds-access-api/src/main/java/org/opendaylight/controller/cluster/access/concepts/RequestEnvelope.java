@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import akka.actor.ActorRef;
+import java.io.Serial;
 
 public final class RequestEnvelope extends Envelope<Request<?, ?>> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public RequestEnvelope(final Request<?, ?> message, final long sessionId, final long txSequence) {

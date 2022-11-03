@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.commands;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
@@ -19,7 +20,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 final class ExistsTransactionSuccessProxyV1 extends AbstractTransactionSuccessProxy<ExistsTransactionSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private boolean exists;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -31,7 +34,7 @@ final class ExistsTransactionSuccessProxyV1 extends AbstractTransactionSuccessPr
 
     ExistsTransactionSuccessProxyV1(final ExistsTransactionSuccess request) {
         super(request);
-        this.exists = request.getExists();
+        exists = request.getExists();
     }
 
     @Override

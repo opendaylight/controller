@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -20,6 +21,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Response<T, C>>
         extends AbstractMessageProxy<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     protected AbstractResponseProxy() {

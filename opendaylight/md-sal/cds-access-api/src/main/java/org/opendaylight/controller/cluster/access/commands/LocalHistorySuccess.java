@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -16,6 +17,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
  * Success class for {@link RequestSuccess}es involving a specific local history.
  */
 public final class LocalHistorySuccess extends RequestSuccess<LocalHistoryIdentifier, LocalHistorySuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public LocalHistorySuccess(final LocalHistoryIdentifier target, final long sequence) {

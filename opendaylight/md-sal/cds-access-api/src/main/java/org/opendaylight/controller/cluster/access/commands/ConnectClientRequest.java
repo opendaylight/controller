@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * It also includes request stream sequencing information.
  */
 public final class ConnectClientRequest extends Request<ClientIdentifier, ConnectClientRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final ABIVersion minVersion;

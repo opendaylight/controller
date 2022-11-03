@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -21,9 +22,10 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 abstract class AbstractTransactionSuccessProxy<T extends TransactionSuccess<T>>
         extends AbstractSuccessProxy<TransactionIdentifier, T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    protected AbstractTransactionSuccessProxy() {
+    AbstractTransactionSuccessProxy() {
         // For Externalizable
     }
 

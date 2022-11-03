@@ -55,6 +55,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
             transactionId = WritableObjects.readLong(in);
         }
 
+        @Serial
         private Object readResolve() {
             return new TransactionIdentifier(historyId, transactionId);
         }
@@ -119,6 +120,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
         return toShortString();
     }
 
+    @Serial
     private Object writeReplace() {
         return new Proxy(historyId, transactionId);
     }

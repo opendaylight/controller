@@ -55,6 +55,7 @@ public final class FrontendIdentifier implements WritableIdentifier {
             clientType = FrontendType.readFrom(in);
         }
 
+        @Serial
         private Object readResolve() {
             return new FrontendIdentifier(memberName, clientType);
         }
@@ -102,14 +103,8 @@ public final class FrontendIdentifier implements WritableIdentifier {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof FrontendIdentifier other)) {
-            return false;
-        }
-
-        return memberName.equals(other.memberName) && clientType.equals(other.clientType);
+        return this == obj || obj instanceof FrontendIdentifier other && memberName.equals(other.memberName)
+            && clientType.equals(other.clientType);
     }
 
     public @NonNull String toPersistentId() {
@@ -121,6 +116,7 @@ public final class FrontendIdentifier implements WritableIdentifier {
         return toPersistentId();
     }
 
+    @Serial
     private Object writeReplace() {
         return new Proxy(memberName, clientType);
     }

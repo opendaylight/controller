@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -19,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 final class ExistsTransactionRequestProxyV1 extends
         AbstractReadPathTransactionRequestProxyV1<ExistsTransactionRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -21,6 +22,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 public final class IncrementTransactionSequenceRequest extends
         AbstractReadTransactionRequest<IncrementTransactionSequenceRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final long increment;

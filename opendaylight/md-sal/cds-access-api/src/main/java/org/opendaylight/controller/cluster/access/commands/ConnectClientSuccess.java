@@ -15,6 +15,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,6 +30,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  * fail, the client can try accessing the provided alternates.
  */
 public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier, ConnectClientSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull ImmutableList<ActorSelection> alternates;

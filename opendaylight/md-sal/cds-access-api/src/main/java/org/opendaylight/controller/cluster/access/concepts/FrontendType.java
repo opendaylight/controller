@@ -36,6 +36,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
     private static final class Proxy implements Externalizable {
         @Serial
         private static final long serialVersionUID = 1L;
+
         private byte[] serialized;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -61,6 +62,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
             in.readFully(serialized);
         }
 
+        @Serial
         private Object readResolve() {
             // TODO: consider caching instances here
             return new FrontendType(new String(serialized, StandardCharsets.UTF_8), serialized);
@@ -156,6 +158,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         return local;
     }
 
+    @Serial
     Object writeReplace() {
         return new Proxy(getSerialized());
     }

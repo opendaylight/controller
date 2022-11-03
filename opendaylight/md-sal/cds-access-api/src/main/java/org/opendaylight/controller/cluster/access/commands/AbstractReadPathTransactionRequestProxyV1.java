@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
@@ -27,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVer
  */
 abstract class AbstractReadPathTransactionRequestProxyV1<T extends AbstractReadPathTransactionRequest<T>>
         extends AbstractReadTransactionRequestProxyV1<T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private YangInstanceIdentifier path;

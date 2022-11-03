@@ -110,8 +110,6 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
 
         return switch (toVersion) {
             case BORON, NEON_SR2, SODIUM_SR1, MAGNESIUM -> verifyNotNull(cloneAsVersion(toVersion));
-            case TEST_PAST_VERSION, TEST_FUTURE_VERSION ->
-                throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
             default -> throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
         };
     }
@@ -154,6 +152,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      */
     abstract @NonNull AbstractMessageProxy<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
 
+    @Serial
     protected final Object writeReplace() {
         return externalizableProxy(version);
     }

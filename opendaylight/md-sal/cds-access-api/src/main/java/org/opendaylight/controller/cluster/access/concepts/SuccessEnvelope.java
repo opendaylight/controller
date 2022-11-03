@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import java.io.Serial;
+
 public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public SuccessEnvelope(final RequestSuccess<?, ?> message, final long sessionId, final long txSequence,

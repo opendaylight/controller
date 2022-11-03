@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -21,9 +22,10 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 abstract class AbstractTransactionRequestProxy<T extends TransactionRequest<T>>
         extends AbstractRequestProxy<TransactionIdentifier, T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    protected AbstractTransactionRequestProxy() {
+    AbstractTransactionRequestProxy() {
         // For Externalizable
     }
 

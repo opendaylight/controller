@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -17,6 +18,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 public final class TransactionCommitSuccess extends TransactionSuccess<TransactionCommitSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public TransactionCommitSuccess(final TransactionIdentifier identifier, final long sequence) {

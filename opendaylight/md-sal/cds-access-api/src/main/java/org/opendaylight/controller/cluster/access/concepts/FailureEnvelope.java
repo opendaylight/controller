@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import java.io.Serial;
+
 public final class FailureEnvelope extends ResponseEnvelope<RequestFailure<?, ?>> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public FailureEnvelope(final RequestFailure<?, ?> message, final long sessionId, final long txSequence,

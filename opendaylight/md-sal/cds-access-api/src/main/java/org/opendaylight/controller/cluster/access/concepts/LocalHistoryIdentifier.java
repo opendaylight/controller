@@ -16,6 +16,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
@@ -25,8 +26,6 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * - a {@link ClientIdentifier}, which uniquely identifies a single instantiation of a particular frontend
  * - an unsigned long, which uniquely identifies the history on the backend
  * - an unsigned long cookie, assigned by the client and meaningless on the backend, which just reflects it back
- *
- * @author Robert Varga
  */
 public final class LocalHistoryIdentifier implements WritableIdentifier {
     /*
@@ -39,7 +38,9 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
      *                      compatibility.
      */
     private static final class Proxy implements Externalizable {
+        @Serial
         private static final long serialVersionUID = 1L;
+
         private ClientIdentifier clientId;
         private long historyId;
         private long cookie;
@@ -72,12 +73,15 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
             cookie = WritableObjects.readSecondLong(in, header);
         }
 
+        @Serial
         private Object readResolve() {
             return new LocalHistoryIdentifier(clientId, historyId, cookie);
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final @NonNull ClientIdentifier clientId;
     private final long historyId;
     private final long cookie;
@@ -131,11 +135,10 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof LocalHistoryIdentifier)) {
+        if (!(obj instanceof LocalHistoryIdentifier other)) {
             return false;
         }
 
-        final LocalHistoryIdentifier other = (LocalHistoryIdentifier) obj;
         return historyId == other.historyId && cookie == other.cookie && clientId.equals(other.clientId);
     }
 
@@ -146,6 +149,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
                 .add("cookie", Long.toUnsignedString(cookie, 16)).toString();
     }
 
+    @Serial
     private Object writeReplace() {
         return new Proxy(clientId, historyId, cookie);
     }

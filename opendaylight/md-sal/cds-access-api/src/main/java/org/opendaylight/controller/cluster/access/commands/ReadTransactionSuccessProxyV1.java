@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.commands;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -24,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVer
  * @author Robert Varga
  */
 final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProxy<ReadTransactionSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Optional<NormalizedNode> data;
@@ -38,8 +40,8 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
 
     ReadTransactionSuccessProxyV1(final ReadTransactionSuccess request) {
         super(request);
-        this.data = request.getData();
-        this.streamVersion = request.getVersion().getStreamVersion();
+        data = request.getData();
+        streamVersion = request.getVersion().getStreamVersion();
     }
 
     @Override

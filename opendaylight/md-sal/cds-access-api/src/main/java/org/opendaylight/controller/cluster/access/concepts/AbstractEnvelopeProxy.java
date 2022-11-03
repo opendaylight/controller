@@ -11,9 +11,11 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externalizable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private T message;
@@ -48,6 +50,7 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
     @SuppressWarnings("checkstyle:hiddenField")
     abstract Envelope<T> createEnvelope(T wrappedNessage, long sessionId, long txSequence);
 
+    @Serial
     final Object readResolve() {
         return createEnvelope(message, sessionId, txSequence);
     }

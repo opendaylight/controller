@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormali
  * @author Robert Varga
  */
 final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestProxy<ModifyTransactionRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private List<TransactionModification> modifications;
@@ -45,9 +47,9 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
 
     ModifyTransactionRequestProxyV1(final ModifyTransactionRequest request) {
         super(request);
-        this.modifications = requireNonNull(request.getModifications());
-        this.protocol = request.getPersistenceProtocol();
-        this.streamVersion = request.getVersion().getStreamVersion();
+        modifications = requireNonNull(request.getModifications());
+        protocol = request.getPersistenceProtocol();
+        streamVersion = request.getVersion().getStreamVersion();
     }
 
     @Override

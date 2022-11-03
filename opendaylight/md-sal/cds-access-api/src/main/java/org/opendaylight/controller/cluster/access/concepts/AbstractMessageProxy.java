@@ -14,6 +14,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
@@ -27,7 +28,9 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * @param <C> Message class
  */
 abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Message<T, C>> implements Externalizable {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private T target;
     private long sequence;
 
@@ -52,6 +55,7 @@ abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Mess
         sequence = WritableObjects.readLong(in);
     }
 
+    @Serial
     protected final Object readResolve() {
         return verifyNotNull(createMessage(target, sequence));
     }

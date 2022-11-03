@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.base.Preconditions;
+import java.io.Serial;
 
 public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final long executionTimeNanos;

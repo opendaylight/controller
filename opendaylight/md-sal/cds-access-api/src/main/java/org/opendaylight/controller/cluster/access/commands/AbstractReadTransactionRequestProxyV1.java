@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
@@ -23,7 +24,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTransactionRequest<T>>
         extends AbstractTransactionRequestProxy<T> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private boolean snapshotOnly;
 
     protected AbstractReadTransactionRequestProxyV1() {

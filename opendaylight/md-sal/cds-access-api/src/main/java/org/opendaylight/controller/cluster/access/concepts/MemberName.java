@@ -58,6 +58,7 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
             in.readFully(serialized);
         }
 
+        @Serial
         private Object readResolve() {
             // TODO: consider caching instances here
             return new MemberName(new String(serialized, StandardCharsets.UTF_8), serialized);
@@ -140,6 +141,7 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         return local;
     }
 
+    @Serial
     Object writeReplace() {
         return new Proxy(getSerialized());
     }

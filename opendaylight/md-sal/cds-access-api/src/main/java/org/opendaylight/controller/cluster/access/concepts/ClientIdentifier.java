@@ -61,6 +61,7 @@ public final class ClientIdentifier implements WritableIdentifier {
             generation = WritableObjects.readLong(in);
         }
 
+        @Serial
         private Object readResolve() {
             return new ClientIdentifier(frontendId, generation);
         }
@@ -124,6 +125,7 @@ public final class ClientIdentifier implements WritableIdentifier {
             .toString();
     }
 
+    @Serial
     private Object writeReplace() {
         return new Proxy(frontendId, generation);
     }

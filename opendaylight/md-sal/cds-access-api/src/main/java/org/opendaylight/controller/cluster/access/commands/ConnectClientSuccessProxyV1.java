@@ -15,6 +15,7 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  * @author Robert Varga
  */
 final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdentifier, ConnectClientSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private List<ActorSelection> alternates;
@@ -42,9 +44,9 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
 
     ConnectClientSuccessProxyV1(final ConnectClientSuccess success) {
         super(success);
-        this.alternates = success.getAlternates();
-        this.backend = success.getBackend();
-        this.maxMessages = success.getMaxMessages();
+        alternates = success.getAlternates();
+        backend = success.getBackend();
+        maxMessages = success.getMaxMessages();
         // We are ignoring the DataTree, it is not serializable anyway
     }
 

@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import java.io.Serial;
+
 final class SuccessEnvelopeProxy extends AbstractResponseEnvelopeProxy<RequestSuccess<?, ?>> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to

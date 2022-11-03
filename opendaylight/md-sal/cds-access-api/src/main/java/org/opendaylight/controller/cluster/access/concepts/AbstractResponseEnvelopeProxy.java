@@ -10,9 +10,11 @@ package org.opendaylight.controller.cluster.access.concepts;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 abstract class AbstractResponseEnvelopeProxy<T extends Response<?, ?>> extends AbstractEnvelopeProxy<T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private long executionTimeNanos;
