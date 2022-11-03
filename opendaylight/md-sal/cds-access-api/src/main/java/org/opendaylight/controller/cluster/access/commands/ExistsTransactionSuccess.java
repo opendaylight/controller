@@ -7,20 +7,19 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Successful reply to an {@link ExistsTransactionRequest}. It indicates presence of requested data via
  * {@link #getExists()}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ExistsTransactionSuccess extends TransactionSuccess<ExistsTransactionSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final boolean exists;
 
     public ExistsTransactionSuccess(final TransactionIdentifier target, final long sequence, final boolean exists) {

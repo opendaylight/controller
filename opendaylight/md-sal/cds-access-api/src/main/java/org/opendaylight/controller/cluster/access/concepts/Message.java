@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.Serial;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -47,14 +47,12 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * Note that this class specifies the {@link Immutable} contract, which means that all subclasses must follow this API
  * contract.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-@Beta
 public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>> implements Immutable,
         Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull ABIVersion version;
@@ -110,17 +108,12 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
             return (C)this;
         }
 
-        switch (toVersion) {
-            case BORON:
-            case NEON_SR2:
-            case SODIUM_SR1:
-            case MAGNESIUM:
-                return verifyNotNull(cloneAsVersion(toVersion));
-            case TEST_PAST_VERSION:
-            case TEST_FUTURE_VERSION:
-            default:
+        return switch (toVersion) {
+            case BORON, NEON_SR2, SODIUM_SR1, MAGNESIUM -> verifyNotNull(cloneAsVersion(toVersion));
+            case TEST_PAST_VERSION, TEST_FUTURE_VERSION ->
                 throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
-        }
+            default -> throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
+        };
     }
 
     /**

@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -20,14 +20,13 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * A request message concept. Upon receipt of this message, the recipient will respond with either
  * a {@link RequestSuccess} or a {@link RequestFailure} message.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-@Beta
 public abstract class Request<T extends WritableIdentifier, C extends Request<T, C>> extends Message<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final @NonNull ActorRef replyTo;
 
     protected Request(final @NonNull T target, final long sequence, final @NonNull ActorRef replyTo) {

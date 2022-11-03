@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -21,6 +20,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
@@ -31,12 +31,10 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * An {@link Identifier} identifying a data store frontend type, which is able to access the data store backend.
  * Frontend implementations need to define this identifier so that multiple clients existing on a member node can be
  * discerned.
- *
- * @author Robert Varga
  */
-@Beta
 public final class FrontendType implements Comparable<FrontendType>, WritableIdentifier {
     private static final class Proxy implements Externalizable {
+        @Serial
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
 
@@ -71,6 +69,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
 
     private static final String SIMPLE_STRING_REGEX = "^[a-zA-Z0-9-_.*+:=,!~';]+$";
     private static final Pattern SIMPLE_STRING_PATTERN = Pattern.compile(SIMPLE_STRING_REGEX);
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull String name;

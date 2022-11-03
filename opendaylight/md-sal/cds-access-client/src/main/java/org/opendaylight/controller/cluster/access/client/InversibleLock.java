@@ -7,25 +7,32 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import com.google.common.annotations.Beta;
-import com.google.common.base.Verify;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
 
 /**
  * A lock implementation which allows users to perform optimistic reads and validate them in a fashion similar
  * to {@link StampedLock}. In case a read is contented with a write, the read side will throw
  * an {@link InversibleLockException}, which the caller can catch and use to wait for the write to resolve.
- *
- * @author Robert Varga
  */
-@Beta
 public final class InversibleLock {
-    private static final AtomicReferenceFieldUpdater<InversibleLock, CountDownLatch> LATCH_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(InversibleLock.class, CountDownLatch.class, "latch");
+    private static final VarHandle LATCH;
+
+    static {
+        try {
+            LATCH = MethodHandles.lookup().findVarHandle(InversibleLock.class, "latch", CountDownLatch.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private final StampedLock lock = new StampedLock();
+
     private volatile CountDownLatch latch;
 
     /**
@@ -43,7 +50,7 @@ public final class InversibleLock {
 
             // Write-locked. Read the corresponding latch and if present report an exception, which will propagate
             // and force release of locks.
-            final CountDownLatch local = latch;
+            final var local = latch;
             if (local != null) {
                 throw new InversibleLockException(local);
             }
@@ -57,18 +64,14 @@ public final class InversibleLock {
     }
 
     public long writeLock() {
-        final CountDownLatch local = new CountDownLatch(1);
-        final boolean taken = LATCH_UPDATER.compareAndSet(this, null, local);
-        Verify.verify(taken);
-
+        verify(LATCH.compareAndSet(this, null, new CountDownLatch(1)));
         return lock.writeLock();
     }
 
     public void unlockWrite(final long stamp) {
-        final CountDownLatch local = LATCH_UPDATER.getAndSet(this, null);
-        Verify.verifyNotNull(local);
+        final CountDownLatch local = (CountDownLatch) LATCH.getAndSet(this, null);
+        verifyNotNull(local);
         lock.unlockWrite(stamp);
         local.countDown();
     }
-
 }

@@ -13,7 +13,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.actor.Scheduler;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,10 +31,7 @@ import scala.concurrent.duration.FiniteDuration;
  * Time-keeping in a client actor is based on monotonic time. The precision of this time can be expected to be the
  * same as {@link System#nanoTime()}, but it is not tied to that particular clock. Actor clock is exposed as
  * a {@link Ticker}, which can be obtained via {@link #ticker()}. This class is thread-safe.
- *
- * @author Robert Varga
  */
-@Beta
 public class ClientActorContext extends AbstractClientActorContext implements Identifiable<ClientIdentifier> {
     private final ExecutionContext executionContext;
     private final ClientIdentifier identifier;
@@ -49,9 +45,9 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
             final ClientIdentifier identifier, final ClientActorConfig config) {
         super(self, persistenceId);
         this.identifier = requireNonNull(identifier);
-        this.scheduler = requireNonNull(system).scheduler();
-        this.executionContext = system.dispatcher();
-        this.dispatchers = new Dispatchers(system.dispatchers());
+        scheduler = requireNonNull(system).scheduler();
+        executionContext = system.dispatcher();
+        dispatchers = new Dispatchers(system.dispatchers());
         this.config = requireNonNull(config);
 
         messageSlicer = MessageSlicer.builder().messageSliceSize(config.getMaximumMessageSliceSize())

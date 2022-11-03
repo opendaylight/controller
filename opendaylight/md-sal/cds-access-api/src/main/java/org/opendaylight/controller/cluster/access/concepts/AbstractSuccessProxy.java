@@ -7,20 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * Abstract Externalizable proxy for use with {@link RequestSuccess} subclasses.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  */
-@Beta
 public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
         extends AbstractResponseProxy<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     protected AbstractSuccessProxy() {

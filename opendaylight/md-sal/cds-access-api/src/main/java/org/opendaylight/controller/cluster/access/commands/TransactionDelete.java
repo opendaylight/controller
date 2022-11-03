@@ -7,15 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * Delete a particular path.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionDelete extends TransactionModification {
     public TransactionDelete(final YangInstanceIdentifier path) {
         super(path);

@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.function.Consumer;
@@ -20,10 +19,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
 /**
  * Single entry in a {@link AbstractClientConnection}. Tracks the request, the associated callback and time when
  * the request was first enqueued.
- *
- * @author Robert Varga
  */
-@Beta
 public class ConnectionEntry implements Immutable {
     private final Consumer<Response<?, ?>> callback;
     private final Request<?, ?> request;
@@ -32,7 +28,7 @@ public class ConnectionEntry implements Immutable {
     ConnectionEntry(final Request<?, ?> request, final Consumer<Response<?, ?>> callback, final long now) {
         this.request = requireNonNull(request);
         this.callback = requireNonNull(callback);
-        this.enqueuedTicks = now;
+        enqueuedTicks = now;
     }
 
     ConnectionEntry(final ConnectionEntry entry) {

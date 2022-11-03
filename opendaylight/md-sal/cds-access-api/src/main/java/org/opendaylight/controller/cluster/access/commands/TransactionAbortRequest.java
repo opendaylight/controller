@@ -8,17 +8,15 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * A transaction request to perform the abort step of the three-phase commit protocol.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionAbortRequest extends TransactionRequest<TransactionAbortRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public TransactionAbortRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {

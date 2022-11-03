@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -17,6 +16,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024.ClientGeneration;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -29,10 +29,11 @@ import org.opendaylight.yangtools.yang.common.Uint64;
  *
  * @author Robert Varga
  */
-@Beta
 public final class ClientIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
+        @Serial
         private static final long serialVersionUID = 1L;
+
         private FrontendIdentifier frontendId;
         private long generation;
 
@@ -65,6 +66,7 @@ public final class ClientIdentifier implements WritableIdentifier {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull FrontendIdentifier frontendId;
@@ -110,21 +112,16 @@ public final class ClientIdentifier implements WritableIdentifier {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ClientIdentifier)) {
-            return false;
-        }
-
-        final ClientIdentifier other = (ClientIdentifier) obj;
-        return generation == other.generation && frontendId.equals(other.frontendId);
+        return this == obj || obj instanceof ClientIdentifier other && generation == other.generation
+            && frontendId.equals(other.frontendId);
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(ClientIdentifier.class).add("frontend", frontendId)
-                .add("generation", Long.toUnsignedString(generation)).toString();
+        return MoreObjects.toStringHelper(ClientIdentifier.class)
+            .add("frontend", frontendId)
+            .add("generation", Long.toUnsignedString(generation))
+            .toString();
     }
 
     private Object writeReplace() {

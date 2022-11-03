@@ -7,17 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * A {@link RequestException} indicating that the backend has received a Request whose sequence does not match the
  * next expected sequence for the target. This is a hard error, as it indicates a Request is missing in the stream.
- *
- * @author Robert Varga
  */
-@Beta
 public final class OutOfOrderRequestException extends RequestException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public OutOfOrderRequestException(final long expectedRequest) {

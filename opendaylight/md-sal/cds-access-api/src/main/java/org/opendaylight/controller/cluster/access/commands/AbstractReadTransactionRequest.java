@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -20,13 +20,11 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * This class is visible outside of this package for the purpose of allowing common instanceof checks
  * and simplified codepaths.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
-@Beta
 public abstract class AbstractReadTransactionRequest<T extends AbstractReadTransactionRequest<T>>
         extends TransactionRequest<T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final boolean snapshotOnly;

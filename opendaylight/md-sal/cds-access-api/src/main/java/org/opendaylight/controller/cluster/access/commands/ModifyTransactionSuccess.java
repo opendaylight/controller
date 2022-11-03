@@ -7,17 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Response to a {@link ModifyTransactionRequest} which does not have a {@link PersistenceProtocol}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ModifyTransactionSuccess extends TransactionSuccess<ModifyTransactionSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public ModifyTransactionSuccess(final TransactionIdentifier identifier, final long sequence) {

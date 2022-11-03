@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -18,12 +18,10 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Abstract base class for {@link Request}s involving specific transaction. This class is visible outside of this
  * package solely for the ability to perform a unified instanceof check.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
-@Beta
 public abstract class TransactionRequest<T extends TransactionRequest<T>> extends Request<TransactionIdentifier, T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     TransactionRequest(final TransactionIdentifier identifier, final long sequence, final ActorRef replyTo) {

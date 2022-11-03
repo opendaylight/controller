@@ -7,17 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Successful reply to an {@link IncrementTransactionSequenceRequest}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class IncrementTransactionSequenceSuccess extends TransactionSuccess<IncrementTransactionSequenceSuccess> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public IncrementTransactionSequenceSuccess(final TransactionIdentifier target, final long sequence) {
