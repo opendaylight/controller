@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.eos.akka;
 
-import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.Empty;
@@ -23,7 +22,6 @@ import org.opendaylight.yangtools.yang.common.Empty;
  * on any node from the datacenter to be activated. Datacenters only need to brought up when using non-default
  * datacenter or multiple datacenters.
  */
-@Beta
 public interface DataCenterControl {
     /**
      * Activates the Entity Ownership Service in the datacenter that this method is called.
