@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -19,12 +19,10 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * Abstract base class for {@link Request}s involving specific local history. This class is visible outside of this
  * package solely for the ability to perform a unified instanceof check.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
-@Beta
 public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> extends Request<LocalHistoryIdentifier, T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     LocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -15,11 +15,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 
 /**
  * Generic {@link RequestFailure} involving a {@link TransactionRequest}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     TransactionFailure(final TransactionIdentifier target, final long sequence, final RequestException cause) {

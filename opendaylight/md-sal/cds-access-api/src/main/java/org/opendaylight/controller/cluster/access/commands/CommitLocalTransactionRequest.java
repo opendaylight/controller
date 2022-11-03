@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.access.commands;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -22,12 +22,10 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * Request to commit a local transaction. Since local transactions do not introduce state on the backend until they
  * are ready, this message carries a complete set of modifications.
- *
- * @author Robert Varga
  */
-@Beta
 public final class CommitLocalTransactionRequest
         extends AbstractLocalTransactionRequest<CommitLocalTransactionRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "

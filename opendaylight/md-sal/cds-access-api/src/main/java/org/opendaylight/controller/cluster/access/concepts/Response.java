@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -17,13 +17,11 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * {@link RequestFailure} and {@link RequestSuccess}, which provide appropriate specialization. It is visible purely for
  * the purpose of allowing to check if an object is either of those specializations with a single instanceof check.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-@Beta
 public abstract class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     Response(final @NonNull T target, final long sequence) {

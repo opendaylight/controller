@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -16,11 +16,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Request to abort a local transaction. Since local transactions do not introduce state on the backend until they
  * are ready, the purpose of this message is to inform the backend that a message identifier has been used. This is
  * not important for single transactions, but is critical to ensure transaction ordering within local histories.
- *
- * @author Robert Varga
  */
-@Beta
 public final class AbortLocalTransactionRequest extends AbstractLocalTransactionRequest<AbortLocalTransactionRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public AbortLocalTransactionRequest(final @NonNull TransactionIdentifier identifier,

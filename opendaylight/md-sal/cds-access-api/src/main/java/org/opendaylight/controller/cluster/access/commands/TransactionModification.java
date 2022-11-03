@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -23,10 +22,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutpu
  * {@link #readFrom(NormalizedNodeDataInput, ReusableStreamReceiver)} methods for explicit serialization. The reason for
  * this is that they are usually transmitted in bulk, hence it is advantageous to reuse
  * a {@link NormalizedNodeDataOutput} instance to achieve better compression.
- *
- * @author Robert Varga
  */
-@Beta
 public abstract class TransactionModification {
     static final byte TYPE_DELETE = 1;
     static final byte TYPE_MERGE = 2;
@@ -57,15 +53,11 @@ public abstract class TransactionModification {
     static TransactionModification readFrom(final NormalizedNodeDataInput in, final ReusableStreamReceiver writer)
             throws IOException {
         final byte type = in.readByte();
-        switch (type) {
-            case TYPE_DELETE:
-                return new TransactionDelete(in.readYangInstanceIdentifier());
-            case TYPE_MERGE:
-                return new TransactionMerge(in.readYangInstanceIdentifier(), in.readNormalizedNode(writer));
-            case TYPE_WRITE:
-                return new TransactionWrite(in.readYangInstanceIdentifier(), in.readNormalizedNode(writer));
-            default:
-                throw new IllegalArgumentException("Unhandled type " + type);
-        }
+        return switch (type) {
+            case TYPE_DELETE -> new TransactionDelete(in.readYangInstanceIdentifier());
+            case TYPE_MERGE -> new TransactionMerge(in.readYangInstanceIdentifier(), in.readNormalizedNode(writer));
+            case TYPE_WRITE -> new TransactionWrite(in.readYangInstanceIdentifier(), in.readNormalizedNode(writer));
+            default -> throw new IllegalArgumentException("Unhandled type " + type);
+        };
     }
 }

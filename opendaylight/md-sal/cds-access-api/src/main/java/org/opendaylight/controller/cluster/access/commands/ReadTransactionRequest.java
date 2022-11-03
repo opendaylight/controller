@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -16,11 +16,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * A transaction request to read a particular path exists in the current view of a particular transaction.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ReadTransactionRequest extends AbstractReadPathTransactionRequest<ReadTransactionRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public ReadTransactionRequest(final @NonNull TransactionIdentifier identifier, final long sequence,

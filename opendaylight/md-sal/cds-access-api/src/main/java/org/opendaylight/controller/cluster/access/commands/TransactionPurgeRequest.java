@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -16,11 +16,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * A transaction request to perform the final transaction transition, which is purging it from the protocol view,
  * meaning the frontend has no further knowledge of the transaction. The backend is free to purge any state related
  * to the transaction and responds with a {@link TransactionPurgeResponse}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class TransactionPurgeRequest extends TransactionRequest<TransactionPurgeRequest> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public TransactionPurgeRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {

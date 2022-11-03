@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -15,11 +15,9 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * been closed, either via a successful commit or abort (which is indicated via {@link #isSuccessful()}. This can
  * happen if the corresponding journal record is replicated, but the message to the frontend gets lost and the backed
  * leader moved before the frontend retried the corresponding request.
- *
- * @author Robert Varga
  */
-@Beta
 public final class ClosedTransactionException extends RequestException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final boolean successful;

@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 
 /**
  * General error raised when the recipient of a {@link Request} determines that it does not know how to handle
  * the request.
- *
- * @author Robert Varga
  */
-@Beta
 public final class UnsupportedRequestException extends RequestException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public UnsupportedRequestException(final Request<?, ?> request) {

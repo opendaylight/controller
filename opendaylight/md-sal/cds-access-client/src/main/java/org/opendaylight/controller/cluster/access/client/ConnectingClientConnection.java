@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import com.google.common.annotations.Beta;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
-@Beta
 public final class ConnectingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
     /**
      * A wild estimate on how deep a queue should be. Without having knowledge of the remote actor we can only

@@ -7,19 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
  * Enumeration of transaction persistence protocols. These govern which protocol is executed between the frontend
  * and backend to drive persistence of a particular transaction.
- *
- * @author Robert Varga
  */
-@Beta
 public enum PersistenceProtocol implements WritableObject {
     /**
      * Abort protocol. The transaction has been aborted on the frontend and its effects should not be visible
@@ -77,20 +74,14 @@ public enum PersistenceProtocol implements WritableObject {
         return finish == null ? 0 : finish.byteValue();
     }
 
-    static PersistenceProtocol valueOf(final byte value) {
-        switch (value) {
-            case 0:
-                return null;
-            case 1:
-                return ABORT;
-            case 2:
-                return SIMPLE;
-            case 3:
-                return THREE_PHASE;
-            case 4:
-                return READY;
-            default:
-                throw new IllegalArgumentException("Unhandled byte value " + value);
-        }
+    static @Nullable PersistenceProtocol valueOf(final byte value) {
+        return switch (value) {
+            case 0 -> null;
+            case 1 -> ABORT;
+            case 2 -> SIMPLE;
+            case 3 -> THREE_PHASE;
+            case 4 -> READY;
+            default -> throw new IllegalArgumentException("Unhandled byte value " + value);
+        };
     }
 }

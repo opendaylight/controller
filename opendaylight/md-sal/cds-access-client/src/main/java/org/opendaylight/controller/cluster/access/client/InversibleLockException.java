@@ -9,17 +9,15 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
+import java.io.Serial;
 import java.util.concurrent.CountDownLatch;
 
 /**
  * Exception thrown from {@link InversibleLock#optimisticRead()} and can be used to wait for the racing write
  * to complete using {@link #awaitResolution()}.
- *
- * @author Robert Varga
  */
-@Beta
 public final class InversibleLockException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final transient CountDownLatch latch;

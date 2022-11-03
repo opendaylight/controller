@@ -10,17 +10,13 @@ package org.opendaylight.controller.cluster.access.client;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.persistence.AbstractPersistentActor;
-import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Frontend actor which takes care of persisting generations and creates an appropriate ClientIdentifier.
- *
- * @author Robert Varga
  */
-@Beta
 public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
     private AbstractClientActorBehavior<?> currentBehavior;
