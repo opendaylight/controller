@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
 import static io.netty.util.concurrent.GlobalEventExecutor.INSTANCE;
 
-import com.google.common.annotations.Beta;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
@@ -29,7 +28,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Beta
 @Component(immediate = true, property = "type=global-event-executor")
 public final class OSGiGlobalEventExecutor implements EventExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(OSGiGlobalEventExecutor.class);
