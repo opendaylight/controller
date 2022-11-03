@@ -7,17 +7,13 @@
  */
 package org.opendaylight.controller.cluster.dom.api;
 
-import com.google.common.annotations.Beta;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
  * Registration of a {@link LeaderLocationListener}.
  *
- * @author Robert Varga
- *
  * @param <T> Listener type
  */
-@Beta
 public interface LeaderLocationListenerRegistration<T extends LeaderLocationListener> extends ListenerRegistration<T> {
-
+    // Just a specialization
 }
