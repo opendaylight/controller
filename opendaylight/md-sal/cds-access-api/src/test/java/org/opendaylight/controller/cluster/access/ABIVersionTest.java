@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.access.ABIVersion.BORON;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_FUTURE_VERSION;
@@ -33,14 +34,14 @@ public class ABIVersionTest {
         assertEquals(BORON, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(BORON))));
     }
 
-    @Test(expected = PastVersionException.class)
+    @Test
     public void testInvalidPastVersion() throws Exception {
-        ABIVersion.valueOf(TEST_PAST_VERSION.shortValue());
+        assertThrows(PastVersionException.class, () -> ABIVersion.valueOf(TEST_PAST_VERSION.shortValue()));
     }
 
-    @Test(expected = FutureVersionException.class)
+    @Test
     public void testInvalidFutureVersion() throws Exception {
-        ABIVersion.valueOf(TEST_FUTURE_VERSION.shortValue());
+        assertThrows(FutureVersionException.class, () -> ABIVersion.valueOf(TEST_FUTURE_VERSION.shortValue()));
     }
 
     private static byte[] writeVersion(final ABIVersion version) {
