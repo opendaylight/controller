@@ -15,8 +15,8 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class SkipTransactionsRequestTest extends AbstractTransactionRequestTest<SkipTransactionsRequest> {
-    private static final SkipTransactionsRequest OBJECT = new SkipTransactionsRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, List.of(UnsignedLong.ONE));
+    private static final SkipTransactionsRequest OBJECT = new SkipTransactionsRequest(TRANSACTION_IDENTIFIER, 0,
+        ACTOR_REF, List.of(UnsignedLong.ONE));
 
     public SkipTransactionsRequestTest() {
         super(OBJECT, 109, 403);
@@ -24,7 +24,7 @@ public class SkipTransactionsRequestTest extends AbstractTransactionRequestTest<
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());

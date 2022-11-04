@@ -21,7 +21,7 @@ public class LocalHistoryFailureTest extends AbstractRequestFailureTest<LocalHis
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getCause(), clone.getCause());
