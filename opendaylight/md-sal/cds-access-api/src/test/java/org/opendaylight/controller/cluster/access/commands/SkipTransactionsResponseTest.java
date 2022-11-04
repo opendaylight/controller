@@ -9,14 +9,13 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class SkipTransactionsResponseTest extends AbstractTransactionSuccessTest<SkipTransactionsResponse> {
-    private static final SkipTransactionsResponse OBJECT = new SkipTransactionsResponse(
-            TRANSACTION_IDENTIFIER, 0);
+    private static final SkipTransactionsResponse OBJECT = new SkipTransactionsResponse(TRANSACTION_IDENTIFIER, 0);
 
     @Override
     protected SkipTransactionsResponse object() {
@@ -25,8 +24,7 @@ public class SkipTransactionsResponseTest extends AbstractTransactionSuccessTest
 
     @Test
     public void cloneAsVersionTest() {
-        final SkipTransactionsResponse clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        assertEquals(OBJECT, clone);
+        assertSame(OBJECT, OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM));
     }
 
     @Override

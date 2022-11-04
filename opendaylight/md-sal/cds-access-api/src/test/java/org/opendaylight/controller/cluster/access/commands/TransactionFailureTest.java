@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertSame;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
@@ -21,7 +22,6 @@ public class TransactionFailureTest extends AbstractRequestFailureTest<Transacti
 
     @Test
     public void cloneAsVersionTest() {
-        final TransactionFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
-        Assert.assertEquals(OBJECT, clone);
+        assertSame(OBJECT, OBJECT.cloneAsVersion(ABIVersion.current()));
     }
 }

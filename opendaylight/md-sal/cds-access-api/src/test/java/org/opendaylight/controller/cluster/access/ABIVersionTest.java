@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.cluster.access.ABIVersion.BORON;
+import static org.opendaylight.controller.cluster.access.ABIVersion.MAGNESIUM;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_FUTURE_VERSION;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_PAST_VERSION;
 
@@ -23,15 +23,15 @@ public class ABIVersionTest {
     @Test
     public void testInvalidVersions() {
         assertTrue(TEST_PAST_VERSION.compareTo(TEST_FUTURE_VERSION) < 0);
-        assertTrue(TEST_PAST_VERSION.compareTo(BORON) < 0);
-        assertTrue(TEST_FUTURE_VERSION.compareTo(BORON) > 0);
+        assertTrue(TEST_PAST_VERSION.compareTo(MAGNESIUM) < 0);
+        assertTrue(TEST_FUTURE_VERSION.compareTo(MAGNESIUM) > 0);
     }
 
     @Test
-    public void testBoronVersion() throws Exception {
-        assertEquals((short)5, BORON.shortValue());
-        assertEquals(BORON, ABIVersion.valueOf(BORON.shortValue()));
-        assertEquals(BORON, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(BORON))));
+    public void testMagnesiumVersion() throws Exception {
+        assertEquals((short)8, MAGNESIUM.shortValue());
+        assertEquals(MAGNESIUM, ABIVersion.valueOf(MAGNESIUM.shortValue()));
+        assertEquals(MAGNESIUM, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(MAGNESIUM))));
     }
 
     @Test
