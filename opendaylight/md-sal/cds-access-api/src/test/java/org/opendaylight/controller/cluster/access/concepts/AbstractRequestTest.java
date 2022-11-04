@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
@@ -14,7 +18,6 @@ import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
 import org.apache.commons.lang.SerializationUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,13 +34,13 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     @Test
     public void getReplyToTest() {
-        Assert.assertEquals(ACTOR_REF, object().getReplyTo());
+        assertEquals(ACTOR_REF, object().getReplyTo());
     }
 
     @Test
     public void addToStringAttributesCommonTest() {
-        final MoreObjects.ToStringHelper result = object().addToStringAttributes(MoreObjects.toStringHelper(object()));
-        Assert.assertTrue(result.toString().contains("replyTo=" + ACTOR_REF));
+        final var result = object().addToStringAttributes(MoreObjects.toStringHelper(object()));
+        assertThat(result.toString(), containsString("replyTo=" + ACTOR_REF));
     }
 
     @SuppressWarnings("unchecked")
@@ -45,9 +48,9 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
     public void serializationTest() {
         final Object deserialize = SerializationUtils.clone(object());
 
-        Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
-        Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
-        Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
+        assertEquals(object().getTarget(), ((T) deserialize).getTarget());
+        assertEquals(object().getVersion(), ((T) deserialize).getVersion());
+        assertEquals(object().getSequence(), ((T) deserialize).getSequence());
         doAdditionalAssertions(deserialize);
     }
 
