@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 
 import java.util.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(
@@ -27,19 +27,17 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
 
     @Test
     public void getDataTest() {
-        final Optional<NormalizedNode> result = OBJECT.getData();
-        assertFalse(result.isPresent());
+        assertEquals(Optional.empty(), OBJECT.getData());
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final ReadTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        assertEquals(OBJECT, clone);
+        assertSame(OBJECT, OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM));
     }
 
     @Override
     protected void doAdditionalAssertions(final Object deserialize) {
-        assertTrue(deserialize instanceof ReadTransactionSuccess);
+        assertThat(deserialize, instanceOf(ReadTransactionSuccess.class));
         assertEquals(OBJECT.getData(), ((ReadTransactionSuccess) deserialize).getData());
     }
 }

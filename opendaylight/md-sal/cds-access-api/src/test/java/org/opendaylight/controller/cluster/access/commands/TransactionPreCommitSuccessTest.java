@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertSame;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
@@ -22,12 +25,11 @@ public class TransactionPreCommitSuccessTest extends AbstractTransactionSuccessT
 
     @Test
     public void cloneAsVersionTest() {
-        final TransactionPreCommitSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertSame(OBJECT, OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM));
     }
 
     @Override
     protected void doAdditionalAssertions(Object deserialize) {
-        Assert.assertTrue(deserialize instanceof TransactionPreCommitSuccess);
+        assertThat(deserialize, instanceOf(TransactionPreCommitSuccess.class));
     }
 }
