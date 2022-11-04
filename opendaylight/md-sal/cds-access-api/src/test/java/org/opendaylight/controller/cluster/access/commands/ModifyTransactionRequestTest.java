@@ -7,16 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.access.commands.TransactionModification.TYPE_WRITE;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -29,7 +31,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     private static final ContainerNode NODE = Builders.containerBuilder().withNodeIdentifier(
             NodeIdentifier.create(QName.create("namespace", "localName"))).build();
 
-    private static final List<TransactionModification> MODIFICATIONS = Lists.newArrayList(
+    private static final List<TransactionModification> MODIFICATIONS = List.of(
             new TransactionWrite(YangInstanceIdentifier.empty(), NODE));
 
     private static final PersistenceProtocol PROTOCOL = PersistenceProtocol.ABORT;
@@ -58,21 +60,20 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
 
     @Test
     public void addToStringAttributesTest() {
-        final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        assertTrue(result.toString().contains("modifications=1"));
-        assertTrue(result.toString().contains("protocol=" + PROTOCOL));
+        final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
+        assertThat(result, containsString("modifications=1"));
+        assertThat(result, containsString("protocol=" + PROTOCOL));
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final ModifyTransactionRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertSame(OBJECT, OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM));
     }
 
     @Override
     protected void doAdditionalAssertions(final Object deserialize) {
-        assertTrue(deserialize instanceof ModifyTransactionRequest);
-        final ModifyTransactionRequest casted = (ModifyTransactionRequest) deserialize;
+        assertThat(deserialize, instanceOf(ModifyTransactionRequest.class));
+        final var casted = (ModifyTransactionRequest) deserialize;
 
         assertEquals(OBJECT.getReplyTo(), casted.getReplyTo());
         assertEquals(OBJECT.getPersistenceProtocol(), casted.getPersistenceProtocol());

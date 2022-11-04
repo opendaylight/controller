@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.commands;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import com.google.common.primitives.UnsignedLong;
 import java.util.List;
@@ -27,8 +28,7 @@ public class SkipTransactionsRequestTest extends AbstractTransactionRequestTest<
 
     @Test
     public void cloneAsVersionTest() {
-        final SkipTransactionsRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        assertEquals(OBJECT, clone);
+        assertSame(OBJECT, OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM));
     }
 
     @Override
