@@ -56,9 +56,9 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
         assertNotNull(clone);
-        assertEquals(ABIVersion.BORON, clone.getVersion());
+        assertEquals(ABIVersion.MAGNESIUM, clone.getVersion());
     }
 
     @Test
