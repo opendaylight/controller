@@ -59,7 +59,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());
@@ -71,7 +71,6 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     protected void doAdditionalAssertions(final ModifyTransactionRequest deserialize) {
         assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
         assertEquals(OBJECT.getPersistenceProtocol(), deserialize.getPersistenceProtocol());
-
         assertNotNull(deserialize.getModifications());
         assertEquals(1, deserialize.getModifications().size());
         final var modification = deserialize.getModifications().get(0);

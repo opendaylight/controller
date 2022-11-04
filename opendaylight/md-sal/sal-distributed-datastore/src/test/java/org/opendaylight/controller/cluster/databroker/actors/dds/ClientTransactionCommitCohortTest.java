@@ -172,7 +172,7 @@ public class ClientTransactionCommitCohortTest {
     private static TransactionTester<RemoteProxyTransaction> createTransactionTester(final TestProbe backendProbe,
                                                              final ClientActorContext context,
                                                              final AbstractClientHistory history) {
-        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
+        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.MAGNESIUM,
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
