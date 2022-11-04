@@ -7,8 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
+
 import org.apache.commons.lang.SerializationUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
@@ -19,12 +25,15 @@ public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLoca
 
     @Test
     public void cloneAsVersionTest() {
-        Assert.assertEquals(object(), object().cloneAsVersion(ABIVersion.BORON));
+        assertSame(object(), object().cloneAsVersion(ABIVersion.BORON));
     }
 
     @Override
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void serializationTest() {
-        SerializationUtils.clone(object());
+        final var ex = assertThrows(UnsupportedOperationException.class, () -> SerializationUtils.clone(object()));
+        assertThat(ex.getMessage(), allOf(
+            startsWith("Local transaction request "),
+            endsWith(" should never be serialized")));
     }
 }
