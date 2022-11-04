@@ -22,7 +22,7 @@ public class TransactionCanCommitSuccessTest extends AbstractTransactionSuccessT
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

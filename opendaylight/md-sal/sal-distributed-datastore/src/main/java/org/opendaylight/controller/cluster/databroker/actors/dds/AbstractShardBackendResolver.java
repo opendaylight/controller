@@ -74,7 +74,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
 
         private synchronized void onStageResolved(final ShardBackendInfo info, final Throwable failure) {
             if (failure == null) {
-                this.result = requireNonNull(info);
+                result = requireNonNull(info);
             } else {
                 LOG.warn("Failed to resolve shard", failure);
             }
@@ -97,7 +97,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
         this.actorUtils = requireNonNull(actorUtils);
-        this.connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.BORON,
+        connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.MAGNESIUM,
             ABIVersion.current()));
     }
 

@@ -18,7 +18,6 @@ import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -52,7 +51,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
 
     @Test
     public void testGetAlternates() {
-        final Collection<ActorSelection> alternates = OBJECT.getAlternates();
+        final var alternates = OBJECT.getAlternates();
         assertArrayEquals(ALTERNATES.toArray(), alternates.toArray());
     }
 
@@ -75,7 +74,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getAlternates(), clone.getAlternates());

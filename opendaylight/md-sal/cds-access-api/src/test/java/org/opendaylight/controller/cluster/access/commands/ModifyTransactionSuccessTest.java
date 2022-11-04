@@ -21,8 +21,8 @@ public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest
 
     @Test
     public void cloneAsVersionTest() {
-        final ModifyTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        assertEquals(ABIVersion.BORON, clone.getVersion());
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        assertEquals(ABIVersion.MAGNESIUM, clone.getVersion());
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

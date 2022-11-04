@@ -21,8 +21,8 @@ public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHis
 
     @Test
     public void cloneAsVersionTest() {
-        final LocalHistorySuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        assertEquals(ABIVersion.BORON, clone.getVersion());
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        assertEquals(ABIVersion.MAGNESIUM, clone.getVersion());
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }
