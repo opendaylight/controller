@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.access.ABIVersion.BORON;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_FUTURE_VERSION;
@@ -33,14 +34,14 @@ public class ABIVersionTest {
         assertEquals(BORON, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(BORON))));
     }
 
-    @Test(expected = PastVersionException.class)
-    public void testInvalidPastVersion() throws Exception {
-        ABIVersion.valueOf(TEST_PAST_VERSION.shortValue());
+    @Test
+    public void testInvalidPastVersion() {
+        assertThrows(PastVersionException.class, () -> ABIVersion.valueOf(TEST_PAST_VERSION.shortValue()));
     }
 
-    @Test(expected = FutureVersionException.class)
-    public void testInvalidFutureVersion() throws Exception {
-        ABIVersion.valueOf(TEST_FUTURE_VERSION.shortValue());
+    @Test
+    public void testInvalidFutureVersion() {
+        assertThrows(FutureVersionException.class, () -> ABIVersion.valueOf(TEST_FUTURE_VERSION.shortValue()));
     }
 
     private static byte[] writeVersion(final ABIVersion version) {
@@ -49,8 +50,9 @@ public class ABIVersionTest {
         return bado.toByteArray();
     }
 
-    @Test(expected = IOException.class)
-    public void testBadRead() throws IOException {
-        ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(TEST_PAST_VERSION)));
+    @Test
+    public void testBadRead() {
+        final var in = ByteStreams.newDataInput(writeVersion(TEST_PAST_VERSION));
+        assertThrows(IOException.class, () -> ABIVersion.readFrom(in));
     }
 }
