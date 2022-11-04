@@ -42,7 +42,7 @@ public class ConnectedClientConnectionTest
 
     @Override
     protected ConnectedClientConnection<BackendInfo> createConnection() {
-        final BackendInfo backend = new BackendInfo(backendProbe.ref(), "test", 0L, ABIVersion.BORON, 10);
+        final BackendInfo backend = new BackendInfo(backendProbe.ref(), "test", 0L, ABIVersion.current(), 10);
         final ConnectingClientConnection<BackendInfo> connectingConn = new ConnectingClientConnection<>(context, 0L,
                 backend.getName());
         return new ConnectedClientConnection<>(connectingConn, backend);
