@@ -77,12 +77,14 @@ public class IntegrationTestKit extends ShardTestKit {
         return datastoreContextBuilder;
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
                                                           final boolean waitUntilLeader,
                                                           final EffectiveModelContext schemaContext) throws Exception {
         return setupDistributedDataStore(typeName, moduleShardsConfig, "modules.conf", waitUntilLeader, schemaContext);
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
                                                           final String modulesConfig,
                                                           final boolean waitUntilLeader,
@@ -169,6 +171,7 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
                                                                        final EffectiveModelContext schemaContext) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
@@ -191,6 +194,7 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
                                                                        final EffectiveModelContext schemaContext,
                                                                        final LogicalDatastoreType storeType) {
