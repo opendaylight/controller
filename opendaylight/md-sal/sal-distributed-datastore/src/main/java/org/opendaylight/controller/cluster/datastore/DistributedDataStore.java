@@ -20,23 +20,25 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 
 /**
- * Implements a distributed DOMStore using Akka Patterns.ask().
+ * Implements a distributed DOMStore using Akka {@code Patterns.ask()}.
+ *
+ * @deprecated This implementation is destined for removal,
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 public class DistributedDataStore extends AbstractDataStore {
-
     private final TransactionContextFactory txContextFactory;
 
     public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
-        this.txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
+        txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
     }
 
     @VisibleForTesting
     DistributedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {
         super(actorUtils, identifier);
-        this.txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
+        txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
     }
 
 

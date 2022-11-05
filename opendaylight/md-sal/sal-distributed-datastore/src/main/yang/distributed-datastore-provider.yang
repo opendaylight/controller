@@ -225,6 +225,7 @@ module distributed-datastore-provider {
         }
 
         leaf use-tell-based-protocol {
+            status obsolete;
             default false;
             type boolean;
             description "Use a newer protocol between the frontend and backend. This feature is considered
