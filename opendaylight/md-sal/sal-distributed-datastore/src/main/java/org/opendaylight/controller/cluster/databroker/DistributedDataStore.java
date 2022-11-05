@@ -25,16 +25,15 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 /**
  * Implements a distributed DOMStore using ClientActor.
  */
-public class ClientBackedDataStore extends AbstractDataStore {
-
-    public ClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+public class DistributedDataStore extends AbstractDataStore {
+    public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
     }
 
     @VisibleForTesting
-    ClientBackedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
+    DistributedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
                           final DataStoreClient clientActor) {
         super(actorUtils, identifier, clientActor);
     }
