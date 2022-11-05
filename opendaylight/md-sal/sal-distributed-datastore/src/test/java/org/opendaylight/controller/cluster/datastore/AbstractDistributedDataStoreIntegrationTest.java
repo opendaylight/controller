@@ -42,8 +42,8 @@ import org.junit.runners.Parameterized.Parameter;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
+import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -386,11 +386,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 } catch (final ExecutionException e) {
                     final String msg = "Unexpected exception: "
                             + Throwables.getStackTraceAsString(e.getCause());
-                    if (DistributedDataStore.class.isAssignableFrom(testParameter)) {
-                        assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
-                    } else {
-                        assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
-                    }
+                    assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
                 }
             } finally {
                 try {
