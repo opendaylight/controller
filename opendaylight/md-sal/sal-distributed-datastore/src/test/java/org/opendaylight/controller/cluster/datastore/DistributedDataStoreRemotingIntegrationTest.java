@@ -65,8 +65,8 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
+import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
@@ -430,7 +430,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         //            member-2-datastore-testCloseTransactionMetadataLeak-fe-0-chn-1-txn-1-0 is not ready yet
         //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy$Allocated.checkReady()
         //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy.newReadOnlyTransaction()
-        assumeTrue(testParameter.isAssignableFrom(ClientBackedDataStore.class));
+        assumeTrue(testParameter.isAssignableFrom(DistributedDataStore.class));
 
         initDatastoresWithCars("testCloseTransactionMetadataLeak");
 
@@ -1357,7 +1357,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @Test
     public void testReadWriteMessageSlicing() throws Exception {
         // The slicing is only implemented for tell-based protocol
-        assumeTrue(ClientBackedDataStore.class.isAssignableFrom(testParameter));
+        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
 
         leaderDatastoreContextBuilder.maximumMessageSliceSize(100);
         followerDatastoreContextBuilder.maximumMessageSliceSize(100);
