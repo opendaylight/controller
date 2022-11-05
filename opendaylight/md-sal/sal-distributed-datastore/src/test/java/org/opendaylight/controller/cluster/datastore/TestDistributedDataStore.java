@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardM
 import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
+@Deprecated(since = "7.0.0", forRemoval = true)
 public class TestDistributedDataStore extends DistributedDataStore implements LocalShardStore {
 
     public TestDistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,

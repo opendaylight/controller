@@ -83,7 +83,8 @@ public final class DistributedDataStoreFactory {
         } else {
             dataStore = new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
                 restoreFromSnapshot);
-            LOG.info("Data store {} is using ask-based protocol", datastoreName);
+            LOG.warn("Data store {} is using ask-based protocol, which will be removed in the next major release",
+                datastoreName);
         }
 
         return dataStore;
