@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManag
 import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManager.GetLocalShardsReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
-public class TestClientBackedDataStore extends ClientBackedDataStore implements LocalShardStore {
+public class TestClientBackedDataStore extends DistributedDataStore implements LocalShardStore {
 
     public TestClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
                                      final Configuration configuration,

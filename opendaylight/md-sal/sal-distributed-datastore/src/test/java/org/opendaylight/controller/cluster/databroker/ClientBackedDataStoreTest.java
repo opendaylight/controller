@@ -75,7 +75,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testCreateTransactionChain() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (DistributedDataStore clientBackedDataStore = new DistributedDataStore(
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreTransactionChain txChain = clientBackedDataStore.createTransactionChain();
             assertNotNull(txChain);
@@ -85,7 +85,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testNewReadOnlyTransaction() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (DistributedDataStore clientBackedDataStore = new DistributedDataStore(
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadTransaction tx = clientBackedDataStore.newReadOnlyTransaction();
             assertNotNull(tx);
@@ -95,7 +95,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testNewWriteOnlyTransaction() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (DistributedDataStore clientBackedDataStore = new DistributedDataStore(
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreWriteTransaction tx = clientBackedDataStore.newWriteOnlyTransaction();
             assertNotNull(tx);
@@ -105,7 +105,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testNewReadWriteTransaction() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (DistributedDataStore clientBackedDataStore = new DistributedDataStore(
                 actorUtils, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadWriteTransaction tx = clientBackedDataStore.newReadWriteTransaction();
             assertNotNull(tx);
