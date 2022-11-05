@@ -224,14 +224,6 @@ module distributed-datastore-provider {
                          maximum size in bytes for a message slice.";
         }
 
-        leaf use-tell-based-protocol {
-            status obsolete;
-            default false;
-            type boolean;
-            description "Use a newer protocol between the frontend and backend. This feature is considered
-                         exprerimental at this point.";
-        }
-
         leaf file-backed-streaming-threshold-in-megabytes {
             default 128;
             type non-zero-uint32-type;
