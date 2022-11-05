@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
-import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
+import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -77,7 +77,7 @@ public final class DistributedDataStoreFactory {
 
         final AbstractDataStore dataStore;
         if (datastoreContext.isUseTellBasedProtocol()) {
-            dataStore = new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory,
+            dataStore = new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
                 restoreFromSnapshot);
             LOG.info("Data store {} is using tell-based protocol", datastoreName);
         } else {
