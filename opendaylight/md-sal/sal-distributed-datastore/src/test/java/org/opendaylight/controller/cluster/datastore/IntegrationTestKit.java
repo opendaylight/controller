@@ -25,12 +25,11 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.lang.reflect.Constructor;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
+import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -88,66 +87,53 @@ public class IntegrationTestKit extends ShardTestKit {
                                                           final boolean waitUntilLeader,
                                                           final EffectiveModelContext schemaContext,
                                                           final String... shardNames) throws Exception {
-        return (DistributedDataStore) setupAbstractDataStore(DistributedDataStore.class, typeName, moduleShardsConfig,
+        return setupAbstractDataStore(typeName, moduleShardsConfig,
                 modulesConfig, waitUntilLeader, schemaContext, shardNames);
     }
 
-    public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
-                                                    final String typeName, final String... shardNames)
+    public AbstractDataStore setupAbstractDataStore(final String typeName, final String... shardNames)
             throws Exception {
-        return setupAbstractDataStore(implementation, typeName, "module-shards.conf", true,
-                SchemaContextHelper.full(), shardNames);
+        return setupAbstractDataStore(typeName, "module-shards.conf", true, SchemaContextHelper.full(), shardNames);
     }
 
-    public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
-                                                    final String typeName, final boolean waitUntilLeader,
+    public AbstractDataStore setupAbstractDataStore(final String typeName, final boolean waitUntilLeader,
                                                     final String... shardNames) throws Exception {
-        return setupAbstractDataStore(implementation, typeName, "module-shards.conf", waitUntilLeader,
-                SchemaContextHelper.full(), shardNames);
+        return setupAbstractDataStore(typeName, "module-shards.conf", waitUntilLeader, SchemaContextHelper.full(),
+            shardNames);
     }
 
-    public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
-                                                    final String typeName, final String moduleShardsConfig,
+    public AbstractDataStore setupAbstractDataStore(final String typeName, final String moduleShardsConfig,
                                                     final boolean waitUntilLeader, final String... shardNames)
             throws Exception {
-        return setupAbstractDataStore(implementation, typeName, moduleShardsConfig, waitUntilLeader,
-                SchemaContextHelper.full(), shardNames);
+        return setupAbstractDataStore(typeName, moduleShardsConfig, waitUntilLeader, SchemaContextHelper.full(),
+            shardNames);
     }
 
-    public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
-                                                    final String typeName, final String moduleShardsConfig,
+    public AbstractDataStore setupAbstractDataStore(final String typeName, final String moduleShardsConfig,
                                                     final boolean waitUntilLeader,
                                                     final EffectiveModelContext schemaContext,
                                                     final String... shardNames) throws Exception {
-        return setupAbstractDataStore(implementation, typeName, moduleShardsConfig, "modules.conf", waitUntilLeader,
-                schemaContext, shardNames);
+        return setupAbstractDataStore(typeName, moduleShardsConfig, "modules.conf", waitUntilLeader, schemaContext,
+            shardNames);
     }
 
-    private AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
-                                                     final String typeName, final String moduleShardsConfig,
-                                                     final String modulesConfig, final boolean waitUntilLeader,
-                                                     final EffectiveModelContext schemaContext,
-                                                     final String... shardNames)
+    private DistributedDataStore setupAbstractDataStore(final String typeName, final String moduleShardsConfig,
+                                                        final String modulesConfig, final boolean waitUntilLeader,
+                                                        final EffectiveModelContext schemaContext,
+                                                       final String... shardNames)
             throws Exception {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final Configuration config = new ConfigurationImpl(moduleShardsConfig, modulesConfig);
 
         setDataStoreName(typeName);
 
-        // Make sure we set up datastore context correctly
-        datastoreContextBuilder.useTellBasedProtocol(ClientBackedDataStore.class.isAssignableFrom(implementation));
-
         final DatastoreContext datastoreContext = datastoreContextBuilder.build();
         final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
         doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
-        final Constructor<? extends AbstractDataStore> constructor = implementation.getDeclaredConstructor(
-                ActorSystem.class, ClusterWrapper.class, Configuration.class,
-                DatastoreContextFactory.class, DatastoreSnapshot.class);
-
-        final AbstractDataStore dataStore = constructor.newInstance(getSystem(), cluster, config, mockContextFactory,
-            restoreFromSnapshot);
+        final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config,
+            mockContextFactory, restoreFromSnapshot);
 
         dataStore.onModelContextUpdated(schemaContext);
 
