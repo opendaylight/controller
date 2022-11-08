@@ -156,7 +156,7 @@ public class AbstractOpsTest {
                                       final ErrorType errorType, final String tag, final String message,
                                       final String applicationTag, final String info, final String causeMsg) {
         assertNotNull("RpcResult was null", rpcResult);
-        final Collection<? extends RpcError> rpcErrors = rpcResult.getErrors();
+        final Collection<? extends RpcError> rpcErrors = rpcResult.errors();
         assertEquals("RpcErrors count", 1, rpcErrors.size());
         assertRpcErrorEquals(rpcErrors.iterator().next(), severity, errorType, tag, message,
                 applicationTag, info, causeMsg);
@@ -164,7 +164,7 @@ public class AbstractOpsTest {
 
     static void assertSuccessfulRpcResult(final DOMRpcResult rpcResult, final NormalizedNode expOutput) {
         assertNotNull("RpcResult was null", rpcResult);
-        assertCompositeNodeEquals(expOutput, rpcResult.getResult());
+        assertCompositeNodeEquals(expOutput, rpcResult.value());
     }
 
     static class TestException extends Exception {

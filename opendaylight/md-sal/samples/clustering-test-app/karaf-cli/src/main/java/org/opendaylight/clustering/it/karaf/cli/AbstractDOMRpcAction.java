@@ -17,12 +17,12 @@ public abstract class AbstractDOMRpcAction implements Action {
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     public final Object execute() throws InterruptedException, ExecutionException {
         final DOMRpcResult result = invokeRpc().get();
-        if (!result.getErrors().isEmpty()) {
+        if (!result.errors().isEmpty()) {
             // FIXME: is there a better way to report errors?
-            System.out.println("Invocation failed: " + result.getErrors());
+            System.out.println("Invocation failed: " + result.errors());
             return null;
         } else {
-            return result.getResult().prettyTree().get();
+            return result.value().prettyTree().get();
         }
     }
 
