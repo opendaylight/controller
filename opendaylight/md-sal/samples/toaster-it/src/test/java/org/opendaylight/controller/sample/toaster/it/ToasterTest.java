@@ -11,7 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -49,6 +51,12 @@ public class ToasterTest extends AbstractMdsalTestBase {
         ObjectName providerOn = new ObjectName(
                 "org.opendaylight.controller:name=OpendaylightToaster,type=toaster-provider");
 
+        if (!platformMBeanServer.isRegistered(providerOn)) {
+            //If toaster-provider is not registered yet, we try to wait a bit
+            //FIXME: wait for toaster-provider registration in some better way or remove if no longer needed
+            // - after migration of toaster-consumer to OSGi DS it starts before toaster-provider
+            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
+        }
         long toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
         assertEquals(0, toastsMade);
 
