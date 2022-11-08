@@ -40,12 +40,6 @@
   <odl:rpc-implementation ref="carProvider"/>
   <odl:rpc-implementation ref="peopleProvider"/>
 
-  <bean id="peopleCarListener" class="org.opendaylight.controller.clustering.it.listener.PeopleCarListener" >
-    <property name="dataProvider" ref="dataBroker"/>
-  </bean>
-
-  <odl:notification-listener ref="peopleCarListener"/>
-
   <bean id="basicTestProvider" class="org.opendaylight.controller.clustering.it.provider.BasicRpcTestProvider">
     <argument ref="bindingRpcRegistry"/>
     <argument ref="clusterSingletonService"/>
