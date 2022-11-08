@@ -20,7 +20,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.GetContextedConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.GetContextedConstantInputBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 @Service
 @Command(scope = "test-app", name = "get-contexted-constant", description = "Run an get-contexted-constant test")
@@ -36,7 +36,7 @@ public class GetContextedConstantCommand extends AbstractDOMRpcAction {
 
     @Override
     protected ListenableFuture<? extends DOMRpcResult> invokeRpc() {
-        final NormalizedNode inputNode = serializer.toNormalizedNodeRpcData(new GetContextedConstantInputBuilder()
+        final ContainerNode inputNode = serializer.toNormalizedNodeRpcData(new GetContextedConstantInputBuilder()
             .setContext(iidSupport.parseArgument(context))
             .build());
         return rpcService.invokeRpc(QName.create(GetContextedConstantInput.QNAME, "get-contexted-constant"), inputNode);
