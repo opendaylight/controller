@@ -16,10 +16,15 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.api.KitchenServiceRuntimeMXBean;
+import org.opendaylight.mdsal.binding.api.NotificationService;
+import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
@@ -30,30 +35,49 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KitchenServiceImpl extends AbstractMXBean
+@Singleton
+@Component(service = KitchenService.class, immediate = true)
+public final class KitchenServiceImpl extends AbstractMXBean
         implements KitchenService, KitchenServiceRuntimeMXBean, ToasterListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(KitchenServiceImpl.class);
     private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
 
-    private final ToasterService toaster;
-
     private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ToasterService toaster;
+    private final Registration reg;
 
     private volatile boolean toasterOutOfBread;
 
-    public KitchenServiceImpl(final ToasterService toaster) {
+    @Inject
+    @Activate
+    public KitchenServiceImpl(@Reference final RpcConsumerRegistry rpcRegistry,
+            @Reference final NotificationService notifService) {
         super("KitchenService", "toaster-consumer", null);
-        this.toaster = toaster;
+        toaster = rpcRegistry.getRpcService(ToasterService.class);
+        reg = notifService.registerNotificationListener(this);
+        register();
+    }
+
+    @PreDestroy
+    @Deactivate
+    public void close() {
+        unregister();
+        reg.close();
     }
 
     @Override
