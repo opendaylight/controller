@@ -54,8 +54,10 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
     public void testToasterInitOnStartUp() throws Exception {
         DataBroker broker = getDataBroker();
 
-        ReadTransaction readTx = broker.newReadOnlyTransaction();
-        Optional<Toaster> optional = readTx.read(LogicalDatastoreType.OPERATIONAL, TOASTER_IID).get();
+        Optional<Toaster> optional;
+        try (ReadTransaction readTx = broker.newReadOnlyTransaction()) {
+            optional = readTx.read(LogicalDatastoreType.OPERATIONAL, TOASTER_IID).get();
+        }
         assertNotNull(optional);
         assertTrue("Operational toaster not present", optional.isPresent());
 
@@ -65,8 +67,10 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
         assertEquals(new DisplayString("Opendaylight"), toasterData.getToasterManufacturer());
         assertEquals(new DisplayString("Model 1 - Binding Aware"), toasterData.getToasterModelNumber());
 
-        Optional<Toaster> configToaster = readTx.read(LogicalDatastoreType.CONFIGURATION, TOASTER_IID).get();
-        assertFalse("Didn't expect config data for toaster.", configToaster.isPresent());
+        try (ReadTransaction readTx = broker.newReadOnlyTransaction()) {
+            Boolean configToaster = readTx.exists(LogicalDatastoreType.CONFIGURATION, TOASTER_IID).get();
+            assertFalse("Didn't expect config data for toaster.", configToaster);
+        }
     }
 
     @Test

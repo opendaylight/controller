@@ -18,7 +18,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.GetSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.GetSingletonConstantInputBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 @Service
 @Command(scope = "test-app", name = "get-singleton-constant", description = "Run an get-singleton-constant test")
@@ -30,7 +30,7 @@ public class GetSingletonConstantCommand extends AbstractDOMRpcAction {
 
     @Override
     protected ListenableFuture<? extends DOMRpcResult> invokeRpc() {
-        final NormalizedNode inputNode =
+        final ContainerNode inputNode =
                 serializer.toNormalizedNodeRpcData(new GetSingletonConstantInputBuilder().build());
         return rpcService.invokeRpc(QName.create(GetSingletonConstantInput.QNAME, "get-singleton-constant"), inputNode);
     }
