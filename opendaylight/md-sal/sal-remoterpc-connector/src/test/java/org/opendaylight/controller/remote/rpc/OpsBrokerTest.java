@@ -40,7 +40,7 @@ public class OpsBrokerTest extends AbstractOpsTest {
 
         final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), RpcResponse.class);
 
-        assertEquals(rpcResult.getResult(), rpcResponse.getOutput());
+        assertEquals(rpcResult.value(), rpcResponse.getOutput());
     }
 
     @Test

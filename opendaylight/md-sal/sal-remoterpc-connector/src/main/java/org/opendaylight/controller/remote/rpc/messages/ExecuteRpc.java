@@ -17,20 +17,20 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
-public final class ExecuteRpc extends AbstractExecute<QName, @Nullable NormalizedNode> {
+public final class ExecuteRpc extends AbstractExecute<QName, @Nullable ContainerNode> {
     private static final long serialVersionUID = 1128904894827335676L;
 
-    private ExecuteRpc(final @NonNull QName type, final @Nullable NormalizedNode input) {
+    private ExecuteRpc(final @NonNull QName type, final @Nullable ContainerNode input) {
         super(type, input);
     }
 
     public static @NonNull ExecuteRpc from(final @NonNull DOMRpcIdentifier rpc,
-            final @Nullable NormalizedNode input) {
+            final @Nullable ContainerNode input) {
         return new ExecuteRpc(rpc.getType(), input);
     }
 
@@ -67,7 +67,7 @@ public final class ExecuteRpc extends AbstractExecute<QName, @Nullable Normalize
         public void readExternal(final ObjectInput in) throws IOException {
             final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
             final QName type = stream.readQName();
-            final NormalizedNode input = stream.readOptionalNormalizedNode().orElse(null);
+            final ContainerNode input = RpcResponse.unmaskContainer(stream.readOptionalNormalizedNode());
             executeRpc = new ExecuteRpc(type, input);
         }
 

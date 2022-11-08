@@ -52,9 +52,8 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final ContainerNode rpcOutput = makeRPCOutput("bar");
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(rpcOutput);
 
-        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
-        final ArgumentCaptor<NormalizedNode> inputCaptor =
-                ArgumentCaptor.forClass(NormalizedNode.class);
+        final ContainerNode invokeRpcInput = makeRPCInput("foo");
+        final ArgumentCaptor<ContainerNode> inputCaptor = ArgumentCaptor.forClass(ContainerNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
             .invokeRpc(eq(TEST_RPC), inputCaptor.capture());
@@ -63,7 +62,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         assertThat(frontEndFuture, instanceOf(RemoteDOMRpcFuture.class));
 
         final DOMRpcResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
-        assertEquals(rpcOutput, result.getResult());
+        assertEquals(rpcOutput, result.value());
     }
 
     /**
@@ -93,7 +92,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final ContainerNode rpcOutput = makeRPCOutput("bar");
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(rpcOutput);
 
-        final ArgumentCaptor<NormalizedNode> inputCaptor = ArgumentCaptor.forClass(NormalizedNode.class);
+        final ArgumentCaptor<ContainerNode> inputCaptor = ArgumentCaptor.forClass(ContainerNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
             .invokeRpc(eq(TEST_RPC), inputCaptor.capture());
@@ -102,7 +101,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         assertThat(frontEndFuture, instanceOf(RemoteDOMRpcFuture.class));
 
         final DOMRpcResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
-        assertEquals(rpcOutput, result.getResult());
+        assertEquals(rpcOutput, result.value());
     }
 
     /**
@@ -133,8 +132,8 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         final ContainerNode rpcOutput = null;
         final DOMRpcResult rpcResult = new DefaultDOMRpcResult(rpcOutput);
 
-        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
-        final ArgumentCaptor<NormalizedNode> inputCaptor = ArgumentCaptor.forClass(NormalizedNode.class);
+        final ContainerNode invokeRpcInput = makeRPCInput("foo");
+        final ArgumentCaptor<ContainerNode> inputCaptor = ArgumentCaptor.forClass(ContainerNode.class);
 
         doReturn(FluentFutures.immediateFluentFuture(rpcResult)).when(domRpcService2)
             .invokeRpc(eq(TEST_RPC), inputCaptor.capture());
@@ -143,7 +142,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         assertThat(frontEndFuture, instanceOf(RemoteDOMRpcFuture.class));
 
         final DOMRpcResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
-        assertNull(result.getResult());
+        assertNull(result.value());
     }
 
     /**
@@ -151,8 +150,8 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
      */
     @Test
     public void testInvokeRpcWithRemoteFailedFuture() {
-        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
-        final ArgumentCaptor<NormalizedNode> inputCaptor = ArgumentCaptor.forClass(NormalizedNode.class);
+        final ContainerNode invokeRpcInput = makeRPCInput("foo");
+        final ArgumentCaptor<ContainerNode> inputCaptor = ArgumentCaptor.forClass(ContainerNode.class);
 
         doReturn(FluentFutures.immediateFailedFluentFuture(new RemoteDOMRpcException("Test Exception", null)))
             .when(domRpcService2).invokeRpc(eq(TEST_RPC), inputCaptor.capture());
@@ -190,7 +189,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
     @Ignore
     @Test
     public void testInvokeRpcWithAkkaTimeoutException() {
-        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
+        final ContainerNode invokeRpcInput = makeRPCInput("foo");
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertThat(frontEndFuture, instanceOf(RemoteDOMRpcFuture.class));
 
@@ -202,10 +201,10 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
      */
     @Test
     public void testInvokeRpcWithLookupException() {
-        final NormalizedNode invokeRpcInput = makeRPCInput("foo");
+        final ContainerNode invokeRpcInput = makeRPCInput("foo");
 
         doThrow(new RuntimeException("test")).when(domRpcService2).invokeRpc(any(QName.class),
-            any(NormalizedNode.class));
+            any(ContainerNode.class));
 
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertThat(frontEndFuture, instanceOf(RemoteDOMRpcFuture.class));

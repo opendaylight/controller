@@ -33,7 +33,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 /**
@@ -102,8 +101,8 @@ final class OpsInvoker extends AbstractUntypedActor {
 
             @Override
             Object response(final QName type, final DOMRpcResult result) {
-                final Collection<? extends RpcError> errors = result.getErrors();
-                return errors.isEmpty() ? new RpcResponse(result.getResult())
+                final Collection<? extends RpcError> errors = result.errors();
+                return errors.isEmpty() ? new RpcResponse(result.value())
                         // This is legacy (wrong) behavior, which ignores the fact that errors may be just warnings,
                         // discarding any output
                         : new Failure(new RpcErrorsException(String.format("Execution of rpc %s failed", type),
