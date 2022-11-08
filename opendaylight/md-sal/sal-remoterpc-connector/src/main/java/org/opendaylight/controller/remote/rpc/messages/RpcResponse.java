@@ -9,22 +9,37 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import java.io.Externalizable;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Optional;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class RpcResponse extends AbstractResponse<NormalizedNode> {
+public class RpcResponse extends AbstractResponse<ContainerNode> {
     private static final long serialVersionUID = -4211279498688989245L;
 
-    public RpcResponse(final @Nullable NormalizedNode output) {
+    public RpcResponse(final @Nullable ContainerNode output) {
         super(output);
     }
 
     @Override
     Object writeReplace() {
         return new Proxy(this);
+    }
+
+    static @Nullable ContainerNode unmaskContainer(final Optional<NormalizedNode> optNode)
+            throws InvalidObjectException {
+        if (optNode.isEmpty()) {
+            return null;
+        }
+        final var node = optNode.orElseThrow();
+        if (node instanceof ContainerNode container) {
+            return container;
+        }
+        throw new InvalidObjectException("Unexpected data " + node.contract().getSimpleName());
     }
 
     private static class Proxy implements Externalizable {
@@ -49,7 +64,7 @@ public class RpcResponse extends AbstractResponse<NormalizedNode> {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            rpcResponse = new RpcResponse(SerializationUtils.readNormalizedNode(in).orElse(null));
+            rpcResponse = new RpcResponse(unmaskContainer(SerializationUtils.readNormalizedNode(in)));
         }
 
         private Object readResolve() {

@@ -13,7 +13,7 @@ import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 /**
  * A {@link DOMRpcImplementation} which routes invocation requests to a remote invoker actor.
@@ -26,8 +26,7 @@ final class RemoteRpcImplementation extends AbstractRemoteImplementation<Execute
     }
 
     @Override
-    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
-            final NormalizedNode input) {
+    public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final ContainerNode input) {
         return new RemoteDOMRpcFuture(rpc.getType(), ask(ExecuteRpc.from(rpc, input)));
     }
 

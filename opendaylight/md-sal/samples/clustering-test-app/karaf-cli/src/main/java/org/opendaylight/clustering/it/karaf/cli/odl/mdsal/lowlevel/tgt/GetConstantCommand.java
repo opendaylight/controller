@@ -18,7 +18,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.GetConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.GetConstantInputBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 @Service
 @Command(scope = "test-app", name = "get-constant", description = "Run an get-constant test")
@@ -30,7 +30,7 @@ public class GetConstantCommand extends AbstractDOMRpcAction {
 
     @Override
     protected ListenableFuture<? extends DOMRpcResult> invokeRpc() {
-        final NormalizedNode input = serializer.toNormalizedNodeRpcData(new GetConstantInputBuilder().build());
+        final ContainerNode input = serializer.toNormalizedNodeRpcData(new GetConstantInputBuilder().build());
         return rpcService.invokeRpc(QName.create(GetConstantInput.QNAME, "get-constant"), input);
     }
 }
