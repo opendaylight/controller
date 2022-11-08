@@ -10,10 +10,11 @@ package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
@@ -26,13 +27,19 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactionFactory> implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMTransactionFactory.class);
-    @SuppressWarnings("rawtypes")
-    private static final AtomicIntegerFieldUpdater<AbstractDOMTransactionFactory> UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(AbstractDOMTransactionFactory.class, "closed");
+    private static final VarHandle CLOSED;
+
+    static {
+        try {
+            CLOSED = MethodHandles.lookup().findVarHandle(AbstractDOMTransactionFactory.class, "closed", boolean.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private final Map<LogicalDatastoreType, T> storeTxFactories;
 
-    private volatile int closed = 0;
+    private volatile boolean closed;
 
     protected AbstractDOMTransactionFactory(final Map<LogicalDatastoreType, T> txFactories) {
         this.storeTxFactories = new EnumMap<>(txFactories);
@@ -112,12 +119,12 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
      *
      */
     protected final void checkNotClosed() {
-        Preconditions.checkState(closed == 0, "Transaction factory was closed. No further operations allowed.");
+        Preconditions.checkState(!closed, "Transaction factory was closed. No further operations allowed.");
     }
 
     @Override
     public void close() {
-        if (!UPDATER.compareAndSet(this, 0, 1)) {
+        if (!CLOSED.compareAndSet(this, false, true)) {
             LOG.warn("Transaction factory was already closed", new Throwable());
         }
     }
