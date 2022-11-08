@@ -21,12 +21,17 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactionFactory> implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMTransactionFactory.class);
     @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractDOMTransactionFactory> UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(AbstractDOMTransactionFactory.class, "closed");
+
     private final Map<LogicalDatastoreType, T> storeTxFactories;
+
     private volatile int closed = 0;
 
     protected AbstractDOMTransactionFactory(final Map<LogicalDatastoreType, T> txFactories) {
@@ -112,7 +117,8 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
 
     @Override
     public void close() {
-        final boolean success = UPDATER.compareAndSet(this, 0, 1);
-        Preconditions.checkState(success, "Transaction factory was already closed");
+        if (!UPDATER.compareAndSet(this, 0, 1)) {
+            LOG.warn("Transaction factory was already closed", new Throwable());
+        }
     }
 }
