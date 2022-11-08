@@ -7,17 +7,9 @@
   <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"/>
   <reference id="entityOwnershipService" interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService"/>
   <reference id="bindingRpcRegistry" interface="org.opendaylight.mdsal.binding.api.RpcProviderService"/>
-  <reference id="domRpcProviderService" interface="org.opendaylight.mdsal.dom.api.DOMRpcProviderService"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
   <reference id="domDataBroker" interface="org.opendaylight.mdsal.dom.api.DOMDataBroker"/>
-  <reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService"/>
-  <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
   <reference id="notificationPublishService" interface="org.opendaylight.mdsal.binding.api.NotificationPublishService" />
-  <reference id="notificationListenerService" interface="org.opendaylight.mdsal.binding.api.NotificationService" />
-  <reference id="configDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface"
-             odl:type="distributed-config"/>
-  <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
-
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <argument ref="notificationPublishService"/>
@@ -39,29 +31,5 @@
 
   <odl:rpc-implementation ref="carProvider"/>
   <odl:rpc-implementation ref="peopleProvider"/>
-
-  <bean id="peopleCarListener" class="org.opendaylight.controller.clustering.it.listener.PeopleCarListener" >
-    <property name="dataProvider" ref="dataBroker"/>
-  </bean>
-
-  <odl:notification-listener ref="peopleCarListener"/>
-
-  <bean id="basicTestProvider" class="org.opendaylight.controller.clustering.it.provider.BasicRpcTestProvider">
-    <argument ref="bindingRpcRegistry"/>
-    <argument ref="clusterSingletonService"/>
-  </bean>
-
-  <bean id="lowLevelTestProvider" class="org.opendaylight.controller.clustering.it.provider.MdsalLowLevelTestProvider">
-    <argument ref="bindingRpcRegistry"/>
-    <argument ref="domRpcProviderService"/>
-    <argument ref="clusterSingletonService"/>
-    <argument ref="schemaService"/>
-    <argument ref="normalizedNodeSerializer"/>
-    <argument ref="notificationPublishService"/>
-    <argument ref="notificationListenerService"/>
-    <argument ref="domDataBroker"/>
-    <argument ref="configDatastore"/>
-    <argument ref="actorSystemProvider"/>
-  </bean>
 
 </blueprint>
