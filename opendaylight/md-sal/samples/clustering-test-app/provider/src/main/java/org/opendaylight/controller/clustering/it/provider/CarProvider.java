@@ -21,6 +21,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
@@ -72,6 +75,10 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +87,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@Singleton
+@Component(service = { })
 @SuppressFBWarnings("SLF4J_ILLEGAL_PASSED_CLASS")
 public class CarProvider implements CarService {
     private static final Logger LOG_PURCHASE_CAR = LoggerFactory.getLogger(PurchaseCarProvider.class);
@@ -109,13 +118,18 @@ public class CarProvider implements CarService {
     private final AtomicReference<DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort>> commitCohortReg =
             new AtomicReference<>();
 
-    public CarProvider(final DataBroker dataProvider, final EntityOwnershipService ownershipService,
-            final DOMDataBroker domDataBroker) {
+    @Inject
+    @Activate
+    public CarProvider(@Reference final DataBroker dataProvider,
+            @Reference final EntityOwnershipService ownershipService,
+            @Reference final DOMDataBroker domDataBroker) {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
         this.domDataBroker = domDataBroker;
     }
 
+    @PreDestroy
+    @Deactivate
     public void close() {
         stopThread();
         closeCommitCohortRegistration();
