@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import org.opendaylight.mdsal.common.api.CommitInfo;
@@ -57,11 +56,11 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
      * Submits a transaction asynchronously for commit.
      *
      * @param transaction the transaction to submit
-     * @param cohorts the associated cohorts
+     * @param cohort the associated cohort
      * @return a resulting Future
      */
     protected abstract FluentFuture<? extends CommitInfo> commit(DOMDataTreeWriteTransaction transaction,
-            Collection<DOMStoreThreePhaseCommitCohort> cohorts);
+            DOMStoreThreePhaseCommitCohort cohort);
 
     /**
      * Creates a new read-only transaction.

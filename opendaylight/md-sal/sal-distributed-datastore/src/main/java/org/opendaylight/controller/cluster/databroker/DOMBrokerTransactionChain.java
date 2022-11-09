@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
@@ -81,11 +80,11 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
 
     @Override
     public FluentFuture<? extends CommitInfo> commit(
-            final DOMDataTreeWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+            final DOMDataTreeWriteTransaction transaction, final DOMStoreThreePhaseCommitCohort cohort) {
         checkNotFailed();
         checkNotClosed();
 
-        final FluentFuture<? extends CommitInfo> ret = broker.commit(transaction, cohorts);
+        final FluentFuture<? extends CommitInfo> ret = broker.commit(transaction, cohort);
 
         COUNTER_UPDATER.incrementAndGet(this);
         ret.addCallback(new FutureCallback<CommitInfo>() {

@@ -10,12 +10,11 @@ package org.opendaylight.controller.cluster.databroker;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateFailedFluentFuture;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -23,7 +22,6 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -108,7 +106,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         if (impl != null) {
             LOG.trace("Transaction {} cancelled before submit", getIdentifier());
             FUTURE_UPDATER.lazySet(this, CANCELLED_FUTURE);
-            closeSubtransactions();
+            closeSubtransaction();
             return true;
         }
 
@@ -129,20 +127,18 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         final AbstractDOMTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
 
-        final Collection<T> txns = getSubtransactions();
-        final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
-
         FluentFuture<? extends CommitInfo> ret;
-        try {
-            for (final T txn : txns) {
-                cohorts.add(txn.ready());
+        final var tx = getSubtransaction();
+        if (tx == null) {
+            ret = CommitInfo.emptyFluentFuture();
+        } else {
+            try {
+                ret = impl.commit(this, tx.ready());
+            } catch (RuntimeException e) {
+                ret = immediateFailedFluentFuture(TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e));
             }
-
-            ret = impl.commit(this, cohorts);
-        } catch (RuntimeException e) {
-            ret = FluentFuture.from(Futures.immediateFailedFuture(
-                    TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e)));
         }
+
         FUTURE_UPDATER.lazySet(this, ret);
         return ret;
     }

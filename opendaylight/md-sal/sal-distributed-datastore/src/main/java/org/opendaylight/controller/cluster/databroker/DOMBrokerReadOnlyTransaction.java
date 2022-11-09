@@ -44,7 +44,7 @@ public class DOMBrokerReadOnlyTransaction
 
     @Override
     public void close() {
-        closeSubtransactions();
+        closeSubtransaction();
     }
 
     @Override

@@ -34,8 +34,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -50,9 +48,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
@@ -84,8 +80,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class ConcurrentDOMDataBrokerTest {
 
     private final DOMDataTreeWriteTransaction transaction = mock(DOMDataTreeWriteTransaction.class);
-    private final DOMStoreThreePhaseCommitCohort mockCohort1 = mock(DOMStoreThreePhaseCommitCohort.class);
-    private final DOMStoreThreePhaseCommitCohort mockCohort2 = mock(DOMStoreThreePhaseCommitCohort.class);
+    private final DOMStoreThreePhaseCommitCohort mockCohort = mock(DOMStoreThreePhaseCommitCohort.class);
     private final ThreadPoolExecutor futureExecutor =
             new ThreadPoolExecutor(0, 1, 5, TimeUnit.SECONDS, new SynchronousQueue<>());
     private ConcurrentDOMDataBroker coordinator;
@@ -121,8 +116,7 @@ public class ConcurrentDOMDataBrokerTest {
             final SettableFuture<Boolean> future = SettableFuture.create();
             if (doAsync) {
                 new Thread(() -> {
-                    Uninterruptibles.awaitUninterruptibly(asyncCanCommitContinue,
-                            10, TimeUnit.SECONDS);
+                    Uninterruptibles.awaitUninterruptibly(asyncCanCommitContinue, 10, TimeUnit.SECONDS);
                     future.set(Boolean.TRUE);
                 }).start();
             } else {
@@ -132,16 +126,11 @@ public class ConcurrentDOMDataBrokerTest {
             return future;
         };
 
-        doAnswer(asyncCanCommit).when(mockCohort1).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).preCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).commit();
+        doAnswer(asyncCanCommit).when(mockCohort).canCommit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).preCommit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).commit();
 
-        doReturn(immediateTrueFluentFuture()).when(mockCohort2).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).preCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).commit();
-
-        ListenableFuture<? extends CommitInfo> future =
-                coordinator.commit(transaction, Arrays.asList(mockCohort1, mockCohort2));
+        ListenableFuture<? extends CommitInfo> future = coordinator.commit(transaction, mockCohort);
 
         final CountDownLatch doneLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
@@ -169,35 +158,22 @@ public class ConcurrentDOMDataBrokerTest {
 
         assertEquals("Task count", doAsync ? 1 : 0, futureExecutor.getTaskCount());
 
-        InOrder inOrder = inOrder(mockCohort1, mockCohort2);
-        inOrder.verify(mockCohort1).canCommit();
-        inOrder.verify(mockCohort2).canCommit();
-        inOrder.verify(mockCohort1).preCommit();
-        inOrder.verify(mockCohort2).preCommit();
-        inOrder.verify(mockCohort1).commit();
-        inOrder.verify(mockCohort2).commit();
+        InOrder inOrder = inOrder(mockCohort);
+        inOrder.verify(mockCohort, times(1)).canCommit();
+        inOrder.verify(mockCohort, times(1)).preCommit();
+        inOrder.verify(mockCohort, times(1)).commit();
     }
 
     @Test
     public void testSubmitWithNegativeCanCommitResponse() throws Exception {
-        doReturn(immediateTrueFluentFuture()).when(mockCohort1).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).abort();
+        doReturn(Futures.immediateFuture(Boolean.FALSE)).when(mockCohort).canCommit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        doReturn(Futures.immediateFuture(Boolean.FALSE)).when(mockCohort2).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).abort();
-
-        DOMStoreThreePhaseCommitCohort mockCohort3 = mock(DOMStoreThreePhaseCommitCohort.class);
-        doReturn(Futures.immediateFuture(Boolean.FALSE)).when(mockCohort3).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort3).abort();
-
-        ListenableFuture<? extends CommitInfo> future = coordinator.commit(
-                transaction, Arrays.asList(mockCohort1, mockCohort2, mockCohort3));
-
-        assertFailure(future, null, mockCohort1, mockCohort2, mockCohort3);
+        assertFailure(coordinator.commit(transaction, mockCohort), null, mockCohort);
     }
 
     private static void assertFailure(final ListenableFuture<?> future, final Exception expCause,
-            final DOMStoreThreePhaseCommitCohort... mockCohorts) throws Exception {
+            final DOMStoreThreePhaseCommitCohort mockCohort) throws Exception {
         try {
             future.get(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
@@ -206,11 +182,7 @@ public class ConcurrentDOMDataBrokerTest {
             if (expCause != null) {
                 assertSame("Expected cause", expCause.getClass(), tcf.getCause().getClass());
             }
-
-            InOrder inOrder = inOrder((Object[])mockCohorts);
-            for (DOMStoreThreePhaseCommitCohort c: mockCohorts) {
-                inOrder.verify(c).abort();
-            }
+            verify(mockCohort, times(1)).abort();
         } catch (TimeoutException e) {
             throw e;
         }
@@ -218,97 +190,42 @@ public class ConcurrentDOMDataBrokerTest {
 
     @Test
     public void testSubmitWithCanCommitException() throws Exception {
-        doReturn(immediateTrueFluentFuture()).when(mockCohort1).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).abort();
+        final Exception cause = new IllegalStateException("mock");
+        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort).canCommit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        IllegalStateException cause = new IllegalStateException("mock");
-        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).abort();
-
-        FluentFuture<? extends CommitInfo> future = coordinator.commit(
-                transaction, Arrays.asList(mockCohort1, mockCohort2));
-
-        assertFailure(future, cause, mockCohort1, mockCohort2);
-    }
-
-    @Test
-    public void testSubmitWithCanCommitDataStoreUnavailableException() throws Exception {
-        doReturn(immediateTrueFluentFuture()).when(mockCohort1).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).abort();
-        NoShardLeaderException rootCause = new NoShardLeaderException("mock");
-        DataStoreUnavailableException cause = new DataStoreUnavailableException(rootCause.getMessage(), rootCause);
-        doReturn(Futures.immediateFailedFuture(rootCause)).when(mockCohort2).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).abort();
-
-        FluentFuture<? extends CommitInfo> future = coordinator.commit(
-            transaction, Arrays.asList(mockCohort1, mockCohort2));
-
-        assertFailure(future, cause, mockCohort1, mockCohort2);
+        assertFailure(coordinator.commit(transaction, mockCohort), cause, mockCohort);
     }
 
     @Test
     public void testSubmitWithPreCommitException() throws Exception {
-        doReturn(immediateTrueFluentFuture()).when(mockCohort1).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).preCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).abort();
+        doReturn(immediateTrueFluentFuture()).when(mockCohort).canCommit();
+        final IllegalStateException cause = new IllegalStateException("mock");
+        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort).preCommit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        doReturn(immediateTrueFluentFuture()).when(mockCohort2).canCommit();
-        IllegalStateException cause = new IllegalStateException("mock");
-        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).preCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).abort();
-
-        DOMStoreThreePhaseCommitCohort mockCohort3 = mock(DOMStoreThreePhaseCommitCohort.class);
-        doReturn(immediateTrueFluentFuture()).when(mockCohort3).canCommit();
-        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock2")))
-                .when(mockCohort3).preCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort3).abort();
-
-        FluentFuture<? extends CommitInfo> future = coordinator.commit(
-                transaction, Arrays.asList(mockCohort1, mockCohort2, mockCohort3));
-
-        assertFailure(future, cause, mockCohort1, mockCohort2, mockCohort3);
+        assertFailure(coordinator.commit(transaction, mockCohort), cause, mockCohort);
     }
 
     @Test
     public void testSubmitWithCommitException() throws Exception {
-        doReturn(immediateTrueFluentFuture()).when(mockCohort1).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).preCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).commit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort1).abort();
+        doReturn(immediateTrueFluentFuture()).when(mockCohort).canCommit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).preCommit();
+        final IllegalStateException cause = new IllegalStateException("mock");
+        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort).commit();
+        doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        doReturn(immediateTrueFluentFuture()).when(mockCohort2).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).preCommit();
-        IllegalStateException cause = new IllegalStateException("mock");
-        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).commit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).abort();
-
-        DOMStoreThreePhaseCommitCohort mockCohort3 = mock(DOMStoreThreePhaseCommitCohort.class);
-        doReturn(immediateTrueFluentFuture()).when(mockCohort3).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort3).preCommit();
-        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock2")))
-                .when(mockCohort3).commit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort3).abort();
-
-        FluentFuture<? extends CommitInfo> future = coordinator.commit(
-                transaction, Arrays.asList(mockCohort1, mockCohort2, mockCohort3));
-
-        assertFailure(future, cause, mockCohort1, mockCohort2, mockCohort3);
+        assertFailure(coordinator.commit(transaction, mockCohort), cause, mockCohort);
     }
 
     @Test
     public void testSubmitWithAbortException() throws Exception {
-        doReturn(immediateTrueFluentFuture()).when(mockCohort1).canCommit();
-        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock abort error")))
-                .when(mockCohort1).abort();
+        final Exception canCommitCause = new IllegalStateException("canCommit error");
+        doReturn(Futures.immediateFailedFuture(canCommitCause)).when(mockCohort).canCommit();
+        final Exception abortCause = new IllegalStateException("abort error");
+        doReturn(Futures.immediateFailedFuture(abortCause)).when(mockCohort).abort();
 
-        IllegalStateException cause = new IllegalStateException("mock canCommit error");
-        doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohort2).abort();
-
-        FluentFuture<? extends CommitInfo> future = coordinator.commit(
-                transaction, Arrays.asList(mockCohort1, mockCohort2));
-
-        assertFailure(future, cause, mockCohort1, mockCohort2);
+        assertFailure(coordinator.commit(transaction, mockCohort), canCommitCause, mockCohort);
     }
 
     @Test
@@ -367,11 +284,6 @@ public class ConcurrentDOMDataBrokerTest {
 
             verify(configDomStore, never()).newReadWriteTransaction();
             verify(operationalDomStore, times(1)).newReadWriteTransaction();
-
-            dataTxn.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
-
-            verify(configDomStore, times(1)).newReadWriteTransaction();
-            verify(operationalDomStore, times(1)).newReadWriteTransaction();
         }
 
     }
@@ -395,11 +307,6 @@ public class ConcurrentDOMDataBrokerTest {
 
             verify(configDomStore, never()).newWriteOnlyTransaction();
             verify(operationalDomStore, times(1)).newWriteOnlyTransaction();
-
-            dataTxn.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty(), mock(NormalizedNode.class));
-
-            verify(configDomStore, times(1)).newWriteOnlyTransaction();
-            verify(operationalDomStore, times(1)).newWriteOnlyTransaction();
         }
     }
 
@@ -422,11 +329,6 @@ public class ConcurrentDOMDataBrokerTest {
 
             verify(configDomStore, never()).newReadOnlyTransaction();
             verify(operationalDomStore, times(1)).newReadOnlyTransaction();
-
-            dataTxn.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty());
-
-            verify(configDomStore, times(1)).newReadOnlyTransaction();
-            verify(operationalDomStore, times(1)).newReadOnlyTransaction();
         }
     }
 
@@ -435,7 +337,6 @@ public class ConcurrentDOMDataBrokerTest {
         DOMStore configDomStore = mock(DOMStore.class);
         DOMStore operationalDomStore = mock(DOMStore.class);
         DOMStoreReadWriteTransaction mockStoreReadWriteTransaction = mock(DOMStoreReadWriteTransaction.class);
-        DOMStoreThreePhaseCommitCohort mockCohort = mock(DOMStoreThreePhaseCommitCohort.class);
 
         doReturn(mockStoreReadWriteTransaction).when(operationalDomStore).newReadWriteTransaction();
         doReturn(mockCohort).when(mockStoreReadWriteTransaction).ready();
@@ -450,10 +351,10 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor) {
             @Override
             public FluentFuture<? extends CommitInfo> commit(DOMDataTreeWriteTransaction writeTx,
-                    Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
-                commitCohorts.addAll(cohorts);
+                    DOMStoreThreePhaseCommitCohort cohort) {
+                commitCohorts.add(cohort);
                 latch.countDown();
-                return super.commit(writeTx, cohorts);
+                return super.commit(writeTx, cohort);
             }
         }) {
             DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
@@ -465,56 +366,6 @@ public class ConcurrentDOMDataBrokerTest {
             assertTrue(latch.await(10, TimeUnit.SECONDS));
 
             assertTrue(commitCohorts.size() == 1);
-        }
-    }
-
-    @Test
-    public void testSubmitWithOnlyTwoSubTransactions() throws InterruptedException {
-        DOMStore configDomStore = mock(DOMStore.class);
-        DOMStore operationalDomStore = mock(DOMStore.class);
-        DOMStoreReadWriteTransaction operationalTransaction = mock(DOMStoreReadWriteTransaction.class);
-        DOMStoreReadWriteTransaction configTransaction = mock(DOMStoreReadWriteTransaction.class);
-        DOMStoreThreePhaseCommitCohort mockCohortOperational = mock(DOMStoreThreePhaseCommitCohort.class);
-        DOMStoreThreePhaseCommitCohort mockCohortConfig = mock(DOMStoreThreePhaseCommitCohort.class);
-
-        doReturn(operationalTransaction).when(operationalDomStore).newReadWriteTransaction();
-        doReturn(configTransaction).when(configDomStore).newReadWriteTransaction();
-
-        doReturn(mockCohortOperational).when(operationalTransaction).ready();
-        doReturn(immediateFalseFluentFuture()).when(mockCohortOperational).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohortOperational).abort();
-
-        doReturn(mockCohortConfig).when(configTransaction).ready();
-        doReturn(immediateFalseFluentFuture()).when(mockCohortConfig).canCommit();
-        doReturn(immediateNullFluentFuture()).when(mockCohortConfig).abort();
-
-        final CountDownLatch latch = new CountDownLatch(1);
-        final List<DOMStoreThreePhaseCommitCohort> commitCohorts = new ArrayList<>();
-
-        try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
-                LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
-                configDomStore), futureExecutor) {
-            @Override
-            @SuppressWarnings("checkstyle:hiddenField")
-            public FluentFuture<? extends CommitInfo> commit(DOMDataTreeWriteTransaction writeTx,
-                    Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
-                commitCohorts.addAll(cohorts);
-                latch.countDown();
-                return super.commit(writeTx, cohorts);
-            }
-        }) {
-            DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
-
-            domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.empty(),
-                    mock(NormalizedNode.class));
-            domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.empty(),
-                    mock(NormalizedNode.class));
-
-            domDataReadWriteTransaction.commit();
-
-            assertTrue(latch.await(10, TimeUnit.SECONDS));
-
-            assertTrue(commitCohorts.size() == 2);
         }
     }
 
@@ -590,16 +441,16 @@ public class ConcurrentDOMDataBrokerTest {
             assertNotNull(supportedExtensions.getInstance(DOMDataTreeChangeService.class));
 
             DOMDataTreeCommitCohortRegistry cohortRegistry = supportedExtensions.getInstance(
-                DOMDataTreeCommitCohortRegistry.class);
+                    DOMDataTreeCommitCohortRegistry.class);
             assertNotNull(cohortRegistry);
 
-            DOMDataTreeCommitCohort mockCohort = mock(DOMDataTreeCommitCohort.class);
+            DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
             DOMDataTreeIdentifier path = new DOMDataTreeIdentifier(
                     org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
                     YangInstanceIdentifier.empty());
-            cohortRegistry.registerCommitCohort(path, mockCohort);
+            cohortRegistry.registerCommitCohort(path, cohort);
 
-            verify(mockConfigStore).registerCommitCohort(path, mockCohort);
+            verify(mockConfigStore).registerCommitCohort(path, cohort);
         }
     }
 }

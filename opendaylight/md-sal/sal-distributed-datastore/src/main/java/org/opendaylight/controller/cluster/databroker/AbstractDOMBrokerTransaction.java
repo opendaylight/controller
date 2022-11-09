@@ -7,27 +7,39 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import java.util.Collection;
-import java.util.EnumMap;
+import com.google.common.base.Preconditions;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Map;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.TransactionDatastoreMismatchException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
 
 public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction> implements DOMDataTreeTransaction {
 
-    private final EnumMap<LogicalDatastoreType, T> backingTxs;
+    private static final VarHandle BACKING_TX;
+
+    static {
+        try {
+            BACKING_TX = MethodHandles.lookup().findVarHandle(AbstractDOMBrokerTransaction.class,
+                    "backingTx", Map.Entry.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private final Object identifier;
     private final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories;
+    private Map.Entry<LogicalDatastoreType, T> backingTx;
 
     /**
-     * Creates new composite Transactions.
+     * Creates new transaction.
      *
      * @param identifier Identifier of transaction.
      */
@@ -35,40 +47,55 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
             Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         this.identifier = requireNonNull(identifier, "Identifier should not be null");
         this.storeTxFactories = requireNonNull(storeTxFactories, "Store Transaction Factories should not be null");
-        this.backingTxs = new EnumMap<>(LogicalDatastoreType.class);
+        Preconditions.checkArgument(!storeTxFactories.isEmpty(), "Store Transaction Factories should not be empty");
     }
 
     /**
-     * Returns subtransaction associated with supplied key.
+     * Returns sub-transaction associated with supplied key.
      *
-     * @param key the data store type key
-     * @return the subtransaction
-     * @throws NullPointerException
-     *             if key is null
-     * @throws IllegalArgumentException
-     *             if no subtransaction is associated with key.
+     * @param datastoreType the data store type
+     * @return the sub-transaction
+     * @throws NullPointerException                  if datastoreType is null
+     * @throws IllegalArgumentException              if no sub-transaction is associated with datastoreType.
+     * @throws TransactionDatastoreMismatchException if datastoreType mismatches the one used at first access
      */
-    protected final T getSubtransaction(final LogicalDatastoreType key) {
-        requireNonNull(key, "key must not be null.");
+    protected final T getSubtransaction(final LogicalDatastoreType datastoreType) {
+        requireNonNull(datastoreType, "datastoreType must not be null.");
 
-        T ret = backingTxs.get(key);
-        if (ret == null) {
-            ret = createTransaction(key);
-            backingTxs.put(key, ret);
+        var entry = backingTx;
+        if (entry == null) {
+            if (!storeTxFactories.containsKey(datastoreType)) {
+                final LogicalDatastoreType availableType = storeTxFactories.keySet().iterator().next();
+                throw new TransactionDatastoreMismatchException(availableType, datastoreType);
+            }
+            final var tx = createTransaction(datastoreType);
+            final var newEntry = Map.entry(datastoreType, tx);
+            final var witness =
+                    (Map.Entry<LogicalDatastoreType, T>) BACKING_TX.compareAndExchange(this, null, newEntry);
+            if (witness != null) {
+                tx.close();
+                entry = witness;
+            } else {
+                entry = newEntry;
+            }
         }
-        checkArgument(ret != null, "No subtransaction associated with %s", key);
-        return ret;
-    }
 
-    protected abstract T createTransaction(LogicalDatastoreType key);
+        final var expected = entry.getKey();
+        if (expected != datastoreType) {
+            throw new TransactionDatastoreMismatchException(expected, datastoreType);
+        }
+        return entry.getValue();
+    }
 
     /**
-     * Returns immutable Iterable of all subtransactions.
-     *
+     * Returns sub-transaction if initialized.
      */
-    protected Collection<T> getSubtransactions() {
-        return backingTxs.values();
+    protected T getSubtransaction() {
+        final Map.Entry<LogicalDatastoreType, T> entry;
+        return (entry = backingTx) == null ? null : entry.getValue();
     }
+
+    protected abstract T createTransaction(LogicalDatastoreType datastoreType);
 
     @Override
     public Object getIdentifier() {
@@ -76,28 +103,13 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    protected void closeSubtransactions() {
-        /*
-         * We share one exception for all failures, which are added
-         * as supressedExceptions to it.
-         */
-        IllegalStateException failure = null;
-        for (T subtransaction : backingTxs.values()) {
+    protected void closeSubtransaction() {
+        if (backingTx != null) {
             try {
-                subtransaction.close();
+                backingTx.getValue().close();
             } catch (Exception e) {
-                // If we did not allocated failure we allocate it
-                if (failure == null) {
-                    failure = new IllegalStateException("Uncaught exception occured during closing transaction", e);
-                } else {
-                    // We update it with additional exceptions, which occurred during error.
-                    failure.addSuppressed(e);
-                }
+                throw new IllegalStateException("Uncaught exception occurred during closing transaction", e);
             }
-        }
-        // If we have failure, we throw it at after all attempts to close.
-        if (failure != null) {
-            throw failure;
         }
     }
 
