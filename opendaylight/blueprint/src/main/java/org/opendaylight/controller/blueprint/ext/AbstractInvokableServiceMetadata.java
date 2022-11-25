@@ -20,11 +20,11 @@ import org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
-import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
+import org.opendaylight.mdsal.dom.spi.ContentRoutedRpcContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 
 abstract class AbstractInvokableServiceMetadata extends AbstractDependentComponentFactoryMetadata {
@@ -86,7 +86,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
         retrievedSchemaContext(((DOMSchemaService)service).getGlobalContext());
     }
 
-    private void retrievedSchemaContext(final SchemaContext schemaContext) {
+    private void retrievedSchemaContext(final EffectiveModelContext schemaContext) {
         log.debug("{}: retrievedSchemaContext", logName());
 
         final Collection<QName> schemaPaths = RpcUtil.decomposeRpcService(rpcInterface, schemaContext,
@@ -122,7 +122,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
         });
     }
 
-    abstract Predicate<RpcRoutingStrategy> rpcFilter();
+    abstract Predicate<ContentRoutedRpcContext> rpcFilter();
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     @Override

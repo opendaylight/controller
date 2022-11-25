@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
+import java.util.Objects;
 import java.util.function.Predicate;
-import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
+import org.opendaylight.mdsal.dom.spi.ContentRoutedRpcContext;
 
 /**
  * Factory metadata corresponding to the "rpc-service" element that gets an RPC service implementation from
@@ -22,7 +23,7 @@ final class RpcServiceMetadata extends AbstractInvokableServiceMetadata {
     }
 
     @Override
-    Predicate<RpcRoutingStrategy> rpcFilter() {
-        return s -> !s.isContextBasedRouted();
+    Predicate<ContentRoutedRpcContext> rpcFilter() {
+        return Objects::isNull;
     }
 }

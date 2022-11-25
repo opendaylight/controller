@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
+import java.util.Objects;
 import java.util.function.Predicate;
-import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
+import org.opendaylight.mdsal.dom.api.DOMRpcService;
+import org.opendaylight.mdsal.dom.spi.ContentRoutedRpcContext;
 
 /**
  * Factory metadata corresponding to the "action-service" element. It waits for a DOM promise of registration
  * to appear in the {@link DOMRpcService} and then acquires a dynamic proxy via RpcProviderRegistry.
- *
- * @author Robert Varga
  */
 final class ActionServiceMetadata extends AbstractInvokableServiceMetadata {
     /*
@@ -33,7 +33,7 @@ final class ActionServiceMetadata extends AbstractInvokableServiceMetadata {
     }
 
     @Override
-    Predicate<RpcRoutingStrategy> rpcFilter() {
-        return RpcRoutingStrategy::isContextBasedRouted;
+    Predicate<ContentRoutedRpcContext> rpcFilter() {
+        return Objects::nonNull;
     }
 }

@@ -10,13 +10,13 @@ package org.opendaylight.controller.blueprint.ext;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
-import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
  * - if a reference bean is provided, it registers it with {@link RpcProviderService}
  * - if a reference bean is not provided, it registers the corresponding no-op implementation with
  *   {@link DOMRpcProviderService} for all action (Routed RPC) elements in the provided interface
- *
- * @author Robert Varga
  */
 public class ActionProviderBean {
     static final String ACTION_PROVIDER = "action-provider";
@@ -64,11 +62,11 @@ public class ActionProviderBean {
     }
 
     public void setDomRpcProvider(final DOMRpcProviderService rpcProviderService) {
-        this.domRpcProvider = rpcProviderService;
+        domRpcProvider = rpcProviderService;
     }
 
     public void setBindingRpcProvider(final RpcProviderService rpcProvider) {
-        this.bindingRpcProvider = rpcProvider;
+        bindingRpcProvider = rpcProvider;
     }
 
     public void setSchemaService(final DOMSchemaService schemaService) {
@@ -122,7 +120,7 @@ public class ActionProviderBean {
 
     private void registerFallback(final Class<RpcService> interfaceClass) {
         final Collection<QName> paths = RpcUtil.decomposeRpcService(interfaceClass,
-            schemaService.getGlobalContext(), RpcRoutingStrategy::isContextBasedRouted);
+            schemaService.getGlobalContext(), Objects::nonNull);
         if (paths.isEmpty()) {
             LOG.warn("{}: interface {} has no actions defined", ACTION_PROVIDER, interfaceClass);
             return;
