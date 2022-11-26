@@ -22,9 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
-public class ShardManagerSnapshot implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public final class ShardManagerSnapshot implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -65,6 +63,8 @@ public class ShardManagerSnapshot implements Serializable {
         }
     }
 
+    private static final long serialVersionUID = 1L;
+
     private final List<String> shardList;
 
     public ShardManagerSnapshot(final @NonNull List<String> shardList) {
@@ -72,7 +72,7 @@ public class ShardManagerSnapshot implements Serializable {
     }
 
     public List<String> getShardList() {
-        return this.shardList;
+        return shardList;
     }
 
     private Object writeReplace() {
