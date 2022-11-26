@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<ClientIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = -5490519942445085251L;
@@ -43,7 +44,7 @@ public final class DisableTrackingPayload extends AbstractIdentifiablePayload<Cl
 
     private static final Logger LOG = LoggerFactory.getLogger(DisableTrackingPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(DT::new);
 
     DisableTrackingPayload(final ClientIdentifier clientId, final byte[] serialized) {
         super(clientId, serialized);
@@ -63,8 +64,8 @@ public final class DisableTrackingPayload extends AbstractIdentifiablePayload<Cl
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected DT externalizableProxy(final byte[] serialized) {
+        return new DT(serialized);
     }
 
     @Override
