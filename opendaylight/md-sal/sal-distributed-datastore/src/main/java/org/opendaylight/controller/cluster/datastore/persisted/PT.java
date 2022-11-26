@@ -15,8 +15,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifia
 /**
  * Serialization proxy for {@link PurgeTransactionPayload}.
  */
-// FIXME: final when we eliminate legacy proxy
-class PT extends AbstractProxy<TransactionIdentifier> {
+final class PT extends AbstractProxy<TransactionIdentifier> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,13 +29,12 @@ class PT extends AbstractProxy<TransactionIdentifier> {
     }
 
     @Override
-    protected final TransactionIdentifier readIdentifier(final DataInput in) throws IOException {
+    protected TransactionIdentifier readIdentifier(final DataInput in) throws IOException {
         return TransactionIdentifier.readFrom(in);
     }
 
     @Override
-    protected final PurgeTransactionPayload createObject(final TransactionIdentifier identifier,
-            final byte[] serialized) {
+    protected PurgeTransactionPayload createObject(final TransactionIdentifier identifier, final byte[] serialized) {
         return new PurgeTransactionPayload(identifier, serialized);
     }
 }
