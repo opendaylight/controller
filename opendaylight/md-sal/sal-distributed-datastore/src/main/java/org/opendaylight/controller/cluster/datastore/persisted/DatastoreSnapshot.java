@@ -102,7 +102,7 @@ public class DatastoreSnapshot implements Serializable {
         return new Proxy(this);
     }
 
-    public static class ShardSnapshot implements Serializable {
+    public static final class ShardSnapshot implements Serializable {
         private static final long serialVersionUID = 1L;
 
         private static final class Proxy implements Externalizable {
@@ -137,8 +137,8 @@ public class DatastoreSnapshot implements Serializable {
             }
         }
 
-        private final String name;
-        private final Snapshot snapshot;
+        private final @NonNull String name;
+        private final @NonNull Snapshot snapshot;
 
         public ShardSnapshot(@NonNull String name, @NonNull Snapshot snapshot) {
             this.name = requireNonNull(name);
