@@ -20,7 +20,6 @@ import java.util.List;
 
 public final class FrontendShardDataTreeSnapshotMetadata extends
         ShardDataTreeSnapshotMetadata<FrontendShardDataTreeSnapshotMetadata> {
-
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -34,7 +33,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
         }
 
         Proxy(final FrontendShardDataTreeSnapshotMetadata metadata) {
-            this.clients = metadata.getClients();
+            clients = metadata.getClients();
         }
 
         @Override
@@ -52,7 +51,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
             for (int i = 0; i < size ; ++i) {
                 readedClients.add(FrontendClientMetadata.readFrom(in));
             }
-            this.clients = ImmutableList.copyOf(readedClients);
+            clients = ImmutableList.copyOf(readedClients);
         }
 
         private Object readResolve() {
@@ -87,7 +86,6 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(FrontendShardDataTreeSnapshotMetadata.class).add("clients", clients)
-                .toString();
+        return MoreObjects.toStringHelper(this).add("clients", clients).toString();
     }
 }

@@ -72,6 +72,17 @@ public enum PayloadVersion implements WritableObject {
     },
 
     /**
+     * ABI version shipped enabled {@code 2022.09 Chlorine SR2}. This version revises the serialization format of
+     * payloads proxies to reduce their size. Otherwise this format is equivalent to {@link #MAGNESIUM}.
+     */
+    CHLORINE_SR2(0) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    },
+
+    /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
      */
     @VisibleForTesting
@@ -126,27 +137,28 @@ public enum PayloadVersion implements WritableObject {
      */
     public static @NonNull PayloadVersion valueOf(final short version)
             throws FutureVersionException, PastVersionException {
-        switch (Short.toUnsignedInt(version)) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                throw new PastVersionException(version, SODIUM_SR1);
-            case 7:
-                return SODIUM_SR1;
-            case 8:
-                return MAGNESIUM;
-            default:
-                throw new FutureVersionException(version, MAGNESIUM);
-        }
+        return switch (Short.toUnsignedInt(version)) {
+            case 0, 1, 2, 3, 4, 5, 6 -> throw new PastVersionException(version, SODIUM_SR1);
+            case 7 -> SODIUM_SR1;
+            case 8 -> MAGNESIUM;
+            case 9 -> CHLORINE_SR2;
+            default -> throw new FutureVersionException(version, MAGNESIUM);
+        };
     }
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         out.writeShort(value);
+    }
+
+    /**
+     * Return {@code true} if this version is greater than, or equal, some other version.
+     *
+     * @param other other version
+     * @return {@code true} if {@code other} is at most this version.
+     */
+    public boolean gte(final PayloadVersion other) {
+        return compareTo(other) >= 0;
     }
 
     /**

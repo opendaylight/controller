@@ -29,7 +29,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
         private static final long serialVersionUID = 1L;
 
-        private ImmutableUnsignedLongSet transactionIds;
+        private transient ImmutableUnsignedLongSet transactionIds;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
@@ -63,7 +63,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
 
-    private SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
+    SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
             final byte @NonNull [] serialized, final ImmutableUnsignedLongSet transactionIds) {
         super(historyId, serialized);
         this.transactionIds = requireNonNull(transactionIds);
