@@ -53,7 +53,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
+    static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
         "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
 
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
@@ -123,6 +123,11 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return ProxySizeHolder.PROXY_SIZE + size();
     }
 
+    @Override
+    protected final Externalizable writeReplace() {
+        return new Proxy(this);
+    }
+
     /**
      * The cached candidate needs to be cleared after it is done applying to the DataTree, otherwise it would be keeping
      * deserialized in memory which are not needed anymore leading to wasted memory. This lets the payload know that
@@ -148,12 +153,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
     abstract DataInput newDataInput();
 
-    @Override
-    protected final Object writeReplace() {
-        return new Proxy(this);
-    }
-
-    private static final class Simple extends CommitTransactionPayload {
+    static final class Simple extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         private final byte[] serialized;
@@ -178,7 +178,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
     }
 
-    private static final class Chunked extends CommitTransactionPayload {
+    static final class Chunked extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")
