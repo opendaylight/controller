@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
-    private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
+    private static final class Proxy extends DH {
         private static final long serialVersionUID = 1L;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
@@ -33,17 +32,6 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
 
         Proxy(final byte[] serialized) {
             super(serialized);
-        }
-
-        @Override
-        protected LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
-            return LocalHistoryIdentifier.readFrom(in);
-        }
-
-        @Override
-        protected CloseLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
-                final byte[] serialized) {
-            return new CloseLocalHistoryPayload(identifier, serialized);
         }
     }
 

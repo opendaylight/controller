@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.io.ByteStreams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.DataInput;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -26,10 +24,8 @@ import org.slf4j.LoggerFactory;
  * local history.
  */
 public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
-    private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
+    private static final class Proxy extends ST {
         private static final long serialVersionUID = 1L;
-
-        private ImmutableUnsignedLongSet transactionIds;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
@@ -41,19 +37,6 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
         Proxy(final byte[] serialized) {
             super(serialized);
         }
-
-        @Override
-        protected LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
-            final var id = LocalHistoryIdentifier.readFrom(in);
-            transactionIds = ImmutableUnsignedLongSet.readFrom(in);
-            return id;
-        }
-
-        @Override
-        protected SkipTransactionsPayload createObject(final LocalHistoryIdentifier identifier,
-                final byte[] serialized) {
-            return new SkipTransactionsPayload(identifier, serialized, verifyNotNull(transactionIds));
-        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
@@ -63,7 +46,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
 
-    private SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
+    SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
             final byte @NonNull [] serialized, final ImmutableUnsignedLongSet transactionIds) {
         super(historyId, serialized);
         this.transactionIds = requireNonNull(transactionIds);
