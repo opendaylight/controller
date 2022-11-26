@@ -9,35 +9,12 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
-    private static final class Proxy extends AbstractProxy<ClientIdentifier> {
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        Proxy(final byte[] serialized) {
-            super(serialized);
-        }
-
-        @Override
-        protected ClientIdentifier readIdentifier(final DataInput in) throws IOException {
-            return ClientIdentifier.readFrom(in);
-        }
-
-        @Override
-        protected DisableTrackingPayload createObject(final ClientIdentifier identifier,
-                final byte[] serialized) {
-            return new DisableTrackingPayload(identifier, serialized);
-        }
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(DisableTrackingPayload.class);
     private static final long serialVersionUID = 1L;
     private static final int PROXY_SIZE = externalizableProxySize(DT::new);
