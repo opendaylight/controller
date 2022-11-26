@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -23,7 +26,50 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author Thomas Pantelis
  */
 public final class ShardManagerSnapshot implements Serializable {
-    private static final class Proxy implements Externalizable {
+    interface SerializedForm extends Externalizable {
+        /**
+         * Return the serial form of this object contents, corresponding to {@link ShardManagerSnapshot#shardList}.
+         *
+         * @return List of shards names.
+         */
+        List<String> shardNames();
+
+        /**
+         * Resolve this proxy to an actual {@link ShardManagerSnapshot}. Implementations can rely on the object to be
+         * set via {@link #resolveTo(ShardManagerSnapshot)}.
+         *
+         * @return A snapshot
+         */
+        Object readResolve();
+
+        /**
+         * Set this proxy to return {@code snapshot} on next {@link #readResolve()}.
+         *
+         * @param newSnapshot Snapshot to set
+         */
+        void resolveTo(@NonNull ShardManagerSnapshot newSnapshot);
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+            final int size = in.readInt();
+            final var shardList = new ArrayList<String>(size);
+            for (int i = 0; i < size; i++) {
+                shardList.add((String) in.readObject());
+            }
+            resolveTo(new ShardManagerSnapshot(shardList));
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var shardList = shardNames();
+            out.writeInt(shardList.size());
+            for (var shardName : shardList) {
+                out.writeObject(shardName);
+            }
+        }
+    }
+
+    private static final class Proxy implements SerializedForm {
         private static final long serialVersionUID = 1L;
 
         private ShardManagerSnapshot snapshot;
@@ -35,31 +81,23 @@ public final class ShardManagerSnapshot implements Serializable {
             // For Externalizable
         }
 
+        @Override
+        public List<String> shardNames() {
+            return snapshot.getShardList();
+        }
+
         Proxy(final ShardManagerSnapshot snapshot) {
             this.snapshot = snapshot;
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(snapshot.shardList.size());
-            for (String shard: snapshot.shardList) {
-                out.writeObject(shard);
-            }
+        public void resolveTo(final ShardManagerSnapshot newSnapshot) {
+            snapshot = requireNonNull(newSnapshot);
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            int size = in.readInt();
-            List<String> localShardList = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                localShardList.add((String) in.readObject());
-            }
-
-            snapshot = new ShardManagerSnapshot(localShardList);
-        }
-
-        private Object readResolve() {
-            return snapshot;
+        public Object readResolve() {
+            return verifyNotNull(snapshot);
         }
     }
 
