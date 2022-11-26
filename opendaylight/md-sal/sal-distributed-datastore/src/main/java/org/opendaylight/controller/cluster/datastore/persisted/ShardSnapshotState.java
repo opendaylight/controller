@@ -23,9 +23,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  *
  * @author Thomas Pantelis
  */
-public class ShardSnapshotState implements Snapshot.State {
-    private static final long serialVersionUID = 1L;
-
+public final class ShardSnapshotState implements Snapshot.State {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -56,6 +54,8 @@ public class ShardSnapshotState implements Snapshot.State {
             return snapshotState;
         }
     }
+
+    private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
