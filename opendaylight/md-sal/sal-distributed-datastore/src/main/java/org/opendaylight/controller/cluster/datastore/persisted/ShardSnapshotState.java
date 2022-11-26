@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,7 +25,26 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * @author Thomas Pantelis
  */
 public final class ShardSnapshotState implements Snapshot.State {
-    private static final class Proxy implements Externalizable {
+    interface SerialForm extends Externalizable {
+
+        ShardSnapshotState snapshotState();
+
+        void resolveTo(@NonNull ShardSnapshotState newSnapshotState);
+
+        Object readResolve();
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            resolveTo(ShardDataTreeSnapshot.deserialize(in));
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            snapshotState().getSnapshot().serialize(out);
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
 
         private ShardSnapshotState snapshotState;
@@ -41,17 +61,18 @@ public final class ShardSnapshotState implements Snapshot.State {
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            snapshotState.snapshot.serialize(out);
+        public ShardSnapshotState snapshotState() {
+            return snapshotState;
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            snapshotState = ShardDataTreeSnapshot.deserialize(in);
+        public void resolveTo(final ShardSnapshotState newSnapshotState) {
+            snapshotState = requireNonNull(newSnapshotState);
         }
 
-        private Object readResolve() {
-            return snapshotState;
+        @Override
+        public Object readResolve() {
+            return verifyNotNull(snapshotState);
         }
     }
 
@@ -83,6 +104,7 @@ public final class ShardSnapshotState implements Snapshot.State {
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        // FIXME: version-dependent
+        return new SS(this);
     }
 }
