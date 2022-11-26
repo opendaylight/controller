@@ -7,19 +7,27 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static java.util.Objects.requireNonNull;
+import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 
-public abstract class AbstractIdentifiablePayloadTest<T extends AbstractIdentifiablePayload<?>> extends AbstractTest {
+abstract class AbstractIdentifiablePayloadTest<T extends AbstractIdentifiablePayload<?>> extends AbstractTest {
+    private final T object;
+    private final int expectedSize;
 
-    abstract T object();
+    AbstractIdentifiablePayloadTest(final T object, final int expectedSize) {
+        this.object = requireNonNull(object);
+        this.expectedSize = expectedSize;
+    }
 
     @Test
     public void testSerialization() {
-        final T object = object();
-        final T cloned = SerializationUtils.clone(object);
-        Assert.assertEquals(object.getIdentifier(), cloned.getIdentifier());
+        final byte[] bytes = SerializationUtils.serialize(object);
+        assertEquals(expectedSize, bytes.length);
+        final T cloned = SerializationUtils.deserialize(bytes);
+        assertEquals(object.getIdentifier(), cloned.getIdentifier());
     }
 }

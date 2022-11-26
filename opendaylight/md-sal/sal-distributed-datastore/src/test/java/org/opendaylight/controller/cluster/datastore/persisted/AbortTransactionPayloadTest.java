@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 public class AbortTransactionPayloadTest extends AbstractIdentifiablePayloadTest<AbortTransactionPayload> {
-
-    @Override
-    AbortTransactionPayload object() {
-        return AbortTransactionPayload.create(nextTransactionId(), 512);
+    public AbortTransactionPayloadTest() {
+        super(AbortTransactionPayload.create(newTransactionId(0), 512), 264);
     }
 }

@@ -45,8 +45,12 @@ public abstract class AbstractTest {
         TX_COUNTER.set(1L);
     }
 
+    protected static TransactionIdentifier newTransactionId(final long txId) {
+        return new TransactionIdentifier(HISTORY_ID, txId);
+    }
+
     protected static TransactionIdentifier nextTransactionId() {
-        return new TransactionIdentifier(HISTORY_ID, TX_COUNTER.getAndIncrement());
+        return newTransactionId(TX_COUNTER.getAndIncrement());
     }
 
     protected static LocalHistoryIdentifier nextHistoryId() {
