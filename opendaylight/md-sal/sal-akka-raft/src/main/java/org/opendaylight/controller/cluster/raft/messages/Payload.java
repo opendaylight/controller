@@ -40,5 +40,6 @@ public abstract class Payload implements Serializable {
      *
      * @return Serialization proxy
      */
+    @java.io.Serial
     protected abstract Object writeReplace();
 }

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -44,19 +45,19 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
         @Override
         protected PurgeLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
                 final byte[] serialized) {
-            return new PurgeLocalHistoryPayload(identifier, serialized);
+            return new PurgeLocalHistoryPayload(true, identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeLocalHistoryPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PH::new);
 
-    PurgeLocalHistoryPayload(final LocalHistoryIdentifier historyId, final byte[] serialized) {
-        super(historyId, serialized);
+    PurgeLocalHistoryPayload(final boolean legacy, final LocalHistoryIdentifier historyId, final byte[] serialized) {
+        super(legacy, historyId, serialized);
     }
 
-    public static PurgeLocalHistoryPayload create(final LocalHistoryIdentifier historyId,
+    public static PurgeLocalHistoryPayload create(final PayloadVersion version, final LocalHistoryIdentifier historyId,
             final int initialSerializedBufferCapacity) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
@@ -66,16 +67,16 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
             LOG.error("Failed to serialize {}", historyId, e);
             throw new IllegalStateException("Failed to serialize " + historyId, e);
         }
-        return new PurgeLocalHistoryPayload(historyId, out.toByteArray());
+        return new PurgeLocalHistoryPayload(PayloadVersion.MAGNESIUM.lte(version), historyId, out.toByteArray());
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected PH proxy(final byte[] serialized) {
+        return new PH(serialized);
     }
 
     @Override
-    protected int externalizableProxySize() {
+    protected int proxySize() {
         return PROXY_SIZE;
     }
 }

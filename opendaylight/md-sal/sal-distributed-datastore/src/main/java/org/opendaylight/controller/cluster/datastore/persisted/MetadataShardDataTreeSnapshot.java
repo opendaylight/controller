@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 @Beta
 public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardDataTreeSnapshot
         implements Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private static final Logger LOG = LoggerFactory.getLogger(MetadataShardDataTreeSnapshot.class);
@@ -53,9 +54,9 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         }
 
         Proxy(final MetadataShardDataTreeSnapshot snapshot) {
-            this.rootNode = snapshot.getRootNode().get();
-            this.metadata = snapshot.getMetadata();
-            this.version = snapshot.version().getStreamVersion();
+            rootNode = snapshot.getRootNode().get();
+            metadata = snapshot.getMetadata();
+            version = snapshot.version().getStreamVersion();
         }
 
         @Override
@@ -138,7 +139,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return new MS(this);
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<ClientIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = -5490519942445085251L;
@@ -37,19 +38,19 @@ public final class DisableTrackingPayload extends AbstractIdentifiablePayload<Cl
         @Override
         protected DisableTrackingPayload createObject(final ClientIdentifier identifier,
                 final byte[] serialized) {
-            return new DisableTrackingPayload(identifier, serialized);
+            return new DisableTrackingPayload(true, identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(DisableTrackingPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(DT::new);
 
-    DisableTrackingPayload(final ClientIdentifier clientId, final byte[] serialized) {
-        super(clientId, serialized);
+    DisableTrackingPayload(final boolean legacy, final ClientIdentifier clientId, final byte[] serialized) {
+        super(legacy, clientId, serialized);
     }
 
-    public static DisableTrackingPayload create(final ClientIdentifier clientId,
+    public static DisableTrackingPayload create(final PayloadVersion version, final ClientIdentifier clientId,
             final int initialSerializedBufferCapacity) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
@@ -59,16 +60,16 @@ public final class DisableTrackingPayload extends AbstractIdentifiablePayload<Cl
             LOG.error("Failed to serialize {}", clientId, e);
             throw new IllegalStateException("Failed to serialize " + clientId, e);
         }
-        return new DisableTrackingPayload(clientId, out.toByteArray());
+        return new DisableTrackingPayload(PayloadVersion.MAGNESIUM.lte(version), clientId, out.toByteArray());
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected DT proxy(final byte[] serialized) {
+        return new DT(serialized);
     }
 
     @Override
-    protected int externalizableProxySize() {
+    protected int proxySize() {
         return PROXY_SIZE;
     }
 }

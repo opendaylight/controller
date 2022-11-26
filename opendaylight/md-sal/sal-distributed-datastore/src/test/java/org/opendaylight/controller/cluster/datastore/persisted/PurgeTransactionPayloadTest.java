@@ -9,6 +9,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 public class PurgeTransactionPayloadTest extends AbstractIdentifiablePayloadTest<PurgeTransactionPayload> {
     public PurgeTransactionPayloadTest() {
-        super(PurgeTransactionPayload.create(newTransactionId(0), 512), 264);
+        super(PurgeTransactionPayload.create(newTransactionId(0), 512), 125);
     }
 }
