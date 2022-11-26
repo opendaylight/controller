@@ -18,8 +18,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLong
 /**
  * Serialization proxy for {@link SkipTransactionsPayload}.
  */
-// FIXME: final when we eliminate legacy proxy
-class ST extends AbstractProxy<LocalHistoryIdentifier> {
+final class ST extends AbstractProxy<LocalHistoryIdentifier> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -35,15 +34,14 @@ class ST extends AbstractProxy<LocalHistoryIdentifier> {
     }
 
     @Override
-    protected final LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
+    protected LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
         final var id = LocalHistoryIdentifier.readFrom(in);
         transactionIds = ImmutableUnsignedLongSet.readFrom(in);
         return id;
     }
 
     @Override
-    protected final SkipTransactionsPayload createObject(final LocalHistoryIdentifier identifier,
-            final byte[] serialized) {
+    protected SkipTransactionsPayload createObject(final LocalHistoryIdentifier identifier, final byte[] serialized) {
         return new SkipTransactionsPayload(identifier, serialized, verifyNotNull(transactionIds));
     }
 

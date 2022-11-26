@@ -15,8 +15,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifia
 /**
  * Serialization proxy for {@link CloseLocalHistoryPayload}.
  */
-// FIXME: final when we eliminate legacy proxy
-class DH extends AbstractProxy<LocalHistoryIdentifier> {
+final class DH extends AbstractProxy<LocalHistoryIdentifier> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,13 +29,12 @@ class DH extends AbstractProxy<LocalHistoryIdentifier> {
     }
 
     @Override
-    protected final LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
+    protected LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
         return LocalHistoryIdentifier.readFrom(in);
     }
 
     @Override
-    protected final CloseLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
-            final byte[] serialized) {
+    protected CloseLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier, final byte[] serialized) {
         return new CloseLocalHistoryPayload(identifier, serialized);
     }
 }
