@@ -150,7 +150,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
 
     @Override
     protected final Object writeReplace() {
-        return new Proxy(this);
+        return new CT(this);
     }
 
     static final class Simple extends CommitTransactionPayload {
@@ -206,7 +206,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
 
     // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
     private static final class ProxySizeHolder {
-        static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy(new Simple(new byte[0]))).length;
+        static final int PROXY_SIZE = SerializationUtils.serialize(new CT(new Simple(new byte[0]))).length;
 
         private ProxySizeHolder() {
             // Hidden on purpose
