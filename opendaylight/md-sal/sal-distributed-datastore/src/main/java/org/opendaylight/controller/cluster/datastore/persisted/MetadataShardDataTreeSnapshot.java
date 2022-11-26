@@ -53,9 +53,9 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         }
 
         Proxy(final MetadataShardDataTreeSnapshot snapshot) {
-            this.rootNode = snapshot.getRootNode().get();
-            this.metadata = snapshot.getMetadata();
-            this.version = snapshot.version().getStreamVersion();
+            rootNode = snapshot.getRootNode().get();
+            metadata = snapshot.getMetadata();
+            version = snapshot.version().getStreamVersion();
         }
 
         @Override
@@ -138,7 +138,8 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        // FIXME: version-dependent
+        return new MS(this);
     }
 
     @Override

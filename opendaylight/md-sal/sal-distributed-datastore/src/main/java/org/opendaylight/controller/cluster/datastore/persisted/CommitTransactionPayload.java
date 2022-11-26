@@ -53,14 +53,10 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
+    static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
         "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
 
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
-
-    CommitTransactionPayload() {
-        // hidden on purpose
-    }
 
     public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
             final DataTreeCandidate candidate, final PayloadVersion version, final int initialSerializedBufferCapacity)
@@ -73,6 +69,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
         final Either<byte[], ChunkedByteArray> source = cos.toVariant();
         LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity, cos.size());
+
         return source.isFirst() ? new Simple(source.getFirst()) : new Chunked(source.getSecond());
     }
 
@@ -123,6 +120,11 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return ProxySizeHolder.PROXY_SIZE + size();
     }
 
+    @Override
+    protected final Externalizable writeReplace() {
+        return new Proxy(this);
+    }
+
     /**
      * The cached candidate needs to be cleared after it is done applying to the DataTree, otherwise it would be keeping
      * deserialized in memory which are not needed anymore leading to wasted memory. This lets the payload know that
@@ -148,12 +150,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
     abstract DataInput newDataInput();
 
-    @Override
-    protected final Object writeReplace() {
-        return new Proxy(this);
-    }
-
-    private static final class Simple extends CommitTransactionPayload {
+    static final class Simple extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         private final byte[] serialized;
@@ -178,7 +175,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
     }
 
-    private static final class Chunked extends CommitTransactionPayload {
+    static final class Chunked extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")
@@ -206,7 +203,8 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
     // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
     private static final class ProxySizeHolder {
-        static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy(new Simple(new byte[0]))).length;
+        static final int PROXY_SIZE =
+            SerializationUtils.serialize(new Simple(new byte[0]).writeReplace()).length;
 
         private ProxySizeHolder() {
             // Hidden on purpose
