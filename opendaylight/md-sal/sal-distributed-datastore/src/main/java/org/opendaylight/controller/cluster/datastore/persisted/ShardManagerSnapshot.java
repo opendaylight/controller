@@ -69,6 +69,7 @@ public final class ShardManagerSnapshot implements Serializable {
         }
     }
 
+    @Deprecated(since = "7.0.0.", forRemoval = true)
     private static final class Proxy implements SerializedForm {
         private static final long serialVersionUID = 1L;
 
@@ -114,7 +115,7 @@ public final class ShardManagerSnapshot implements Serializable {
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return new SM(this);
     }
 
     @Override

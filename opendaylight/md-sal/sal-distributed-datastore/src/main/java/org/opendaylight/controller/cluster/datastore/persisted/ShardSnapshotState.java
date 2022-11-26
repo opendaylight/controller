@@ -44,6 +44,7 @@ public final class ShardSnapshotState implements Snapshot.State {
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
 
@@ -104,6 +105,6 @@ public final class ShardSnapshotState implements Snapshot.State {
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return new SS(this);
     }
 }
