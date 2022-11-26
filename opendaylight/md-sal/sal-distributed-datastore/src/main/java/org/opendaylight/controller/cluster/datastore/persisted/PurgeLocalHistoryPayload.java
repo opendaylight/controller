@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -50,7 +51,7 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeLocalHistoryPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PH::new);
 
     PurgeLocalHistoryPayload(final LocalHistoryIdentifier historyId, final byte[] serialized) {
         super(historyId, serialized);
@@ -70,8 +71,8 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected PH externalizableProxy(final byte[] serialized) {
+        return new PH(serialized);
     }
 
     @Override
