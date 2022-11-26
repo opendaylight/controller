@@ -63,7 +63,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
 
-    private SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
+    SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
             final byte @NonNull [] serialized, final ImmutableUnsignedLongSet transactionIds) {
         super(historyId, serialized);
         this.transactionIds = requireNonNull(transactionIds);

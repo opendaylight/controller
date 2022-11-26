@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -27,9 +28,42 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * @author Thomas Pantelis
  */
 public class DatastoreSnapshot implements Serializable {
-    private static final long serialVersionUID = 1L;
+    interface SerialForm extends Externalizable {
 
-    private static final class Proxy implements Externalizable {
+        DatastoreSnapshot datastoreSnapshot();
+
+        Object readResolve();
+
+        void resolveTo(@NonNull DatastoreSnapshot newDatastoreSnapshot);
+
+        @Override
+        default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            final var type = (String)in.readObject();
+            final var snapshot = (ShardManagerSnapshot) in.readObject();
+
+            final int size = in.readInt();
+            var localShardSnapshots = new ArrayList<ShardSnapshot>(size);
+            for (int i = 0; i < size; i++) {
+                localShardSnapshots.add((ShardSnapshot) in.readObject());
+            }
+
+            resolveTo(new DatastoreSnapshot(type, snapshot, localShardSnapshots));
+        }
+
+        @Override
+        default void writeExternal(ObjectOutput out) throws IOException {
+            final var datastoreSnapshot = datastoreSnapshot();
+            out.writeObject(datastoreSnapshot.type);
+            out.writeObject(datastoreSnapshot.shardManagerSnapshot);
+
+            out.writeInt(datastoreSnapshot.shardSnapshots.size());
+            for (ShardSnapshot shardSnapshot: datastoreSnapshot.shardSnapshots) {
+                out.writeObject(shardSnapshot);
+            }
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
 
         private DatastoreSnapshot datastoreSnapshot;
@@ -42,42 +76,30 @@ public class DatastoreSnapshot implements Serializable {
         }
 
         Proxy(final DatastoreSnapshot datastoreSnapshot) {
-            this.datastoreSnapshot = datastoreSnapshot;
+            this.datastoreSnapshot = requireNonNull(datastoreSnapshot);
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(datastoreSnapshot.type);
-            out.writeObject(datastoreSnapshot.shardManagerSnapshot);
-
-            out.writeInt(datastoreSnapshot.shardSnapshots.size());
-            for (ShardSnapshot shardSnapshot: datastoreSnapshot.shardSnapshots) {
-                out.writeObject(shardSnapshot);
-            }
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            String localType = (String)in.readObject();
-            ShardManagerSnapshot localShardManagerSnapshot = (ShardManagerSnapshot) in.readObject();
-
-            int size = in.readInt();
-            List<ShardSnapshot> localShardSnapshots = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                localShardSnapshots.add((ShardSnapshot) in.readObject());
-            }
-
-            datastoreSnapshot = new DatastoreSnapshot(localType, localShardManagerSnapshot, localShardSnapshots);
-        }
-
-        private Object readResolve() {
+        public DatastoreSnapshot datastoreSnapshot() {
             return datastoreSnapshot;
+        }
+
+        @Override
+        public void resolveTo(DatastoreSnapshot newDatastoreSnapshot) {
+            datastoreSnapshot = requireNonNull(newDatastoreSnapshot);
+        }
+
+        @Override
+        public Object readResolve() {
+            return verifyNotNull(datastoreSnapshot);
         }
     }
 
-    private final String type;
+    private static final long serialVersionUID = 1L;
+
+    private final @NonNull String type;
     private final ShardManagerSnapshot shardManagerSnapshot;
-    private final List<ShardSnapshot> shardSnapshots;
+    private final @NonNull ImmutableList<ShardSnapshot> shardSnapshots;
 
     public DatastoreSnapshot(@NonNull String type, @Nullable ShardManagerSnapshot shardManagerSnapshot,
             @NonNull List<ShardSnapshot> shardSnapshots) {
@@ -103,9 +125,28 @@ public class DatastoreSnapshot implements Serializable {
     }
 
     public static class ShardSnapshot implements Serializable {
-        private static final long serialVersionUID = 1L;
+        interface SerialForm extends Externalizable {
 
-        private static final class Proxy implements Externalizable {
+            ShardSnapshot shardSnapshot();
+
+            Object readResolve();
+
+            void resolveTo(String name, Snapshot snapshot);
+
+            @Override
+            default void writeExternal(ObjectOutput out) throws IOException {
+                final var shardSnapshot = shardSnapshot();
+                out.writeObject(shardSnapshot.name);
+                out.writeObject(shardSnapshot.snapshot);
+            }
+
+            @Override
+            default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+                resolveTo((String) in.readObject(), (Snapshot) in.readObject());
+            }
+        }
+
+        private static final class Proxy implements SerialForm {
             private static final long serialVersionUID = 1L;
 
             private ShardSnapshot shardSnapshot;
@@ -122,23 +163,25 @@ public class DatastoreSnapshot implements Serializable {
             }
 
             @Override
-            public void writeExternal(ObjectOutput out) throws IOException {
-                out.writeObject(shardSnapshot.name);
-                out.writeObject(shardSnapshot.snapshot);
+            public ShardSnapshot shardSnapshot() {
+                return shardSnapshot;
             }
 
             @Override
-            public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-                shardSnapshot = new ShardSnapshot((String)in.readObject(), (Snapshot) in.readObject());
+            public void resolveTo(final String name, final Snapshot snapshot) {
+                shardSnapshot = new ShardSnapshot(name, snapshot);
             }
 
-            private Object readResolve() {
-                return shardSnapshot;
+            @Override
+            public Object readResolve() {
+                return verifyNotNull(shardSnapshot);
             }
         }
 
-        private final String name;
-        private final Snapshot snapshot;
+        private static final long serialVersionUID = 1L;
+
+        private final @NonNull String name;
+        private final @NonNull Snapshot snapshot;
 
         public ShardSnapshot(@NonNull String name, @NonNull Snapshot snapshot) {
             this.name = requireNonNull(name);
