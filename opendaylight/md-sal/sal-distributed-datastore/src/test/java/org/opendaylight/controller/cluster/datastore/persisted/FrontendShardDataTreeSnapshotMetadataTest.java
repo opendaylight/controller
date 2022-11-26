@@ -42,21 +42,21 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     @Test
     public void testCreateMetadataSnapshotEmptyInput() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata emptyOrigSnapshot = createEmptyMetadataSnapshot();
-        final FrontendShardDataTreeSnapshotMetadata emptyCopySnapshot = copy(emptyOrigSnapshot, 127);
+        final FrontendShardDataTreeSnapshotMetadata emptyCopySnapshot = copy(emptyOrigSnapshot, 86);
         testMetadataSnapshotEqual(emptyOrigSnapshot, emptyCopySnapshot);
     }
 
     @Test
     public void testSerializeMetadataSnapshotWithOneClient() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(1);
-        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 162);
+        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 121);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
     @Test
     public void testSerializeMetadataSnapshotWithMoreClients() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(5);
-        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 314);
+        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 273);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
