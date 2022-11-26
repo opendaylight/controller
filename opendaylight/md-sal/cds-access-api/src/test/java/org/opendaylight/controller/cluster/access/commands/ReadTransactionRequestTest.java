@@ -7,32 +7,31 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class ReadTransactionRequestTest extends AbstractReadTransactionRequestTest<ReadTransactionRequest> {
-    private static final ReadTransactionRequest OBJECT = new ReadTransactionRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, PATH, SNAPSHOT_ONLY);
+    private static final ReadTransactionRequest OBJECT = new ReadTransactionRequest(TRANSACTION_IDENTIFIER, 0,
+        ACTOR_REF, PATH, SNAPSHOT_ONLY);
 
-    @Override
-    protected ReadTransactionRequest object() {
-        return OBJECT;
+    public ReadTransactionRequestTest() {
+        super(OBJECT, 618);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final ABIVersion cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
-        final ReadTransactionRequest clone = OBJECT.cloneAsVersion(cloneVersion);
-        Assert.assertEquals(cloneVersion, clone.getVersion());
-        Assert.assertEquals(OBJECT.getPath(), clone.getPath());
-        Assert.assertEquals(OBJECT.isSnapshotOnly(), clone.isSnapshotOnly());
+        final var cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
+        final var clone = OBJECT.cloneAsVersion(cloneVersion);
+        assertEquals(cloneVersion, clone.getVersion());
+        assertEquals(OBJECT.getPath(), clone.getPath());
+        assertEquals(OBJECT.isSnapshotOnly(), clone.isSnapshotOnly());
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof ReadTransactionRequest);
-        Assert.assertEquals(OBJECT.getReplyTo(), ((ReadTransactionRequest) deserialize).getReplyTo());
-        Assert.assertEquals(OBJECT.getPath(), ((ReadTransactionRequest) deserialize).getPath());
+    protected void doAdditionalAssertions(final ReadTransactionRequest deserialize) {
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.getPath(), deserialize.getPath());
     }
 }

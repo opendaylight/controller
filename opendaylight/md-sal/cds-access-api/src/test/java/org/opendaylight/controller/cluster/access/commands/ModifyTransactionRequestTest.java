@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.access.commands.TransactionModification.TYPE_WRITE;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -29,57 +28,48 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     private static final ContainerNode NODE = Builders.containerBuilder().withNodeIdentifier(
             NodeIdentifier.create(QName.create("namespace", "localName"))).build();
 
-    private static final List<TransactionModification> MODIFICATIONS = Lists.newArrayList(
+    private static final List<TransactionModification> MODIFICATIONS = List.of(
             new TransactionWrite(YangInstanceIdentifier.empty(), NODE));
 
     private static final PersistenceProtocol PROTOCOL = PersistenceProtocol.ABORT;
 
-    private static final ModifyTransactionRequest OBJECT = new ModifyTransactionRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, MODIFICATIONS, PROTOCOL);
+    private static final ModifyTransactionRequest OBJECT = new ModifyTransactionRequest(TRANSACTION_IDENTIFIER, 0,
+        ACTOR_REF, MODIFICATIONS, PROTOCOL);
 
-    @Override
-    protected ModifyTransactionRequest object() {
-        return OBJECT;
+    public ModifyTransactionRequestTest() {
+        super(OBJECT, 440);
     }
 
     @Test
     public void getPersistenceProtocolTest() {
-        final Optional<PersistenceProtocol> result = OBJECT.getPersistenceProtocol();
-        assertTrue(result.isPresent());
-        assertEquals(PROTOCOL, result.get());
+        assertEquals(Optional.of(PROTOCOL), OBJECT.getPersistenceProtocol());
     }
 
     @Test
     public void getModificationsTest() {
-        final List<TransactionModification> result = OBJECT.getModifications();
-        assertNotNull(result);
-        assertEquals(MODIFICATIONS, result);
+        assertEquals(MODIFICATIONS, OBJECT.getModifications());
     }
 
     @Test
     public void addToStringAttributesTest() {
-        final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        assertTrue(result.toString().contains("modifications=1"));
-        assertTrue(result.toString().contains("protocol=" + PROTOCOL));
+        final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
+        assertThat(result, containsString("modifications=1"));
+        assertThat(result, containsString("protocol=" + PROTOCOL));
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final ModifyTransactionRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, OBJECT.cloneAsVersion(ABIVersion.BORON));
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        assertTrue(deserialize instanceof ModifyTransactionRequest);
-        final ModifyTransactionRequest casted = (ModifyTransactionRequest) deserialize;
+    protected void doAdditionalAssertions(final ModifyTransactionRequest deserialize) {
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.getPersistenceProtocol(), deserialize.getPersistenceProtocol());
 
-        assertEquals(OBJECT.getReplyTo(), casted.getReplyTo());
-        assertEquals(OBJECT.getPersistenceProtocol(), casted.getPersistenceProtocol());
-
-        assertNotNull(casted.getModifications());
-        assertEquals(1, casted.getModifications().size());
-        final TransactionModification modification = casted.getModifications().get(0);
+        assertNotNull(deserialize.getModifications());
+        assertEquals(1, deserialize.getModifications().size());
+        final var modification = deserialize.getModifications().get(0);
         assertEquals(YangInstanceIdentifier.empty(), modification.getPath());
         assertEquals(TYPE_WRITE, modification.getType());
     }
