@@ -59,6 +59,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     protected abstract static class AbstractProxy<T extends Identifier> implements Proxy {
         private static final long serialVersionUID = 1L;
 
@@ -134,12 +135,11 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         return verifyNotNull(externalizableProxy(serialized));
     }
 
-    @SuppressWarnings("checkstyle:hiddenField")
-    protected abstract @NonNull AbstractProxy<T> externalizableProxy(byte @NonNull[] serialized);
+    protected abstract @NonNull Proxy externalizableProxy(byte @NonNull[] serialized);
 
     protected abstract int externalizableProxySize();
 
-    protected static final int externalizableProxySize(final Function<byte[], ? extends AbstractProxy<?>> constructor) {
+    protected static final int externalizableProxySize(final Function<byte[], Proxy> constructor) {
         return SerializationUtils.serialize(constructor.apply(new byte[0])).length;
     }
 }
