@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static com.google.common.math.IntMath.ceilingPowerOfTwo;
 import static java.util.Objects.requireNonNull;
 
@@ -21,10 +20,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.SerializationUtils;
@@ -157,11 +154,6 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     abstract DataInput newDataInput();
 
     @Override
-    protected final Externalizable legacyProxy() {
-        return new Proxy(this);
-    }
-
-    @Override
     protected final Externalizable proxy() {
         return new CT(this);
     }
@@ -228,47 +220,6 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
         private ProxySizeHolder() {
             // Hidden on purpose
-        }
-    }
-
-    private static final class Proxy implements Externalizable {
-        private static final long serialVersionUID = 1L;
-
-        private CommitTransactionPayload payload;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        Proxy(final CommitTransactionPayload payload) {
-            this.payload = requireNonNull(payload);
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(payload.size());
-            payload.writeBytes(out);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            final int length = in.readInt();
-            if (length < 0) {
-                throw new StreamCorruptedException("Invalid payload length " + length);
-            } else if (length < MAX_ARRAY_SIZE) {
-                final byte[] serialized = new byte[length];
-                in.readFully(serialized);
-                payload = new Simple(true, serialized);
-            } else {
-                payload = new Chunked(true, ChunkedByteArray.readFrom(in, length, MAX_ARRAY_SIZE));
-            }
-        }
-
-        private Object readResolve() {
-            return verifyNotNull(payload);
         }
     }
 }
