@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 public class CreateLocalHistoryPayloadTest extends AbstractIdentifiablePayloadTest<CreateLocalHistoryPayload> {
-
-    @Override
-    CreateLocalHistoryPayload object() {
-        return CreateLocalHistoryPayload.create(nextHistoryId(), 512);
+    public CreateLocalHistoryPayloadTest() {
+        super(CreateLocalHistoryPayload.create(newHistoryId(0), 512), 265);
     }
 }
