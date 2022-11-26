@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableRangeSet;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
@@ -17,7 +21,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientRequest> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
@@ -30,49 +33,45 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     private static final ConnectClientRequest OBJECT = new ConnectClientRequest(
             CLIENT_IDENTIFIER, 0, ACTOR_REF, MIN_VERSION, MAX_VERSION);
 
-    @Override
-    protected ConnectClientRequest object() {
-        return OBJECT;
+    public ConnectClientRequestTest() {
+        super(OBJECT, 310);
     }
 
     @Test
     public void getMinVersionTest() {
-        Assert.assertEquals(MIN_VERSION, OBJECT.getMinVersion());
+        assertEquals(MIN_VERSION, OBJECT.getMinVersion());
     }
 
     @Test
     public void getMaxVersionTest() {
-        Assert.assertEquals(MAX_VERSION, OBJECT.getMaxVersion());
+        assertEquals(MAX_VERSION, OBJECT.getMaxVersion());
     }
 
     @Test
     public void toRequestFailureTest() {
-        final RequestException exception = new DeadTransactionException(ImmutableRangeSet.of());
-        final ConnectClientFailure failure = OBJECT.toRequestFailure(exception);
-        Assert.assertNotNull(failure);
+        final var exception = new DeadTransactionException(ImmutableRangeSet.of());
+        final var failure = OBJECT.toRequestFailure(exception);
+        assertNotNull(failure);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final ConnectClientRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertNotNull(clone);
-        Assert.assertEquals(ABIVersion.BORON, clone.getVersion());
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        assertNotNull(clone);
+        assertEquals(ABIVersion.BORON, clone.getVersion());
     }
 
     @Test
     public void addToStringAttributesTest() {
-        final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        Assert.assertTrue(result.toString().contains("minVersion=" + MIN_VERSION));
-        Assert.assertTrue(result.toString().contains("maxVersion=" + MAX_VERSION));
+        final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
+        assertThat(result, containsString("minVersion=" + MIN_VERSION));
+        assertThat(result, containsString("maxVersion=" + MAX_VERSION));
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof ConnectClientRequest);
-        final ConnectClientRequest casted = (ConnectClientRequest) deserialize;
-
-        Assert.assertEquals(OBJECT.getMaxVersion(), casted.getMaxVersion());
-        Assert.assertEquals(OBJECT.getMinVersion(), casted.getMinVersion());
-        Assert.assertEquals(OBJECT.getReplyTo(), casted.getReplyTo());
+    protected void doAdditionalAssertions(final ConnectClientRequest deserialize) {
+        assertEquals(OBJECT.getMaxVersion(), deserialize.getMaxVersion());
+        assertEquals(OBJECT.getMinVersion(), deserialize.getMinVersion());
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
     }
 }
