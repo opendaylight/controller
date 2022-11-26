@@ -43,20 +43,21 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
         @Override
         protected PurgeTransactionPayload createObject(final TransactionIdentifier identifier,
                 final byte[] serialized) {
-            return new PurgeTransactionPayload(identifier, serialized);
+            return new PurgeTransactionPayload(true, identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PT::new);
+    private static final int LEGACY_PROXY_SIZE = externalizableProxySize(Proxy::new);
 
-    PurgeTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
-        super(transactionId, serialized);
+    PurgeTransactionPayload(final boolean legacy, final TransactionIdentifier transactionId, final byte[] serialized) {
+        super(legacy, transactionId, serialized);
     }
 
-    public static PurgeTransactionPayload create(final TransactionIdentifier transactionId,
-            final int initialSerializedBufferCapacity) {
+    public static PurgeTransactionPayload create(final PayloadVersion version,
+            final TransactionIdentifier transactionId, final int initialSerializedBufferCapacity) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
             transactionId.writeTo(out);
@@ -65,16 +66,26 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
             LOG.error("Failed to serialize {}", transactionId, e);
             throw new IllegalStateException("Failed to serialize " + transactionId, e);
         }
-        return new PurgeTransactionPayload(transactionId, out.toByteArray());
+        return new PurgeTransactionPayload(PayloadVersion.MAGNESIUM.gte(version), transactionId, out.toByteArray());
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
+    protected PT proxy(final byte[] serialized) {
+        return new PT(serialized);
+    }
+
+    @Override
+    protected int proxySize() {
+        return PROXY_SIZE;
+    }
+
+    @Override
+    protected Proxy legacyProxy(final byte[] serialized) {
         return new Proxy(serialized);
     }
 
     @Override
-    protected int externalizableProxySize() {
-        return PROXY_SIZE;
+    protected int legacyProxySize() {
+        return LEGACY_PROXY_SIZE;
     }
 }

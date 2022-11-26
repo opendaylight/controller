@@ -43,19 +43,20 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
         @Override
         protected CloseLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
                 final byte[] serialized) {
-            return new CloseLocalHistoryPayload(identifier, serialized);
+            return new CloseLocalHistoryPayload(true, identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(CloseLocalHistoryPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(DH::new);
+    private static final int LEGACY_PROXY_SIZE = externalizableProxySize(Proxy::new);
 
-    CloseLocalHistoryPayload(final LocalHistoryIdentifier historyId, final byte[] serialized) {
-        super(historyId, serialized);
+    CloseLocalHistoryPayload(final boolean legacy, final LocalHistoryIdentifier historyId, final byte[] serialized) {
+        super(legacy, historyId, serialized);
     }
 
-    public static CloseLocalHistoryPayload create(final LocalHistoryIdentifier historyId,
+    public static CloseLocalHistoryPayload create(final PayloadVersion version, final LocalHistoryIdentifier historyId,
             final int initialSerializedBufferCapacity) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
@@ -65,16 +66,26 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
             LOG.error("Failed to serialize {}", historyId, e);
             throw new IllegalStateException("Failed to serialize " + historyId, e);
         }
-        return new CloseLocalHistoryPayload(historyId, out.toByteArray());
+        return new CloseLocalHistoryPayload(PayloadVersion.MAGNESIUM.gte(version), historyId, out.toByteArray());
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
+    protected DH proxy(final byte[] serialized) {
+        return new DH(serialized);
+    }
+
+    @Override
+    protected int proxySize() {
+        return PROXY_SIZE;
+    }
+
+    @Override
+    protected Proxy legacyProxy(final byte[] serialized) {
         return new Proxy(serialized);
     }
 
     @Override
-    protected int externalizableProxySize() {
-        return PROXY_SIZE;
+    protected int legacyProxySize() {
+        return LEGACY_PROXY_SIZE;
     }
 }

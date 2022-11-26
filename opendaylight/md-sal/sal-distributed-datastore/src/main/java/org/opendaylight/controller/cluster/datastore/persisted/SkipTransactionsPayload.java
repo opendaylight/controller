@@ -29,7 +29,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
         private static final long serialVersionUID = 1L;
 
-        private ImmutableUnsignedLongSet transactionIds;
+        private transient ImmutableUnsignedLongSet transactionIds;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
@@ -52,25 +52,27 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
         @Override
         protected SkipTransactionsPayload createObject(final LocalHistoryIdentifier identifier,
                 final byte[] serialized) {
-            return new SkipTransactionsPayload(identifier, serialized, verifyNotNull(transactionIds));
+            return new SkipTransactionsPayload(true, identifier, serialized, verifyNotNull(transactionIds));
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(ST::new);
+    private static final int LEGACY_PROXY_SIZE = externalizableProxySize(ST::new);
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
 
-    private SkipTransactionsPayload(final @NonNull LocalHistoryIdentifier historyId,
+    SkipTransactionsPayload(final boolean legacy, final @NonNull LocalHistoryIdentifier historyId,
             final byte @NonNull [] serialized, final ImmutableUnsignedLongSet transactionIds) {
-        super(historyId, serialized);
+        super(legacy, historyId, serialized);
         this.transactionIds = requireNonNull(transactionIds);
     }
 
-    public static @NonNull SkipTransactionsPayload create(final LocalHistoryIdentifier historyId,
-            final ImmutableUnsignedLongSet transactionIds, final int initialSerializedBufferCapacity) {
+    public static @NonNull SkipTransactionsPayload create(final PayloadVersion version,
+            final LocalHistoryIdentifier historyId, final ImmutableUnsignedLongSet transactionIds,
+            final int initialSerializedBufferCapacity) {
         final var out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
             historyId.writeTo(out);
@@ -81,7 +83,8 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
             throw new IllegalStateException("Failed to serialize " + historyId + " ids " + transactionIds, e);
         }
 
-        return new SkipTransactionsPayload(historyId, out.toByteArray(), transactionIds);
+        return new SkipTransactionsPayload(PayloadVersion.MAGNESIUM.gte(version), historyId, out.toByteArray(),
+            transactionIds);
     }
 
     public @NonNull ImmutableUnsignedLongSet getTransactionIds() {
@@ -89,12 +92,22 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
+    protected ST proxy(final byte[] serialized) {
+        return new ST(serialized);
+    }
+
+    @Override
+    protected int proxySize() {
+        return PROXY_SIZE;
+    }
+
+    @Override
+    protected Proxy legacyProxy(final byte[] serialized) {
         return new Proxy(serialized);
     }
 
     @Override
-    protected int externalizableProxySize() {
-        return PROXY_SIZE;
+    protected int legacyProxySize() {
+        return LEGACY_PROXY_SIZE;
     }
 }
