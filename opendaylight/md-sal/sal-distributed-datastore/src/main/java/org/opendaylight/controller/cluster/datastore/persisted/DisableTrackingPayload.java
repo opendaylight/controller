@@ -9,46 +9,12 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public sealed class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Magnesium extends DisableTrackingPayload implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Magnesium(final ClientIdentifier clientId, final byte[] serialized) {
-            super(clientId, serialized);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy extends AbstractProxy<ClientIdentifier> {
-        @java.io.Serial
-        private static final long serialVersionUID = -5490519942445085251L;
-
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        protected ClientIdentifier readIdentifier(final DataInput in) throws IOException {
-            return ClientIdentifier.readFrom(in);
-        }
-
-        @Override
-        protected DisableTrackingPayload createObject(final ClientIdentifier identifier,
-                final byte[] serialized) {
-            return new Magnesium(identifier, serialized);
-        }
-    }
-
+public final class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(DisableTrackingPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
