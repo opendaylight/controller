@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -15,7 +16,6 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -29,14 +29,14 @@ public abstract class AbstractTransactionRequestTest<T extends TransactionReques
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
             HISTORY_IDENTIFIER, 0);
 
-    @Override
-    protected abstract T object();
+    protected AbstractTransactionRequestTest(final T object, final int baseSize) {
+        super(object, baseSize);
+    }
 
     @Test
     public void toRequestFailureTest() {
-        final Throwable cause = new Throwable();
-        final RequestException exception = new RuntimeRequestException("fail", cause);
-        final TransactionFailure failure = object().toRequestFailure(exception);
-        Assert.assertNotNull(failure);
+        final var exception = new RuntimeRequestException("fail", new Throwable());
+        final var failure = object().toRequestFailure(exception);
+        assertNotNull(failure);
     }
 }

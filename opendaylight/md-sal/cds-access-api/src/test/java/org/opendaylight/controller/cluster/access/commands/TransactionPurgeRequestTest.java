@@ -7,28 +7,26 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class TransactionPurgeRequestTest extends AbstractTransactionRequestTest<TransactionPurgeRequest> {
-    private static final TransactionPurgeRequest OBJECT = new TransactionPurgeRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF);
+    private static final TransactionPurgeRequest OBJECT = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0,
+        ACTOR_REF);
 
-    @Override
-    protected TransactionPurgeRequest object() {
-        return OBJECT;
+    public TransactionPurgeRequestTest() {
+        super(OBJECT, 400);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final TransactionPurgeRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, OBJECT.cloneAsVersion(ABIVersion.BORON));
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof TransactionPurgeRequest);
-        Assert.assertEquals(OBJECT.getReplyTo(), ((TransactionPurgeRequest) deserialize).getReplyTo());
+    protected void doAdditionalAssertions(final TransactionPurgeRequest deserialize) {
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
     }
 }

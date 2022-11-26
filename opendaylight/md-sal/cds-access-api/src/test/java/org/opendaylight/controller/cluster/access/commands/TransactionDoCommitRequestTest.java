@@ -7,28 +7,26 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class TransactionDoCommitRequestTest extends AbstractTransactionRequestTest<TransactionDoCommitRequest> {
-    private static final TransactionDoCommitRequest OBJECT = new TransactionDoCommitRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF);
+    private static final TransactionDoCommitRequest OBJECT = new TransactionDoCommitRequest(TRANSACTION_IDENTIFIER, 0,
+        ACTOR_REF);
 
-    @Override
-    protected TransactionDoCommitRequest object() {
-        return OBJECT;
+    public TransactionDoCommitRequestTest() {
+        super(OBJECT, 403);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final TransactionDoCommitRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, OBJECT.cloneAsVersion(ABIVersion.BORON));
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof TransactionDoCommitRequest);
-        Assert.assertEquals(OBJECT.getReplyTo(), ((TransactionDoCommitRequest) deserialize).getReplyTo());
+    protected void doAdditionalAssertions(final TransactionDoCommitRequest deserialize) {
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
     }
 }

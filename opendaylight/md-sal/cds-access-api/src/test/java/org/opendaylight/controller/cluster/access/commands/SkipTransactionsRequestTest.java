@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.primitives.UnsignedLong;
@@ -20,20 +18,17 @@ public class SkipTransactionsRequestTest extends AbstractTransactionRequestTest<
     private static final SkipTransactionsRequest OBJECT = new SkipTransactionsRequest(
             TRANSACTION_IDENTIFIER, 0, ACTOR_REF, List.of(UnsignedLong.ONE));
 
-    @Override
-    protected SkipTransactionsRequest object() {
-        return OBJECT;
+    public SkipTransactionsRequestTest() {
+        super(OBJECT, 403);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final SkipTransactionsRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, OBJECT.cloneAsVersion(ABIVersion.BORON));
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        assertThat(deserialize, instanceOf(SkipTransactionsRequest.class));
-        assertEquals(OBJECT.getReplyTo(), ((SkipTransactionsRequest) deserialize).getReplyTo());
+    protected void doAdditionalAssertions(final SkipTransactionsRequest deserialize) {
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
     }
 }
