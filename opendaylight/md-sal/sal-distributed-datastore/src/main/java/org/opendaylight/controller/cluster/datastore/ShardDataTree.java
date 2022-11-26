@@ -609,8 +609,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(historyId, this);
             transactionChains.put(historyId, chain);
-            replicatePayload(historyId, CreateLocalHistoryPayload.create(
-                    historyId, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+            replicatePayload(historyId, CreateLocalHistoryPayload.create(PayloadVersion.current(), historyId,
+                shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
         } else if (callback != null) {
             callback.run();
         }
@@ -665,7 +665,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     final void closeTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
         if (commonCloseTransactionChain(id, callback)) {
-            replicatePayload(id, CloseLocalHistoryPayload.create(id,
+            replicatePayload(id, CloseLocalHistoryPayload.create(PayloadVersion.current(), id,
                 shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
         }
     }
@@ -709,8 +709,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        replicatePayload(id, PurgeLocalHistoryPayload.create(
-                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        replicatePayload(id, PurgeLocalHistoryPayload.create(PayloadVersion.current(), id,
+                shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     final void skipTransactions(final LocalHistoryIdentifier id, final ImmutableUnsignedLongSet transactionIds,
@@ -724,7 +724,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        replicatePayload(id, SkipTransactionsPayload.create(id, transactionIds,
+        replicatePayload(id, SkipTransactionsPayload.create(PayloadVersion.current(), id, transactionIds,
             shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
@@ -747,8 +747,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     final void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
         final TransactionIdentifier id = transaction.getIdentifier();
         LOG.debug("{}: aborting transaction {}", logContext, id);
-        replicatePayload(id, AbortTransactionPayload.create(
-                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        replicatePayload(id, AbortTransactionPayload.create(PayloadVersion.current(), id,
+            shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     @Override

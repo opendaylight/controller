@@ -93,6 +93,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPayload;
+import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
@@ -938,7 +939,7 @@ public class Shard extends RaftActor {
             }
             knownFrontends.put(frontend, new LeaderFrontendState.Disabled(persistenceId(), clientId, getDataStore()));
 
-            persistPayload(clientId, DisableTrackingPayload.create(clientId,
+            persistPayload(clientId, DisableTrackingPayload.create(PayloadVersion.current(), clientId,
                 datastoreContext.getInitialPayloadSerializedBufferCapacity()), false);
         }
     }
@@ -1239,15 +1240,12 @@ public class Shard extends RaftActor {
         }
 
         public TreeType getTreeType() {
-            switch (datastoreContext.getLogicalStoreType()) {
-                case CONFIGURATION:
-                    return TreeType.CONFIGURATION;
-                case OPERATIONAL:
-                    return TreeType.OPERATIONAL;
-                default:
-                    throw new IllegalStateException("Unhandled logical store type "
-                            + datastoreContext.getLogicalStoreType());
-            }
+            return switch (datastoreContext.getLogicalStoreType()) {
+            case CONFIGURATION -> TreeType.CONFIGURATION;
+            case OPERATIONAL -> TreeType.OPERATIONAL;
+            default -> throw new IllegalStateException("Unhandled logical store type "
+                    + datastoreContext.getLogicalStoreType());
+            };
         }
 
         protected void verify() {
