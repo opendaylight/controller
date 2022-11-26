@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<TransactionIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -43,16 +44,16 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
         @Override
         protected PurgeTransactionPayload createObject(final TransactionIdentifier identifier,
                 final byte[] serialized) {
-            return new PurgeTransactionPayload(identifier, serialized);
+            return new PurgeTransactionPayload(true, identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PT::new);
 
-    PurgeTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
-        super(transactionId, serialized);
+    PurgeTransactionPayload(final boolean legacy, final TransactionIdentifier transactionId, final byte[] serialized) {
+        super(legacy, transactionId, serialized);
     }
 
     public static PurgeTransactionPayload create(final TransactionIdentifier transactionId,
@@ -65,16 +66,16 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
             LOG.error("Failed to serialize {}", transactionId, e);
             throw new IllegalStateException("Failed to serialize " + transactionId, e);
         }
-        return new PurgeTransactionPayload(transactionId, out.toByteArray());
+        return new PurgeTransactionPayload(false, transactionId, out.toByteArray());
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected PT proxy(final byte[] serialized) {
+        return new PT(serialized);
     }
 
     @Override
-    protected int externalizableProxySize() {
+    protected int proxySize() {
         return PROXY_SIZE;
     }
 }

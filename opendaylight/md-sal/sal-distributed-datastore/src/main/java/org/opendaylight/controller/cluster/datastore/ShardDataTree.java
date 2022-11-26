@@ -724,7 +724,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        replicatePayload(id, SkipTransactionsPayload.create(id, transactionIds,
+        replicatePayload(id, SkipTransactionsPayload.create(PayloadVersion.current(), id, transactionIds,
             shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
