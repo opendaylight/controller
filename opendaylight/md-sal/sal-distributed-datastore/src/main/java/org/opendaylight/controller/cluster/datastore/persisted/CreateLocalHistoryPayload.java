@@ -37,7 +37,7 @@ public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload
 
     private static final Logger LOG = LoggerFactory.getLogger(CreateLocalHistoryPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(CH::new);
 
     CreateLocalHistoryPayload(final LocalHistoryIdentifier historyId, final byte[] serialized) {
         super(historyId, serialized);
@@ -57,8 +57,8 @@ public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected CH externalizableProxy(final byte[] serialized) {
+        return new CH(serialized);
     }
 
     @Override

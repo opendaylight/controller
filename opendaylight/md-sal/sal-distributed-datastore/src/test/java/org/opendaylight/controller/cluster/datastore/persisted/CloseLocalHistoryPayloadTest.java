@@ -9,6 +9,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 public class CloseLocalHistoryPayloadTest extends AbstractIdentifiablePayloadTest<CloseLocalHistoryPayload> {
     public CloseLocalHistoryPayloadTest() {
-        super(CloseLocalHistoryPayload.create(nextHistoryId(), 512), 338);
+        super(CloseLocalHistoryPayload.create(nextHistoryId(), 512), 237);
     }
 }

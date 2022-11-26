@@ -37,7 +37,7 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PT::new);
 
     PurgeTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
         super(transactionId, serialized);
@@ -57,8 +57,8 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected PT externalizableProxy(final byte[] serialized) {
+        return new PT(serialized);
     }
 
     @Override
