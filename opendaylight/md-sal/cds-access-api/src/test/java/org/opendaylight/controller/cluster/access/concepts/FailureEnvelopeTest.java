@@ -11,23 +11,24 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.DataInput;
 import java.io.IOException;
+import org.apache.commons.lang.SerializationUtils;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
-
     @Override
-    protected FailureEnvelope createEnvelope() {
-        final RequestFailure<?, ?> message =
-                new MockFailure(OBJECT, new RuntimeRequestException("msg", new RuntimeException()), 42);
-        return new FailureEnvelope(message, 1L, 2L, 11L);
+    protected EnvelopeDetails<FailureEnvelope> createEnvelope() {
+        final var cause = new RuntimeRequestException("msg", new RuntimeException());
+        final int causeSize = SerializationUtils.serialize(cause).length;
+        return new EnvelopeDetails<>(new FailureEnvelope(new MockFailure(OBJECT, cause, 42), 1L, 2L, 11L),
+            causeSize + 687);
     }
 
     @Override
     protected void doAdditionalAssertions(final FailureEnvelope envelope, final FailureEnvelope resolvedObject) {
         assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
-        final RequestException expectedCause = envelope.getMessage().getCause();
-        final RequestException actualCause = resolvedObject.getMessage().getCause();
+        final var expectedCause = envelope.getMessage().getCause();
+        final var actualCause = resolvedObject.getMessage().getCause();
         assertEquals(expectedCause.getMessage(), actualCause.getMessage());
         assertEquals(expectedCause.isRetriable(), actualCause.isRetriable());
     }
