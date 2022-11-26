@@ -28,7 +28,7 @@ import scala.concurrent.Future;
  * TODO: once we remove compatibility, make this class package-private and final.
  */
 public class TransactionReadyReplyMapper extends Mapper<Object, ActorSelection> {
-    protected static final Mapper<Throwable, Throwable> SAME_FAILURE_TRANSFORMER = new Mapper<Throwable, Throwable>() {
+    protected static final Mapper<Throwable, Throwable> SAME_FAILURE_TRANSFORMER = new Mapper<>() {
         @Override
         public Throwable apply(final Throwable failure) {
             return failure;
