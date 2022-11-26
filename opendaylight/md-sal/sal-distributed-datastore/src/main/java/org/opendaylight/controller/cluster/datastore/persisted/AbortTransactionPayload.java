@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class AbortTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<TransactionIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -49,7 +50,7 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
 
     private static final Logger LOG = LoggerFactory.getLogger(AbortTransactionPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(AT::new);
 
     AbortTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
         super(transactionId, serialized);
@@ -69,8 +70,8 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected AT externalizableProxy(final byte[] serialized) {
+        return new AT(serialized);
     }
 
     @Override
