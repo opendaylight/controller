@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  * local history.
  */
 public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -58,7 +59,7 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(ST::new);
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
@@ -89,8 +90,8 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected ST externalizableProxy(final byte[] serialized) {
+        return new ST(serialized);
     }
 
     @Override
