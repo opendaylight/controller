@@ -32,7 +32,62 @@ import org.opendaylight.yangtools.concepts.Identifier;
  */
 public abstract class AbstractIdentifiablePayload<T extends Identifier> extends IdentifiablePayload<T>
         implements Serializable {
-    protected abstract static class AbstractProxy<T extends Identifier> implements Externalizable {
+    /**
+     * An {@link Externalizable} with default implementations we expect our implementations to comply with. On-wire
+     * serialization format is defined by {@link #bytes()}.
+     */
+    protected interface SerialForm extends Externalizable {
+        /**
+         * Return the serial form of this object contents, corresponding to
+         * {@link AbstractIdentifiablePayload#serialized}.
+         *
+         * @return Serialized form
+         */
+        byte[] bytes();
+
+        /**
+         * Resolve this proxy to an actual {@link AbstractIdentifiablePayload}.
+         *
+         * @return A payload.
+         */
+        Object readResolve();
+
+        /**
+         * Restore state from specified serialized form.
+         *
+         * @param newBytes Serialized form, as returned by {@link #bytes()}
+         * @throws IOException when a deserialization problem occurs
+         */
+        void readExternal(byte[] newBytes) throws IOException;
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * The default implementation is canonical and should never be overridden.
+         */
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            final var bytes = new byte[in.readInt()];
+            in.readFully(bytes);
+            readExternal(bytes);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * The default implementation is canonical and should never be overridden.
+         */
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var bytes = bytes();
+            out.writeInt(bytes.length);
+            out.write(bytes);
+        }
+    }
+
+    protected abstract static class AbstractProxy<T extends Identifier> implements SerialForm {
         private static final long serialVersionUID = 1L;
 
         private byte[] serialized;
@@ -47,20 +102,18 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         }
 
         @Override
-        public final void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(serialized.length);
-            out.write(serialized);
+        public final byte[] bytes() {
+            return serialized;
         }
 
         @Override
-        public final void readExternal(final ObjectInput in) throws IOException {
-            final int length = in.readInt();
-            serialized = new byte[length];
-            in.readFully(serialized);
+        public final void readExternal(final byte[] bytes) throws IOException {
+            serialized = requireNonNull(bytes);
             identifier = verifyNotNull(readIdentifier(ByteStreams.newDataInput(serialized)));
         }
 
-        protected final Object readResolve() {
+        @Override
+        public final Object readResolve() {
             return verifyNotNull(createObject(identifier, serialized));
         }
 
@@ -90,6 +143,10 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         return serialized.length;
     }
 
+    protected final byte @NonNull [] serialized() {
+        return serialized;
+    }
+
     @Override
     public final int serializedSize() {
         // TODO: this is not entirely accurate, as the serialization stream has additional overheads:
@@ -109,7 +166,6 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         return verifyNotNull(externalizableProxy(serialized));
     }
 
-    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract @NonNull AbstractProxy<T> externalizableProxy(byte @NonNull[] serialized);
 
     protected abstract int externalizableProxySize();
