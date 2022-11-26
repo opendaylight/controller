@@ -7,20 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 
 public class SuccessEnvelopeTest extends AbstractEnvelopeTest<SuccessEnvelope> {
-
     @Override
-    protected SuccessEnvelope createEnvelope() {
-        final RequestSuccess<?, ?> message = new TransactionAbortSuccess(OBJECT, 2L);
-        return new SuccessEnvelope(message, 1L, 2L, 11L);
+    protected EnvelopeDetails<SuccessEnvelope> createEnvelope() {
+        return new EnvelopeDetails<>(new SuccessEnvelope(new TransactionAbortSuccess(OBJECT, 2L), 1L, 2L, 11L), 769);
     }
 
     @Override
-    protected void doAdditionalAssertions(final SuccessEnvelope envelope,
-                                          final SuccessEnvelope resolvedObject) {
-        Assert.assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
+    protected void doAdditionalAssertions(final SuccessEnvelope envelope, final SuccessEnvelope resolvedObject) {
+        assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
     }
 }
