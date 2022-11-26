@@ -26,9 +26,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  *
  * @author Thomas Pantelis
  */
-public class DatastoreSnapshot implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public final class DatastoreSnapshot implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -74,6 +72,8 @@ public class DatastoreSnapshot implements Serializable {
             return datastoreSnapshot;
         }
     }
+
+    private static final long serialVersionUID = 1L;
 
     private final String type;
     private final ShardManagerSnapshot shardManagerSnapshot;
