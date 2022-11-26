@@ -32,7 +32,34 @@ import org.opendaylight.yangtools.concepts.Identifier;
  */
 public abstract class AbstractIdentifiablePayload<T extends Identifier> extends IdentifiablePayload<T>
         implements Serializable {
-    protected abstract static class AbstractProxy<T extends Identifier> implements Externalizable {
+    /**
+     * An {@link Externalizable} with default implementations we expect our implementations to comply with.
+     */
+    protected interface Proxy extends Externalizable {
+
+        byte[] bytes();
+
+        Object readResolve();
+
+        void readExternal(byte[] bytes) throws IOException;
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            final int length = in.readInt();
+            final var serialized = new byte[length];
+            in.readFully(serialized);
+            readExternal(serialized);
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var serialized = bytes();
+            out.writeInt(serialized.length);
+            out.write(serialized);
+        }
+    }
+
+    protected abstract static class AbstractProxy<T extends Identifier> implements Proxy {
         private static final long serialVersionUID = 1L;
 
         private byte[] serialized;
@@ -47,20 +74,18 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         }
 
         @Override
-        public final void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(serialized.length);
-            out.write(serialized);
+        public final byte[] bytes() {
+            return serialized;
         }
 
         @Override
-        public final void readExternal(final ObjectInput in) throws IOException {
-            final int length = in.readInt();
-            serialized = new byte[length];
-            in.readFully(serialized);
+        public final void readExternal(final byte[] bytes) throws IOException {
+            serialized = requireNonNull(bytes);
             identifier = verifyNotNull(readIdentifier(ByteStreams.newDataInput(serialized)));
         }
 
-        protected final Object readResolve() {
+        @Override
+        public final Object readResolve() {
             return verifyNotNull(createObject(identifier, serialized));
         }
 
