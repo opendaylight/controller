@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
@@ -21,8 +26,19 @@ import org.junit.Test;
 public abstract class AbstractRequestTest<T extends Request<?, T>> {
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
     protected static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
+    private static final int ACTOR_REF_SIZE = ACTOR_REF.path().toSerializationFormat().length();
 
-    protected abstract T object();
+    private final T object;
+    private final int expectedSize;
+
+    protected AbstractRequestTest(final T object, final int baseSize) {
+        this.object = requireNonNull(object);
+        this.expectedSize = baseSize + ACTOR_REF_SIZE;
+    }
+
+    protected final T object() {
+        return object;
+    }
 
     @Before
     public void setUp() {
@@ -36,20 +52,22 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     @Test
     public void addToStringAttributesCommonTest() {
-        final MoreObjects.ToStringHelper result = object().addToStringAttributes(MoreObjects.toStringHelper(object()));
-        Assert.assertTrue(result.toString().contains("replyTo=" + ACTOR_REF));
+        final var result = object.addToStringAttributes(MoreObjects.toStringHelper(object));
+        assertThat(result.toString(), containsString("replyTo=" + ACTOR_REF));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void serializationTest() {
-        final Object deserialize = SerializationUtils.clone(object());
+        final byte[] bytes = SerializationUtils.serialize(object);
+        assertEquals(expectedSize, bytes.length);
+        @SuppressWarnings("unchecked")
+        final T deserialize = (T) SerializationUtils.deserialize(bytes);
 
-        Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
-        Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
-        Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
+        assertEquals(object.getTarget(), deserialize.getTarget());
+        assertEquals(object.getVersion(), deserialize.getVersion());
+        assertEquals(object.getSequence(), deserialize.getSequence());
         doAdditionalAssertions(deserialize);
     }
 
-    protected abstract void doAdditionalAssertions(Object deserialize);
+    protected abstract void doAdditionalAssertions(T deserialize);
 }

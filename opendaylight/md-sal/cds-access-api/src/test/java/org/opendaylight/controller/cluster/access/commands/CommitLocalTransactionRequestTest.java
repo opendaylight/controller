@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.MoreObjects;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -30,34 +33,32 @@ public class CommitLocalTransactionRequestTest
     private static final DataTreeModification MODIFICATION = Mockito.mock(DataTreeModification.class);
     private static final boolean COORDINATED = true;
 
-    private static final CommitLocalTransactionRequest OBJECT = new CommitLocalTransactionRequest(
-            TRANSACTION, 0, ACTOR_REF, MODIFICATION, null, COORDINATED);
+    private static final CommitLocalTransactionRequest OBJECT = new CommitLocalTransactionRequest(TRANSACTION, 0,
+        ACTOR_REF, MODIFICATION, null, COORDINATED);
 
-    @Override
-    protected CommitLocalTransactionRequest object() {
-        return OBJECT;
+    public CommitLocalTransactionRequestTest() {
+        super(OBJECT, 0);
     }
 
     @Test
     public void getModificationTest() {
-        Assert.assertEquals(MODIFICATION, OBJECT.getModification());
+        assertEquals(MODIFICATION, OBJECT.getModification());
     }
 
     @Test
     public void isCoordinatedTest() {
-        Assert.assertEquals(COORDINATED, OBJECT.isCoordinated());
+        assertEquals(COORDINATED, OBJECT.isCoordinated());
     }
 
     @Test
     public void addToStringAttributesTest() {
-        final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        Assert.assertTrue(result.toString().contains("coordinated=" + COORDINATED));
+        final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
+        assertThat(result, containsString("coordinated=" + COORDINATED));
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof CommitLocalTransactionRequest);
-        Assert.assertEquals(OBJECT.getReplyTo(), ((CommitLocalTransactionRequest) deserialize).getReplyTo());
-        Assert.assertEquals(OBJECT.getModification(), ((CommitLocalTransactionRequest) deserialize).getModification());
+    protected void doAdditionalAssertions(final CommitLocalTransactionRequest deserialize) {
+        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.getModification(), deserialize.getModification());
     }
 }

@@ -45,12 +45,20 @@ public abstract class AbstractTest {
         TX_COUNTER.set(1L);
     }
 
+    protected static TransactionIdentifier newTransactionId(final long txId) {
+        return new TransactionIdentifier(HISTORY_ID, txId);
+    }
+
     protected static TransactionIdentifier nextTransactionId() {
-        return new TransactionIdentifier(HISTORY_ID, TX_COUNTER.getAndIncrement());
+        return newTransactionId(TX_COUNTER.getAndIncrement());
+    }
+
+    protected static LocalHistoryIdentifier newHistoryId(final long historyId) {
+        return new LocalHistoryIdentifier(CLIENT_ID, historyId);
     }
 
     protected static LocalHistoryIdentifier nextHistoryId() {
-        return new LocalHistoryIdentifier(CLIENT_ID, HISTORY_COUNTER.incrementAndGet());
+        return newHistoryId(HISTORY_COUNTER.incrementAndGet());
     }
 
     protected static <T> T waitOnAsyncTask(final CompletionStage<T> completionStage, final FiniteDuration timeout)

@@ -111,6 +111,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     public void testCandidateSerialization() throws IOException {
         final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertEquals("payload size", 156, payload.size());
+        assertEquals("serialized size", 270, SerializationUtils.serialize(payload).length);
     }
 
     @Test

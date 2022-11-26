@@ -23,16 +23,18 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  * @author Thomas Pantelis
  */
 public class CloseTransactionChainTest extends AbstractTest {
-
     @Test
     public void testSerialization() {
-        CloseTransactionChain expected = new CloseTransactionChain(nextHistoryId(), DataStoreVersions.CURRENT_VERSION);
+        CloseTransactionChain expected = new CloseTransactionChain(newHistoryId(1), DataStoreVersions.CURRENT_VERSION);
 
-        Object serialized = expected.toSerializable();
+        var serialized = (Serializable) expected.toSerializable();
         assertEquals("Serialized type", CloseTransactionChain.class, serialized.getClass());
 
+        final byte[] bytes = SerializationUtils.serialize(serialized);
+        assertEquals(241, bytes.length);
+
         CloseTransactionChain actual = CloseTransactionChain.fromSerializable(
-                SerializationUtils.clone((Serializable) serialized));
+                SerializationUtils.deserialize(bytes));
         assertEquals("getIdentifier", expected.getIdentifier(), actual.getIdentifier());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
     }
