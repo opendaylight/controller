@@ -10,15 +10,17 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * Serialization proxy for {@link ShardDataTreeSnapshot}.
  */
-final class DSS implements ShardSnapshot.SerialForm {
+final class DSS implements Externalizable {
     private static final long serialVersionUID = 1L;
 
     private ShardSnapshot shardSnapshot;
@@ -33,13 +35,9 @@ final class DSS implements ShardSnapshot.SerialForm {
     }
 
     @Override
-    public ShardSnapshot shardSnapshot() {
-        return shardSnapshot;
-    }
-
-    @Override
-    public void resolveTo(final ShardSnapshot newSnapshot) {
-        shardSnapshot = requireNonNull(newSnapshot);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeObject(shardSnapshot.getName());
+        out.writeObject(shardSnapshot.getSnapshot());
     }
 
     @Override
@@ -47,8 +45,7 @@ final class DSS implements ShardSnapshot.SerialForm {
         shardSnapshot = new ShardSnapshot((String) in.readObject(), (Snapshot) in.readObject());
     }
 
-    @Override
-    public Object readResolve() {
+    private Object readResolve() {
         return verifyNotNull(shardSnapshot);
     }
 }
