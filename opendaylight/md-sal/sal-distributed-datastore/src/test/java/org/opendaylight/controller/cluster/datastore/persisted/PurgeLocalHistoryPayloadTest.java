@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 public class PurgeLocalHistoryPayloadTest extends AbstractIdentifiablePayloadTest<PurgeLocalHistoryPayload> {
-
-    @Override
-    PurgeLocalHistoryPayload object() {
-        return PurgeLocalHistoryPayload.create(nextHistoryId(), 512);
+    public PurgeLocalHistoryPayloadTest() {
+        super(PurgeLocalHistoryPayload.create(nextHistoryId(), 512), 265);
     }
 }

@@ -20,8 +20,9 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLocalTransactionRequest<T>>
         extends AbstractTransactionRequestTest<T> {
-    @Override
-    protected abstract T object();
+    protected AbstractLocalTransactionRequestTest(final T object, final int baseSize) {
+        super(object, baseSize);
+    }
 
     @Test
     public void cloneAsVersionTest() {
