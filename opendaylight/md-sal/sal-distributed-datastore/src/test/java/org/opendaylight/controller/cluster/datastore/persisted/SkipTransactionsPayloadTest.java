@@ -11,6 +11,6 @@ import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSe
 
 public class SkipTransactionsPayloadTest extends AbstractIdentifiablePayloadTest<SkipTransactionsPayload> {
     public SkipTransactionsPayloadTest() {
-        super(SkipTransactionsPayload.create(newHistoryId(0), MutableUnsignedLongSet.of(42).immutableCopy(), 512), 270);
+        super(SkipTransactionsPayload.create(newHistoryId(0), MutableUnsignedLongSet.of(42).immutableCopy(), 512), 131);
     }
 }
