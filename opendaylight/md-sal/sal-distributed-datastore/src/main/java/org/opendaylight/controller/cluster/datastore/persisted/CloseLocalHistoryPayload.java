@@ -9,10 +9,8 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,41 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-public sealed class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Magnesium extends CloseLocalHistoryPayload implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Magnesium(final LocalHistoryIdentifier historyId, final byte[] serialized) {
-            super(historyId, serialized);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        protected LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
-            return LocalHistoryIdentifier.readFrom(in);
-        }
-
-        @Override
-        protected CloseLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
-                final byte[] serialized) {
-            return new Magnesium(identifier, serialized);
-        }
-    }
-
+public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(CloseLocalHistoryPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;

@@ -10,10 +10,17 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
+
 /**
  * Serialization proxy for {@link DatastoreSnapshot}.
  */
-final class DS implements DatastoreSnapshot.SerialForm {
+final class DS implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,17 +36,33 @@ final class DS implements DatastoreSnapshot.SerialForm {
     }
 
     @Override
-    public DatastoreSnapshot datastoreSnapshot() {
-        return datastoreSnapshot;
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        final var type = (String) in.readObject();
+        final var snapshot = (ShardManagerSnapshot) in.readObject();
+
+        final int size = in.readInt();
+        var localShardSnapshots = new ArrayList<ShardSnapshot>(size);
+        for (int i = 0; i < size; i++) {
+            localShardSnapshots.add((ShardSnapshot) in.readObject());
+        }
+
+        datastoreSnapshot = new DatastoreSnapshot(type, snapshot, localShardSnapshots);
     }
 
     @Override
-    public void resolveTo(final DatastoreSnapshot newDatastoreSnapshot) {
-        datastoreSnapshot = requireNonNull(newDatastoreSnapshot);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeObject(datastoreSnapshot.getType());
+        out.writeObject(datastoreSnapshot.getShardManagerSnapshot());
+
+        final var shardSnapshots = datastoreSnapshot.getShardSnapshots();
+        out.writeInt(shardSnapshots.size());
+        for (var shardSnapshot : shardSnapshots) {
+            out.writeObject(shardSnapshot);
+        }
     }
 
-    @Override
-    public Object readResolve() {
+    @java.io.Serial
+    private Object readResolve() {
         return verifyNotNull(datastoreSnapshot);
     }
 }

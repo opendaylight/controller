@@ -10,12 +10,16 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
 
 /**
  * Serialization proxy for {@link ShardManagerSnapshot}.
  */
-final class SM implements ShardManagerSnapshot.SerializedForm {
+final class SM implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -31,17 +35,26 @@ final class SM implements ShardManagerSnapshot.SerializedForm {
     }
 
     @Override
-    public List<String> shardNames() {
-        return snapshot.getShardList();
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        final int size = in.readInt();
+        final var shardList = new ArrayList<String>(size);
+        for (int i = 0; i < size; i++) {
+            shardList.add((String) in.readObject());
+        }
+        snapshot = new ShardManagerSnapshot(shardList);
     }
 
     @Override
-    public void resolveTo(final ShardManagerSnapshot newSnapshot) {
-        snapshot = requireNonNull(newSnapshot);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        final var shardList = snapshot.getShardList();
+        out.writeInt(shardList.size());
+        for (var shardName : shardList) {
+            out.writeObject(shardName);
+        }
     }
 
-    @Override
-    public Object readResolve() {
+    @java.io.Serial
+    private Object readResolve() {
         return verifyNotNull(snapshot);
     }
 }
