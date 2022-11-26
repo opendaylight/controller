@@ -48,7 +48,7 @@ public class ShardDataTreeSnapshotTest {
         }
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(236, bytes.length);
+        assertEquals(202, bytes.length);
 
         ShardDataTreeSnapshot deserialized;
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
@@ -77,7 +77,7 @@ public class ShardDataTreeSnapshotTest {
         }
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(384, bytes.length);
+        assertEquals(350, bytes.length);
 
         ShardDataTreeSnapshot deserialized;
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
