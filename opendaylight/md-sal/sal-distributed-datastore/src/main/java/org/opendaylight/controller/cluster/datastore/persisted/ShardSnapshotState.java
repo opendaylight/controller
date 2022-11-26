@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -41,39 +40,6 @@ public final class ShardSnapshotState implements Snapshot.State {
         @Override
         default void writeExternal(final ObjectOutput out) throws IOException {
             snapshotState().getSnapshot().serialize(out);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements SerialForm {
-        private static final long serialVersionUID = 1L;
-
-        private ShardSnapshotState snapshotState;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        Proxy(final ShardSnapshotState snapshotState) {
-            this.snapshotState = snapshotState;
-        }
-
-        @Override
-        public ShardSnapshotState snapshotState() {
-            return snapshotState;
-        }
-
-        @Override
-        public void resolveTo(final ShardSnapshotState newSnapshotState) {
-            snapshotState = requireNonNull(newSnapshotState);
-        }
-
-        @Override
-        public Object readResolve() {
-            return verifyNotNull(snapshotState);
         }
     }
 
