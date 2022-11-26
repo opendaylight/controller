@@ -53,13 +53,13 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
+    static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
         "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
 
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
 
-    CommitTransactionPayload() {
-        // hidden on purpose
+    CommitTransactionPayload(final boolean legacy) {
+        super(legacy);
     }
 
     public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
@@ -73,7 +73,9 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
         final Either<byte[], ChunkedByteArray> source = cos.toVariant();
         LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity, cos.size());
-        return source.isFirst() ? new Simple(source.getFirst()) : new Chunked(source.getSecond());
+
+        final boolean legacy = PayloadVersion.MAGNESIUM.lte(version);
+        return source.isFirst() ? new Simple(legacy, source.getFirst()) : new Chunked(legacy, source.getSecond());
     }
 
     @VisibleForTesting
@@ -118,9 +120,15 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     }
 
     @Override
-    public final int serializedSize() {
+    public final int newSize() {
         // TODO: this is not entirely accurate as the the byte[] can be chunked by the serialization stream
         return ProxySizeHolder.PROXY_SIZE + size();
+    }
+
+    @Override
+    protected int legacySize() {
+        // TODO: this is not entirely accurate as the the byte[] can be chunked by the serialization stream
+        return ProxySizeHolder.LEGACY_PROXY_SIZE + size();
     }
 
     /**
@@ -149,16 +157,22 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     abstract DataInput newDataInput();
 
     @Override
-    protected final Object writeReplace() {
+    protected final Externalizable legacyProxy() {
         return new Proxy(this);
     }
 
-    private static final class Simple extends CommitTransactionPayload {
+    @Override
+    protected final Externalizable proxy() {
+        return new CT(this);
+    }
+
+    static final class Simple extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         private final byte[] serialized;
 
-        Simple(final byte[] serialized) {
+        Simple(final boolean legacy, final byte[] serialized) {
+            super(legacy);
             this.serialized = requireNonNull(serialized);
         }
 
@@ -178,13 +192,14 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
     }
 
-    private static final class Chunked extends CommitTransactionPayload {
+    static final class Chunked extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")
         private final ChunkedByteArray source;
 
-        Chunked(final ChunkedByteArray source) {
+        Chunked(final boolean legacy, final ChunkedByteArray source) {
+            super(legacy);
             this.source = requireNonNull(source);
         }
 
@@ -206,7 +221,10 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
     // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
     private static final class ProxySizeHolder {
-        static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy(new Simple(new byte[0]))).length;
+        static final int PROXY_SIZE =
+            SerializationUtils.serialize((Serializable) new Simple(false, new byte[0]).writeReplace()).length;
+        static final int LEGACY_PROXY_SIZE =
+            SerializationUtils.serialize((Serializable) new Simple(true, new byte[0]).writeReplace()).length;
 
         private ProxySizeHolder() {
             // Hidden on purpose
@@ -243,9 +261,9 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
             } else if (length < MAX_ARRAY_SIZE) {
                 final byte[] serialized = new byte[length];
                 in.readFully(serialized);
-                payload = new Simple(serialized);
+                payload = new Simple(true, serialized);
             } else {
-                payload = new Chunked(ChunkedByteArray.readFrom(in, length, MAX_ARRAY_SIZE));
+                payload = new Chunked(true, ChunkedByteArray.readFrom(in, length, MAX_ARRAY_SIZE));
             }
         }
 
