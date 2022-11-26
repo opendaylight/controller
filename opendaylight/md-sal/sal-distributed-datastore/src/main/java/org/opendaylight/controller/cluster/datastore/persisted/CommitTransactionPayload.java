@@ -53,7 +53,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
+    static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
         "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
 
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
@@ -153,7 +153,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         return new Proxy(this);
     }
 
-    private static final class Simple extends CommitTransactionPayload {
+    static final class Simple extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         private final byte[] serialized;
@@ -178,7 +178,7 @@ public abstract class CommitTransactionPayload extends IdentifiablePayload<Trans
         }
     }
 
-    private static final class Chunked extends CommitTransactionPayload {
+    static final class Chunked extends CommitTransactionPayload {
         private static final long serialVersionUID = 1L;
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")

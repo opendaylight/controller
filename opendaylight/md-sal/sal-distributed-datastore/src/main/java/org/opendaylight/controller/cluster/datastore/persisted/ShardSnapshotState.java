@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,9 +25,26 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * @author Thomas Pantelis
  */
 public class ShardSnapshotState implements Snapshot.State {
-    private static final long serialVersionUID = 1L;
+    interface SerialForm extends Externalizable {
 
-    private static final class Proxy implements Externalizable {
+        ShardSnapshotState snapshotState();
+
+        void resolveTo(@NonNull ShardSnapshotState newSnapshotState);
+
+        Object readResolve();
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            resolveTo(ShardDataTreeSnapshot.deserialize(in));
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            snapshotState().getSnapshot().serialize(out);
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
 
         private ShardSnapshotState snapshotState;
@@ -43,19 +61,22 @@ public class ShardSnapshotState implements Snapshot.State {
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            snapshotState.snapshot.serialize(out);
+        public ShardSnapshotState snapshotState() {
+            return snapshotState;
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            snapshotState = ShardDataTreeSnapshot.deserialize(in);
+        public void resolveTo(final ShardSnapshotState newSnapshotState) {
+            snapshotState = requireNonNull(newSnapshotState);
         }
 
-        private Object readResolve() {
-            return snapshotState;
+        @Override
+        public Object readResolve() {
+            return verifyNotNull(snapshotState);
         }
     }
+
+    private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
