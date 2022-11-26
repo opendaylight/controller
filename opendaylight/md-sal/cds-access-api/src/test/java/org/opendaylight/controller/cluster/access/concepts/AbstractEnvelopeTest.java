@@ -7,12 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.apache.commons.lang.SerializationUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
+    protected record EnvelopeDetails<E extends Envelope<?>>(E envelope, int expectedSize) {
+        // Nothing else
+    }
+
     private static final FrontendIdentifier FRONTEND =
             new FrontendIdentifier(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
     private static final ClientIdentifier CLIENT = new ClientIdentifier(FRONTEND, 0);
@@ -20,33 +26,37 @@ public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
     protected static final TransactionIdentifier OBJECT = new TransactionIdentifier(HISTORY, 0);
 
     private E envelope;
+    private int expectedSize;
 
     @Before
     public void setUp() throws Exception {
-        envelope = createEnvelope();
+        final var details = createEnvelope();
+        envelope = requireNonNull(details.envelope);
+        expectedSize = details.expectedSize;
     }
 
     @Test
     public void testProxySerializationDeserialization() {
         final byte[] serializedBytes = SerializationUtils.serialize(envelope);
-        final Object deserialize = SerializationUtils.deserialize(serializedBytes);
-        checkDeserialized((E) deserialize);
+        assertEquals(expectedSize, serializedBytes.length);
+        @SuppressWarnings("unchecked")
+        final E deserialize = (E) SerializationUtils.deserialize(serializedBytes);
+        checkDeserialized(deserialize);
     }
 
     private void checkDeserialized(final E deserializedEnvelope) {
-        Assert.assertEquals(envelope.getSessionId(), deserializedEnvelope.getSessionId());
-        Assert.assertEquals(envelope.getTxSequence(), deserializedEnvelope.getTxSequence());
-        final Message<?, ?> expectedMessage = envelope.getMessage();
-        final Message<?, ?> actualMessage = deserializedEnvelope.getMessage();
-        Assert.assertEquals(expectedMessage.getSequence(), actualMessage.getSequence());
-        Assert.assertEquals(expectedMessage.getTarget(), actualMessage.getTarget());
-        Assert.assertEquals(expectedMessage.getVersion(), actualMessage.getVersion());
-        Assert.assertEquals(expectedMessage.getClass(), actualMessage.getClass());
+        assertEquals(envelope.getSessionId(), deserializedEnvelope.getSessionId());
+        assertEquals(envelope.getTxSequence(), deserializedEnvelope.getTxSequence());
+        final var expectedMessage = envelope.getMessage();
+        final var actualMessage = deserializedEnvelope.getMessage();
+        assertEquals(expectedMessage.getSequence(), actualMessage.getSequence());
+        assertEquals(expectedMessage.getTarget(), actualMessage.getTarget());
+        assertEquals(expectedMessage.getVersion(), actualMessage.getVersion());
+        assertEquals(expectedMessage.getClass(), actualMessage.getClass());
         doAdditionalAssertions(envelope, deserializedEnvelope);
     }
 
-    protected abstract E createEnvelope();
+    protected abstract EnvelopeDetails<E> createEnvelope();
 
-    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract void doAdditionalAssertions(E envelope, E resolvedObject);
 }
