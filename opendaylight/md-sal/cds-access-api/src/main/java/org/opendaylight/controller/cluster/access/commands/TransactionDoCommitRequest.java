@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -16,20 +16,32 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * A transaction request to perform the final, doCommit, step of the three-phase commit protocol.
  */
 public final class TransactionDoCommitRequest extends TransactionRequest<TransactionDoCommitRequest> {
-    @Serial
+    interface SerialForm extends TransactionRequest.SerialForm<TransactionDoCommitRequest> {
+        @Override
+        default TransactionDoCommitRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new TransactionDoCommitRequest(target, sequence, replyTo);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
+
+    private TransactionDoCommitRequest(final TransactionDoCommitRequest request, final ABIVersion version) {
+        super(request, version);
+    }
 
     public TransactionDoCommitRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
         super(target, sequence, replyTo);
     }
 
     @Override
-    protected TransactionDoCommitRequestProxyV1 externalizableProxy(final ABIVersion version) {
-        return new TransactionDoCommitRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new TDCR(this) : new TransactionDoCommitRequestProxyV1(this);
     }
 
     @Override
     protected TransactionDoCommitRequest cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new TransactionDoCommitRequest(this, version);
     }
 }

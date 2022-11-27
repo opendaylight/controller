@@ -12,10 +12,16 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.serialization.JavaSerializer;
+import akka.serialization.Serialization;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.Serial;
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
@@ -30,7 +36,43 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  * fail, the client can try accessing the provided alternates.
  */
 public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier, ConnectClientSuccess> {
-    @Serial
+    interface SerialForm extends RequestSuccess.SerialForm<ClientIdentifier, ConnectClientSuccess> {
+        @Override
+        default ClientIdentifier readTarget(final DataInput in) throws IOException {
+            return ClientIdentifier.readFrom(in);
+        }
+
+        @Override
+        default ConnectClientSuccess readExternal(final ObjectInput in, final ClientIdentifier target,
+                final long sequence) throws IOException, ClassNotFoundException {
+            final var backend = JavaSerializer.currentSystem().value().provider()
+                .resolveActorRef((String) in.readObject());
+            final var maxMessages = in.readInt();
+
+            final int alternatesSize = in.readInt();
+            final var alternates = new ArrayList<ActorSelection>(alternatesSize);
+            for (int i = 0; i < alternatesSize; ++i) {
+                alternates.add(ActorSelection.apply(ActorRef.noSender(), (String)in.readObject()));
+            }
+
+            return new ConnectClientSuccess(target, sequence, backend, alternates, maxMessages, null);
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final ConnectClientSuccess msg) throws IOException {
+            out.writeObject(Serialization.serializedActorPath(msg.backend));
+            out.writeInt(msg.maxMessages);
+
+            out.writeInt(msg.alternates.size());
+            for (ActorSelection b : msg.alternates) {
+                out.writeObject(b.toSerializationFormat());
+            }
+
+            // We are ignoring the DataTree, it is not serializable anyway
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull ImmutableList<ActorSelection> alternates;
@@ -39,6 +81,14 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     private final ReadOnlyDataTree dataTree;
     private final @NonNull ActorRef backend;
     private final int maxMessages;
+
+    private ConnectClientSuccess(final ConnectClientSuccess success, final ABIVersion version) {
+        super(success, version);
+        alternates = success.alternates;
+        dataTree = success.dataTree;
+        backend = success.backend;
+        maxMessages = success.maxMessages;
+    }
 
     ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
         final List<ActorSelection> alternates, final int maxMessages, final ReadOnlyDataTree dataTree) {
@@ -78,13 +128,13 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     }
 
     @Override
-    protected ConnectClientSuccessProxyV1 externalizableProxy(final ABIVersion version) {
-        return new ConnectClientSuccessProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new CCS(this) : new ConnectClientSuccessProxyV1(this);
     }
 
     @Override
     protected ConnectClientSuccess cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new ConnectClientSuccess(this, version);
     }
 
     @Override

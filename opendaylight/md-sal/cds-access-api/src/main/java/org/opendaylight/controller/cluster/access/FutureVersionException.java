@@ -7,17 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access;
 
-import java.io.Serial;
-
 /**
  * Exception thrown from {@link ABIVersion#valueOf(short)} when the specified version is too new to be supported
  * by the codebase.
  */
 public final class FutureVersionException extends AbstractVersionException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    FutureVersionException(final short version, ABIVersion closest) {
+    FutureVersionException(final short version, final ABIVersion closest) {
         super("Version " + Short.toUnsignedInt(version) + " is too new", version, closest);
     }
 }

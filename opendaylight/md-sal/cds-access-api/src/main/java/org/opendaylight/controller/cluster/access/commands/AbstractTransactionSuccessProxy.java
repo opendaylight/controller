@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -21,8 +18,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @param <T> Message type
  */
 abstract class AbstractTransactionSuccessProxy<T extends TransactionSuccess<T>>
-        extends AbstractSuccessProxy<TransactionIdentifier, T> {
-    @Serial
+        extends AbstractSuccessProxy<TransactionIdentifier, T> implements TransactionSuccess.SerialForm<T> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     AbstractTransactionSuccessProxy() {
@@ -31,10 +28,5 @@ abstract class AbstractTransactionSuccessProxy<T extends TransactionSuccess<T>>
 
     AbstractTransactionSuccessProxy(final T request) {
         super(request);
-    }
-
-    @Override
-    protected final TransactionIdentifier readTarget(final DataInput in) throws IOException {
-        return TransactionIdentifier.readFrom(in);
     }
 }
