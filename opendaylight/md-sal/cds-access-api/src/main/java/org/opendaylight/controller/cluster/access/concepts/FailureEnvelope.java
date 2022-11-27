@@ -7,10 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import java.io.Serial;
+import java.io.ObjectInput;
 
 public final class FailureEnvelope extends ResponseEnvelope<RequestFailure<?, ?>> {
-    @Serial
+    interface SerialForm extends ResponseEnvelope.SerialForm<RequestFailure<?, ?>, FailureEnvelope> {
+        @Override
+        default FailureEnvelope readExternal(final ObjectInput in, final long sessionId, final long txSequence,
+                final RequestFailure<?, ?> message, final long executionTimeNanos) {
+            return new FailureEnvelope(message, sessionId, txSequence, executionTimeNanos);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public FailureEnvelope(final RequestFailure<?, ?> message, final long sessionId, final long txSequence,
@@ -19,7 +27,12 @@ public final class FailureEnvelope extends ResponseEnvelope<RequestFailure<?, ?>
     }
 
     @Override
-    FailureEnvelopeProxy createProxy() {
+    FE createProxy() {
+        return new FE(this);
+    }
+
+    @Override
+    FailureEnvelopeProxy legacyProxy() {
         return new FailureEnvelopeProxy(this);
     }
 }

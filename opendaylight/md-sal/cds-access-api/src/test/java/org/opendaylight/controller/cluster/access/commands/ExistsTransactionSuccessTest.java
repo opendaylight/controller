@@ -32,7 +32,10 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
 
     @Test
     public void cloneAsVersionTest() {
-        assertEquals(OBJECT, OBJECT.cloneAsVersion(ABIVersion.BORON));
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        assertEquals(OBJECT.getSequence(), clone.getSequence());
+        assertEquals(OBJECT.getTarget(), clone.getTarget());
+        assertEquals(OBJECT.getExists(), clone.getExists());
     }
 
     @Test

@@ -7,12 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * Externalizable proxy for use with {@link LocalHistoryFailure}. It implements the initial (Boron) serialization
@@ -20,9 +16,10 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  *
  * @author Robert Varga
  */
-final class LocalHistoryFailureProxyV1 extends
-        AbstractRequestFailureProxy<LocalHistoryIdentifier, LocalHistoryFailure> {
-    @Serial
+final class LocalHistoryFailureProxyV1
+        extends AbstractRequestFailureProxy<LocalHistoryIdentifier, LocalHistoryFailure>
+        implements LocalHistoryFailure.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -34,16 +31,5 @@ final class LocalHistoryFailureProxyV1 extends
 
     LocalHistoryFailureProxyV1(final LocalHistoryFailure failure) {
         super(failure);
-    }
-
-    @Override
-    protected LocalHistoryFailure createFailure(final LocalHistoryIdentifier target, final long sequence,
-            final RequestException cause) {
-        return new LocalHistoryFailure(target, sequence, cause);
-    }
-
-    @Override
-    protected LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
-        return LocalHistoryIdentifier.readFrom(in);
     }
 }
