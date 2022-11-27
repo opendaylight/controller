@@ -8,7 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.DataInput;
+import java.io.IOException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -21,7 +22,15 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @param <T> Message type
  */
 public abstract class TransactionRequest<T extends TransactionRequest<T>> extends Request<TransactionIdentifier, T> {
-    @Serial
+    protected interface SerialForm<T extends TransactionRequest<T>>
+            extends Request.SerialForm<TransactionIdentifier, T> {
+        @Override
+        default TransactionIdentifier readTarget(final DataInput in) throws IOException {
+            return TransactionIdentifier.readFrom(in);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     TransactionRequest(final TransactionIdentifier identifier, final long sequence, final ActorRef replyTo) {
@@ -38,5 +47,5 @@ public abstract class TransactionRequest<T extends TransactionRequest<T>> extend
     }
 
     @Override
-    protected abstract AbstractTransactionRequestProxy<T> externalizableProxy(ABIVersion version);
+    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

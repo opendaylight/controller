@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import java.io.Serial;
-
 /**
  * General error raised when the recipient of a {@link Request} determines that the request contains
  * a {@link ClientIdentifier} which corresponds to an outdated generation.
  */
 public final class RetiredGenerationException extends RequestException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public RetiredGenerationException(final long originatingGeneration, final long newGeneration) {

@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.access.commands;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -18,7 +17,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * already been purged.
  */
 public final class DeadTransactionException extends RequestException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final RangeSet<UnsignedLong> purgedIdentifiers;
