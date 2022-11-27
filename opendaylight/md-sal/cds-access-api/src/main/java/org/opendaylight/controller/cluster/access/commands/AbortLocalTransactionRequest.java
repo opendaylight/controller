@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -18,7 +17,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * not important for single transactions, but is critical to ensure transaction ordering within local histories.
  */
 public final class AbortLocalTransactionRequest extends AbstractLocalTransactionRequest<AbortLocalTransactionRequest> {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public AbortLocalTransactionRequest(final @NonNull TransactionIdentifier identifier,

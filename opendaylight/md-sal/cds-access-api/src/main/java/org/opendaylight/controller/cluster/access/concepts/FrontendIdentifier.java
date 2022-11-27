@@ -15,7 +15,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serial;
 import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -25,7 +24,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 public final class FrontendIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
-        @Serial
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private MemberName memberName;
@@ -55,13 +54,13 @@ public final class FrontendIdentifier implements WritableIdentifier {
             clientType = FrontendType.readFrom(in);
         }
 
-        @Serial
+        @java.io.Serial
         private Object readResolve() {
             return new FrontendIdentifier(memberName, clientType);
         }
     }
 
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final MemberName memberName;
@@ -116,7 +115,7 @@ public final class FrontendIdentifier implements WritableIdentifier {
         return toPersistentId();
     }
 
-    @Serial
+    @java.io.Serial
     private Object writeReplace() {
         return new Proxy(memberName, clientType);
     }
