@@ -150,7 +150,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @param reqVersion Requested ABI version
      * @return Proxy for this object
      */
-    abstract @NonNull AbstractMessageProxy<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
+    abstract @NonNull MessageProxy<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
 
     @Serial
     protected final Object writeReplace() {
