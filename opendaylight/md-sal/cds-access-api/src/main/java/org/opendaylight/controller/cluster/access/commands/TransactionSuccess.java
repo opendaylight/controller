@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -20,7 +19,11 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 public abstract class TransactionSuccess<T extends TransactionSuccess<T>>
         extends RequestSuccess<TransactionIdentifier, T> {
-    @Serial
+    interface SerialForm<T extends TransactionSuccess<T>> extends RequestSuccess.SerialForm<TransactionIdentifier, T> {
+
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     TransactionSuccess(final TransactionIdentifier identifier, final long sequence) {
@@ -32,5 +35,5 @@ public abstract class TransactionSuccess<T extends TransactionSuccess<T>>
     }
 
     @Override
-    protected abstract AbstractTransactionSuccessProxy<T> externalizableProxy(ABIVersion version);
+    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

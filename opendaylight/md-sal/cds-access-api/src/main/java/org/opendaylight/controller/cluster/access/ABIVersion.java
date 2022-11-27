@@ -136,6 +136,10 @@ public enum ABIVersion implements WritableObject {
         };
     }
 
+    public boolean lt(final ABIVersion other) {
+        return compareTo(other) < 0;
+    }
+
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         out.writeShort(value);
