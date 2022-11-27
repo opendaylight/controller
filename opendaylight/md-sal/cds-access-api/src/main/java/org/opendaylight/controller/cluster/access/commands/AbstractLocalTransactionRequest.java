@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -23,7 +22,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 public abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTransactionRequest<T>>
         extends TransactionRequest<T> {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     AbstractLocalTransactionRequest(final TransactionIdentifier identifier, final long sequence,
@@ -32,7 +31,7 @@ public abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTra
     }
 
     @Override
-    protected final AbstractTransactionRequestProxy<T> externalizableProxy(final ABIVersion version) {
+    protected final SerialForm<T> externalizableProxy(final ABIVersion version) {
         throw new UnsupportedOperationException("Local transaction request " + this + " should never be serialized");
     }
 

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
+import java.io.DataInput;
+import java.io.IOException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -17,8 +18,25 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Generic {@link RequestFailure} involving a {@link TransactionRequest}.
  */
 public final class TransactionFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
-    @Serial
+    interface SerialForm extends RequestFailure.SerialForm<TransactionIdentifier, TransactionFailure> {
+        @Override
+        default TransactionIdentifier readTarget(final DataInput in) throws IOException {
+            return TransactionIdentifier.readFrom(in);
+        }
+
+        @Override
+        default TransactionFailure createFailure(final TransactionIdentifier target, final long sequence,
+                final RequestException cause) {
+            return new TransactionFailure(target, sequence, cause);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
+
+    private TransactionFailure(final TransactionFailure failure, final ABIVersion version) {
+        super(failure, version);
+    }
 
     TransactionFailure(final TransactionIdentifier target, final long sequence, final RequestException cause) {
         super(target, sequence, cause);
@@ -26,11 +44,11 @@ public final class TransactionFailure extends RequestFailure<TransactionIdentifi
 
     @Override
     protected TransactionFailure cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new TransactionFailure(this, version);
     }
 
     @Override
-    protected TransactionFailureProxyV1 externalizableProxy(final ABIVersion version) {
-        return new TransactionFailureProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new TF(this) : new TransactionFailureProxyV1(this);
     }
 }

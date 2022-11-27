@@ -7,20 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.concepts.WritableObjects;
-
 final class IncrementTransactionSequenceRequestProxyV1
-        extends AbstractReadTransactionRequestProxyV1<IncrementTransactionSequenceRequest> {
-    @Serial
+        extends AbstractReadTransactionRequestProxyV1<IncrementTransactionSequenceRequest>
+        implements IncrementTransactionSequenceRequest.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = -7345885599575376005L;
-
-    private long increment;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
     // be able to create instances via reflection.
@@ -31,24 +22,5 @@ final class IncrementTransactionSequenceRequestProxyV1
 
     IncrementTransactionSequenceRequestProxyV1(final IncrementTransactionSequenceRequest request) {
         super(request);
-        increment = request.getIncrement();
-    }
-
-    @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        WritableObjects.writeLong(out, increment);
-    }
-
-    @Override
-    public void readExternal(final ObjectInput in) throws ClassNotFoundException, IOException {
-        super.readExternal(in);
-        increment = WritableObjects.readLong(in);
-    }
-
-    @Override
-    IncrementTransactionSequenceRequest createReadRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyToActor, final boolean snapshotOnly) {
-        return new IncrementTransactionSequenceRequest(target, sequence, replyToActor, snapshotOnly, increment);
     }
 }
