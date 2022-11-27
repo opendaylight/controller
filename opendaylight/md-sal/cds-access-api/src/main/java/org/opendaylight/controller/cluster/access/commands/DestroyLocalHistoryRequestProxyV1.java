@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-
 /**
  * Externalizable proxy for use with {@link DestroyLocalHistoryRequest}. It implements the initial (Boron) serialization
  * format.
  *
  * @author Robert Varga
  */
-final class DestroyLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<DestroyLocalHistoryRequest> {
+final class DestroyLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<DestroyLocalHistoryRequest>
+        implements DestroyLocalHistoryRequest.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -28,11 +26,5 @@ final class DestroyLocalHistoryRequestProxyV1 extends AbstractLocalHistoryReques
 
     DestroyLocalHistoryRequestProxyV1(final DestroyLocalHistoryRequest request) {
         super(request);
-    }
-
-    @Override
-    protected DestroyLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final long sequence,
-            final ActorRef replyTo) {
-        return new DestroyLocalHistoryRequest(target, sequence, replyTo);
     }
 }

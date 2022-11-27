@@ -19,7 +19,7 @@ import com.google.common.annotations.Beta;
 public final class FutureVersionException extends AbstractVersionException {
     private static final long serialVersionUID = 1L;
 
-    FutureVersionException(final short version, ABIVersion closest) {
+    FutureVersionException(final short version, final ABIVersion closest) {
         super("Version " + Short.toUnsignedInt(version) + " is too new", version, closest);
     }
 }

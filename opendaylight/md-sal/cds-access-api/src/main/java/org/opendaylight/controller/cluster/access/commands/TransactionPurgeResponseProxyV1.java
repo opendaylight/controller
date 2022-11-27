@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-
 /**
  * Externalizable proxy for use with {@link TransactionPurgeResponse}. It implements the initial (Boron)
  * serialization format.
  *
  * @author Robert Varga
  */
-final class TransactionPurgeResponseProxyV1 extends AbstractTransactionSuccessProxy<TransactionPurgeResponse> {
+final class TransactionPurgeResponseProxyV1 extends AbstractTransactionSuccessProxy<TransactionPurgeResponse>
+        implements TransactionPurgeResponse.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -27,10 +26,5 @@ final class TransactionPurgeResponseProxyV1 extends AbstractTransactionSuccessPr
 
     TransactionPurgeResponseProxyV1(final TransactionPurgeResponse success) {
         super(success);
-    }
-
-    @Override
-    protected TransactionPurgeResponse createSuccess(final TransactionIdentifier target, final long sequence) {
-        return new TransactionPurgeResponse(target, sequence);
     }
 }

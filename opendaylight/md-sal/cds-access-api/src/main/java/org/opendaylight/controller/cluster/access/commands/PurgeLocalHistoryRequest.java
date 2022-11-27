@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
@@ -20,6 +21,14 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  */
 @Beta
 public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLocalHistoryRequest> {
+    interface SerialForm extends LocalHistoryRequest.SerialForm<PurgeLocalHistoryRequest> {
+        @Override
+        default PurgeLocalHistoryRequest readExternal(final ObjectInput in, final LocalHistoryIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new PurgeLocalHistoryRequest(target, sequence, replyTo);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     public PurgeLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
@@ -31,8 +40,8 @@ public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLoc
     }
 
     @Override
-    protected AbstractLocalHistoryRequestProxy<PurgeLocalHistoryRequest> externalizableProxy(final ABIVersion version) {
-        return new PurgeLocalHistoryRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new PHR(this) : new PurgeLocalHistoryRequestProxyV1(this);
     }
 
     @Override

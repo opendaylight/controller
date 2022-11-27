@@ -7,18 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 /**
  * Externalizable proxy for use with {@link ExistsTransactionRequest}. It implements the initial (Boron) serialization
  * format.
  *
  * @author Robert Varga
  */
-final class ExistsTransactionRequestProxyV1 extends
-        AbstractReadPathTransactionRequestProxyV1<ExistsTransactionRequest> {
+final class ExistsTransactionRequestProxyV1 extends AbstractReadPathTransactionRequestProxyV1<ExistsTransactionRequest>
+        implements ExistsTransactionRequest.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -30,11 +26,5 @@ final class ExistsTransactionRequestProxyV1 extends
 
     ExistsTransactionRequestProxyV1(final ExistsTransactionRequest request) {
         super(request);
-    }
-
-    @Override
-    ExistsTransactionRequest createReadPathRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyTo, final YangInstanceIdentifier path, final boolean snapshotOnly) {
-        return new ExistsTransactionRequest(target, sequence, replyTo, path, snapshotOnly);
     }
 }

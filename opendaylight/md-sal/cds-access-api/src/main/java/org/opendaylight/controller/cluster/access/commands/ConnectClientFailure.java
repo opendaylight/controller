@@ -8,8 +8,9 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import java.io.DataInput;
+import java.io.IOException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -21,6 +22,19 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
  */
 @Beta
 public final class ConnectClientFailure extends RequestFailure<ClientIdentifier, ConnectClientFailure> {
+    interface SerialForm extends RequestFailure.SerialForm<ClientIdentifier, ConnectClientFailure> {
+        @Override
+        default ClientIdentifier readTarget(final DataInput in) throws IOException {
+            return ClientIdentifier.readFrom(in);
+        }
+
+        @Override
+        default ConnectClientFailure createFailure(final ClientIdentifier target, final long sequence,
+                final RequestException cause) {
+            return new ConnectClientFailure(target, sequence, cause);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     ConnectClientFailure(final ClientIdentifier target, final long sequence, final RequestException cause) {
@@ -32,9 +46,8 @@ public final class ConnectClientFailure extends RequestFailure<ClientIdentifier,
     }
 
     @Override
-    protected AbstractRequestFailureProxy<ClientIdentifier, ConnectClientFailure> externalizableProxy(
-            final ABIVersion version) {
-        return new ConnectClientFailureProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new CCF(this) : new ConnectClientFailureProxyV1(this);
     }
 
     @Override

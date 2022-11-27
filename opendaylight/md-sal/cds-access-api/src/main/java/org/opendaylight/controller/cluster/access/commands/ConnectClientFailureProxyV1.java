@@ -7,11 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.DataInput;
-import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * Serialization proxy for use with {@link ConnectClientFailure}. This class implements initial (Boron) serialization
@@ -19,7 +16,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  *
  * @author Robert Varga
  */
-final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<ClientIdentifier, ConnectClientFailure> {
+final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<ClientIdentifier, ConnectClientFailure>
+        implements ConnectClientFailure.SerialForm {
     private static final long serialVersionUID = 2688639416324657256L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -31,16 +29,5 @@ final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<Clie
 
     ConnectClientFailureProxyV1(final ConnectClientFailure failure) {
         super(failure);
-    }
-
-    @Override
-    protected ConnectClientFailure createFailure(final ClientIdentifier target, final long sequence,
-            final RequestException cause) {
-        return new ConnectClientFailure(target, sequence, cause);
-    }
-
-    @Override
-    protected ClientIdentifier readTarget(final DataInput in) throws IOException {
-        return ClientIdentifier.readFrom(in);
     }
 }

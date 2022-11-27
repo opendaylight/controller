@@ -36,9 +36,33 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 @Beta
 public final class FrontendType implements Comparable<FrontendType>, WritableIdentifier {
-    private static final class Proxy implements Externalizable {
+    interface SerialForm extends Externalizable {
+        @NonNull FrontendType type();
+
+        void setType(@NonNull FrontendType type);
+
+        Object readResolve();
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var serialized = type().getSerialized();
+            out.writeInt(serialized.length);
+            out.write(serialized);
+        }
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            final var serialized = new byte[in.readInt()];
+            in.readFully(serialized);
+            // TODO: consider caching instances here
+            setType(new FrontendType(new String(serialized, StandardCharsets.UTF_8), serialized));
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
-        private byte[] serialized;
+
+        private FrontendType type;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
         // be able to create instances via reflection.
@@ -47,31 +71,29 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
             // For Externalizable
         }
 
-        Proxy(final byte[] serialized) {
-            this.serialized = requireNonNull(serialized);
+        Proxy(final FrontendType type) {
+            this.type = requireNonNull(type);
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(serialized.length);
-            out.write(serialized);
+        public FrontendType type() {
+            return verifyNotNull(type);
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            serialized = new byte[in.readInt()];
-            in.readFully(serialized);
+        public void setType(final FrontendType type) {
+            this.type = requireNonNull(type);
         }
 
-        private Object readResolve() {
-            // TODO: consider caching instances here
-            return new FrontendType(new String(serialized, StandardCharsets.UTF_8), serialized);
+        @Override
+        public Object readResolve() {
+            return type();
         }
     }
 
+    private static final long serialVersionUID = 1L;
     private static final String SIMPLE_STRING_REGEX = "^[a-zA-Z0-9-_.*+:=,!~';]+$";
     private static final Pattern SIMPLE_STRING_PATTERN = Pattern.compile(SIMPLE_STRING_REGEX);
-    private static final long serialVersionUID = 1L;
 
     private final @NonNull String name;
 
@@ -158,6 +180,6 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
     }
 
     Object writeReplace() {
-        return new Proxy(getSerialized());
+        return new Proxy(this);
     }
 }

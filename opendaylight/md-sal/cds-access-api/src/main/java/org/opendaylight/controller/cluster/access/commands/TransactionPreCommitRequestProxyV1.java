@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-
 /**
  * Externalizable proxy for use with {@link TransactionPreCommitRequest}. It implements the initial (Boron)
  * serialization format.
  *
  * @author Robert Varga
  */
-final class TransactionPreCommitRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionPreCommitRequest> {
+final class TransactionPreCommitRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionPreCommitRequest>
+        implements TransactionPreCommitRequest.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -28,11 +26,5 @@ final class TransactionPreCommitRequestProxyV1 extends AbstractTransactionReques
 
     TransactionPreCommitRequestProxyV1(final TransactionPreCommitRequest request) {
         super(request);
-    }
-
-    @Override
-    protected TransactionPreCommitRequest createRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyTo) {
-        return new TransactionPreCommitRequest(target, sequence, replyTo);
     }
 }

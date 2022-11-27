@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 
@@ -20,14 +22,27 @@ import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
  */
 @Beta
 public final class LocalHistorySuccess extends RequestSuccess<LocalHistoryIdentifier, LocalHistorySuccess> {
-    private static final long serialVersionUID = 1L;
+    interface SerialForm extends RequestSuccess.SerialForm<LocalHistoryIdentifier, LocalHistorySuccess> {
+        @Override
+        default LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+            return LocalHistoryIdentifier.readFrom(in);
+        }
 
-    public LocalHistorySuccess(final LocalHistoryIdentifier target, final long sequence) {
-        super(target, sequence);
+        @Override
+        default LocalHistorySuccess readExternal(final ObjectInput it, final LocalHistoryIdentifier target,
+                final long sequence) {
+            return new LocalHistorySuccess(target, sequence);
+        }
     }
+
+    private static final long serialVersionUID = 1L;
 
     private LocalHistorySuccess(final LocalHistorySuccess success, final ABIVersion version) {
         super(success, version);
+    }
+
+    public LocalHistorySuccess(final LocalHistoryIdentifier target, final long sequence) {
+        super(target, sequence);
     }
 
     @Override
@@ -36,8 +51,7 @@ public final class LocalHistorySuccess extends RequestSuccess<LocalHistoryIdenti
     }
 
     @Override
-    protected AbstractSuccessProxy<LocalHistoryIdentifier, LocalHistorySuccess> externalizableProxy(
-            final ABIVersion version) {
-        return new LocalHistorySuccessProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new HS(this) : new LocalHistorySuccessProxyV1(this);
     }
 }

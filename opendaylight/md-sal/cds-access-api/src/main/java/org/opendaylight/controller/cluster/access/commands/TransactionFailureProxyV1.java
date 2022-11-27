@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.DataInput;
-import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
@@ -19,7 +16,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @author Robert Varga
  */
-final class TransactionFailureProxyV1 extends AbstractRequestFailureProxy<TransactionIdentifier, TransactionFailure> {
+final class TransactionFailureProxyV1 extends AbstractRequestFailureProxy<TransactionIdentifier, TransactionFailure>
+        implements TransactionFailure.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -31,16 +29,5 @@ final class TransactionFailureProxyV1 extends AbstractRequestFailureProxy<Transa
 
     TransactionFailureProxyV1(final TransactionFailure failure) {
         super(failure);
-    }
-
-    @Override
-    protected TransactionFailure createFailure(final TransactionIdentifier target, final long sequence,
-            final RequestException cause) {
-        return new TransactionFailure(target, sequence, cause);
-    }
-
-    @Override
-    protected TransactionIdentifier readTarget(final DataInput in) throws IOException {
-        return TransactionIdentifier.readFrom(in);
     }
 }

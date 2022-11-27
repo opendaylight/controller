@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import java.io.DataInput;
+import java.io.IOException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -23,6 +25,13 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 @Beta
 public abstract class TransactionSuccess<T extends TransactionSuccess<T>>
         extends RequestSuccess<TransactionIdentifier, T> {
+    interface SerialForm<T extends TransactionSuccess<T>> extends RequestSuccess.SerialForm<TransactionIdentifier, T> {
+        @Override
+        default TransactionIdentifier readTarget(final DataInput in) throws IOException {
+            return TransactionIdentifier.readFrom(in);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     TransactionSuccess(final TransactionIdentifier identifier, final long sequence) {
@@ -34,5 +43,5 @@ public abstract class TransactionSuccess<T extends TransactionSuccess<T>>
     }
 
     @Override
-    protected abstract AbstractTransactionSuccessProxy<T> externalizableProxy(ABIVersion version);
+    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

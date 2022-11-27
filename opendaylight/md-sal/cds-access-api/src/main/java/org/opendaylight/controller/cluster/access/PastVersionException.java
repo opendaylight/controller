@@ -12,8 +12,6 @@ import com.google.common.annotations.Beta;
 /**
  * Exception thrown from {@link ABIVersion#valueOf(short)} when the specified version is too old and no longer
  * supported by the codebase.
- *
- * @author Robert Varga
  */
 @Beta
 public final class PastVersionException extends AbstractVersionException {

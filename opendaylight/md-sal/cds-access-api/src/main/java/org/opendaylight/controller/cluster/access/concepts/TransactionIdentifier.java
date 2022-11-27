@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
@@ -27,10 +28,30 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  */
 @Beta
 public final class TransactionIdentifier implements WritableIdentifier {
-    private static final class Proxy implements Externalizable {
+    interface SerialForm extends Externalizable {
+        @NonNull TransactionIdentifier identifier();
+
+        void setIdentifier(@NonNull TransactionIdentifier identifier);
+
+        Object readResolve();
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            setIdentifier(new TransactionIdentifier(LocalHistoryIdentifier.readFrom(in), WritableObjects.readLong(in)));
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var id = identifier();
+            id.getHistoryId().writeTo(out);
+            WritableObjects.writeLong(out, id.getTransactionId());
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
-        private LocalHistoryIdentifier historyId;
-        private long transactionId;
+
+        private TransactionIdentifier identifier;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
         // be able to create instances via reflection.
@@ -39,25 +60,23 @@ public final class TransactionIdentifier implements WritableIdentifier {
             // For Externalizable
         }
 
-        Proxy(final LocalHistoryIdentifier historyId, final long transactionId) {
-            this.historyId = requireNonNull(historyId);
-            this.transactionId = transactionId;
+        Proxy(final TransactionIdentifier identifier) {
+            this.identifier = requireNonNull(identifier);
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            historyId.writeTo(out);
-            WritableObjects.writeLong(out, transactionId);
+        public @NonNull TransactionIdentifier identifier() {
+            return verifyNotNull(identifier);
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            historyId = LocalHistoryIdentifier.readFrom(in);
-            transactionId = WritableObjects.readLong(in);
+        public void setIdentifier(final TransactionIdentifier identifier) {
+            this.identifier = requireNonNull(identifier);
         }
 
-        private Object readResolve() {
-            return new TransactionIdentifier(historyId, transactionId);
+        @Override
+        public Object readResolve() {
+            return identifier();
         }
     }
 
@@ -126,6 +145,6 @@ public final class TransactionIdentifier implements WritableIdentifier {
     }
 
     private Object writeReplace() {
-        return new Proxy(historyId, transactionId);
+        return new Proxy(this);
     }
 }

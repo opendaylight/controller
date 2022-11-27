@@ -7,48 +7,35 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import org.opendaylight.yangtools.concepts.WritableObjects;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
 
-abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externalizable {
+abstract class AbstractEnvelopeProxy<T extends Message<?, ?>, E extends Envelope<T>>
+        implements Envelope.SerialForm<T, E> {
     private static final long serialVersionUID = 1L;
 
-    private T message;
-    private long sessionId;
-    private long txSequence;
+    private E envelope;
 
     AbstractEnvelopeProxy() {
         // for Externalizable
     }
 
-    AbstractEnvelopeProxy(final Envelope<T> envelope) {
-        message = envelope.getMessage();
-        txSequence = envelope.getTxSequence();
-        sessionId = envelope.getSessionId();
+    AbstractEnvelopeProxy(final E envelope) {
+        this.envelope = requireNonNull(envelope);
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        WritableObjects.writeLongs(out, sessionId, txSequence);
-        out.writeObject(message);
+    public final E envelope() {
+        return verifyNotNull(envelope);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        final byte header = WritableObjects.readLongHeader(in);
-        sessionId = WritableObjects.readFirstLong(in, header);
-        txSequence = WritableObjects.readSecondLong(in, header);
-        message = (T) in.readObject();
+    public final void setEnvelope(final E envelope) {
+        this.envelope = requireNonNull(envelope);
     }
 
-    @SuppressWarnings("checkstyle:hiddenField")
-    abstract Envelope<T> createEnvelope(T wrappedNessage, long sessionId, long txSequence);
-
-    final Object readResolve() {
-        return createEnvelope(message, sessionId, txSequence);
+    @Override
+    public final Object readResolve() {
+        return envelope();
     }
 }

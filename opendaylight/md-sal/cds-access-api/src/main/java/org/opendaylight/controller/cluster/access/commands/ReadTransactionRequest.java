@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
+import java.io.IOException;
+import java.io.ObjectInput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -21,6 +23,15 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 @Beta
 public final class ReadTransactionRequest extends AbstractReadPathTransactionRequest<ReadTransactionRequest> {
+    interface SerialForm extends AbstractReadPathTransactionRequest.SerialForm<ReadTransactionRequest> {
+        @Override
+        default ReadTransactionRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
+            final long sequence, final ActorRef replyTo, final boolean snapshotOnly, final YangInstanceIdentifier path)
+                throws IOException {
+            return new ReadTransactionRequest(target, sequence, replyTo, path, snapshotOnly);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     public ReadTransactionRequest(final @NonNull TransactionIdentifier identifier, final long sequence,
@@ -38,7 +49,7 @@ public final class ReadTransactionRequest extends AbstractReadPathTransactionReq
     }
 
     @Override
-    protected ReadTransactionRequestProxyV1 externalizableProxy(final ABIVersion version) {
-        return new ReadTransactionRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new RTR(this) : new ReadTransactionRequestProxyV1(this);
     }
 }

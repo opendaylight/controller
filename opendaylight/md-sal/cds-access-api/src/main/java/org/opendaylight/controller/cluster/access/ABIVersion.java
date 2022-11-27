@@ -150,6 +150,17 @@ public enum ABIVersion implements WritableObject {
         }
     }
 
+    /**
+     * Return {@code true} if this version is earier than some {@code other} version.
+     *
+     * @param other Other {@link ABIVersion}
+     * @return {@code true} if {@code other is later}
+     * @throws NullPointerException if {@code other} is null
+     */
+    public boolean lt(final @NonNull ABIVersion other) {
+        return compareTo(other) < 0;
+    }
+
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         out.writeShort(value);

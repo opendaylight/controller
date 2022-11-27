@@ -9,6 +9,9 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -20,8 +23,26 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 @Beta
 public final class ExistsTransactionSuccess extends TransactionSuccess<ExistsTransactionSuccess> {
+    interface SerialForm extends TransactionSuccess.SerialForm<ExistsTransactionSuccess> {
+        @Override
+        default ExistsTransactionSuccess readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence) throws IOException {
+            return new ExistsTransactionSuccess(target, sequence, in.readBoolean());
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final ExistsTransactionSuccess msg) throws IOException {
+            out.writeBoolean(msg.getExists());
+        }
+    }
+
     private static final long serialVersionUID = 1L;
     private final boolean exists;
+
+    private ExistsTransactionSuccess(final ExistsTransactionSuccess success, final ABIVersion version) {
+        super(success, version);
+        exists = success.exists;
+    }
 
     public ExistsTransactionSuccess(final TransactionIdentifier target, final long sequence, final boolean exists) {
         super(target, sequence);
@@ -33,13 +54,13 @@ public final class ExistsTransactionSuccess extends TransactionSuccess<ExistsTra
     }
 
     @Override
-    protected ExistsTransactionSuccessProxyV1 externalizableProxy(final ABIVersion version) {
-        return new ExistsTransactionSuccessProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new ETS(this) : new ExistsTransactionSuccessProxyV1(this);
     }
 
     @Override
     protected ExistsTransactionSuccess cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new ExistsTransactionSuccess(this, version);
     }
 
     @Override

@@ -12,8 +12,11 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -31,6 +34,27 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  */
 @Beta
 public final class ConnectClientRequest extends Request<ClientIdentifier, ConnectClientRequest> {
+    interface SerialForm extends Request.SerialForm<ClientIdentifier, ConnectClientRequest> {
+        @Override
+        default ConnectClientRequest readExternal(final ObjectInput in, final ClientIdentifier target,
+                final long sequence, final ActorRef replyTo) throws IOException {
+            return new ConnectClientRequest(target, sequence, replyTo, ABIVersion.inexactReadFrom(in),
+                ABIVersion.inexactReadFrom(in));
+        }
+
+        @Override
+        default ClientIdentifier readTarget(final DataInput in) throws IOException {
+            return ClientIdentifier.readFrom(in);
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final ConnectClientRequest msg) throws IOException {
+            Request.SerialForm.super.writeExternal(out, msg);
+            msg.getMinVersion().writeTo(out);
+            msg.getMaxVersion().writeTo(out);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     private final ABIVersion minVersion;
@@ -50,8 +74,8 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     private ConnectClientRequest(final ConnectClientRequest request, final ABIVersion version) {
         super(request, version);
-        this.minVersion = request.minVersion;
-        this.maxVersion = request.maxVersion;
+        minVersion = request.minVersion;
+        maxVersion = request.maxVersion;
     }
 
     public ABIVersion getMinVersion() {
@@ -68,9 +92,8 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
     }
 
     @Override
-    protected AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> externalizableProxy(
-            final ABIVersion version) {
-        return new ConnectClientRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new CCR(this) : new ConnectClientRequestProxyV1(this);
     }
 
     @Override

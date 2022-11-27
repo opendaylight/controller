@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-
 /**
  * Externalizable proxy for use with {@link IncrementTransactionSequenceSuccess}. It implements the initial (Boron)
  * serialization format.
@@ -16,7 +14,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 final class IncrementTransactionSequenceSuccessProxyV1
-        extends AbstractTransactionSuccessProxy<IncrementTransactionSequenceSuccess> {
+        extends AbstractTransactionSuccessProxy<IncrementTransactionSequenceSuccess>
+        implements IncrementTransactionSequenceSuccess.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -28,11 +27,5 @@ final class IncrementTransactionSequenceSuccessProxyV1
 
     IncrementTransactionSequenceSuccessProxyV1(final IncrementTransactionSequenceSuccess request) {
         super(request);
-    }
-
-    @Override
-    protected IncrementTransactionSequenceSuccess createSuccess(final TransactionIdentifier target,
-            final long sequence) {
-        return new IncrementTransactionSequenceSuccess(target, sequence);
     }
 }

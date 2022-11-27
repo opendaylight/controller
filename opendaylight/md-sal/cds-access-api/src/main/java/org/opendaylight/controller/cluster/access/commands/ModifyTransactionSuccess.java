@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import java.io.IOException;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -18,6 +20,14 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 @Beta
 public final class ModifyTransactionSuccess extends TransactionSuccess<ModifyTransactionSuccess> {
+    interface SerialForm extends TransactionSuccess.SerialForm<ModifyTransactionSuccess> {
+        @Override
+        default ModifyTransactionSuccess readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence) throws IOException {
+            return new ModifyTransactionSuccess(target, sequence);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     public ModifyTransactionSuccess(final TransactionIdentifier identifier, final long sequence) {
@@ -29,8 +39,8 @@ public final class ModifyTransactionSuccess extends TransactionSuccess<ModifyTra
     }
 
     @Override
-    protected AbstractTransactionSuccessProxy<ModifyTransactionSuccess> externalizableProxy(final ABIVersion version) {
-        return new ModifyTransactionSuccessProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new MTS(this) : new ModifyTransactionSuccessProxyV1(this);
     }
 
     @Override

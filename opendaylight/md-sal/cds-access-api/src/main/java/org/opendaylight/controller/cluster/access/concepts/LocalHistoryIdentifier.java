@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
@@ -29,20 +30,45 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * @author Robert Varga
  */
 public final class LocalHistoryIdentifier implements WritableIdentifier {
-    /*
-     * Implementation note: cookie is currently required only for module-based sharding, which is implemented as part
-     *                      of normal DataBroker interfaces. For DOMDataTreeProducer cookie will always be zero, hence
-     *                      we may end up not needing cookie at all.
+    /**
+     * Serialized form of {@link LocalHistoryIdentifier}.
      *
-     *                      We use WritableObjects.writeLongs() to output historyId and cookie (in that order). If we
-     *                      end up not needing the cookie at all, we can switch to writeLong() and use zero flags for
-     *                      compatibility.
+     * @implNote
+     *     cookie is currently required only for module-based sharding, which is implemented as part of normal
+     *     DataBroker interfaces. For DOMDataTreeProducer cookie will always be zero, hence we may end up not needing
+     *     cookie at all.
+     *     We use WritableObjects.writeLongs() to output historyId and cookie (in that order). If we end up not needing
+     *     the cookie at all, we can switch to writeLong() and use zero flags for compatibility.
      */
-    private static final class Proxy implements Externalizable {
+    interface SerialForm extends Externalizable {
+        @NonNull LocalHistoryIdentifier identifier();
+
+        void setIdentifier(@NonNull LocalHistoryIdentifier identifier);
+
+        Object readResolve();
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var id = identifier();
+            id.getClientId().writeTo(out);
+            WritableObjects.writeLongs(out, id.getHistoryId(), id.getCookie());
+        }
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            final var clientId = ClientIdentifier.readFrom(in);
+
+            final byte header = WritableObjects.readLongHeader(in);
+            final var historyId = WritableObjects.readFirstLong(in, header);
+            final var cookie = WritableObjects.readSecondLong(in, header);
+            setIdentifier(new LocalHistoryIdentifier(clientId, historyId, cookie));
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
-        private ClientIdentifier clientId;
-        private long historyId;
-        private long cookie;
+
+        private LocalHistoryIdentifier identifier;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
         // be able to create instances via reflection.
@@ -51,29 +77,23 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
             // For Externalizable
         }
 
-        Proxy(final ClientIdentifier frontendId, final long historyId, final long cookie) {
-            clientId = requireNonNull(frontendId);
-            this.historyId = historyId;
-            this.cookie = cookie;
+        Proxy(final LocalHistoryIdentifier identifier) {
+            this.identifier = requireNonNull(identifier);
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            clientId.writeTo(out);
-            WritableObjects.writeLongs(out, historyId, cookie);
+        public LocalHistoryIdentifier identifier() {
+            return verifyNotNull(identifier);
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            clientId = ClientIdentifier.readFrom(in);
-
-            final byte header = WritableObjects.readLongHeader(in);
-            historyId = WritableObjects.readFirstLong(in, header);
-            cookie = WritableObjects.readSecondLong(in, header);
+        public void setIdentifier(final LocalHistoryIdentifier identifier) {
+            this.identifier = requireNonNull(identifier);
         }
 
-        private Object readResolve() {
-            return new LocalHistoryIdentifier(clientId, historyId, cookie);
+        @Override
+        public Object readResolve() {
+            return identifier();
         }
     }
 
@@ -147,6 +167,6 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
     }
 
     private Object writeReplace() {
-        return new Proxy(clientId, historyId, cookie);
+        return new Proxy(this);
     }
 }

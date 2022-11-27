@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -19,7 +20,19 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 @Beta
 public final class TransactionPreCommitRequest extends TransactionRequest<TransactionPreCommitRequest> {
+    interface SerialForm extends TransactionRequest.SerialForm<TransactionPreCommitRequest> {
+        @Override
+        default TransactionPreCommitRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new TransactionPreCommitRequest(target, sequence, replyTo);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
+
+    private TransactionPreCommitRequest(final TransactionPreCommitRequest request, final ABIVersion version) {
+        super(request, version);
+    }
 
     public TransactionPreCommitRequest(final TransactionIdentifier target, final long sequence,
             final ActorRef replyTo) {
@@ -27,12 +40,12 @@ public final class TransactionPreCommitRequest extends TransactionRequest<Transa
     }
 
     @Override
-    protected TransactionPreCommitRequestProxyV1 externalizableProxy(final ABIVersion version) {
-        return new TransactionPreCommitRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new TPCR(this) : new TransactionPreCommitRequestProxyV1(this);
     }
 
     @Override
     protected TransactionPreCommitRequest cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new TransactionPreCommitRequest(this, version);
     }
 }

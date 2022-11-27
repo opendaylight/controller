@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
@@ -27,10 +28,30 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 @Beta
 public final class FrontendIdentifier implements WritableIdentifier {
-    private static final class Proxy implements Externalizable {
+    interface SerialForm extends Externalizable {
+        @NonNull FrontendIdentifier identifier();
+
+        void setIdentifier(@NonNull FrontendIdentifier identifier);
+
+        Object readResolve();
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var id = identifier();
+            id.memberName.writeTo(out);
+            id.clientType.writeTo(out);
+        }
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            setIdentifier(new FrontendIdentifier(MemberName.readFrom(in), FrontendType.readFrom(in)));
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
         private static final long serialVersionUID = 1L;
-        private MemberName memberName;
-        private FrontendType clientType;
+
+        private FrontendIdentifier identifier;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
         // be able to create instances via reflection.
@@ -39,25 +60,23 @@ public final class FrontendIdentifier implements WritableIdentifier {
             // Needed for Externalizable
         }
 
-        Proxy(final MemberName memberName, final FrontendType clientType) {
-            this.memberName = requireNonNull(memberName);
-            this.clientType = requireNonNull(clientType);
+        Proxy(final FrontendIdentifier identifier) {
+            this.identifier = requireNonNull(identifier);
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            memberName.writeTo(out);
-            clientType.writeTo(out);
+        public FrontendIdentifier identifier() {
+            return verifyNotNull(identifier);
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            memberName = MemberName.readFrom(in);
-            clientType = FrontendType.readFrom(in);
+        public void setIdentifier(final FrontendIdentifier identifier) {
+            this.identifier = requireNonNull(identifier);
         }
 
-        private Object readResolve() {
-            return new FrontendIdentifier(memberName, clientType);
+        @Override
+        public Object readResolve() {
+            return identifier();
         }
     }
 
@@ -122,6 +141,6 @@ public final class FrontendIdentifier implements WritableIdentifier {
     }
 
     private Object writeReplace() {
-        return new Proxy(memberName, clientType);
+        return new Proxy(this);
     }
 }

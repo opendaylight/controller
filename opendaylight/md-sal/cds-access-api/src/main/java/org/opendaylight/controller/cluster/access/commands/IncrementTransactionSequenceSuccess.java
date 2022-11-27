@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -18,19 +19,32 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 @Beta
 public final class IncrementTransactionSequenceSuccess extends TransactionSuccess<IncrementTransactionSequenceSuccess> {
+    interface SerialForm extends TransactionSuccess.SerialForm<IncrementTransactionSequenceSuccess> {
+        @Override
+        default IncrementTransactionSequenceSuccess readExternal(final ObjectInput it,
+                final TransactionIdentifier target, final long sequence) {
+            return new IncrementTransactionSequenceSuccess(target, sequence);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
+
+    private IncrementTransactionSequenceSuccess(final IncrementTransactionSequenceSuccess success,
+            final ABIVersion version) {
+        super(success, version);
+    }
 
     public IncrementTransactionSequenceSuccess(final TransactionIdentifier target, final long sequence) {
         super(target, sequence);
     }
 
     @Override
-    protected IncrementTransactionSequenceSuccessProxyV1 externalizableProxy(final ABIVersion version) {
-        return new IncrementTransactionSequenceSuccessProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new ITSS(this) : new IncrementTransactionSequenceSuccessProxyV1(this);
     }
 
     @Override
     protected IncrementTransactionSequenceSuccess cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new IncrementTransactionSequenceSuccess(this, version);
     }
 }

@@ -7,7 +7,17 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import java.io.ObjectInput;
+
 public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>> {
+    interface SerialForm extends ResponseEnvelope.SerialForm<RequestSuccess<?, ?>, SuccessEnvelope> {
+        @Override
+        default SuccessEnvelope readExternal(final ObjectInput in, final long sessionId, final long txSequence,
+                final RequestSuccess<?, ?> message, final long executionTimeNanos) {
+            return new SuccessEnvelope(message, sessionId, txSequence, executionTimeNanos);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     public SuccessEnvelope(final RequestSuccess<?, ?> message, final long sessionId, final long txSequence,
@@ -16,7 +26,13 @@ public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>
     }
 
     @Override
-    SuccessEnvelopeProxy createProxy() {
+    SE createProxy() {
+        return new SE(this);
+    }
+
+    @Override
+    SuccessEnvelopeProxy legacyProxy() {
         return new SuccessEnvelopeProxy(this);
     }
+
 }

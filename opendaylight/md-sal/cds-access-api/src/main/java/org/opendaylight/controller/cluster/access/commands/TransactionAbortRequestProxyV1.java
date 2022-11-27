@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-
 /**
  * Externalizable proxy for use with {@link TransactionAbortRequest}. It implements the initial (Boron) serialization
  * format.
  *
  * @author Robert Varga
  */
-final class TransactionAbortRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionAbortRequest> {
+final class TransactionAbortRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionAbortRequest>
+        implements TransactionAbortRequest.SerialForm {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -28,11 +26,5 @@ final class TransactionAbortRequestProxyV1 extends AbstractTransactionRequestPro
 
     TransactionAbortRequestProxyV1(final TransactionAbortRequest request) {
         super(request);
-    }
-
-    @Override
-    protected TransactionAbortRequest createRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyTo) {
-        return new TransactionAbortRequest(target, sequence, replyTo);
     }
 }

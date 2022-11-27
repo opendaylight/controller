@@ -12,11 +12,17 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
 
 /**
  * A transaction request to apply a particular set of operations on top of the current transaction. This message is
@@ -27,6 +33,48 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 @Beta
 public final class ModifyTransactionRequest extends TransactionRequest<ModifyTransactionRequest>
         implements SliceableMessage {
+    interface SerialForm extends TransactionRequest.SerialForm<ModifyTransactionRequest> {
+
+
+        @Override
+        default ModifyTransactionRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence, final ActorRef replyTo) throws IOException {
+
+            final var protocol = Optional.ofNullable(PersistenceProtocol.readFrom(in));
+            final int size = in.readInt();
+            final List<TransactionModification> modifications;
+            if (size != 0) {
+                modifications = new ArrayList<>(size);
+                final var nnin = NormalizedNodeDataInput.newDataInput(in);
+                final var writer = ReusableImmutableNormalizedNodeStreamWriter.create();
+                for (int i = 0; i < size; ++i) {
+                    modifications.add(TransactionModification.readFrom(nnin, writer));
+                }
+            } else {
+                modifications = ImmutableList.of();
+            }
+
+            return new ModifyTransactionRequest(target, sequence, replyTo, modifications, protocol.orElse(null));
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final ModifyTransactionRequest msg) throws IOException {
+            TransactionRequest.SerialForm.super.writeExternal(out, msg);
+
+            out.writeByte(PersistenceProtocol.byteValue(msg.getPersistenceProtocol().orElse(null)));
+
+            final var modifications = msg.getModifications();
+            out.writeInt(modifications.size());
+            if (!modifications.isEmpty()) {
+                try (var nnout = msg.getVersion().getStreamVersion().newDataOutput(out)) {
+                    for (var op : modifications) {
+                        op.writeTo(nnout);
+                    }
+                }
+            }
+        }
+    }
+
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
@@ -34,6 +82,12 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
             + "aren't serialized. FindBugs does not recognize this.")
     private final List<TransactionModification> modifications;
     private final PersistenceProtocol protocol;
+
+    private ModifyTransactionRequest(final ModifyTransactionRequest request, final ABIVersion version) {
+        super(request, version);
+        modifications = request.modifications;
+        protocol = request.protocol;
+    }
 
     ModifyTransactionRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo,
         final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
@@ -57,12 +111,12 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     }
 
     @Override
-    protected ModifyTransactionRequestProxyV1 externalizableProxy(final ABIVersion version) {
-        return new ModifyTransactionRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new MTR(this) : new ModifyTransactionRequestProxyV1(this);
     }
 
     @Override
     protected ModifyTransactionRequest cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new ModifyTransactionRequest(this, version);
     }
 }

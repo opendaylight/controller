@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.DataInput;
-import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
@@ -20,7 +18,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * @param <T> Message type
  */
 abstract class AbstractLocalHistoryRequestProxy<T extends LocalHistoryRequest<T>>
-        extends AbstractRequestProxy<LocalHistoryIdentifier, T> {
+        extends AbstractRequestProxy<LocalHistoryIdentifier, T> implements LocalHistoryRequest.SerialForm<T> {
     private static final long serialVersionUID = 1L;
 
     protected AbstractLocalHistoryRequestProxy() {
@@ -29,10 +27,5 @@ abstract class AbstractLocalHistoryRequestProxy<T extends LocalHistoryRequest<T>
 
     AbstractLocalHistoryRequestProxy(final T request) {
         super(request);
-    }
-
-    @Override
-    protected final LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
-        return LocalHistoryIdentifier.readFrom(in);
     }
 }
