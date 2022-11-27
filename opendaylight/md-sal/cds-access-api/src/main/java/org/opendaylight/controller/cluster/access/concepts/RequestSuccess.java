@@ -17,8 +17,8 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  *
  * @param <T> Target identifier type
  */
-public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>> extends
-        Response<T, C> {
+public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
+        extends Response<T, C> {
     @Serial
     private static final long serialVersionUID = 1L;
 

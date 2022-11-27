@@ -34,7 +34,7 @@ abstract class AbstractTransactionRequestProxy<T extends TransactionRequest<T>>
     }
 
     @Override
-    protected final TransactionIdentifier readTarget(final DataInput in) throws IOException {
+    public final TransactionIdentifier readTarget(final DataInput in) throws IOException {
         return TransactionIdentifier.readFrom(in);
     }
 }

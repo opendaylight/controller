@@ -62,5 +62,5 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
     }
 
     @Override
-    protected abstract AbstractRequestProxy<T, C> externalizableProxy(ABIVersion version);
+    protected abstract RequestProxy<T, C> externalizableProxy(ABIVersion version);
 }

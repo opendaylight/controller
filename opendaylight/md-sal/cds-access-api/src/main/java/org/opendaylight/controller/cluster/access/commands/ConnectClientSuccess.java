@@ -12,15 +12,23 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.serialization.JavaSerializer;
+import akka.serialization.Serialization;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MessageProxy;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
@@ -30,6 +38,42 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  * fail, the client can try accessing the provided alternates.
  */
 public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier, ConnectClientSuccess> {
+    interface SerialForm extends MessageProxy<ClientIdentifier, ConnectClientSuccess> {
+        @Override
+        default ClientIdentifier readTarget(final DataInput in) throws IOException {
+            return ClientIdentifier.readFrom(in);
+        }
+
+        @Override
+        default ConnectClientSuccess readExternal(final ObjectInput in, final ClientIdentifier target,
+                final long sequence) throws IOException, ClassNotFoundException {
+            final var backend = JavaSerializer.currentSystem().value().provider()
+                .resolveActorRef((String) in.readObject());
+            final var maxMessages = in.readInt();
+
+            final int alternatesSize = in.readInt();
+            final var alternates = new ArrayList<ActorSelection>(alternatesSize);
+            for (int i = 0; i < alternatesSize; ++i) {
+                alternates.add(ActorSelection.apply(ActorRef.noSender(), (String)in.readObject()));
+            }
+
+            return new ConnectClientSuccess(target, sequence, backend, alternates, maxMessages, null);
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final ConnectClientSuccess msg) throws IOException {
+            out.writeObject(Serialization.serializedActorPath(msg.backend));
+            out.writeInt(msg.maxMessages);
+
+            out.writeInt(msg.alternates.size());
+            for (ActorSelection b : msg.alternates) {
+                out.writeObject(b.toSerializationFormat());
+            }
+
+            // We are ignoring the DataTree, it is not serializable anyway
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -79,11 +123,12 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
 
     @Override
     protected ConnectClientSuccessProxyV1 externalizableProxy(final ABIVersion version) {
-        return new ConnectClientSuccessProxyV1(this);
+        return ABIVersion.MAGNESIUM.lte(version) ? new ConnectClientSuccessProxyV1(this) : new CCS(this);
     }
 
     @Override
     protected ConnectClientSuccess cloneAsVersion(final ABIVersion version) {
+        // FIXME: perform cloning
         return this;
     }
 

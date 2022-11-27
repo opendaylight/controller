@@ -34,7 +34,7 @@ abstract class AbstractLocalHistoryRequestProxy<T extends LocalHistoryRequest<T>
     }
 
     @Override
-    protected final LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+    public final LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
         return LocalHistoryIdentifier.readFrom(in);
     }
 }

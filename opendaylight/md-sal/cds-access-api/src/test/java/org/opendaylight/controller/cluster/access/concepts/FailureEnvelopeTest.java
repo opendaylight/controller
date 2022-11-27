@@ -54,7 +54,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         }
 
         @Override
-        protected WritableIdentifier readTarget(final DataInput in) throws IOException {
+        public WritableIdentifier readTarget(final DataInput in) throws IOException {
             return TransactionIdentifier.readFrom(in);
         }
     }

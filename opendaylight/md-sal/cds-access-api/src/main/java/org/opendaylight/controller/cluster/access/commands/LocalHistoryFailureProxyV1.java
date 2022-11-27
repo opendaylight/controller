@@ -43,7 +43,7 @@ final class LocalHistoryFailureProxyV1 extends
     }
 
     @Override
-    protected LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+    public LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
         return LocalHistoryIdentifier.readFrom(in);
     }
 }
