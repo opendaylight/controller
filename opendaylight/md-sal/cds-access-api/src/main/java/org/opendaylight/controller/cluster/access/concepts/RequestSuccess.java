@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import java.io.IOException;
+import java.io.ObjectOutput;
 import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -17,8 +19,16 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  *
  * @param <T> Target identifier type
  */
-public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>> extends
-        Response<T, C> {
+public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
+        extends Response<T, C> {
+    protected interface SerialForm<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
+            extends Response.SerialForm<T, C> {
+        @Override
+        default void writeExternal(final ObjectOutput out, final C msg) throws IOException {
+            // Defaults to no-op
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,7 +39,4 @@ public abstract class RequestSuccess<T extends WritableIdentifier, C extends Req
     protected RequestSuccess(final @NonNull T target, final long sequence) {
         super(target, sequence);
     }
-
-    @Override
-    protected abstract AbstractSuccessProxy<T, C> externalizableProxy(ABIVersion version);
 }

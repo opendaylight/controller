@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
  * Externalizable proxy for use with {@link CreateLocalHistoryRequest}. It implements the initial (Boron) serialization
@@ -17,7 +15,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  *
  * @author Robert Varga
  */
-final class CreateLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<CreateLocalHistoryRequest> {
+final class CreateLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<CreateLocalHistoryRequest>
+        implements CreateLocalHistoryRequest.SerialForm {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,11 +29,5 @@ final class CreateLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequest
 
     CreateLocalHistoryRequestProxyV1(final CreateLocalHistoryRequest request) {
         super(request);
-    }
-
-    @Override
-    protected CreateLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final long sequence,
-            final ActorRef replyTo) {
-        return new CreateLocalHistoryRequest(target, sequence, replyTo);
     }
 }

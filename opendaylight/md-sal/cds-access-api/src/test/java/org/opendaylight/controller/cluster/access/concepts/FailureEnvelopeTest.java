@@ -48,13 +48,13 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         }
 
         @Override
-        protected MockFailure createFailure(final WritableIdentifier target, final long sequence,
-                                            final RequestException failureCause) {
+        public MockFailure createFailure(final WritableIdentifier target, final long sequence,
+                final RequestException failureCause) {
             return new MockFailure(target, failureCause, sequence);
         }
 
         @Override
-        protected WritableIdentifier readTarget(final DataInput in) throws IOException {
+        public WritableIdentifier readTarget(final DataInput in) throws IOException {
             return TransactionIdentifier.readFrom(in);
         }
     }
