@@ -32,7 +32,7 @@ public abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTra
     }
 
     @Override
-    protected final AbstractTransactionRequestProxy<T> externalizableProxy(final ABIVersion version) {
+    protected final SerialForm<T> externalizableProxy(final ABIVersion version) {
         throw new UnsupportedOperationException("Local transaction request " + this + " should never be serialized");
     }
 

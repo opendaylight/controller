@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
@@ -18,8 +15,9 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  *
  * @author Robert Varga
  */
-final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistoryIdentifier, LocalHistorySuccess> {
-    @Serial
+final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistoryIdentifier, LocalHistorySuccess>
+        implements LocalHistorySuccess.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -31,15 +29,5 @@ final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistory
 
     LocalHistorySuccessProxyV1(final LocalHistorySuccess success) {
         super(success);
-    }
-
-    @Override
-    protected LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
-        return LocalHistoryIdentifier.readFrom(in);
-    }
-
-    @Override
-    protected LocalHistorySuccess createSuccess(final LocalHistoryIdentifier target, final long sequence) {
-        return new LocalHistorySuccess(target, sequence);
     }
 }

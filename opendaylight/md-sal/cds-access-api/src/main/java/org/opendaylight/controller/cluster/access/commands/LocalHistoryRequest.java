@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import java.io.DataInput;
+import java.io.IOException;
 import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -22,6 +24,13 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * @param <T> Message type
  */
 public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> extends Request<LocalHistoryIdentifier, T> {
+    interface SerialForm<T extends LocalHistoryRequest<T>> extends Request.SerialForm<LocalHistoryIdentifier, T> {
+        @Override
+        default LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+            return LocalHistoryIdentifier.readFrom(in);
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -40,5 +49,5 @@ public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> exte
     }
 
     @Override
-    protected abstract AbstractLocalHistoryRequestProxy<T> externalizableProxy(ABIVersion version);
+    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

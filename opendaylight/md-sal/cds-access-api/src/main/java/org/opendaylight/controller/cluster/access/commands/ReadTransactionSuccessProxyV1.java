@@ -7,29 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.Serial;
-import java.util.Optional;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
-
 /**
  * Externalizable proxy for use with {@link ReadTransactionSuccess}. It implements the initial (Boron) serialization
  * format.
  *
  * @author Robert Varga
  */
-final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProxy<ReadTransactionSuccess> {
-    @Serial
+final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProxy<ReadTransactionSuccess>
+        implements ReadTransactionSuccess.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-
-    private Optional<NormalizedNode> data;
-    private transient NormalizedNodeStreamVersion streamVersion;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
     // be able to create instances via reflection.
@@ -40,37 +27,5 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
 
     ReadTransactionSuccessProxyV1(final ReadTransactionSuccess request) {
         super(request);
-        data = request.getData();
-        streamVersion = request.getVersion().getStreamVersion();
-    }
-
-    @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-
-        if (data.isPresent()) {
-            out.writeBoolean(true);
-            try (NormalizedNodeDataOutput nnout = streamVersion.newDataOutput(out)) {
-                nnout.writeNormalizedNode(data.get());
-            }
-        } else {
-            out.writeBoolean(false);
-        }
-    }
-
-    @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-
-        if (in.readBoolean()) {
-            data = Optional.of(NormalizedNodeDataInput.newDataInput(in).readNormalizedNode());
-        } else {
-            data = Optional.empty();
-        }
-    }
-
-    @Override
-    protected ReadTransactionSuccess createSuccess(final TransactionIdentifier target, final long sequence) {
-        return new ReadTransactionSuccess(target, sequence, data);
     }
 }

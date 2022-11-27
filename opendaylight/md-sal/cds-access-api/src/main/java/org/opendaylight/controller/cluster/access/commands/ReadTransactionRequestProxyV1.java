@@ -7,19 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
 /**
  * Externalizable proxy for use with {@link ReadTransactionRequest}. It implements the initial (Boron) serialization
  * format.
  *
  * @author Robert Varga
  */
-final class ReadTransactionRequestProxyV1 extends AbstractReadPathTransactionRequestProxyV1<ReadTransactionRequest> {
-    @Serial
+final class ReadTransactionRequestProxyV1 extends AbstractReadPathTransactionRequestProxyV1<ReadTransactionRequest>
+        implements ReadTransactionRequest.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -31,11 +27,5 @@ final class ReadTransactionRequestProxyV1 extends AbstractReadPathTransactionReq
 
     ReadTransactionRequestProxyV1(final ReadTransactionRequest request) {
         super(request);
-    }
-
-    @Override
-    ReadTransactionRequest createReadPathRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyTo, final YangInstanceIdentifier path, final boolean snapshotOnly) {
-        return new ReadTransactionRequest(target, sequence, replyTo, path, snapshotOnly);
     }
 }
