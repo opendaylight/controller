@@ -34,7 +34,7 @@ final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistory
     }
 
     @Override
-    protected LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+    public LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
         return LocalHistoryIdentifier.readFrom(in);
     }
 

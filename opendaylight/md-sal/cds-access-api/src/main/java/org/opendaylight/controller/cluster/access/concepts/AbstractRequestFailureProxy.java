@@ -36,15 +36,15 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        out.writeObject(cause);
+    public void readExternal(final ObjectInput in, final T target, final long sequence)
+            throws IOException, ClassNotFoundException {
+        cause = (RequestException) in.readObject();
+        super.readExternal(in, target, sequence);
     }
 
     @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        cause = (RequestException) in.readObject();
+    public final void writeExternal(final ObjectOutput out, final C msg) throws IOException {
+        out.writeObject(cause);
     }
 
     @Override
