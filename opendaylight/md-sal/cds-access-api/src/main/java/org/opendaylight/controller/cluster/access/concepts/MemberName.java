@@ -20,7 +20,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -29,11 +28,35 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * Type-safe encapsulation of a cluster member name.
  */
 public final class MemberName implements Comparable<MemberName>, WritableIdentifier {
-    private static final class Proxy implements Externalizable {
-        @Serial
+    interface SerialForm extends Externalizable {
+        @NonNull MemberName name();
+
+        void setName(@NonNull MemberName name);
+
+        @java.io.Serial
+        Object readResolve();
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var serialized = name().getSerialized();
+            out.writeInt(serialized.length);
+            out.write(serialized);
+        }
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException {
+            final var serialized = new byte[in.readInt()];
+            in.readFully(serialized);
+            // TODO: consider caching instances here
+            setName(new MemberName(new String(serialized, StandardCharsets.UTF_8), serialized));
+        }
+    }
+
+    private static final class Proxy implements SerialForm {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        private byte[] serialized;
+        private MemberName name;
 
         // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
         // be able to create instances via reflection.
@@ -42,30 +65,27 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
             // For Externalizable
         }
 
-        Proxy(final byte[] serialized) {
-            this.serialized = requireNonNull(serialized);
+        Proxy(final MemberName name) {
+            this.name = requireNonNull(name);
         }
 
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(serialized.length);
-            out.write(serialized);
+        public MemberName name() {
+            return verifyNotNull(name);
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            serialized = new byte[in.readInt()];
-            in.readFully(serialized);
+        public void setName(final MemberName name) {
+            this.name = requireNonNull(name);
         }
 
-        @Serial
-        private Object readResolve() {
-            // TODO: consider caching instances here
-            return new MemberName(new String(serialized, StandardCharsets.UTF_8), serialized);
+        @Override
+        public Object readResolve() {
+            return name();
         }
     }
 
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull String name;
@@ -141,8 +161,8 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         return local;
     }
 
-    @Serial
+    @java.io.Serial
     Object writeReplace() {
-        return new Proxy(getSerialized());
+        return new Proxy(this);
     }
 }

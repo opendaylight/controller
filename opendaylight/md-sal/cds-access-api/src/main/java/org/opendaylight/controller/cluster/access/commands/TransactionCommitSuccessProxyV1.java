@@ -7,17 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-
 /**
  * Externalizable proxy for use with {@link TransactionCommitSuccess}. It implements the initial (Boron)
  * serialization format.
  *
  * @author Robert Varga
  */
-final class TransactionCommitSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionCommitSuccess> {
-    @Serial
+final class TransactionCommitSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionCommitSuccess>
+        implements TransactionCommitSuccess.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -29,10 +27,5 @@ final class TransactionCommitSuccessProxyV1 extends AbstractTransactionSuccessPr
 
     TransactionCommitSuccessProxyV1(final TransactionCommitSuccess success) {
         super(success);
-    }
-
-    @Override
-    protected TransactionCommitSuccess createSuccess(final TransactionIdentifier target, final long sequence) {
-        return new TransactionCommitSuccess(target, sequence);
     }
 }

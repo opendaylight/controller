@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
@@ -17,7 +17,15 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * {@link DestroyLocalHistoryRequest} and indicates it has removed all state attached to a particular local history.
  */
 public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLocalHistoryRequest> {
-    @Serial
+    interface SerialForm extends LocalHistoryRequest.SerialForm<PurgeLocalHistoryRequest> {
+        @Override
+        default PurgeLocalHistoryRequest readExternal(final ObjectInput in, final LocalHistoryIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new PurgeLocalHistoryRequest(target, sequence, replyTo);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public PurgeLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
@@ -29,8 +37,8 @@ public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLoc
     }
 
     @Override
-    protected AbstractLocalHistoryRequestProxy<PurgeLocalHistoryRequest> externalizableProxy(final ABIVersion version) {
-        return new PurgeLocalHistoryRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new PHR(this) : new PurgeLocalHistoryRequestProxyV1(this);
     }
 
     @Override

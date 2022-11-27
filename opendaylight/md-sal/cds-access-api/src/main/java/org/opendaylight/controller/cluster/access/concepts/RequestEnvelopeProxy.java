@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import java.io.Serial;
-
-final class RequestEnvelopeProxy extends AbstractEnvelopeProxy<Request<?, ?>> {
-    @Serial
+final class RequestEnvelopeProxy extends AbstractEnvelopeProxy<Request<?, ?>, RequestEnvelope>
+        implements RequestEnvelope.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -22,10 +21,5 @@ final class RequestEnvelopeProxy extends AbstractEnvelopeProxy<Request<?, ?>> {
 
     RequestEnvelopeProxy(final RequestEnvelope envelope) {
         super(envelope);
-    }
-
-    @Override
-    RequestEnvelope createEnvelope(final Request<?, ?> message, final long sessionId, final long txSequence) {
-        return new RequestEnvelope(message, sessionId, txSequence);
     }
 }
