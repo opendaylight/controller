@@ -10,8 +10,12 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
+import akka.serialization.JavaSerializer;
+import akka.serialization.Serialization;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import java.io.Serial;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -24,7 +28,25 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <C> Message type
  */
 public abstract class Request<T extends WritableIdentifier, C extends Request<T, C>> extends Message<T, C> {
-    @Serial
+    protected interface SerialForm<T extends WritableIdentifier, C extends Request<T, C>>
+            extends Message.SerialForm<T, C> {
+        @Override
+        default C readExternal(final ObjectInput in, final T target, final long sequence)
+                throws ClassNotFoundException, IOException {
+            return readExternal(in, target, sequence,
+                JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject()));
+        }
+
+        @NonNull C readExternal(@NonNull ObjectInput in, @NonNull T target, long sequence, @NonNull ActorRef replyTo)
+            throws IOException;
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final C msg) throws IOException {
+            out.writeObject(Serialization.serializedActorPath(msg.getReplyTo()));
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull ActorRef replyTo;
@@ -62,5 +84,5 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
     }
 
     @Override
-    protected abstract AbstractRequestProxy<T, C> externalizableProxy(ABIVersion version);
+    protected abstract SerialForm<T, C> externalizableProxy(ABIVersion version);
 }

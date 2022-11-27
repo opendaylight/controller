@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -17,7 +16,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * leader moved before the frontend retried the corresponding request.
  */
 public final class ClosedTransactionException extends RequestException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final boolean successful;

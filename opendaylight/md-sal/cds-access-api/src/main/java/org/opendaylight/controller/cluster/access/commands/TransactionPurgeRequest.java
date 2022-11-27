@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -18,20 +18,32 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * to the transaction and responds with a {@link TransactionPurgeResponse}.
  */
 public final class TransactionPurgeRequest extends TransactionRequest<TransactionPurgeRequest> {
-    @Serial
+    interface SerialForm extends TransactionRequest.SerialForm<TransactionPurgeRequest> {
+        @Override
+        default TransactionPurgeRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new TransactionPurgeRequest(target, sequence, replyTo);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
+
+    private TransactionPurgeRequest(final TransactionPurgeRequest request, final ABIVersion version) {
+        super(request, version);
+    }
 
     public TransactionPurgeRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
         super(target, sequence, replyTo);
     }
 
     @Override
-    protected TransactionPurgeRequestProxyV1 externalizableProxy(final ABIVersion version) {
-        return new TransactionPurgeRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new TPR(this) : new TransactionPurgeRequestProxyV1(this);
     }
 
     @Override
     protected TransactionPurgeRequest cloneAsVersion(final ABIVersion version) {
-        return this;
+        return new TransactionPurgeRequest(this, version);
     }
 }
