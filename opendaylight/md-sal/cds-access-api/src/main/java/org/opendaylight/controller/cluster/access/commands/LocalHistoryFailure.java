@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
+import java.io.DataInput;
+import java.io.IOException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -17,20 +18,37 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
  * Generic {@link RequestFailure} involving a {@link LocalHistoryRequest}.
  */
 public final class LocalHistoryFailure extends RequestFailure<LocalHistoryIdentifier, LocalHistoryFailure> {
-    @Serial
+    interface SerialForm extends RequestFailure.SerialForm<LocalHistoryIdentifier, LocalHistoryFailure> {
+        @Override
+        default LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+            return LocalHistoryIdentifier.readFrom(in);
+        }
+
+        @Override
+        default LocalHistoryFailure createFailure(final LocalHistoryIdentifier target, final long sequence,
+                final RequestException cause) {
+            return new LocalHistoryFailure(target, sequence, cause);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
+
+    private LocalHistoryFailure(final LocalHistoryFailure failure, final ABIVersion version) {
+        super(failure, version);
+    }
 
     LocalHistoryFailure(final LocalHistoryIdentifier target, final long sequence, final RequestException cause) {
         super(target, sequence, cause);
     }
 
     @Override
-    protected LocalHistoryFailure cloneAsVersion(final ABIVersion version) {
-        return this;
+    protected LocalHistoryFailure cloneAsVersion(final ABIVersion targetVersion) {
+        return new LocalHistoryFailure(this, targetVersion);
     }
 
     @Override
-    protected LocalHistoryFailureProxyV1 externalizableProxy(final ABIVersion version) {
-        return new LocalHistoryFailureProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new HF(this) : new LocalHistoryFailureProxyV1(this);
     }
 }

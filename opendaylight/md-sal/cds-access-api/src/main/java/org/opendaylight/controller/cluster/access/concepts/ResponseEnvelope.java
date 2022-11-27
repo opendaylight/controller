@@ -7,18 +7,39 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.base.Preconditions;
-import java.io.Serial;
+import static com.google.common.base.Preconditions.checkArgument;
+
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T> {
-    @Serial
+    interface SerialForm<T extends Response<?, ?>, E extends ResponseEnvelope<T>> extends Envelope.SerialForm<T, E> {
+        @Override
+        default void writeExternal(final ObjectOutput out, final @NonNull E envelope) throws IOException {
+            Envelope.SerialForm.super.writeExternal(out, envelope);
+            WritableObjects.writeLong(out, envelope.getExecutionTimeNanos());
+        }
+
+        @Override
+        default E readExternal(final ObjectInput in, final long sessionId, final long txSequence, final T message)
+                throws IOException {
+            return readExternal(in, sessionId, txSequence, message, WritableObjects.readLong(in));
+        }
+
+        E readExternal(ObjectInput in, long sessionId, long txSequence, T message, long executionTimeNanos);
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final long executionTimeNanos;
 
     ResponseEnvelope(final T message, final long sessionId, final long txSequence, final long executionTimeNanos) {
         super(message, sessionId, txSequence);
-        Preconditions.checkArgument(executionTimeNanos >= 0);
+        checkArgument(executionTimeNanos >= 0, "Negative executionTime");
         this.executionTimeNanos = executionTimeNanos;
     }
 
@@ -31,7 +52,4 @@ public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelop
     public final long getExecutionTimeNanos() {
         return executionTimeNanos;
     }
-
-    @Override
-    abstract AbstractResponseEnvelopeProxy<T> createProxy();
 }

@@ -11,13 +11,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
-import java.io.Serial;
 
 /**
  * General error raised when the recipient of a {@link Request} fails to process a request.
  */
 public final class RuntimeRequestException extends RequestException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public RuntimeRequestException(final String message, final Throwable cause) {
