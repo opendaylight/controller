@@ -51,9 +51,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-
+    public void writeExternal(final ObjectOutput out, final ConnectClientSuccess msg) throws IOException {
         out.writeObject(Serialization.serializedActorPath(backend));
         out.writeInt(maxMessages);
 
@@ -83,7 +81,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
     }
 
     @Override
-    protected ClientIdentifier readTarget(final DataInput in) throws IOException {
+    public ClientIdentifier readTarget(final DataInput in) throws IOException {
         return ClientIdentifier.readFrom(in);
     }
 }
