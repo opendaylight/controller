@@ -13,12 +13,18 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.DataInput;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serial;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * An abstract concept of a Message. This class cannot be instantiated directly, use its specializations {@link Request}
@@ -50,8 +56,45 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>> implements Immutable,
-        Serializable {
+public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>>
+        implements Immutable, Serializable {
+    /**
+     * Externalizable proxy for use with {@link Message} subclasses.
+     *
+     * @param <T> Target identifier type
+     * @param <C> Message class
+     */
+    protected interface SerialForm<T extends WritableIdentifier, C extends Message<T, C>> extends Externalizable {
+
+        @NonNull C message();
+
+        void resolveTo(C newMessage);
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            final var message = message();
+            message.getTarget().writeTo(out);
+            WritableObjects.writeLong(out, message.getSequence());
+            writeExternal(out, message);
+        }
+
+        void writeExternal(@NonNull ObjectOutput out, @NonNull C msg) throws IOException;
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+            final var target = verifyNotNull(readTarget(in));
+            final var sequence = WritableObjects.readLong(in);
+            resolveTo(verifyNotNull(readExternal(in, target, sequence)));
+        }
+
+        @NonNull C readExternal(@NonNull ObjectInput in, @NonNull T target, long sequence)
+            throws IOException, ClassNotFoundException;
+
+        Object readResolve();
+
+        @NonNull T readTarget(@NonNull DataInput in) throws IOException;
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -150,7 +193,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @param reqVersion Requested ABI version
      * @return Proxy for this object
      */
-    abstract @NonNull AbstractMessageProxy<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
+    protected abstract @NonNull SerialForm<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
 
     @Serial
     protected final Object writeReplace() {

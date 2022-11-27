@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -23,6 +26,27 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>>
         extends Response<T, C> {
+    /**
+     * Externalizable proxy for use with {@link RequestFailure} subclasses.
+     *
+     * @param <T> Target identifier type
+     */
+    protected interface SerialForm<T extends WritableIdentifier, C extends RequestFailure<T, C>>
+            extends Message.SerialForm<T, C> {
+        @Override
+        default C readExternal(final ObjectInput in, final T target, final long sequence)
+                throws IOException, ClassNotFoundException {
+            return createFailure(target, sequence, (RequestException) in.readObject());
+        }
+
+        @Override
+        default void writeExternal(final ObjectOutput out, final C msg) throws IOException {
+            out.writeObject(msg.getCause());
+        }
+
+        @NonNull C createFailure(@NonNull T target, long sequence, @NonNull RequestException failureCause);
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -63,5 +87,5 @@ public abstract class RequestFailure<T extends WritableIdentifier, C extends Req
     }
 
     @Override
-    protected abstract AbstractRequestFailureProxy<T, C> externalizableProxy(ABIVersion version);
+    protected abstract SerialForm<T, C> externalizableProxy(ABIVersion version);
 }

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -17,7 +17,15 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 public final class TransactionPurgeResponse extends TransactionSuccess<TransactionPurgeResponse> {
-    @Serial
+    interface SerialForm extends TransactionSuccess.SerialForm<TransactionPurgeResponse> {
+        @Override
+        default TransactionPurgeResponse readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence) {
+            return new TransactionPurgeResponse(target, sequence);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public TransactionPurgeResponse(final TransactionIdentifier identifier, final long sequence) {
@@ -25,8 +33,7 @@ public final class TransactionPurgeResponse extends TransactionSuccess<Transacti
     }
 
     @Override
-    protected AbstractTransactionSuccessProxy<TransactionPurgeResponse> externalizableProxy(
-            final ABIVersion version) {
+    protected SerialForm externalizableProxy(final ABIVersion version) {
         return new TransactionPurgeResponseProxyV1(this);
     }
 
