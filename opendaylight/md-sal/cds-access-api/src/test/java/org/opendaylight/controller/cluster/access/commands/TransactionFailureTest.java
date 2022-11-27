@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -21,7 +21,9 @@ public class TransactionFailureTest extends AbstractRequestFailureTest<Transacti
 
     @Test
     public void cloneAsVersionTest() {
-        final TransactionFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
-        assertEquals(OBJECT, clone);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        assertEquals(OBJECT.getSequence(), clone.getSequence());
+        assertEquals(OBJECT.getTarget(), clone.getTarget());
+        assertEquals(OBJECT.getCause(), clone.getCause());
     }
 }

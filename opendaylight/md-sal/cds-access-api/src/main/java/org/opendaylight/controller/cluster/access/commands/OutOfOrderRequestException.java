@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -15,7 +14,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * next expected sequence for the target. This is a hard error, as it indicates a Request is missing in the stream.
  */
 public final class OutOfOrderRequestException extends RequestException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public OutOfOrderRequestException(final long expectedRequest) {
