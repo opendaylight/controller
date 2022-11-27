@@ -7,16 +7,53 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import java.io.Serial;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Serializable {
-    @Serial
+    interface SerialForm<T extends Message<?, ?>, E extends Envelope<T>> extends Externalizable {
+
+        @NonNull E envelope();
+
+        void setEnvelope(@NonNull E envelope);
+
+        @java.io.Serial
+        Object readResolve();
+
+        @Override
+        default void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+            final byte header = WritableObjects.readLongHeader(in);
+            final var sessionId = WritableObjects.readFirstLong(in, header);
+            final var txSequence = WritableObjects.readSecondLong(in, header);
+            @SuppressWarnings("unchecked")
+            final var message = (T) in.readObject();
+            setEnvelope(readExternal(in, sessionId, txSequence, message));
+        }
+
+        E readExternal(ObjectInput in, long sessionId, long txSequence, T message) throws IOException;
+
+        @Override
+        default void writeExternal(final ObjectOutput out) throws IOException {
+            writeExternal(out, envelope());
+        }
+
+        default void writeExternal(final ObjectOutput out, final @NonNull E envelope) throws IOException {
+            WritableObjects.writeLongs(out, envelope.getSessionId(), envelope.getTxSequence());
+            out.writeObject(envelope.getMessage());
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull T message;
@@ -62,10 +99,10 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
                 .add("txSequence", Long.toHexString(txSequence)).add("message", message).toString();
     }
 
-    @Serial
+    @java.io.Serial
     final Object writeReplace() {
-        return createProxy();
+        return verifyNotNull(createProxy());
     }
 
-    abstract AbstractEnvelopeProxy<T> createProxy();
+    abstract @NonNull SerialForm<T, ?> createProxy();
 }

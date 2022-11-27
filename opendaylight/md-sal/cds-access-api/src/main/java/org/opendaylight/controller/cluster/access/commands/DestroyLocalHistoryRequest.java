@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
@@ -16,7 +16,15 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * Request to destroy a local history.
  */
 public final class DestroyLocalHistoryRequest extends LocalHistoryRequest<DestroyLocalHistoryRequest> {
-    @Serial
+    interface SerialForm extends LocalHistoryRequest.SerialForm<DestroyLocalHistoryRequest> {
+        @Override
+        default DestroyLocalHistoryRequest readExternal(final ObjectInput in, final LocalHistoryIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new DestroyLocalHistoryRequest(target, sequence, replyTo);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public DestroyLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence,
@@ -29,9 +37,8 @@ public final class DestroyLocalHistoryRequest extends LocalHistoryRequest<Destro
     }
 
     @Override
-    protected AbstractLocalHistoryRequestProxy<DestroyLocalHistoryRequest> externalizableProxy(
-            final ABIVersion version) {
-        return new DestroyLocalHistoryRequestProxyV1(this);
+    protected SerialForm externalizableProxy(final ABIVersion version) {
+        return ABIVersion.MAGNESIUM.lt(version) ? new DHR(this) : new DestroyLocalHistoryRequestProxyV1(this);
     }
 
     @Override

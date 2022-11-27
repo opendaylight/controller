@@ -9,14 +9,13 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A failure cause behind a {@link RequestFailure} to process a {@link Request}.
  */
 public abstract class RequestException extends Exception {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     protected RequestException(final @NonNull String message) {

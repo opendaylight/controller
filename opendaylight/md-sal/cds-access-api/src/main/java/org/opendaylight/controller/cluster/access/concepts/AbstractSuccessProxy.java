@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -18,7 +17,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
         extends AbstractResponseProxy<T, C> {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     protected AbstractSuccessProxy() {
@@ -28,11 +27,4 @@ public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C exten
     protected AbstractSuccessProxy(final @NonNull C success) {
         super(success);
     }
-
-    @Override
-    final C createResponse(final T target, final long sequence) {
-        return createSuccess(target, sequence);
-    }
-
-    protected abstract @NonNull C createSuccess(@NonNull T target, long sequence);
 }

@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
-import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -17,7 +16,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * been retired.
  */
 public final class DeadHistoryException extends RequestException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public DeadHistoryException(final RangeSet<UnsignedLong> purgedHistories) {
