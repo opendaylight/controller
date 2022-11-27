@@ -42,7 +42,7 @@ final class TransactionFailureProxyV1 extends AbstractRequestFailureProxy<Transa
     }
 
     @Override
-    protected TransactionIdentifier readTarget(final DataInput in) throws IOException {
+    public TransactionIdentifier readTarget(final DataInput in) throws IOException {
         return TransactionIdentifier.readFrom(in);
     }
 }
