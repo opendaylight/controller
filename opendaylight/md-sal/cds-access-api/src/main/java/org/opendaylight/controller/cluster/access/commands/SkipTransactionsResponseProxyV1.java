@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-
 /**
  * Externalizable proxy for use with {@link SkipTransactionsResponse}. It implements the initial (Phosphorus SR1)
  * serialization format.
  */
-final class SkipTransactionsResponseProxyV1 extends AbstractTransactionSuccessProxy<SkipTransactionsResponse> {
-    @Serial
+final class SkipTransactionsResponseProxyV1 extends AbstractTransactionSuccessProxy<SkipTransactionsResponse>
+        implements SkipTransactionsResponse.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -27,10 +25,5 @@ final class SkipTransactionsResponseProxyV1 extends AbstractTransactionSuccessPr
 
     SkipTransactionsResponseProxyV1(final SkipTransactionsResponse success) {
         super(success);
-    }
-
-    @Override
-    protected SkipTransactionsResponse createSuccess(final TransactionIdentifier target, final long sequence) {
-        return new SkipTransactionsResponse(target, sequence);
     }
 }

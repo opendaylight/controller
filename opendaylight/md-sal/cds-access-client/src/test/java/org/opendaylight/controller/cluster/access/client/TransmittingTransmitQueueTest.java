@@ -64,7 +64,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     @Override
     protected TransmitQueue.Transmitting createQueue() {
         doReturn(false).when(mockMessageSlicer).slice(any());
-        backendInfo = new BackendInfo(probe.ref(), "test", 0L, ABIVersion.BORON, 3);
+        backendInfo = new BackendInfo(probe.ref(), "test", 0L, ABIVersion.current(), 3);
         return new TransmitQueue.Transmitting(new TransmitQueue.Halted(0), 0, backendInfo, now(), mockMessageSlicer);
     }
 

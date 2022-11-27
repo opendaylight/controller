@@ -8,10 +8,18 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.ObjectInput;
 
 public final class RequestEnvelope extends Envelope<Request<?, ?>> {
-    @Serial
+    interface SerialForm extends Envelope.SerialForm<Request<?, ?>, RequestEnvelope> {
+        @Override
+        default RequestEnvelope readExternal(final ObjectInput in, final long sessionId, final long txSequence,
+                final Request<?, ?> message) {
+            return new RequestEnvelope(message, sessionId, txSequence);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public RequestEnvelope(final Request<?, ?> message, final long sessionId, final long txSequence) {
@@ -19,7 +27,12 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
     }
 
     @Override
-    RequestEnvelopeProxy createProxy() {
+    RE createProxy() {
+        return new RE(this);
+    }
+
+    @Override
+    RequestEnvelopeProxy legacyProxy() {
         return new RequestEnvelopeProxy(this);
     }
 
