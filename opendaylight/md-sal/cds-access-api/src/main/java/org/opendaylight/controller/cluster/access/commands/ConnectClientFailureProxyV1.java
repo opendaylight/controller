@@ -42,7 +42,7 @@ final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<Clie
     }
 
     @Override
-    protected ClientIdentifier readTarget(final DataInput in) throws IOException {
+    public ClientIdentifier readTarget(final DataInput in) throws IOException {
         return ClientIdentifier.readFrom(in);
     }
 }

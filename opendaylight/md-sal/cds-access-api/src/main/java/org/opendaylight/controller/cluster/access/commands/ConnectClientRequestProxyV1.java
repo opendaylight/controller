@@ -64,7 +64,7 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
     }
 
     @Override
-    protected ClientIdentifier readTarget(final DataInput in) throws IOException {
+    public ClientIdentifier readTarget(final DataInput in) throws IOException {
         return ClientIdentifier.readFrom(in);
     }
 }
