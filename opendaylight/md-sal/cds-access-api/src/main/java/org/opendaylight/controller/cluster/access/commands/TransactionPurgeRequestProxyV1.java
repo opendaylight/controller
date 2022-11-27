@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Externalizable proxy for use with {@link TransactionPurgeRequest}. It implements the initial (Boron)
@@ -17,7 +15,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @author Robert Varga
  */
-final class TransactionPurgeRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionPurgeRequest> {
+final class TransactionPurgeRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionPurgeRequest>
+        implements TransactionPurgeRequest.SerialForm {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,11 +29,5 @@ final class TransactionPurgeRequestProxyV1 extends AbstractTransactionRequestPro
 
     TransactionPurgeRequestProxyV1(final TransactionPurgeRequest request) {
         super(request);
-    }
-
-    @Override
-    protected TransactionPurgeRequest createRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyTo) {
-        return new TransactionPurgeRequest(target, sequence, replyTo);
     }
 }

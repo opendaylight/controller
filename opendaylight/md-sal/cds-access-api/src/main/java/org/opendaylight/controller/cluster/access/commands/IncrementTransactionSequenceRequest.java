@@ -9,9 +9,13 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * A blank transaction request. This is used to provide backfill requests in converted retransmit scenarios, such as
@@ -22,6 +26,23 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 public final class IncrementTransactionSequenceRequest extends
         AbstractReadTransactionRequest<IncrementTransactionSequenceRequest> {
+    interface SerialForm extends AbstractReadTransactionRequest.SerialForm<IncrementTransactionSequenceRequest> {
+        @Override
+        default void writeExternal(final ObjectOutput out, final IncrementTransactionSequenceRequest msg)
+                throws IOException {
+            AbstractReadTransactionRequest.SerialForm.super.writeExternal(out, msg);
+            WritableObjects.writeLong(out, msg.getIncrement());
+        }
+
+        @Override
+        default IncrementTransactionSequenceRequest readExternal(final ObjectInput in,
+                final TransactionIdentifier target, final long sequence, final ActorRef replyTo,
+                final boolean snapshotOnly) throws IOException {
+            return new IncrementTransactionSequenceRequest(target, sequence, replyTo, snapshotOnly,
+                WritableObjects.readLong(in));
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -44,7 +65,7 @@ public final class IncrementTransactionSequenceRequest extends
     }
 
     @Override
-    protected IncrementTransactionSequenceRequestProxyV1 externalizableProxy(final ABIVersion version) {
+    protected SerialForm externalizableProxy(final ABIVersion version) {
         return new IncrementTransactionSequenceRequestProxyV1(this);
     }
 

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -17,6 +19,19 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
  * Generic {@link RequestFailure} involving a {@link LocalHistoryRequest}.
  */
 public final class LocalHistoryFailure extends RequestFailure<LocalHistoryIdentifier, LocalHistoryFailure> {
+    interface SerialForm extends RequestFailure.SerialForm<LocalHistoryIdentifier, LocalHistoryFailure> {
+        @Override
+        default LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+            return LocalHistoryIdentifier.readFrom(in);
+        }
+
+        @Override
+        default LocalHistoryFailure createFailure(final LocalHistoryIdentifier target, final long sequence,
+                final RequestException cause) {
+            return new LocalHistoryFailure(target, sequence, cause);
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,7 +45,7 @@ public final class LocalHistoryFailure extends RequestFailure<LocalHistoryIdenti
     }
 
     @Override
-    protected LocalHistoryFailureProxyV1 externalizableProxy(final ABIVersion version) {
+    protected SerialForm externalizableProxy(final ABIVersion version) {
         return new LocalHistoryFailureProxyV1(this);
     }
 }

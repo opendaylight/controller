@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -17,6 +19,19 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Generic {@link RequestFailure} involving a {@link TransactionRequest}.
  */
 public final class TransactionFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
+    interface SerialForm extends RequestFailure.SerialForm<TransactionIdentifier, TransactionFailure> {
+        @Override
+        default TransactionIdentifier readTarget(final DataInput in) throws IOException {
+            return TransactionIdentifier.readFrom(in);
+        }
+
+        @Override
+        default TransactionFailure createFailure(final TransactionIdentifier target, final long sequence,
+                final RequestException cause) {
+            return new TransactionFailure(target, sequence, cause);
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,7 +45,7 @@ public final class TransactionFailure extends RequestFailure<TransactionIdentifi
     }
 
     @Override
-    protected TransactionFailureProxyV1 externalizableProxy(final ABIVersion version) {
+    protected SerialForm externalizableProxy(final ABIVersion version) {
         return new TransactionFailureProxyV1(this);
     }
 }

@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import java.io.Serial;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
  * Externalizable proxy for use with {@link PurgeLocalHistoryRequest}. It implements the initial (Boron) serialization
@@ -17,7 +15,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  *
  * @author Robert Varga
  */
-final class PurgeLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<PurgeLocalHistoryRequest> {
+final class PurgeLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<PurgeLocalHistoryRequest>
+        implements PurgeLocalHistoryRequest.SerialForm {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,11 +29,5 @@ final class PurgeLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestP
 
     PurgeLocalHistoryRequestProxyV1(final PurgeLocalHistoryRequest request) {
         super(request);
-    }
-
-    @Override
-    protected PurgeLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final long sequence,
-            final ActorRef replyTo) {
-        return new PurgeLocalHistoryRequest(target, sequence, replyTo);
     }
 }

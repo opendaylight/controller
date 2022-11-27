@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import java.io.Serial;
+import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -16,16 +16,24 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * A transaction request to perform the second, preCommit, step of the three-phase commit protocol.
  */
 public final class TransactionPreCommitRequest extends TransactionRequest<TransactionPreCommitRequest> {
-    @Serial
+    interface SerialForm extends TransactionRequest.SerialForm<TransactionPreCommitRequest> {
+        @Override
+        default TransactionPreCommitRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new TransactionPreCommitRequest(target, sequence, replyTo);
+        }
+    }
+
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public TransactionPreCommitRequest(final TransactionIdentifier target, final long sequence,
+    TransactionPreCommitRequest(final TransactionIdentifier target, final long sequence,
             final ActorRef replyTo) {
         super(target, sequence, replyTo);
     }
 
     @Override
-    protected TransactionPreCommitRequestProxyV1 externalizableProxy(final ABIVersion version) {
+    protected SerialForm externalizableProxy(final ABIVersion version) {
         return new TransactionPreCommitRequestProxyV1(this);
     }
 

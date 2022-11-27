@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
+import java.io.ObjectInput;
 import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -16,6 +17,14 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * Request to create a new local history.
  */
 public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateLocalHistoryRequest> {
+    interface SerialForm extends LocalHistoryRequest.SerialForm<CreateLocalHistoryRequest> {
+        @Override
+        default CreateLocalHistoryRequest readExternal(final ObjectInput in, final LocalHistoryIdentifier target,
+                final long sequence, final ActorRef replyTo) {
+            return new CreateLocalHistoryRequest(target, sequence, replyTo);
+        }
+    }
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -32,8 +41,7 @@ public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateL
     }
 
     @Override
-    protected AbstractLocalHistoryRequestProxy<CreateLocalHistoryRequest> externalizableProxy(
-            final ABIVersion version) {
+    protected SerialForm externalizableProxy(final ABIVersion version) {
         return new CreateLocalHistoryRequestProxyV1(this);
     }
 

@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -20,11 +17,9 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <T> Target identifier type
  */
 public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, C extends RequestFailure<T, C>>
-        extends AbstractResponseProxy<T, C> {
+        extends AbstractResponseProxy<T, C> implements RequestFailure.SerialForm<T, C> {
     @Serial
     private static final long serialVersionUID = 1L;
-
-    private RequestException cause;
 
     protected AbstractRequestFailureProxy() {
         // For Externalizable
@@ -32,26 +27,5 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
 
     protected AbstractRequestFailureProxy(final @NonNull C failure) {
         super(failure);
-        this.cause = failure.getCause();
     }
-
-    @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        out.writeObject(cause);
-    }
-
-    @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        cause = (RequestException) in.readObject();
-    }
-
-    @Override
-    final C createResponse(final T target, final long sequence) {
-        return createFailure(target, sequence, cause);
-    }
-
-    protected abstract @NonNull C createFailure(@NonNull T target, long sequence,
-            @NonNull RequestException failureCause);
 }
