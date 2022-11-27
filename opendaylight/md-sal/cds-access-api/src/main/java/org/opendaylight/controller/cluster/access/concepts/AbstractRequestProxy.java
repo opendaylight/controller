@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <T> Target identifier type
  */
 public abstract class AbstractRequestProxy<T extends WritableIdentifier, C extends Request<T, C>>
-        extends AbstractMessageProxy<T, C> {
+        extends AbstractMessageProxy<T, C> implements RequestProxy<T, C> {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -39,15 +39,15 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
+    public void writeExternal(final ObjectOutput out, final @NonNull C msg) throws IOException {
         out.writeObject(Serialization.serializedActorPath(replyTo));
     }
 
     @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
+    public void readExternal(final ObjectInput in, final @NonNull T target, final long sequence)
+            throws IOException, ClassNotFoundException {
         replyTo = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
+        super.readExternal(in, target, sequence);
     }
 
     @Override
