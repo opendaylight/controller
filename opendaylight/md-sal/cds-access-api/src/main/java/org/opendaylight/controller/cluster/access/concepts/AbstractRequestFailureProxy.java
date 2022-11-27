@@ -24,32 +24,23 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private RequestException cause;
-
     protected AbstractRequestFailureProxy() {
         // For Externalizable
     }
 
     protected AbstractRequestFailureProxy(final @NonNull C failure) {
         super(failure);
-        this.cause = failure.getCause();
     }
 
     @Override
-    public void writeExternal(final ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        out.writeObject(cause);
+    public C readExternal(final ObjectInput in, final T target, final long sequence)
+            throws IOException, ClassNotFoundException {
+        return createFailure(target, sequence, (RequestException) in.readObject());
     }
 
     @Override
-    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        cause = (RequestException) in.readObject();
-    }
-
-    @Override
-    final C createResponse(final T target, final long sequence) {
-        return createFailure(target, sequence, cause);
+    public final void writeExternal(final ObjectOutput out, final C msg) throws IOException {
+        out.writeObject(msg.getCause());
     }
 
     protected abstract @NonNull C createFailure(@NonNull T target, long sequence,
