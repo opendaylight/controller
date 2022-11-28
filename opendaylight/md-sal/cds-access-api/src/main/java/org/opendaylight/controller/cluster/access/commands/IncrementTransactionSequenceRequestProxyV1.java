@@ -11,11 +11,15 @@ import akka.actor.ActorRef;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 final class IncrementTransactionSequenceRequestProxyV1
         extends AbstractReadTransactionRequestProxyV1<IncrementTransactionSequenceRequest> {
+    @Serial
+    private static final long serialVersionUID = -7345885599575376005L;
+
     private long increment;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -27,7 +31,7 @@ final class IncrementTransactionSequenceRequestProxyV1
 
     IncrementTransactionSequenceRequestProxyV1(final IncrementTransactionSequenceRequest request) {
         super(request);
-        this.increment = request.getIncrement();
+        increment = request.getIncrement();
     }
 
     @Override

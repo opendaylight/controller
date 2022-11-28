@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -20,6 +21,9 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * @author Robert Varga
  */
 final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<ClientIdentifier, ConnectClientFailure> {
+    @Serial
+    private static final long serialVersionUID = 2688639416324657256L;
+
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
     // be able to create instances via reflection.
     @SuppressWarnings("checkstyle:RedundantModifier")
