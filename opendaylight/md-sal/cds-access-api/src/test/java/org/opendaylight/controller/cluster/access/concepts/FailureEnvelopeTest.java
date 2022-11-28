@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 import org.apache.commons.lang.SerializationUtils;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -34,6 +35,8 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
     }
 
     private static class MockRequestFailureProxy extends AbstractRequestFailureProxy<WritableIdentifier, MockFailure> {
+        @Serial
+        private static final long serialVersionUID = 5015515628523887221L;
 
         @SuppressWarnings("checkstyle:RedundantModifier")
         public MockRequestFailureProxy() {
@@ -54,10 +57,10 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         protected WritableIdentifier readTarget(final DataInput in) throws IOException {
             return TransactionIdentifier.readFrom(in);
         }
-
     }
 
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         MockFailure(final WritableIdentifier target, final RequestException cause, final long sequence) {

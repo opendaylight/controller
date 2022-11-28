@@ -15,6 +15,9 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
 public class CanCommitTransactionReply extends VersionedExternalizableMessage {
+    @java.io.Serial
+    private static final long serialVersionUID = 4355566635423934872L;
+
     private static final CanCommitTransactionReply YES =
             new CanCommitTransactionReply(true, DataStoreVersions.CURRENT_VERSION);
     private static final CanCommitTransactionReply NO =
