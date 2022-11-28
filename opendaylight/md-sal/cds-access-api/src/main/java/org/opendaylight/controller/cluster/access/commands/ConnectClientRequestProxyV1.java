@@ -12,6 +12,7 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -23,6 +24,9 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  * @author Robert Varga
  */
 final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> {
+    @Serial
+    private static final long serialVersionUID = 8439729661327852159L;
+
     private ABIVersion minVersion;
     private ABIVersion maxVersion;
 
@@ -35,8 +39,8 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
 
     ConnectClientRequestProxyV1(final ConnectClientRequest request) {
         super(request);
-        this.minVersion = request.getMinVersion();
-        this.maxVersion = request.getMaxVersion();
+        minVersion = request.getMinVersion();
+        maxVersion = request.getMaxVersion();
     }
 
     @Override

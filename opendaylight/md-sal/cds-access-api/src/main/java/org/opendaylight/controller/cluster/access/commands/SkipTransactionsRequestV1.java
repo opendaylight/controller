@@ -13,6 +13,7 @@ import com.google.common.primitives.UnsignedLong;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serial;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
@@ -22,6 +23,9 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * (Phosphorus SR1) serialization format.
  */
 final class SkipTransactionsRequestV1 extends AbstractTransactionRequestProxy<SkipTransactionsRequest> {
+    @Serial
+    private static final long serialVersionUID = -7493419007644462643L;
+
     private List<UnsignedLong> others;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
