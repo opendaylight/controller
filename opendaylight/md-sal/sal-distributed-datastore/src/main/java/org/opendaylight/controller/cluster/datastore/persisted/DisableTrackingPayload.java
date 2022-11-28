@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 public final class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
     private static final class Proxy extends AbstractProxy<ClientIdentifier> {
+        private static final long serialVersionUID = -5490519942445085251L;
+
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
@@ -15,6 +14,8 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
 public class CanCommitTransactionReply extends VersionedExternalizableMessage {
+    private static final long serialVersionUID = 4355566635423934872L;
+
     private static final CanCommitTransactionReply YES =
             new CanCommitTransactionReply(true, DataStoreVersions.CURRENT_VERSION);
     private static final CanCommitTransactionReply NO =

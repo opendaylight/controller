@@ -23,6 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  * @author Robert Varga
  */
 final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> {
+    private static final long serialVersionUID = 8439729661327852159L;
+
     private ABIVersion minVersion;
     private ABIVersion maxVersion;
 
@@ -35,8 +37,8 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
 
     ConnectClientRequestProxyV1(final ConnectClientRequest request) {
         super(request);
-        this.minVersion = request.getMinVersion();
-        this.maxVersion = request.getMaxVersion();
+        minVersion = request.getMinVersion();
+        maxVersion = request.getMaxVersion();
     }
 
     @Override

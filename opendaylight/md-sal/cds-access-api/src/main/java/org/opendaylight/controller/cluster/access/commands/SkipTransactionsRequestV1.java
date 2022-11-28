@@ -22,6 +22,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * (Phosphorus SR1) serialization format.
  */
 final class SkipTransactionsRequestV1 extends AbstractTransactionRequestProxy<SkipTransactionsRequest> {
+    private static final long serialVersionUID = -7493419007644462643L;
+
     private List<UnsignedLong> others;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to

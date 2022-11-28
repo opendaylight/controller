@@ -33,6 +33,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
     }
 
     private static class MockRequestFailureProxy extends AbstractRequestFailureProxy<WritableIdentifier, MockFailure> {
+        private static final long serialVersionUID = 5015515628523887221L;
 
         @SuppressWarnings("checkstyle:RedundantModifier")
         public MockRequestFailureProxy() {
@@ -53,7 +54,6 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         protected WritableIdentifier readTarget(final DataInput in) throws IOException {
             return TransactionIdentifier.readFrom(in);
         }
-
     }
 
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
