@@ -162,7 +162,7 @@ public enum PayloadVersion implements WritableObject {
         try {
             return valueOf(s);
         } catch (FutureVersionException | PastVersionException e) {
-            throw new IOException("Unsupported version", e);
+            throw new IOException(e);
         }
     }
 }
