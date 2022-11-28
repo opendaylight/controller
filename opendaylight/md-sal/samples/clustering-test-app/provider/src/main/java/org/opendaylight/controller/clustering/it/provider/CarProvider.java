@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -21,8 +24,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -35,6 +42,7 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
@@ -66,12 +74,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +93,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@Singleton
+@Component(service = { })
 @SuppressFBWarnings("SLF4J_ILLEGAL_PASSED_CLASS")
 public class CarProvider implements CarService {
     private static final Logger LOG_PURCHASE_CAR = LoggerFactory.getLogger(PurchaseCarProvider.class);
@@ -101,6 +116,8 @@ public class CarProvider implements CarService {
     private final AtomicBoolean registeredListener = new AtomicBoolean();
 
     private final Set<ListenerRegistration<?>> carsDclRegistrations = ConcurrentHashMap.newKeySet();
+
+    private final Set<ObjectRegistration<?>> regs = new HashSet<>();
     private final Set<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
             ConcurrentHashMap.newKeySet();
 
@@ -108,17 +125,33 @@ public class CarProvider implements CarService {
     private volatile boolean stopThread;
     private final AtomicReference<DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort>> commitCohortReg =
             new AtomicReference<>();
+    private final RpcProviderService rpcProviderService;
+    private final CarPurchaseService rpcImplementation;
 
-    public CarProvider(final DataBroker dataProvider, final EntityOwnershipService ownershipService,
-            final DOMDataBroker domDataBroker) {
+    @Inject
+    @Activate
+    public CarProvider(@Reference final DataBroker dataProvider,
+            @Reference final EntityOwnershipService ownershipService,
+            @Reference final DOMDataBroker domDataBroker,
+            @Reference final RpcProviderService rpcProviderService,
+            @Reference final CarPurchaseService rpcImplementation) {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
         this.domDataBroker = domDataBroker;
+        this.rpcProviderService = requireNonNull(rpcProviderService);
+        this.rpcImplementation = requireNonNull(rpcImplementation);
+
+        // Add global registration
+        regs.add(rpcProviderService.registerRpcImplementation(CarPurchaseService.class, rpcImplementation));
     }
 
+    @PreDestroy
+    @Deactivate
     public void close() {
         stopThread();
         closeCommitCohortRegistration();
+        regs.forEach(ObjectRegistration::close);
+        regs.clear();
     }
 
     private void stopThread() {
