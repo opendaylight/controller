@@ -20,10 +20,9 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PublishNotificationsTask implements Runnable {
-
+public final class PublishNotificationsTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(PublishNotificationsTask.class);
-    private static final int SECOND_AS_NANO = 1000000000;
+    private static final int SECOND_AS_NANO = 1_000_000_000;
 
     private final NotificationPublishService notificationPublishService;
     private final String notificationId;
@@ -44,9 +43,9 @@ public class PublishNotificationsTask implements Runnable {
         this.notificationPublishService = requireNonNull(notificationPublishService);
         this.notificationId = requireNonNull(notificationId);
         checkArgument(secondsToTake > 0);
-        this.timeToTake = secondsToTake * SECOND_AS_NANO;
+        timeToTake = secondsToTake * SECOND_AS_NANO;
         checkArgument(maxPerSecond > 0);
-        this.delay = SECOND_AS_NANO / maxPerSecond;
+        delay = SECOND_AS_NANO / maxPerSecond;
 
         LOG.debug("Delay : {}", delay);
     }

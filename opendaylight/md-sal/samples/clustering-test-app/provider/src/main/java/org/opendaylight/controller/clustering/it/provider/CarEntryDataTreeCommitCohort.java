@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
+public final class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(CarEntryDataTreeCommitCohort.class);
 
     private static final QName YEAR_QNAME = QName.create(Cars.QNAME, "year").intern();

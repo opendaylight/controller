@@ -16,6 +16,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
@@ -34,11 +37,16 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PeopleProvider implements PeopleService, AutoCloseable {
-
+@Singleton
+@Component(service = { })
+public final class PeopleProvider implements PeopleService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(PeopleProvider.class);
 
     private final Set<ObjectRegistration<?>> regs = new HashSet<>();
@@ -46,8 +54,11 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
     private final RpcProviderService rpcProviderService;
     private final CarPurchaseService rpcImplementation;
 
-    public PeopleProvider(final DataBroker dataProvider, final RpcProviderService rpcProviderService,
-            final CarPurchaseService rpcImplementation) {
+    @Inject
+    @Activate
+    public PeopleProvider(@Reference final DataBroker dataProvider,
+            @Reference final RpcProviderService rpcProviderService,
+            @Reference final CarPurchaseService rpcImplementation) {
         this.dataProvider = requireNonNull(dataProvider);
         this.rpcProviderService = requireNonNull(rpcProviderService);
         this.rpcImplementation = requireNonNull(rpcImplementation);
@@ -91,6 +102,8 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
         return futureResult;
     }
 
+    @PreDestroy
+    @Deactivate
     @Override
     public void close() {
         regs.forEach(ObjectRegistration::close);

@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
+public final class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(IdIntsListener.class);
     private static final long SECOND_AS_NANO = 1000000000;
 

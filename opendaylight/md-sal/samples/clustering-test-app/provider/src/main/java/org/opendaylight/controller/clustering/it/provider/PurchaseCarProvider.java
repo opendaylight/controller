@@ -12,6 +12,8 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutput;
@@ -20,15 +22,22 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable {
+@Singleton
+@Component(service = CarPurchaseService.class)
+public final class PurchaseCarProvider implements CarPurchaseService {
     private static final Logger LOG = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
     private final NotificationPublishService notificationProvider;
 
-    public PurchaseCarProvider(final NotificationPublishService notificationProvider) {
+    @Inject
+    @Activate
+    public PurchaseCarProvider(@Reference final NotificationPublishService notificationProvider) {
         this.notificationProvider = requireNonNull(notificationProvider);
     }
 
@@ -42,10 +51,5 @@ public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable {
             .build()),
             result -> RpcResultBuilder.success(new BuyCarOutputBuilder().build()).build(),
             MoreExecutors.directExecutor());
-    }
-
-    @Override
-    public void close() {
-
     }
 }

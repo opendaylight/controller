@@ -20,7 +20,9 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
@@ -109,21 +111,27 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
+@Singleton
+@Component(service = {})
 public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalLowLevelTestProvider.class);
 
-    private final ObjectRegistration<OdlMdsalLowlevelControlService> registration;
+    private final Registration registration;
     private final DistributedDataStoreInterface configDataStore;
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
     private final DOMDataBroker domDataBroker;
@@ -145,20 +153,18 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
     private IdIntsListener idIntsListener;
     private final Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
 
+    @Inject
+    @Activate
     public MdsalLowLevelTestProvider(
-                                     // FIXME: do not depend on this service
-                                     final RpcProviderService rpcRegistry,
-                                     final DOMRpcProviderService domRpcService,
-                                     final ClusterSingletonServiceProvider singletonService,
-                                     // FIXME: do not depend on this service
-                                     final DOMSchemaService schemaService,
-                                     final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
-                                     final NotificationPublishService notificationPublishService,
-                                     final NotificationService notificationService,
-                                     final DOMDataBroker domDataBroker,
-                                     final DistributedDataStoreInterface configDataStore,
-                                     // FIXME: do not depend on this service
-                                     final ActorSystemProvider actorSystemProvider) {
+            @Reference final RpcProviderService rpcRegistry,
+            @Reference final DOMRpcProviderService domRpcService,
+            @Reference final ClusterSingletonServiceProvider singletonService,
+            @Reference final DOMSchemaService schemaService,
+            @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+            @Reference final NotificationPublishService notificationPublishService,
+            @Reference final NotificationService notificationService,
+            @Reference final DOMDataBroker domDataBroker,
+            @Reference final DistributedDataStoreInterface configDataStore) {
         this.domRpcService = domRpcService;
         this.singletonService = singletonService;
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;
@@ -170,6 +176,12 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         domDataTreeChangeService = domDataBroker.getExtensions().getInstance(DOMDataTreeChangeService.class);
 
         registration = rpcRegistry.registerRpcImplementation(OdlMdsalLowlevelControlService.class, this);
+    }
+
+    @PreDestroy
+    @Deactivate
+    public void close() {
+        registration.close();
     }
 
     @Override

@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class SingletonGetConstantService implements DOMRpcImplementation, ClusterSingletonService {
-
     private static final Logger LOG = LoggerFactory.getLogger(SingletonGetConstantService.class);
 
     private static final QNameModule MODULE = QNameModule.create(

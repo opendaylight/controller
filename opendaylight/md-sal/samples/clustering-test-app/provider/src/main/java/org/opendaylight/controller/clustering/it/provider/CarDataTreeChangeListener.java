@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ryan Goulding (ryandgoulding@gmail.com)
  */
-public class CarDataTreeChangeListener implements DataTreeChangeListener<Cars> {
+public final class CarDataTreeChangeListener implements DataTreeChangeListener<Cars> {
     private static final Logger LOG = LoggerFactory.getLogger(CarDataTreeChangeListener.class);
 
-    @java.lang.Override
+    @Override
     public void onDataTreeChanged(final java.util.Collection<DataTreeModification<Cars>> changes) {
         if (LOG.isTraceEnabled()) {
             for (DataTreeModification<Cars> change : changes) {
