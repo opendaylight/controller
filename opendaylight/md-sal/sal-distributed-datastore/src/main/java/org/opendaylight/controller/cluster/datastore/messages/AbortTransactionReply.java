@@ -5,12 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
 public class AbortTransactionReply extends VersionedExternalizableMessage {
+    @java.io.Serial
+    private static final long serialVersionUID = 7251132353204199793L;
     private static final AbortTransactionReply INSTANCE = new AbortTransactionReply();
 
     public AbortTransactionReply() {
