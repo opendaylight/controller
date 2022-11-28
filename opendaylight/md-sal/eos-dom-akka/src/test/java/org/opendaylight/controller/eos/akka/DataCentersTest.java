@@ -18,6 +18,7 @@ import java.util.List;
 import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 
@@ -57,6 +58,7 @@ public class DataCentersTest extends AbstractNativeEosTest {
     }
 
     @Test
+    @Ignore
     public void testDatacenterActivation() throws Exception {
         registerCandidates(node1, ENTITY_1, "member-1");
         registerCandidates(node3, ENTITY_1, "member-3");
