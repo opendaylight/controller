@@ -17,6 +17,8 @@ import java.io.ObjectOutput;
  * @author Thomas Pantelis
  */
 public class EmptyExternalizable implements Externalizable {
+    @java.io.Serial
+    private static final long serialVersionUID = 8413772905242947276L;
 
     @Override
     public void readExternal(ObjectInput in) {

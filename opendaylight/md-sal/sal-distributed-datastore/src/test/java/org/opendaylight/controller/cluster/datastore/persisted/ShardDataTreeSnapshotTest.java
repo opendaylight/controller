@@ -123,6 +123,9 @@ public class ShardDataTreeSnapshotTest {
         }
 
         private static class Proxy implements Externalizable {
+            @java.io.Serial
+            private static final long serialVersionUID = 7534948936595056176L;
+
             private String data;
 
             @SuppressWarnings("checkstyle:RedundantModifier")
