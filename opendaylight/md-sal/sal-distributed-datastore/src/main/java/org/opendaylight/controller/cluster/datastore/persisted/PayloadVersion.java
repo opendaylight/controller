@@ -123,7 +123,7 @@ public enum PayloadVersion implements WritableObject {
      * @return Current {@link PayloadVersion}
      */
     public static @NonNull PayloadVersion current() {
-        return MAGNESIUM;
+        return CHLORINE_SR2;
     }
 
     /**

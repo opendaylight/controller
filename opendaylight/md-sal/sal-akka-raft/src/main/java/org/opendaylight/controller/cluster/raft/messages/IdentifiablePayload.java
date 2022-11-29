@@ -10,16 +10,23 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static com.google.common.base.Verify.verifyNotNull;
 
 import java.io.Externalizable;
+import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 
-public abstract class IdentifiablePayload<T extends Identifier> extends Payload implements Identifiable<T> {
+public abstract class IdentifiablePayload<T extends Identifier> extends Payload
+        implements Identifiable<T>, MigratedSerializable {
     private static final long serialVersionUID = 1L;
 
     private final boolean legacy;
 
     protected IdentifiablePayload(final boolean legacy) {
         this.legacy = legacy;
+    }
+
+    @Override
+    public final boolean isMigrated() {
+        return legacy;
     }
 
     @Override
@@ -34,7 +41,7 @@ public abstract class IdentifiablePayload<T extends Identifier> extends Payload 
     protected abstract int newSize();
 
     @Override
-    protected final Object writeReplace() {
+    public final Object writeReplace() {
         return verifyNotNull(legacy ? legacyProxy() : proxy());
     }
 
