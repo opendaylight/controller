@@ -126,22 +126,12 @@ public enum PayloadVersion implements WritableObject {
      */
     public static @NonNull PayloadVersion valueOf(final short version)
             throws FutureVersionException, PastVersionException {
-        switch (Short.toUnsignedInt(version)) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                throw new PastVersionException(version, SODIUM_SR1);
-            case 7:
-                return SODIUM_SR1;
-            case 8:
-                return MAGNESIUM;
-            default:
-                throw new FutureVersionException(version, MAGNESIUM);
-        }
+        return switch (Short.toUnsignedInt(version)) {
+            case 0, 1, 2, 3, 4, 5, 6 -> throw new PastVersionException(version, SODIUM_SR1);
+            case 7 -> SODIUM_SR1;
+            case 8 -> MAGNESIUM;
+            default -> throw new FutureVersionException(version, MAGNESIUM);
+        };
     }
 
     @Override
