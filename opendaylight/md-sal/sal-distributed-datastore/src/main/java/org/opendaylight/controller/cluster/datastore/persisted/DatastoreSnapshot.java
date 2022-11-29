@@ -37,7 +37,7 @@ public class DatastoreSnapshot implements Serializable {
         void resolveTo(@NonNull DatastoreSnapshot newDatastoreSnapshot);
 
         @Override
-        default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        default void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             final var type = (String)in.readObject();
             final var snapshot = (ShardManagerSnapshot) in.readObject();
 
@@ -51,7 +51,7 @@ public class DatastoreSnapshot implements Serializable {
         }
 
         @Override
-        default void writeExternal(ObjectOutput out) throws IOException {
+        default void writeExternal(final ObjectOutput out) throws IOException {
             final var datastoreSnapshot = datastoreSnapshot();
             out.writeObject(datastoreSnapshot.type);
             out.writeObject(datastoreSnapshot.shardManagerSnapshot);
@@ -85,7 +85,7 @@ public class DatastoreSnapshot implements Serializable {
         }
 
         @Override
-        public void resolveTo(DatastoreSnapshot newDatastoreSnapshot) {
+        public void resolveTo(final DatastoreSnapshot newDatastoreSnapshot) {
             datastoreSnapshot = requireNonNull(newDatastoreSnapshot);
         }
 
@@ -101,8 +101,8 @@ public class DatastoreSnapshot implements Serializable {
     private final ShardManagerSnapshot shardManagerSnapshot;
     private final @NonNull ImmutableList<ShardSnapshot> shardSnapshots;
 
-    public DatastoreSnapshot(@NonNull String type, @Nullable ShardManagerSnapshot shardManagerSnapshot,
-            @NonNull List<ShardSnapshot> shardSnapshots) {
+    public DatastoreSnapshot(final @NonNull String type, final @Nullable ShardManagerSnapshot shardManagerSnapshot,
+            final @NonNull List<ShardSnapshot> shardSnapshots) {
         this.type = requireNonNull(type);
         this.shardManagerSnapshot = shardManagerSnapshot;
         this.shardSnapshots = ImmutableList.copyOf(shardSnapshots);
@@ -134,14 +134,14 @@ public class DatastoreSnapshot implements Serializable {
             void resolveTo(String name, Snapshot snapshot);
 
             @Override
-            default void writeExternal(ObjectOutput out) throws IOException {
+            default void writeExternal(final ObjectOutput out) throws IOException {
                 final var shardSnapshot = shardSnapshot();
                 out.writeObject(shardSnapshot.name);
                 out.writeObject(shardSnapshot.snapshot);
             }
 
             @Override
-            default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            default void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
                 resolveTo((String) in.readObject(), (Snapshot) in.readObject());
             }
         }
@@ -183,7 +183,7 @@ public class DatastoreSnapshot implements Serializable {
         private final @NonNull String name;
         private final @NonNull Snapshot snapshot;
 
-        public ShardSnapshot(@NonNull String name, @NonNull Snapshot snapshot) {
+        public ShardSnapshot(final @NonNull String name, final @NonNull Snapshot snapshot) {
             this.name = requireNonNull(name);
             this.snapshot = requireNonNull(snapshot);
         }
