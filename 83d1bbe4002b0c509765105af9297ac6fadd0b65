@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4880277d_672b5afc",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/test/java/org/opendaylight/controller/eos/akka/DataCentersTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2022-11-29T17:48:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fed79276_13e569db",
+      "revId": "83d1bbe4002b0c509765105af9297ac6fadd0b65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c466fd17_1df4c1ac",
@@ -31,6 +49,24 @@
       "writtenOn": "2022-11-18T19:16:47Z",
       "side": 1,
       "message": "not necessary, just rebase and unload bundles akka-agregator, repackaged-akka and repackaged-akka-jar",
+      "revId": "83d1bbe4002b0c509765105af9297ac6fadd0b65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad84fd13_6ae399ff",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2022-11-29T17:48:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c466fd17_1df4c1ac",
       "revId": "83d1bbe4002b0c509765105af9297ac6fadd0b65",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
