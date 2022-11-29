@@ -46,7 +46,7 @@ class RaftActorRecoverySupport {
     RaftActorRecoverySupport(final RaftActorContext context, final RaftActorRecoveryCohort cohort) {
         this.context = context;
         this.cohort = cohort;
-        this.log = context.getLogger();
+        log = context.getLogger();
     }
 
     boolean handleRecoveryMessage(final Object message, final PersistentDataProvider persistentProvider) {
@@ -254,7 +254,7 @@ class RaftActorRecoverySupport {
         final SnapshotManager snapshotManager = context.getSnapshotManager();
         if (snapshotManager.capture(logEntry, -1)) {
             log.info("Capturing snapshot, resetting timer for the next recovery snapshot interval.");
-            this.recoverySnapshotTimer.reset().start();
+            recoverySnapshotTimer.reset().start();
         } else {
             log.info("SnapshotManager is not able to capture snapshot at this time. It will be retried "
                 + "again with the next recovered entry.");
@@ -262,7 +262,7 @@ class RaftActorRecoverySupport {
     }
 
     private boolean shouldTakeRecoverySnapshot() {
-        return this.recoverySnapshotTimer != null && this.recoverySnapshotTimer.elapsed(TimeUnit.SECONDS)
+        return recoverySnapshotTimer != null && recoverySnapshotTimer.elapsed(TimeUnit.SECONDS)
             >= context.getConfigParams().getRecoverySnapshotIntervalSeconds();
     }
 
@@ -338,6 +338,6 @@ class RaftActorRecoverySupport {
     }
 
     private static boolean isMigratedSerializable(final Object message) {
-        return message instanceof MigratedSerializable && ((MigratedSerializable)message).isMigrated();
+        return message instanceof MigratedSerializable migrated && migrated.isMigrated();
     }
 }
