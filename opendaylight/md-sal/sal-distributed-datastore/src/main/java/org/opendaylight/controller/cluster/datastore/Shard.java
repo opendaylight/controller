@@ -1239,15 +1239,10 @@ public class Shard extends RaftActor {
         }
 
         public TreeType getTreeType() {
-            switch (datastoreContext.getLogicalStoreType()) {
-                case CONFIGURATION:
-                    return TreeType.CONFIGURATION;
-                case OPERATIONAL:
-                    return TreeType.OPERATIONAL;
-                default:
-                    throw new IllegalStateException("Unhandled logical store type "
-                            + datastoreContext.getLogicalStoreType());
-            }
+            return switch (datastoreContext.getLogicalStoreType()) {
+                case CONFIGURATION -> TreeType.CONFIGURATION;
+                case OPERATIONAL -> TreeType.OPERATIONAL;
+            };
         }
 
         protected void verify() {
