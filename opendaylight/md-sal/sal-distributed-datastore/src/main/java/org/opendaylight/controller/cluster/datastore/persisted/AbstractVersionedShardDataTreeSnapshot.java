@@ -34,6 +34,7 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
             case SODIUM_SR1:
                 return new ShardSnapshotState(readSnapshot(in), true);
             case MAGNESIUM:
+            case CHLORINE_SR2:
                 return new ShardSnapshotState(readSnapshot(in), false);
             case TEST_FUTURE_VERSION:
             case TEST_PAST_VERSION:
@@ -77,6 +78,7 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
         switch (version) {
             case SODIUM_SR1:
             case MAGNESIUM:
+            case CHLORINE_SR2:
                 // Sodium and Magnesium snapshots use Java Serialization, but differ in stream format
                 out.writeObject(this);
                 return;

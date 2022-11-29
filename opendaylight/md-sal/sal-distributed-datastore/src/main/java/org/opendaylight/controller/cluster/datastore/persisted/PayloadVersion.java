@@ -72,6 +72,17 @@ public enum PayloadVersion implements WritableObject {
     },
 
     /**
+     * ABI version shipped enabled {@code 2022.09 Chlorine SR2}. This version revises the serialization format of
+     * payloads proxies to reduce their size. Otherwise this format is equivalent to {@link #MAGNESIUM}.
+     */
+    CHLORINE_SR2(9) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    },
+
+    /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
      */
     @VisibleForTesting
@@ -130,7 +141,8 @@ public enum PayloadVersion implements WritableObject {
             case 0, 1, 2, 3, 4, 5, 6 -> throw new PastVersionException(version, SODIUM_SR1);
             case 7 -> SODIUM_SR1;
             case 8 -> MAGNESIUM;
-            default -> throw new FutureVersionException(version, MAGNESIUM);
+            case 9 -> CHLORINE_SR2;
+            default -> throw new FutureVersionException(version, CHLORINE_SR2);
         };
     }
 
