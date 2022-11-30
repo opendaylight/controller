@@ -10,10 +10,15 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * Serialization proxy for {@link FrontendIdentifier}.
  */
-final class FI implements FrontendIdentifier.SerialForm {
+final class FI implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,17 +34,18 @@ final class FI implements FrontendIdentifier.SerialForm {
     }
 
     @Override
-    public FrontendIdentifier identifier() {
+    public void readExternal(final ObjectInput in) throws IOException {
+        identifier = new FrontendIdentifier(MemberName.readFrom(in), FrontendType.readFrom(in));
+    }
+
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        identifier.getMemberName().writeTo(out);
+        identifier.getClientType().writeTo(out);
+    }
+
+    @java.io.Serial
+    private Object readResolve() {
         return verifyNotNull(identifier);
-    }
-
-    @Override
-    public void setIdentifier(final FrontendIdentifier identifier) {
-        this.identifier = requireNonNull(identifier);
-    }
-
-    @Override
-    public Object readResolve() {
-        return identifier();
     }
 }
