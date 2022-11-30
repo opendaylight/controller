@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  *
  * @param <T> Target identifier type
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 public abstract class AbstractRequestProxy<T extends WritableIdentifier, C extends Request<T, C>>
         extends AbstractMessageProxy<T, C> implements Request.SerialForm<T, C> {
     @java.io.Serial
