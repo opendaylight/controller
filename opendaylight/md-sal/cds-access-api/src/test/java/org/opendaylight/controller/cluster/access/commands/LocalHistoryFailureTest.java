@@ -7,21 +7,21 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class LocalHistoryFailureTest extends AbstractRequestFailureTest<LocalHistoryFailure> {
     private static final LocalHistoryFailure OBJECT = new LocalHistoryFailure(HISTORY_IDENTIFIER, 0, CAUSE);
 
-    @Override
-    LocalHistoryFailure object() {
-        return OBJECT;
+    public LocalHistoryFailureTest() {
+        super(OBJECT, 392);
     }
 
     @Test
     public void cloneAsVersionTest() {
         final LocalHistoryFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, clone);
     }
 }

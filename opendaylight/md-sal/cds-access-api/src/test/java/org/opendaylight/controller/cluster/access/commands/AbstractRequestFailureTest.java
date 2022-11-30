@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.apache.commons.lang.SerializationUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -29,26 +32,36 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
             HISTORY_IDENTIFIER, 0);
     protected static final RequestException CAUSE = new RuntimeRequestException("fail", new Throwable());
+    private static final int CAUSE_SIZE = SerializationUtils.serialize(CAUSE).length;
 
-    abstract T object();
+    private final T object;
+    private final int expectedSize;
+
+    protected AbstractRequestFailureTest(final T object, final int baseSize) {
+        this.object = requireNonNull(object);
+        this.expectedSize = baseSize + CAUSE_SIZE;
+    }
 
     @Test
     public void getCauseTest() {
-        Assert.assertEquals(CAUSE, object().getCause());
+        assertEquals(CAUSE, object.getCause());
     }
 
     @Test
     public void isHardFailureTest() {
-        Assert.assertTrue(object().isHardFailure());
+        assertTrue(object.isHardFailure());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void serializationTest() {
-        final Object deserialize = SerializationUtils.clone(object());
+        final var bytes = SerializationUtils.serialize(object);
+        assertEquals(expectedSize, bytes.length);
 
-        Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
-        Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
-        Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
+        @SuppressWarnings("unchecked")
+        final var deserialize = (T) SerializationUtils.deserialize(bytes);
+
+        assertEquals(object.getTarget(), deserialize.getTarget());
+        assertEquals(object.getVersion(), deserialize.getVersion());
+        assertEquals(object.getSequence(), deserialize.getSequence());
     }
 }
