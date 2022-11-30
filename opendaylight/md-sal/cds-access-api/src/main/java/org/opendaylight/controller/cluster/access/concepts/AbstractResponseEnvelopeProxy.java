@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+@Deprecated(since = "7.0.0", forRemoval = true)
 abstract class AbstractResponseEnvelopeProxy<T extends Response<?, ?>, E extends ResponseEnvelope<T>>
         extends AbstractEnvelopeProxy<T, E> {
     @java.io.Serial

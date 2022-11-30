@@ -16,7 +16,6 @@ import org.opendaylight.controller.cluster.access.client.AbstractClientConnectio
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -95,7 +94,7 @@ class TransactionTester<T extends AbstractProxyTransaction> {
         }
 
         @Override
-        protected AbstractRequestFailureProxy<TransactionIdentifier, TransactionFailure> externalizableProxy(
+        protected RequestFailure.SerialForm<TransactionIdentifier, TransactionFailure> externalizableProxy(
                 final ABIVersion version) {
             throw new UnsupportedOperationException("Not implemented");
         }

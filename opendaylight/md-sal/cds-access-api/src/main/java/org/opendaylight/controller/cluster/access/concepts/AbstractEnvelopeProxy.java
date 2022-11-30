@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+@Deprecated(since = "7.0.0", forRemoval = true)
 abstract class AbstractEnvelopeProxy<T extends Message<?, ?>, E extends Envelope<T>>
         implements Envelope.SerialForm<T, E> {
     @java.io.Serial

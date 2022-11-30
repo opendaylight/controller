@@ -16,11 +16,10 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 /**
  * Abstract Externalizable proxy for use with {@link Message} subclasses.
  *
- * @author Robert Varga
- *
  * @param <T> Target identifier type
  * @param <C> Message class
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Message<T, C>>
         implements Message.SerialForm<T, C> {
     @java.io.Serial

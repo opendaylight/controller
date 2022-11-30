@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.access.commands;
 /**
  * Externalizable proxy for use with {@link TransactionPreCommitSuccess}. It implements the initial (Boron)
  * serialization format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class TransactionPreCommitSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionPreCommitSuccess>
         implements TransactionPreCommitSuccess.SerialForm {
     @java.io.Serial
