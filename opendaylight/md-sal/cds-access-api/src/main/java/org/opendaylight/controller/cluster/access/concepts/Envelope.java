@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
@@ -17,6 +16,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -101,8 +101,10 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
 
     @java.io.Serial
     final Object writeReplace() {
-        return verifyNotNull(createProxy());
+        return ABIVersion.MAGNESIUM.lt(message.getVersion()) ? createProxy() : legacyProxy();
     }
 
     abstract @NonNull SerialForm<T, ?> createProxy();
+
+    abstract @NonNull AbstractEnvelopeProxy<T, ?> legacyProxy();
 }
