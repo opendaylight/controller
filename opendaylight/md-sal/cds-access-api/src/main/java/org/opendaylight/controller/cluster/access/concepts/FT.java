@@ -7,39 +7,47 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Serialization proxy for {@link FrontendType}.
  */
-final class FT implements FrontendType.SerialForm {
+final class FT implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private FrontendType type;
+    private byte[] serialized;
 
     @SuppressWarnings("checkstyle:RedundantModifier")
     public FT() {
         // for Externalizable
     }
 
-    FT(final FrontendType type) {
-        this.type = requireNonNull(type);
+    FT(final byte[] serialized) {
+        this.serialized = requireNonNull(serialized);
     }
 
     @Override
-    public FrontendType type() {
-        return verifyNotNull(type);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeInt(serialized.length);
+        out.write(serialized);
     }
 
     @Override
-    public void setType(final FrontendType type) {
-        this.type = requireNonNull(type);
+    public void readExternal(final ObjectInput in) throws IOException {
+        serialized = new byte[in.readInt()];
+        in.readFully(serialized);
     }
 
-    @Override
-    public Object readResolve() {
-        return type();
+    @java.io.Serial
+    private Object readResolve() {
+        // TODO: consider caching instances here
+        return new FrontendType(new String(serialized, StandardCharsets.UTF_8), serialized);
     }
 }
