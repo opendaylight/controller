@@ -13,10 +13,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Abstract base class for serialization proxies associated with {@link TransactionRequest}s.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 abstract class AbstractTransactionRequestProxy<T extends TransactionRequest<T>>
         extends AbstractRequestProxy<TransactionIdentifier, T> implements TransactionRequest.SerialForm<T> {
     @java.io.Serial
