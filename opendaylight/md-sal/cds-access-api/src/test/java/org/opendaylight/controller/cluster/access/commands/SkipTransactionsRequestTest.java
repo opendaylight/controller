@@ -19,7 +19,7 @@ public class SkipTransactionsRequestTest extends AbstractTransactionRequestTest<
             TRANSACTION_IDENTIFIER, 0, ACTOR_REF, List.of(UnsignedLong.ONE));
 
     public SkipTransactionsRequestTest() {
-        super(OBJECT, 403);
+        super(OBJECT, 109, 403);
     }
 
     @Test
