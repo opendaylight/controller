@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -16,9 +15,8 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest<ModifyTransactionSuccess> {
     private static final ModifyTransactionSuccess OBJECT = new ModifyTransactionSuccess(TRANSACTION_IDENTIFIER, 0);
 
-    @Override
-    protected ModifyTransactionSuccess object() {
-        return OBJECT;
+    public ModifyTransactionSuccessTest() {
+        super(OBJECT, 486);
     }
 
     @Test
@@ -27,10 +25,5 @@ public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest
         assertEquals(ABIVersion.BORON, clone.getVersion());
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
-    }
-
-    @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        assertTrue(deserialize instanceof ModifyTransactionSuccess);
     }
 }
