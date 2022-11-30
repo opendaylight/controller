@@ -10,10 +10,12 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.ObjectInput;
+
 /**
  * Serialization proxy for {@link RequestEnvelope}.
  */
-final class RE implements RequestEnvelope.SerialForm {
+final class RE implements Envelope.SerialForm<Request<?, ?>, RequestEnvelope> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -36,6 +38,12 @@ final class RE implements RequestEnvelope.SerialForm {
     @Override
     public void setEnvelope(final RequestEnvelope envelope) {
         this.envelope = requireNonNull(envelope);
+    }
+
+    @Override
+    public RequestEnvelope readExternal(final ObjectInput in, final long sessionId, final long txSequence,
+            final Request<?, ?> message) {
+        return new RequestEnvelope(message, sessionId, txSequence);
     }
 
     @Override

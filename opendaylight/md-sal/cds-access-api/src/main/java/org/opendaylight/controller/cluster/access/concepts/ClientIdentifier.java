@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024.ClientGeneration;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -28,61 +24,6 @@ import org.opendaylight.yangtools.yang.common.Uint64;
  * of a particular frontend.
  */
 public final class ClientIdentifier implements WritableIdentifier {
-    interface SerialForm extends Externalizable {
-        @NonNull ClientIdentifier identifier();
-
-        void setIdentifier(@NonNull ClientIdentifier identifier);
-
-        @java.io.Serial
-        Object readResolve();
-
-        @Override
-        default void readExternal(final ObjectInput in) throws IOException {
-            setIdentifier(new ClientIdentifier(FrontendIdentifier.readFrom(in), WritableObjects.readLong(in)));
-        }
-
-        @Override
-        default void writeExternal(final ObjectOutput out) throws IOException {
-            final var id = identifier();
-            id.getFrontendId().writeTo(out);
-            WritableObjects.writeLong(out, id.getGeneration());
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements SerialForm {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private ClientIdentifier identifier;
-
-        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
-        // be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // Needed for Externalizable
-        }
-
-        Proxy(final ClientIdentifier identifier) {
-            this.identifier = requireNonNull(identifier);
-        }
-
-        @Override
-        public ClientIdentifier identifier() {
-            return verifyNotNull(identifier);
-        }
-
-        @Override
-        public void setIdentifier(final ClientIdentifier identifier) {
-            this.identifier = requireNonNull(identifier);
-        }
-
-        @Override
-        public Object readResolve() {
-            return identifier();
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
