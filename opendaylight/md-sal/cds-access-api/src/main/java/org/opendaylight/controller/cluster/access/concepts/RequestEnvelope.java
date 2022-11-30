@@ -28,7 +28,7 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
 
     @Override
     SerialForm createProxy() {
-        return new RequestEnvelopeProxy(this);
+        return new RE(this);
     }
 
     /**
