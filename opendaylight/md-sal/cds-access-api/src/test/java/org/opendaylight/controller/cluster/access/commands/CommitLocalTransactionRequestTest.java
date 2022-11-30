@@ -37,7 +37,7 @@ public class CommitLocalTransactionRequestTest
         ACTOR_REF, MODIFICATION, null, COORDINATED);
 
     public CommitLocalTransactionRequestTest() {
-        super(OBJECT, 0);
+        super(OBJECT, 0, 0);
     }
 
     @Test

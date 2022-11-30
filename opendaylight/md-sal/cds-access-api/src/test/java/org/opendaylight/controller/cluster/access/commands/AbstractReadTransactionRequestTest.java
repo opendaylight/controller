@@ -20,8 +20,8 @@ public abstract class AbstractReadTransactionRequestTest<T extends AbstractReadP
     protected static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
     protected static final boolean SNAPSHOT_ONLY = true;
 
-    protected AbstractReadTransactionRequestTest(final T object, final int baseSize) {
-        super(object, baseSize);
+    protected AbstractReadTransactionRequestTest(final T object, final int baseSize, final int legacySize) {
+        super(object, baseSize, legacySize);
     }
 
     @Test
