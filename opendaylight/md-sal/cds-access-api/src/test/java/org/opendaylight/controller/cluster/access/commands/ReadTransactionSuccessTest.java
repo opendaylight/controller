@@ -18,14 +18,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 
 public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
-    private static final ContainerNode NODE = Builders.containerBuilder().withNodeIdentifier(
-            NodeIdentifier.create(QName.create("namespace", "localName"))).build();
+    private static final ContainerNode NODE = Builders.containerBuilder()
+        .withNodeIdentifier(NodeIdentifier.create(QName.create("namespace", "localName")))
+        .build();
 
-    private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(
-            TRANSACTION_IDENTIFIER, 0, Optional.of(NODE));
+    private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(TRANSACTION_IDENTIFIER, 0,
+        Optional.of(NODE));
 
     public ReadTransactionSuccessTest() {
-        super(OBJECT, 515);
+        super(OBJECT, 129, 515);
     }
 
     @Test
