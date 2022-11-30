@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class IncrementTransactionSequenceRequestProxyV1
         extends AbstractReadTransactionRequestProxyV1<IncrementTransactionSequenceRequest>
         implements IncrementTransactionSequenceRequest.SerialForm {
