@@ -11,10 +11,9 @@ package org.opendaylight.controller.cluster.access.commands;
  * Abstract base class for serialization proxies associated with {@link AbstractReadTransactionRequest}s. It implements
  * the initial (Boron) serialization format.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 abstract class AbstractReadPathTransactionRequestProxyV1<T extends AbstractReadPathTransactionRequest<T>>
         extends AbstractReadTransactionRequestProxyV1<T> implements AbstractReadPathTransactionRequest.SerialForm<T> {
     @java.io.Serial

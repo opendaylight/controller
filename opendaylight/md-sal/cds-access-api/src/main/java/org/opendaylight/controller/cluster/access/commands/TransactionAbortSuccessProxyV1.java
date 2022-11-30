@@ -13,6 +13,7 @@ package org.opendaylight.controller.cluster.access.commands;
  *
  * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class TransactionAbortSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionAbortSuccess>
         implements TransactionAbortSuccess.SerialForm {
     @java.io.Serial
