@@ -13,10 +13,9 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 /**
  * Abstract base class for serialization proxies associated with {@link LocalHistoryRequest}s.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 abstract class AbstractLocalHistoryRequestProxy<T extends LocalHistoryRequest<T>>
         extends AbstractRequestProxy<LocalHistoryIdentifier, T> implements LocalHistoryRequest.SerialForm<T> {
     @java.io.Serial
