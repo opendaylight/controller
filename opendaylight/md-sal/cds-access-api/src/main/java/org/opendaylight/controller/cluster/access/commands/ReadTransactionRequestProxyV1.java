@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.access.commands;
 /**
  * Externalizable proxy for use with {@link ReadTransactionRequest}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class ReadTransactionRequestProxyV1 extends AbstractReadPathTransactionRequestProxyV1<ReadTransactionRequest>
         implements ReadTransactionRequest.SerialForm {
     @java.io.Serial

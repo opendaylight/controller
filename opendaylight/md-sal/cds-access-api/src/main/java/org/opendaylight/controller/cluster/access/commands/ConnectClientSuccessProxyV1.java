@@ -13,9 +13,8 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 /**
  * Externalizable proxy for use with {@link ConnectClientSuccess}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdentifier, ConnectClientSuccess>
         implements ConnectClientSuccess.SerialForm {
     @java.io.Serial

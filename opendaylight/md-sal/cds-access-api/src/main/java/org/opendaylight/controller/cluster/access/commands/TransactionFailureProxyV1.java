@@ -13,9 +13,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Externalizable proxy for use with {@link TransactionFailure}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class TransactionFailureProxyV1 extends AbstractRequestFailureProxy<TransactionIdentifier, TransactionFailure>
         implements TransactionFailure.SerialForm {
     @java.io.Serial

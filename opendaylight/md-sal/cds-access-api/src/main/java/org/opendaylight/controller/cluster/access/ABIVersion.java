@@ -42,7 +42,10 @@ public enum ABIVersion implements WritableObject {
     /**
      * Oldest ABI version we support. The messages remain the same as {@code BORON}, but messages bearing QNames in any
      * shape are using {@link NormalizedNodeStreamVersion#MAGNESIUM}, which improves encoding.
+     *
+     * @deprecated Support for this version is going to be removed in the next major version.
      */
+    @Deprecated(since = "7.0.0", forRemoval = true)
     MAGNESIUM(8) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
