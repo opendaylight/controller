@@ -34,6 +34,6 @@ public class TransactionIdentifierTest extends AbstractIdentifierTest<Transactio
 
     @Override
     int expectedSize() {
-        return 121;
+        return 96;
     }
 }
