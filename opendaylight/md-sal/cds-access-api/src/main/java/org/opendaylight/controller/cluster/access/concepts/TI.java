@@ -10,10 +10,16 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.yangtools.concepts.WritableObjects;
+
 /**
  * Serialization proxy for {@link TransactionIdentifier}.
  */
-final class TI implements TransactionIdentifier.SerialForm {
+final class TI implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,17 +35,18 @@ final class TI implements TransactionIdentifier.SerialForm {
     }
 
     @Override
-    public TransactionIdentifier identifier() {
+    public void readExternal(final ObjectInput in) throws IOException {
+        identifier = new TransactionIdentifier(LocalHistoryIdentifier.readFrom(in), WritableObjects.readLong(in));
+    }
+
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        identifier.getHistoryId().writeTo(out);
+        WritableObjects.writeLong(out, identifier.getTransactionId());
+    }
+
+    @java.io.Serial
+    private Object readResolve() {
         return verifyNotNull(identifier);
-    }
-
-    @Override
-    public void setIdentifier(final TransactionIdentifier identifier) {
-        this.identifier = requireNonNull(identifier);
-    }
-
-    @Override
-    public Object readResolve() {
-        return identifier();
     }
 }

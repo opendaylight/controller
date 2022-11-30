@@ -7,15 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
@@ -24,61 +20,6 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * Globally-unique identifier of a transaction.
  */
 public final class TransactionIdentifier implements WritableIdentifier {
-    interface SerialForm extends Externalizable {
-        @NonNull TransactionIdentifier identifier();
-
-        void setIdentifier(@NonNull TransactionIdentifier identifier);
-
-        @java.io.Serial
-        Object readResolve();
-
-        @Override
-        default void readExternal(final ObjectInput in) throws IOException {
-            setIdentifier(new TransactionIdentifier(LocalHistoryIdentifier.readFrom(in), WritableObjects.readLong(in)));
-        }
-
-        @Override
-        default void writeExternal(final ObjectOutput out) throws IOException {
-            final var id = identifier();
-            id.getHistoryId().writeTo(out);
-            WritableObjects.writeLong(out, id.getTransactionId());
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements SerialForm {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private TransactionIdentifier identifier;
-
-        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
-        // be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        Proxy(final TransactionIdentifier identifier) {
-            this.identifier = requireNonNull(identifier);
-        }
-
-        @Override
-        public @NonNull TransactionIdentifier identifier() {
-            return verifyNotNull(identifier);
-        }
-
-        @Override
-        public void setIdentifier(final TransactionIdentifier identifier) {
-            this.identifier = requireNonNull(identifier);
-        }
-
-        @Override
-        public Object readResolve() {
-            return identifier();
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

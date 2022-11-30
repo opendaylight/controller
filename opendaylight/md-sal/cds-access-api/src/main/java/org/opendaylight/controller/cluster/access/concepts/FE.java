@@ -10,10 +10,12 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.ObjectInput;
+
 /**
  * Serialization proxy for {@link FailureEnvelope}.
  */
-final class FE implements FailureEnvelope.SerialForm {
+final class FE implements ResponseEnvelope.SerialForm<RequestFailure<?, ?>, FailureEnvelope> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -36,6 +38,12 @@ final class FE implements FailureEnvelope.SerialForm {
     @Override
     public void setEnvelope(final FailureEnvelope envelope) {
         this.envelope = requireNonNull(envelope);
+    }
+
+    @Override
+    public FailureEnvelope readExternal(final ObjectInput in, final long sessionId, final long txSequence,
+            final RequestFailure<?, ?> message, final long executionTimeNanos) {
+        return new FailureEnvelope(message, sessionId, txSequence, executionTimeNanos);
     }
 
     @Override
