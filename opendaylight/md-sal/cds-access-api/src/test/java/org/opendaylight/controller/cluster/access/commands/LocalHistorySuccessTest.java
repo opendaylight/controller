@@ -16,7 +16,7 @@ public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHis
     private static final LocalHistorySuccess OBJECT = new LocalHistorySuccess(HISTORY_IDENTIFIER, 0);
 
     public LocalHistorySuccessTest() {
-        super(OBJECT, 382);
+        super(OBJECT, 96, 382);
     }
 
     @Test

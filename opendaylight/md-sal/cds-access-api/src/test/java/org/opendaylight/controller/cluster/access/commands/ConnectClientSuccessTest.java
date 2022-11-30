@@ -34,14 +34,15 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
         DataTreeConfiguration.DEFAULT_OPERATIONAL);
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
     private static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
+    private static final int ACTOR_REF_SIZE = ACTOR_REF.path().toSerializationFormat().length();
     private static final ActorSelection ACTOR_SELECTION =  ActorSelection.apply(ACTOR_REF, "foo");
     private static final List<ActorSelection> ALTERNATES = ImmutableList.of(ACTOR_SELECTION);
     private static final int MAX_MESSAGES = 10;
-    private static final ConnectClientSuccess OBJECT = new ConnectClientSuccess(
-            CLIENT_IDENTIFIER, 0, ACTOR_REF, ALTERNATES, TREE, MAX_MESSAGES);
+    private static final ConnectClientSuccess OBJECT = new ConnectClientSuccess(CLIENT_IDENTIFIER, 0, ACTOR_REF,
+        ALTERNATES, TREE, MAX_MESSAGES);
 
     public ConnectClientSuccessTest() {
-        super(OBJECT, 432 + ACTOR_REF.path().toSerializationFormat().length());
+        super(OBJECT, 146 + ACTOR_REF_SIZE, 432 + ACTOR_REF_SIZE);
     }
 
     @Before

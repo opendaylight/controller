@@ -16,7 +16,7 @@ public class ConnectClientFailureTest extends AbstractRequestFailureTest<Connect
     private static final ConnectClientFailure OBJECT = new ConnectClientFailure(CLIENT_IDENTIFIER, 0, CAUSE);
 
     public ConnectClientFailureTest() {
-        super(OBJECT, 392);
+        super(OBJECT, 99, 392);
     }
 
     @Test
