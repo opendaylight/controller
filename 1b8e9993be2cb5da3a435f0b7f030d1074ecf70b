@@ -22,6 +22,30 @@
       },
       "revId": "1b8e9993be2cb5da3a435f0b7f030d1074ecf70b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "628ecab7_21495503",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/dependency-reduced-pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2022-11-30T11:40:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a71707d0_ef89a571",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 7
+      },
+      "revId": "1b8e9993be2cb5da3a435f0b7f030d1074ecf70b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
