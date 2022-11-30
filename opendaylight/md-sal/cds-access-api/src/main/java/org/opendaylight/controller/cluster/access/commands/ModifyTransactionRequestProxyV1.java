@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.access.commands;
 /**
  * Externalizable proxy for use with {@link ExistsTransactionRequest}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestProxy<ModifyTransactionRequest>
         implements ModifyTransactionRequest.SerialForm {
     @java.io.Serial
