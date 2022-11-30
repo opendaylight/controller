@@ -12,9 +12,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 
 /**
  * Serialization proxy associated with {@link LocalHistorySuccess}.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistoryIdentifier, LocalHistorySuccess>
         implements LocalHistorySuccess.SerialForm {
     @java.io.Serial

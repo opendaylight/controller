@@ -13,9 +13,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 /**
  * Externalizable proxy for use with {@link LocalHistoryFailure}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class LocalHistoryFailureProxyV1
         extends AbstractRequestFailureProxy<LocalHistoryIdentifier, LocalHistoryFailure>
         implements LocalHistoryFailure.SerialForm {
