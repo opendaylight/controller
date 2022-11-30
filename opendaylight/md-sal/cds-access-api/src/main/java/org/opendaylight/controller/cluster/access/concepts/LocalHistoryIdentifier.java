@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
@@ -28,76 +24,6 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * - an unsigned long cookie, assigned by the client and meaningless on the backend, which just reflects it back
  */
 public final class LocalHistoryIdentifier implements WritableIdentifier {
-    /**
-     * Serialized form of {@link LocalHistoryIdentifier}.
-     *
-     * @implNote
-     *     cookie is currently required only for module-based sharding, which is implemented as part of normal
-     *     DataBroker interfaces. For DOMDataTreeProducer cookie will always be zero, hence we may end up not needing
-     *     cookie at all.
-     *     We use WritableObjects.writeLongs() to output historyId and cookie (in that order). If we end up not needing
-     *     the cookie at all, we can switch to writeLong() and use zero flags for compatibility.
-     */
-    interface SerialForm extends Externalizable {
-        @NonNull LocalHistoryIdentifier identifier();
-
-        void setIdentifier(@NonNull LocalHistoryIdentifier identifier);
-
-        @java.io.Serial
-        Object readResolve();
-
-        @Override
-        default void writeExternal(final ObjectOutput out) throws IOException {
-            final var id = identifier();
-            id.getClientId().writeTo(out);
-            WritableObjects.writeLongs(out, id.getHistoryId(), id.getCookie());
-        }
-
-        @Override
-        default void readExternal(final ObjectInput in) throws IOException {
-            final var clientId = ClientIdentifier.readFrom(in);
-
-            final byte header = WritableObjects.readLongHeader(in);
-            final var historyId = WritableObjects.readFirstLong(in, header);
-            final var cookie = WritableObjects.readSecondLong(in, header);
-            setIdentifier(new LocalHistoryIdentifier(clientId, historyId, cookie));
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements SerialForm {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private LocalHistoryIdentifier identifier;
-
-        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
-        // be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        Proxy(final LocalHistoryIdentifier identifier) {
-            this.identifier = requireNonNull(identifier);
-        }
-
-        @Override
-        public LocalHistoryIdentifier identifier() {
-            return verifyNotNull(identifier);
-        }
-
-        @Override
-        public void setIdentifier(final LocalHistoryIdentifier identifier) {
-            this.identifier = requireNonNull(identifier);
-        }
-
-        @Override
-        public Object readResolve() {
-            return identifier();
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
