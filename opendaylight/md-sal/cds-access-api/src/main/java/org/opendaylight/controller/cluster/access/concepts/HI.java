@@ -10,10 +10,23 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.yangtools.concepts.WritableObjects;
+
 /**
  * Serialization proxy for {@link LocalHistoryIdentifier}.
+ *
+ * @implNote
+ *     cookie is currently required only for module-based sharding, which is implemented as part of normal
+ *     DataBroker interfaces. For DOMDataTreeProducer cookie will always be zero, hence we may end up not needing
+ *     cookie at all.
+ *     We use WritableObjects.writeLongs() to output historyId and cookie (in that order). If we end up not needing
+ *     the cookie at all, we can switch to writeLong() and use zero flags for compatibility.
  */
-final class HI implements LocalHistoryIdentifier.SerialForm {
+final class HI implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,17 +42,22 @@ final class HI implements LocalHistoryIdentifier.SerialForm {
     }
 
     @Override
-    public LocalHistoryIdentifier identifier() {
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        identifier.getClientId().writeTo(out);
+        WritableObjects.writeLongs(out, identifier.getHistoryId(), identifier.getCookie());
+    }
+
+    @Override
+    public void readExternal(final ObjectInput in) throws IOException {
+        final var clientId = ClientIdentifier.readFrom(in);
+        final byte header = WritableObjects.readLongHeader(in);
+        final var historyId = WritableObjects.readFirstLong(in, header);
+        final var cookie = WritableObjects.readSecondLong(in, header);
+        identifier = new LocalHistoryIdentifier(clientId, historyId, cookie);
+    }
+
+    @java.io.Serial
+    private Object readResolve() {
         return verifyNotNull(identifier);
-    }
-
-    @Override
-    public void setIdentifier(final LocalHistoryIdentifier identifier) {
-        this.identifier = requireNonNull(identifier);
-    }
-
-    @Override
-    public Object readResolve() {
-        return identifier();
     }
 }
