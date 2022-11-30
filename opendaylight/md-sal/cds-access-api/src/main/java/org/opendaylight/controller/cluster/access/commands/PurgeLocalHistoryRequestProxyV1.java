@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.access.commands;
 /**
  * Externalizable proxy for use with {@link PurgeLocalHistoryRequest}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class PurgeLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<PurgeLocalHistoryRequest>
         implements PurgeLocalHistoryRequest.SerialForm {
     @java.io.Serial

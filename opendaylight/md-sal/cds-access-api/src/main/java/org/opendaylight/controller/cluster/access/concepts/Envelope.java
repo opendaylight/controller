@@ -106,5 +106,6 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
 
     abstract @NonNull SerialForm<T, ?> createProxy();
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     abstract @NonNull AbstractEnvelopeProxy<T, ?> legacyProxy();
 }
