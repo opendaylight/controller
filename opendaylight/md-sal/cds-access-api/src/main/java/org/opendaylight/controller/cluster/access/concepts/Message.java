@@ -158,6 +158,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
             case NEON_SR2:
             case SODIUM_SR1:
             case MAGNESIUM:
+            case CHLORINE_SR2:
                 return verifyNotNull(cloneAsVersion(toVersion));
             case TEST_PAST_VERSION:
             case TEST_FUTURE_VERSION:
