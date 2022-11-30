@@ -33,6 +33,6 @@ public class LocalHistoryIdentifierTest extends AbstractIdentifierTest<LocalHist
 
     @Override
     int expectedSize() {
-        return 121;
+        return 95;
     }
 }
