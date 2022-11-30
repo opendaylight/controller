@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.access.commands;
 /**
  * Externalizable proxy for use with {@link TransactionAbortRequest}. It implements the initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class TransactionAbortRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionAbortRequest>
         implements TransactionAbortRequest.SerialForm {
     @java.io.Serial

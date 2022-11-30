@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  *
  * @param <T> Target identifier type
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
         extends AbstractResponseProxy<T, C> {
     @java.io.Serial
