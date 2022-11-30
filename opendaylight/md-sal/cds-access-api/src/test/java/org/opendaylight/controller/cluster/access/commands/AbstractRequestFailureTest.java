@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -36,10 +37,12 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
 
     private final T object;
     private final int expectedSize;
+    private final int legacySize;
 
-    protected AbstractRequestFailureTest(final T object, final int baseSize) {
+    protected AbstractRequestFailureTest(final T object, final int baseSize, final int legacySize) {
         this.object = requireNonNull(object);
         this.expectedSize = baseSize + CAUSE_SIZE;
+        this.legacySize = legacySize + CAUSE_SIZE;
     }
 
     @Test
@@ -55,7 +58,8 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
     @Test
     public void serializationTest() {
         final var bytes = SerializationUtils.serialize(object);
-        assertEquals(expectedSize, bytes.length);
+        assertEquals(legacySize, bytes.length);
+        assertEquals(expectedSize, SerializationUtils.serialize(object.toVersion(ABIVersion.CHLORINE_SR2)).length);
 
         @SuppressWarnings("unchecked")
         final var deserialize = (T) SerializationUtils.deserialize(bytes);

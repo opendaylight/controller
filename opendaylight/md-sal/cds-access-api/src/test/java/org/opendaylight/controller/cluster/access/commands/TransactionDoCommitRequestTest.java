@@ -17,7 +17,7 @@ public class TransactionDoCommitRequestTest extends AbstractTransactionRequestTe
         ACTOR_REF);
 
     public TransactionDoCommitRequestTest() {
-        super(OBJECT, 403);
+        super(OBJECT, 102, 403);
     }
 
     @Test
