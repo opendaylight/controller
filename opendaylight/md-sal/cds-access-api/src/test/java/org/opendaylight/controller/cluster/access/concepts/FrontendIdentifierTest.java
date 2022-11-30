@@ -33,6 +33,6 @@ public class FrontendIdentifierTest extends AbstractIdentifierTest<FrontendIdent
 
     @Override
     int expectedSize() {
-        return 115;
+        return 93;
     }
 }

@@ -32,6 +32,6 @@ public class ClientIdentifierTest extends AbstractIdentifierTest<ClientIdentifie
 
     @Override
     int expectedSize() {
-        return 114;
+        return 94;
     }
 }

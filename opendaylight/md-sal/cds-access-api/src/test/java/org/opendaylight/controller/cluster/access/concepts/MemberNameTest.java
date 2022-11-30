@@ -34,7 +34,7 @@ public class MemberNameTest extends AbstractIdentifierTest<MemberName> {
 
     @Override
     int expectedSize() {
-        return 101;
+        return 87;
     }
 
     @Test
