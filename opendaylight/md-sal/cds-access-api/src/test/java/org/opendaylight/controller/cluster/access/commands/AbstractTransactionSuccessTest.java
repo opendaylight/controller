@@ -11,8 +11,10 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 
 public abstract class AbstractTransactionSuccessTest<T extends TransactionSuccess<T>>
         extends AbstractRequestSuccessTest<T> {
+    protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(HISTORY_IDENTIFIER,
+        0);
 
-    protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
-            HISTORY_IDENTIFIER, 0);
-
+    protected AbstractTransactionSuccessTest(final T object, final int expectedSize) {
+        super(object, expectedSize);
+    }
 }
