@@ -23,7 +23,7 @@ public class ModifyTransactionRequestEmptyTest extends AbstractTransactionReques
         ACTOR_REF, List.of(), PROTOCOL);
 
     public ModifyTransactionRequestEmptyTest() {
-        super(OBJECT, 408);
+        super(OBJECT, 0, 408);
     }
 
     @Test

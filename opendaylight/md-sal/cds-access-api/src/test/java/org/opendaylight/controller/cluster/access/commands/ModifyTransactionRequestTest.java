@@ -37,7 +37,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
         ACTOR_REF, MODIFICATIONS, PROTOCOL);
 
     public ModifyTransactionRequestTest() {
-        super(OBJECT, 440);
+        super(OBJECT, 140, 440);
     }
 
     @Test

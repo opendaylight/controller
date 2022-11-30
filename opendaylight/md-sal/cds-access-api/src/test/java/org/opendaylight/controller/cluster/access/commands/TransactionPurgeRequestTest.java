@@ -17,7 +17,7 @@ public class TransactionPurgeRequestTest extends AbstractTransactionRequestTest<
         ACTOR_REF);
 
     public TransactionPurgeRequestTest() {
-        super(OBJECT, 400);
+        super(OBJECT, 101, 400);
     }
 
     @Test

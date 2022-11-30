@@ -17,7 +17,7 @@ public class TransactionAbortRequestTest extends AbstractTransactionRequestTest<
         ACTOR_REF);
 
     public TransactionAbortRequestTest() {
-        super(OBJECT, 400);
+        super(OBJECT, 0, 400);
     }
 
     @Test
