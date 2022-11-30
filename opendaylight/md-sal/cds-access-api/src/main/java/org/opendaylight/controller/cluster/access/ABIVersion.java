@@ -76,6 +76,16 @@ public enum ABIVersion implements WritableObject {
             return NormalizedNodeStreamVersion.MAGNESIUM;
         }
     },
+    /**
+     * Revised ABI version. The messages remain the same as {@link #MAGNESIUM}, the serialization proxies in use are
+     * flat objects without any superclasses.
+     */
+    CHLORINE_SR2(9) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    },
 
     /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
@@ -132,7 +142,8 @@ public enum ABIVersion implements WritableObject {
             case 6 -> NEON_SR2;
             case 7 -> SODIUM_SR1;
             case 8 -> MAGNESIUM;
-            default -> throw new FutureVersionException(value, MAGNESIUM);
+            case 9 -> CHLORINE_SR2;
+            default -> throw new FutureVersionException(value, CHLORINE_SR2);
         };
     }
 
