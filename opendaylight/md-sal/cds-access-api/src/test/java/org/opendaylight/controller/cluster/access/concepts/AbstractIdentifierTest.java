@@ -42,7 +42,6 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
         assertEquals(object().hashCode(), equalObject().hashCode());
     }
 
-
     @Test
     public final void testSerialization() throws Exception {
         assertTrue(object().equals(copy(object())));

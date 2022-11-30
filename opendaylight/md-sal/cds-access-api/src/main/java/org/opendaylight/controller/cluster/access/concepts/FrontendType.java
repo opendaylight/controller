@@ -56,6 +56,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements SerialForm {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -179,7 +180,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
     }
 
     @java.io.Serial
-    Object writeReplace() {
-        return new Proxy(this);
+    private Object writeReplace() {
+        return new FT(this);
     }
 }

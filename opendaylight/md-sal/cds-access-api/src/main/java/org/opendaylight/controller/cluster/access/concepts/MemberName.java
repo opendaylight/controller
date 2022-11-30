@@ -52,6 +52,7 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements SerialForm {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -163,6 +164,6 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
 
     @java.io.Serial
     Object writeReplace() {
-        return new Proxy(this);
+        return new MN(this);
     }
 }
