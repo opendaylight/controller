@@ -34,7 +34,7 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
             CLIENT_IDENTIFIER, 0, ACTOR_REF, MIN_VERSION, MAX_VERSION);
 
     public ConnectClientRequestTest() {
-        super(OBJECT, 310);
+        super(OBJECT, 112, 310);
     }
 
     @Test
