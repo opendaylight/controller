@@ -7,21 +7,21 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class TransactionFailureTest extends AbstractRequestFailureTest<TransactionFailure> {
     private static final TransactionFailure OBJECT = new TransactionFailure(TRANSACTION_IDENTIFIER, 0, CAUSE);
 
-    @Override
-    TransactionFailure object() {
-        return OBJECT;
+    public TransactionFailureTest() {
+        super(OBJECT, 392);
     }
 
     @Test
     public void cloneAsVersionTest() {
         final TransactionFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, clone);
     }
 }

@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -18,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -28,7 +30,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 
 public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<ConnectClientSuccess> {
-
     private static final DataTree TREE = new InMemoryDataTreeFactory().create(
         DataTreeConfiguration.DEFAULT_OPERATIONAL);
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
@@ -39,9 +40,8 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     private static final ConnectClientSuccess OBJECT = new ConnectClientSuccess(
             CLIENT_IDENTIFIER, 0, ACTOR_REF, ALTERNATES, TREE, MAX_MESSAGES);
 
-    @Override
-    protected ConnectClientSuccess object() {
-        return OBJECT;
+    public ConnectClientSuccessTest() {
+        super(OBJECT, 432 + ACTOR_REF.path().toSerializationFormat().length());
     }
 
     @Before
@@ -52,31 +52,30 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     @Test
     public void testGetAlternates() {
         final Collection<ActorSelection> alternates = OBJECT.getAlternates();
-        Assert.assertArrayEquals(ALTERNATES.toArray(), alternates.toArray());
+        assertArrayEquals(ALTERNATES.toArray(), alternates.toArray());
     }
 
     @Test
     public void testGetBackend() {
         final ActorRef actorRef = OBJECT.getBackend();
-        Assert.assertEquals(ACTOR_REF, actorRef);
+        assertEquals(ACTOR_REF, actorRef);
     }
 
     @Test
     public void testGetDataTree() {
         final ReadOnlyDataTree tree = OBJECT.getDataTree().get();
-        Assert.assertEquals(TREE, tree);
+        assertEquals(TREE, tree);
     }
 
     @Test
     public void testGetMaxMessages() {
-        final int maxMessages = OBJECT.getMaxMessages();
-        Assert.assertEquals(MAX_MESSAGES, maxMessages);
+        assertEquals(MAX_MESSAGES, OBJECT.getMaxMessages());
     }
 
     @Test
     public void cloneAsVersionTest() {
         final ConnectClientSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+        assertEquals(OBJECT, clone);
     }
 
     @Test
@@ -86,11 +85,10 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     }
 
     @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof ConnectClientSuccess);
-        Assert.assertEquals(OBJECT.getAlternates().size(), ((ConnectClientSuccess) deserialize).getAlternates().size());
-        Assert.assertEquals(OBJECT.getBackend(), ((ConnectClientSuccess) deserialize).getBackend());
-        Assert.assertEquals(Optional.empty(), ((ConnectClientSuccess) deserialize).getDataTree());
-        Assert.assertEquals(OBJECT.getMaxMessages(), ((ConnectClientSuccess) deserialize).getMaxMessages());
+    protected void doAdditionalAssertions(final ConnectClientSuccess deserialize) {
+        assertEquals(OBJECT.getAlternates().size(), deserialize.getAlternates().size());
+        assertEquals(OBJECT.getBackend(), deserialize.getBackend());
+        assertEquals(Optional.empty(), deserialize.getDataTree());
+        assertEquals(OBJECT.getMaxMessages(), deserialize.getMaxMessages());
     }
 }

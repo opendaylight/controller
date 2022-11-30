@@ -7,27 +7,21 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class TransactionAbortSuccessTest extends AbstractTransactionSuccessTest<TransactionAbortSuccess> {
-    private static final TransactionAbortSuccess OBJECT = new TransactionAbortSuccess(
-            TRANSACTION_IDENTIFIER, 0);
+    private static final TransactionAbortSuccess OBJECT = new TransactionAbortSuccess(TRANSACTION_IDENTIFIER, 0);
 
-    @Override
-    protected TransactionAbortSuccess object() {
-        return OBJECT;
+    public TransactionAbortSuccessTest() {
+        super(OBJECT, 485);
     }
 
     @Test
     public void cloneAsVersionTest() {
         final TransactionAbortSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
-    }
-
-    @Override
-    protected void doAdditionalAssertions(Object deserialize) {
-        Assert.assertTrue(deserialize instanceof TransactionAbortSuccess);
+        assertEquals(OBJECT, clone);
     }
 }

@@ -7,27 +7,22 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class TransactionCanCommitSuccessTest extends AbstractTransactionSuccessTest<TransactionCanCommitSuccess> {
-    private static final TransactionCanCommitSuccess OBJECT = new TransactionCanCommitSuccess(
-            TRANSACTION_IDENTIFIER, 0);
+    private static final TransactionCanCommitSuccess OBJECT = new TransactionCanCommitSuccess(TRANSACTION_IDENTIFIER,
+        0);
 
-    @Override
-    protected TransactionCanCommitSuccess object() {
-        return OBJECT;
+    public TransactionCanCommitSuccessTest() {
+        super(OBJECT, 489);
     }
 
     @Test
     public void cloneAsVersionTest() {
         final TransactionCanCommitSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
-    }
-
-    @Override
-    protected void doAdditionalAssertions(Object deserialize) {
-        Assert.assertTrue(deserialize instanceof TransactionCanCommitSuccess);
+        assertEquals(OBJECT, clone);
     }
 }

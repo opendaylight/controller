@@ -7,30 +7,21 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class SkipTransactionsResponseTest extends AbstractTransactionSuccessTest<SkipTransactionsResponse> {
-    private static final SkipTransactionsResponse OBJECT = new SkipTransactionsResponse(
-            TRANSACTION_IDENTIFIER, 0);
+    private static final SkipTransactionsResponse OBJECT = new SkipTransactionsResponse(TRANSACTION_IDENTIFIER, 0);
 
-    @Override
-    protected SkipTransactionsResponse object() {
-        return OBJECT;
+    public SkipTransactionsResponseTest() {
+        super(OBJECT, 486);
     }
 
     @Test
     public void cloneAsVersionTest() {
         final SkipTransactionsResponse clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         assertEquals(OBJECT, clone);
-    }
-
-    @Override
-    protected void doAdditionalAssertions(final Object deserialize) {
-        assertThat(deserialize, instanceOf(SkipTransactionsResponse.class));
     }
 }
