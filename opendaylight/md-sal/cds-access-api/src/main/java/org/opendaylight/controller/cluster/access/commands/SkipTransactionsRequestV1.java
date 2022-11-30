@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.access.commands;
  * Externalizable proxy for use with {@link SkipTransactionsRequest}. It implements the initial
  * (Phosphorus SR1) serialization format.
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class SkipTransactionsRequestV1 extends AbstractTransactionRequestProxy<SkipTransactionsRequest>
         implements SkipTransactionsRequest.SerialForm {
     @java.io.Serial
