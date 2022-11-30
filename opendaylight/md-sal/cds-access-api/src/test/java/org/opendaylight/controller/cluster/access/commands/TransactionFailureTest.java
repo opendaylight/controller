@@ -16,7 +16,7 @@ public class TransactionFailureTest extends AbstractRequestFailureTest<Transacti
     private static final TransactionFailure OBJECT = new TransactionFailure(TRANSACTION_IDENTIFIER, 0, CAUSE);
 
     public TransactionFailureTest() {
-        super(OBJECT, 392);
+        super(OBJECT, 100, 392);
     }
 
     @Test

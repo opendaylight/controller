@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import org.apache.commons.lang.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -28,16 +29,19 @@ public abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, T>>
 
     private final @NonNull T object;
     private final int expectedSize;
+    private final int legacySize;
 
-    protected AbstractRequestSuccessTest(final T object, final int expectedSize) {
+    protected AbstractRequestSuccessTest(final T object, final int expectedSize, final int legacySize) {
         this.object = requireNonNull(object);
         this.expectedSize = expectedSize;
+        this.legacySize = legacySize;
     }
 
     @Test
     public void serializationTest() {
         final var bytes = SerializationUtils.serialize(object);
-        assertEquals(expectedSize, bytes.length);
+        assertEquals(legacySize, bytes.length);
+        assertEquals(expectedSize, SerializationUtils.serialize(object.toVersion(ABIVersion.CHLORINE_SR2)).length);
 
         @SuppressWarnings("unchecked")
         final var deserialize = (T) SerializationUtils.deserialize(bytes);
