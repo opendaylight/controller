@@ -13,9 +13,8 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 /**
  * Serialization proxy for use with {@link ConnectClientFailure}. This class implements initial (Boron) serialization
  * format.
- *
- * @author Robert Varga
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<ClientIdentifier, ConnectClientFailure>
         implements ConnectClientFailure.SerialForm {
     @java.io.Serial

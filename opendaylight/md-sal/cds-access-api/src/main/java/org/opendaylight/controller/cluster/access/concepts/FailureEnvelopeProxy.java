@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+@Deprecated(since = "7.0.0", forRemoval = true)
 final class FailureEnvelopeProxy extends AbstractResponseEnvelopeProxy<RequestFailure<?, ?>, FailureEnvelope>
         implements FailureEnvelope.SerialForm {
     @java.io.Serial
