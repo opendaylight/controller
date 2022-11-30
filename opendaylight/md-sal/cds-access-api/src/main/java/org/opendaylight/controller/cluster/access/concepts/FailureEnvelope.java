@@ -28,6 +28,6 @@ public final class FailureEnvelope extends ResponseEnvelope<RequestFailure<?, ?>
 
     @Override
     SerialForm createProxy() {
-        return new FailureEnvelopeProxy(this);
+        return new FE(this);
     }
 }
