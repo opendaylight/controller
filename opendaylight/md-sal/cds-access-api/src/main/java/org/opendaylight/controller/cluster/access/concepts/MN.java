@@ -7,39 +7,47 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Serialization proxy for {@link MemberName}.
  */
-final class MN implements MemberName.SerialForm {
+final class MN implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private MemberName name;
+    private byte[] serialized;
 
     @SuppressWarnings("checkstyle:RedundantModifier")
     public MN() {
         // for Externalizable
     }
 
-    MN(final MemberName name) {
-        this.name = requireNonNull(name);
+    MN(final byte[] serialized) {
+        this.serialized = requireNonNull(serialized);
     }
 
     @Override
-    public MemberName name() {
-        return verifyNotNull(name);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeInt(serialized.length);
+        out.write(serialized);
     }
 
     @Override
-    public void setName(final MemberName name) {
-        this.name = requireNonNull(name);
+    public void readExternal(final ObjectInput in) throws IOException {
+        serialized = new byte[in.readInt()];
+        in.readFully(serialized);
     }
 
-    @Override
-    public Object readResolve() {
-        return name();
+    @java.io.Serial
+    private Object readResolve() {
+        // TODO: consider caching instances here
+        return new MemberName(new String(serialized, StandardCharsets.UTF_8), serialized);
     }
 }
