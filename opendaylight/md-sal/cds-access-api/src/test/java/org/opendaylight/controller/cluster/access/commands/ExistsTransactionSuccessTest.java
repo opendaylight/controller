@@ -22,7 +22,7 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
         EXISTS);
 
     public ExistsTransactionSuccessTest() {
-        super(OBJECT, 487);
+        super(OBJECT, 99, 487);
     }
 
     @Test
