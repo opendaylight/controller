@@ -18,7 +18,7 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
         Optional.empty());
 
     public ReadTransactionSuccessNoDataTest() {
-        super(OBJECT, 99, 485);
+        super(OBJECT, 99);
     }
 
     @Test

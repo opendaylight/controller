@@ -16,7 +16,7 @@ public class LocalHistoryFailureTest extends AbstractRequestFailureTest<LocalHis
     private static final LocalHistoryFailure OBJECT = new LocalHistoryFailure(HISTORY_IDENTIFIER, 0, CAUSE);
 
     public LocalHistoryFailureTest() {
-        super(OBJECT, 99, 392);
+        super(OBJECT, 99);
     }
 
     @Test

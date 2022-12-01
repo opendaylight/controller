@@ -39,22 +39,11 @@ public enum ABIVersion implements WritableObject {
     // BORON was 5
     // NEON_SR2 was 6
     // SODIUM_SR1 was 7
+    // MAGNESIUM was 8
+
     /**
-     * Oldest ABI version we support. The messages remain the same as {@code BORON}, but messages bearing QNames in any
-     * shape are using {@link NormalizedNodeStreamVersion#MAGNESIUM}, which improves encoding.
-     *
-     * @deprecated Support for this version is going to be removed in the next major version.
-     */
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    MAGNESIUM(8) {
-        @Override
-        public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.MAGNESIUM;
-        }
-    },
-    /**
-     * Revised ABI version. The messages remain the same as {@link #MAGNESIUM}, the serialization proxies in use are
-     * flat objects without any superclasses.
+     * Oldest ABI version we support. The messages remain the same as {@code MAGNESIUM}, the serialization proxies in
+     * use are flat objects without any superclasses.
      */
     CHLORINE_SR2(9) {
         @Override
@@ -113,8 +102,7 @@ public enum ABIVersion implements WritableObject {
      */
     public static @NonNull ABIVersion valueOf(final short value) throws FutureVersionException, PastVersionException {
         return switch (Short.toUnsignedInt(value)) {
-            case 0, 1, 2, 3, 4, 6, 7 -> throw new PastVersionException(value, MAGNESIUM);
-            case 8 -> MAGNESIUM;
+            case 0, 1, 2, 3, 4, 6, 7, 8 -> throw new PastVersionException(value, CHLORINE_SR2);
             case 9 -> CHLORINE_SR2;
             default -> throw new FutureVersionException(value, CHLORINE_SR2);
         };

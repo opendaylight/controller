@@ -26,7 +26,7 @@ public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLoca
 
     @Test
     public void cloneAsVersionTest() {
-        assertSame(object(), object().cloneAsVersion(ABIVersion.MAGNESIUM));
+        assertSame(object(), object().cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION));
     }
 
     @Override
