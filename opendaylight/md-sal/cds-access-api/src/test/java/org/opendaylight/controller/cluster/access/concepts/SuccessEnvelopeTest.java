@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionAbortSucce
 public class SuccessEnvelopeTest extends AbstractEnvelopeTest<SuccessEnvelope> {
     @Override
     protected EnvelopeDetails<SuccessEnvelope> createEnvelope() {
-        return new EnvelopeDetails<>(new SuccessEnvelope(new TransactionAbortSuccess(OBJECT, 2L), 1L, 2L, 11L), 769);
+        return new EnvelopeDetails<>(new SuccessEnvelope(new TransactionAbortSuccess(OBJECT, 2L), 1L, 2L, 11L), 180);
     }
 
     @Override
