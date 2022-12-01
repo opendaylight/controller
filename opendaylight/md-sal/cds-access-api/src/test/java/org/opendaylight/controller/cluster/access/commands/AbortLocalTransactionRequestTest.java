@@ -27,7 +27,7 @@ public class AbortLocalTransactionRequestTest
     private static final AbortLocalTransactionRequest OBJECT = new AbortLocalTransactionRequest(TRANSACTION, ACTOR_REF);
 
     public AbortLocalTransactionRequestTest() {
-        super(OBJECT, 0, 0);
+        super(OBJECT);
     }
 
     @Override

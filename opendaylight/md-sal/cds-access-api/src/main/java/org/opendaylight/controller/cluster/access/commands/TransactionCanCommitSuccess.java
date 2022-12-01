@@ -39,7 +39,7 @@ public final class TransactionCanCommitSuccess extends TransactionSuccess<Transa
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TCCS(this) : new TransactionCanCommitSuccessProxyV1(this);
+        return new TCCS(this);
     }
 
     @Override

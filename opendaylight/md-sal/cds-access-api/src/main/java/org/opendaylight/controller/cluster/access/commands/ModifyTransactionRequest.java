@@ -109,7 +109,7 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new MTR(this) : new ModifyTransactionRequestProxyV1(this);
+        return new MTR(this);
     }
 
     @Override

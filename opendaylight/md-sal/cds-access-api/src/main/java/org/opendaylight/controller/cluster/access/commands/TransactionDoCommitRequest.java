@@ -37,7 +37,7 @@ public final class TransactionDoCommitRequest extends TransactionRequest<Transac
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TDCR(this) : new TransactionDoCommitRequestProxyV1(this);
+        return new TDCR(this);
     }
 
     @Override

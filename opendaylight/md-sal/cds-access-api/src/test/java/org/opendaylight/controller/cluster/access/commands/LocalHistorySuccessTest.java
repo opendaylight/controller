@@ -16,13 +16,13 @@ public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHis
     private static final LocalHistorySuccess OBJECT = new LocalHistorySuccess(HISTORY_IDENTIFIER, 0);
 
     public LocalHistorySuccessTest() {
-        super(OBJECT, 96, 382);
+        super(OBJECT, 96);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
-        assertEquals(ABIVersion.MAGNESIUM, clone.getVersion());
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
+        assertEquals(ABIVersion.TEST_FUTURE_VERSION, clone.getVersion());
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

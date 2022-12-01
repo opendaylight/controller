@@ -17,7 +17,7 @@ public class ReadTransactionRequestTest extends AbstractReadTransactionRequestTe
         ACTOR_REF, PATH, SNAPSHOT_ONLY);
 
     public ReadTransactionRequestTest() {
-        super(OBJECT, 108, 618);
+        super(OBJECT, 108);
     }
 
     @Test
