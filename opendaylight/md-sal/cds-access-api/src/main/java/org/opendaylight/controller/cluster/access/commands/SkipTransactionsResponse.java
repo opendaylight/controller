@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -16,14 +15,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 // FIXME: rename to SkipTransactionsSuccess
 public final class SkipTransactionsResponse extends TransactionSuccess<SkipTransactionsResponse> {
-    interface SerialForm extends TransactionSuccess.SerialForm<SkipTransactionsResponse> {
-        @Override
-        default SkipTransactionsResponse readExternal(final ObjectInput in, final TransactionIdentifier target,
-                final long sequence) {
-            return new SkipTransactionsResponse(target, sequence);
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -36,8 +27,8 @@ public final class SkipTransactionsResponse extends TransactionSuccess<SkipTrans
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new STS(this) : new SkipTransactionsResponseProxyV1(this);
+    protected STS externalizableProxy(final ABIVersion version) {
+        return new STS(this);
     }
 
     @Override

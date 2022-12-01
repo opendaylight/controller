@@ -10,11 +10,14 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.ObjectInput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+
 /**
  * Externalizable proxy for use with {@link TransactionPurgeResponse}. It implements the Chlorine SR2 serialization
  * format.
  */
-final class TPS implements TransactionPurgeResponse.SerialForm {
+final class TPS implements TransactionSuccess.SerialForm<TransactionPurgeResponse> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -37,6 +40,12 @@ final class TPS implements TransactionPurgeResponse.SerialForm {
     @Override
     public void setMessage(final TransactionPurgeResponse message) {
         this.message = requireNonNull(message);
+    }
+
+    @Override
+    public TransactionPurgeResponse readExternal(final ObjectInput in, final TransactionIdentifier target,
+            final long sequence) {
+        return new TransactionPurgeResponse(target, sequence);
     }
 
     @Override

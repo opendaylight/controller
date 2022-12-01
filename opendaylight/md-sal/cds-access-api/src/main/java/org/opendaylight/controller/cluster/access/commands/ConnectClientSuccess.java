@@ -129,7 +129,7 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new CCS(this) : new ConnectClientSuccessProxyV1(this);
+        return new CCS(this);
     }
 
     @Override

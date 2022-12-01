@@ -26,8 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -47,8 +45,7 @@ public class ConnectionEntryTest {
         }
 
         @Override
-        protected AbstractRequestFailureProxy<WritableIdentifier, MockFailure> externalizableProxy(
-                final ABIVersion version) {
+        protected SerialForm<WritableIdentifier, MockFailure> externalizableProxy(final ABIVersion version) {
             return null;
         }
 
@@ -71,7 +68,7 @@ public class ConnectionEntryTest {
         }
 
         @Override
-        protected AbstractRequestProxy<WritableIdentifier, MockRequest> externalizableProxy(final ABIVersion version) {
+        protected Request.SerialForm<WritableIdentifier, MockRequest> externalizableProxy(final ABIVersion version) {
             return null;
         }
 

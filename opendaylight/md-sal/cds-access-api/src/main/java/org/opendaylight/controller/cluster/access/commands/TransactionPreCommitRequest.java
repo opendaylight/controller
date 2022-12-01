@@ -38,7 +38,7 @@ public final class TransactionPreCommitRequest extends TransactionRequest<Transa
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TPCR(this) : new TransactionPreCommitRequestProxyV1(this);
+        return new TPCR(this);
     }
 
     @Override

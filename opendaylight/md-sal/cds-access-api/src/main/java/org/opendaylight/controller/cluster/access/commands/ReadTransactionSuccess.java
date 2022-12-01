@@ -10,15 +10,11 @@ package org.opendaylight.controller.cluster.access.commands;
 import static java.util.Objects.requireNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 
 /**
  * Successful reply to an {@link ReadTransactionRequest}. It indicates presence of requested data via
@@ -26,35 +22,6 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput
  */
 public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransactionSuccess>
         implements SliceableMessage {
-    interface SerialForm extends TransactionSuccess.SerialForm<ReadTransactionSuccess> {
-        @Override
-        default ReadTransactionSuccess readExternal(final ObjectInput in, final TransactionIdentifier target,
-                final long sequence) throws IOException {
-            final Optional<NormalizedNode> data;
-            if (in.readBoolean()) {
-                data = Optional.of(NormalizedNodeDataInput.newDataInput(in).readNormalizedNode());
-            } else {
-                data = Optional.empty();
-            }
-            return new ReadTransactionSuccess(target, sequence, data);
-        }
-
-        @Override
-        default void writeExternal(final ObjectOutput out, final ReadTransactionSuccess msg) throws IOException {
-            TransactionSuccess.SerialForm.super.writeExternal(out, msg);
-
-            final var data = msg.getData();
-            if (data.isPresent()) {
-                out.writeBoolean(true);
-                try (var nnout = msg.getVersion().getStreamVersion().newDataOutput(out)) {
-                    nnout.writeNormalizedNode(data.orElseThrow());
-                }
-            } else {
-                out.writeBoolean(false);
-            }
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -77,8 +44,8 @@ public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransac
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new RTS(this) : new ReadTransactionSuccessProxyV1(this);
+    protected RTS externalizableProxy(final ABIVersion version) {
+        return new RTS(this);
     }
 
     @Override

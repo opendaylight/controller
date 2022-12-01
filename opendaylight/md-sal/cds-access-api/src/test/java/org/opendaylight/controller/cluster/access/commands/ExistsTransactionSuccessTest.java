@@ -22,7 +22,7 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
         EXISTS);
 
     public ExistsTransactionSuccessTest() {
-        super(OBJECT, 99, 487);
+        super(OBJECT, 99);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getExists(), clone.getExists());

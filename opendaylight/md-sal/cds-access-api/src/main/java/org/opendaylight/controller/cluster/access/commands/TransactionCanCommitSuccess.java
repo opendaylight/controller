@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -18,14 +17,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 public final class TransactionCanCommitSuccess extends TransactionSuccess<TransactionCanCommitSuccess> {
-    interface SerialForm extends TransactionSuccess.SerialForm<TransactionCanCommitSuccess> {
-        @Override
-        default TransactionCanCommitSuccess readExternal(final ObjectInput in, final TransactionIdentifier target,
-                final long sequence) {
-            return new TransactionCanCommitSuccess(target, sequence);
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +29,8 @@ public final class TransactionCanCommitSuccess extends TransactionSuccess<Transa
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TCCS(this) : new TransactionCanCommitSuccessProxyV1(this);
+    protected TCCS externalizableProxy(final ABIVersion version) {
+        return new TCCS(this);
     }
 
     @Override

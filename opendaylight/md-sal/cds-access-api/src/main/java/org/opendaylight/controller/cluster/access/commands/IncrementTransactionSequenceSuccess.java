@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -15,14 +14,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Successful reply to an {@link IncrementTransactionSequenceRequest}.
  */
 public final class IncrementTransactionSequenceSuccess extends TransactionSuccess<IncrementTransactionSequenceSuccess> {
-    interface SerialForm extends TransactionSuccess.SerialForm<IncrementTransactionSequenceSuccess> {
-        @Override
-        default IncrementTransactionSequenceSuccess readExternal(final ObjectInput it,
-                final TransactionIdentifier target, final long sequence) {
-            return new IncrementTransactionSequenceSuccess(target, sequence);
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -36,8 +27,8 @@ public final class IncrementTransactionSequenceSuccess extends TransactionSucces
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new ITSS(this) : new IncrementTransactionSequenceSuccessProxyV1(this);
+    protected ITSS externalizableProxy(final ABIVersion version) {
+        return new ITSS(this);
     }
 
     @Override

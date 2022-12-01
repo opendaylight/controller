@@ -37,7 +37,7 @@ public final class TransactionAbortRequest extends TransactionRequest<Transactio
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TAR(this) : new TransactionAbortRequestProxyV1(this);
+        return new TAR(this);
     }
 
     @Override

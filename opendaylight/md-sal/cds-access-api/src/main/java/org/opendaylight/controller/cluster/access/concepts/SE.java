@@ -15,7 +15,7 @@ import java.io.ObjectInput;
 /**
  * Serialization proxy for {@link SuccessEnvelope}.
  */
-final class SE implements SuccessEnvelope.SerialForm {
+final class SE implements ResponseEnvelope.SerialForm<RequestSuccess<?, ?>, SuccessEnvelope> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

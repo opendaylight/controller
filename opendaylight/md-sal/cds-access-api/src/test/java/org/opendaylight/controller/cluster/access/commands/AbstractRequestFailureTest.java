@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -37,12 +36,10 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
 
     private final T object;
     private final int expectedSize;
-    private final int legacySize;
 
-    protected AbstractRequestFailureTest(final T object, final int baseSize, final int legacySize) {
+    protected AbstractRequestFailureTest(final T object, final int baseSize) {
         this.object = requireNonNull(object);
         this.expectedSize = baseSize + CAUSE_SIZE;
-        this.legacySize = legacySize + CAUSE_SIZE;
     }
 
     @Test
@@ -59,7 +56,6 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
     public void serializationTest() {
         final var bytes = SerializationUtils.serialize(object);
         assertEquals(expectedSize, bytes.length);
-        assertEquals(legacySize, SerializationUtils.serialize(object.toVersion(ABIVersion.MAGNESIUM)).length);
 
         @SuppressWarnings("unchecked")
         final var deserialize = (T) SerializationUtils.deserialize(bytes);

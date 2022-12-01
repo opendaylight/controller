@@ -10,11 +10,16 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+
 /**
  * Externalizable proxy for use with {@link ExistsTransactionSuccess}. It implements the Chlorine SR2 serialization
  * format.
  */
-final class ETS implements ExistsTransactionSuccess.SerialForm {
+final class ETS implements TransactionSuccess.SerialForm<ExistsTransactionSuccess> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -37,6 +42,17 @@ final class ETS implements ExistsTransactionSuccess.SerialForm {
     @Override
     public void setMessage(final ExistsTransactionSuccess message) {
         this.message = requireNonNull(message);
+    }
+
+    @Override
+    public void writeExternal(final ObjectOutput out, final ExistsTransactionSuccess msg) throws IOException {
+        out.writeBoolean(msg.getExists());
+    }
+
+    @Override
+    public ExistsTransactionSuccess readExternal(final ObjectInput in, final TransactionIdentifier target,
+            final long sequence) throws IOException {
+        return new ExistsTransactionSuccess(target, sequence, in.readBoolean());
     }
 
     @Override

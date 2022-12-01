@@ -10,11 +10,14 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.ObjectInput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+
 /**
  * Externalizable proxy for use with {@link IncrementTransactionSequenceSuccess}. It implements the Chlorine SR2
  * serialization format.
  */
-final class ITSS implements IncrementTransactionSequenceSuccess.SerialForm {
+final class ITSS implements TransactionSuccess.SerialForm<IncrementTransactionSequenceSuccess> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -37,6 +40,12 @@ final class ITSS implements IncrementTransactionSequenceSuccess.SerialForm {
     @Override
     public void setMessage(final IncrementTransactionSequenceSuccess message) {
         this.message = requireNonNull(message);
+    }
+
+    @Override
+    public IncrementTransactionSequenceSuccess readExternal(final ObjectInput it, final TransactionIdentifier target,
+            final long sequence) {
+        return new IncrementTransactionSequenceSuccess(target, sequence);
     }
 
     @Override

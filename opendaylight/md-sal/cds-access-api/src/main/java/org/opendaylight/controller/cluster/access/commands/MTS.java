@@ -10,11 +10,15 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+
 /**
  * Externalizable proxy for use with {@link ModifyTransactionSuccess}. It implements the Chlorine SR2 serialization
  * format.
  */
-final class MTS implements ModifyTransactionSuccess.SerialForm {
+final class MTS implements TransactionSuccess.SerialForm<ModifyTransactionSuccess> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -37,6 +41,12 @@ final class MTS implements ModifyTransactionSuccess.SerialForm {
     @Override
     public void setMessage(final ModifyTransactionSuccess message) {
         this.message = requireNonNull(message);
+    }
+
+    @Override
+    public ModifyTransactionSuccess readExternal(final ObjectInput in, final TransactionIdentifier target,
+            final long sequence) throws IOException {
+        return new ModifyTransactionSuccess(target, sequence);
     }
 
     @Override
