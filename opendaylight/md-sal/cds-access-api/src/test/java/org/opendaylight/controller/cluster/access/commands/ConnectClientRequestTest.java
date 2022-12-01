@@ -34,7 +34,7 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
             CLIENT_IDENTIFIER, 0, ACTOR_REF, MIN_VERSION, MAX_VERSION);
 
     public ConnectClientRequestTest() {
-        super(OBJECT, 112, 310);
+        super(OBJECT, 112);
     }
 
     @Test
@@ -56,9 +56,9 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertNotNull(clone);
-        assertEquals(ABIVersion.MAGNESIUM, clone.getVersion());
+        assertEquals(ABIVersion.TEST_FUTURE_VERSION, clone.getVersion());
     }
 
     @Test

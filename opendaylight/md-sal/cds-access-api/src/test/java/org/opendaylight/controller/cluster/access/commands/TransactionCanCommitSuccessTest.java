@@ -17,12 +17,12 @@ public class TransactionCanCommitSuccessTest extends AbstractTransactionSuccessT
         0);
 
     public TransactionCanCommitSuccessTest() {
-        super(OBJECT, 99, 489);
+        super(OBJECT, 99);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

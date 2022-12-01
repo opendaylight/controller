@@ -151,7 +151,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         }
 
         return switch (toVersion) {
-            case MAGNESIUM, CHLORINE_SR2 -> verifyNotNull(cloneAsVersion(toVersion));
+            case CHLORINE_SR2 -> verifyNotNull(cloneAsVersion(toVersion));
             default -> throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
         };
     }

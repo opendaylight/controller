@@ -17,12 +17,12 @@ public class TransactionDoCommitRequestTest extends AbstractTransactionRequestTe
         ACTOR_REF);
 
     public TransactionDoCommitRequestTest() {
-        super(OBJECT, 102, 403);
+        super(OBJECT, 102);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());

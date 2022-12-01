@@ -38,7 +38,7 @@ public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLoc
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new PHR(this) : new PurgeLocalHistoryRequestProxyV1(this);
+        return new PHR(this);
     }
 
     @Override

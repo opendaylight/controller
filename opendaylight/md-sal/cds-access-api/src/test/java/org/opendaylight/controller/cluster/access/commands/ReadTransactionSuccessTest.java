@@ -26,7 +26,7 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
         Optional.of(NODE));
 
     public ReadTransactionSuccessTest() {
-        super(OBJECT, 129, 515);
+        super(OBJECT, 129);
     }
 
     @Test
@@ -36,7 +36,7 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getData(), clone.getData());

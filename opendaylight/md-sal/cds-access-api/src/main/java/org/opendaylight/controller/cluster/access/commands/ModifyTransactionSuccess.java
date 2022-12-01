@@ -37,7 +37,7 @@ public final class ModifyTransactionSuccess extends TransactionSuccess<ModifyTra
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new MTS(this) : new ModifyTransactionSuccessProxyV1(this);
+        return new MTS(this);
     }
 
     @Override

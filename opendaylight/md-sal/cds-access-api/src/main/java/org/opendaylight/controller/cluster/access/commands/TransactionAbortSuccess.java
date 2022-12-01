@@ -39,7 +39,7 @@ public final class TransactionAbortSuccess extends TransactionSuccess<Transactio
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TAS(this) : new TransactionAbortSuccessProxyV1(this);
+        return new TAS(this);
     }
 
     @Override
