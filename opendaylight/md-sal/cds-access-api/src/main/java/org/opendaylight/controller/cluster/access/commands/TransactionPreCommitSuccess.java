@@ -39,7 +39,7 @@ public final class TransactionPreCommitSuccess extends TransactionSuccess<Transa
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TPCS(this) : new TransactionPreCommitSuccessProxyV1(this);
+        return new TPCS(this);
     }
 
     @Override

@@ -37,7 +37,7 @@ public final class TransactionPurgeResponse extends TransactionSuccess<Transacti
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TPS(this) : new TransactionPurgeResponseProxyV1(this);
+        return new TPS(this);
     }
 
     @Override

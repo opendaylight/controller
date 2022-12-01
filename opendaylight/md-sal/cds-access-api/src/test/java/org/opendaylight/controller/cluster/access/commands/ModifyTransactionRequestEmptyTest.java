@@ -23,7 +23,7 @@ public class ModifyTransactionRequestEmptyTest extends AbstractTransactionReques
         ACTOR_REF, List.of(), PROTOCOL);
 
     public ModifyTransactionRequestEmptyTest() {
-        super(OBJECT, 108, 408);
+        super(OBJECT, 108);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class ModifyTransactionRequestEmptyTest extends AbstractTransactionReques
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());

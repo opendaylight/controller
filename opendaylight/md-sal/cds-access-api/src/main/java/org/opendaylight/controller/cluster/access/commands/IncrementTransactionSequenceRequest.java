@@ -70,7 +70,7 @@ public final class IncrementTransactionSequenceRequest extends
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new ITSR(this) : new IncrementTransactionSequenceRequestProxyV1(this);
+        return new ITSR(this);
     }
 
     @Override

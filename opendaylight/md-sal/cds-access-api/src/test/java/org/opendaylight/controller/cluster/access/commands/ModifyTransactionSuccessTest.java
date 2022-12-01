@@ -16,13 +16,13 @@ public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest
     private static final ModifyTransactionSuccess OBJECT = new ModifyTransactionSuccess(TRANSACTION_IDENTIFIER, 0);
 
     public ModifyTransactionSuccessTest() {
-        super(OBJECT, 98, 486);
+        super(OBJECT, 98);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
-        assertEquals(ABIVersion.MAGNESIUM, clone.getVersion());
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
+        assertEquals(ABIVersion.TEST_FUTURE_VERSION, clone.getVersion());
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

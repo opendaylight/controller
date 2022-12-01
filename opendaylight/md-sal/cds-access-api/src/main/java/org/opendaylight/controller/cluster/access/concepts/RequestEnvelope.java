@@ -31,11 +31,6 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
         return new RE(this);
     }
 
-    @Override
-    RequestEnvelopeProxy legacyProxy() {
-        return new RequestEnvelopeProxy(this);
-    }
-
     /**
      * Respond to this envelope with a {@link RequestFailure} caused by specified {@link RequestException}.
      *

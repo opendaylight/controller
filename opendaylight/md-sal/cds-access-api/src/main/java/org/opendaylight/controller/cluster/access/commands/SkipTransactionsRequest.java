@@ -103,7 +103,7 @@ public final class SkipTransactionsRequest extends TransactionRequest<SkipTransa
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new STR(this) : new SkipTransactionsRequestV1(this);
+        return new STR(this);
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public abstract class AbstractRequestTest<T extends Request<?, T>> {
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
@@ -30,12 +29,10 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     private final T object;
     private final int expectedSize;
-    private final int legacySize;
 
-    protected AbstractRequestTest(final T object, final int baseSize, final int legacySize) {
+    protected AbstractRequestTest(final T object, final int baseSize) {
         this.object = requireNonNull(object);
         this.expectedSize = baseSize + ACTOR_REF_SIZE;
-        this.legacySize = legacySize + ACTOR_REF_SIZE;
     }
 
     protected final T object() {
@@ -60,8 +57,6 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     @Test
     public void serializationTest() {
-        assertEquals(legacySize, SerializationUtils.serialize(object.cloneAsVersion(ABIVersion.MAGNESIUM)).length);
-
         final byte[] bytes = SerializationUtils.serialize(object);
         assertEquals(expectedSize, bytes.length);
         @SuppressWarnings("unchecked")
