@@ -60,10 +60,10 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     @Test
     public void serializationTest() {
-        assertEquals(expectedSize, SerializationUtils.serialize(object.cloneAsVersion(ABIVersion.CHLORINE_SR2)).length);
+        assertEquals(legacySize, SerializationUtils.serialize(object.cloneAsVersion(ABIVersion.MAGNESIUM)).length);
 
         final byte[] bytes = SerializationUtils.serialize(object);
-        assertEquals(legacySize, bytes.length);
+        assertEquals(expectedSize, bytes.length);
         @SuppressWarnings("unchecked")
         final T deserialize = (T) SerializationUtils.deserialize(bytes);
 

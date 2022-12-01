@@ -41,7 +41,7 @@ public class RequestEnvelopeTest extends AbstractEnvelopeTest<RequestEnvelope> {
         final int refSize = replyTo.path().toSerializationFormat().length();
 
         return new EnvelopeDetails<>(new RequestEnvelope(new TransactionPurgeRequest(OBJECT, 2L, replyTo), 1L, 2L),
-            refSize + 584);
+            refSize + 179);
     }
 
     @Override

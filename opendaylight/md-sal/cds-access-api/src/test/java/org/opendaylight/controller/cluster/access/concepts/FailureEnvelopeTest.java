@@ -21,7 +21,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         final var cause = new RuntimeRequestException("msg", new RuntimeException());
         final int causeSize = SerializationUtils.serialize(cause).length;
         return new EnvelopeDetails<>(new FailureEnvelope(new MockFailure(OBJECT, cause, 42), 1L, 2L, 11L),
-            causeSize + 687);
+            causeSize + 485);
     }
 
     @Override
