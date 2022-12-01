@@ -30,9 +30,4 @@ public final class FailureEnvelope extends ResponseEnvelope<RequestFailure<?, ?>
     FE createProxy() {
         return new FE(this);
     }
-
-    @Override
-    FailureEnvelopeProxy legacyProxy() {
-        return new FailureEnvelopeProxy(this);
-    }
 }

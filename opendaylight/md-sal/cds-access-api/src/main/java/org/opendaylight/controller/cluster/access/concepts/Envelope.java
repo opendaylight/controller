@@ -16,7 +16,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -101,11 +100,8 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
 
     @java.io.Serial
     final Object writeReplace() {
-        return ABIVersion.MAGNESIUM.lt(message.getVersion()) ? createProxy() : legacyProxy();
+        return createProxy();
     }
 
     abstract @NonNull SerialForm<T, ?> createProxy();
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    abstract @NonNull AbstractEnvelopeProxy<T, ?> legacyProxy();
 }

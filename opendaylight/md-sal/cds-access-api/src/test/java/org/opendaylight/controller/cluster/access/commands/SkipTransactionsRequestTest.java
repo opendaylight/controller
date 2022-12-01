@@ -19,12 +19,12 @@ public class SkipTransactionsRequestTest extends AbstractTransactionRequestTest<
         ACTOR_REF, List.of(UnsignedLong.ONE));
 
     public SkipTransactionsRequestTest() {
-        super(OBJECT, 109, 403);
+        super(OBJECT, 109);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());

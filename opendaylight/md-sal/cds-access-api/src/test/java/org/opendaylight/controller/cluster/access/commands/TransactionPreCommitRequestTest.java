@@ -17,12 +17,12 @@ public class TransactionPreCommitRequestTest extends AbstractTransactionRequestT
         ACTOR_REF);
 
     public TransactionPreCommitRequestTest() {
-        super(OBJECT, 102, 404);
+        super(OBJECT, 102);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());

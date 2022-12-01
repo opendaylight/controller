@@ -47,6 +47,6 @@ public final class ReadTransactionRequest extends AbstractReadPathTransactionReq
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new RTR(this) : new ReadTransactionRequestProxyV1(this);
+        return new RTR(this);
     }
 }
