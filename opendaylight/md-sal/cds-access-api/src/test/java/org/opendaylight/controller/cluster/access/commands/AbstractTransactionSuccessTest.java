@@ -14,7 +14,7 @@ public abstract class AbstractTransactionSuccessTest<T extends TransactionSucces
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(HISTORY_IDENTIFIER,
         0);
 
-    protected AbstractTransactionSuccessTest(final T object, final int expectedSize, final int legacySize) {
-        super(object, expectedSize, legacySize);
+    protected AbstractTransactionSuccessTest(final T object, final int expectedSize) {
+        super(object, expectedSize);
     }
 }

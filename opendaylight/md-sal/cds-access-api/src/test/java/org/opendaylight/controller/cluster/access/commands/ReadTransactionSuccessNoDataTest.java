@@ -18,7 +18,7 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
         Optional.empty());
 
     public ReadTransactionSuccessNoDataTest() {
-        super(OBJECT, 99, 485);
+        super(OBJECT, 99);
     }
 
     @Test
@@ -28,7 +28,7 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getData(), clone.getData());

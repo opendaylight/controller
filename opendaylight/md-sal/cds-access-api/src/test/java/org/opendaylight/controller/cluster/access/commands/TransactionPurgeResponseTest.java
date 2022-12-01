@@ -16,12 +16,12 @@ public class TransactionPurgeResponseTest extends AbstractTransactionSuccessTest
     private static final TransactionPurgeResponse OBJECT = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, 0);
 
     public TransactionPurgeResponseTest() {
-        super(OBJECT, 98, 486);
+        super(OBJECT, 98);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

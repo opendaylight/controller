@@ -49,6 +49,6 @@ public final class LocalHistorySuccess extends RequestSuccess<LocalHistoryIdenti
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new HS(this) : new LocalHistorySuccessProxyV1(this);
+        return new HS(this);
     }
 }

@@ -30,10 +30,4 @@ public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>
     SE createProxy() {
         return new SE(this);
     }
-
-    @Override
-    SuccessEnvelopeProxy legacyProxy() {
-        return new SuccessEnvelopeProxy(this);
-    }
-
 }
