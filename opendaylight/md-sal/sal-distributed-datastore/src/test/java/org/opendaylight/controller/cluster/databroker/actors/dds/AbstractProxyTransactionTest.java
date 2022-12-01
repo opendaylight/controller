@@ -109,7 +109,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         backendProbe = new TestProbe(system, "backend");
         context = AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID,
                 PERSISTENCE_ID);
-        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
+        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(),
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
@@ -304,7 +304,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext2");
         final ClientActorContext context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
+        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(),
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
@@ -324,7 +324,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         final AbstractClientHistory history = mock(AbstractClientHistory.class);
         final ClientActorContext context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
+        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(),
                 "default", UnsignedLong.ZERO, Optional.empty(), 5);
         final AbstractClientConnection<ShardBackendInfo> connection =
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
