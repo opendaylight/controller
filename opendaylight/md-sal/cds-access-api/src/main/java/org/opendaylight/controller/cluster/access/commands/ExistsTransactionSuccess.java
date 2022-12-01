@@ -53,7 +53,7 @@ public final class ExistsTransactionSuccess extends TransactionSuccess<ExistsTra
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new ETS(this) : new ExistsTransactionSuccessProxyV1(this);
+        return new ETS(this);
     }
 
     @Override

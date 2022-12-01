@@ -41,7 +41,7 @@ public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateL
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new CHR(this) : new CreateLocalHistoryRequestProxyV1(this);
+        return new CHR(this);
     }
 
     @Override

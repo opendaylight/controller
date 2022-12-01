@@ -38,7 +38,7 @@ public final class DestroyLocalHistoryRequest extends LocalHistoryRequest<Destro
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new DHR(this) : new DestroyLocalHistoryRequestProxyV1(this);
+        return new DHR(this);
     }
 
     @Override

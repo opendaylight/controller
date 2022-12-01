@@ -16,7 +16,7 @@ public class TransactionAbortSuccessTest extends AbstractTransactionSuccessTest<
     private static final TransactionAbortSuccess OBJECT = new TransactionAbortSuccess(TRANSACTION_IDENTIFIER, 0);
 
     public TransactionAbortSuccessTest() {
-        super(OBJECT, 98, 485);
+        super(OBJECT, 98);
     }
 
     @Test
