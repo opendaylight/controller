@@ -26,7 +26,7 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
         Optional.of(NODE));
 
     public ReadTransactionSuccessTest() {
-        super(OBJECT, 129, 515);
+        super(OBJECT, 129);
     }
 
     @Test

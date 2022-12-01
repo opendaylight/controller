@@ -39,7 +39,7 @@ public final class TransactionPurgeRequest extends TransactionRequest<Transactio
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TPR(this) : new TransactionPurgeRequestProxyV1(this);
+        return new TPR(this);
     }
 
     @Override

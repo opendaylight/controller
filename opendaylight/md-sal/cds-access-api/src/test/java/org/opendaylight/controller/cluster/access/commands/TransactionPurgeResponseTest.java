@@ -16,7 +16,7 @@ public class TransactionPurgeResponseTest extends AbstractTransactionSuccessTest
     private static final TransactionPurgeResponse OBJECT = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, 0);
 
     public TransactionPurgeResponseTest() {
-        super(OBJECT, 98, 486);
+        super(OBJECT, 98);
     }
 
     @Test

@@ -90,7 +90,7 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new CCR(this) : new ConnectClientRequestProxyV1(this);
+        return new CCR(this);
     }
 
     @Override

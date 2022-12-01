@@ -37,7 +37,7 @@ public final class IncrementTransactionSequenceSuccess extends TransactionSucces
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new ITSS(this) : new IncrementTransactionSequenceSuccessProxyV1(this);
+        return new ITSS(this);
     }
 
     @Override

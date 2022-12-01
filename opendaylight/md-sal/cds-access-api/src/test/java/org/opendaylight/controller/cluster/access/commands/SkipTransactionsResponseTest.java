@@ -16,7 +16,7 @@ public class SkipTransactionsResponseTest extends AbstractTransactionSuccessTest
     private static final SkipTransactionsResponse OBJECT = new SkipTransactionsResponse(TRANSACTION_IDENTIFIER, 0);
 
     public SkipTransactionsResponseTest() {
-        super(OBJECT, 98, 486);
+        super(OBJECT, 98);
     }
 
     @Test
