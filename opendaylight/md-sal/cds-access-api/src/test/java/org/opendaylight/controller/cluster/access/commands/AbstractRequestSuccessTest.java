@@ -40,8 +40,8 @@ public abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, T>>
     @Test
     public void serializationTest() {
         final var bytes = SerializationUtils.serialize(object);
-        assertEquals(legacySize, bytes.length);
-        assertEquals(expectedSize, SerializationUtils.serialize(object.toVersion(ABIVersion.CHLORINE_SR2)).length);
+        assertEquals(expectedSize, bytes.length);
+        assertEquals(legacySize, SerializationUtils.serialize(object.toVersion(ABIVersion.MAGNESIUM)).length);
 
         @SuppressWarnings("unchecked")
         final var deserialize = (T) SerializationUtils.deserialize(bytes);
