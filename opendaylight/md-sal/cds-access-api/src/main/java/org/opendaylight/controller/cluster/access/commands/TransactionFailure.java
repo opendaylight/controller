@@ -49,6 +49,6 @@ public final class TransactionFailure extends RequestFailure<TransactionIdentifi
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new TF(this) : new TransactionFailureProxyV1(this);
+        return new TF(this);
     }
 }

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 
 import java.io.DataInput;
@@ -21,7 +23,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         final var cause = new RuntimeRequestException("msg", new RuntimeException());
         final int causeSize = SerializationUtils.serialize(cause).length;
         return new EnvelopeDetails<>(new FailureEnvelope(new MockFailure(OBJECT, cause, 42), 1L, 2L, 11L),
-            causeSize + 485);
+            causeSize + 216);
     }
 
     @Override
@@ -33,9 +35,11 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         assertEquals(expectedCause.isRetriable(), actualCause.isRetriable());
     }
 
-    private static class MockRequestFailureProxy extends AbstractRequestFailureProxy<WritableIdentifier, MockFailure> {
+    private static class MockRequestFailureProxy implements RequestFailure.SerialForm<WritableIdentifier, MockFailure> {
         @java.io.Serial
         private static final long serialVersionUID = 5015515628523887221L;
+
+        private MockFailure message;
 
         @SuppressWarnings("checkstyle:RedundantModifier")
         public MockRequestFailureProxy() {
@@ -43,7 +47,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         }
 
         private MockRequestFailureProxy(final MockFailure mockFailure) {
-            super(mockFailure);
+            message = requireNonNull(mockFailure);
         }
 
         @Override
@@ -56,6 +60,21 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         public WritableIdentifier readTarget(final DataInput in) throws IOException {
             return TransactionIdentifier.readFrom(in);
         }
+
+        @Override
+        public MockFailure message() {
+            return verifyNotNull(message);
+        }
+
+        @Override
+        public void setMessage(final MockFailure message) {
+            this.message = requireNonNull(message);
+        }
+
+        @Override
+        public Object readResolve() {
+            return message();
+        }
     }
 
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
@@ -67,7 +86,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         }
 
         @Override
-        protected AbstractRequestFailureProxy<WritableIdentifier, MockFailure> externalizableProxy(
+        protected RequestFailure.SerialForm<WritableIdentifier, MockFailure> externalizableProxy(
                 final ABIVersion version) {
             return new MockRequestFailureProxy(this);
         }
