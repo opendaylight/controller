@@ -38,8 +38,11 @@ public enum ABIVersion implements WritableObject {
 
     /**
      * Initial ABI version, as shipped with Boron Simultaneous release.
+     *
+     * @deprecated This version scheduled for removal in the next major release.
      */
     // We seed the initial version to be the same as DataStoreVersions.BORON-VERSION for compatibility reasons.
+    @Deprecated(since = "6.0.4", forRemoval = true)
     BORON(5) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
@@ -49,7 +52,10 @@ public enum ABIVersion implements WritableObject {
     /**
      * Revised ABI version. The messages remain the same as {@link #BORON}, but messages bearing QNames in any shape
      * are using {@link NormalizedNodeStreamVersion#NEON_SR2}, which improves encoding.
+     *
+     * @deprecated This version scheduled for removal in the next major release.
      */
+    @Deprecated(since = "6.0.4", forRemoval = true)
     NEON_SR2(6) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
@@ -59,7 +65,10 @@ public enum ABIVersion implements WritableObject {
     /**
      * Revised ABI version. The messages remain the same as {@link #BORON}, but messages bearing QNames in any shape
      * are using {@link NormalizedNodeStreamVersion#SODIUM_SR1}, which improves encoding.
+     *
+     * @deprecated This version scheduled for removal in the next major release.
      */
+    @Deprecated(since = "6.0.4", forRemoval = true)
     SODIUM_SR1(7) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
