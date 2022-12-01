@@ -123,7 +123,7 @@ public enum ABIVersion implements WritableObject {
      * @return Current {@link ABIVersion}
      */
     public static @NonNull ABIVersion current() {
-        return MAGNESIUM;
+        return CHLORINE_SR2;
     }
 
     /**
