@@ -17,7 +17,7 @@ public class TransactionCanCommitSuccessTest extends AbstractTransactionSuccessT
         0);
 
     public TransactionCanCommitSuccessTest() {
-        super(OBJECT, 99, 489);
+        super(OBJECT, 99);
     }
 
     @Test

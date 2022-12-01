@@ -44,7 +44,7 @@ public final class ConnectClientFailure extends RequestFailure<ClientIdentifier,
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new CCF(this) : new ConnectClientFailureProxyV1(this);
+        return new CCF(this);
     }
 
     @Override
