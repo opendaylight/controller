@@ -16,12 +16,12 @@ public class SkipTransactionsResponseTest extends AbstractTransactionSuccessTest
     private static final SkipTransactionsResponse OBJECT = new SkipTransactionsResponse(TRANSACTION_IDENTIFIER, 0);
 
     public SkipTransactionsResponseTest() {
-        super(OBJECT, 98, 486);
+        super(OBJECT, 98);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
     }

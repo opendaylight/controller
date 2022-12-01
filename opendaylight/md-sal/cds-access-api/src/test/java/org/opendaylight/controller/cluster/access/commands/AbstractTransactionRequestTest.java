@@ -29,8 +29,8 @@ public abstract class AbstractTransactionRequestTest<T extends TransactionReques
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
             HISTORY_IDENTIFIER, 0);
 
-    protected AbstractTransactionRequestTest(final T object, final int baseSize, final int legacySize) {
-        super(object, baseSize, legacySize);
+    protected AbstractTransactionRequestTest(final T object, final int baseSize) {
+        super(object, baseSize);
     }
 
     @Test

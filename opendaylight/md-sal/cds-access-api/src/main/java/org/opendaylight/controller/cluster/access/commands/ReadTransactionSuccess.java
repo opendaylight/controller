@@ -78,7 +78,7 @@ public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransac
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new RTS(this) : new ReadTransactionSuccessProxyV1(this);
+        return new RTS(this);
     }
 
     @Override

@@ -37,7 +37,7 @@ public final class SkipTransactionsResponse extends TransactionSuccess<SkipTrans
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new STS(this) : new SkipTransactionsResponseProxyV1(this);
+        return new STS(this);
     }
 
     @Override

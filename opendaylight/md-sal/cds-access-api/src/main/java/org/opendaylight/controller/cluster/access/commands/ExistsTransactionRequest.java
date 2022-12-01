@@ -47,6 +47,6 @@ public final class ExistsTransactionRequest extends AbstractReadPathTransactionR
 
     @Override
     protected SerialForm externalizableProxy(final ABIVersion version) {
-        return ABIVersion.MAGNESIUM.lt(version) ? new ETR(this) : new ExistsTransactionRequestProxyV1(this);
+        return new ETR(this);
     }
 }

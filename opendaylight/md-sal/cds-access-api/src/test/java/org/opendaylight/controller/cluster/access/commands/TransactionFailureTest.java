@@ -16,12 +16,12 @@ public class TransactionFailureTest extends AbstractRequestFailureTest<Transacti
     private static final TransactionFailure OBJECT = new TransactionFailure(TRANSACTION_IDENTIFIER, 0, CAUSE);
 
     public TransactionFailureTest() {
-        super(OBJECT, 100, 392);
+        super(OBJECT, 100);
     }
 
     @Test
     public void cloneAsVersionTest() {
-        final var clone = OBJECT.cloneAsVersion(ABIVersion.MAGNESIUM);
+        final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getCause(), clone.getCause());
