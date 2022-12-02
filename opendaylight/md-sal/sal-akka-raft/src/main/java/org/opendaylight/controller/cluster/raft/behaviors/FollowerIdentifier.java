@@ -19,17 +19,21 @@ import org.opendaylight.yangtools.util.AbstractStringIdentifier;
  * @author Thomas Pantelis
  */
 class FollowerIdentifier extends AbstractStringIdentifier<FollowerIdentifier> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    FollowerIdentifier(String followerId) {
+    FollowerIdentifier(final String followerId) {
         super(followerId);
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new FI(getValue());
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private FollowerIdentifier identifier;
@@ -40,20 +44,21 @@ class FollowerIdentifier extends AbstractStringIdentifier<FollowerIdentifier> {
         public Proxy() {
         }
 
-        Proxy(FollowerIdentifier identifier) {
+        Proxy(final FollowerIdentifier identifier) {
             this.identifier = identifier;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(identifier.getValue());
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             identifier = new FollowerIdentifier((String) in.readObject());
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return identifier;
         }
