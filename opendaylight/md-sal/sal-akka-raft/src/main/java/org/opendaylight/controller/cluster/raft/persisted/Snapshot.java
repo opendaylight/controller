@@ -22,8 +22,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-// Not final and non-sealed for mocking
-public class Snapshot implements Serializable {
+public sealed class Snapshot implements Serializable {
     /**
      * Implementations of this interface are used as the state payload for a snapshot.
      *
