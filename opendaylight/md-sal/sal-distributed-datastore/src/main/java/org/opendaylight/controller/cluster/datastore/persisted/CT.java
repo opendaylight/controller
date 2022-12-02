@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.io.ChunkedByteArray;
  * Serialization proxy for {@link CommitTransactionPayload}.
  */
 final class CT implements Externalizable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private CommitTransactionPayload payload;

@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
  * Serialization proxy for {@link DatastoreSnapshot}.
  */
 final class DS implements DatastoreSnapshot.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private DatastoreSnapshot datastoreSnapshot;

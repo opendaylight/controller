@@ -21,8 +21,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+public sealed class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Magnesium extends PurgeLocalHistoryPayload implements MagnesiumPayload {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Magnesium(final LocalHistoryIdentifier historyId, final byte[] serialized) {
+            super(historyId, serialized);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
@@ -30,10 +42,6 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final byte[] serialized) {
-            super(serialized);
         }
 
         @Override
@@ -44,13 +52,14 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
         @Override
         protected PurgeLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
                 final byte[] serialized) {
-            return new PurgeLocalHistoryPayload(identifier, serialized);
+            return new Magnesium(identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeLocalHistoryPayload.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PH::new);
 
     PurgeLocalHistoryPayload(final LocalHistoryIdentifier historyId, final byte[] serialized) {
         super(historyId, serialized);
@@ -70,8 +79,8 @@ public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected PH externalizableProxy(final byte[] serialized) {
+        return new PH(serialized);
     }
 
     @Override

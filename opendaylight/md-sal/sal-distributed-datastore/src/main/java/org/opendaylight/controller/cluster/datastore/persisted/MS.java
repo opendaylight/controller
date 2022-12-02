@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 final class MS implements Externalizable {
     private static final Logger LOG = LoggerFactory.getLogger(MS.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
@@ -77,6 +78,7 @@ final class MS implements Externalizable {
         rootNode = stream.readNormalizedNode();
     }
 
+    @java.io.Serial
     private Object readResolve() {
         return new MetadataShardDataTreeSnapshot(rootNode, metadata);
     }

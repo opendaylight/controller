@@ -69,7 +69,9 @@ public final class ShardManagerSnapshot implements Serializable {
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements SerializedForm {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private ShardManagerSnapshot snapshot;
@@ -79,10 +81,6 @@ public final class ShardManagerSnapshot implements Serializable {
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final ShardManagerSnapshot snapshot) {
-            this.snapshot = snapshot;
         }
 
         @Override
@@ -101,6 +99,7 @@ public final class ShardManagerSnapshot implements Serializable {
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final List<String> shardList;
@@ -113,8 +112,9 @@ public final class ShardManagerSnapshot implements Serializable {
         return shardList;
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new SM(this);
     }
 
     @Override

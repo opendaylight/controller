@@ -45,6 +45,7 @@ public final class ShardSnapshotState implements Snapshot.State {
     }
 
     private static final class Proxy implements SerialForm {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private ShardSnapshotState snapshotState;
@@ -54,10 +55,6 @@ public final class ShardSnapshotState implements Snapshot.State {
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final ShardSnapshotState snapshotState) {
-            this.snapshotState = snapshotState;
         }
 
         @Override
@@ -76,6 +73,7 @@ public final class ShardSnapshotState implements Snapshot.State {
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
@@ -103,7 +101,8 @@ public final class ShardSnapshotState implements Snapshot.State {
         return migrated;
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new SS(this);
     }
 }
