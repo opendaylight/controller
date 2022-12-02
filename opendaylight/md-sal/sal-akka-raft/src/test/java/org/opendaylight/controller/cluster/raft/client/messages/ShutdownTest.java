@@ -22,7 +22,7 @@ public class ShutdownTest {
     @Test
     public void test() {
         final var bytes = SerializationUtils.serialize(Shutdown.INSTANCE);
-        assertEquals(187, bytes.length);
+        assertEquals(86, bytes.length);
         final var cloned = SerializationUtils.deserialize(bytes);
         assertSame("Cloned instance", Shutdown.INSTANCE, cloned);
     }
