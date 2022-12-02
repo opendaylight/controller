@@ -22,7 +22,7 @@ public class ApplyJournalEntriesTest {
     public void testSerialization() {
         final var expected = new ApplyJournalEntries(5);
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(108, bytes.length);
+        assertEquals(80, bytes.length);
         final var cloned = (ApplyJournalEntries) SerializationUtils.deserialize(bytes);
 
         assertEquals("getFromIndex", expected.getToIndex(), cloned.getToIndex());

@@ -17,7 +17,7 @@ public class NoopPayloadTest {
     @Test
     public void testSerialization() {
         final var bytes = SerializationUtils.serialize(NoopPayload.INSTANCE);
-        assertEquals(89, bytes.length);
+        assertEquals(74, bytes.length);
         assertSame(NoopPayload.INSTANCE, SerializationUtils.deserialize(bytes));
     }
 }

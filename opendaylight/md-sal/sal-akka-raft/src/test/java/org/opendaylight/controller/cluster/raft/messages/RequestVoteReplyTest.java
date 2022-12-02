@@ -22,7 +22,7 @@ public class RequestVoteReplyTest {
     public void testSerialization() {
         final var expected = new RequestVoteReply(5, true);
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(105, bytes.length);
+        assertEquals(78, bytes.length);
         final var cloned = (RequestVoteReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());

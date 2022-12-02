@@ -22,7 +22,7 @@ public class RequestVoteTest {
     public void testSerialization() {
         final var expected = new RequestVote(4, "candidateId", 3, 2);
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(131, bytes.length);
+        assertEquals(97, bytes.length);
         final var cloned = (RequestVote) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());

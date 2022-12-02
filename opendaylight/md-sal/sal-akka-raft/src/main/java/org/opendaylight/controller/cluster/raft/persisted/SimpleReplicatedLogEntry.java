@@ -24,7 +24,9 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  * @author Thomas Pantelis
  */
 public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private long index;
@@ -58,14 +60,16 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
             data = (Payload) in.readObject();
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return new SimpleReplicatedLogEntry(index, term, data);
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative
-    private static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy()).length;
+    // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative.
+    private static final int PROXY_SIZE = SerializationUtils.serialize(new LE((Void) null)).length;
 
     private final long index;
     private final long term;
@@ -121,7 +125,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return new LE(this);
     }
 
     @Override
@@ -139,12 +143,11 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
         if (this == obj) {
             return true;
         }
-
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        SimpleReplicatedLogEntry other = (SimpleReplicatedLogEntry) obj;
+        var other = (SimpleReplicatedLogEntry) obj;
         return index == other.index && term == other.term && payload.equals(other.payload);
     }
 

@@ -19,6 +19,7 @@ import java.io.ObjectOutput;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "7.0.0", forRemoval = true)
 public abstract class EmptyExternalizableProxy implements Externalizable {
     private static final long serialVersionUID = 1L;
 
