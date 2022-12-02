@@ -17,10 +17,15 @@ import java.io.Serializable;
  */
 public final class TimeoutNow implements Serializable, ControlMessage {
     private static final long serialVersionUID = 1L;
+
     public static final TimeoutNow INSTANCE = new TimeoutNow();
 
     private TimeoutNow() {
         // Hidden on purpose
+    }
+
+    private Object readResolve() {
+        return INSTANCE;
     }
 
     private Object writeReplace() {

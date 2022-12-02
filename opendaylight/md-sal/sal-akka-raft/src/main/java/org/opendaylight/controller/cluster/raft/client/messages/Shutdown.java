@@ -20,10 +20,15 @@ import org.opendaylight.controller.cluster.raft.base.messages.EmptyExternalizabl
  */
 public final class Shutdown implements Serializable, ControlMessage {
     private static final long serialVersionUID = 1L;
+
     public static final Shutdown INSTANCE = new Shutdown();
 
     private Shutdown() {
         // Hidden on purpose
+    }
+
+    private Object readResolve() {
+        return INSTANCE;
     }
 
     private Object writeReplace() {
