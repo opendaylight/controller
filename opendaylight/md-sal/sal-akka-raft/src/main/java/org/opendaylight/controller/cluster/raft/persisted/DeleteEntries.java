@@ -18,23 +18,29 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class DeleteEntries implements Serializable {
+public sealed class DeleteEntries implements Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Legacy extends DeleteEntries implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Legacy(final long fromIndex) {
+            super(fromIndex);
+        }
+    }
+
     @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        private DeleteEntries deleteEntries;
+        private DeleteEntries deleteEntries = null;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final DeleteEntries deleteEntries) {
-            this.deleteEntries = deleteEntries;
         }
 
         @Override
@@ -44,7 +50,7 @@ public class DeleteEntries implements Serializable {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            deleteEntries = new DeleteEntries(in.readLong());
+            deleteEntries = new Legacy(in.readLong());
         }
 
         @java.io.Serial
@@ -62,16 +68,17 @@ public class DeleteEntries implements Serializable {
         this.fromIndex = fromIndex;
     }
 
-    public long getFromIndex() {
+    public final long getFromIndex() {
         return fromIndex;
     }
 
-    private Object writeReplace() {
+    @java.io.Serial
+    public final Object writeReplace() {
         return new DE(this);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "DeleteEntries [fromIndex=" + fromIndex + "]";
     }
 }

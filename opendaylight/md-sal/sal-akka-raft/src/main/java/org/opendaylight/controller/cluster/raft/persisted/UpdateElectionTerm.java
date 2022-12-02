@@ -16,23 +16,29 @@ import java.io.Serializable;
 /**
  * Message class to persist election term information.
  */
-public class UpdateElectionTerm implements Serializable {
+public sealed class UpdateElectionTerm implements Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Legacy extends UpdateElectionTerm implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Legacy(final long currentTerm, final String votedFor) {
+            super(currentTerm, votedFor);
+        }
+    }
+
     @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        private UpdateElectionTerm updateElectionTerm;
+        private UpdateElectionTerm updateElectionTerm = null;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final UpdateElectionTerm updateElectionTerm) {
-            this.updateElectionTerm = updateElectionTerm;
         }
 
         @Override
@@ -43,7 +49,7 @@ public class UpdateElectionTerm implements Serializable {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            updateElectionTerm = new UpdateElectionTerm(in.readLong(), (String) in.readObject());
+            updateElectionTerm = new Legacy(in.readLong(), (String) in.readObject());
         }
 
         @java.io.Serial
@@ -63,21 +69,21 @@ public class UpdateElectionTerm implements Serializable {
         this.votedFor = votedFor;
     }
 
-    public long getCurrentTerm() {
+    public final long getCurrentTerm() {
         return currentTerm;
     }
 
-    public String getVotedFor() {
+    public final String getVotedFor() {
         return votedFor;
     }
 
     @java.io.Serial
-    private Object writeReplace() {
+    public final Object writeReplace() {
         return new UT(this);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "UpdateElectionTerm [currentTerm=" + currentTerm + ", votedFor=" + votedFor + "]";
     }
 }

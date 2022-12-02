@@ -23,7 +23,17 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+public sealed class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Legacy extends SimpleReplicatedLogEntry implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Legacy(final long index, final long term, final Payload payload) {
+            super(index, term, payload);
+        }
+    }
+
     @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
         @java.io.Serial
@@ -62,7 +72,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
         @java.io.Serial
         private Object readResolve() {
-            return new SimpleReplicatedLogEntry(index, term, data);
+            return new Legacy(index, term, data);
         }
     }
 
@@ -90,46 +100,47 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public Payload getData() {
+    public final Payload getData() {
         return payload;
     }
 
     @Override
-    public long getTerm() {
+    public final long getTerm() {
         return term;
     }
 
     @Override
-    public long getIndex() {
+    public final long getIndex() {
         return index;
     }
 
     @Override
-    public int size() {
+    public final int size() {
         return payload.size();
     }
 
     @Override
-    public int serializedSize() {
+    public final int serializedSize() {
         return PROXY_SIZE + payload.serializedSize();
     }
 
     @Override
-    public boolean isPersistencePending() {
+    public final boolean isPersistencePending() {
         return persistencePending;
     }
 
     @Override
-    public void setPersistencePending(final boolean pending) {
+    public final void setPersistencePending(final boolean pending) {
         persistencePending = pending;
     }
 
-    private Object writeReplace() {
+    @java.io.Serial
+    public final Object writeReplace() {
         return new LE(this);
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + payload.hashCode();
@@ -139,20 +150,13 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-
-        var other = (SimpleReplicatedLogEntry) obj;
-        return index == other.index && term == other.term && payload.equals(other.payload);
+    public final boolean equals(final Object obj) {
+        return this == obj || obj instanceof SimpleReplicatedLogEntry other && index == other.index
+            && term == other.term && payload.equals(other.payload);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "SimpleReplicatedLogEntry [index=" + index + ", term=" + term + ", payload=" + payload + "]";
     }
 }

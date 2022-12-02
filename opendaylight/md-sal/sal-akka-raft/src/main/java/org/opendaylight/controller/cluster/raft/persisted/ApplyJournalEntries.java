@@ -22,23 +22,29 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class ApplyJournalEntries implements Serializable, ControlMessage {
+public sealed class ApplyJournalEntries implements Serializable, ControlMessage {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Legacy extends ApplyJournalEntries implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Legacy(final long toIndex) {
+            super(toIndex);
+        }
+    }
+
     @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        private ApplyJournalEntries applyEntries;
+        private ApplyJournalEntries applyEntries = null;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final ApplyJournalEntries applyEntries) {
-            this.applyEntries = applyEntries;
         }
 
         @Override
@@ -48,7 +54,7 @@ public class ApplyJournalEntries implements Serializable, ControlMessage {
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            applyEntries = new ApplyJournalEntries(in.readLong());
+            applyEntries = new Legacy(in.readLong());
         }
 
         @java.io.Serial
@@ -66,16 +72,17 @@ public class ApplyJournalEntries implements Serializable, ControlMessage {
         this.toIndex = toIndex;
     }
 
-    public long getToIndex() {
+    public final long getToIndex() {
         return toIndex;
     }
 
-    private Object writeReplace() {
+    @java.io.Serial
+    public final Object writeReplace() {
         return new AJE(this);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "ApplyJournalEntries [toIndex=" + toIndex + "]";
     }
 }

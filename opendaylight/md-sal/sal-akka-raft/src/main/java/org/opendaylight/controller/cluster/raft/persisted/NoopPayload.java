@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import akka.dispatch.ControlMessage;
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
@@ -18,14 +19,14 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-public final class NoopPayload extends Payload implements ControlMessage {
-    public static final NoopPayload INSTANCE = new NoopPayload();
-
+// FIXME: do not implement MigratedSerializable once Proxy is gone
+public final class NoopPayload extends Payload implements ControlMessage, MigratedSerializable {
     // There is no need for Externalizable
     @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Serializable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
+        private static final @NonNull NoopPayload INSTANCE = new NoopPayload(true);
 
         @java.io.Serial
         private Object readResolve() {
@@ -35,12 +36,16 @@ public final class NoopPayload extends Payload implements ControlMessage {
 
     @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final NP PROXY = new NP();
+    private static final @NonNull NP PROXY = new NP();
     // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative
     private static final int PROXY_SIZE = SerializationUtils.serialize(PROXY).length;
 
-    private NoopPayload() {
-        // Hidden on purpose
+    public static final @NonNull NoopPayload INSTANCE = new NoopPayload(false);
+
+    private final boolean migrated;
+
+    private NoopPayload(final boolean migrated) {
+        this.migrated = migrated;
     }
 
     @Override
@@ -54,7 +59,13 @@ public final class NoopPayload extends Payload implements ControlMessage {
     }
 
     @Override
-    protected Object writeReplace() {
+    public boolean isMigrated() {
+        return migrated;
+    }
+
+    // FIXME: protected once not MigratedSerializable
+    @Override
+    public Object writeReplace() {
         return PROXY;
     }
 }

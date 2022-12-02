@@ -22,9 +22,8 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-// Not final for mocking
+// Not final and non-sealed for mocking
 public class Snapshot implements Serializable {
-
     /**
      * Implementations of this interface are used as the state payload for a snapshot.
      *
@@ -43,21 +42,30 @@ public class Snapshot implements Serializable {
     }
 
     @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Legacy extends Snapshot implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Legacy(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
+                final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
+                final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
+            super(state, unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, electionTerm,
+                electionVotedFor, serverConfig);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        private Snapshot snapshot;
+        private Snapshot snapshot = null;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final Snapshot snapshot) {
-            this.snapshot = snapshot;
         }
 
         @Override
@@ -91,7 +99,7 @@ public class Snapshot implements Serializable {
             ServerConfigurationPayload serverConfig = (ServerConfigurationPayload) in.readObject();
 
             int size = in.readInt();
-            List<ReplicatedLogEntry> unAppliedEntries = new ArrayList<>(size);
+            var unAppliedEntries = new ArrayList<ReplicatedLogEntry>(size);
             for (int i = 0; i < size; i++) {
                 unAppliedEntries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(),
                         (Payload) in.readObject()));
@@ -99,7 +107,7 @@ public class Snapshot implements Serializable {
 
             State state = (State) in.readObject();
 
-            snapshot = Snapshot.create(state, unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
+            snapshot = new Legacy(state, unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
                     electionTerm, electionVotedFor, serverConfig);
         }
 
@@ -180,12 +188,12 @@ public class Snapshot implements Serializable {
     }
 
     @java.io.Serial
-    private Object writeReplace() {
+    public final Object writeReplace() {
         return new SS(this);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
                 + ", state=" + state + ", electionTerm=" + electionTerm + ", electionVotedFor="
