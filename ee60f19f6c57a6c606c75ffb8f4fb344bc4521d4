@@ -22,6 +22,30 @@
       },
       "revId": "ee60f19f6c57a6c606c75ffb8f4fb344bc4521d4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "57c4c885_60213a80",
+        "filename": "opendaylight/md-sal/eos-dom-akka/src/test/java/org/opendaylight/controller/eos/akka/DataCentersTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2022-12-02T13:48:06Z",
+      "side": 1,
+      "message": "we reorder those because in some cases both nodes are in state of candidates and wrong node can be chosen\nawait was added because sometimes node state changes take more time than expected(it happened more often when i was running tests on a weaker pc and during the build, guess some processes there go slower if the system is loaded). this await was enough to make node state changes in time before the assertion",
+      "parentUuid": "cec49546_c0ea24bf",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 34
+      },
+      "revId": "ee60f19f6c57a6c606c75ffb8f4fb344bc4521d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
