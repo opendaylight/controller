@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 
@@ -20,19 +20,21 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class ServerConfigurationPayloadTest {
-
     @Test
     public void testSerialization() {
-        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(new ServerInfo("1", true),
-                new ServerInfo("2", false)));
-        ServerConfigurationPayload cloned = (ServerConfigurationPayload) SerializationUtils.clone(expected);
+        final var expected = new ServerConfigurationPayload(List.of(new ServerInfo("1", true),
+            new ServerInfo("2", false)));
+
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(125, bytes.length);
+        final var cloned = (ServerConfigurationPayload) SerializationUtils.deserialize(bytes);
 
         assertEquals("getServerConfig", expected.getServerConfig(), cloned.getServerConfig());
     }
 
     @Test
     public void testSize() {
-        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(new ServerInfo("1", true)));
+        final var expected = new ServerConfigurationPayload(List.of(new ServerInfo("1", true)));
         assertTrue(expected.size() > 0);
     }
 }

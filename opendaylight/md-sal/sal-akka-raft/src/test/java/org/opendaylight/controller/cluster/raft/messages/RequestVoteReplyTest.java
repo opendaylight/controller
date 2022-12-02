@@ -18,11 +18,12 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class RequestVoteReplyTest {
-
     @Test
     public void testSerialization() {
-        RequestVoteReply expected = new RequestVoteReply(5, true);
-        RequestVoteReply cloned = (RequestVoteReply) SerializationUtils.clone(expected);
+        final var expected = new RequestVoteReply(5, true);
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(105, bytes.length);
+        final var cloned = (RequestVoteReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("isVoteGranted", expected.isVoteGranted(), cloned.isVoteGranted());

@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
  * @author Thomas Pantelis
  */
 public class AppendEntriesTest {
-
     @Test
     public void testSerialization() {
         ReplicatedLogEntry entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
@@ -36,19 +35,23 @@ public class AppendEntriesTest {
 
         // Without leader address
 
-        AppendEntries expected = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry1, entry2), 10L,
-                -1, payloadVersion, RaftVersions.CURRENT_VERSION, null);
+        var expected = new AppendEntries(5L, "node1", 7L, 8L, List.of(entry1, entry2), 10L, -1, payloadVersion,
+            RaftVersions.CURRENT_VERSION, null);
 
-        AppendEntries cloned = (AppendEntries) SerializationUtils.clone(expected);
+        var bytes = SerializationUtils.serialize(expected);
+        assertEquals(355, bytes.length);
+        var cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
 
         verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
 
         // With leader address
 
-        expected = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry1, entry2), 10L,
-                -1, payloadVersion, RaftVersions.CURRENT_VERSION, "leader address");
+        expected = new AppendEntries(5L, "node1", 7L, 8L, List.of(entry1, entry2), 10L, -1, payloadVersion,
+            RaftVersions.CURRENT_VERSION, "leader address");
 
-        cloned = (AppendEntries) SerializationUtils.clone(expected);
+        bytes = SerializationUtils.serialize(expected);
+        assertEquals(371, bytes.length);
+        cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
 
         verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
     }
@@ -62,15 +65,18 @@ public class AppendEntriesTest {
 
         short payloadVersion = 5;
 
-        AppendEntries expected = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry1, entry2), 10L,
-                -1, payloadVersion, RaftVersions.BORON_VERSION, "leader address");
+        final var expected = new AppendEntries(5L, "node1", 7L, 8L, List.of(entry1, entry2), 10L, -1,
+            payloadVersion, RaftVersions.BORON_VERSION, "leader address");
 
-        AppendEntries cloned = (AppendEntries) SerializationUtils.clone(expected);
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(350, bytes.length);
+        final var cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
 
         verifyAppendEntries(expected, cloned, RaftVersions.BORON_VERSION);
     }
 
-    private static void verifyAppendEntries(AppendEntries expected, AppendEntries actual, short recipientRaftVersion) {
+    private static void verifyAppendEntries(final AppendEntries expected, final AppendEntries actual,
+            final short recipientRaftVersion) {
         assertEquals("getLeaderId", expected.getLeaderId(), actual.getLeaderId());
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getLeaderCommit", expected.getLeaderCommit(), actual.getLeaderCommit());
@@ -94,7 +100,7 @@ public class AppendEntriesTest {
         }
     }
 
-    private static void verifyReplicatedLogEntry(ReplicatedLogEntry expected, ReplicatedLogEntry actual) {
+    private static void verifyReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
         assertEquals("getIndex", expected.getIndex(), actual.getIndex());
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getData", expected.getData().toString(), actual.getData().toString());

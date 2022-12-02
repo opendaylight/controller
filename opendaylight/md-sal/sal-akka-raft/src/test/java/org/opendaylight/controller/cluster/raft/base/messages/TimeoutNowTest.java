@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -18,10 +19,11 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class TimeoutNowTest {
-
     @Test
     public void test() {
-        TimeoutNow cloned = (TimeoutNow) SerializationUtils.clone(TimeoutNow.INSTANCE);
+        final var bytes = SerializationUtils.serialize(TimeoutNow.INSTANCE);
+        assertEquals(187, bytes.length);
+        final var cloned = SerializationUtils.deserialize(bytes);
         assertSame("Cloned instance", TimeoutNow.INSTANCE, cloned);
     }
 }

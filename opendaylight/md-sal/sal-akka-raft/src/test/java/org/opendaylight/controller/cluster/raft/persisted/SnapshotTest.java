@@ -9,8 +9,6 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
@@ -23,27 +21,29 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
  * @author Thomas Pantelis
  */
 public class SnapshotTest {
-
     @Test
     public void testSerialization() {
-        testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7}, Arrays.asList(
-                new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))));
-        testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, Collections.emptyList());
+        testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7}, List.of(
+                new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))), 548);
+        testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, List.of(), 389);
     }
 
-    private static void testSerialization(final byte[] state, final List<ReplicatedLogEntry> unapplied) {
+    private static void testSerialization(final byte[] state, final List<ReplicatedLogEntry> unapplied,
+            final int expectedSize) {
         long lastIndex = 6;
         long lastTerm = 2;
         long lastAppliedIndex = 5;
         long lastAppliedTerm = 1;
         long electionTerm = 3;
         String electionVotedFor = "member-1";
-        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("1", true), new ServerInfo("2", false)));
 
-        Snapshot expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm, lastAppliedIndex,
+        final var expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm, lastAppliedIndex,
                 lastAppliedTerm, electionTerm, electionVotedFor, serverConfig);
-        Snapshot cloned = (Snapshot) SerializationUtils.clone(expected);
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(expectedSize, bytes.length);
+        final var cloned = (Snapshot) SerializationUtils.deserialize(bytes);
 
         assertEquals("lastIndex", expected.getLastIndex(), cloned.getLastIndex());
         assertEquals("lastTerm", expected.getLastTerm(), cloned.getLastTerm());

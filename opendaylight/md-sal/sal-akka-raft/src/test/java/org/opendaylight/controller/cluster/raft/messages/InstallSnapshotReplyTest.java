@@ -18,11 +18,12 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class InstallSnapshotReplyTest {
-
     @Test
     public void testSerialization() {
-        InstallSnapshotReply expected = new InstallSnapshotReply(5L, "follower", 1, true);
-        InstallSnapshotReply cloned = (InstallSnapshotReply) SerializationUtils.clone(expected);
+        final var expected = new InstallSnapshotReply(5L, "follower", 1, true);
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(126, bytes.length);
+        final var cloned = (InstallSnapshotReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
