@@ -117,7 +117,7 @@ public final class AppendEntriesReply extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return recipientRaftVersion > RaftVersions.BORON_VERSION ? new Proxy2(this) : new Proxy(this);
+        return new Proxy2(this);
     }
 
     /**
@@ -166,57 +166,6 @@ public final class AppendEntriesReply extends AbstractRaftRPC {
             appendEntriesReply = new AppendEntriesReply(followerId, term, success, logLastIndex, logLastTerm,
                     payloadVersion, forceInstallSnapshot, needsLeaderAddress, raftVersion,
                     RaftVersions.CURRENT_VERSION);
-        }
-
-        private Object readResolve() {
-            return appendEntriesReply;
-        }
-    }
-
-    /**
-     * Pre-Fluorine version.
-     */
-    @Deprecated
-    private static class Proxy implements Externalizable {
-        private static final long serialVersionUID = 1L;
-
-        private AppendEntriesReply appendEntriesReply;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-        }
-
-        Proxy(final AppendEntriesReply appendEntriesReply) {
-            this.appendEntriesReply = appendEntriesReply;
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeShort(appendEntriesReply.raftVersion);
-            out.writeLong(appendEntriesReply.getTerm());
-            out.writeObject(appendEntriesReply.followerId);
-            out.writeBoolean(appendEntriesReply.success);
-            out.writeLong(appendEntriesReply.logLastIndex);
-            out.writeLong(appendEntriesReply.logLastTerm);
-            out.writeShort(appendEntriesReply.payloadVersion);
-            out.writeBoolean(appendEntriesReply.forceInstallSnapshot);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            short raftVersion = in.readShort();
-            long term = in.readLong();
-            String followerId = (String) in.readObject();
-            boolean success = in.readBoolean();
-            long logLastIndex = in.readLong();
-            long logLastTerm = in.readLong();
-            short payloadVersion = in.readShort();
-            boolean forceInstallSnapshot = in.readBoolean();
-
-            appendEntriesReply = new AppendEntriesReply(followerId, term, success, logLastIndex, logLastTerm,
-                    payloadVersion, forceInstallSnapshot, false, raftVersion, RaftVersions.CURRENT_VERSION);
         }
 
         private Object readResolve() {

@@ -1739,7 +1739,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
 
         assertEquals(payloadVersion, leader.getLeaderPayloadVersion());
-        assertEquals(RaftVersions.HELIUM_VERSION, followerInfo.getRaftVersion());
+        assertEquals(RaftVersions.FLUORINE_VERSION, followerInfo.getRaftVersion());
 
         AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1, payloadVersion);
 
