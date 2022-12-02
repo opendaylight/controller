@@ -17,7 +17,9 @@ import java.io.Serializable;
  * Message class to persist election term information.
  */
 public class UpdateElectionTerm implements Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private UpdateElectionTerm updateElectionTerm;
@@ -44,11 +46,13 @@ public class UpdateElectionTerm implements Serializable {
             updateElectionTerm = new UpdateElectionTerm(in.readLong(), (String) in.readObject());
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return updateElectionTerm;
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final long currentTerm;
@@ -67,8 +71,9 @@ public class UpdateElectionTerm implements Serializable {
         return votedFor;
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new UT(this);
     }
 
     @Override

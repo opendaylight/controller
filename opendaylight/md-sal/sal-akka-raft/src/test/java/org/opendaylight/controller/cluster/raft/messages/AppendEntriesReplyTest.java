@@ -25,7 +25,7 @@ public class AppendEntriesReplyTest {
             RaftVersions.CURRENT_VERSION);
 
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(143, bytes.length);
+        assertEquals(98, bytes.length);
         final var cloned = (AppendEntriesReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());

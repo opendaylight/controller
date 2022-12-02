@@ -39,7 +39,7 @@ public class AppendEntriesTest {
             RaftVersions.CURRENT_VERSION, null);
 
         var bytes = SerializationUtils.serialize(expected);
-        assertEquals(355, bytes.length);
+        assertEquals(285, bytes.length);
         var cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
 
         verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
@@ -50,7 +50,7 @@ public class AppendEntriesTest {
             RaftVersions.CURRENT_VERSION, "leader address");
 
         bytes = SerializationUtils.serialize(expected);
-        assertEquals(371, bytes.length);
+        assertEquals(301, bytes.length);
         cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
 
         verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);

@@ -22,7 +22,7 @@ public class InstallSnapshotReplyTest {
     public void testSerialization() {
         final var expected = new InstallSnapshotReply(5L, "follower", 1, true);
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(126, bytes.length);
+        assertEquals(95, bytes.length);
         final var cloned = (InstallSnapshotReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());

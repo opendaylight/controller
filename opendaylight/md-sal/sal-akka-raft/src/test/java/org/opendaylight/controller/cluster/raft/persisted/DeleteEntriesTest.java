@@ -22,7 +22,7 @@ public class DeleteEntriesTest {
     public void testSerialization() {
         final var expected = new DeleteEntries(5);
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(102, bytes.length);
+        assertEquals(79, bytes.length);
         final var cloned = (DeleteEntries) SerializationUtils.deserialize(bytes);
 
         assertEquals("getFromIndex", expected.getFromIndex(), cloned.getFromIndex());

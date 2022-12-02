@@ -22,16 +22,20 @@ public final class NoopPayload extends Payload implements ControlMessage {
     public static final NoopPayload INSTANCE = new NoopPayload();
 
     // There is no need for Externalizable
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Serializable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
+        @java.io.Serial
         private Object readResolve() {
             return INSTANCE;
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final Proxy PROXY = new Proxy();
+    private static final NP PROXY = new NP();
     // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative
     private static final int PROXY_SIZE = SerializationUtils.serialize(PROXY).length;
 

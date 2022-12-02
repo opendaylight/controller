@@ -50,10 +50,12 @@ public final class InstallSnapshotReply extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return new Proxy(this);
+        return new IR(this);
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private InstallSnapshotReply installSnapshotReply;
@@ -86,6 +88,7 @@ public final class InstallSnapshotReply extends AbstractRaftRPC {
             installSnapshotReply = new InstallSnapshotReply(term, followerId, chunkIndex, success);
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return installSnapshotReply;
         }

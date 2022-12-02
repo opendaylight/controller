@@ -23,7 +23,7 @@ public class SimpleReplicatedLogEntryTest {
     public void testSerialization() {
         final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(260, bytes.length);
+        assertEquals(218, bytes.length);
         final var cloned = (SimpleReplicatedLogEntry) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
