@@ -37,24 +37,4 @@ public class AppendEntriesReplyTest {
         assertEquals("isForceInstallSnapshot", expected.isForceInstallSnapshot(), cloned.isForceInstallSnapshot());
         assertEquals("isNeedsLeaderAddress", expected.isNeedsLeaderAddress(), cloned.isNeedsLeaderAddress());
     }
-
-    @Test
-    @Deprecated
-    public void testPreFluorineSerialization() {
-        final var expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
-            RaftVersions.BORON_VERSION);
-
-        final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(141, bytes.length);
-        final var cloned = (AppendEntriesReply) SerializationUtils.deserialize(bytes);
-
-        assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
-        assertEquals("getLogLastTerm", expected.getLogLastTerm(), cloned.getLogLastTerm());
-        assertEquals("getLogLastIndex", expected.getLogLastIndex(), cloned.getLogLastIndex());
-        assertEquals("getPayloadVersion", expected.getPayloadVersion(), cloned.getPayloadVersion());
-        assertEquals("getRaftVersion", expected.getRaftVersion(), cloned.getRaftVersion());
-        assertEquals("isForceInstallSnapshot", expected.isForceInstallSnapshot(), cloned.isForceInstallSnapshot());
-        assertEquals("isNeedsLeaderAddress", false, cloned.isNeedsLeaderAddress());
-    }
 }

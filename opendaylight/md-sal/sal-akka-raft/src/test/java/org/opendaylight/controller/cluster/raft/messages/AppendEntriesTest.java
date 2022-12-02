@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.util.Iterator;
 import java.util.List;
@@ -56,25 +55,6 @@ public class AppendEntriesTest {
         verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
     }
 
-    @Test
-    @Deprecated
-    public void testPreFluorineSerialization() {
-        ReplicatedLogEntry entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
-
-        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
-
-        short payloadVersion = 5;
-
-        final var expected = new AppendEntries(5L, "node1", 7L, 8L, List.of(entry1, entry2), 10L, -1,
-            payloadVersion, RaftVersions.BORON_VERSION, "leader address");
-
-        final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(350, bytes.length);
-        final var cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
-
-        verifyAppendEntries(expected, cloned, RaftVersions.BORON_VERSION);
-    }
-
     private static void verifyAppendEntries(final AppendEntries expected, final AppendEntries actual,
             final short recipientRaftVersion) {
         assertEquals("getLeaderId", expected.getLeaderId(), actual.getLeaderId());
@@ -91,13 +71,8 @@ public class AppendEntriesTest {
             verifyReplicatedLogEntry(iter.next(), e);
         }
 
-        if (recipientRaftVersion > RaftVersions.BORON_VERSION) {
-            assertEquals("getLeaderAddress", expected.getLeaderAddress(), actual.getLeaderAddress());
-            assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
-        } else {
-            assertFalse(actual.getLeaderAddress().isPresent());
-            assertEquals("getLeaderRaftVersion", RaftVersions.BORON_VERSION, actual.getLeaderRaftVersion());
-        }
+        assertEquals("getLeaderAddress", expected.getLeaderAddress(), actual.getLeaderAddress());
+        assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
     }
 
     private static void verifyReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
