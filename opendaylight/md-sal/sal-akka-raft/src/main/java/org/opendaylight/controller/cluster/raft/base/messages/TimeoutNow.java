@@ -16,18 +16,27 @@ import java.io.Serializable;
  * @author Thomas Pantelis
  */
 public final class TimeoutNow implements Serializable, ControlMessage {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
+
     public static final TimeoutNow INSTANCE = new TimeoutNow();
 
     private TimeoutNow() {
         // Hidden on purpose
     }
 
+    @java.io.Serial
+    private Object readResolve() {
+        return INSTANCE;
+    }
+
+    @java.io.Serial
     private Object writeReplace() {
         return new Proxy();
     }
 
     private static class Proxy extends EmptyExternalizableProxy {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't

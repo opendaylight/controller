@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
 import java.util.OptionalInt;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
 /**
@@ -32,13 +34,15 @@ public final class InstallSnapshot extends AbstractRaftRPC {
     private final OptionalInt lastChunkHashCode;
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via writeReplace()")
     private final Optional<ServerConfigurationPayload> serverConfig;
+    private final short recipientRaftVersion;
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Stores a reference to an externally mutable byte[] "
             + "object but this is OK since this class is merely a DTO and does not process byte[] internally. "
             + "Also it would be inefficient to create a copy as the byte[] could be large.")
     public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
             final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
-            final OptionalInt lastChunkHashCode, final Optional<ServerConfigurationPayload> serverConfig) {
+            final OptionalInt lastChunkHashCode, final Optional<ServerConfigurationPayload> serverConfig,
+            final short recipientRaftVersion) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -48,13 +52,15 @@ public final class InstallSnapshot extends AbstractRaftRPC {
         this.totalChunks = totalChunks;
         this.lastChunkHashCode = lastChunkHashCode;
         this.serverConfig = serverConfig;
+        this.recipientRaftVersion = recipientRaftVersion;
     }
 
+    @VisibleForTesting
     public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
                            final long lastIncludedTerm, final byte[] data, final int chunkIndex,
                            final int totalChunks) {
         this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks, OptionalInt.empty(),
-            Optional.empty());
+            Optional.empty(), RaftVersions.CURRENT_VERSION);
     }
 
     public String getLeaderId() {
@@ -92,10 +98,6 @@ public final class InstallSnapshot extends AbstractRaftRPC {
         return serverConfig;
     }
 
-    public <T> Object toSerializable(final short version) {
-        return this;
-    }
-
     @Override
     public String toString() {
         return "InstallSnapshot [term=" + getTerm() + ", leaderId=" + leaderId + ", lastIncludedIndex="
@@ -106,10 +108,11 @@ public final class InstallSnapshot extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return new Proxy(this);
+        return recipientRaftVersion <= RaftVersions.FLUORINE_VERSION ? new Proxy(this) : new IS(this);
     }
 
     private static class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private InstallSnapshot installSnapshot;
@@ -162,9 +165,10 @@ public final class InstallSnapshot extends AbstractRaftRPC {
             byte[] data = (byte[])in.readObject();
 
             installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
-                    chunkIndex, totalChunks, lastChunkHashCode, serverConfig);
+                    chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION);
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return installSnapshot;
         }
