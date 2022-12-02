@@ -999,8 +999,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         chunkIndex,
                         installSnapshotState.getTotalChunks(),
                         OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
-                        serverConfig
-                ).toSerializable(followerLogInfo.getRaftVersion()),
+                        serverConfig,
+                        followerLogInfo.getRaftVersion()),
                 actor()
         );
     }

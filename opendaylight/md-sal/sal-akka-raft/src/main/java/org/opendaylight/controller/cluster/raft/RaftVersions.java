@@ -17,6 +17,7 @@ public final class RaftVersions {
     public static final short LITHIUM_VERSION = 1;
     public static final short BORON_VERSION = 3;
     public static final short FLUORINE_VERSION = 4;
+    public static final short ARGON_VERSION = 5;
     public static final short CURRENT_VERSION = FLUORINE_VERSION;
 
     private RaftVersions() {
