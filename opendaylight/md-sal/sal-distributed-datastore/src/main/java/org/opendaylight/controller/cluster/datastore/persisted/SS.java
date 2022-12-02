@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
  * Serialization proxy for {@link ShardSnapshotState}.
  */
 final class SS implements ShardSnapshotState.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private ShardSnapshotState snapshotState;
