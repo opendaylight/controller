@@ -26,7 +26,16 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
  */
 public class InstallSnapshotTest {
     @Test
-    public void testSerialization() {
+    public void testCurrentSerialization() {
+        testSerialization(RaftVersions.CURRENT_VERSION, 1262, 1125);
+    }
+
+    @Test
+    public void testFluorineSerialization() {
+        testSerialization(RaftVersions.FLUORINE_VERSION, 1302, 1165);
+    }
+
+    private static void testSerialization(final short raftVersion, final int fullSize, final int emptySize) {
         byte[] data = new byte[1000];
         for (int i = 0, j = 0; i < data.length; i++) {
             data[i] = (byte)j;
@@ -35,13 +44,13 @@ public class InstallSnapshotTest {
             }
         }
 
-        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(List.of(
+        var serverConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("leader", true), new ServerInfo("follower", false)));
-        assertInstallSnapshot(1302, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
-            Optional.of(serverConfig), RaftVersions.CURRENT_VERSION));
+        assertInstallSnapshot(fullSize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
+            Optional.of(serverConfig), raftVersion));
 
-        assertInstallSnapshot(1165, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.empty(),
-            Optional.empty(), RaftVersions.CURRENT_VERSION));
+        assertInstallSnapshot(emptySize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.empty(),
+            Optional.empty(), raftVersion));
     }
 
     private static void assertInstallSnapshot(final int expectedSize, final InstallSnapshot expected) {
