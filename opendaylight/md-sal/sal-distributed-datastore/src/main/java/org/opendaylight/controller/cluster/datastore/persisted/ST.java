@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLong
  * Serialization proxy for {@link SkipTransactionsPayload}.
  */
 final class ST implements SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private ImmutableUnsignedLongSet transactionIds;

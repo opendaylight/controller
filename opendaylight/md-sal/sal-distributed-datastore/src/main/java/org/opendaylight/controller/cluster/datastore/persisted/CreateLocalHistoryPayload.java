@@ -12,6 +12,7 @@ import com.google.common.io.ByteStreams;
 import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +21,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+public sealed class CreateLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Magnesium extends CreateLocalHistoryPayload implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Magnesium(final LocalHistoryIdentifier historyId, final byte[] serialized) {
+            super(historyId, serialized);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
@@ -29,10 +42,6 @@ public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final byte[] serialized) {
-            super(serialized);
         }
 
         @Override
@@ -43,13 +52,14 @@ public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload
         @Override
         protected CreateLocalHistoryPayload createObject(final LocalHistoryIdentifier identifier,
                 final byte[] serialized) {
-            return new CreateLocalHistoryPayload(identifier, serialized);
+            return new Magnesium(identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(CreateLocalHistoryPayload.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(CH::new);
 
     CreateLocalHistoryPayload(final LocalHistoryIdentifier historyId, final byte[] serialized) {
         super(historyId, serialized);
@@ -69,8 +79,8 @@ public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected CH externalizableProxy(final byte[] serialized) {
+        return new CH(serialized);
     }
 
     @Override

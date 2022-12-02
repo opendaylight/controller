@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidate
 import org.opendaylight.controller.cluster.io.ChunkedByteArray;
 import org.opendaylight.controller.cluster.io.ChunkedOutputStream;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
+import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.opendaylight.yangtools.concepts.Either;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
@@ -149,11 +150,12 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     abstract DataInput newDataInput();
 
     @Override
-    protected final Object writeReplace() {
-        return new Proxy(this);
+    public final Object writeReplace() {
+        return new CT(this);
     }
 
-    static final class Simple extends CommitTransactionPayload {
+    static sealed class Simple extends CommitTransactionPayload {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private final byte[] serialized;
@@ -178,7 +180,8 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
     }
 
-    static final class Chunked extends CommitTransactionPayload {
+    static sealed class Chunked extends CommitTransactionPayload {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")
@@ -206,14 +209,36 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
     // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
     private static final class ProxySizeHolder {
-        static final int PROXY_SIZE = SerializationUtils.serialize(new Proxy(new Simple(new byte[0]))).length;
+        static final int PROXY_SIZE = SerializationUtils.serialize(new CT(new Simple(new byte[0]))).length;
 
         private ProxySizeHolder() {
             // Hidden on purpose
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class SimpleMagnesium extends Simple implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        SimpleMagnesium(final byte[] serialized) {
+            super(serialized);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class ChunkedMagnesium extends Chunked implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        ChunkedMagnesium(final ChunkedByteArray source) {
+            super(source);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private CommitTransactionPayload payload;
@@ -243,12 +268,13 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
             } else if (length < MAX_ARRAY_SIZE) {
                 final byte[] serialized = new byte[length];
                 in.readFully(serialized);
-                payload = new Simple(serialized);
+                payload = new SimpleMagnesium(serialized);
             } else {
-                payload = new Chunked(ChunkedByteArray.readFrom(in, length, MAX_ARRAY_SIZE));
+                payload = new ChunkedMagnesium(ChunkedByteArray.readFrom(in, length, MAX_ARRAY_SIZE));
             }
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return verifyNotNull(payload);
         }
