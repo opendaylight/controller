@@ -336,7 +336,8 @@ public class RaftActorTest extends AbstractActorTest {
         // Wait for akka's recovery to complete so it doesn't interfere.
         mockRaftActor.waitForRecoveryComplete();
 
-        ApplySnapshot applySnapshot = new ApplySnapshot(mock(Snapshot.class));
+        ApplySnapshot applySnapshot = new ApplySnapshot(
+            Snapshot.create(null, null, 0, 0, 0, 0, 0, persistenceId, null));
         doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(applySnapshot);
 
