@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ExtendedActorSystem;
@@ -45,10 +44,11 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
     }
 
     @Override
-    public byte[] toBinary(Object obj) {
-        checkArgument(obj instanceof SimpleReplicatedLogEntry, "Unsupported object type %s", obj.getClass());
+    public byte[] toBinary(final Object obj) {
+        if (!(obj instanceof SimpleReplicatedLogEntry replicatedLogEntry)) {
+            throw new IllegalArgumentException("Unsupported object type " + obj.getClass());
+        }
 
-        SimpleReplicatedLogEntry replicatedLogEntry = (SimpleReplicatedLogEntry)obj;
         final int estimatedSerializedSize = replicatedLogEntry.serializedSize();
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(estimatedSerializedSize);
@@ -62,7 +62,7 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
     }
 
     @Override
-    public Object fromBinaryJava(byte[] bytes, Class<?> manifest) {
+    public Object fromBinaryJava(final byte[] bytes, final Class<?> manifest) {
         try (ClassLoaderObjectInputStream is = new ClassLoaderObjectInputStream(system.dynamicAccess().classLoader(),
                 new ByteArrayInputStream(bytes))) {
             return is.readObject();

@@ -76,20 +76,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     public static RaftActorBehavior createBehavior(final RaftActorContext context, final RaftState state) {
-        switch (state) {
-            case Candidate:
-                return new Candidate(context);
-            case Follower:
-                return new Follower(context);
-            case IsolatedLeader:
-                return new IsolatedLeader(context);
-            case Leader:
-                return new Leader(context);
-            case PreLeader:
-                return new PreLeader(context);
-            default:
-                throw new IllegalArgumentException("Unhandled state " + state);
-        }
+        return switch (state) {
+            case Candidate -> new Candidate(context);
+            case Follower -> new Follower(context);
+            case IsolatedLeader -> new IsolatedLeader(context);
+            case Leader -> new Leader(context);
+            case PreLeader -> new PreLeader(context);
+        };
     }
 
     @Override
@@ -418,14 +411,14 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
-        if (message instanceof AppendEntries) {
-            return appendEntries(sender, (AppendEntries) message);
-        } else if (message instanceof AppendEntriesReply) {
-            return handleAppendEntriesReply(sender, (AppendEntriesReply) message);
-        } else if (message instanceof RequestVote) {
-            return requestVote(sender, (RequestVote) message);
-        } else if (message instanceof RequestVoteReply) {
-            return handleRequestVoteReply(sender, (RequestVoteReply) message);
+        if (message instanceof AppendEntries appendEntries) {
+            return appendEntries(sender, appendEntries);
+        } else if (message instanceof AppendEntriesReply appendEntriesReply) {
+            return handleAppendEntriesReply(sender, appendEntriesReply);
+        } else if (message instanceof RequestVote requestVote) {
+            return requestVote(sender, requestVote);
+        } else if (message instanceof RequestVoteReply requestVoteReply) {
+            return handleRequestVoteReply(sender, requestVoteReply);
         } else {
             return null;
         }
@@ -446,12 +439,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return this;
         }
 
-        log.info("{} :- Switching from behavior {} to {}, election term: {}", logName(), this.state(),
+        log.info("{} :- Switching from behavior {} to {}, election term: {}", logName(), state(),
                 newBehavior.state(), context.getTermInformation().getCurrentTerm());
         try {
             close();
         } catch (RuntimeException e) {
-            log.error("{}: Failed to close behavior : {}", logName(), this.state(), e);
+            log.error("{}: Failed to close behavior : {}", logName(), state(), e);
         }
         return newBehavior;
     }
@@ -502,11 +495,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     // Check whether we should update the term. In case of half-connected nodes, we want to ignore RequestVote
     // messages, as the candidate is not able to receive our response.
     protected boolean shouldUpdateTerm(final RaftRPC rpc) {
-        if (!(rpc instanceof RequestVote)) {
+        if (!(rpc instanceof RequestVote requestVote)) {
             return true;
         }
 
-        final RequestVote requestVote = (RequestVote) rpc;
         log.debug("{}: Found higher term in RequestVote rpc, verifying whether it's safe to update term.", logName());
         final Optional<Cluster> maybeCluster = context.getCluster();
         if (!maybeCluster.isPresent()) {

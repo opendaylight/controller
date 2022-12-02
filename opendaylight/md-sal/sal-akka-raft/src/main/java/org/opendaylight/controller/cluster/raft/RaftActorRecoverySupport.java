@@ -59,19 +59,18 @@ class RaftActorRecoverySupport {
         }
 
         boolean recoveryComplete = false;
-        if (message instanceof UpdateElectionTerm) {
-            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
-                    ((UpdateElectionTerm) message).getVotedFor());
-        } else if (message instanceof SnapshotOffer) {
-            onRecoveredSnapshot((SnapshotOffer) message);
-        } else if (message instanceof ReplicatedLogEntry) {
-            onRecoveredJournalLogEntry((ReplicatedLogEntry) message);
-        } else if (message instanceof ApplyJournalEntries) {
-            onRecoveredApplyLogEntries(((ApplyJournalEntries) message).getToIndex());
-        } else if (message instanceof DeleteEntries) {
-            onDeleteEntries((DeleteEntries) message);
-        } else if (message instanceof ServerConfigurationPayload) {
-            context.updatePeerIds((ServerConfigurationPayload)message);
+        if (message instanceof UpdateElectionTerm updateElectionTerm) {
+            context.getTermInformation().update(updateElectionTerm.getCurrentTerm(), updateElectionTerm.getVotedFor());
+        } else if (message instanceof SnapshotOffer snapshotOffer) {
+            onRecoveredSnapshot(snapshotOffer);
+        } else if (message instanceof ReplicatedLogEntry replicatedLogEntry) {
+            onRecoveredJournalLogEntry(replicatedLogEntry);
+        } else if (message instanceof ApplyJournalEntries applyJournalEntries) {
+            onRecoveredApplyLogEntries(applyJournalEntries.getToIndex());
+        } else if (message instanceof DeleteEntries deleteEntries) {
+            onDeleteEntries(deleteEntries);
+        } else if (message instanceof ServerConfigurationPayload serverConfigurationPayload) {
+            context.updatePeerIds(serverConfigurationPayload);
         } else if (message instanceof RecoveryCompleted) {
             recoveryComplete = true;
             onRecoveryCompletedMessage(persistentProvider);

@@ -60,18 +60,18 @@ class RaftActorSnapshotMessageSupport {
     }
 
     boolean handleSnapshotMessage(final Object message, final ActorRef sender) {
-        if (message instanceof ApplySnapshot) {
-            onApplySnapshot((ApplySnapshot) message);
-        } else if (message instanceof SaveSnapshotSuccess) {
-            onSaveSnapshotSuccess((SaveSnapshotSuccess) message);
-        } else if (message instanceof SaveSnapshotFailure) {
-            onSaveSnapshotFailure((SaveSnapshotFailure) message);
-        } else if (message instanceof CaptureSnapshotReply) {
-            onCaptureSnapshotReply((CaptureSnapshotReply) message);
+        if (message instanceof ApplySnapshot applySnapshot) {
+            onApplySnapshot(applySnapshot);
+        } else if (message instanceof SaveSnapshotSuccess saveSnapshotSuccess) {
+            onSaveSnapshotSuccess(saveSnapshotSuccess);
+        } else if (message instanceof SaveSnapshotFailure saveSnapshotFailure) {
+            onSaveSnapshotFailure(saveSnapshotFailure);
+        } else if (message instanceof CaptureSnapshotReply captureSnapshotReply) {
+            onCaptureSnapshotReply(captureSnapshotReply);
         } else if (COMMIT_SNAPSHOT.equals(message)) {
             context.getSnapshotManager().commit(-1, -1);
-        } else if (message instanceof GetSnapshot) {
-            onGetSnapshot(sender, (GetSnapshot) message);
+        } else if (message instanceof GetSnapshot getSnapshot) {
+            onGetSnapshot(sender, getSnapshot);
         } else if (message instanceof SnapshotComplete) {
             log.debug("{}: SnapshotComplete received", context.getId());
         } else {

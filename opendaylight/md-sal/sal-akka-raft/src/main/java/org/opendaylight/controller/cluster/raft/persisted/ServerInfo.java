@@ -18,10 +18,10 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author Thomas Pantelis
  */
 public final class ServerInfo {
-    private final String id;
+    private final @NonNull String id;
     private final boolean isVoting;
 
-    public ServerInfo(@NonNull String id, boolean isVoting) {
+    public ServerInfo(final @NonNull String id, final boolean isVoting) {
         this.id = requireNonNull(id);
         this.isVoting = isVoting;
     }
@@ -44,16 +44,8 @@ public final class ServerInfo {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ServerInfo)) {
-            return false;
-        }
-
-        final ServerInfo other = (ServerInfo) obj;
-        return isVoting == other.isVoting && id.equals(other.id);
+    public boolean equals(final Object obj) {
+        return this == obj || obj instanceof ServerInfo other && isVoting == other.isVoting && id.equals(other.id);
     }
 
     @Override
