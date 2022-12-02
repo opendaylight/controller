@@ -45,12 +45,16 @@ public class InstallSnapshotTest {
         Object serialized = expected.toSerializable(RaftVersions.CURRENT_VERSION);
         assertEquals("Serialized type", InstallSnapshot.class, serialized.getClass());
 
-        InstallSnapshot actual = (InstallSnapshot) SerializationUtils.clone((Serializable) serialized);
+        var bytes = SerializationUtils.serialize((Serializable) serialized);
+        assertEquals(1302, bytes.length);
+        var actual = (InstallSnapshot) SerializationUtils.deserialize(bytes);
+
         verifyInstallSnapshot(expected, actual);
 
         expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6);
-        actual = (InstallSnapshot) SerializationUtils.clone((Serializable) expected.toSerializable(
-                RaftVersions.CURRENT_VERSION));
+        bytes = SerializationUtils.serialize((Serializable) expected.toSerializable(RaftVersions.CURRENT_VERSION));
+        assertEquals(1165, bytes.length);
+        actual = (InstallSnapshot) SerializationUtils.deserialize(bytes);
         verifyInstallSnapshot(expected, actual);
     }
 

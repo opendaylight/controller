@@ -19,12 +19,14 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
  * @author Thomas Pantelis
  */
 public class AppendEntriesReplyTest {
-
     @Test
     public void testSerialization() {
-        AppendEntriesReply expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
-                RaftVersions.CURRENT_VERSION);
-        AppendEntriesReply cloned = (AppendEntriesReply) SerializationUtils.clone(expected);
+        final var expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
+            RaftVersions.CURRENT_VERSION);
+
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(143, bytes.length);
+        final var cloned = (AppendEntriesReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
@@ -39,9 +41,12 @@ public class AppendEntriesReplyTest {
     @Test
     @Deprecated
     public void testPreFluorineSerialization() {
-        AppendEntriesReply expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
-                RaftVersions.BORON_VERSION);
-        AppendEntriesReply cloned = (AppendEntriesReply) SerializationUtils.clone(expected);
+        final var expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
+            RaftVersions.BORON_VERSION);
+
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(141, bytes.length);
+        final var cloned = (AppendEntriesReply) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());

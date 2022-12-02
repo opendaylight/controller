@@ -18,11 +18,12 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class UpdateElectionTermTest {
-
     @Test
     public void testSerialization() {
-        UpdateElectionTerm expected = new UpdateElectionTerm(5, "leader");
-        UpdateElectionTerm cloned = (UpdateElectionTerm) SerializationUtils.clone(expected);
+        final var expected = new UpdateElectionTerm(5, "leader");
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(116, bytes.length);
+        final var cloned = (UpdateElectionTerm) SerializationUtils.deserialize(bytes);
 
         assertEquals("getCurrentTerm", expected.getCurrentTerm(), cloned.getCurrentTerm());
         assertEquals("getVotedFor", expected.getVotedFor(), cloned.getVotedFor());
