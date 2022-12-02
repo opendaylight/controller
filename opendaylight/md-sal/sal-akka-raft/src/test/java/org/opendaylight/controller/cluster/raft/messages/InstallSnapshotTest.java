@@ -10,8 +10,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.apache.commons.lang.SerializationUtils;
@@ -26,7 +25,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
  * @author Thomas Pantelis
  */
 public class InstallSnapshotTest {
-
     @Test
     public void testSerialization() {
         byte[] data = new byte[1000];
@@ -37,25 +35,19 @@ public class InstallSnapshotTest {
             }
         }
 
-        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("leader", true), new ServerInfo("follower", false)));
-        InstallSnapshot expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
-            Optional.of(serverConfig));
+        assertInstallSnapshot(1302, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
+            Optional.of(serverConfig), RaftVersions.CURRENT_VERSION));
 
-        Object serialized = expected.toSerializable(RaftVersions.CURRENT_VERSION);
-        assertEquals("Serialized type", InstallSnapshot.class, serialized.getClass());
+        assertInstallSnapshot(1165, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.empty(),
+            Optional.empty(), RaftVersions.CURRENT_VERSION));
+    }
 
-        var bytes = SerializationUtils.serialize((Serializable) serialized);
-        assertEquals(1302, bytes.length);
-        var actual = (InstallSnapshot) SerializationUtils.deserialize(bytes);
-
-        verifyInstallSnapshot(expected, actual);
-
-        expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6);
-        bytes = SerializationUtils.serialize((Serializable) expected.toSerializable(RaftVersions.CURRENT_VERSION));
-        assertEquals(1165, bytes.length);
-        actual = (InstallSnapshot) SerializationUtils.deserialize(bytes);
-        verifyInstallSnapshot(expected, actual);
+    private static void assertInstallSnapshot(final int expectedSize, final InstallSnapshot expected) {
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(expectedSize, bytes.length);
+        verifyInstallSnapshot(expected, (InstallSnapshot) SerializationUtils.deserialize(bytes));
     }
 
     private static void verifyInstallSnapshot(final InstallSnapshot expected, final InstallSnapshot actual) {

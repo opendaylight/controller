@@ -20,6 +20,7 @@ public final class RaftVersions {
     @Deprecated(since = "7.0.0", forRemoval = true)
     public static final short BORON_VERSION = 3;
     public static final short FLUORINE_VERSION = 4;
+    public static final short ARGON_VERSION = 5;
     public static final short CURRENT_VERSION = FLUORINE_VERSION;
 
     private RaftVersions() {
