@@ -117,7 +117,7 @@ public final class AppendEntriesReply extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return recipientRaftVersion >= RaftVersions.FLUORINE_VERSION ? new Proxy2(this) : new Proxy(this);
+        return recipientRaftVersion > RaftVersions.BORON_VERSION ? new Proxy2(this) : new Proxy(this);
     }
 
     /**

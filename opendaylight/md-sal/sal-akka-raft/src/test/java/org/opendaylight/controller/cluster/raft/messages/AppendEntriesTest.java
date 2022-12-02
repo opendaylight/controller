@@ -91,7 +91,7 @@ public class AppendEntriesTest {
             verifyReplicatedLogEntry(iter.next(), e);
         }
 
-        if (recipientRaftVersion >= RaftVersions.FLUORINE_VERSION) {
+        if (recipientRaftVersion > RaftVersions.BORON_VERSION) {
             assertEquals("getLeaderAddress", expected.getLeaderAddress(), actual.getLeaderAddress());
             assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
         } else {
