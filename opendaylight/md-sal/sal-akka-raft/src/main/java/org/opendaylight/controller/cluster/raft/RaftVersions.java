@@ -13,17 +13,14 @@ package org.opendaylight.controller.cluster.raft;
  * @author Thomas Pantelis
  */
 public final class RaftVersions {
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public static final short HELIUM_VERSION = 0;
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public static final short LITHIUM_VERSION = 1;
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public static final short BORON_VERSION = 3;
+    // HELIUM_VERSION = 0
+    // LITHIUM_VERSION = 1
+    // BORON_VERSION = 3
     public static final short FLUORINE_VERSION = 4;
     public static final short ARGON_VERSION = 5;
     public static final short CURRENT_VERSION = ARGON_VERSION;
 
     private RaftVersions() {
-
+        // Hidden on purpose
     }
 }
