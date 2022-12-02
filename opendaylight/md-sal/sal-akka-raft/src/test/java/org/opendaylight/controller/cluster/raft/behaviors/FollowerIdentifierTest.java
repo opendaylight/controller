@@ -18,11 +18,12 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class FollowerIdentifierTest {
-
     @Test
     public void testSerialization() {
-        FollowerIdentifier expected = new FollowerIdentifier("follower1");
-        FollowerIdentifier cloned = (FollowerIdentifier) SerializationUtils.clone(expected);
+        final var expected = new FollowerIdentifier("follower1");
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(109, bytes.length);
+        final var cloned = (FollowerIdentifier) SerializationUtils.deserialize(bytes);
         assertEquals("cloned", expected, cloned);
     }
 }

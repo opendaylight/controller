@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -19,10 +20,11 @@ import org.junit.Test;
  *
  */
 public class EmptyStateTest {
-
     @Test
     public void testSerialization() {
-        EmptyState cloned = (EmptyState) SerializationUtils.clone(EmptyState.INSTANCE);
+        final var bytes = SerializationUtils.serialize(EmptyState.INSTANCE);
+        assertEquals(82, bytes.length);
+        final var cloned = SerializationUtils.deserialize(bytes);
         assertSame("cloned", EmptyState.INSTANCE, cloned);
     }
 }

@@ -18,11 +18,12 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class ApplyJournalEntriesTest {
-
     @Test
     public void testSerialization() {
-        ApplyJournalEntries expected = new ApplyJournalEntries(5);
-        ApplyJournalEntries cloned = (ApplyJournalEntries) SerializationUtils.clone(expected);
+        final var expected = new ApplyJournalEntries(5);
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(108, bytes.length);
+        final var cloned = (ApplyJournalEntries) SerializationUtils.deserialize(bytes);
 
         assertEquals("getFromIndex", expected.getToIndex(), cloned.getToIndex());
     }

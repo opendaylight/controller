@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -18,10 +19,11 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class ShutdownTest {
-
     @Test
     public void test() {
-        Shutdown cloned = (Shutdown) SerializationUtils.clone(Shutdown.INSTANCE);
+        final var bytes = SerializationUtils.serialize(Shutdown.INSTANCE);
+        assertEquals(187, bytes.length);
+        final var cloned = SerializationUtils.deserialize(bytes);
         assertSame("Cloned instance", Shutdown.INSTANCE, cloned);
     }
 }

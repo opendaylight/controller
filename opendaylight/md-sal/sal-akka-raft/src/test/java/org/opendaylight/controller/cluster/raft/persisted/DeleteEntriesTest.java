@@ -18,11 +18,12 @@ import org.junit.Test;
  * @author Thomas Pantelis
  */
 public class DeleteEntriesTest {
-
     @Test
     public void testSerialization() {
-        DeleteEntries expected = new DeleteEntries(5);
-        DeleteEntries cloned = (DeleteEntries) SerializationUtils.clone(expected);
+        final var expected = new DeleteEntries(5);
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(102, bytes.length);
+        final var cloned = (DeleteEntries) SerializationUtils.deserialize(bytes);
 
         assertEquals("getFromIndex", expected.getFromIndex(), cloned.getFromIndex());
     }

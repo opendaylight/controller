@@ -19,12 +19,12 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
  * @author Thomas Pantelis
  */
 public class SimpleReplicatedLogEntryTest {
-
     @Test
     public void testSerialization() {
-        SimpleReplicatedLogEntry expected = new SimpleReplicatedLogEntry(0, 1,
-                new MockRaftActorContext.MockPayload("A"));
-        SimpleReplicatedLogEntry cloned = (SimpleReplicatedLogEntry) SerializationUtils.clone(expected);
+        final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
+        final var bytes = SerializationUtils.serialize(expected);
+        assertEquals(260, bytes.length);
+        final var cloned = (SimpleReplicatedLogEntry) SerializationUtils.deserialize(bytes);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getIndex", expected.getIndex(), cloned.getIndex());
