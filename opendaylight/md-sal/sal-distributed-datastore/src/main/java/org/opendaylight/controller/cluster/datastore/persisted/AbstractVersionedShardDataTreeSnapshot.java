@@ -32,8 +32,8 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
         final PayloadVersion version = PayloadVersion.readFrom(in);
         switch (version) {
             case SODIUM_SR1:
-                return new ShardSnapshotState(readSnapshot(in), true);
             case MAGNESIUM:
+                return new ShardSnapshotState(readSnapshot(in), true);
             case CHLORINE_SR2:
                 return new ShardSnapshotState(readSnapshot(in), false);
             case TEST_FUTURE_VERSION:
