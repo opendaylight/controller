@@ -50,6 +50,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
          *
          * @return A payload.
          */
+        @java.io.Serial
         Object readResolve();
 
         /**
@@ -87,7 +88,9 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     protected abstract static class AbstractProxy<T extends Identifier> implements SerialForm {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private byte[] serialized;
@@ -162,15 +165,15 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
     }
 
     @Override
-    protected final Object writeReplace() {
+    public final Object writeReplace() {
         return verifyNotNull(externalizableProxy(serialized));
     }
 
-    protected abstract @NonNull AbstractProxy<T> externalizableProxy(byte @NonNull[] serialized);
+    protected abstract @NonNull SerialForm externalizableProxy(byte @NonNull[] serialized);
 
     protected abstract int externalizableProxySize();
 
-    protected static final int externalizableProxySize(final Function<byte[], ? extends AbstractProxy<?>> constructor) {
+    protected static final int externalizableProxySize(final Function<byte[], ? extends SerialForm> constructor) {
         return SerializationUtils.serialize(constructor.apply(new byte[0])).length;
     }
 }

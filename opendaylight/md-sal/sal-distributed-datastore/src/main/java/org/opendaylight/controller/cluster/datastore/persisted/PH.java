@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifia
  * Serialization proxy for {@link PurgeLocalHistoryPayload}.
  */
 final class PH implements SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private LocalHistoryIdentifier identifier;

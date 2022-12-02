@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * Serialization proxy for {@link ShardDataTreeSnapshot}.
  */
 final class DSS implements ShardSnapshot.SerialForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private ShardSnapshot shardSnapshot;
