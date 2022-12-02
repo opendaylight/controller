@@ -39,6 +39,7 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -221,6 +222,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return this;
         }
 
+        final var followerRaftVersion = appendEntriesReply.getRaftVersion();
+        if (followerRaftVersion < RaftVersions.FLUORINE_VERSION) {
+            log.warn("{}: handleAppendEntriesReply - ignoring reply from follower {} raft version {}", logName(),
+                followerId, followerRaftVersion);
+            return this;
+        }
+
         final long lastActivityNanos = followerLogInformation.nanosSinceLastActivity();
         if (lastActivityNanos > context.getConfigParams().getElectionTimeOutInterval().toNanos()) {
             log.warn("{} : handleAppendEntriesReply delayed beyond election timeout, "
@@ -231,7 +239,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         followerLogInformation.markFollowerActive();
         followerLogInformation.setPayloadVersion(appendEntriesReply.getPayloadVersion());
-        followerLogInformation.setRaftVersion(appendEntriesReply.getRaftVersion());
+        followerLogInformation.setRaftVersion(followerRaftVersion);
         followerLogInformation.setNeedsLeaderAddress(appendEntriesReply.isNeedsLeaderAddress());
 
         long followerLastLogIndex = appendEntriesReply.getLogLastIndex();

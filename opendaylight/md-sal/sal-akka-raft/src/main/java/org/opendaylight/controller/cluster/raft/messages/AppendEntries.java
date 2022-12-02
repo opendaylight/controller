@@ -140,10 +140,7 @@ public final class AppendEntries extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        if (recipientRaftVersion <= RaftVersions.BORON_VERSION) {
-            return new Proxy(this);
-        }
-        return recipientRaftVersion == RaftVersions.FLUORINE_VERSION ? new ProxyV2(this) : new AE(this);
+        return new ProxyV2(this);
     }
 
     /**
@@ -207,68 +204,6 @@ public final class AppendEntries extends AbstractRaftRPC {
             appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries.build(), leaderCommit,
                     replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, leaderRaftVersion,
                     leaderAddress);
-        }
-
-        private Object readResolve() {
-            return appendEntries;
-        }
-    }
-
-    /**
-     * Pre-Fluorine version.
-     */
-    @Deprecated
-    private static class Proxy implements Externalizable {
-        private static final long serialVersionUID = 1L;
-
-        private AppendEntries appendEntries;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-        }
-
-        Proxy(final AppendEntries appendEntries) {
-            this.appendEntries = appendEntries;
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(appendEntries.getTerm());
-            out.writeObject(appendEntries.leaderId);
-            out.writeLong(appendEntries.prevLogTerm);
-            out.writeLong(appendEntries.prevLogIndex);
-            out.writeLong(appendEntries.leaderCommit);
-            out.writeLong(appendEntries.replicatedToAllIndex);
-            out.writeShort(appendEntries.payloadVersion);
-
-            out.writeInt(appendEntries.entries.size());
-            for (ReplicatedLogEntry e: appendEntries.entries) {
-                out.writeLong(e.getIndex());
-                out.writeLong(e.getTerm());
-                out.writeObject(e.getData());
-            }
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            long term = in.readLong();
-            String leaderId = (String) in.readObject();
-            long prevLogTerm = in.readLong();
-            long prevLogIndex = in.readLong();
-            long leaderCommit = in.readLong();
-            long replicatedToAllIndex = in.readLong();
-            short payloadVersion = in.readShort();
-
-            int size = in.readInt();
-            var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
-            for (int i = 0; i < size; i++) {
-                entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
-            }
-
-            appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries.build(), leaderCommit,
-                replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, RaftVersions.BORON_VERSION, null);
         }
 
         private Object readResolve() {
