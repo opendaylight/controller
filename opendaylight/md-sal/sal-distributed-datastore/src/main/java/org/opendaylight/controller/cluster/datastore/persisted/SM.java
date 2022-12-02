@@ -16,6 +16,7 @@ import java.util.List;
  * Serialization proxy for {@link ShardManagerSnapshot}.
  */
 final class SM implements ShardManagerSnapshot.SerializedForm {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private ShardManagerSnapshot snapshot;
@@ -43,5 +44,4 @@ final class SM implements ShardManagerSnapshot.SerializedForm {
     public Object readResolve() {
         return verifyNotNull(snapshot);
     }
-
 }
