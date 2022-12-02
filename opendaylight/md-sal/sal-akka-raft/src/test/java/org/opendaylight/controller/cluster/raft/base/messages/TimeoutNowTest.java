@@ -22,7 +22,7 @@ public class TimeoutNowTest {
     @Test
     public void test() {
         final var bytes = SerializationUtils.serialize(TimeoutNow.INSTANCE);
-        assertEquals(187, bytes.length);
+        assertEquals(86, bytes.length);
         final var cloned = SerializationUtils.deserialize(bytes);
         assertSame("Cloned instance", TimeoutNow.INSTANCE, cloned);
     }
