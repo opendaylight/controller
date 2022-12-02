@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -42,11 +43,8 @@ public final class FollowerLogInformation {
 
     private short payloadVersion = -1;
 
-    // Assume the HELIUM_VERSION version initially for backwards compatibility until we obtain the follower's
-    // actual version via AppendEntriesReply. Although we no longer support the Helium version, a pre-Boron
-    // follower will not have the version field in AppendEntriesReply so it will be set to 0 which is
-    // HELIUM_VERSION.
-    private short raftVersion = RaftVersions.HELIUM_VERSION;
+    // Assume the FLUORINE_VERSION version initially, as we no longer support pre-Fluorine versions.
+    private short raftVersion = RaftVersions.FLUORINE_VERSION;
 
     private final PeerInfo peerInfo;
 
@@ -65,7 +63,7 @@ public final class FollowerLogInformation {
      */
     @VisibleForTesting
     FollowerLogInformation(final PeerInfo peerInfo, final long matchIndex, final RaftActorContext context) {
-        this.nextIndex = context.getCommitIndex();
+        nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
         this.context = context;
         this.peerInfo = requireNonNull(peerInfo);
@@ -299,6 +297,7 @@ public final class FollowerLogInformation {
      * @param raftVersion the raft version.
      */
     public void setRaftVersion(final short raftVersion) {
+        checkArgument(raftVersion >= RaftVersions.FLUORINE_VERSION, "Unexpected version %s", raftVersion);
         this.raftVersion = raftVersion;
     }
 
@@ -317,8 +316,8 @@ public final class FollowerLogInformation {
      * @param state the LeaderInstallSnapshotState
      */
     public void setLeaderInstallSnapshotState(final @NonNull LeaderInstallSnapshotState state) {
-        if (this.installSnapshotState == null) {
-            this.installSnapshotState = requireNonNull(state);
+        if (installSnapshotState == null) {
+            installSnapshotState = requireNonNull(state);
         }
     }
 
