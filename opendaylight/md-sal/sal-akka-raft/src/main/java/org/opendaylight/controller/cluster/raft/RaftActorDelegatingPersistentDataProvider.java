@@ -13,7 +13,6 @@ import akka.japi.Procedure;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 
 /**
@@ -42,33 +41,19 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
     }
 
     private <T> void doPersist(final T entry, final Procedure<T> procedure, final boolean async) {
-        if (getDelegate().isRecoveryApplicable()) {
-            persistSuper(entry, procedure, async);
-        } else {
-            if (entry instanceof ReplicatedLogEntry) {
-                Payload payload = ((ReplicatedLogEntry)entry).getData();
-                if (payload instanceof PersistentPayload) {
-                    // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes
-                    // on recovery if data persistence is later enabled.
-                    if (async) {
-                        persistentProvider.persistAsync(payload, p -> procedure.apply(entry));
-                    } else {
-                        persistentProvider.persist(payload, p -> procedure.apply(entry));
-                    }
-                } else {
-                    persistSuper(entry, procedure, async);
-                }
+        if (!getDelegate().isRecoveryApplicable() && entry instanceof ReplicatedLogEntry replicatedLogEntry
+            && replicatedLogEntry.getData() instanceof PersistentPayload payload) {
+            // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes on recovery
+            // if data persistence is later enabled.
+            if (async) {
+                persistentProvider.persistAsync(payload, p -> procedure.apply(entry));
             } else {
-                persistSuper(entry, procedure, async);
+                persistentProvider.persist(payload, p -> procedure.apply(entry));
             }
-        }
-    }
-
-    private <T> void persistSuper(final T object, final Procedure<T> procedure, final boolean async) {
-        if (async) {
-            super.persistAsync(object, procedure);
+        } else if (async) {
+            super.persistAsync(entry, procedure);
         } else {
-            super.persist(object, procedure);
+            super.persist(entry, procedure);
         }
     }
 }

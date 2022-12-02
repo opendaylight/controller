@@ -64,27 +64,27 @@ class RaftActorServerConfigurationSupport {
 
     RaftActorServerConfigurationSupport(final RaftActor raftActor) {
         this.raftActor = raftActor;
-        this.raftContext = raftActor.getRaftActorContext();
+        raftContext = raftActor.getRaftActorContext();
     }
 
     boolean handleMessage(final Object message, final ActorRef sender) {
-        if (message instanceof AddServer) {
-            onAddServer((AddServer) message, sender);
+        if (message instanceof AddServer addServer) {
+            onAddServer(addServer, sender);
             return true;
-        } else if (message instanceof RemoveServer) {
-            onRemoveServer((RemoveServer) message, sender);
+        } else if (message instanceof RemoveServer removeServer) {
+            onRemoveServer(removeServer, sender);
             return true;
-        } else if (message instanceof ChangeServersVotingStatus) {
-            onChangeServersVotingStatus((ChangeServersVotingStatus) message, sender);
+        } else if (message instanceof ChangeServersVotingStatus changeServersVotingStatus) {
+            onChangeServersVotingStatus(changeServersVotingStatus, sender);
             return true;
-        } else if (message instanceof ServerOperationTimeout) {
-            currentOperationState.onServerOperationTimeout((ServerOperationTimeout) message);
+        } else if (message instanceof ServerOperationTimeout serverOperationTimeout) {
+            currentOperationState.onServerOperationTimeout(serverOperationTimeout);
             return true;
-        } else if (message instanceof UnInitializedFollowerSnapshotReply) {
-            currentOperationState.onUnInitializedFollowerSnapshotReply((UnInitializedFollowerSnapshotReply) message);
+        } else if (message instanceof UnInitializedFollowerSnapshotReply uninitFollowerSnapshotReply) {
+            currentOperationState.onUnInitializedFollowerSnapshotReply(uninitFollowerSnapshotReply);
             return true;
-        } else if (message instanceof ApplyState) {
-            return onApplyState((ApplyState) message);
+        } else if (message instanceof ApplyState applyState) {
+            return onApplyState(applyState);
         } else if (message instanceof SnapshotComplete) {
             currentOperationState.onSnapshotComplete();
             return false;
@@ -765,8 +765,7 @@ class RaftActorServerConfigurationSupport {
             }
 
             raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
-            if (raftActor.getCurrentBehavior() instanceof AbstractLeader) {
-                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+            if (raftActor.getCurrentBehavior() instanceof AbstractLeader leader) {
                 leader.updateMinReplicaCount();
             }
 
