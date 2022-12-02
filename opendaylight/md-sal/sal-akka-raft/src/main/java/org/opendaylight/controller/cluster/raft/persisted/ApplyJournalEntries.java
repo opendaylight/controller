@@ -23,7 +23,9 @@ import java.io.Serializable;
  * @author Thomas Pantelis
  */
 public class ApplyJournalEntries implements Serializable, ControlMessage {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private ApplyJournalEntries applyEntries;
@@ -49,11 +51,13 @@ public class ApplyJournalEntries implements Serializable, ControlMessage {
             applyEntries = new ApplyJournalEntries(in.readLong());
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return applyEntries;
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final long toIndex;
@@ -67,7 +71,7 @@ public class ApplyJournalEntries implements Serializable, ControlMessage {
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return new AJE(this);
     }
 
     @Override

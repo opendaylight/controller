@@ -34,10 +34,12 @@ public final class RequestVoteReply extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return new Proxy(this);
+        return new VR(this);
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private RequestVoteReply requestVoteReply;
@@ -66,6 +68,7 @@ public final class RequestVoteReply extends AbstractRaftRPC {
             requestVoteReply = new RequestVoteReply(term, voteGranted);
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return requestVoteReply;
         }

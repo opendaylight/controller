@@ -42,7 +42,9 @@ public class Snapshot implements Serializable {
         }
     }
 
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private Snapshot snapshot;
@@ -101,11 +103,13 @@ public class Snapshot implements Serializable {
                     electionTerm, electionVotedFor, serverConfig);
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return snapshot;
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final State state;
@@ -160,7 +164,7 @@ public class Snapshot implements Serializable {
     }
 
     public long getLastIndex() {
-        return this.lastIndex;
+        return lastIndex;
     }
 
     public long getElectionTerm() {
@@ -175,8 +179,9 @@ public class Snapshot implements Serializable {
         return serverConfig;
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new SS(this);
     }
 
     @Override

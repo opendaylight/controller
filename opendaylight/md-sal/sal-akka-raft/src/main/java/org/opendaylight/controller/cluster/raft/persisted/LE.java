@@ -30,6 +30,13 @@ final class LE implements Externalizable {
         // For Externalizable
     }
 
+    // For size estimation only, use full bit size
+    LE(final Void dummy) {
+        index = Long.MIN_VALUE;
+        term = Long.MIN_VALUE;
+        data = null;
+    }
+
     LE(final SimpleReplicatedLogEntry logEntry) {
         index = logEntry.getIndex();
         term = logEntry.getTerm();

@@ -22,7 +22,7 @@ public class UpdateElectionTermTest {
     public void testSerialization() {
         final var expected = new UpdateElectionTerm(5, "leader");
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(116, bytes.length);
+        assertEquals(88, bytes.length);
         final var cloned = (UpdateElectionTerm) SerializationUtils.deserialize(bytes);
 
         assertEquals("getCurrentTerm", expected.getCurrentTerm(), cloned.getCurrentTerm());

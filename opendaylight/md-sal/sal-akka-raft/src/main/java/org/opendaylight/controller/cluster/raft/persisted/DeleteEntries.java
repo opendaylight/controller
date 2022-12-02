@@ -19,7 +19,9 @@ import java.io.Serializable;
  * @author Thomas Pantelis
  */
 public class DeleteEntries implements Serializable {
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private DeleteEntries deleteEntries;
@@ -45,11 +47,13 @@ public class DeleteEntries implements Serializable {
             deleteEntries = new DeleteEntries(in.readLong());
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return deleteEntries;
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final long fromIndex;
@@ -63,7 +67,7 @@ public class DeleteEntries implements Serializable {
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return new DE(this);
     }
 
     @Override
