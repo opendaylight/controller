@@ -30,11 +30,7 @@ public final class TimeoutNow implements Serializable, ControlMessage {
         return INSTANCE;
     }
 
-    @java.io.Serial
-    private Object writeReplace() {
-        return new Proxy();
-    }
-
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static class Proxy extends EmptyExternalizableProxy {
         @java.io.Serial
         private static final long serialVersionUID = 1L;

@@ -22,7 +22,7 @@ public class FollowerIdentifierTest {
     public void testSerialization() {
         final var expected = new FollowerIdentifier("follower1");
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(109, bytes.length);
+        assertEquals(87, bytes.length);
         final var cloned = (FollowerIdentifier) SerializationUtils.deserialize(bytes);
         assertEquals("cloned", expected, cloned);
     }
