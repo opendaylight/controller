@@ -55,7 +55,7 @@ public final class AppendEntries extends AbstractRaftRPC {
 
     private final String leaderAddress;
 
-    private AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
+    AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
             final long prevLogTerm, @NonNull final List<ReplicatedLogEntry> entries, final long leaderCommit,
             final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
             final short leaderRaftVersion, @Nullable final String leaderAddress) {
@@ -140,7 +140,10 @@ public final class AppendEntries extends AbstractRaftRPC {
 
     @Override
     Object writeReplace() {
-        return recipientRaftVersion > RaftVersions.BORON_VERSION ? new ProxyV2(this) : new Proxy(this);
+        if (recipientRaftVersion <= RaftVersions.BORON_VERSION) {
+            return new Proxy(this);
+        }
+        return recipientRaftVersion == RaftVersions.FLUORINE_VERSION ? new ProxyV2(this) : new AE(this);
     }
 
     /**
