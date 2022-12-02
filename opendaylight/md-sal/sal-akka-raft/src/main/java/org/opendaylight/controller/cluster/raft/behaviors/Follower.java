@@ -328,8 +328,8 @@ public class Follower extends AbstractRaftActorBehavior {
             shouldCaptureSnapshot.compareAndSet(false,
                     context.getReplicatedLog().shouldCaptureSnapshot(entry.getIndex()));
 
-            if (entry.getData() instanceof ServerConfigurationPayload) {
-                context.updatePeerIds((ServerConfigurationPayload)entry.getData());
+            if (entry.getData() instanceof ServerConfigurationPayload serverConfiguration) {
+                context.updatePeerIds(serverConfiguration);
             }
         }
 
@@ -456,12 +456,11 @@ public class Follower extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (!(message instanceof RaftRPC)) {
+        if (!(message instanceof RaftRPC rpc)) {
             // The rest of the processing requires the message to be a RaftRPC
             return null;
         }
 
-        final RaftRPC rpc = (RaftRPC) message;
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
@@ -472,14 +471,14 @@ public class Follower extends AbstractRaftActorBehavior {
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
         }
 
-        if (rpc instanceof InstallSnapshot) {
-            handleInstallSnapshot(sender, (InstallSnapshot) rpc);
+        if (rpc instanceof InstallSnapshot installSnapshot) {
+            handleInstallSnapshot(sender, installSnapshot);
             restartLastLeaderMessageTimer();
             scheduleElection(electionDuration());
             return this;
         }
 
-        if (!(rpc instanceof RequestVote) || canGrantVote((RequestVote) rpc)) {
+        if (!(rpc instanceof RequestVote requestVote) || canGrantVote(requestVote)) {
             restartLastLeaderMessageTimer();
             scheduleElection(electionDuration());
         }
