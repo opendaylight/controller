@@ -18,6 +18,7 @@ import java.util.List;
  * Externalizable proxy for {@link FrontendShardDataTreeSnapshotMetadata}.
  */
 final class FM implements Externalizable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private List<FrontendClientMetadata> clients;
@@ -49,6 +50,7 @@ final class FM implements Externalizable {
         clients = builder.build();
     }
 
+    @java.io.Serial
     private Object readResolve() {
         return new FrontendShardDataTreeSnapshotMetadata(clients);
     }

@@ -20,8 +20,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
+public sealed class PurgeTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
+    @Deprecated(since = "7.0.0", forRemoval = true)
+    private static final class Magnesium extends PurgeTransactionPayload implements MagnesiumPayload {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Magnesium(final TransactionIdentifier transactionId, final byte[] serialized) {
+            super(transactionId, serialized);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<TransactionIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
@@ -29,10 +41,6 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final byte[] serialized) {
-            super(serialized);
         }
 
         @Override
@@ -43,13 +51,14 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
         @Override
         protected PurgeTransactionPayload createObject(final TransactionIdentifier identifier,
                 final byte[] serialized) {
-            return new PurgeTransactionPayload(identifier, serialized);
+            return new Magnesium(identifier, serialized);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(PT::new);
 
     PurgeTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
         super(transactionId, serialized);
@@ -69,8 +78,8 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected PT externalizableProxy(final byte[] serialized) {
+        return new PT(serialized);
     }
 
     @Override
