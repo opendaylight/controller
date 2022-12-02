@@ -469,8 +469,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // and became the leader again,. We still want to apply this as a local modification because
         // we have resumed leadership with that log entry having been committed.
         final Payload payload = entry.getData();
-        if (payload instanceof IdentifiablePayload) {
-            return new ApplyState(null, ((IdentifiablePayload<?>) payload).getIdentifier(), entry);
+        if (payload instanceof IdentifiablePayload<?> identifiable) {
+            return new ApplyState(null, identifiable.getIdentifier(), entry);
         }
 
         return new ApplyState(null, null, entry);
@@ -511,9 +511,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // start a new election due to lack of responses. This case would only occur if there isn't a majority
                 // of other nodes available that can elect the requesting candidate. Since we're transferring
                 // leadership, we should make every effort to get the requesting node elected.
-                if (rpc instanceof RequestVote && context.getRaftActorLeadershipTransferCohort() != null) {
+                if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
                     log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
-                    super.handleMessage(sender, rpc);
+                    requestVote(sender, requestVote);
                 }
 
                 return internalSwitchBehavior(RaftState.Follower);
@@ -528,10 +528,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             setSnapshotHolder(new SnapshotHolder(sendInstallSnapshot.getSnapshot(),
                 sendInstallSnapshot.getSnapshotBytes()));
             sendInstallSnapshot();
-        } else if (message instanceof Replicate) {
-            replicate((Replicate) message);
-        } else if (message instanceof InstallSnapshotReply) {
-            handleInstallSnapshotReply((InstallSnapshotReply) message);
+        } else if (message instanceof Replicate replicate) {
+            replicate(replicate);
+        } else if (message instanceof InstallSnapshotReply installSnapshotReply) {
+            handleInstallSnapshotReply(installSnapshotReply);
         } else if (message instanceof CheckConsensusReached) {
             possiblyUpdateCommitIndex();
         } else {

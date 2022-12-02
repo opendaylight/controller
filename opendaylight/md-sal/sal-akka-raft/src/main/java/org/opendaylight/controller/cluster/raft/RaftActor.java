@@ -228,9 +228,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (snapshotSupport.handleSnapshotMessage(message, getSender())) {
             return;
         }
-        if (message instanceof ApplyState) {
-            ApplyState applyState = (ApplyState) message;
-
+        if (message instanceof ApplyState applyState) {
             if (!hasFollowers()) {
                 // for single node, the capture should happen after the apply state
                 // as we delete messages from the persistent journal which have made it to the snapshot
@@ -242,8 +240,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             }
 
             possiblyHandleBehaviorMessage(message);
-        } else if (message instanceof ApplyJournalEntries) {
-            ApplyJournalEntries applyEntries = (ApplyJournalEntries) message;
+        } else if (message instanceof ApplyJournalEntries applyEntries) {
             LOG.debug("{}: Persisting ApplyJournalEntries with index={}", persistenceId(), applyEntries.getToIndex());
 
             persistence().persistAsync(applyEntries, NoopProcedure.instance());
@@ -253,24 +250,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onGetOnDemandRaftStats();
         } else if (message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
-        } else if (message instanceof SwitchBehavior) {
-            switchBehavior((SwitchBehavior) message);
-        } else if (message instanceof LeaderTransitioning) {
-            onLeaderTransitioning((LeaderTransitioning)message);
+        } else if (message instanceof SwitchBehavior switchBehavior) {
+            switchBehavior(switchBehavior);
+        } else if (message instanceof LeaderTransitioning leaderTransitioning) {
+            onLeaderTransitioning(leaderTransitioning);
         } else if (message instanceof Shutdown) {
             onShutDown();
-        } else if (message instanceof Runnable) {
-            ((Runnable)message).run();
-        } else if (message instanceof NoopPayload) {
-            persistData(null, null, (NoopPayload) message, false);
-        } else if (message instanceof RequestLeadership) {
-            onRequestLeadership((RequestLeadership) message);
+        } else if (message instanceof Runnable runnable) {
+            runnable.run();
+        } else if (message instanceof NoopPayload noopPayload) {
+            persistData(null, null, noopPayload, false);
+        } else if (message instanceof RequestLeadership requestLeadership) {
+            onRequestLeadership(requestLeadership);
         } else if (!possiblyHandleBehaviorMessage(message)) {
-            if (message instanceof JournalProtocol.Response
-                && delegatingPersistenceProvider.handleJournalResponse((JournalProtocol.Response) message)) {
+            if (message instanceof JournalProtocol.Response response
+                && delegatingPersistenceProvider.handleJournalResponse(response)) {
                 LOG.debug("{}: handled a journal response", persistenceId());
-            } else if (message instanceof SnapshotProtocol.Response
-                && delegatingPersistenceProvider.handleSnapshotResponse((SnapshotProtocol.Response) message)) {
+            } else if (message instanceof SnapshotProtocol.Response response
+                && delegatingPersistenceProvider.handleSnapshotResponse(response)) {
                 LOG.debug("{}: handled a snapshot response", persistenceId());
             } else {
                 handleNonRaftCommand(message);
@@ -484,11 +481,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             builder.lastLogTerm(lastLogEntry.getTerm());
         }
 
-        if (getCurrentBehavior() instanceof AbstractLeader) {
-            AbstractLeader leader = (AbstractLeader)getCurrentBehavior();
+        if (getCurrentBehavior() instanceof AbstractLeader leader) {
             Collection<String> followerIds = leader.getFollowerIds();
             List<FollowerInfo> followerInfoList = new ArrayList<>(followerIds.size());
-            for (String id: followerIds) {
+            for (String id : followerIds) {
                 final FollowerLogInformation info = leader.getFollower(id);
                 followerInfoList.add(new FollowerInfo(id, info.getNextIndex(), info.getMatchIndex(),
                         info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(
