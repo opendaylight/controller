@@ -17,6 +17,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,20 @@ import org.slf4j.LoggerFactory;
  * for other purposes. It contains a {@link LocalHistoryIdentifier} and a list of transaction identifiers within that
  * local history.
  */
-public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+public sealed class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+    private static final class Magnesium extends SkipTransactionsPayload implements LegacySerializable {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        Magnesium(final LocalHistoryIdentifier historyId, final byte[] serialized,
+                final ImmutableUnsignedLongSet transactionIds) {
+            super(historyId, serialized, transactionIds);
+        }
+    }
+
+    @Deprecated(since = "7.0.0", forRemoval = true)
     private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private ImmutableUnsignedLongSet transactionIds;
@@ -36,10 +49,6 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final byte[] serialized) {
-            super(serialized);
         }
 
         @Override
@@ -52,13 +61,14 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
         @Override
         protected SkipTransactionsPayload createObject(final LocalHistoryIdentifier identifier,
                 final byte[] serialized) {
-            return new SkipTransactionsPayload(identifier, serialized, verifyNotNull(transactionIds));
+            return new Magnesium(identifier, serialized, verifyNotNull(transactionIds));
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(Proxy::new);
+    private static final int PROXY_SIZE = externalizableProxySize(ST::new);
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via externalizable proxy")
     private final @NonNull ImmutableUnsignedLongSet transactionIds;
@@ -89,8 +99,8 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     }
 
     @Override
-    protected Proxy externalizableProxy(final byte[] serialized) {
-        return new Proxy(serialized);
+    protected ST externalizableProxy(final byte[] serialized) {
+        return new ST(serialized);
     }
 
     @Override
