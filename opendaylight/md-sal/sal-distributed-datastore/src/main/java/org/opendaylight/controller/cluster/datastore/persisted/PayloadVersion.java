@@ -53,6 +53,7 @@ public enum PayloadVersion implements WritableObject {
      * ABI version as shipped in Sodium SR1 Simultaneous Release. QName-bearing messages are using
      * {@link NormalizedNodeStreamVersion#SODIUM_SR1}, which improves encoding.
      */
+    @Deprecated(since = "7.0.0", forRemoval = true)
     SODIUM_SR1(7) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
@@ -64,6 +65,7 @@ public enum PayloadVersion implements WritableObject {
      * Revised payload version. Payloads remain the same as {@link #SODIUM_SR1}, but messages bearing QNames in any
      * shape are using {@link NormalizedNodeStreamVersion#MAGNESIUM}, which improves encoding.
      */
+    @Deprecated(since = "7.0.0", forRemoval = true)
     MAGNESIUM(8) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
@@ -123,7 +125,7 @@ public enum PayloadVersion implements WritableObject {
      * @return Current {@link PayloadVersion}
      */
     public static @NonNull PayloadVersion current() {
-        return MAGNESIUM;
+        return CHLORINE_SR2;
     }
 
     /**
