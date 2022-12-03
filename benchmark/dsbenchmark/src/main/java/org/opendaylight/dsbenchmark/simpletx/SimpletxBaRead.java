@@ -77,7 +77,7 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
                         }
                         for (int i = 0; i < outerList.getInnerList().size(); i++) {
                             String itemStr = objectsArray[i];
-                            if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
+                            if (!itemStr.contentEquals("Item-" + l + "-" + i)) {
                                 LOG.error("innerList: name: {}, value: {}", i, itemStr);
                                 break;
                             }
