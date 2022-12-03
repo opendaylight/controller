@@ -185,8 +185,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
             LOG.debug("{}: Parsed data node: {}", logName, dataNode);
 
             return dataNode;
-        } catch (final IOException | SAXException | XMLStreamException | ParserConfigurationException
-                | URISyntaxException e) {
+        } catch (final IOException | SAXException | XMLStreamException | URISyntaxException e) {
             String msg = String.format("%s: Could not read/parse app config %s", logName, url);
             LOG.error(msg, e);
             throw new ConfigXMLReaderException(msg, e);

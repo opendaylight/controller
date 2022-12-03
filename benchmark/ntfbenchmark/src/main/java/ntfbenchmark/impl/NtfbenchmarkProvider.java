@@ -114,7 +114,7 @@ public final class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkSe
                     listenerRegistration.getInstance().getAllDone().get();
                 }
             } catch (final InterruptedException | ExecutionException e) {
-                LOG.error("Out of time: test did not finish within the {} min deadline ", TEST_TIMEOUT);
+                LOG.error("Out of time: test did not finish within the {} min deadline ", TEST_TIMEOUT, e);
             }
 
             final long producerEndTime = System.nanoTime();

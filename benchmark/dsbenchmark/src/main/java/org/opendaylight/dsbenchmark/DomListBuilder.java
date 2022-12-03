@@ -36,10 +36,10 @@ public final class DomListBuilder {
         List<MapEntryNode> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(ImmutableNodes.mapEntryBuilder()
-                                .withNodeIdentifier(NodeIdentifierWithPredicates.of(OuterList.QNAME, OL_ID, j))
-                                .withChild(ImmutableNodes.leafNode(OL_ID, j))
-                                .withChild(buildInnerList(j, innerElements))
-                                .build());
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(OuterList.QNAME, OL_ID, j))
+                .withChild(ImmutableNodes.leafNode(OL_ID, j))
+                .withChild(buildInnerList(j, innerElements))
+                .build());
         }
         return outerList;
     }
@@ -47,13 +47,13 @@ public final class DomListBuilder {
     private static MapNode buildInnerList(final int index, final int elements) {
         CollectionNodeBuilder<MapEntryNode, SystemMapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
 
-        final String itemStr = "Item-" + String.valueOf(index) + "-";
+        final String itemStr = "Item-" + index + "-";
         for (int i = 0; i < elements; i++) {
             innerList.addChild(ImmutableNodes.mapEntryBuilder()
-                                .withNodeIdentifier(NodeIdentifierWithPredicates.of(InnerList.QNAME, IL_NAME, i))
-                                .withChild(ImmutableNodes.leafNode(IL_NAME, i))
-                                .withChild(ImmutableNodes.leafNode(IL_VALUE, itemStr + String.valueOf(i)))
-                                .build());
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(InnerList.QNAME, IL_NAME, i))
+                .withChild(ImmutableNodes.leafNode(IL_NAME, i))
+                .withChild(ImmutableNodes.leafNode(IL_VALUE, itemStr + String.valueOf(i)))
+                .build());
         }
         return innerList.build();
     }

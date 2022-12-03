@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Set;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.mdsal.binding.spec.naming.BindingMapping;
@@ -25,7 +24,6 @@ import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
@@ -88,20 +86,14 @@ public abstract class BindingContext {
     }
 
     public NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
-            throws XMLStreamException, IOException, ParserConfigurationException, SAXException, URISyntaxException {
+            throws XMLStreamException, IOException, SAXException, URISyntaxException {
         final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
         final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
         final XmlParserStream xmlParser = XmlParserStream.create(writer, dataSchema);
         xmlParser.traverse(new DOMSource(element));
 
         final NormalizedNode result = resultHolder.getResult();
-        if (result instanceof MapNode) {
-            final MapNode mapNode = (MapNode) result;
-            final MapEntryNode mapEntryNode = mapNode.body().iterator().next();
-            return mapEntryNode;
-        }
-
-        return result;
+        return result instanceof MapNode mapNode ? mapNode.body().iterator().next() : result;
     }
 
     public abstract NormalizedNode newDefaultNode(SchemaTreeInference dataSchema);
