@@ -96,8 +96,6 @@ public class DatastoreContext implements ClientActorConfig {
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private boolean useTellBasedProtocol = true;
     private boolean transactionDebugContextEnabled = false;
     private String shardManagerPersistenceId;
     private int maximumMessageSliceSize = DEFAULT_MAX_MESSAGE_SLICE_SIZE;
@@ -148,7 +146,6 @@ public class DatastoreContext implements ClientActorConfig {
         shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
         transactionDebugContextEnabled = other.transactionDebugContextEnabled;
         shardManagerPersistenceId = other.shardManagerPersistenceId;
-        useTellBasedProtocol = other.useTellBasedProtocol;
         backendAlivenessTimerInterval = other.backendAlivenessTimerInterval;
         requestTimeout = other.requestTimeout;
         noProgressTimeout = other.noProgressTimeout;
@@ -364,11 +361,6 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isTransactionDebugContextEnabled() {
         return transactionDebugContextEnabled;
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public boolean isUseTellBasedProtocol() {
-        return useTellBasedProtocol;
     }
 
     public boolean isUseLz4Compression() {
@@ -601,12 +593,6 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder transactionDebugContextEnabled(final boolean value) {
             datastoreContext.transactionDebugContextEnabled = value;
-            return this;
-        }
-
-        @Deprecated(since = "7.0.0", forRemoval = true)
-        public Builder useTellBasedProtocol(final boolean value) {
-            datastoreContext.useTellBasedProtocol = value;
             return this;
         }
 
