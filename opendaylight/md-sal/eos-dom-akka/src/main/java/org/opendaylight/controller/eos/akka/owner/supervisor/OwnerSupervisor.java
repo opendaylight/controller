@@ -84,7 +84,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     // Our own clock implementation so we do not have to rely on synchronized clocks. This basically functions as an
     // increasing counter which is fine for our needs as we only ever have a single writer since t supervisor is
     // running in a cluster-singleton
-    private final LWWRegister.Clock<String> clock = (currentTimestamp, value) -> currentTimestamp + 1;
+    private static final LWWRegister.Clock<String> CLOCK = (currentTimestamp, value) -> currentTimestamp + 1;
 
     private final Cluster cluster;
     private final SelfUniqueAddress node;
@@ -371,7 +371,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
                         new LWWRegister<>(node.uniqueAddress(), candidate, 0),
                         Replicator.writeLocal(),
                         askReplyTo,
-                        register -> register.withValue(node, candidate, clock)),
+                        register -> register.withValue(node, candidate, CLOCK)),
                 OwnerChanged::new);
     }
 

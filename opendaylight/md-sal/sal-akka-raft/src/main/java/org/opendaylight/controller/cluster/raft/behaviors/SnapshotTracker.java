@@ -48,11 +48,12 @@ class SnapshotTracker implements AutoCloseable {
      * @param lastChunkHashCode the optional hash code for the chunk
      * @return true if this is the last chunk is received
      * @throws InvalidChunkException if the chunk index is invalid or out of order
+     * @throws IOException if there is a problem writing to the stream
      */
     boolean addChunk(final int chunkIndex, final byte[] chunk, final OptionalInt maybeLastChunkHashCode)
-            throws InvalidChunkException, IOException {
+            throws IOException {
         log.debug("addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
-                chunkIndex, lastChunkIndex, count, this.lastChunkHashCode);
+                chunkIndex, lastChunkIndex, count, lastChunkHashCode);
 
         if (sealed) {
             throw new InvalidChunkException("Invalid chunk received with chunkIndex " + chunkIndex
@@ -63,9 +64,9 @@ class SnapshotTracker implements AutoCloseable {
             throw new InvalidChunkException("Expected chunkIndex " + (lastChunkIndex + 1) + " got " + chunkIndex);
         }
 
-        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.getAsInt() != this.lastChunkHashCode) {
+        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.getAsInt() != lastChunkHashCode) {
             throw new InvalidChunkException("The hash code of the recorded last chunk does not match "
-                    + "the senders hash code, expected " + this.lastChunkHashCode + " was "
+                    + "the senders hash code, expected " + lastChunkHashCode + " was "
                     + maybeLastChunkHashCode.getAsInt());
         }
 
@@ -74,7 +75,7 @@ class SnapshotTracker implements AutoCloseable {
         count += chunk.length;
         sealed = chunkIndex == totalChunks;
         lastChunkIndex = chunkIndex;
-        this.lastChunkHashCode = Arrays.hashCode(chunk);
+        lastChunkHashCode = Arrays.hashCode(chunk);
         return sealed;
     }
 

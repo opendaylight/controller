@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Optional;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
@@ -93,8 +92,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         return Resources.getResource(testClass, defaultAppConfigFileName);
     }
 
-    public T createDefaultInstance() throws ConfigXMLReaderException, ParserConfigurationException, XMLStreamException,
-            IOException, SAXException, URISyntaxException {
+    public T createDefaultInstance() throws ConfigXMLReaderException, XMLStreamException, IOException, SAXException,
+            URISyntaxException {
         return createDefaultInstance(dataSchema -> {
             throw new IllegalArgumentException(
                 "Failed to read XML (not creating model from defaults as runtime would, for better clarity in tests)");
