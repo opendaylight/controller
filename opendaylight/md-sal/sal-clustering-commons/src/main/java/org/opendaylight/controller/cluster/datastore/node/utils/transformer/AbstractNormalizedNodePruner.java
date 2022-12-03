@@ -181,7 +181,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         }
     }
 
-    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) throws IOException {
+    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) {
         // Default is pass-through
         return value;
     }

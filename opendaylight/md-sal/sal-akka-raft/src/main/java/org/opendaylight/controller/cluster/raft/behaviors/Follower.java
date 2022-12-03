@@ -671,8 +671,7 @@ public class Follower extends AbstractRaftActorBehavior {
         } catch (IOException e) {
             log.debug("{}: Exception in InstallSnapshot of follower", logName(), e);
 
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
-                    -1, false), actor());
+            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
 
             closeSnapshotTracker();
         }

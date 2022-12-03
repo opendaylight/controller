@@ -493,31 +493,31 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (message instanceof RaftRPC rpc) {
-            // If RPC request or response contains term T > currentTerm:
-            // set currentTerm = T, convert to follower (§5.1)
-            // This applies to all RPC messages and responses
-            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm() && shouldUpdateTerm(rpc)) {
-                log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
-                        logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+        // If RPC request or response contains term T > currentTerm:
+        // set currentTerm = T, convert to follower (§5.1)
+        // This applies to all RPC messages and responses
+        if (message instanceof RaftRPC rpc && rpc.getTerm() > context.getTermInformation().getCurrentTerm()
+                && shouldUpdateTerm(rpc)) {
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+            log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
+                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-                // This is a special case. Normally when stepping down as leader we don't process and reply to the
-                // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
-                // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
-                // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
-                // state and starting a new election and grabbing leadership back before the other candidate node can
-                // start a new election due to lack of responses. This case would only occur if there isn't a majority
-                // of other nodes available that can elect the requesting candidate. Since we're transferring
-                // leadership, we should make every effort to get the requesting node elected.
-                if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
-                    log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
-                    requestVote(sender, requestVote);
-                }
+            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
-                return internalSwitchBehavior(RaftState.Follower);
+            // This is a special case. Normally when stepping down as leader we don't process and reply to the
+            // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
+            // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
+            // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
+            // state and starting a new election and grabbing leadership back before the other candidate node can
+            // start a new election due to lack of responses. This case would only occur if there isn't a majority
+            // of other nodes available that can elect the requesting candidate. Since we're transferring
+            // leadership, we should make every effort to get the requesting node elected.
+            if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
+                log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
+                requestVote(sender, requestVote);
             }
+
+            return internalSwitchBehavior(RaftState.Follower);
         }
 
         if (message instanceof SendHeartBeat) {
@@ -979,7 +979,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             } catch (IOException e) {
                 log.warn("{}: Unable to send chunk: {}/{}. Reseting snapshot progress. Snapshot state: {}", logName(),
                         installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks(),
-                        installSnapshotState);
+                        installSnapshotState, e);
                 installSnapshotState.reset();
             }
         }

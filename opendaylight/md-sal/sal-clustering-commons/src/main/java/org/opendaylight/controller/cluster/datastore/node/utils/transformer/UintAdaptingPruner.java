@@ -133,7 +133,7 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
     }
 
     @Override
-    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) throws IOException {
+    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) {
         final DataSchemaNode schema = context.getDataSchemaNode();
         return schema instanceof TypedDataSchemaNode ? adaptValue(((TypedDataSchemaNode) schema).getType(), value)
                 : value;

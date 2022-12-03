@@ -49,7 +49,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private long snapshotSize;
     private InputStream snapshotInputStream;
-    private Stopwatch chunkTimer = Stopwatch.createUnstarted();
+    private final Stopwatch chunkTimer = Stopwatch.createUnstarted();
     private byte[] currentChunk = null;
 
     LeaderInstallSnapshotState(final int snapshotChunkSize, final String logName) {
@@ -198,7 +198,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
             try {
                 snapshotInputStream.close();
             } catch (IOException e) {
-                LOG.warn("{}: Error closing snapshot stream", logName);
+                LOG.warn("{}: Error closing snapshot stream", logName, e);
             }
 
             snapshotInputStream = null;

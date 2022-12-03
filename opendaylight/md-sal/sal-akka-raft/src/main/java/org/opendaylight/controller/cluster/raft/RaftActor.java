@@ -103,8 +103,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
-
-    private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50L); // 50 millis
+    private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
     /**
      * This context should NOT be passed directly to any other actor it is
