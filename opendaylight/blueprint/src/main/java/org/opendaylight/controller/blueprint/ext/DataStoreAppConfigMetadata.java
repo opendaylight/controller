@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -268,8 +267,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 }
             });
 
-        } catch (final ConfigXMLReaderException | IOException | SAXException | XMLStreamException
-                | ParserConfigurationException | URISyntaxException e) {
+        } catch (ConfigXMLReaderException | IOException | SAXException | XMLStreamException | URISyntaxException e) {
             if (e.getCause() == null) {
                 setFailureMessage(e.getMessage());
             } else {
@@ -280,7 +278,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private @Nullable NormalizedNode parsePossibleDefaultAppConfigElement(final SchemaTreeInference dataSchema)
-            throws URISyntaxException, IOException, ParserConfigurationException, SAXException, XMLStreamException {
+            throws URISyntaxException, IOException, SAXException, XMLStreamException {
         if (defaultAppConfigElement == null) {
             return null;
         }

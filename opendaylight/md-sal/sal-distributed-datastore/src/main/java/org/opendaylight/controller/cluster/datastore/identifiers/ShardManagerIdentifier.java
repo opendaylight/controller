@@ -11,26 +11,19 @@ package org.opendaylight.controller.cluster.datastore.identifiers;
 public class ShardManagerIdentifier {
     private final String type;
 
-    public ShardManagerIdentifier(String type) {
+    public ShardManagerIdentifier(final String type) {
         this.type = type;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-
-        ShardManagerIdentifier that = (ShardManagerIdentifier) obj;
-
-        if (!type.equals(that.type)) {
-            return false;
-        }
-
-        return true;
+        return type.equals(((ShardManagerIdentifier) obj).type);
     }
 
     @Override
@@ -49,14 +42,13 @@ public class ShardManagerIdentifier {
     public static class Builder {
         private String type;
 
-        public Builder type(String newType) {
-            this.type = newType;
+        public Builder type(final String newType) {
+            type = newType;
             return this;
         }
 
         public ShardManagerIdentifier build() {
-            return new ShardManagerIdentifier(this.type);
+            return new ShardManagerIdentifier(type);
         }
-
     }
 }

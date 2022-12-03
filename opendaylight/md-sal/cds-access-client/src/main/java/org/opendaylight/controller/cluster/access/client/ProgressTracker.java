@@ -118,12 +118,13 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      */
     ProgressTracker(final ProgressTracker oldTracker, final long now) {
-        this.defaultTicksPerTask = oldTracker.defaultTicksPerTask;
-        this.tasksEncountered = this.tasksClosed = oldTracker.tasksClosed;
-        this.lastClosed = oldTracker.lastClosed;
-        this.nearestAllowed = oldTracker.nearestAllowed;  // Call cancelDebt explicitly if needed.
-        this.lastIdle = oldTracker.lastIdle;
-        this.elapsedBeforeIdle = oldTracker.elapsedBeforeIdle;
+        defaultTicksPerTask = oldTracker.defaultTicksPerTask;
+        tasksEncountered = tasksClosed = oldTracker.tasksClosed;
+        lastClosed = oldTracker.lastClosed;
+        // Call cancelDebt explicitly if needed.
+        nearestAllowed = oldTracker.nearestAllowed;
+        lastIdle = oldTracker.lastIdle;
+        elapsedBeforeIdle = oldTracker.elapsedBeforeIdle;
         if (!oldTracker.isIdle()) {
             transitToIdle(now);
         }
@@ -154,7 +155,8 @@ abstract class ProgressTracker {
      *
      * @return number of tasks started but not finished yet
      */
-    final long tasksOpen() {  // TODO: Should we return int?
+    // TODO: Should we return int?
+    final long tasksOpen() {
         // TODO: Should we check the return value is non-negative?
         return tasksEncountered - tasksClosed;
     }

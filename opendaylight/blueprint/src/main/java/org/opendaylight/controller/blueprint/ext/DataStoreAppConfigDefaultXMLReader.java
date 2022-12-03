@@ -54,7 +54,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     @FunctionalInterface
     public interface FallbackConfigProvider {
         NormalizedNode get(SchemaTreeInference dataSchema)
-            throws IOException, XMLStreamException, ParserConfigurationException, SAXException, URISyntaxException;
+            throws IOException, XMLStreamException, SAXException, URISyntaxException;
     }
 
     @FunctionalInterface
@@ -103,7 +103,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     @SuppressWarnings("unchecked")
     public T createDefaultInstance(final FallbackConfigProvider fallback) throws ConfigXMLReaderException,
-            URISyntaxException, ParserConfigurationException, XMLStreamException, SAXException, IOException {
+            URISyntaxException, XMLStreamException, SAXException, IOException {
         YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
 
         LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName, yangPath,
@@ -185,8 +185,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
             LOG.debug("{}: Parsed data node: {}", logName, dataNode);
 
             return dataNode;
-        } catch (final IOException | SAXException | XMLStreamException | ParserConfigurationException
-                | URISyntaxException e) {
+        } catch (final IOException | SAXException | XMLStreamException | URISyntaxException e) {
             String msg = String.format("%s: Could not read/parse app config %s", logName, url);
             LOG.error(msg, e);
             throw new ConfigXMLReaderException(msg, e);

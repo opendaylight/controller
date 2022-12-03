@@ -66,17 +66,17 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         OuterList outerList = optionalDataObject.get();
 
-                        String[] objectsArray = new String[outerList.getInnerList().size()];
-                        for (InnerList innerList : outerList.getInnerList().values()) {
+                        String[] objectsArray = new String[outerList.nonnullInnerList().size()];
+                        for (InnerList innerList : outerList.nonnullInnerList().values()) {
                             if (objectsArray[innerList.getName()] != null) {
                                 LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
                                     innerList.getValue());
                             }
                             objectsArray[innerList.getName()] = innerList.getValue();
                         }
-                        for (int i = 0; i < outerList.getInnerList().size(); i++) {
+                        for (int i = 0; i < outerList.nonnullInnerList().size(); i++) {
                             String itemStr = objectsArray[i];
-                            if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
+                            if (!itemStr.contentEquals("Item-" + l + "-" + i)) {
                                 LOG.error("innerList: name: {}, value: {}", i, itemStr);
                                 break;
                             }

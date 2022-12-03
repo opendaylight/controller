@@ -25,11 +25,11 @@ public class ForwardedReadyTransaction {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final boolean doImmediateCommit;
     private final short txnClientVersion;
-    private @Nullable final SortedSet<String> participatingShardNames;
+    private final @Nullable SortedSet<String> participatingShardNames;
 
-    public ForwardedReadyTransaction(TransactionIdentifier transactionId, short txnClientVersion,
-            ReadWriteShardDataTreeTransaction transaction, boolean doImmediateCommit,
-            Optional<SortedSet<String>> participatingShardNames) {
+    public ForwardedReadyTransaction(final TransactionIdentifier transactionId, final short txnClientVersion,
+            final ReadWriteShardDataTreeTransaction transaction, final boolean doImmediateCommit,
+            final Optional<SortedSet<String>> participatingShardNames) {
         this.transactionId = requireNonNull(transactionId);
         this.transaction = requireNonNull(transaction);
         this.txnClientVersion = txnClientVersion;

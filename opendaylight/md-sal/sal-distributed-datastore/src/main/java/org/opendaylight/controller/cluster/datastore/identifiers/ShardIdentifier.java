@@ -52,19 +52,8 @@ public class ShardIdentifier {
             return false;
         }
 
-        ShardIdentifier that = (ShardIdentifier) obj;
-
-        if (!memberName.equals(that.memberName)) {
-            return false;
-        }
-        if (!shardName.equals(that.shardName)) {
-            return false;
-        }
-        if (!type.equals(that.type)) {
-            return false;
-        }
-
-        return true;
+        final var that = (ShardIdentifier) obj;
+        return memberName.equals(that.memberName) && shardName.equals(that.shardName) && type.equals(that.type);
     }
 
     @Override
@@ -103,17 +92,17 @@ public class ShardIdentifier {
         }
 
         public Builder shardName(final String newShardName) {
-            this.shardName = newShardName;
+            shardName = newShardName;
             return this;
         }
 
         public Builder memberName(final MemberName newMemberName) {
-            this.memberName = newMemberName;
+            memberName = newMemberName;
             return this;
         }
 
         public Builder type(final String newType) {
-            this.type = newType;
+            type = newType;
             return this;
         }
 

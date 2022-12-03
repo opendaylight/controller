@@ -600,7 +600,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         + "all members {} self member: {}", logName(), unreachable, members, selfMember);
 
         // no unreachable peers means we cannot be isolated
-        if (unreachable.size() == 0) {
+        if (unreachable.isEmpty()) {
             return false;
         }
 
@@ -610,11 +610,7 @@ public class Follower extends AbstractRaftActorBehavior {
         membersToCheck.removeAll(unreachable);
 
         // check if the only member not unreachable is us
-        if (membersToCheck.size() == 1 && membersToCheck.iterator().next().equals(selfMember)) {
-            return true;
-        }
-
-        return false;
+        return membersToCheck.size() == 1 && membersToCheck.iterator().next().equals(selfMember);
     }
 
     private void handleInstallSnapshot(final ActorRef sender, final InstallSnapshot installSnapshot) {

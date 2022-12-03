@@ -170,7 +170,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     private SkipTransactionsResponse handleSkipTransactionsRequest(final SkipTransactionsRequest request,
-            final RequestEnvelope envelope, final long now) throws RequestException {
+            final RequestEnvelope envelope, final long now) {
         final var first = request.getTarget();
         final var others = request.getOthers();
         final var ids = new ArrayList<UnsignedLong>(others.size() + 1);

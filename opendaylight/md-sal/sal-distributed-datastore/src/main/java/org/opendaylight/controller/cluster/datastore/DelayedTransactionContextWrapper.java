@@ -116,7 +116,7 @@ final class DelayedTransactionContextWrapper extends AbstractTransactionContextW
         synchronized (queuedTxOperations) {
             contextOnEntry = transactionContext;
             if (contextOnEntry == null) {
-                checkState(pendingEnqueue == false, "Concurrent access to transaction %s detected", getIdentifier());
+                checkState(!pendingEnqueue, "Concurrent access to transaction %s detected", getIdentifier());
                 pendingEnqueue = true;
             }
         }

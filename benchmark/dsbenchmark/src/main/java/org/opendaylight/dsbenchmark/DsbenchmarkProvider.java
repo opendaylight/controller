@@ -65,15 +65,15 @@ import org.slf4j.LoggerFactory;
 @RequireServiceComponentRuntime
 public final class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
-    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
-            InstanceIdentifier.builder(TestExec.class).build();
-    private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID =
-            InstanceIdentifier.builder(TestStatus.class).build();
+    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID = InstanceIdentifier.create(TestExec.class);
+    private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID = InstanceIdentifier.create(TestStatus.class);
 
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private final DsbenchmarkListenerProvider listenerProvider;
-    private final DOMDataBroker domDataBroker;  // Async DOM Broker for use with all DOM operations
-    private final DataBroker dataBroker; // Async Binding-Aware Broker for use in tx chains
+    // Async DOM Broker for use with all DOM operations
+    private final DOMDataBroker domDataBroker;
+    // Async Binding-Aware Broker for use in tx chains;
+    private final DataBroker dataBroker;
     private final Registration rpcReg;
 
     private long testsCompleted = 0;
@@ -120,11 +120,11 @@ public final class DsbenchmarkProvider implements DsbenchmarkService, AutoClosea
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
         // Check if there is a test in progress
-        if (execStatus.compareAndSet(ExecStatus.Idle, ExecStatus.Executing) == false) {
+        if (!execStatus.compareAndSet(ExecStatus.Idle, ExecStatus.Executing)) {
             LOG.info("Test in progress");
             return RpcResultBuilder.success(new StartTestOutputBuilder()
-                    .setStatus(StartTestOutput.Status.TESTINPROGRESS)
-                    .build()).buildFuture();
+                .setStatus(StartTestOutput.Status.TESTINPROGRESS)
+                .build()).buildFuture();
         }
 
         // Cleanup data that may be left over from a previous test run
@@ -153,11 +153,11 @@ public final class DsbenchmarkProvider implements DsbenchmarkService, AutoClosea
             testsCompleted++;
 
         } catch (final Exception e) {
-            LOG.error("Test error: {}", e.toString());
+            LOG.error("Test error", e);
             execStatus.set(ExecStatus.Idle);
             return RpcResultBuilder.success(new StartTestOutputBuilder()
-                    .setStatus(StartTestOutput.Status.FAILED)
-                    .build()).buildFuture();
+                .setStatus(StartTestOutput.Status.FAILED)
+                .build()).buildFuture();
         }
 
         LOG.info("Test finished");
@@ -249,43 +249,37 @@ public final class DsbenchmarkProvider implements DsbenchmarkService, AutoClosea
                         retVal = new SimpletxBaWrite(dataBroker, oper, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     }
+                } else if (StartTestInput.Operation.DELETE == oper) {
+                    retVal = new SimpletxDomDelete(domDataBroker, outerListElem,
+                            innerListElem, writesPerTx, dataStore);
+                } else if (StartTestInput.Operation.READ == oper) {
+                    retVal = new SimpletxDomRead(domDataBroker, outerListElem,
+                            innerListElem, writesPerTx, dataStore);
                 } else {
-                    if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new SimpletxDomDelete(domDataBroker, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
-                    } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new SimpletxDomRead(domDataBroker, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
-                    } else {
-                        retVal = new SimpletxDomWrite(domDataBroker, oper, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
-                    }
+                    retVal = new SimpletxDomWrite(domDataBroker, oper, outerListElem,
+                            innerListElem, writesPerTx, dataStore);
                 }
-            } else {
-                if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
-                    if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new TxchainBaDelete(dataBroker, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
-                    } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new TxchainBaRead(dataBroker, outerListElem,
-                                innerListElem,writesPerTx, dataStore);
-                    } else {
-                        retVal = new TxchainBaWrite(dataBroker, oper, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
-                    }
+            } else if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
+                if (StartTestInput.Operation.DELETE == oper) {
+                    retVal = new TxchainBaDelete(dataBroker, outerListElem,
+                            innerListElem, writesPerTx, dataStore);
+                } else if (StartTestInput.Operation.READ == oper) {
+                    retVal = new TxchainBaRead(dataBroker, outerListElem,
+                            innerListElem,writesPerTx, dataStore);
                 } else {
-                    if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new TxchainDomDelete(domDataBroker, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
-                    } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new TxchainDomRead(domDataBroker, outerListElem,
-                                innerListElem, writesPerTx, dataStore);
+                    retVal = new TxchainBaWrite(dataBroker, oper, outerListElem,
+                            innerListElem, writesPerTx, dataStore);
+                }
+            } else if (StartTestInput.Operation.DELETE == oper) {
+                retVal = new TxchainDomDelete(domDataBroker, outerListElem,
+                        innerListElem, writesPerTx, dataStore);
+            } else if (StartTestInput.Operation.READ == oper) {
+                retVal = new TxchainDomRead(domDataBroker, outerListElem,
+                        innerListElem, writesPerTx, dataStore);
 
-                    } else {
-                        retVal = new TxchainDomWrite(domDataBroker, oper, outerListElem,
-                                innerListElem,writesPerTx, dataStore);
-                    }
-                }
+            } else {
+                retVal = new TxchainDomWrite(domDataBroker, oper, outerListElem,
+                        innerListElem,writesPerTx, dataStore);
             }
         } finally {
             execStatus.set(ExecStatus.Idle);

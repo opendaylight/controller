@@ -52,14 +52,7 @@ public abstract class DatastoreAbstractWriter {
     }
 
     protected LogicalDatastoreType getDataStoreType() {
-        final LogicalDatastoreType dsType;
-        if (dataStore == DataStore.CONFIG) {
-            dsType = LogicalDatastoreType.CONFIGURATION;
-        } else if ((dataStore == DataStore.OPERATIONAL) || (rn.nextBoolean() == true)) {
-            dsType = LogicalDatastoreType.OPERATIONAL;
-        } else {
-            dsType = LogicalDatastoreType.CONFIGURATION;
-        }
-        return dsType;
+        return dataStore == DataStore.CONFIG || dataStore != DataStore.OPERATIONAL && !rn.nextBoolean()
+            ? LogicalDatastoreType.CONFIGURATION : LogicalDatastoreType.OPERATIONAL;
     }
 }
