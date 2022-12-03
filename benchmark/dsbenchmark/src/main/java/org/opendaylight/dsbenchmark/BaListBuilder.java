@@ -28,10 +28,10 @@ public final class BaListBuilder {
         List<OuterList> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(new OuterListBuilder()
-                                .setId(j)
-                                .setInnerList(buildInnerList(j, innerElements))
-                                .withKey(new OuterListKey(j))
-                                .build());
+                .setId(j)
+                .setInnerList(buildInnerList(j, innerElements))
+                .withKey(new OuterListKey(j))
+                .build());
         }
         return outerList;
     }
@@ -39,14 +39,14 @@ public final class BaListBuilder {
     private static Map<InnerListKey, InnerList> buildInnerList(final int index, final int elements) {
         Builder<InnerListKey, InnerList> innerList = ImmutableMap.builderWithExpectedSize(elements);
 
-        final String itemStr = "Item-" + String.valueOf(index) + "-";
+        final String itemStr = "Item-" + index + "-";
         for (int i = 0; i < elements; i++) {
             final InnerListKey key = new InnerListKey(i);
             innerList.put(key, new InnerListBuilder()
-                                .withKey(key)
-                                .setName(i)
-                                .setValue(itemStr + String.valueOf(i))
-                                .build());
+                .withKey(key)
+                .setName(i)
+                .setValue(itemStr + i)
+                .build());
         }
         return innerList.build();
     }

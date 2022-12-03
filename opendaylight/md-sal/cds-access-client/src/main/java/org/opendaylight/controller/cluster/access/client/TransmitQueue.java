@@ -148,7 +148,8 @@ abstract class TransmitQueue {
 
     private final Deque<TransmittedConnectionEntry> inflight = new ArrayDeque<>();
     private final Deque<ConnectionEntry> pending = new ArrayDeque<>();
-    private final AveragingProgressTracker tracker;  // Cannot be just ProgressTracker as we are inheriting limits.
+    // Cannot be just ProgressTracker as we are inheriting limits.
+    private final AveragingProgressTracker tracker;
     private ReconnectForwarder successor;
 
     /**
@@ -425,11 +426,9 @@ abstract class TransmitQueue {
             }
 
             // Check if the entry has (ever) been transmitted
-            if (!(e instanceof TransmittedConnectionEntry)) {
+            if (!(e instanceof TransmittedConnectionEntry te)) {
                 return Optional.empty();
             }
-
-            final TransmittedConnectionEntry te = (TransmittedConnectionEntry) e;
 
             // Now check session match
             if (envelope.getSessionId() != te.getSessionId()) {
