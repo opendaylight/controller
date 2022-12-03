@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -17,7 +16,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,7 +41,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -57,23 +54,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
 import org.opendaylight.controller.cluster.datastore.TestShard.StartDropMessages;
 import org.opendaylight.controller.cluster.datastore.TestShard.StopDropMessages;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
-import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
@@ -139,20 +130,8 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-@RunWith(Parameterized.class)
 public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
-
-    @Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { TestDistributedDataStore.class, 7 }, { TestClientBackedDataStore.class, 12 }
-        });
-    }
-
-    @Parameter(0)
-    public Class<? extends AbstractDataStore> testParameter;
-    @Parameter(1)
-    public int commitTimeout;
+    public final int commitTimeout = 12;
 
     private static final String[] CARS_AND_PEOPLE = {"cars", "people"};
     private static final String[] CARS = {"cars"};
@@ -236,12 +215,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderBuilder, commitTimeout);
 
-        leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(
-                testParameter, type, moduleShardsConfig, false, shards);
+        leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(TestClientBackedDataStore.class,
+                type, moduleShardsConfig, false, shards);
 
         followerTestKit = new IntegrationTestKit(followerSystem, followerBuilder, commitTimeout);
-        followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
-                testParameter, type, moduleShardsConfig, false, shards);
+        followerDistributedDataStore = followerTestKit.setupAbstractDataStore(TestClientBackedDataStore.class,
+                type, moduleShardsConfig, false, shards);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(), shards);
 
@@ -352,9 +331,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final ActorSystem newSystem = newActorSystem("reinstated-member2", "Member2");
 
-        try (AbstractDataStore member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder,
-                commitTimeout)
-                .setupAbstractDataStore(testParameter, testName, "module-shards-member2", true, CARS)) {
+        try (var member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder, commitTimeout)
+                .setupAbstractDataStore(TestClientBackedDataStore.class, testName, "module-shards-member2", true,
+                    CARS)) {
             verifyCars(member2Datastore.newReadOnlyTransaction(), car2);
         }
     }
@@ -391,12 +370,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                         (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
                             .executeOperation(localShard, new RequestFrontendMetadata());
 
-                    final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2);
-                    } else {
-                        assertAskClientMetadata(clientMeta);
-                    }
+                    assertClientMetadata(frontendMetadata.getClients().get(0), numCars * 2);
                 });
 
         try (var tx = txChain.newReadOnlyTransaction()) {
@@ -406,12 +380,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
     }
 
-    private static void assertAskClientMetadata(final FrontendClientMetadata clientMeta) {
-        // ask based should track no metadata
-        assertEquals(List.of(), clientMeta.getCurrentHistories());
-    }
-
-    private static void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
+    private static void assertClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
         final var iterator = clientMeta.getCurrentHistories().iterator();
         var metadata = iterator.next();
         while (iterator.hasNext() && metadata.getHistoryId() != 1) {
@@ -424,14 +393,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testCloseTransactionMetadataLeak() throws Exception {
-        // FIXME: CONTROLLER-2016: ask-based frontend triggers this:
-        //
-        // java.lang.IllegalStateException: Previous transaction
-        //            member-2-datastore-testCloseTransactionMetadataLeak-fe-0-chn-1-txn-1-0 is not ready yet
-        //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy$Allocated.checkReady()
-        //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy.newReadOnlyTransaction()
-        assumeTrue(testParameter.isAssignableFrom(ClientBackedDataStore.class));
-
         initDatastoresWithCars("testCloseTransactionMetadataLeak");
 
         final DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
@@ -459,15 +420,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     final var localShard = leaderDistributedDataStore.getActorUtils().findLocalShard("cars")
                         .orElseThrow();
                     final var frontendMetadata =
-                            (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
-                                    .executeOperation(localShard, new RequestFrontendMetadata());
+                        (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
+                            .executeOperation(localShard, new RequestFrontendMetadata());
 
-                    final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2);
-                    } else {
-                        assertAskClientMetadata(clientMeta);
-                    }
+                    assertClientMetadata(frontendMetadata.getClients().get(0), numCars * 2);
                 });
     }
 
@@ -740,9 +696,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
         IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder, commitTimeout);
 
-        try (AbstractDataStore ds =
-                newMember1TestKit.setupAbstractDataStore(
-                        testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
+        try (AbstractDataStore ds = newMember1TestKit.setupAbstractDataStore(TestClientBackedDataStore.class, testName,
+                MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
 
             followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), CARS);
 
@@ -963,9 +918,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         readWriteTx.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
 
         // FIXME: CONTROLLER-2017: ClientBackedDataStore reports only 4 transactions
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
-        IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-            stats -> assertEquals("getReadWriteTransactionCount", 5, stats.getReadWriteTransactionCount()));
+        //        IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+        //            stats -> assertEquals("getReadWriteTransactionCount", 5, stats.getReadWriteTransactionCount()));
 
         // Disable elections on the leader so it switches to follower.
 
@@ -1014,7 +968,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).operationTimeoutInMillis(500),
                 commitTimeout);
         try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
-                testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
+                TestClientBackedDataStore.class, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
 
             followerTestKit.waitForMembersUp("member-3");
             follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1027,21 +981,18 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
             final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
-            final var usesCohorts = DistributedDataStore.class.isAssignableFrom(testParameter);
-            if (usesCohorts) {
-                IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-                    stats -> assertEquals("getTxCohortCacheSize", 1, stats.getTxCohortCacheSize()));
-            }
+            // FIXME: what are these cohorts?
+            //                IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+            //                    stats -> assertEquals("getTxCohortCacheSize", 1, stats.getTxCohortCacheSize()));
 
             writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
             final MapEntryNode car = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
             writeTx.write(CarsModel.newCarPath("optima"), car);
             final DOMStoreThreePhaseCommitCohort cohort2 = writeTx.ready();
 
-            if (usesCohorts) {
-                IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-                    stats -> assertEquals("getTxCohortCacheSize", 2, stats.getTxCohortCacheSize()));
-            }
+            // FIXME: what are these cohorts?
+            //                IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+            //                    stats -> assertEquals("getTxCohortCacheSize", 2, stats.getTxCohortCacheSize()));
 
             // Gracefully stop the leader via a Shutdown message.
 
@@ -1106,31 +1057,19 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             raftState -> assertEquals("getRaftState", "IsolatedLeader", raftState.getRaftState()));
 
         final var noShardLeaderCohort = noShardLeaderWriteTx.ready();
-        final ListenableFuture<Boolean> canCommit;
 
-        // There is difference in behavior here:
-        if (!leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-            // ask-based canCommit() times out and aborts
-            final var ex = assertThrows(ExecutionException.class,
-                () -> leaderTestKit.doCommit(noShardLeaderCohort)).getCause();
-            assertThat(ex, instanceOf(NoShardLeaderException.class));
-            assertThat(ex.getMessage(), containsString(
-                "Shard member-1-shard-cars-testTransactionWithIsolatedLeader currently has no leader."));
-            canCommit = null;
-        } else {
-            // tell-based canCommit() does not have a real timeout and hence continues
-            canCommit = noShardLeaderCohort.canCommit();
-            Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
-            assertFalse(canCommit.isDone());
-        }
+        // tell-based canCommit() does not have a real timeout and hence continues
+        final var canCommit = noShardLeaderCohort.canCommit();
+        Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
+        assertFalse(canCommit.isDone());
 
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
 
         final DOMStoreThreePhaseCommitCohort successTxCohort = successWriteTx.ready();
 
-        followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
-                testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
+        followerDistributedDataStore = followerTestKit.setupAbstractDataStore(TestClientBackedDataStore.class, testName,
+                MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
 
         leaderTestKit.doCommit(preIsolatedLeaderTxCohort);
         leaderTestKit.doCommit(successTxCohort);
@@ -1173,12 +1112,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final var ex = assertThrows(ExecutionException.class, () -> followerTestKit.doCommit(rwTx.ready()));
         final String msg = "Unexpected exception: " + Throwables.getStackTraceAsString(ex.getCause());
-        if (DistributedDataStore.class.isAssignableFrom(testParameter)) {
-            assertTrue(msg, Throwables.getRootCause(ex) instanceof NoShardLeaderException
-                || ex.getCause() instanceof ShardLeaderNotRespondingException);
-        } else {
-            assertThat(msg, Throwables.getRootCause(ex), instanceOf(RequestTimeoutException.class));
-        }
+        assertThat(msg, Throwables.getRootCause(ex), instanceOf(RequestTimeoutException.class));
     }
 
     @Test
@@ -1208,11 +1142,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final var ex = assertThrows(ExecutionException.class, () -> followerTestKit.doCommit(rwTx.ready()));
         final String msg = "Unexpected exception: " + Throwables.getStackTraceAsString(ex.getCause());
-        if (DistributedDataStore.class.isAssignableFrom(testParameter)) {
-            assertThat(msg, Throwables.getRootCause(ex), instanceOf(NoShardLeaderException.class));
-        } else {
-            assertThat(msg, Throwables.getRootCause(ex), instanceOf(RequestTimeoutException.class));
-        }
+        assertThat(msg, Throwables.getRootCause(ex), instanceOf(RequestTimeoutException.class));
     }
 
     @Test
@@ -1226,9 +1156,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
                 follower2System, follower2DatastoreContextBuilder, commitTimeout);
 
-        try (AbstractDataStore ds =
-                follower2TestKit.setupAbstractDataStore(
-                        testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS)) {
+        try (AbstractDataStore ds = follower2TestKit.setupAbstractDataStore(TestClientBackedDataStore.class, testName,
+                MODULE_SHARDS_CARS_1_2_3, false, CARS)) {
 
             followerTestKit.waitForMembersUp("member-1", "member-3");
             follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1265,9 +1194,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
                 follower2System, follower2DatastoreContextBuilder, commitTimeout);
 
-        final AbstractDataStore ds2 =
-                     follower2TestKit.setupAbstractDataStore(
-                             testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS);
+        final AbstractDataStore ds2 =follower2TestKit.setupAbstractDataStore(TestClientBackedDataStore.class, testName,
+            MODULE_SHARDS_CARS_1_2_3, false, CARS);
 
         followerTestKit.waitForMembersUp("member-1", "member-3");
         follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1356,9 +1284,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testReadWriteMessageSlicing() throws Exception {
-        // The slicing is only implemented for tell-based protocol
-        assumeTrue(ClientBackedDataStore.class.isAssignableFrom(testParameter));
-
         leaderDatastoreContextBuilder.maximumMessageSliceSize(100);
         followerDatastoreContextBuilder.maximumMessageSliceSize(100);
         initDatastoresWithCars("testLargeReadReplySlicing");
@@ -1389,7 +1314,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         leaderTestKit.doCommit(initialWriteTx.ready());
 
         try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
-                testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false)) {
+            TestClientBackedDataStore.class, testName, MODULE_SHARDS_CARS_1_2_3, false)) {
 
             final ActorRef member3Cars = ((LocalShardStore) follower2DistributedDataStore).getLocalShards()
                     .getLocalShards().get("cars").getActor();
@@ -1435,6 +1360,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         executor.shutdownNow();
     }
 
+    // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
+    //                         the snapshot index seems to fluctuate
+    @Ignore
     @Test
     public void testSnapshotOnRootOverwrite() throws Exception {
         initDatastores("testSnapshotOnRootOverwrite", "module-shards-default-cars-member1-and-2.conf",
@@ -1450,9 +1378,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
 
-        // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
-        //                         the snapshot index seems to fluctuate
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
             state -> assertEquals(1, state.getSnapshotIndex()));
 

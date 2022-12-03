@@ -69,24 +69,8 @@ public final class DistributedDataStoreFactory {
         } else {
             config = orgConfig;
         }
-        final ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
-        final DatastoreContextFactory contextFactory = introspector.newContextFactory();
 
-        // This is the potentially-updated datastore context, distinct from the initial one
-        final DatastoreContext datastoreContext = contextFactory.getBaseDatastoreContext();
-
-        final AbstractDataStore dataStore;
-        if (datastoreContext.isUseTellBasedProtocol()) {
-            dataStore = new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory,
-                restoreFromSnapshot);
-            LOG.info("Data store {} is using tell-based protocol", datastoreName);
-        } else {
-            dataStore = new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
-                restoreFromSnapshot);
-            LOG.warn("Data store {} is using ask-based protocol, which will be removed in the next major release",
-                datastoreName);
-        }
-
-        return dataStore;
+        return new ClientBackedDataStore(actorSystem, new ClusterWrapperImpl(actorSystem), config,
+            introspector.newContextFactory(), restoreFromSnapshot);
     }
 }

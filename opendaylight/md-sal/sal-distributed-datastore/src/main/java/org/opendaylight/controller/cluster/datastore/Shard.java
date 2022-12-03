@@ -1088,10 +1088,8 @@ public class Shard extends RaftActor {
         paused = true;
 
         // Tell-based protocol can replay transaction state, so it is safe to blow it up when we are paused.
-        if (datastoreContext.isUseTellBasedProtocol()) {
-            knownFrontends.values().forEach(LeaderFrontendState::retire);
-            knownFrontends = ImmutableMap.of();
-        }
+        knownFrontends.values().forEach(LeaderFrontendState::retire);
+        knownFrontends = ImmutableMap.of();
 
         store.setRunOnPendingTransactionsComplete(operation);
     }
