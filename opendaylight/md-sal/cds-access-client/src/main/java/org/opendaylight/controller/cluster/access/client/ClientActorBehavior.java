@@ -148,12 +148,11 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             return ((InternalCommand<T>) command).execute(this);
         }
 
-        if (command instanceof SuccessEnvelope) {
-            return onRequestSuccess((SuccessEnvelope) command);
+        if (command instanceof SuccessEnvelope successEnvelope) {
+            return onRequestSuccess(successEnvelope);
         }
-
-        if (command instanceof FailureEnvelope) {
-            return internalOnRequestFailure((FailureEnvelope) command);
+        if (command instanceof FailureEnvelope failureEnvelope) {
+            return internalOnRequestFailure(failureEnvelope);
         }
 
         if (MessageAssembler.isHandledMessage(command)) {
@@ -170,10 +169,10 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     private static long extractCookie(final Identifier id) {
-        if (id instanceof TransactionIdentifier) {
-            return ((TransactionIdentifier) id).getHistoryId().getCookie();
-        } else if (id instanceof LocalHistoryIdentifier) {
-            return ((LocalHistoryIdentifier) id).getCookie();
+        if (id instanceof TransactionIdentifier transactionId) {
+            return transactionId.getHistoryId().getCookie();
+        } else if (id instanceof LocalHistoryIdentifier historyId) {
+            return historyId.getCookie();
         } else {
             throw new IllegalArgumentException("Unhandled identifier " + id);
         }
@@ -323,8 +322,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
             LOG.error("{}: failed to resolve shard {}", persistenceId(), shard, failure);
             final RequestException cause;
-            if (failure instanceof RequestException) {
-                cause = (RequestException) failure;
+            if (failure instanceof RequestException requestException) {
+                cause = requestException;
             } else {
                 cause = new RuntimeRequestException("Failed to resolve shard " + shard, failure);
             }
