@@ -37,14 +37,13 @@ public class NormalizedNodeNavigator {
 
         String newParentPath = parentPath + "/" + dataContainerNode.getIdentifier().toString();
 
-        for (NormalizedNode node : dataContainerNode.body()) {
-            if (node instanceof MixinNode && node instanceof NormalizedNodeContainer) {
-                navigateNormalizedNodeContainerMixin(level, newParentPath, (NormalizedNodeContainer<?>) node);
+        for (var node : dataContainerNode.body()) {
+            if (node instanceof MixinNode && node instanceof NormalizedNodeContainer<?> container) {
+                navigateNormalizedNodeContainerMixin(level, newParentPath, container);
             } else {
                 navigateNormalizedNode(level, newParentPath, node);
             }
         }
-
     }
 
     private void navigateNormalizedNodeContainerMixin(final int level, final String parentPath,
@@ -53,20 +52,18 @@ public class NormalizedNodeNavigator {
 
         String newParentPath = parentPath + "/" + node.getIdentifier().toString();
 
-        for (NormalizedNode normalizedNode : node.body()) {
-            if (normalizedNode instanceof MixinNode && normalizedNode instanceof NormalizedNodeContainer) {
-                navigateNormalizedNodeContainerMixin(level + 1, newParentPath,
-                        (NormalizedNodeContainer<?>) normalizedNode);
+        for (var normalizedNode : node.body()) {
+            if (normalizedNode instanceof MixinNode && normalizedNode instanceof NormalizedNodeContainer<?> container) {
+                navigateNormalizedNodeContainerMixin(level + 1, newParentPath, container);
             } else {
                 navigateNormalizedNode(level, newParentPath, normalizedNode);
             }
         }
-
     }
 
     private void navigateNormalizedNode(final int level, final String parentPath, final NormalizedNode normalizedNode) {
-        if (normalizedNode instanceof DataContainerNode) {
-            navigateDataContainerNode(level + 1, parentPath, (DataContainerNode) normalizedNode);
+        if (normalizedNode instanceof DataContainerNode dataContainer) {
+            navigateDataContainerNode(level + 1, parentPath, dataContainer);
         } else {
             visitor.visitNode(level + 1, parentPath, normalizedNode);
         }

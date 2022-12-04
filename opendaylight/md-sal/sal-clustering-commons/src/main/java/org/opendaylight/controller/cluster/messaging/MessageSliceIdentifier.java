@@ -60,17 +60,9 @@ final class MessageSliceIdentifier implements Identifier {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof MessageSliceIdentifier)) {
-            return false;
-        }
-
-        MessageSliceIdentifier other = (MessageSliceIdentifier) obj;
-        return other.clientIdentifier.equals(clientIdentifier) && other.slicerId == slicerId
-                && other.messageId == messageId;
+        return this == obj || obj instanceof MessageSliceIdentifier other
+            && other.clientIdentifier.equals(clientIdentifier) && other.slicerId == slicerId
+            && other.messageId == messageId;
     }
 
     @Override

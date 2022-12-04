@@ -68,25 +68,23 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
             return;
         }
 
-        if (message instanceof ThisActorSystemQuarantinedEvent) {
-            final ThisActorSystemQuarantinedEvent event = (ThisActorSystemQuarantinedEvent) message;
+        if (message instanceof ThisActorSystemQuarantinedEvent event) {
             LOG.warn("Got quarantined by {}", event.remoteAddress());
             quarantined = true;
 
             // execute the callback
             callback.apply();
-        } else  if (message instanceof AssociationErrorEvent) {
+        } else if (message instanceof AssociationErrorEvent event) {
             final String errorMessage = message.toString();
             LOG.trace("errorMessage:{}", errorMessage);
             if (errorMessage.contains("The remote system has a UID that has been quarantined")) {
-                final Address address = ((AssociationErrorEvent) message).getRemoteAddress();
+                final Address address = event.getRemoteAddress();
                 addressSet.add(address);
                 count++;
                 LOG.trace("address:{} addressSet: {} count:{}", address, addressSet, count);
                 if (count >= MESSAGE_THRESHOLD && addressSet.size() > 1) {
                     count = 0;
                     addressSet.clear();
-                    final AssociationErrorEvent event = (AssociationErrorEvent) message;
                     LOG.warn("Got quarantined via AssociationEvent by {}", event.remoteAddress());
                     quarantined = true;
 
@@ -97,8 +95,7 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
                 count = 0;
                 addressSet.clear();
             }
-        } else if (message instanceof ClusterEvent.MemberDowned) {
-            final ClusterEvent.MemberDowned event = (ClusterEvent.MemberDowned) message;
+        } else if (message instanceof ClusterEvent.MemberDowned event) {
             if (Cluster.get(getContext().system()).selfMember().equals(event.member())) {
                 LOG.warn("This member has been downed, restarting");
 

@@ -42,11 +42,11 @@ public final  class MessageAssembler implements AutoCloseable {
     private final String logContext;
 
     MessageAssembler(final Builder builder) {
-        this.fileBackedStreamFactory = requireNonNull(builder.fileBackedStreamFactory,
+        fileBackedStreamFactory = requireNonNull(builder.fileBackedStreamFactory,
                 "FiledBackedStreamFactory cannot be null");
-        this.assembledMessageCallback = requireNonNull(builder.assembledMessageCallback,
+        assembledMessageCallback = requireNonNull(builder.assembledMessageCallback,
                 "assembledMessageCallback cannot be null");
-        this.logContext = builder.logContext;
+        logContext = builder.logContext;
 
         stateCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(builder.expireStateAfterInactivityDuration, builder.expireStateAfterInactivityUnit)
@@ -97,13 +97,13 @@ public final  class MessageAssembler implements AutoCloseable {
      * @return true if the message was handled, false otherwise
      */
     public boolean handleMessage(final Object message, final @NonNull ActorRef sendTo) {
-        if (message instanceof MessageSlice) {
-            LOG.debug("{}: handleMessage: {}", logContext, message);
-            onMessageSlice((MessageSlice) message, sendTo);
+        if (message instanceof MessageSlice messageSlice) {
+            LOG.debug("{}: handleMessage: {}", logContext, messageSlice);
+            onMessageSlice(messageSlice, sendTo);
             return true;
-        } else if (message instanceof AbortSlicing) {
-            LOG.debug("{}: handleMessage: {}", logContext, message);
-            onAbortSlicing((AbortSlicing) message);
+        } else if (message instanceof AbortSlicing abortSlicing) {
+            LOG.debug("{}: handleMessage: {}", logContext, abortSlicing);
+            onAbortSlicing(abortSlicing);
             return true;
         }
 
@@ -116,14 +116,9 @@ public final  class MessageAssembler implements AutoCloseable {
             final AssembledMessageState state = stateCache.get(identifier, () -> createState(messageSlice));
             processMessageSliceForState(messageSlice, state, sendTo);
         } catch (ExecutionException e) {
-            final MessageSliceException messageSliceEx;
             final Throwable cause = e.getCause();
-            if (cause instanceof MessageSliceException) {
-                messageSliceEx = (MessageSliceException) cause;
-            } else {
-                messageSliceEx = new MessageSliceException(String.format(
-                        "Error creating state for identifier %s", identifier), cause);
-            }
+            final MessageSliceException messageSliceEx = cause instanceof MessageSliceException sliceEx ? sliceEx
+                : new MessageSliceException(String.format("Error creating state for identifier %s", identifier), cause);
 
             messageSlice.getReplyTo().tell(MessageSliceReply.failed(identifier, messageSliceEx, sendTo),
                     ActorRef.noSender());
@@ -231,7 +226,7 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
-            this.fileBackedStreamFactory = requireNonNull(newFileBackedStreamFactory);
+            fileBackedStreamFactory = requireNonNull(newFileBackedStreamFactory);
             return this;
         }
 
@@ -243,7 +238,7 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder assembledMessageCallback(final BiConsumer<Object, ActorRef> newAssembledMessageCallback) {
-            this.assembledMessageCallback = newAssembledMessageCallback;
+            assembledMessageCallback = newAssembledMessageCallback;
             return this;
         }
 
@@ -258,8 +253,8 @@ public final  class MessageAssembler implements AutoCloseable {
          */
         public Builder expireStateAfterInactivity(final long duration, final TimeUnit unit) {
             checkArgument(duration > 0, "duration must be > 0");
-            this.expireStateAfterInactivityDuration = duration;
-            this.expireStateAfterInactivityUnit = unit;
+            expireStateAfterInactivityDuration = duration;
+            expireStateAfterInactivityUnit = unit;
             return this;
         }
 
@@ -270,7 +265,7 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder logContext(final String newLogContext) {
-            this.logContext = newLogContext;
+            logContext = newLogContext;
             return this;
         }
 
