@@ -22,6 +22,30 @@
       },
       "revId": "1ecfc69f4942b875ace6c8c530bcbfc40306ee6b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "34a354cc_591276f0",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/PurchaseCarProvider.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2022-12-04T18:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a73cc695_41fa71bf",
+      "range": {
+        "startLine": 34,
+        "startChar": 11,
+        "endLine": 34,
+        "endChar": 24
+      },
+      "revId": "1ecfc69f4942b875ace6c8c530bcbfc40306ee6b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
