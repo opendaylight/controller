@@ -54,9 +54,9 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
         UINT8 {
             @Override
             public Object apply(final Object obj) {
-                if (obj instanceof Short) {
+                if (obj instanceof Short shortObj) {
                     LOG.trace("Translating legacy uint8 {}", obj);
-                    return Uint8.valueOf((Short) obj);
+                    return Uint8.valueOf(shortObj);
                 }
                 return obj;
             }
@@ -64,9 +64,9 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
         UINT16 {
             @Override
             public Object apply(final Object obj) {
-                if (obj instanceof Integer) {
+                if (obj instanceof Integer intObj) {
                     LOG.trace("Translating legacy uint16 {}", obj);
-                    return Uint16.valueOf((Integer) obj);
+                    return Uint16.valueOf(intObj);
                 }
                 return obj;
             }
@@ -74,9 +74,9 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
         UINT32 {
             @Override
             public Object apply(final Object obj) {
-                if (obj instanceof Long) {
+                if (obj instanceof Long longObj) {
                     LOG.trace("Translating legacy uint32 {}", obj);
-                    return Uint32.valueOf((Long) obj);
+                    return Uint32.valueOf(longObj);
                 }
                 return obj;
             }
@@ -84,9 +84,9 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
         UINT64 {
             @Override
             public Object apply(final Object obj) {
-                if (obj instanceof BigInteger) {
+                if (obj instanceof BigInteger bigInt) {
                     LOG.trace("Translating legacy uint64 {}", obj);
-                    return Uint64.valueOf((BigInteger) obj);
+                    return Uint64.valueOf(bigInt);
                 }
                 return obj;
             }
@@ -142,9 +142,9 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
     private void adaptEntry(final ReusableImmutableNormalizedNodeStreamWriter writer, final NodeWithValue<?> name) {
         final NodeWithValue<?> adapted;
         final DataSchemaNode schema = currentSchema().getDataSchemaNode();
-        if (schema instanceof TypedDataSchemaNode) {
+        if (schema instanceof TypedDataSchemaNode typed) {
             final Object oldValue = name.getValue();
-            final Object newValue = adaptValue(((TypedDataSchemaNode) schema).getType(), oldValue);
+            final Object newValue = adaptValue(typed.getType(), oldValue);
             adapted = newValue == oldValue ? name : new NodeWithValue<>(name.getNodeType(), newValue);
         } else {
             adapted = name;
@@ -157,8 +157,8 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
             final NodeIdentifierWithPredicates name, final int size) {
         final NodeIdentifierWithPredicates adapted;
         final DataSchemaNode schema = currentSchema().getDataSchemaNode();
-        if (schema instanceof ListSchemaNode) {
-            adapted = NIP_ADAPTERS.getUnchecked((ListSchemaNode) schema).apply(name);
+        if (schema instanceof ListSchemaNode list) {
+            adapted = NIP_ADAPTERS.getUnchecked(list).apply(name);
         } else {
             adapted = name;
         }

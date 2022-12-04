@@ -48,12 +48,12 @@ public class MessageSlicer implements AutoCloseable {
     private final long id;
 
     MessageSlicer(final Builder builder) {
-        this.fileBackedStreamFactory = builder.fileBackedStreamFactory;
-        this.messageSliceSize = builder.messageSliceSize;
-        this.maxSlicingTries = builder.maxSlicingTries;
+        fileBackedStreamFactory = builder.fileBackedStreamFactory;
+        messageSliceSize = builder.messageSliceSize;
+        maxSlicingTries = builder.maxSlicingTries;
 
         id = SLICER_ID_COUNTER.getAndIncrement();
-        this.logContext = builder.logContext + "_slicer-id-" + id;
+        logContext = builder.logContext + "_slicer-id-" + id;
 
         CacheBuilder<Identifier, SlicedMessageState<ActorRef>> cacheBuilder =
                 CacheBuilder.newBuilder().removalListener(this::stateRemoved);
@@ -174,9 +174,9 @@ public class MessageSlicer implements AutoCloseable {
      * @return true if the message was handled, false otherwise
      */
     public boolean handleMessage(final Object message) {
-        if (message instanceof MessageSliceReply) {
-            LOG.debug("{}: handleMessage: {}", logContext, message);
-            return onMessageSliceReply((MessageSliceReply) message);
+        if (message instanceof MessageSliceReply sliceReply) {
+            LOG.debug("{}: handleMessage: {}", logContext, sliceReply);
+            return onMessageSliceReply(sliceReply);
         }
 
         return false;
@@ -219,8 +219,7 @@ public class MessageSlicer implements AutoCloseable {
 
     private boolean onMessageSliceReply(final MessageSliceReply reply) {
         final Identifier identifier = reply.getIdentifier();
-        if (!(identifier instanceof MessageSliceIdentifier)
-                || ((MessageSliceIdentifier)identifier).getSlicerId() != id) {
+        if (!(identifier instanceof MessageSliceIdentifier sliceIdentifier) || sliceIdentifier.getSlicerId() != id) {
             return false;
         }
 
@@ -336,7 +335,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
-            this.fileBackedStreamFactory = requireNonNull(newFileBackedStreamFactory);
+            fileBackedStreamFactory = requireNonNull(newFileBackedStreamFactory);
             return this;
         }
 
@@ -348,7 +347,7 @@ public class MessageSlicer implements AutoCloseable {
          */
         public Builder messageSliceSize(final int newMessageSliceSize) {
             checkArgument(newMessageSliceSize > 0, "messageSliceSize must be > 0");
-            this.messageSliceSize = newMessageSliceSize;
+            messageSliceSize = newMessageSliceSize;
             return this;
         }
 
@@ -361,7 +360,7 @@ public class MessageSlicer implements AutoCloseable {
          */
         public Builder maxSlicingTries(final int newMaxSlicingTries) {
             checkArgument(newMaxSlicingTries > 0, "newMaxSlicingTries must be > 0");
-            this.maxSlicingTries = newMaxSlicingTries;
+            maxSlicingTries = newMaxSlicingTries;
             return this;
         }
 
@@ -376,8 +375,8 @@ public class MessageSlicer implements AutoCloseable {
          */
         public Builder expireStateAfterInactivity(final long duration, final TimeUnit unit) {
             checkArgument(duration > 0, "duration must be > 0");
-            this.expireStateAfterInactivityDuration = duration;
-            this.expireStateAfterInactivityUnit = unit;
+            expireStateAfterInactivityDuration = duration;
+            expireStateAfterInactivityUnit = unit;
             return this;
         }
 
@@ -388,7 +387,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder logContext(final String newLogContext) {
-            this.logContext = requireNonNull(newLogContext);
+            logContext = requireNonNull(newLogContext);
             return this;
         }
 

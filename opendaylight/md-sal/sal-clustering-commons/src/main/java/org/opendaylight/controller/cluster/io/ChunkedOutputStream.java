@@ -126,14 +126,14 @@ public final class ChunkedOutputStream extends OutputStream {
 
     public Either<byte[], ChunkedByteArray> toVariant() {
         checkClosed();
-        return result instanceof byte[] ? Either.ofFirst((byte[]) result)
+        return result instanceof byte[] bytes ? Either.ofFirst(bytes)
                 : Either.ofSecond(new ChunkedByteArray(size, (ImmutableList<byte[]>) result));
     }
 
     @VisibleForTesting
     ChunkedByteArray toChunkedByteArray() {
         checkClosed();
-        return new ChunkedByteArray(size, result instanceof byte[] ? ImmutableList.of((byte[]) result)
+        return new ChunkedByteArray(size, result instanceof byte[] bytes? ImmutableList.of(bytes)
             : (ImmutableList<byte[]>) result);
     }
 

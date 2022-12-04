@@ -72,9 +72,8 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             }
 
 
-        } else if (message instanceof RoleChanged) {
+        } else if (message instanceof RoleChanged roleChanged) {
             // this message is sent by RaftActor. Notify registered listeners when this message is received.
-            RoleChanged roleChanged = (RoleChanged) message;
 
             LOG.info("RoleChangeNotifier for {} , received role change from {} to {}", memberId,
                 roleChanged.getOldRole(), roleChanged.getNewRole());
@@ -86,10 +85,10 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             for (ActorRef listener: registeredListeners.values()) {
                 listener.tell(latestRoleChangeNotification, getSelf());
             }
-        } else if (message instanceof LeaderStateChanged) {
-            latestLeaderStateChanged = (LeaderStateChanged)message;
+        } else if (message instanceof LeaderStateChanged leaderStateChanged) {
+            latestLeaderStateChanged = leaderStateChanged;
 
-            for (ActorRef listener: registeredListeners.values()) {
+            for (ActorRef listener : registeredListeners.values()) {
                 listener.tell(latestLeaderStateChanged, getSelf());
             }
         } else {
