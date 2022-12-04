@@ -65,12 +65,12 @@ final class OpsRegistrar extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof UpdateRemoteEndpoints) {
+        if (message instanceof UpdateRemoteEndpoints updateEndpoints) {
             LOG.debug("Handling updateRemoteEndpoints message");
-            updateRemoteRpcEndpoints(((UpdateRemoteEndpoints) message).getRpcEndpoints());
-        } else if (message instanceof UpdateRemoteActionEndpoints) {
+            updateRemoteRpcEndpoints(updateEndpoints.getRpcEndpoints());
+        } else if (message instanceof UpdateRemoteActionEndpoints updateEndpoints) {
             LOG.debug("Handling updateRemoteActionEndpoints message");
-            updateRemoteActionEndpoints(((UpdateRemoteActionEndpoints) message).getActionEndpoints());
+            updateRemoteActionEndpoints(updateEndpoints.getActionEndpoints());
         } else {
             unknownMessage(message);
         }

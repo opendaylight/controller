@@ -68,11 +68,11 @@ final class OpsInvoker extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof ExecuteRpc) {
+        if (message instanceof ExecuteRpc executeRpc) {
             LOG.debug("Handling ExecuteOps Message");
-            execute((ExecuteRpc) message);
-        } else if (message instanceof ExecuteAction) {
-            execute((ExecuteAction) message);
+            execute(executeRpc);
+        } else if (message instanceof ExecuteAction executeAction) {
+            execute(executeAction);
         } else {
             unknownMessage(message);
         }

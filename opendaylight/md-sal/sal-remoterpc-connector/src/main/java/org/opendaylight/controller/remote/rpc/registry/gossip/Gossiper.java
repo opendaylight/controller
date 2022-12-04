@@ -87,7 +87,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     Gossiper(final RemoteOpsProviderConfig config, final Boolean autoStartGossipTicks) {
         this.config = requireNonNull(config);
-        this.autoStartGossipTicks = autoStartGossipTicks.booleanValue();
+        this.autoStartGossipTicks = autoStartGossipTicks;
     }
 
     Gossiper(final RemoteOpsProviderConfig config) {
@@ -146,25 +146,25 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         //These ticks can be sent by another actor as well which is esp. useful while testing
         if (GOSSIP_TICK.equals(message)) {
             receiveGossipTick();
-        } else if (message instanceof GossipStatus) {
+        } else if (message instanceof GossipStatus status) {
             // Message from remote gossiper with its bucket versions
-            receiveGossipStatus((GossipStatus) message);
-        } else if (message instanceof GossipEnvelope) {
+            receiveGossipStatus(status);
+        } else if (message instanceof GossipEnvelope envelope) {
             // Message from remote gossiper with buckets. This is usually in response to GossipStatus
             // message. The contained buckets are newer as determined by the remote gossiper by
             // comparing the GossipStatus message with its local versions.
-            receiveGossip((GossipEnvelope) message);
-        } else if (message instanceof ClusterEvent.MemberUp) {
-            receiveMemberUpOrReachable(((ClusterEvent.MemberUp) message).member());
+            receiveGossip(envelope);
+        } else if (message instanceof ClusterEvent.MemberUp memberUp) {
+            receiveMemberUpOrReachable(memberUp.member());
 
-        } else if (message instanceof ClusterEvent.ReachableMember) {
-            receiveMemberUpOrReachable(((ClusterEvent.ReachableMember) message).member());
+        } else if (message instanceof ClusterEvent.ReachableMember reachableMember) {
+            receiveMemberUpOrReachable(reachableMember.member());
 
-        } else if (message instanceof ClusterEvent.MemberRemoved) {
-            receiveMemberRemoveOrUnreachable(((ClusterEvent.MemberRemoved) message).member());
+        } else if (message instanceof ClusterEvent.MemberRemoved memberRemoved) {
+            receiveMemberRemoveOrUnreachable(memberRemoved.member());
 
-        } else if (message instanceof ClusterEvent.UnreachableMember) {
-            receiveMemberRemoveOrUnreachable(((ClusterEvent.UnreachableMember) message).member());
+        } else if (message instanceof ClusterEvent.UnreachableMember unreachableMember) {
+            receiveMemberRemoveOrUnreachable(unreachableMember.member());
 
         } else {
             unhandled(message);

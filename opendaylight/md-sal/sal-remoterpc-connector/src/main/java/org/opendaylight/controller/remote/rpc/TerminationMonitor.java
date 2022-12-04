@@ -22,11 +22,9 @@ public class TerminationMonitor extends UntypedAbstractActor {
 
     @Override
     public void onReceive(final Object message) {
-        if (message instanceof Terminated) {
-            Terminated terminated = (Terminated) message;
+        if (message instanceof Terminated terminated) {
             LOG.debug("Actor terminated : {}", terminated.actor());
-        } else if (message instanceof Monitor) {
-            Monitor monitor = (Monitor) message;
+        } else if (message instanceof Monitor monitor) {
             getContext().watch(monitor.getActorRef());
         }
     }

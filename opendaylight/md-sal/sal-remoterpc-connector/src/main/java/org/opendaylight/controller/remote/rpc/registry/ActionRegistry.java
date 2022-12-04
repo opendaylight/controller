@@ -77,9 +77,9 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
-        if (message instanceof ActionRegistry.Messages.UpdateActions) {
+        if (message instanceof ActionRegistry.Messages.UpdateActions updateActions) {
             LOG.debug("handling updatesActionRoutes message");
-            updatesActionRoutes((Messages.UpdateActions) message);
+            updatesActionRoutes(updateActions);
         } else {
             super.handleCommand(message);
         }
@@ -149,11 +149,11 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
             }
 
             Collection<DOMActionInstance> getAddedActions() {
-                return this.addedActions;
+                return addedActions;
             }
 
             Collection<DOMActionInstance> getRemovedActions() {
-                return this.removedActions;
+                return removedActions;
             }
 
 
