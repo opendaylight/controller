@@ -29,26 +29,24 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
 
     SavingClientActorBehavior(final InitialClientActorContext context, final ClientIdentifier nextId) {
         super(context);
-        this.myId = requireNonNull(nextId);
+        myId = requireNonNull(nextId);
     }
 
     @Override
     AbstractClientActorBehavior<?> onReceiveCommand(final Object command) {
-        if (command instanceof SaveSnapshotFailure) {
-            LOG.error("{}: failed to persist state", persistenceId(), ((SaveSnapshotFailure) command).cause());
+        if (command instanceof SaveSnapshotFailure saveFailure) {
+            LOG.error("{}: failed to persist state", persistenceId(), saveFailure.cause());
             return null;
-        } else if (command instanceof SaveSnapshotSuccess) {
-            LOG.debug("{}: got command: {}", persistenceId(), command);
-            SaveSnapshotSuccess saved = (SaveSnapshotSuccess)command;
+        } else if (command instanceof SaveSnapshotSuccess saved) {
+            LOG.debug("{}: got command: {}", persistenceId(), saved);
             context().deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                     saved.metadata().timestamp() - 1, 0L, 0L));
             return this;
-        } else if (command instanceof DeleteSnapshotsSuccess) {
-            LOG.debug("{}: got command: {}", persistenceId(), command);
-        } else if (command instanceof DeleteSnapshotsFailure) {
+        } else if (command instanceof DeleteSnapshotsSuccess deleteSuccess) {
+            LOG.debug("{}: got command: {}", persistenceId(), deleteSuccess);
+        } else if (command instanceof DeleteSnapshotsFailure deleteFailure) {
             // Not treating this as a fatal error.
-            LOG.warn("{}: failed to delete prior snapshots", persistenceId(),
-                    ((DeleteSnapshotsFailure) command).cause());
+            LOG.warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
         } else {
             LOG.debug("{}: stashing command {}", persistenceId(), command);
             context().stash();

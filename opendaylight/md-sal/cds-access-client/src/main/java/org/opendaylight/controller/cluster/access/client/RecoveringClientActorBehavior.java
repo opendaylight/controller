@@ -63,8 +63,8 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
             LOG.debug("{}: persisting new identifier {}", persistenceId(), nextId);
             context().saveSnapshot(nextId);
             return new SavingClientActorBehavior(context(), nextId);
-        } else if (recover instanceof SnapshotOffer) {
-            lastId = (ClientIdentifier) ((SnapshotOffer)recover).snapshot();
+        } else if (recover instanceof SnapshotOffer snapshotOffer) {
+            lastId = (ClientIdentifier) snapshotOffer.snapshot();
             LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
         } else {
             LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
