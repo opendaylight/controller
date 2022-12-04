@@ -87,7 +87,7 @@ public final class ExecuteAction extends AbstractExecute<Absolute, @NonNull Cont
         public void readExternal(final ObjectInput in) throws IOException {
             final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
             final SchemaNodeIdentifier sni = stream.readSchemaNodeIdentifier();
-            if (!(sni instanceof Absolute)) {
+            if (!(sni instanceof Absolute absolute)) {
                 throw new InvalidObjectException("Non-absolute type " + sni);
             }
 
@@ -95,7 +95,7 @@ public final class ExecuteAction extends AbstractExecute<Absolute, @NonNull Cont
             final YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
             final ContainerNode input = (ContainerNode) stream.readOptionalNormalizedNode().orElse(null);
 
-            executeAction = new ExecuteAction((Absolute) sni, new DOMDataTreeIdentifier(type, path), input);
+            executeAction = new ExecuteAction(absolute, new DOMDataTreeIdentifier(type, path), input);
         }
 
         private Object readResolve() {

@@ -22,7 +22,7 @@ final class RemoteDOMRpcFuture extends AbstractRemoteFuture<QName, DOMRpcResult,
 
     @Override
     DOMRpcResult processReply(final Object reply) {
-        return reply instanceof RpcResponse ? new DefaultDOMRpcResult(((RpcResponse) reply).getOutput()) : null;
+        return reply instanceof RpcResponse response ? new DefaultDOMRpcResult(response.getOutput()) : null;
     }
 
     @Override

@@ -78,11 +78,11 @@ public final class ActionRoutingTable extends AbstractRoutingTable<ActionRouting
             actions = new ArrayList<>(size);
             for (int i = 0; i < size; ++i) {
                 final SchemaNodeIdentifier sni = nnin.readSchemaNodeIdentifier();
-                if (!(sni instanceof Absolute)) {
+                if (!(sni instanceof Absolute absolute)) {
                     throw new InvalidObjectException("Non-absolute type " + sni);
                 }
 
-                actions.add(DOMActionInstance.of((Absolute) sni, LogicalDatastoreType.OPERATIONAL,
+                actions.add(DOMActionInstance.of(absolute, LogicalDatastoreType.OPERATIONAL,
                         nnin.readYangInstanceIdentifier()));
             }
         }
