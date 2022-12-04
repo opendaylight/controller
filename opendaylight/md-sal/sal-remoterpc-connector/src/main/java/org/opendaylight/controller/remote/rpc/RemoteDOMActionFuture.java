@@ -23,8 +23,7 @@ final class RemoteDOMActionFuture extends AbstractRemoteFuture<Absolute, DOMActi
 
     @Override
     DOMActionResult processReply(final Object reply) {
-        if (reply instanceof ActionResponse) {
-            final ActionResponse actionReply = (ActionResponse) reply;
+        if (reply instanceof ActionResponse actionReply) {
             final ContainerNode output = actionReply.getOutput();
             return output == null ? new SimpleDOMActionResult(actionReply.getErrors())
                     : new SimpleDOMActionResult(output, actionReply.getErrors());

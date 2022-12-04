@@ -81,10 +81,10 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
-        if (message instanceof AddOrUpdateRoutes) {
-            receiveAddRoutes((AddOrUpdateRoutes) message);
-        } else if (message instanceof RemoveRoutes) {
-            receiveRemoveRoutes((RemoveRoutes) message);
+        if (message instanceof AddOrUpdateRoutes addRoutes) {
+            receiveAddRoutes(addRoutes);
+        } else if (message instanceof RemoveRoutes removeRoutes) {
+            receiveRemoveRoutes(removeRoutes);
         } else {
             super.handleCommand(message);
         }
@@ -161,7 +161,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
             }
 
             List<DOMRpcIdentifier> getRouteIdentifiers() {
-                return this.rpcRouteIdentifiers;
+                return rpcRouteIdentifiers;
             }
 
             @Override
