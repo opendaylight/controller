@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cdc8af12_2caa4872",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/kitchen/impl/KitchenServiceImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-12-12T11:26:34Z",
+      "side": 1,
+      "message": "Not needed empty line.",
+      "revId": "e1dba10eb6a74bbfec9463524d0089933695a62c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
