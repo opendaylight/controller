@@ -69,6 +69,24 @@
       "parentUuid": "31413496_5e458c60",
       "revId": "c5d46784ddd17bf7f5d9b976c42631e7b103432d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0b5b8ecf_3cc3de46",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/kitchen/impl/KitchenServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2022-12-13T13:10:38Z",
+      "side": 1,
+      "message": "As can be seen in patch set 8 if we wait a bit the test pass.",
+      "parentUuid": "f3278ccb_df52d94a",
+      "revId": "c5d46784ddd17bf7f5d9b976c42631e7b103432d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
