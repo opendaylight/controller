@@ -51,6 +51,24 @@
       "parentUuid": "13c298ef_c1c21f30",
       "revId": "c5d46784ddd17bf7f5d9b976c42631e7b103432d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f3278ccb_df52d94a",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/kitchen/impl/KitchenServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2022-12-13T08:50:54Z",
+      "side": 1,
+      "message": "I am afraid you hit something like: https://jira.opendaylight.org/browse/CONTROLLER-2065. So Toaster service is not registered at all or what.",
+      "parentUuid": "31413496_5e458c60",
+      "revId": "c5d46784ddd17bf7f5d9b976c42631e7b103432d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
