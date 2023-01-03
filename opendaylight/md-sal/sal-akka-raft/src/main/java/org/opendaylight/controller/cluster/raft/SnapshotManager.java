@@ -224,6 +224,7 @@ public class SnapshotManager implements SnapshotState {
         @Override
         public void apply(final ApplySnapshot snapshot) {
             log.debug("apply should not be called in state {}", this);
+            snapshot.getCallback().onFailure();
         }
 
         @Override
