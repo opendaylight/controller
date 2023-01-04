@@ -11,9 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import java.lang.management.ManagementFactory;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -23,6 +21,7 @@ import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.HashBrown;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WhiteBread;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenUrlReference;
@@ -33,6 +32,9 @@ public class ToasterTest extends AbstractMdsalTestBase {
     @Inject
     @Filter(timeout = 60 * 1000)
     KitchenService kitchenService;
+    @Inject
+    @Filter(timeout = 60 * 1000)
+    ToasterService toasterService;
 
     @Override
     public MavenUrlReference getFeatureRepo() {
@@ -51,12 +53,6 @@ public class ToasterTest extends AbstractMdsalTestBase {
         ObjectName providerOn = new ObjectName(
                 "org.opendaylight.controller:name=OpendaylightToaster,type=toaster-provider");
 
-        if (!platformMBeanServer.isRegistered(providerOn)) {
-            //If toaster-provider is not registered yet, we try to wait a bit
-            //FIXME: wait for toaster-provider registration in some better way or remove if no longer needed
-            // - after migration of toaster-consumer to OSGi DS it starts before toaster-provider
-            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
-        }
         long toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
         assertEquals(0, toastsMade);
 
