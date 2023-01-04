@@ -21,6 +21,7 @@ import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.HashBrown;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WhiteBread;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenUrlReference;
@@ -31,6 +32,9 @@ public class ToasterTest extends AbstractMdsalTestBase {
     @Inject
     @Filter(timeout = 60 * 1000)
     KitchenService kitchenService;
+    @Inject
+    @Filter(timeout = 60 * 1000)
+    ToasterService toasterService;
 
     @Override
     public MavenUrlReference getFeatureRepo() {

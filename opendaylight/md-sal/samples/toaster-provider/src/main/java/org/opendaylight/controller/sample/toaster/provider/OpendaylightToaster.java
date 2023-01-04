@@ -23,12 +23,17 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
@@ -37,6 +42,7 @@ import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
@@ -58,22 +64,40 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfig;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfigBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpendaylightToaster extends AbstractMXBean
+@Singleton
+@Component(service = ToasterService.class, immediate = true)
+@Designate(ocd = OpendaylightToaster.Configuration.class)
+public final class OpendaylightToaster extends AbstractMXBean
         implements ToasterService, ToasterProviderRuntimeMXBean, DataTreeChangeListener<Toaster>, AutoCloseable {
+    @ObjectClassDefinition
+    public @interface Configuration {
+        @AttributeDefinition(description = "The name of the toaster's manufacturer", max = "255")
+        String manufacturer() default TOASTER_MANUFACTURER;
+        @AttributeDefinition(description = "The name of the toaster's model", max = "255")
+        String modelNumber() default TOASTER_MODEL_NUMBER;
+        @AttributeDefinition(description = "How many times we attempt to make toast before failing ",
+            min = "0", max = "65535")
+        int maxMakeToastTries() default 2;
+    }
 
     private static final CancelToastOutput EMPTY_CANCEL_OUTPUT = new CancelToastOutputBuilder().build();
     private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
@@ -82,12 +106,13 @@ public class OpendaylightToaster extends AbstractMXBean
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightToaster.class);
 
     private static final InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
-    private static final DisplayString TOASTER_MANUFACTURER = new DisplayString("Opendaylight");
-    private static final DisplayString TOASTER_MODEL_NUMBER = new DisplayString("Model 1 - Binding Aware");
+    private static final String TOASTER_MANUFACTURER = "Opendaylight";
+    private static final String TOASTER_MODEL_NUMBER = "Model 1 - Binding Aware";
 
-    private DataBroker dataBroker;
-    private NotificationPublishService notificationProvider;
-    private ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
+    private final DataBroker dataBroker;
+    private final NotificationPublishService notificationProvider;
+    private final ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
+    private final Registration reg;
 
     private final ExecutorService executor;
 
@@ -99,47 +124,65 @@ public class OpendaylightToaster extends AbstractMXBean
     private final AtomicLong toastsMade = new AtomicLong(0);
     private final AtomicLong darknessFactor = new AtomicLong(1000);
 
-    private final ToasterAppConfig toasterAppConfig;
+    private final @NonNull DisplayString manufacturer;
+    private final @NonNull DisplayString modelNumber;
+    private final int maxMakeToastTries;
 
-    public OpendaylightToaster() {
-        this(new ToasterAppConfigBuilder().setManufacturer(TOASTER_MANUFACTURER).setModelNumber(TOASTER_MODEL_NUMBER)
-                .setMaxMakeToastTries(Uint16.valueOf(2)).build());
-    }
-
-    public OpendaylightToaster(final ToasterAppConfig toasterAppConfig) {
+    public OpendaylightToaster(final DataBroker dataProvider,
+            final NotificationPublishService notificationPublishService, final RpcProviderService rpcProviderService,
+            final String manufacturer, final String modelNumber, final int maxMakeToastTries) {
         super("OpendaylightToaster", "toaster-provider", null);
+        notificationProvider = requireNonNull(notificationPublishService);
+        dataBroker = requireNonNull(dataProvider);
+
+        this.manufacturer = new DisplayString(manufacturer);
+        this.modelNumber = new DisplayString(modelNumber);
+        this.maxMakeToastTries = maxMakeToastTries;
+
         executor = Executors.newFixedThreadPool(1);
-        this.toasterAppConfig = toasterAppConfig;
-    }
+        reg = rpcProviderService.registerRpcImplementation(ToasterService.class, this);
 
-    public void setNotificationProvider(final NotificationPublishService notificationPublishService) {
-        notificationProvider = notificationPublishService;
-    }
-
-    public void setDataBroker(final DataBroker dataBroker) {
-        this.dataBroker = dataBroker;
-    }
-
-    public void init() {
         LOG.info("Initializing...");
 
         dataTreeChangeListenerRegistration = requireNonNull(dataBroker, "dataBroker must be set")
             .registerDataTreeChangeListener(DataTreeIdentifier.create(CONFIGURATION, TOASTER_IID), this);
-        setToasterStatusUp(null);
+        try {
+            setToasterStatusUp(null).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException("Failed to commit initial data", e);
+        }
 
         // Register our MXBean.
         register();
+    }
+
+    @Inject
+    public OpendaylightToaster(final DataBroker dataProvider,
+            final NotificationPublishService notificationPublishService, final RpcProviderService rpcProviderService) {
+        this(dataProvider, notificationPublishService, rpcProviderService, TOASTER_MANUFACTURER, TOASTER_MODEL_NUMBER,
+            2);
+    }
+
+    @Activate
+    public OpendaylightToaster(@Reference final DataBroker dataProvider,
+            @Reference final NotificationPublishService notificationPublishService,
+            @Reference final RpcProviderService rpcProviderService, final @NonNull Configuration configuration) {
+        this(dataProvider, notificationPublishService, rpcProviderService, configuration.manufacturer(),
+            configuration.modelNumber(), configuration.maxMakeToastTries());
     }
 
     /**
      * Implemented from the AutoCloseable interface.
      */
     @Override
+    @PreDestroy
+    @Deactivate
     public void close() {
         LOG.info("Closing...");
 
         // Unregister our MXBean.
         unregister();
+        reg.close();
 
         // When we close this service we need to shutdown our executor!
         executor.shutdown();
@@ -169,8 +212,11 @@ public class OpendaylightToaster extends AbstractMXBean
         // note - we are simulating a device whose manufacture and model are
         // fixed (embedded) into the hardware.
         // This is why the manufacture and model number are hardcoded.
-        return new ToasterBuilder().setToasterManufacturer(toasterAppConfig.getManufacturer())
-                .setToasterModelNumber(toasterAppConfig.getModelNumber()).setToasterStatus(status).build();
+        return new ToasterBuilder()
+            .setToasterManufacturer(manufacturer)
+            .setToasterModelNumber(modelNumber)
+            .setToasterStatus(status)
+            .build();
     }
 
     /**
@@ -221,7 +267,7 @@ public class OpendaylightToaster extends AbstractMXBean
 
         final SettableFuture<RpcResult<MakeToastOutput>> futureResult = SettableFuture.create();
 
-        checkStatusAndMakeToast(input, futureResult, toasterAppConfig.getMaxMakeToastTries().toJava());
+        checkStatusAndMakeToast(input, futureResult, maxMakeToastTries);
 
         return futureResult;
     }
@@ -354,11 +400,12 @@ public class OpendaylightToaster extends AbstractMXBean
         return toastsMade.get();
     }
 
-    private void setToasterStatusUp(final Function<Boolean, MakeToastOutput> resultCallback) {
+    private ListenableFuture<?> setToasterStatusUp(final Function<Boolean, MakeToastOutput> resultCallback) {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         tx.put(OPERATIONAL,TOASTER_IID, buildToaster(ToasterStatus.Up));
 
-        Futures.addCallback(tx.commit(), new FutureCallback<CommitInfo>() {
+        final var future = tx.commit();
+        Futures.addCallback(future, new FutureCallback<CommitInfo>() {
             @Override
             public void onSuccess(final CommitInfo result) {
                 LOG.info("Successfully set ToasterStatus to Up");
@@ -380,6 +427,8 @@ public class OpendaylightToaster extends AbstractMXBean
                 }
             }
         }, MoreExecutors.directExecutor());
+
+        return future;
     }
 
     private boolean outOfBread() {
