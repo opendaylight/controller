@@ -21,7 +21,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +31,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
@@ -37,6 +42,7 @@ import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
@@ -61,6 +67,7 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfig;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfigBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
@@ -69,10 +76,17 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
-public class OpendaylightToaster extends AbstractMXBean
+@Singleton
+@Component(service = ToasterService.class, immediate = true)
+public final class OpendaylightToaster extends AbstractMXBean
         implements ToasterService, ToasterProviderRuntimeMXBean, DataTreeChangeListener<Toaster>, AutoCloseable {
 
     private static final CancelToastOutput EMPTY_CANCEL_OUTPUT = new CancelToastOutputBuilder().build();
@@ -90,6 +104,7 @@ public class OpendaylightToaster extends AbstractMXBean
     private ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
 
     private final ExecutorService executor;
+    private final Set<ObjectRegistration<?>> regs = new HashSet<>();
 
     // This holds the Future for the current make toast task and is used to cancel the current toast.
     private final AtomicReference<Future<?>> currentMakeToastTask = new AtomicReference<>();
@@ -102,14 +117,29 @@ public class OpendaylightToaster extends AbstractMXBean
     private final ToasterAppConfig toasterAppConfig;
 
     public OpendaylightToaster() {
-        this(new ToasterAppConfigBuilder().setManufacturer(TOASTER_MANUFACTURER).setModelNumber(TOASTER_MODEL_NUMBER)
-                .setMaxMakeToastTries(Uint16.valueOf(2)).build());
-    }
-
-    public OpendaylightToaster(final ToasterAppConfig toasterAppConfig) {
         super("OpendaylightToaster", "toaster-provider", null);
         executor = Executors.newFixedThreadPool(1);
-        this.toasterAppConfig = toasterAppConfig;
+        toasterAppConfig = new ToasterAppConfigBuilder()
+                .setManufacturer(TOASTER_MANUFACTURER)
+                .setModelNumber(TOASTER_MODEL_NUMBER)
+                .setMaxMakeToastTries(Uint16.valueOf(2)).build();
+    }
+
+    @Inject
+    @Activate
+    public OpendaylightToaster(@Reference final DataBroker dataProvider,
+            @Reference final NotificationPublishService notificationPublishService,
+            @Reference final RpcProviderService rpcProviderService) {
+        super("OpendaylightToaster", "toaster-provider", null);
+        executor = Executors.newFixedThreadPool(1);
+        this.toasterAppConfig = new ToasterAppConfigBuilder()
+                .setManufacturer(TOASTER_MANUFACTURER)
+                .setModelNumber(TOASTER_MODEL_NUMBER)
+                .setMaxMakeToastTries(Uint16.valueOf(2)).build();
+        notificationProvider = notificationPublishService;
+        dataBroker = dataProvider;
+        regs.add(rpcProviderService.registerRpcImplementation(ToasterService.class, this));
+        init();
     }
 
     public void setNotificationProvider(final NotificationPublishService notificationPublishService) {
@@ -135,11 +165,15 @@ public class OpendaylightToaster extends AbstractMXBean
      * Implemented from the AutoCloseable interface.
      */
     @Override
+    @PreDestroy
+    @Deactivate
     public void close() {
         LOG.info("Closing...");
 
         // Unregister our MXBean.
         unregister();
+        regs.forEach(ObjectRegistration::close);
+        regs.clear();
 
         // When we close this service we need to shutdown our executor!
         executor.shutdown();
