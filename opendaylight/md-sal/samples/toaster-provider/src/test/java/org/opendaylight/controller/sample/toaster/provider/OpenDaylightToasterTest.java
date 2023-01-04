@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
@@ -41,13 +42,8 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
 
     @Before
     public void setupToaster() {
-        toaster = new OpendaylightToaster();
-        toaster.setDataBroker(getDataBroker());
-        toaster.init();
-
-        // We'll mock the NotificationProviderService.
-        NotificationPublishService mockNotification = mock(NotificationPublishService.class);
-        toaster.setNotificationProvider(mockNotification);
+        toaster = new OpendaylightToaster(getDataBroker(), mock(NotificationPublishService.class),
+            mock(RpcProviderService.class));
     }
 
     @Test
