@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2ee6f084_0afea8d3",
+        "filename": "opendaylight/md-sal/samples/toaster-it/src/test/java/org/opendaylight/controller/sample/toaster/it/ToasterTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2023-01-10T09:54:57Z",
+      "side": 1,
+      "message": "this file update belongs to previous change\nhttps://git.opendaylight.org/gerrit/c/yangtools/+/83244\ndoes it makes sense to move it there?",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 34
+      },
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9ee90052_3dcbf22d",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2023-01-10T09:54:57Z",
+      "side": 1,
+      "message": "make it consistent: either use \u0027this.\u0027 prefix for every property or for none\nat least in constructor",
+      "range": {
+        "startLine": 148,
+        "startChar": 8,
+        "endLine": 148,
+        "endChar": 13
+      },
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f599d575_7523abb3",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2023-01-10T09:54:57Z",
+      "side": 1,
+      "message": "if the only place where the regs is filled is constructor\nthen it makes sens to make it immutable and init with data like \nregs \u003d Set.of(...);",
+      "range": {
+        "startLine": 154,
+        "startChar": 7,
+        "endLine": 154,
+        "endChar": 17
+      },
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "88215114_6a06e80b",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2023-01-10T09:54:57Z",
+      "side": 1,
+      "message": "no reason to clear the collection which goes to garbage collector \n(with instance of current class)",
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
