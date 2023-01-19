@@ -71,6 +71,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3934f8d0_5bb30386",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-01-19T12:06:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ee90052_3dcbf22d",
+      "range": {
+        "startLine": 148,
+        "startChar": 8,
+        "endLine": 148,
+        "endChar": 13
+      },
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f599d575_7523abb3",
@@ -94,6 +118,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "44c54555_ffdb7641",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-01-19T12:06:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f599d575_7523abb3",
+      "range": {
+        "startLine": 154,
+        "startChar": 7,
+        "endLine": 154,
+        "endChar": 17
+      },
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "88215114_6a06e80b",
@@ -107,6 +155,24 @@
       "writtenOn": "2023-01-10T09:54:57Z",
       "side": 1,
       "message": "no reason to clear the collection which goes to garbage collector \n(with instance of current class)",
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "25aad7b8_355527b3",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-01-19T12:06:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88215114_6a06e80b",
       "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
