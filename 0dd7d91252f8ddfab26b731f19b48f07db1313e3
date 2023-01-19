@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "134ad03c_c196d453",
+        "filename": "opendaylight/md-sal/samples/toaster-it/src/test/java/org/opendaylight/controller/sample/toaster/it/ToasterTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-01-19T09:23:32Z",
+      "side": 1,
+      "message": "do you mean this change https://git.opendaylight.org/gerrit/c/controller/+/103146?\nThere the change is needed for the test to pass successfully.\nHere we can use this, in my opinion better solution for the test to pass.",
+      "parentUuid": "2ee6f084_0afea8d3",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 34
+      },
+      "revId": "0dd7d91252f8ddfab26b731f19b48f07db1313e3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "9ee90052_3dcbf22d",
         "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
         "patchSetId": 3
