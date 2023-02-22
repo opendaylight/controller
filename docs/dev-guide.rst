@@ -1370,7 +1370,7 @@ Something practical
 
     Status: 200 OK
 
-Websocket change event notification subscription tutorial
+Change event notification subscription tutorial
 ---------------------------------------------------------
 
 Subscribing to data change notifications makes it possible to obtain
@@ -1378,9 +1378,10 @@ notifications about data manipulation (insert, change, delete) which are
 done on any specified **path** of any specified **datastore** with
 specific **scope**. In following examples *{odlAddress}* is address of
 server where ODL is running and *{odlPort}* is port on which
-OpenDaylight is running.
+OpenDaylight is running. OpenDaylight offers two methods for receiving notifications:
+Server-Sent Events (SSE) and WebSocket. SSE is the default notification mechanism used in OpenDaylight.
 
-Websocket notifications subscription process
+SSE notifications subscription process
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this section we will learn what steps need to be taken in order to
@@ -1412,9 +1413,10 @@ provide three parameters to this RPC:
 The RPC to create the stream can be invoked via RESTCONF like this:
 
 -  URI:
-   http://{odlAddress}:{odlPort}/restconf/operations/sal-remote:create-data-change-event-subscription
+   http://{odlAddress}:{odlPort}/rests/operations/sal-remote:create-data-change-event-subscription
 
 -  HEADER: Content-Type=application/json
+           Accept=application/json
 
 -  OPERATION: POST
 
@@ -1435,7 +1437,7 @@ The response should look something like this:
 .. code:: json
 
     {
-        "output": {
+        "sal-remote:output": {
             "stream-name": "data-change-event-subscription/toaster:toaster/toaster:toasterStatus/datastore=CONFIGURATION/scope=SUBTREE"
         }
     }
@@ -1451,15 +1453,15 @@ subscribe to the stream in the next step.
 Subscribe to stream
 ^^^^^^^^^^^^^^^^^^^
 
-In order to subscribe to stream and obtain WebSocket location you need
+In order to subscribe to stream and obtain SSE location you need
 to call *GET* on your stream path. The URI should generally be
-http://{odlAddress}:{odlPort}/restconf/streams/stream/{streamName},
+http://{odlAddress}:{odlPort}/rests/data/ietf-restconf-monitoring:restconf-state/streams/stream/{streamName},
 where *{streamName}* is the *stream-name* parameter contained in
 response from *create-data-change-event-subscription* RPC from the
 previous step.
 
 -  URI:
-   http://{odlAddress}:{odlPort}/restconf/streams/stream/data-change-event-subscription/toaster:toaster/datastore=CONFIGURATION/scope=SUBTREE
+   http://{odlAddress}:{odlPort}/rests/data/ietf-restconf-monitoring:restconf-state/streams/stream/data-change-event-subscription/toaster:toaster/datastore=CONFIGURATION/scope=SUBTREE
 
 -  OPERATION: GET
 
@@ -1483,11 +1485,13 @@ In addition, the following ODL extension query parameter is supported:
   contain modified leaf nodes without data.
   This can help in reducing the size of the notifications.
 
-The expected response status is 200 OK and response body should be
-empty. You will get your WebSocket location from **Location** header of
-response. For example in our particular toaster example location header
-would have this value:
-*ws://{odlAddress}:8185/toaster:toaster/datastore=CONFIGURATION/scope=SUBTREE*
+The response should look something like this:
+
+.. code:: json
+
+    {
+        "subscribe-to-notification:location": "http://localhost:8181/rests/notif/data-change-event-subscription/network-topology:network-topology/datastore=CONFIGURATION/scope=SUBTREE"
+    }
 
 .. note::
 
@@ -1498,8 +1502,39 @@ would have this value:
 Receive notifications
 ^^^^^^^^^^^^^^^^^^^^^
 
-You should now have a data change notification stream created and have
-location of a WebSocket. You can use this WebSocket to listen to data
+Once you got SSE location you can now connect to it and
+start receiving data change events. The request should look something like this:
+
+::
+
+    curl -v -X GET  http://localhost:8181/rests/notif/data-change-event-subscription/toaster:toaster/toasterStatus/datastore=OPERATIONAL/scope=ONE  -H "Content-Type: text/event-stream" -H "Authorization: Basic YWRtaW46YWRtaW4="
+
+
+WebSocket notifications subscription process
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enabling WebSocket notifications in OpenDaylight requires a manual setup before building the project.
+The following steps can be followed to enable WebSocket notifications in OpenDaylight:
+
+1. Open the file `restconf8040.cfg`, which is located at `netconf/restconf/restconf-nb-rfc8040/src/main/resources/` directory.
+2. Locate the `use-sse` configuration parameter and change its value from `true` to `false`.
+3. Uncomment the `use-sse` parameter if it is commented out.
+4. Save the changes made to the `restconf8040.cfg` file.
+
+Once these steps are completed, WebSocket notifications will be enabled in OpenDaylight,
+and they can be used for receiving notifications instead of SSE.
+
+WebSocket Notifications subscription process is the same as SSE until you receive a location of WebSocket.
+You can follow steps given above and after subscribing to a notification stream over WebSocket,
+you will receive a response indicating that the subscription was successful:
+
+.. code:: json
+
+    {
+        "subscribe-to-notification:location": "ws://localhost:8181/rests/notif/data-change-event-subscription/network-topology:network-topology/datastore=CONFIGURATION/scope=SUBTREE"
+    }
+
+You can use this WebSocket to listen to data
 change notifications. To listen to notifications you can use a
 JavaScript client or if you are using chrome browser you can use the
 `Simple WebSocket
@@ -1570,7 +1605,7 @@ use to connect to OpenDaylight via RESTCONF:
     function createStream() {
         $.ajax(
             {
-                url: 'http://{odlAddress}:{odlPort}/restconf/operations/sal-remote:create-data-change-event-subscription',
+                url: 'http://{odlAddress}:{odlPort}/rests/operations/sal-remote:create-data-change-event-subscription',
                 type: 'POST',
                 headers: {
                   'Authorization': 'Basic ' + btoa('{username}:{password}'),
@@ -1599,7 +1634,7 @@ Subscribe to stream
 
 The Next step is to subscribe to the stream. To subscribe to the stream
 you need to call *GET* on
-*http://{odlAddress}:{odlPort}/restconf/streams/stream/{stream-name}*.
+*http://{odlAddress}:{odlPort}/rests/data/ietf-restconf-monitoring:restconf-state/streams/stream/{stream-name}*.
 If the call is successful, you get WebSocket address for this stream in
 **Location** parameter inside response header. You can get response
 header by calling *getResponseHeader(\ *Location*)* on HttpRequest
@@ -1610,7 +1645,7 @@ object inside *done()* function call:
     function subscribeToStream(streamName) {
         $.ajax(
             {
-                url: 'http://{odlAddress}:{odlPort}/restconf/streams/stream/' + streamName;
+                url: 'http://{odlAddress}:{odlPort}/rests/data/ietf-restconf-monitoring:restconf-state/streams/stream/' + streamName;
                 type: 'GET',
                 headers: {
                   'Authorization': 'Basic ' + btoa('{username}:{password}'),
