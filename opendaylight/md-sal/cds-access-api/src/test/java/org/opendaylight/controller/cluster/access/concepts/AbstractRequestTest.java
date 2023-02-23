@@ -18,7 +18,7 @@ import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;

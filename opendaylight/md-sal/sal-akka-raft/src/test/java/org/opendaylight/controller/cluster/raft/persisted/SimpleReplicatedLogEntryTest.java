@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 

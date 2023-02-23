@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
@@ -43,7 +43,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
         final Class<?> ofType;
 
         WriteMessagesComplete(final int count, final Class<?> ofType) {
-            this.latch = new CountDownLatch(count);
+            latch = new CountDownLatch(count);
             this.ofType = ofType;
         }
     }

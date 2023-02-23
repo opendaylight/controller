@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.AbstractOpsTest;
 
@@ -20,7 +20,7 @@ public class ExecuteOpsTest {
         ExecuteRpc expected = ExecuteRpc.from(AbstractOpsTest.TEST_RPC_ID,
                 AbstractOpsTest.makeRPCInput("serialization-test"));
 
-        ExecuteRpc actual = (ExecuteRpc) SerializationUtils.clone(expected);
+        ExecuteRpc actual = SerializationUtils.clone(expected);
 
         assertEquals("getName", expected.getType(), actual.getType());
         assertEquals("getInputNormalizedNode", expected.getInput(), actual.getInput());

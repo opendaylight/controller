@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -32,7 +32,7 @@ public class ShardSnapshotStateTest {
             .build();
 
         ShardSnapshotState expected = new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expectedNode));
-        ShardSnapshotState cloned = (ShardSnapshotState) SerializationUtils.clone(expected);
+        ShardSnapshotState cloned = SerializationUtils.clone(expected);
 
         assertNotNull("getSnapshot is null", cloned.getSnapshot());
         assertEquals("getSnapshot type", MetadataShardDataTreeSnapshot.class, cloned.getSnapshot().getClass());
