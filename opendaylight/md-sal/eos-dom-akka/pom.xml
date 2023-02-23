@@ -27,10 +27,6 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>config</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-akka</artifactId>
         </dependency>
@@ -92,6 +88,10 @@
 
         <dependency>
             <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_2.13</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor-testkit-typed_2.13</artifactId>
         </dependency>
         <dependency>
@@ -100,6 +100,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>mdsal-binding-dom-codec</artifactId>
             <scope>test</scope>
@@ -107,6 +112,11 @@
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>mdsal-binding-generator</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>mdsal-binding-runtime-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
