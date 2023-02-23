@@ -13,7 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -41,16 +41,23 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import scala.concurrent.Future;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SegmentedFileJournalTest {
     private static final File DIRECTORY = new File("target/sfj-test");
     private static final int SEGMENT_SIZE = 1024 * 1024;
     private static final int MESSAGE_SIZE = 512 * 1024;
 
     private static ActorSystem SYSTEM;
+
+    @Mock
+    private Consumer<PersistentRepr> firstCallback;
 
     private TestKit kit;
     private ActorRef actor;
@@ -219,7 +226,8 @@ public class SegmentedFileJournalTest {
     }
 
     private void assertReplayCount(final int expected) {
-        Consumer<PersistentRepr> firstCallback = mock(Consumer.class);
+        // Cast fixes an Eclipse warning 'generic array created'
+        reset((Object) firstCallback);
         doNothing().when(firstCallback).accept(any(PersistentRepr.class));
         AsyncMessage<Void> replay = SegmentedJournalActor.replayMessages(0, Long.MAX_VALUE, Long.MAX_VALUE,
             firstCallback);
