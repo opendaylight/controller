@@ -13,7 +13,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>bundle-parent</artifactId>
-    <version>12.0.2</version>
+    <version>12.0.3</version>
     <relativePath/>
   </parent>
 
@@ -102,6 +102,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <!-- Seems to be broken with 5.1.1 -->
+      <version>4.11.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -109,8 +111,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <plugins>
       <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-              <!-- Overridden to have TCP channel support -->
-          <version>3.0.0-M5</version>
           <configuration>
               <!-- Overridden to fix corruption, where the process would hang after test -->
               <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
