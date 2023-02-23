@@ -20,7 +20,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <packaging>bundle</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- Akka -->
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-akka</artifactId>
