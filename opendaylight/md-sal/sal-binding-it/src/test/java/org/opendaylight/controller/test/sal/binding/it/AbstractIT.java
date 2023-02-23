@@ -33,7 +33,6 @@ public abstract class AbstractIT extends AbstractMdsalTestBase {
     protected Option[] getAdditionalOptions() {
         return new Option[] {
                 mavenBundle("org.opendaylight.controller", "sal-test-model").versionAsInProject(),
-                mavenBundle("net.bytebuddy", "byte-buddy").versionAsInProject(),
         };
     }
 }

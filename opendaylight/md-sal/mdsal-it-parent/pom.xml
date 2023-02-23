@@ -93,20 +93,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.framework</artifactId>
     </dependency>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-    </dependency>
 
-    <!-- Testing Dependencies -->
+    <!--
+        Unfortunately default mockito-inline does not work in OSGi.
+        See https://github.com/mockito/mockito/issues/2203#issuecomment-926372053
+      -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <!-- Seems to be broken with 5.1.1 -->
       <version>4.11.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -177,20 +176,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-           <id>unpack-karaf-resources</id>
-           <goals>
-            <goal>unpack-dependencies</goal>
-           </goals>
-           <phase>process-test-resources</phase>
-           <configuration>
-            <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
-            <groupId>org.opendaylight.controller</groupId>
-            <includeArtifactIds>mockito-core,objenesis,mdsal-it-base</includeArtifactIds>
-            <excludes>META-INF\/**</excludes>
-            <ignorePermissions>false</ignorePermissions>
-           </configuration>
+            <id>unpack-karaf-resources</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+              <groupId>org.opendaylight.controller</groupId>
+              <includeArtifactIds>mockito-core,byte-buddy,objenesis,mdsal-it-base</includeArtifactIds>
+              <excludes>META-INF\/**</excludes>
+              <ignorePermissions>false</ignorePermissions>
+            </configuration>
           </execution>
-         </executions>
+        </executions>
       </plugin>
     </plugins>
   </build>
