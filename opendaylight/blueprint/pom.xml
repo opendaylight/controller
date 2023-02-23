@@ -63,6 +63,46 @@
       <artifactId>org.apache.aries.util</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>concepts</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-data-codec-xml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-model-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-model-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-common-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-dom-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-dom-spi</artifactId>
     </dependency>
@@ -75,8 +115,12 @@
       <artifactId>mdsal-binding-dom-codec-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-codec-xml</artifactId>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-spec-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>yang-binding</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -98,6 +142,17 @@
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-binding-test-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
