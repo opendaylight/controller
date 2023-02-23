@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Optional;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -44,7 +44,7 @@ public class DeleteModificationTest extends AbstractModificationTest {
 
         DeleteModification expected = new DeleteModification(path);
 
-        DeleteModification clone = (DeleteModification) SerializationUtils.clone(expected);
+        DeleteModification clone = SerializationUtils.clone(expected);
         assertEquals("getPath", expected.getPath(), clone.getPath());
     }
 }

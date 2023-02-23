@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.commands;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;

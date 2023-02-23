@@ -15,7 +15,7 @@ import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class MessageSliceTest {
 
     @After
     public void tearDown() {
-        TestKit.shutdownActorSystem(actorSystem, Boolean.TRUE);
+        TestKit.shutdownActorSystem(actorSystem, true);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class MessageSliceTest {
 
         MessageSlice expected = new MessageSlice(new StringIdentifier("test"), data, 2, 3, 54321,
                 TestProbe.apply(actorSystem).ref());
-        MessageSlice cloned = (MessageSlice) SerializationUtils.clone(expected);
+        MessageSlice cloned = SerializationUtils.clone(expected);
 
         assertEquals("getIdentifier", expected.getIdentifier(), cloned.getIdentifier());
         assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());

@@ -12,7 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
@@ -31,7 +31,7 @@ public class CanCommitTransactionReplyTest {
                 CanCommitTransactionReply.class);
     }
 
-    private static void testSerialization(CanCommitTransactionReply expected, Class<?> expSerialized) {
+    private static void testSerialization(final CanCommitTransactionReply expected, final Class<?> expSerialized) {
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", expSerialized, serialized.getClass());
 

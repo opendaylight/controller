@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.DataInput;
 import java.io.IOException;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 

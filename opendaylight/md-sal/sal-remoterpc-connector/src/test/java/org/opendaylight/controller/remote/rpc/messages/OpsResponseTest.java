@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.Optional;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.AbstractOpsTest;
 
@@ -29,9 +29,9 @@ public class OpsResponseTest {
         ActionResponse expectedAction = new ActionResponse(
             Optional.of(AbstractOpsTest.makeRPCOutput("serialization-test")), Collections.emptyList());
 
-        RpcResponse actualRpc = (RpcResponse) SerializationUtils.clone(expectedRpc);
+        RpcResponse actualRpc = SerializationUtils.clone(expectedRpc);
 
-        ActionResponse actualAction = (ActionResponse) SerializationUtils.clone(expectedAction);
+        ActionResponse actualAction = SerializationUtils.clone(expectedAction);
 
         assertEquals("getResultNormalizedNode", expectedRpc.getOutput(),
                 actualRpc.getOutput());

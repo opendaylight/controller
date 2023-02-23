@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Optional;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -41,7 +41,7 @@ public class MergeModificationTest extends AbstractModificationTest {
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build());
 
-        MergeModification clone = (MergeModification) SerializationUtils.clone(expected);
+        MergeModification clone = SerializationUtils.clone(expected);
         assertEquals("getPath", expected.getPath(), clone.getPath());
         assertEquals("getData", expected.getData(), clone.getData());
     }

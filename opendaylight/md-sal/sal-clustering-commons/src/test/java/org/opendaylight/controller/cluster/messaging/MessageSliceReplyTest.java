@@ -16,7 +16,7 @@ import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class MessageSliceReplyTest {
     private void testSuccess() {
         MessageSliceReply expected = MessageSliceReply.success(new StringIdentifier("test"), 3,
                 TestProbe.apply(actorSystem).ref());
-        MessageSliceReply cloned = (MessageSliceReply) SerializationUtils.clone(expected);
+        MessageSliceReply cloned = SerializationUtils.clone(expected);
 
         assertEquals("getIdentifier", expected.getIdentifier(), cloned.getIdentifier());
         assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());
@@ -59,7 +59,7 @@ public class MessageSliceReplyTest {
     private void testFailure() {
         MessageSliceReply expected = MessageSliceReply.failed(new StringIdentifier("test"),
                 new MessageSliceException("mock", true), TestProbe.apply(actorSystem).ref());
-        MessageSliceReply cloned = (MessageSliceReply) SerializationUtils.clone(expected);
+        MessageSliceReply cloned = SerializationUtils.clone(expected);
 
         assertEquals("getIdentifier", expected.getIdentifier(), cloned.getIdentifier());
         assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());

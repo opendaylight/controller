@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.messaging;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
 /**
@@ -22,7 +22,7 @@ public class MessageSliceIdentifierTest {
     @Test
     public void testSerialization() {
         MessageSliceIdentifier expected = new MessageSliceIdentifier(new StringIdentifier("test"), 123L);
-        MessageSliceIdentifier cloned = (MessageSliceIdentifier) SerializationUtils.clone(expected);
+        MessageSliceIdentifier cloned = SerializationUtils.clone(expected);
         assertEquals("cloned", expected, cloned);
         assertEquals("getClientIdentifier", expected.getClientIdentifier(), cloned.getClientIdentifier());
         assertEquals("getSlicerId", expected.getSlicerId(), cloned.getSlicerId());
