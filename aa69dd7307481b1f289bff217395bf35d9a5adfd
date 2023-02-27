@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "134abb08_500a739b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2023-02-27T09:20:42Z",
+      "side": 1,
+      "message": "Signed-off-by: should be the last line.",
+      "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "78fc6b49_c12505ab",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 1374,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2023-02-27T09:20:42Z",
+      "side": 1,
+      "message": "Make this line shorter.",
+      "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6decf6e1_bfa23800",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2023-02-27T09:20:42Z",
+      "side": 1,
+      "message": "Probably we are clashing wit another functionality.",
+      "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
