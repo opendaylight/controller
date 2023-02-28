@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6142b09e_16004303",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2023-02-28T10:20:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "134abb08_500a739b",
+      "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "78fc6b49_c12505ab",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-02-27T09:20:42Z",
       "side": 1,
       "message": "Make this line shorter.",
+      "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3ca4d76c_fcdacc4d",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 1374,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2023-02-28T10:20:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "78fc6b49_c12505ab",
       "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
