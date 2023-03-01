@@ -424,6 +424,18 @@
                 <classifier>features</classifier>
                 <type>xml</type>
             </dependency>
+
+            <!-- Atomix -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>atomix-storage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>atomix-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

@@ -162,7 +162,7 @@ public class FileBytes extends AbstractBytes {
 
   /**
    * Maps a portion of the randomAccessFile into memory in {@link FileChannel.MapMode#READ_WRITE} mode and returns
-   * a {@link UnsafeMappedBytes} instance.
+   * a {@link MappedBytes} instance.
    *
    * @param offset The offset from which to map the randomAccessFile into memory.
    * @param size   The count of the bytes to map into memory.
@@ -175,7 +175,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   /**
-   * Maps a portion of the randomAccessFile into memory and returns a {@link UnsafeMappedBytes} instance.
+   * Maps a portion of the randomAccessFile into memory and returns a {@link MappedBytes} instance.
    *
    * @param offset The offset from which to map the randomAccessFile into memory.
    * @param size   The count of the bytes to map into memory.

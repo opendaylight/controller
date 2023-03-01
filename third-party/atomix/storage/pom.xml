@@ -1,5 +1,6 @@
 <!--
-  ~ Copyright 2017-present Open Networking Foundation
+  ~ Copyright 2017-2021 Open Networking Foundation
+  ~ Copyright 2023 PANTHEON.tech, s.r.o.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,20 +18,25 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>io.atomix</groupId>
-    <artifactId>atomix-parent</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>bundle-parent</artifactId>
+    <version>7.0.5-SNAPSHOT</version>
+    <relativePath>../../../bundle-parent</relativePath>
   </parent>
 
-  <packaging>bundle</packaging>
   <artifactId>atomix-storage</artifactId>
   <name>Atomix Storage</name>
 
+  <properties>
+    <odlparent.checkstyle.skip>true</odlparent.checkstyle.skip>
+    <odlparent.modernizer.skip>true</odlparent.modernizer.skip>
+    <odlparent.spotbugs.skip>true</odlparent.spotbugs.skip>
+  </properties>
+
   <dependencies>
     <dependency>
-      <groupId>io.atomix</groupId>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>atomix-utils</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
@@ -50,6 +56,21 @@
             </Import-Package>
           </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check-license</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <!-- This project has a different license -->
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -37,6 +37,8 @@
     <module>opendaylight/config</module>
 
     <module>opendaylight/blueprint</module>
+
+    <module>third-party/atomix</module>
   </modules>
 
   <profiles>

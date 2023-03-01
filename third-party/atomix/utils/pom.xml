@@ -1,5 +1,6 @@
 <!--
-  ~ Copyright 2017-present Open Networking Foundation
+  ~ Copyright 2017-2021 Open Networking Foundation
+  ~ Copyright 2023 PANTHEON.tech, s.r.o.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,45 +18,43 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>io.atomix</groupId>
-    <artifactId>atomix-parent</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>bundle-parent</artifactId>
+    <version>7.0.5-SNAPSHOT</version>
+    <relativePath>../../../bundle-parent</relativePath>
   </parent>
 
-  <packaging>bundle</packaging>
   <artifactId>atomix-utils</artifactId>
   <name>Atomix Utilities</name>
+
+  <properties>
+    <odlparent.checkstyle.skip>true</odlparent.checkstyle.skip>
+    <odlparent.modernizer.skip>true</odlparent.modernizer.skip>
+    <odlparent.spotbugs.skip>true</odlparent.spotbugs.skip>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>${commons.lang3.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math3</artifactId>
-      <version>${commons.math3.version}</version>
     </dependency>
     <dependency>
       <groupId>com.esotericsoftware</groupId>
       <artifactId>kryo</artifactId>
-      <version>${kryo.version}</version>
+      <version>4.0.2</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
-      <version>${config.version}</version>
     </dependency>
+
     <dependency>
-      <groupId>io.github.classgraph</groupId>
-      <artifactId>classgraph</artifactId>
-      <version>${classgraph.version}</version>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
     </dependency>
   </dependencies>
 
@@ -75,6 +74,21 @@
             </Import-Package>
           </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check-license</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <!-- This project has a different license -->
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
