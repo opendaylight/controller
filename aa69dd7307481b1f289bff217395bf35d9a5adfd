@@ -86,6 +86,24 @@
       "message": "Probably we are clashing wit another functionality.",
       "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd45ac64_a1c8ccd5",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2023-03-01T09:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6decf6e1_bfa23800",
+      "revId": "aa69dd7307481b1f289bff217395bf35d9a5adfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
