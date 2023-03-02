@@ -64,12 +64,12 @@ public final class Namespace implements KryoFactory, KryoPool {
   /**
    * ID to use if this KryoNamespace does not define registration id.
    */
-  public static final int FLOATING_ID = -1;
+  private static final int FLOATING_ID = -1;
 
   /**
    * Smallest ID free to use for user defined registrations.
    */
-  public static final int INITIAL_ID = 16;
+  private static final int INITIAL_ID = 16;
 
   static final String NO_NAME = "(no name)";
 
@@ -126,30 +126,6 @@ public final class Namespace implements KryoFactory, KryoPool {
         blocks.add(new RegistrationBlock(this.blockHeadId, types));
       }
       return new Namespace(blocks, classLoader, registrationRequired, compatible, friendlyName).populate(1);
-    }
-
-    /**
-     * Sets the next Kryo registration Id for following register entries.
-     *
-     * @param id Kryo registration Id
-     * @return this
-     * @see Kryo#register(Class, Serializer, int)
-     */
-    public Builder nextId(final int id) {
-      if (!types.isEmpty()) {
-        if (id != FLOATING_ID && id < blockHeadId + types.size()) {
-
-          if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn("requested nextId {} could potentially overlap "
-                    + "with existing registrations {}+{} ",
-                id, blockHeadId, types.size(), new RuntimeException());
-          }
-        }
-        blocks.add(new RegistrationBlock(this.blockHeadId, types));
-        types = new ArrayList<>();
-      }
-      this.blockHeadId = id;
-      return this;
     }
 
     /**
