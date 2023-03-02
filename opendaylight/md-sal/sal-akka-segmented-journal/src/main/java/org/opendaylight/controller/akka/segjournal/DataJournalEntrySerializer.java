@@ -13,11 +13,10 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
 import akka.persistence.PersistentRepr;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.serializers.JavaSerializer;
+import io.atomix.storage.journal.JournalSerdes.EntryInput;
+import io.atomix.storage.journal.JournalSerdes.EntryOutput;
+import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
@@ -28,14 +27,13 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
  *
  * <p>
  * Since we are persisting only parts of {@link PersistentRepr}, this class asymmetric by design:
- * {@link #write(Kryo, Output, DataJournalEntry)} only accepts {@link ToPersistence} subclass, which is a wrapper
- * around a {@link PersistentRepr}, while {@link #read(Kryo, Input, Class)} produces an {@link FromPersistence}, which
+ * {@link #write(EntryOutput, DataJournalEntry)} only accepts {@link ToPersistence} subclass, which is a wrapper
+ * around a {@link PersistentRepr}, while {@link #read(EntryInput)} produces an {@link FromPersistence}, which
  * needs further processing to reconstruct a {@link PersistentRepr}.
  *
  * @author Robert Varga
  */
-final class DataJournalEntrySerializer extends Serializer<DataJournalEntry> {
-    private final JavaSerializer serializer = new JavaSerializer();
+final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> {
     private final ExtendedActorSystem actorSystem;
 
     DataJournalEntrySerializer(final ActorSystem actorSystem) {
@@ -43,20 +41,20 @@ final class DataJournalEntrySerializer extends Serializer<DataJournalEntry> {
     }
 
     @Override
-    public void write(final Kryo kryo, final Output output, final DataJournalEntry object) {
-        verify(object instanceof ToPersistence);
-        final PersistentRepr repr = ((ToPersistence) object).repr();
+    public void write(final EntryOutput output, final DataJournalEntry entry) throws IOException {
+        verify(entry instanceof ToPersistence);
+        final PersistentRepr repr = ((ToPersistence) entry).repr();
         output.writeString(repr.manifest());
         output.writeString(repr.writerUuid());
-        serializer.write(kryo, output, repr.payload());
+        output.writeObject(repr.payload());
     }
 
     @Override
-    public DataJournalEntry read(final Kryo kryo, final Input input, final Class<DataJournalEntry> type) {
+    public DataJournalEntry read(final EntryInput input) throws IOException {
         final String manifest = input.readString();
         final String uuid = input.readString();
         final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
-            (Callable<Object>)() -> serializer.read(kryo, input, type));
+            (Callable<Object>) input::readObject);
         return new FromPersistence(manifest, uuid, payload);
     }
 }

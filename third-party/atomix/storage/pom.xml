@@ -128,8 +128,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              io.atomix.storage.journal,
-              com.esotericsoftware.kryo.*;version=4.0.2
+              io.atomix.storage.journal
             </Export-Package>
             <Import-Package>
               sun.nio.ch;resolution:=optional,
