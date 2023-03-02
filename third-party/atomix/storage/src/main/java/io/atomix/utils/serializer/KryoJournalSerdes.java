@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Pool of Kryo instances, with classes pre-registered.
  */
-public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
+public final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     /**
      * Default buffer size used for serialization.
      *
@@ -58,7 +58,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
 
     private static final String NO_NAME = "(no name)";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Namespace.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KryoJournalSerdes.class);
 
     private final KryoPool kryoPool = new KryoPool.Builder(this).softReferences().build();
 
@@ -76,7 +76,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      * @param registrationRequired whether registration is required
      * @param friendlyName         friendly name for the namespace
      */
-    private Namespace(
+    private KryoJournalSerdes(
             final List<RegisteredType> registeredTypes,
             final ClassLoader classLoader,
             final String friendlyName) {
@@ -89,7 +89,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
     }
 
     /**
-     * Creates a new {@link Namespace} builder.
+     * Creates a new {@link KryoJournalSerdes} builder.
      *
      * @return builder
      */
@@ -315,7 +315,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
         @Override
         public JournalSerdes build(final String friendlyName) {
             checkState(!types.isEmpty(), "No serializers registered");
-            return new Namespace(types, classLoader, friendlyName);
+            return new KryoJournalSerdes(types, classLoader, friendlyName);
         }
     }
 }
