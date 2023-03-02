@@ -18,7 +18,7 @@ package io.atomix.utils;
 /**
  * Atomix I/O exception.
  */
-public class AtomixIOException extends AtomixRuntimeException {
+public class AtomixIOException extends RuntimeException {
   public AtomixIOException() {
   }
 
@@ -27,7 +27,7 @@ public class AtomixIOException extends AtomixRuntimeException {
   }
 
   public AtomixIOException(String message, Object... args) {
-    super(message, args);
+    super(String.format(message, args));
   }
 
   public AtomixIOException(String message, Throwable cause) {
