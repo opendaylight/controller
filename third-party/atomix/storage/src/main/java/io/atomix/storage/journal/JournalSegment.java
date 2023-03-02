@@ -15,7 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import com.google.common.collect.Sets;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.SparseJournalIndex;
 import io.atomix.utils.serializer.Namespace;
@@ -27,6 +26,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
@@ -45,7 +45,7 @@ public class JournalSegment<E> implements AutoCloseable {
   private final JournalIndex index;
   private final Namespace namespace;
   private final MappableJournalSegmentWriter<E> writer;
-  private final Set<MappableJournalSegmentReader<E>> readers = Sets.newConcurrentHashSet();
+  private final Set<MappableJournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
   private boolean open = true;
 

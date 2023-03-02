@@ -26,10 +26,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import com.google.common.collect.Sets;
 import io.atomix.utils.serializer.Namespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   private volatile long commitIndex;
 
   private final ConcurrentNavigableMap<Long, JournalSegment<E>> segments = new ConcurrentSkipListMap<>();
-  private final Collection<SegmentedJournalReader<E>> readers = Sets.newConcurrentHashSet();
+  private final Collection<SegmentedJournalReader<E>> readers = ConcurrentHashMap.newKeySet();
   private JournalSegment<E> currentSegment;
 
   private volatile boolean open = true;
