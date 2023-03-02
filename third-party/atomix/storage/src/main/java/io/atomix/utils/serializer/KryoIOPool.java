@@ -16,13 +16,12 @@
 package io.atomix.utils.serializer;
 
 import java.lang.ref.SoftReference;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
 abstract class KryoIOPool<T> {
 
-  private final Queue<SoftReference<T>> queue = new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<SoftReference<T>> queue = new ConcurrentLinkedQueue<>();
 
   private T borrow(final int bufferSize) {
     T element;
