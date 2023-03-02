@@ -170,7 +170,6 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void append(Indexed<E> entry) {
     final long nextIndex = getNextIndex();
 
@@ -242,7 +241,6 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void truncate(long index) {
     // If the index is greater than or equal to the last index, skip the truncate.
     if (index >= getLastIndex()) {
