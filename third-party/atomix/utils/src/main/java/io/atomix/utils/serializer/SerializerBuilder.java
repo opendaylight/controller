@@ -15,12 +15,10 @@
  */
 package io.atomix.utils.serializer;
 
-import io.atomix.utils.Builder;
-
 /**
  * Serializer builder.
  */
-public class SerializerBuilder implements Builder<Serializer> {
+public class SerializerBuilder {
   private final String name;
   private final Namespace.Builder namespaceBuilder = Namespace.builder()
       .register(Namespaces.BASIC)
@@ -119,7 +117,6 @@ public class SerializerBuilder implements Builder<Serializer> {
     return this;
   }
 
-  @Override
   public Serializer build() {
     return Serializer.using(name != null ? namespaceBuilder.build(name) : namespaceBuilder.build());
   }
