@@ -18,7 +18,7 @@ package io.atomix.storage.journal;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import io.atomix.utils.serializer.Namespace;
+import io.atomix.utils.serializer.KryoJournalSerdes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -113,7 +113,7 @@ public interface JournalSerdes {
      * @return builder
      */
     static Builder builder() {
-        return Namespace.builder();
+        return KryoJournalSerdes.builder();
     }
 
     /**
