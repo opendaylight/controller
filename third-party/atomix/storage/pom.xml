@@ -30,7 +30,6 @@
 
   <properties>
     <odlparent.checkstyle.skip>true</odlparent.checkstyle.skip>
-    <odlparent.modernizer.skip>true</odlparent.modernizer.skip>
     <odlparent.spotbugs.skip>true</odlparent.spotbugs.skip>
   </properties>
 

@@ -17,7 +17,7 @@ package io.atomix.storage.journal;
 
 import java.io.File;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Segment file utility.
@@ -47,8 +47,8 @@ public final class JournalSegmentFile {
    * @throws NullPointerException if {@code file} is null
    */
   public static boolean isSegmentFile(String journalName, String fileName) {
-    checkNotNull(journalName, "journalName cannot be null");
-    checkNotNull(fileName, "fileName cannot be null");
+    requireNonNull(journalName, "journalName cannot be null");
+    requireNonNull(fileName, "fileName cannot be null");
 
     int partSeparator = fileName.lastIndexOf(PART_SEPARATOR);
     int extensionSeparator = fileName.lastIndexOf(EXTENSION_SEPARATOR);
@@ -73,7 +73,7 @@ public final class JournalSegmentFile {
    * Creates a segment file for the given directory, log name, segment ID, and segment version.
    */
   static File createSegmentFile(String name, File directory, long id) {
-    return new File(directory, String.format("%s-%d.log", checkNotNull(name, "name cannot be null"), id));
+    return new File(directory, String.format("%s-%d.log", requireNonNull(name, "name cannot be null"), id));
   }
 
   /**

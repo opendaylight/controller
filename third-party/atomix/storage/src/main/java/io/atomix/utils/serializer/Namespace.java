@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -175,7 +175,7 @@ public final class Namespace implements KryoFactory, KryoPool {
      * @return this
      */
     public Builder register(Serializer<?> serializer, final Class<?>... classes) {
-      types.add(Pair.of(classes, checkNotNull(serializer)));
+      types.add(Pair.of(classes, requireNonNull(serializer)));
       return this;
     }
 
@@ -279,7 +279,7 @@ public final class Namespace implements KryoFactory, KryoPool {
     this.registrationRequired = registrationRequired;
     this.classLoader = classLoader;
     this.compatible = compatible;
-    this.friendlyName = checkNotNull(friendlyName);
+    this.friendlyName = requireNonNull(friendlyName);
   }
 
   /**

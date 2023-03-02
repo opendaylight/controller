@@ -20,7 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.nio.ByteBuffer;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Stores information about a {@link JournalSegment} of the log.
@@ -226,7 +226,7 @@ public final class JournalSegmentDescriptor {
     private final ByteBuffer buffer;
 
     private Builder(ByteBuffer buffer) {
-      this.buffer = checkNotNull(buffer, "buffer cannot be null");
+      this.buffer = requireNonNull(buffer, "buffer cannot be null");
       buffer.putInt(VERSION_POSITION, VERSION);
     }
 

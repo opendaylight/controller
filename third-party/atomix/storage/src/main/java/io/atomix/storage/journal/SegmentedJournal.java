@@ -35,8 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Segmented journal.
@@ -83,10 +83,10 @@ public class SegmentedJournal<E> implements Journal<E> {
       int maxEntriesPerSegment,
       double indexDensity,
       boolean flushOnCommit) {
-    this.name = checkNotNull(name, "name cannot be null");
-    this.storageLevel = checkNotNull(storageLevel, "storageLevel cannot be null");
-    this.directory = checkNotNull(directory, "directory cannot be null");
-    this.namespace = checkNotNull(namespace, "namespace cannot be null");
+    this.name = requireNonNull(name, "name cannot be null");
+    this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
+    this.directory = requireNonNull(directory, "directory cannot be null");
+    this.namespace = requireNonNull(namespace, "namespace cannot be null");
     this.maxSegmentSize = maxSegmentSize;
     this.maxEntrySize = maxEntrySize;
     this.maxEntriesPerSegment = maxEntriesPerSegment;
@@ -696,7 +696,7 @@ public class SegmentedJournal<E> implements Journal<E> {
      * @return The storage builder.
      */
     public Builder<E> withName(String name) {
-      this.name = checkNotNull(name, "name cannot be null");
+      this.name = requireNonNull(name, "name cannot be null");
       return this;
     }
 
@@ -709,7 +709,7 @@ public class SegmentedJournal<E> implements Journal<E> {
      * @return The storage builder.
      */
     public Builder<E> withStorageLevel(StorageLevel storageLevel) {
-      this.storageLevel = checkNotNull(storageLevel, "storageLevel cannot be null");
+      this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
       return this;
     }
 
@@ -723,7 +723,7 @@ public class SegmentedJournal<E> implements Journal<E> {
      * @throws NullPointerException If the {@code directory} is {@code null}
      */
     public Builder<E> withDirectory(String directory) {
-      return withDirectory(new File(checkNotNull(directory, "directory cannot be null")));
+      return withDirectory(new File(requireNonNull(directory, "directory cannot be null")));
     }
 
     /**
@@ -736,7 +736,7 @@ public class SegmentedJournal<E> implements Journal<E> {
      * @throws NullPointerException If the {@code directory} is {@code null}
      */
     public Builder<E> withDirectory(File directory) {
-      this.directory = checkNotNull(directory, "directory cannot be null");
+      this.directory = requireNonNull(directory, "directory cannot be null");
       return this;
     }
 
@@ -747,7 +747,7 @@ public class SegmentedJournal<E> implements Journal<E> {
      * @return The journal builder.
      */
     public Builder<E> withNamespace(Namespace namespace) {
-      this.namespace = checkNotNull(namespace, "namespace cannot be null");
+      this.namespace = requireNonNull(namespace, "namespace cannot be null");
       return this;
     }
 
