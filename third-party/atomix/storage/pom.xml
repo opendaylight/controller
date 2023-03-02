@@ -30,7 +30,7 @@
 
   <properties>
     <odlparent.checkstyle.skip>true</odlparent.checkstyle.skip>
-    <odlparent.spotbugs.skip>true</odlparent.spotbugs.skip>
+    <odlparent.spotbugs.enforce>false</odlparent.spotbugs.enforce>
   </properties>
 
   <dependencies>
