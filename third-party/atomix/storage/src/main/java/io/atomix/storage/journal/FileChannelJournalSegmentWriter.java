@@ -17,7 +17,6 @@ package io.atomix.storage.journal;
 
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.utils.serializer.Namespace;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -47,7 +46,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
   private final JournalSegment<E> segment;
   private final int maxEntrySize;
   private final JournalIndex index;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private final ByteBuffer memory;
   private final long firstIndex;
   private Indexed<E> lastEntry;
@@ -57,7 +56,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      Namespace namespace) {
+      JournalSerdes namespace) {
     this.channel = channel;
     this.segment = segment;
     this.maxEntrySize = maxEntrySize;

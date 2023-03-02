@@ -16,8 +16,6 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.utils.serializer.Namespace;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -30,7 +28,7 @@ class MappableJournalSegmentReader<E> implements JournalReader<E> {
   private final FileChannel channel;
   private final int maxEntrySize;
   private final JournalIndex index;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private JournalReader<E> reader;
 
   MappableJournalSegmentReader(
@@ -38,7 +36,7 @@ class MappableJournalSegmentReader<E> implements JournalReader<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      Namespace namespace) {
+      JournalSerdes namespace) {
     this.channel = channel;
     this.segment = segment;
     this.maxEntrySize = maxEntrySize;

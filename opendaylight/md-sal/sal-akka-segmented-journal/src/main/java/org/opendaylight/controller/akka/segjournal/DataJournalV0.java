@@ -14,11 +14,11 @@ import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import io.atomix.storage.journal.Indexed;
+import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.SegmentedJournalReader;
 import io.atomix.storage.journal.SegmentedJournalWriter;
 import io.atomix.storage.journal.StorageLevel;
-import io.atomix.utils.serializer.Namespace;
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
@@ -45,7 +45,7 @@ final class DataJournalV0 extends DataJournal {
         super(persistenceId, messageSize);
         entries = SegmentedJournal.<DataJournalEntry>builder()
                 .withStorageLevel(storage).withDirectory(directory).withName("data")
-                .withNamespace(Namespace.builder()
+                .withNamespace(JournalSerdes.builder()
                     .register(new DataJournalEntrySerializer(system), FromPersistence.class, ToPersistence.class)
                     .build())
                 .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)

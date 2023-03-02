@@ -16,8 +16,6 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.utils.serializer.Namespace;
-
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -30,7 +28,7 @@ class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
   private final JournalSegment<E> segment;
   private final int maxEntrySize;
   private final JournalIndex index;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private JournalWriter<E> writer;
 
   MappableJournalSegmentWriter(
@@ -38,7 +36,7 @@ class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      Namespace namespace) {
+      JournalSerdes namespace) {
     this.channel = channel;
     this.segment = segment;
     this.maxEntrySize = maxEntrySize;

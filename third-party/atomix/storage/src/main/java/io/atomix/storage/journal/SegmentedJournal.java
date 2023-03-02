@@ -29,8 +29,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-
-import io.atomix.utils.serializer.Namespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +56,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   private final String name;
   private final StorageLevel storageLevel;
   private final File directory;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private final int maxSegmentSize;
   private final int maxEntrySize;
   private final int maxEntriesPerSegment;
@@ -77,7 +75,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       String name,
       StorageLevel storageLevel,
       File directory,
-      Namespace namespace,
+      JournalSerdes namespace,
       int maxSegmentSize,
       int maxEntrySize,
       int maxEntriesPerSegment,
@@ -677,7 +675,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     private String name = DEFAULT_NAME;
     private StorageLevel storageLevel = StorageLevel.DISK;
     private File directory = new File(DEFAULT_DIRECTORY);
-    private Namespace namespace;
+    private JournalSerdes namespace;
     private int maxSegmentSize = DEFAULT_MAX_SEGMENT_SIZE;
     private int maxEntrySize = DEFAULT_MAX_ENTRY_SIZE;
     private int maxEntriesPerSegment = DEFAULT_MAX_ENTRIES_PER_SEGMENT;
@@ -744,7 +742,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
      * @param namespace The journal serializer.
      * @return The journal builder.
      */
-    public Builder<E> withNamespace(Namespace namespace) {
+    public Builder<E> withNamespace(JournalSerdes namespace) {
       this.namespace = requireNonNull(namespace, "namespace cannot be null");
       return this;
     }
