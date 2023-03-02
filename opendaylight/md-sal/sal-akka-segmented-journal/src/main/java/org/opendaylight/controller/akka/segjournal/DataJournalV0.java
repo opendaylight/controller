@@ -140,7 +140,7 @@ final class DataJournalV0 extends DataJournal {
             }
 
             LOG.trace("{}: starting append of {}", persistenceId, payload);
-            final Indexed<ToPersistence> entry = writer.append(new ToPersistence(repr));
+            final var entry = writer.append(new ToPersistence(repr));
             final int size = entry.size();
             LOG.trace("{}: finished append of {} with {} bytes at {}", persistenceId, payload, size, entry.index());
             recordMessageSize(size);

@@ -251,7 +251,7 @@ public class SegmentedFileJournalTest {
         return future.value().get().get();
     }
 
-    private static final class LargePayload implements Serializable {
+    static final class LargePayload implements Serializable {
         private static final long serialVersionUID = 1L;
 
         final byte[] bytes = new byte[MESSAGE_SIZE / 2];
