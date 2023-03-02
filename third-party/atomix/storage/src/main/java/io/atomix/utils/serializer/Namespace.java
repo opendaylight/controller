@@ -56,11 +56,6 @@ public final class Namespace implements KryoFactory, KryoPool {
   public static final int DEFAULT_BUFFER_SIZE = 4096;
 
   /**
-   * Maximum allowed buffer size.
-   */
-  public static final int MAX_BUFFER_SIZE = 100 * 1000 * 1000;
-
-  /**
    * ID to use if this KryoNamespace does not define registration id.
    */
   private static final int FLOATING_ID = -1;
