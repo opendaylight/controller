@@ -23,7 +23,6 @@ import com.esotericsoftware.kryo.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.pool.KryoCallback;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
-import com.esotericsoftware.kryo.serializers.CompatibleFieldSerializer;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import org.objenesis.strategy.StdInstantiatorStrategy;
@@ -90,7 +89,6 @@ public final class Namespace implements KryoFactory, KryoPool {
   private final ImmutableList<RegistrationBlock> registeredBlocks;
 
   private final ClassLoader classLoader;
-  private final boolean compatible;
   private final boolean registrationRequired;
   private final String friendlyName;
 
@@ -104,7 +102,6 @@ public final class Namespace implements KryoFactory, KryoPool {
     private List<RegistrationBlock> blocks = new ArrayList<>();
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private boolean registrationRequired = true;
-    private boolean compatible = false;
 
     /**
      * Builds a {@link Namespace} instance.
@@ -125,7 +122,7 @@ public final class Namespace implements KryoFactory, KryoPool {
       if (!types.isEmpty()) {
         blocks.add(new RegistrationBlock(this.blockHeadId, types));
       }
-      return new Namespace(blocks, classLoader, registrationRequired, compatible, friendlyName).populate(1);
+      return new Namespace(blocks, classLoader, registrationRequired, friendlyName).populate(1);
     }
 
     /**
@@ -151,20 +148,6 @@ public final class Namespace implements KryoFactory, KryoPool {
      */
     public Builder setClassLoader(ClassLoader classLoader) {
       this.classLoader = classLoader;
-      return this;
-    }
-
-    /**
-     * Sets whether backwards/forwards compatible versioned serialization is enabled.
-     * <p>
-     * When compatible serialization is enabled, the {@link CompatibleFieldSerializer} will be set as the
-     * default serializer for types that do not otherwise explicitly specify a serializer.
-     *
-     * @param compatible whether versioned serialization is enabled
-     * @return this
-     */
-    public Builder setCompatible(boolean compatible) {
-      this.compatible = compatible;
       return this;
     }
 
@@ -195,19 +178,16 @@ public final class Namespace implements KryoFactory, KryoPool {
    *
    * @param registeredTypes      types to register
    * @param registrationRequired whether registration is required
-   * @param compatible           whether compatible serialization is enabled
    * @param friendlyName         friendly name for the namespace
    */
   private Namespace(
       final List<RegistrationBlock> registeredTypes,
       ClassLoader classLoader,
       boolean registrationRequired,
-      boolean compatible,
       String friendlyName) {
     this.registeredBlocks = ImmutableList.copyOf(registeredTypes);
     this.registrationRequired = registrationRequired;
     this.classLoader = classLoader;
-    this.compatible = compatible;
     this.friendlyName = requireNonNull(friendlyName);
   }
 
@@ -393,11 +373,6 @@ public final class Namespace implements KryoFactory, KryoPool {
     Kryo kryo = new Kryo();
     kryo.setClassLoader(classLoader);
     kryo.setRegistrationRequired(registrationRequired);
-
-    // If compatible serialization is enabled, override the default serializer.
-    if (compatible) {
-      kryo.setDefaultSerializer(CompatibleFieldSerializer::new);
-    }
 
     // TODO rethink whether we want to use StdInstantiatorStrategy
     kryo.setInstantiatorStrategy(
