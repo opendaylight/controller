@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.ByteArraySerializer;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -46,8 +45,8 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public abstract class AbstractJournalTest {
   private static final JournalSerdes NAMESPACE = JournalSerdes.builder()
-      .register(new TestEntrySerializer(), TestEntry.class)
-      .register(new ByteArraySerializer(), byte[].class)
+      .register(new TestEntrySerdes(), TestEntry.class)
+      .register(new ByteArraySerdes(), byte[].class)
       .build();
 
   protected static final TestEntry ENTRY = new TestEntry(32);
