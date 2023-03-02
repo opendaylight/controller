@@ -27,8 +27,6 @@ import io.atomix.utils.serializer.serializers.ArraysAsListSerializer;
 import io.atomix.utils.serializer.serializers.ImmutableListSerializer;
 import io.atomix.utils.serializer.serializers.ImmutableMapSerializer;
 import io.atomix.utils.serializer.serializers.ImmutableSetSerializer;
-import io.atomix.utils.time.LogicalTimestamp;
-import io.atomix.utils.time.WallClockTimestamp;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
@@ -102,8 +100,6 @@ public final class Namespaces {
       .register(String[].class)
       .register(boolean[].class)
       .register(Object[].class)
-      .register(LogicalTimestamp.class)
-      .register(WallClockTimestamp.class)
       .register(Version.class)
       .build("BASIC");
 
