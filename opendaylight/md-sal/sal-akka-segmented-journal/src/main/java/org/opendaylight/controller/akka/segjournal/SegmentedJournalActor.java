@@ -18,7 +18,6 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.esotericsoftware.kryo.serializers.DefaultSerializers.LongSerializer;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import io.atomix.storage.journal.Indexed;
@@ -149,7 +148,7 @@ final class SegmentedJournalActor extends AbstractActor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedJournalActor.class);
     private static final JournalSerdes DELETE_NAMESPACE = JournalSerdes.builder()
-        .register(new LongSerializer(), Long.class)
+        .register(new LongSerdes(), Long.class)
         .build();
     private static final int DELETE_SEGMENT_SIZE = 64 * 1024;
 
