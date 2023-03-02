@@ -18,6 +18,7 @@ package io.atomix.storage.journal;
 /**
  * Memory journal test.
  */
+@Deprecated
 public class MemoryJournalTest extends AbstractJournalTest {
   public MemoryJournalTest(int maxSegmentSize, int cacheSize) {
     super(maxSegmentSize, cacheSize);
