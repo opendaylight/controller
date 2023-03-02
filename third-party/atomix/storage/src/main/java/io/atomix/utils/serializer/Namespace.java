@@ -179,41 +179,6 @@ public final class Namespace implements KryoFactory, KryoPool {
       return this;
     }
 
-    private Builder register(RegistrationBlock block) {
-      if (block.begin() != FLOATING_ID) {
-        // flush pending types
-        nextId(block.begin());
-        blocks.add(block);
-        nextId(block.begin() + block.types().size());
-      } else {
-        // flush pending types
-        final int addedBlockBegin = blockHeadId + types.size();
-        nextId(addedBlockBegin);
-        blocks.add(new RegistrationBlock(addedBlockBegin, block.types()));
-        nextId(addedBlockBegin + block.types().size());
-      }
-      return this;
-    }
-
-    /**
-     * Registers all the class registered to given KryoNamespace.
-     *
-     * @param ns KryoNamespace
-     * @return this
-     */
-    public Builder register(final Namespace ns) {
-
-      if (blocks.containsAll(ns.registeredBlocks)) {
-        // Everything was already registered.
-        LOGGER.debug("Ignoring {}, already registered.", ns);
-        return this;
-      }
-      for (RegistrationBlock block : ns.registeredBlocks) {
-        this.register(block);
-      }
-      return this;
-    }
-
     /**
      * Sets the namespace class loader.
      *
