@@ -320,17 +320,6 @@ public final class Namespace implements KryoFactory, KryoPool {
   }
 
   /**
-   * Gets the number of classes registered in this Kryo namespace.
-   *
-   * @return size of namespace
-   */
-  public int size() {
-    return (int) registeredBlocks.stream()
-        .flatMap(block -> block.types().stream())
-        .count();
-  }
-
-  /**
    * Creates a Kryo instance.
    *
    * @return Kryo instance
