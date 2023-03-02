@@ -15,7 +15,7 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.utils.misc.ArraySizeHashPrinter;
+import java.util.Arrays;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 
@@ -42,7 +42,8 @@ public class TestEntry {
   @Override
   public String toString() {
     return toStringHelper(this)
-        .add("bytes", ArraySizeHashPrinter.of(bytes))
+        .add("length", bytes.length)
+        .add("hash", Arrays.hashCode(bytes))
         .toString();
   }
 }
