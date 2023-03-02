@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage;
+package io.atomix.storage.journal;
 
 /**
  * Log exception.

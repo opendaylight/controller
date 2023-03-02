@@ -16,7 +16,6 @@
 package io.atomix.storage.journal;
 
 import com.esotericsoftware.kryo.KryoException;
-import io.atomix.storage.StorageException;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.utils.serializer.Namespace;
 

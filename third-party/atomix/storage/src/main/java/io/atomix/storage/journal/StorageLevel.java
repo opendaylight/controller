@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-present Open Networking Foundation
+ * Copyright 2015-present Open Networking Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.atomix.storage.journal;
 
 /**
- * Provides classes and interfaces for managing storage objects.
+ * Storage level configuration values which control how logs are stored on disk or in memory.
  */
-package io.atomix.storage;
+public enum StorageLevel {
+
+  /**
+   * Stores data in memory only.
+   */
+  @Deprecated
+  MEMORY,
+
+  /**
+   * Stores data in a memory-mapped file.
+   */
+  MAPPED,
+
+  /**
+   * Stores data on disk.
+   */
+  DISK
+
+}

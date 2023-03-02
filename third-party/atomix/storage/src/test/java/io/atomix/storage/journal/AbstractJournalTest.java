@@ -15,7 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.storage.StorageLevel;
 import io.atomix.utils.serializer.Namespace;
 import org.junit.After;
 import org.junit.Before;

@@ -16,8 +16,6 @@
 package io.atomix.storage.journal;
 
 import com.google.common.collect.Sets;
-import io.atomix.storage.StorageException;
-import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.SparseJournalIndex;
 import io.atomix.utils.serializer.Namespace;

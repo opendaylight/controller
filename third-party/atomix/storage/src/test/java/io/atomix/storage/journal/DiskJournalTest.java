@@ -15,8 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.storage.StorageLevel;
-
 /**
  * Disk journal test.
  */

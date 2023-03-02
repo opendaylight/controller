@@ -30,8 +30,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.google.common.collect.Sets;
-import io.atomix.storage.StorageException;
-import io.atomix.storage.StorageLevel;
 import io.atomix.utils.serializer.Namespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

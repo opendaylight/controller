@@ -24,7 +24,7 @@ import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
 import akka.testkit.CallingThreadDispatcher;
 import akka.testkit.javadsl.TestKit;
-import io.atomix.storage.StorageLevel;
+import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;

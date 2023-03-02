@@ -15,7 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.storage.StorageException;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.utils.serializer.Namespace;
