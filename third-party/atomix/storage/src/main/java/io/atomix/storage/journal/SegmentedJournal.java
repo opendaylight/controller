@@ -665,7 +665,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   /**
    * Raft log builder.
    */
-  public static class Builder<E> {
+  public static final class Builder<E> {
     private static final boolean DEFAULT_FLUSH_ON_COMMIT = false;
     private static final String DEFAULT_NAME = "atomix";
     private static final String DEFAULT_DIRECTORY = System.getProperty("user.dir");
@@ -673,17 +673,15 @@ public final class SegmentedJournal<E> implements Journal<E> {
     private static final int DEFAULT_MAX_ENTRY_SIZE = 1024 * 1024;
     private static final int DEFAULT_MAX_ENTRIES_PER_SEGMENT = 1024 * 1024;
     private static final double DEFAULT_INDEX_DENSITY = .005;
-    private static final int DEFAULT_CACHE_SIZE = 1024;
 
-    protected String name = DEFAULT_NAME;
-    protected StorageLevel storageLevel = StorageLevel.DISK;
-    protected File directory = new File(DEFAULT_DIRECTORY);
-    protected Namespace namespace;
-    protected int maxSegmentSize = DEFAULT_MAX_SEGMENT_SIZE;
-    protected int maxEntrySize = DEFAULT_MAX_ENTRY_SIZE;
-    protected int maxEntriesPerSegment = DEFAULT_MAX_ENTRIES_PER_SEGMENT;
-    protected double indexDensity = DEFAULT_INDEX_DENSITY;
-    protected int cacheSize = DEFAULT_CACHE_SIZE;
+    private String name = DEFAULT_NAME;
+    private StorageLevel storageLevel = StorageLevel.DISK;
+    private File directory = new File(DEFAULT_DIRECTORY);
+    private Namespace namespace;
+    private int maxSegmentSize = DEFAULT_MAX_SEGMENT_SIZE;
+    private int maxEntrySize = DEFAULT_MAX_ENTRY_SIZE;
+    private int maxEntriesPerSegment = DEFAULT_MAX_ENTRIES_PER_SEGMENT;
+    private double indexDensity = DEFAULT_INDEX_DENSITY;
     private boolean flushOnCommit = DEFAULT_FLUSH_ON_COMMIT;
 
     protected Builder() {
@@ -834,7 +832,6 @@ public final class SegmentedJournal<E> implements Journal<E> {
     @Deprecated
     public Builder<E> withCacheSize(int cacheSize) {
       checkArgument(cacheSize >= 0, "cacheSize must be positive");
-      this.cacheSize = cacheSize;
       return this;
     }
 
