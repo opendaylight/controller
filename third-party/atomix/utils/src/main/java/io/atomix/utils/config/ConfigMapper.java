@@ -26,7 +26,6 @@ import com.typesafe.config.ConfigMemorySize;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigValue;
-import io.atomix.utils.Named;
 import io.atomix.utils.memory.MemorySize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,17 +209,6 @@ public class ConfigMapper {
 
         String configPropName = propertyNames.remove(descriptor.name);
         if (configPropName == null) {
-          if ((Named.class.isAssignableFrom(clazz) || NamedConfig.class.isAssignableFrom(clazz))
-              && descriptor.setter.getParameterTypes()[0] == String.class && name != null && "name".equals(descriptor.name)) {
-            if (descriptor.deprecated) {
-              if (path == null) {
-                LOGGER.warn("{} is deprecated!", name);
-              } else {
-                LOGGER.warn("{}.{} is deprecated!", path, name);
-              }
-            }
-            setter.invoke(instance, name);
-          }
           continue;
         }
 
@@ -254,12 +242,6 @@ public class ConfigMapper {
 
         String configPropName = propertyNames.remove(descriptor.name);
         if (configPropName == null) {
-          if (Named.class.isAssignableFrom(clazz) && field.getType() == String.class && name != null && "name".equals(descriptor.name)) {
-            if (descriptor.deprecated) {
-              LOGGER.warn("{}.{} is deprecated!", path, name);
-            }
-            field.set(instance, name);
-          }
           continue;
         }
 
