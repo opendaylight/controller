@@ -108,7 +108,7 @@ public final class Namespace implements KryoFactory, KryoPool {
       if (!types.isEmpty()) {
         blocks.add(new RegistrationBlock(this.blockHeadId, types));
       }
-      return new Namespace(blocks, classLoader, friendlyName).populate(1);
+      return new Namespace(blocks, classLoader, friendlyName);
     }
 
     /**
@@ -161,20 +161,9 @@ public final class Namespace implements KryoFactory, KryoPool {
     this.registeredBlocks = ImmutableList.copyOf(registeredTypes);
     this.classLoader = classLoader;
     this.friendlyName = requireNonNull(friendlyName);
-  }
 
-  /**
-   * Populates the Kryo pool.
-   *
-   * @param instances to add to the pool
-   * @return this
-   */
-  public Namespace populate(int instances) {
-
-    for (int i = 0; i < instances; ++i) {
-      release(create());
-    }
-    return this;
+    // Pre-populate with a single instance
+    release(create());
   }
 
   /**
