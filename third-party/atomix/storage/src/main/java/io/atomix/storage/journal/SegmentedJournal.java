@@ -41,7 +41,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Segmented journal.
  */
-public class SegmentedJournal<E> implements Journal<E> {
+public final class SegmentedJournal<E> implements Journal<E> {
 
   /**
    * Returns a new Raft log builder.

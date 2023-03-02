@@ -32,7 +32,7 @@ import java.util.zip.Checksum;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
+final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
   private final FileChannel channel;
   private final int maxEntrySize;
   private final JournalIndex index;
