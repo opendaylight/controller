@@ -16,6 +16,7 @@
  */
 package io.atomix.utils.serializer;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -27,7 +28,6 @@ import com.esotericsoftware.kryo.pool.KryoCallback;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
 import io.atomix.storage.journal.JournalSerdes;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
     private final KryoOutputPool kryoOutputPool = new KryoOutputPool();
     private final KryoInputPool kryoInputPool = new KryoInputPool();
 
-    private final ImmutableList<RegistrationBlock> registeredBlocks;
+    private final List<Entry<Class<?>[], EntrySerializer<?>>> registeredTypes;
 
     private final ClassLoader classLoader;
     private final String friendlyName;
@@ -77,9 +76,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      * KryoNamespace builder.
      */
     private static final class Builder implements JournalSerdes.Builder {
-        private final int blockHeadId = INITIAL_ID;
         private final List<Entry<Class<?>[], EntrySerializer<?>>> types = new ArrayList<>();
-        private final List<RegistrationBlock> blocks = new ArrayList<>();
         private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         @Override
@@ -101,10 +98,8 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
 
         @Override
         public JournalSerdes build(final String friendlyName) {
-            if (!types.isEmpty()) {
-                blocks.add(new RegistrationBlock(blockHeadId, types));
-            }
-            return new Namespace(blocks, classLoader, friendlyName);
+            checkState(!types.isEmpty(), "No serializers registered");
+            return new Namespace(types, classLoader, friendlyName);
         }
     }
 
@@ -125,11 +120,11 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      * @param friendlyName         friendly name for the namespace
      */
     private Namespace(
-        final List<RegistrationBlock> registeredTypes,
+        final List<Entry<Class<?>[], EntrySerializer<?>>> registeredTypes,
         final ClassLoader classLoader,
         final String friendlyName) {
-        registeredBlocks = ImmutableList.copyOf(registeredTypes);
-        this.classLoader = classLoader;
+        this.registeredTypes = List.copyOf(registeredTypes);
+        this.classLoader = requireNonNull(classLoader);
         this.friendlyName = requireNonNull(friendlyName);
 
         // Pre-populate with a single instance
@@ -238,11 +233,9 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
         kryo.setInstantiatorStrategy(
             new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
 
-        for (RegistrationBlock block : registeredBlocks) {
-            int id = block.begin();
-            for (Entry<Class<?>[], EntrySerializer<?>> entry : block.types()) {
-                register(kryo, entry.getKey(), entry.getValue(), id++);
-            }
+        int id = INITIAL_ID;
+        for (Entry<Class<?>[], EntrySerializer<?>> entry : registeredTypes) {
+            register(kryo, entry.getKey(), entry.getValue(), id++);
         }
         return kryo;
     }
@@ -322,47 +315,6 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
                 // omit lengthy detail, when there's a name
                 .toString();
         }
-        return MoreObjects.toStringHelper(getClass()).add("registeredBlocks", registeredBlocks).toString();
-    }
-
-    static final class RegistrationBlock {
-        private final int begin;
-        private final ImmutableList<Entry<Class<?>[], EntrySerializer<?>>> types;
-
-        RegistrationBlock(final int begin, final List<Entry<Class<?>[], EntrySerializer<?>>> types) {
-            this.begin = begin;
-            this.types = ImmutableList.copyOf(types);
-        }
-
-        public int begin() {
-            return begin;
-        }
-
-        public ImmutableList<Entry<Class<?>[], EntrySerializer<?>>> types() {
-            return types;
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(getClass()).add("begin", begin).add("types", types).toString();
-        }
-
-        @Override
-        public int hashCode() {
-            return types.hashCode();
-        }
-
-        // Only the registered types are used for equality.
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (obj instanceof RegistrationBlock that) {
-                return Objects.equals(types, that.types);
-            }
-            return false;
-        }
+        return MoreObjects.toStringHelper(getClass()).add("registeredTypes", registeredTypes).toString();
     }
 }
