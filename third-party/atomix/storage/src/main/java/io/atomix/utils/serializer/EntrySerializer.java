@@ -44,4 +44,9 @@ final class EntrySerializer<T> extends Serializer<T> {
             throw new KryoException(e);
         }
     }
+
+    @Override
+    public String toString() {
+        return serdes.toString();
+    }
 }

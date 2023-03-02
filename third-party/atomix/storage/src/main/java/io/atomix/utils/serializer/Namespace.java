@@ -36,8 +36,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +65,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
     private final KryoOutputPool kryoOutputPool = new KryoOutputPool();
     private final KryoInputPool kryoInputPool = new KryoInputPool();
 
-    private final List<Entry<Class<?>[], EntrySerializer<?>>> registeredTypes;
-
+    private final List<RegisteredType> registeredTypes;
     private final ClassLoader classLoader;
     private final String friendlyName;
 
@@ -80,7 +77,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      * @param friendlyName         friendly name for the namespace
      */
     private Namespace(
-            final List<Entry<Class<?>[], EntrySerializer<?>>> registeredTypes,
+            final List<RegisteredType> registeredTypes,
             final ClassLoader classLoader,
             final String friendlyName) {
         this.registeredTypes = List.copyOf(registeredTypes);
@@ -203,8 +200,8 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
             new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
 
         int id = INITIAL_ID;
-        for (Entry<Class<?>[], EntrySerializer<?>> entry : registeredTypes) {
-            register(kryo, entry.getKey(), entry.getValue(), id++);
+        for (RegisteredType registeredType : registeredTypes) {
+            register(kryo, registeredType.types(), registeredType.serializer(), id++);
         }
         return kryo;
     }
@@ -287,13 +284,20 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
         return MoreObjects.toStringHelper(getClass()).add("registeredTypes", registeredTypes).toString();
     }
 
+    private record RegisteredType(EntrySerializer<?> serializer, Class<?>[] types) {
+        RegisteredType {
+            requireNonNull(serializer);
+            requireNonNull(types);
+        }
+    }
+
     private static final class Builder implements JournalSerdes.Builder {
-        private final List<Entry<Class<?>[], EntrySerializer<?>>> types = new ArrayList<>();
+        private final List<RegisteredType> types = new ArrayList<>();
         private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         @Override
         public Builder register(final EntrySerdes<?> serdes, final Class<?>... classes) {
-            types.add(Map.entry(classes, new EntrySerializer<>(serdes)));
+            types.add(new RegisteredType(new EntrySerializer<>(serdes), classes));
             return this;
         }
 
