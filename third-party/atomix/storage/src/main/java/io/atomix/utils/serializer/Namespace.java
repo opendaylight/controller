@@ -319,10 +319,6 @@ public final class Namespace implements KryoFactory, KryoPool {
     }
   }
 
-  private String friendlyName() {
-    return friendlyName;
-  }
-
   /**
    * Gets the number of classes registered in this Kryo namespace.
    *
@@ -383,7 +379,7 @@ public final class Namespace implements KryoFactory, KryoPool {
 
       if (!matches) {
         LOGGER.error("{}: Failed to register {} as {}, {} was already registered.",
-            friendlyName(), types, id, existing.getType());
+            friendlyName, types, id, existing.getType());
 
         throw new IllegalStateException(String.format(
             "Failed to register %s as %s, %s was already registered.",
@@ -406,7 +402,7 @@ public final class Namespace implements KryoFactory, KryoPool {
       if (r != null) {
         if (r.getId() != id) {
           LOGGER.debug("{}: {} already registered as {}. Skipping {}.",
-              friendlyName(), r.getType(), r.getId(), id);
+              friendlyName, r.getType(), r.getId(), id);
         }
         LOGGER.trace("{} registered as {}", r.getType(), r.getId());
       }
