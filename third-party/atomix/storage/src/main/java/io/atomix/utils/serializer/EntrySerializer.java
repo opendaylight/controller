@@ -15,6 +15,7 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.JavaSerializer;
+import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 
@@ -43,5 +44,10 @@ final class EntrySerializer<T> extends Serializer<T> {
         } catch (IOException e) {
             throw new KryoException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).addValue(serdes).toString();
     }
 }
