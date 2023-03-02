@@ -667,7 +667,7 @@ public class SegmentedJournal<E> implements Journal<E> {
   /**
    * Raft log builder.
    */
-  public static class Builder<E> implements io.atomix.utils.Builder<SegmentedJournal<E>> {
+  public static class Builder<E> {
     private static final boolean DEFAULT_FLUSH_ON_COMMIT = false;
     private static final String DEFAULT_NAME = "atomix";
     private static final String DEFAULT_DIRECTORY = System.getProperty("user.dir");
@@ -868,7 +868,11 @@ public class SegmentedJournal<E> implements Journal<E> {
       return this;
     }
 
-    @Override
+    /**
+     * Build the {@link SegmentedJournal}.
+     *
+     * @return A new {@link SegmentedJournal}.
+     */
     public SegmentedJournal<E> build() {
       return new SegmentedJournal<>(
           name,
