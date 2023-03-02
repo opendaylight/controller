@@ -16,7 +16,6 @@
  */
 package io.atomix.utils.serializer;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -33,7 +32,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.objenesis.strategy.StdInstantiatorStrategy;
@@ -43,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Pool of Kryo instances, with classes pre-registered.
  */
-public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
+final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     /**
      * Default buffer size used for serialization.
      *
@@ -56,9 +54,9 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      */
     private static final int INITIAL_ID = 16;
 
-    private static final String NO_NAME = "(no name)";
+    static final String NO_NAME = "(no name)";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Namespace.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KryoJournalSerdes.class);
 
     private final KryoPool kryoPool = new KryoPool.Builder(this).softReferences().build();
 
@@ -76,7 +74,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      * @param registrationRequired whether registration is required
      * @param friendlyName         friendly name for the namespace
      */
-    private Namespace(
+    KryoJournalSerdes(
             final List<RegisteredType> registeredTypes,
             final ClassLoader classLoader,
             final String friendlyName) {
@@ -86,15 +84,6 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
 
         // Pre-populate with a single instance
         release(create());
-    }
-
-    /**
-     * Creates a new {@link Namespace} builder.
-     *
-     * @return builder
-     */
-    public static JournalSerdes.Builder builder() {
-        return new Builder();
     }
 
     @Override
@@ -282,40 +271,5 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
                 .toString();
         }
         return MoreObjects.toStringHelper(getClass()).add("registeredTypes", registeredTypes).toString();
-    }
-
-    private static record RegisteredType(EntrySerializer<?> serializer, Class<?>[] types) {
-        RegisteredType {
-            requireNonNull(serializer);
-            requireNonNull(types);
-        }
-    }
-
-    private static final class Builder implements JournalSerdes.Builder {
-        private final List<RegisteredType> types = new ArrayList<>();
-        private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-        @Override
-        public Builder register(final EntrySerdes<?> serdes, final Class<?>... classes) {
-            types.add(new RegisteredType(new EntrySerializer<>(serdes), classes));
-            return this;
-        }
-
-        @Override
-        public Builder setClassLoader(final ClassLoader classLoader) {
-            this.classLoader = requireNonNull(classLoader);
-            return this;
-        }
-
-        @Override
-        public JournalSerdes build() {
-            return build(NO_NAME);
-        }
-
-        @Override
-        public JournalSerdes build(final String friendlyName) {
-            checkState(!types.isEmpty(), "No serializers registered");
-            return new Namespace(types, classLoader, friendlyName);
-        }
     }
 }
