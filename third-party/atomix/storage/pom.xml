@@ -129,7 +129,6 @@
           <instructions>
             <Export-Package>
               io.atomix.storage.journal,
-              io.atomix.utils.serializer,
               com.esotericsoftware.kryo.*;version=4.0.2
             </Export-Package>
             <Import-Package>
