@@ -17,8 +17,6 @@ package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.SparseJournalIndex;
-import io.atomix.utils.serializer.Namespace;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -43,7 +41,7 @@ public class JournalSegment<E> implements AutoCloseable {
   private final StorageLevel storageLevel;
   private final int maxEntrySize;
   private final JournalIndex index;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private final MappableJournalSegmentWriter<E> writer;
   private final Set<MappableJournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
@@ -55,7 +53,7 @@ public class JournalSegment<E> implements AutoCloseable {
       StorageLevel storageLevel,
       int maxEntrySize,
       double indexDensity,
-      Namespace namespace) {
+      JournalSerdes namespace) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;

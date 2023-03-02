@@ -17,8 +17,6 @@ package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
-import io.atomix.utils.serializer.Namespace;
-
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
@@ -33,7 +31,7 @@ final class MappedJournalSegmentReader<E> implements JournalReader<E> {
   private final ByteBuffer buffer;
   private final int maxEntrySize;
   private final JournalIndex index;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private final long firstIndex;
   private Indexed<E> currentEntry;
   private Indexed<E> nextEntry;
@@ -43,7 +41,7 @@ final class MappedJournalSegmentReader<E> implements JournalReader<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      Namespace namespace) {
+      JournalSerdes namespace) {
     this.buffer = buffer.slice();
     this.maxEntrySize = maxEntrySize;
     this.index = index;

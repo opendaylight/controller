@@ -1,5 +1,6 @@
 /*
- * Copyright 2017-present Open Networking Foundation
+ * Copyright 2017-2021 Open Networking Foundation
+ * Copyright 2023 PANTHEON.tech, s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +16,13 @@
  */
 package io.atomix.storage.journal;
 
-import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.ByteArraySerializer;
-import io.atomix.utils.serializer.Namespace;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.ByteArraySerializer;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -32,12 +32,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  * Base journal test.
@@ -46,7 +45,7 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Parameterized.class)
 public abstract class AbstractJournalTest {
-  private static final Namespace NAMESPACE = Namespace.builder()
+  private static final JournalSerdes NAMESPACE = JournalSerdes.builder()
       .register(new TestEntrySerializer(), TestEntry.class)
       .register(new ByteArraySerializer(), byte[].class)
       .build();
@@ -57,10 +56,10 @@ public abstract class AbstractJournalTest {
   private final int maxSegmentSize;
   protected final int entriesPerSegment;
 
-  protected AbstractJournalTest(int maxSegmentSize) {
+  protected AbstractJournalTest(final int maxSegmentSize) {
     this.maxSegmentSize = maxSegmentSize;
-    int entryLength = (NAMESPACE.serialize(ENTRY).length + 8);
-    this.entriesPerSegment = (maxSegmentSize - 64) / entryLength;
+    int entryLength = NAMESPACE.serialize(ENTRY).length + 8;
+    entriesPerSegment = (maxSegmentSize - 64) / entryLength;
   }
 
   protected abstract StorageLevel storageLevel();
@@ -70,7 +69,7 @@ public abstract class AbstractJournalTest {
     List<Object[]> runs = new ArrayList<>();
     for (int i = 1; i <= 10; i++) {
       for (int j = 1; j <= 10; j++) {
-        runs.add(new Object[]{64 + (i * (NAMESPACE.serialize(ENTRY).length + 8) + j)});
+        runs.add(new Object[]{64 + i * (NAMESPACE.serialize(ENTRY).length + 8) + j});
       }
     }
     return runs;
@@ -373,13 +372,13 @@ public abstract class AbstractJournalTest {
     if (Files.exists(PATH)) {
       Files.walkFileTree(PATH, new SimpleFileVisitor<Path>() {
         @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
           Files.delete(file);
           return FileVisitResult.CONTINUE;
         }
 
         @Override
-        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException {
           Files.delete(dir);
           return FileVisitResult.CONTINUE;
         }
