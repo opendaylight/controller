@@ -26,7 +26,6 @@ import com.esotericsoftware.kryo.pool.KryoPool;
 import com.esotericsoftware.kryo.serializers.CompatibleFieldSerializer;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.tuple.Pair;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -99,7 +100,7 @@ public final class Namespace implements KryoFactory, KryoPool {
   //@NotThreadSafe
   public static final class Builder {
     private int blockHeadId = INITIAL_ID;
-    private List<Pair<Class<?>[], Serializer<?>>> types = new ArrayList<>();
+    private List<Entry<Class<?>[], Serializer<?>>> types = new ArrayList<>();
     private List<RegistrationBlock> blocks = new ArrayList<>();
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private boolean registrationRequired = true;
@@ -162,7 +163,7 @@ public final class Namespace implements KryoFactory, KryoPool {
      * @return this
      */
     public Builder register(Serializer<?> serializer, final Class<?>... classes) {
-      types.add(Pair.of(classes, requireNonNull(serializer)));
+      types.add(Map.entry(classes, serializer));
       return this;
     }
 
@@ -431,8 +432,8 @@ public final class Namespace implements KryoFactory, KryoPool {
       if (id == FLOATING_ID) {
         id = kryo.getNextRegistrationId();
       }
-      for (Pair<Class<?>[], Serializer<?>> entry : block.types()) {
-        register(kryo, entry.getLeft(), entry.getRight(), id++);
+      for (Entry<Class<?>[], Serializer<?>> entry : block.types()) {
+        register(kryo, entry.getKey(), entry.getValue(), id++);
       }
     }
     return kryo;
@@ -520,9 +521,9 @@ public final class Namespace implements KryoFactory, KryoPool {
 
   static final class RegistrationBlock {
     private final int begin;
-    private final ImmutableList<Pair<Class<?>[], Serializer<?>>> types;
+    private final ImmutableList<Entry<Class<?>[], Serializer<?>>> types;
 
-    RegistrationBlock(int begin, List<Pair<Class<?>[], Serializer<?>>> types) {
+    RegistrationBlock(int begin, List<Entry<Class<?>[], Serializer<?>>> types) {
       this.begin = begin;
       this.types = ImmutableList.copyOf(types);
     }
@@ -531,7 +532,7 @@ public final class Namespace implements KryoFactory, KryoPool {
       return begin;
     }
 
-    public ImmutableList<Pair<Class<?>[], Serializer<?>>> types() {
+    public ImmutableList<Entry<Class<?>[], Serializer<?>>> types() {
       return types;
     }
 
