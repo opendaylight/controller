@@ -55,11 +55,6 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
     private static final int DEFAULT_BUFFER_SIZE = 4096;
 
     /**
-     * ID to use if this KryoNamespace does not define registration id.
-     */
-    private static final int FLOATING_ID = -1;
-
-    /**
      * Smallest ID free to use for user defined registrations.
      */
     private static final int INITIAL_ID = 16;
@@ -245,9 +240,6 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
 
         for (RegistrationBlock block : registeredBlocks) {
             int id = block.begin();
-            if (id == FLOATING_ID) {
-                id = kryo.getNextRegistrationId();
-            }
             for (Entry<Class<?>[], EntrySerializer<?>> entry : block.types()) {
                 register(kryo, entry.getKey(), entry.getValue(), id++);
             }
