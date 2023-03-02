@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.ByteArraySerializer;
 import io.atomix.utils.serializer.Namespace;
 import org.junit.After;
 import org.junit.Before;
@@ -46,8 +47,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public abstract class AbstractJournalTest {
   private static final Namespace NAMESPACE = Namespace.builder()
-      .register(TestEntry.class)
-      .register(byte[].class)
+      .register(new TestEntrySerializer(), TestEntry.class)
+      .register(new ByteArraySerializer(), byte[].class)
       .build();
 
   protected static final TestEntry ENTRY = new TestEntry(32);
