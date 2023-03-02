@@ -152,19 +152,6 @@ public final class Namespace implements KryoFactory, KryoPool {
     }
 
     /**
-     * Registers classes to be serialized using Kryo default serializer.
-     *
-     * @param expectedTypes list of classes
-     * @return this
-     */
-    public Builder register(final Class<?>... expectedTypes) {
-      for (Class<?> clazz : expectedTypes) {
-        types.add(Pair.of(new Class<?>[]{clazz}, null));
-      }
-      return this;
-    }
-
-    /**
      * Registers serializer for the given set of classes.
      * <p>
      * When multiple classes are registered with an explicitly provided serializer, the namespace guarantees
