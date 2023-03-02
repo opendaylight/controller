@@ -17,8 +17,6 @@ package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
-import io.atomix.utils.serializer.Namespace;
-
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -36,7 +34,7 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
   private final FileChannel channel;
   private final int maxEntrySize;
   private final JournalIndex index;
-  private final Namespace namespace;
+  private final JournalSerdes namespace;
   private final ByteBuffer memory;
   private final long firstIndex;
   private Indexed<E> currentEntry;
@@ -47,7 +45,7 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      Namespace namespace) {
+      JournalSerdes namespace) {
     this.channel = channel;
     this.maxEntrySize = maxEntrySize;
     this.index = index;
