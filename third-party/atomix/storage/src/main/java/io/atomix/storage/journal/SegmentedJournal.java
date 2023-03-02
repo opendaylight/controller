@@ -70,7 +70,7 @@ public class SegmentedJournal<E> implements Journal<E> {
   private volatile long commitIndex;
 
   private final NavigableMap<Long, JournalSegment<E>> segments = new ConcurrentSkipListMap<>();
-  private final Collection<SegmentedJournalReader> readers = Sets.newConcurrentHashSet();
+  private final Collection<SegmentedJournalReader<E>> readers = Sets.newConcurrentHashSet();
   private JournalSegment<E> currentSegment;
 
   private volatile boolean open = true;
@@ -359,7 +359,7 @@ public class SegmentedJournal<E> implements Journal<E> {
     assertOpen();
     assertDiskSpace();
 
-    JournalSegment lastSegment = getLastSegment();
+    JournalSegment<E> lastSegment = getLastSegment();
     JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
         .withId(lastSegment != null ? lastSegment.descriptor().id() + 1 : 1)
         .withIndex(currentSegment.lastIndex() + 1)
@@ -410,7 +410,7 @@ public class SegmentedJournal<E> implements Journal<E> {
    *
    * @param segment The segment to remove.
    */
-  synchronized void removeSegment(JournalSegment segment) {
+  synchronized void removeSegment(JournalSegment<E> segment) {
     segments.remove(segment.index());
     segment.close();
     segment.delete();
@@ -552,7 +552,7 @@ public class SegmentedJournal<E> implements Journal<E> {
    * @param index The index at which to reset readers.
    */
   void resetHead(long index) {
-    for (SegmentedJournalReader reader : readers) {
+    for (SegmentedJournalReader<E> reader : readers) {
       if (reader.getNextIndex() < index) {
         reader.reset(index);
       }
@@ -565,14 +565,14 @@ public class SegmentedJournal<E> implements Journal<E> {
    * @param index The index at which to reset readers.
    */
   void resetTail(long index) {
-    for (SegmentedJournalReader reader : readers) {
+    for (SegmentedJournalReader<E> reader : readers) {
       if (reader.getNextIndex() >= index) {
         reader.reset(index);
       }
     }
   }
 
-  void closeReader(SegmentedJournalReader reader) {
+  void closeReader(SegmentedJournalReader<E> reader) {
     readers.remove(reader);
   }
 
@@ -616,7 +616,7 @@ public class SegmentedJournal<E> implements Journal<E> {
       SortedMap<Long, JournalSegment<E>> compactSegments = segments.headMap(segmentEntry.getValue().index());
       if (!compactSegments.isEmpty()) {
         log.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
-        for (JournalSegment segment : compactSegments.values()) {
+        for (JournalSegment<E> segment : compactSegments.values()) {
           log.trace("Deleting segment: {}", segment);
           segment.close();
           segment.delete();
