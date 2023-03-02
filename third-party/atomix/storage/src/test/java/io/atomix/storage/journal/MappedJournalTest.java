@@ -19,8 +19,8 @@ package io.atomix.storage.journal;
  * Memory mapped journal test.
  */
 public class MappedJournalTest extends PersistentJournalTest {
-  public MappedJournalTest(int maxSegmentSize, int cacheSize) {
-    super(maxSegmentSize, cacheSize);
+  public MappedJournalTest(int maxSegmentSize) {
+    super(maxSegmentSize);
   }
 
   @Override

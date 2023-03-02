@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
  * Persistent journal test base.
  */
 public abstract class PersistentJournalTest extends AbstractJournalTest {
-  protected PersistentJournalTest(int maxSegmentSize, int cacheSize) {
-    super(maxSegmentSize, cacheSize);
+  protected PersistentJournalTest(int maxSegmentSize) {
+    super(maxSegmentSize);
   }
 
   /**

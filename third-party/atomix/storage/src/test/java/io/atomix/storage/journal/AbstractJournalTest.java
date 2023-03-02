@@ -54,12 +54,10 @@ public abstract class AbstractJournalTest {
   private static final Path PATH = Paths.get("target/test-logs/");
 
   private final int maxSegmentSize;
-  private final int cacheSize;
   protected final int entriesPerSegment;
 
-  protected AbstractJournalTest(int maxSegmentSize, int cacheSize) {
+  protected AbstractJournalTest(int maxSegmentSize) {
     this.maxSegmentSize = maxSegmentSize;
-    this.cacheSize = cacheSize;
     int entryLength = (NAMESPACE.serialize(ENTRY).length + 8);
     this.entriesPerSegment = (maxSegmentSize - 64) / entryLength;
   }
@@ -71,7 +69,7 @@ public abstract class AbstractJournalTest {
     List<Object[]> runs = new ArrayList<>();
     for (int i = 1; i <= 10; i++) {
       for (int j = 1; j <= 10; j++) {
-        runs.add(new Object[]{64 + (i * (NAMESPACE.serialize(ENTRY).length + 8) + j), j});
+        runs.add(new Object[]{64 + (i * (NAMESPACE.serialize(ENTRY).length + 8) + j)});
       }
     }
     return runs;
@@ -85,7 +83,6 @@ public abstract class AbstractJournalTest {
         .withStorageLevel(storageLevel())
         .withMaxSegmentSize(maxSegmentSize)
         .withIndexDensity(.2)
-        .withCacheSize(cacheSize)
         .build();
   }
 

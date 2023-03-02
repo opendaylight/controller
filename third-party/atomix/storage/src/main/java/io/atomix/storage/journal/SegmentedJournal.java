@@ -822,20 +822,6 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     /**
-     * Sets the journal cache size.
-     *
-     * @param cacheSize the journal cache size
-     * @return the journal builder
-     * @throws IllegalArgumentException if the cache size is not positive
-     * @deprecated since 3.0.4
-     */
-    @Deprecated
-    public Builder<E> withCacheSize(int cacheSize) {
-      checkArgument(cacheSize >= 0, "cacheSize must be positive");
-      return this;
-    }
-
-    /**
      * Enables flushing buffers to disk when entries are committed to a segment, returning the builder for method
      * chaining.
      * <p>
