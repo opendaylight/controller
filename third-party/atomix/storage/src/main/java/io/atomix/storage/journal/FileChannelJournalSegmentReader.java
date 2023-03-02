@@ -141,7 +141,6 @@ class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
   /**
    * Reads the next entry in the segment.
    */
-  @SuppressWarnings("unchecked")
   private void readNext() {
     // Compute the index of the next entry in the segment.
     final long index = getNextIndex();
