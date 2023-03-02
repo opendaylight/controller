@@ -56,7 +56,7 @@ public class BufferCleaner {
       CLEANER = (ByteBuffer buffer) -> {
         // noop
       };
-      LOGGER.debug("java.nio.DirectByteBuffer.cleaner(): unavailable", hack);
+      LOGGER.debug("java.nio.DirectByteBuffer.cleaner(): unavailable: {}", hack);
     }
   }
 
