@@ -24,9 +24,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.google.common.collect.Sets;
@@ -67,7 +67,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   private final SegmentedJournalWriter<E> writer;
   private volatile long commitIndex;
 
-  private final NavigableMap<Long, JournalSegment<E>> segments = new ConcurrentSkipListMap<>();
+  private final ConcurrentNavigableMap<Long, JournalSegment<E>> segments = new ConcurrentSkipListMap<>();
   private final Collection<SegmentedJournalReader<E>> readers = Sets.newConcurrentHashSet();
   private JournalSegment<E> currentSegment;
 
