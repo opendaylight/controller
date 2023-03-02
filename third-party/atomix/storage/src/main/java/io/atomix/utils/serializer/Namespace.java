@@ -69,14 +69,7 @@ public final class Namespace implements KryoFactory, KryoPool {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Namespace.class);
 
-  /**
-   * Default Kryo namespace.
-   */
-  public static final Namespace DEFAULT = builder().build();
-
-  private final KryoPool kryoPool = new KryoPool.Builder(this)
-      .softReferences()
-      .build();
+  private final KryoPool kryoPool = new KryoPool.Builder(this).softReferences().build();
 
   private final KryoOutputPool kryoOutputPool = new KryoOutputPool();
   private final KryoInputPool kryoInputPool = new KryoInputPool();
