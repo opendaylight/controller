@@ -68,11 +68,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>atomix-utils</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>4.0.2</version>
@@ -133,7 +128,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                             <!-- atomix.io is using an older Guava, and Kryo is using ancient objenesis,
                                  so let's embed it to prevent duplicates -->
                             *;inline=true;artifactId=atomix-storage,
-                            *;inline=true;artifactId=atomix-utils,
                             *;inline=true;groupId=com.esotericsoftware,
                             *;inline=true;groupId=org.objenesis,
                             *;inline=true;groupId=org.ow2.asm,

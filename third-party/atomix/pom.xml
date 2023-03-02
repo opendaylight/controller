@@ -21,6 +21,5 @@
 
     <modules>
         <module>storage</module>
-        <module>utils</module>
     </modules>
 </project>
