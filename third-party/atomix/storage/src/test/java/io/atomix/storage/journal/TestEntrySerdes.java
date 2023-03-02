@@ -15,22 +15,21 @@
  */
 package io.atomix.storage.journal;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.ByteArraySerializer;
+import io.atomix.storage.journal.JournalSerdes.EntryInput;
+import io.atomix.storage.journal.JournalSerdes.EntryOutput;
+import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
+import java.io.IOException;
 
-class TestEntrySerializer extends Serializer<TestEntry> {
-    private static final ByteArraySerializer BA_SERIALIZER = new ByteArraySerializer();
+final class TestEntrySerdes implements EntrySerdes<TestEntry> {
+    private static final ByteArraySerdes BA_SERIALIZER = new ByteArraySerdes();
 
     @Override
-    public void write(Kryo kryo, Output output, TestEntry object) {
-        kryo.writeObjectOrNull(output, object.bytes(), BA_SERIALIZER);
+    public TestEntry read(final EntryInput input) throws IOException {
+        return new TestEntry(BA_SERIALIZER.read(input));
     }
 
     @Override
-    public TestEntry read(Kryo kryo, Input input, Class<TestEntry> type) {
-        return new TestEntry(kryo.readObjectOrNull(input, byte[].class, BA_SERIALIZER));
+    public void write(final EntryOutput output, final TestEntry entry) throws IOException {
+        BA_SERIALIZER.write(output, entry.bytes());
     }
 }
