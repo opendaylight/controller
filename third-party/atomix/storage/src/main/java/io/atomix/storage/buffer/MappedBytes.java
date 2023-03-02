@@ -15,7 +15,6 @@
  */
 package io.atomix.storage.buffer;
 
-import io.atomix.utils.AtomixIOException;
 import io.atomix.utils.memory.BufferCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +85,7 @@ public class MappedBytes extends ByteBufferBytes {
     try {
       return randomAccessFile.getChannel().map(mode, 0, size);
     } catch (IOException e) {
-      throw new AtomixIOException(e);
+      throw new RuntimeException(e);
     }
   }
 
