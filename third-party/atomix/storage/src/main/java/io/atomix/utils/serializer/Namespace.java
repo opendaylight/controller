@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -40,7 +41,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Pool of Kryo instances, with classes pre-registered.
@@ -72,7 +72,7 @@ public final class Namespace implements KryoFactory, KryoPool {
 
   static final String NO_NAME = "(no name)";
 
-  private static final Logger LOGGER = getLogger(Namespace.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Namespace.class);
 
   /**
    * Default Kryo namespace.
