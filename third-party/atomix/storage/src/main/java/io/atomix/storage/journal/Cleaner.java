@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.atomix.storage.journal;
 
-/**
- * Provides classes and interfaces for performing low-level on- and off-heap memory management.
- */
-package io.atomix.utils.memory;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+@FunctionalInterface
+interface Cleaner {
+
+  /**
+   * Free {@link ByteBuffer} if possible.
+   */
+  void freeBuffer(ByteBuffer buffer) throws IOException;
+}

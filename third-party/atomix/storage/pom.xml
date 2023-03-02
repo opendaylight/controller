@@ -52,7 +52,7 @@
               io.atomix.storage.*
             </Export-Package>
             <Import-Package>
-              !sun.nio.ch,!sun.misc,*
+              sun.nio.ch;resolution:=optional,sun.misc;resolution:=optional,*
             </Import-Package>
           </instructions>
         </configuration>
