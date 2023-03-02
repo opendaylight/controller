@@ -168,8 +168,6 @@ public final class Namespace implements KryoFactory, KryoPool {
 
   /**
    * Serializes given object to byte array using Kryo instance in pool.
-   * <p>
-   * Note: Serialized bytes must be smaller than {@link #MAX_BUFFER_SIZE}.
    *
    * @param obj Object to serialize
    * @return serialized bytes
