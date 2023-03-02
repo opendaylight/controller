@@ -67,16 +67,6 @@ public class Indexed<E> {
     return entry.getClass();
   }
 
-  /**
-   * Casts the entry to the given type.
-   *
-   * @return The cast entry.
-   */
-  @SuppressWarnings("unchecked")
-  public <E> Indexed<E> cast() {
-    return (Indexed<E>) this;
-  }
-
   @Override
   public String toString() {
     return toStringHelper(this)
