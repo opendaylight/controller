@@ -16,8 +16,10 @@
  */
 package io.atomix.storage.journal;
 
-import com.esotericsoftware.kryo.Serializer;
+import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.Namespace;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -139,11 +141,11 @@ public interface JournalSerdes {
          * When multiple classes are registered with an explicitly provided serializer, the namespace guarantees
          * all instances will be serialized with the same type ID.
          *
-         * @param classes    list of classes to register
-         * @param serializer serializer to use for the class
+         * @param classes list of classes to register
+         * @param serdes  serializer to use for the class
          * @return this builder
          */
-        Builder register(Serializer<?> serializer, Class<?>... classes);
+        Builder register(EntrySerdes<?> serdes, Class<?>... classes);
 
         /**
          * Sets the namespace class loader.
@@ -152,5 +154,53 @@ public interface JournalSerdes {
          * @return this builder
          */
         Builder setClassLoader(ClassLoader classLoader);
+    }
+
+    /**
+     * Input data stream exposed to {@link EntrySerdes#read(EntryInput)}.
+     */
+    @Beta
+    interface EntryInput {
+
+        byte[] readBytes(int length) throws IOException;
+
+        long readLong() throws IOException;
+
+        String readString() throws IOException;
+
+        Object readObject() throws IOException;
+
+        @VisibleForTesting
+        int readVarInt() throws IOException;
+    }
+
+    /**
+     * Output data stream exposed to {@link EntrySerdes#write(EntryOutput, Object)}.
+     */
+    @Beta
+    interface EntryOutput {
+
+        void writeBytes(byte[] bytes) throws IOException;
+
+        void writeLong(long value) throws IOException;
+
+        void writeObject(Object value) throws IOException;
+
+        void writeString(String value) throws IOException;
+
+        @VisibleForTesting
+        void writeVarInt(int value) throws IOException;
+    }
+
+    /**
+     * A serializer/deserializer for an entry.
+     *
+     * @param <T> Entry type
+     */
+    interface EntrySerdes<T> {
+
+        T read(EntryInput input) throws IOException;
+
+        void write(EntryOutput output, T entry) throws IOException;
     }
 }

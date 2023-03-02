@@ -83,13 +83,13 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
      */
     private static final class Builder implements JournalSerdes.Builder {
         private final int blockHeadId = INITIAL_ID;
-        private final List<Entry<Class<?>[], Serializer<?>>> types = new ArrayList<>();
+        private final List<Entry<Class<?>[], EntrySerializer<?>>> types = new ArrayList<>();
         private final List<RegistrationBlock> blocks = new ArrayList<>();
         private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         @Override
-        public Builder register(final Serializer<?> serializer, final Class<?>... classes) {
-            types.add(Map.entry(classes, serializer));
+        public Builder register(final EntrySerdes<?> serdes, final Class<?>... classes) {
+            types.add(Map.entry(classes, new EntrySerializer<>(serdes)));
             return this;
         }
 
@@ -248,7 +248,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
             if (id == FLOATING_ID) {
                 id = kryo.getNextRegistrationId();
             }
-            for (Entry<Class<?>[], Serializer<?>> entry : block.types()) {
+            for (Entry<Class<?>[], EntrySerializer<?>> entry : block.types()) {
                 register(kryo, entry.getKey(), entry.getValue(), id++);
             }
         }
@@ -335,9 +335,9 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
 
     static final class RegistrationBlock {
         private final int begin;
-        private final ImmutableList<Entry<Class<?>[], Serializer<?>>> types;
+        private final ImmutableList<Entry<Class<?>[], EntrySerializer<?>>> types;
 
-        RegistrationBlock(final int begin, final List<Entry<Class<?>[], Serializer<?>>> types) {
+        RegistrationBlock(final int begin, final List<Entry<Class<?>[], EntrySerializer<?>>> types) {
             this.begin = begin;
             this.types = ImmutableList.copyOf(types);
         }
@@ -346,7 +346,7 @@ public final class Namespace implements JournalSerdes, KryoFactory, KryoPool {
             return begin;
         }
 
-        public ImmutableList<Entry<Class<?>[], Serializer<?>>> types() {
+        public ImmutableList<Entry<Class<?>[], EntrySerializer<?>>> types() {
             return types;
         }
 
