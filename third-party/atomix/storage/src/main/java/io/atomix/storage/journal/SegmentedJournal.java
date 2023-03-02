@@ -230,7 +230,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   /**
    * Opens the segments.
    */
-  private void open() {
+  private synchronized void open() {
     // Load existing log segments from disk.
     for (JournalSegment<E> segment : loadSegments()) {
       segments.put(segment.descriptor().index(), segment);
