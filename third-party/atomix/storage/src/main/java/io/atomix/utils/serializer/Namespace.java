@@ -77,7 +77,6 @@ public final class Namespace implements KryoFactory, KryoPool {
   private final ImmutableList<RegistrationBlock> registeredBlocks;
 
   private final ClassLoader classLoader;
-  private final boolean registrationRequired;
   private final String friendlyName;
 
   /**
@@ -89,7 +88,6 @@ public final class Namespace implements KryoFactory, KryoPool {
     private List<Entry<Class<?>[], Serializer<?>>> types = new ArrayList<>();
     private List<RegistrationBlock> blocks = new ArrayList<>();
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    private boolean registrationRequired = true;
 
     /**
      * Builds a {@link Namespace} instance.
@@ -110,7 +108,7 @@ public final class Namespace implements KryoFactory, KryoPool {
       if (!types.isEmpty()) {
         blocks.add(new RegistrationBlock(this.blockHeadId, types));
       }
-      return new Namespace(blocks, classLoader, registrationRequired, friendlyName).populate(1);
+      return new Namespace(blocks, classLoader, friendlyName).populate(1);
     }
 
     /**
@@ -138,18 +136,6 @@ public final class Namespace implements KryoFactory, KryoPool {
       this.classLoader = classLoader;
       return this;
     }
-
-    /**
-     * Sets the registrationRequired flag.
-     *
-     * @param registrationRequired Kryo's registrationRequired flag
-     * @return this
-     * @see Kryo#setRegistrationRequired(boolean)
-     */
-    public Builder setRegistrationRequired(boolean registrationRequired) {
-      this.registrationRequired = registrationRequired;
-      return this;
-    }
   }
 
   /**
@@ -171,10 +157,8 @@ public final class Namespace implements KryoFactory, KryoPool {
   private Namespace(
       final List<RegistrationBlock> registeredTypes,
       ClassLoader classLoader,
-      boolean registrationRequired,
       String friendlyName) {
     this.registeredBlocks = ImmutableList.copyOf(registeredTypes);
-    this.registrationRequired = registrationRequired;
     this.classLoader = classLoader;
     this.friendlyName = requireNonNull(friendlyName);
   }
@@ -360,7 +344,7 @@ public final class Namespace implements KryoFactory, KryoPool {
     LOGGER.trace("Creating Kryo instance for {}", this);
     Kryo kryo = new Kryo();
     kryo.setClassLoader(classLoader);
-    kryo.setRegistrationRequired(registrationRequired);
+    kryo.setRegistrationRequired(true);
 
     // TODO rethink whether we want to use StdInstantiatorStrategy
     kryo.setInstantiatorStrategy(
