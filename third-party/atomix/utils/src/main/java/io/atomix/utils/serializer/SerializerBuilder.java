@@ -114,7 +114,7 @@ public class SerializerBuilder implements Builder<Serializer> {
    * @param types the serializable types
    * @return the serializer builder
    */
-  public SerializerBuilder addSerializer(com.esotericsoftware.kryo.Serializer serializer, Class<?>... types) {
+  public SerializerBuilder addSerializer(com.esotericsoftware.kryo.Serializer<?> serializer, Class<?>... types) {
     namespaceBuilder.register(serializer, types);
     return this;
   }

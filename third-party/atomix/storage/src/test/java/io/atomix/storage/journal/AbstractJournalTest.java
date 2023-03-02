@@ -31,7 +31,6 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +68,7 @@ public abstract class AbstractJournalTest {
   protected abstract StorageLevel storageLevel();
 
   @Parameterized.Parameters
-  public static Collection primeNumbers() {
+  public static List<Object[]> primeNumbers() {
     List<Object[]> runs = new ArrayList<>();
     for (int i = 1; i <= 10; i++) {
       for (int j = 1; j <= 10; j++) {
@@ -104,7 +103,6 @@ public abstract class AbstractJournalTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testWriteRead() throws Exception {
     try (Journal<TestEntry> journal = createJournal()) {
       JournalWriter<TestEntry> writer = journal.writer();
@@ -126,7 +124,7 @@ public abstract class AbstractJournalTest {
       // Test reading an entry
       Indexed<TestEntry> entry1;
       reader.reset();
-      entry1 = (Indexed) reader.next();
+      entry1 = reader.next();
       assertEquals(1, entry1.index());
       assertEquals(entry1, reader.getCurrentEntry());
       assertEquals(1, reader.getCurrentIndex());
@@ -135,7 +133,7 @@ public abstract class AbstractJournalTest {
       Indexed<TestEntry> entry2;
       assertTrue(reader.hasNext());
       assertEquals(2, reader.getNextIndex());
-      entry2 = (Indexed) reader.next();
+      entry2 = reader.next();
       assertEquals(2, entry2.index());
       assertEquals(entry2, reader.getCurrentEntry());
       assertEquals(2, reader.getCurrentIndex());
@@ -144,7 +142,7 @@ public abstract class AbstractJournalTest {
       // Test opening a new reader and reading from the journal.
       reader = journal.openReader(1);
       assertTrue(reader.hasNext());
-      entry1 = (Indexed) reader.next();
+      entry1 = reader.next();
       assertEquals(1, entry1.index());
       assertEquals(entry1, reader.getCurrentEntry());
       assertEquals(1, reader.getCurrentIndex());
@@ -152,7 +150,7 @@ public abstract class AbstractJournalTest {
 
       assertTrue(reader.hasNext());
       assertEquals(2, reader.getNextIndex());
-      entry2 = (Indexed) reader.next();
+      entry2 = reader.next();
       assertEquals(2, entry2.index());
       assertEquals(entry2, reader.getCurrentEntry());
       assertEquals(2, reader.getCurrentIndex());
@@ -164,7 +162,7 @@ public abstract class AbstractJournalTest {
       // Test opening a new reader and reading from the journal.
       reader = journal.openReader(1);
       assertTrue(reader.hasNext());
-      entry1 = (Indexed) reader.next();
+      entry1 = reader.next();
       assertEquals(1, entry1.index());
       assertEquals(entry1, reader.getCurrentEntry());
       assertEquals(1, reader.getCurrentIndex());
@@ -172,7 +170,7 @@ public abstract class AbstractJournalTest {
 
       assertTrue(reader.hasNext());
       assertEquals(2, reader.getNextIndex());
-      entry2 = (Indexed) reader.next();
+      entry2 = reader.next();
       assertEquals(2, entry2.index());
       assertEquals(entry2, reader.getCurrentEntry());
       assertEquals(2, reader.getCurrentIndex());
@@ -194,7 +192,7 @@ public abstract class AbstractJournalTest {
       assertEquals(1, reader.getCurrentEntry().index());
       assertTrue(reader.hasNext());
       assertEquals(2, reader.getNextIndex());
-      entry2 = (Indexed) reader.next();
+      entry2 = reader.next();
       assertEquals(2, entry2.index());
       assertEquals(entry2, reader.getCurrentEntry());
       assertEquals(2, reader.getCurrentIndex());
@@ -268,7 +266,6 @@ public abstract class AbstractJournalTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testWriteReadEntries() throws Exception {
     try (Journal<TestEntry> journal = createJournal()) {
       JournalWriter<TestEntry> writer = journal.writer();
@@ -278,11 +275,11 @@ public abstract class AbstractJournalTest {
         writer.append(ENTRY);
         assertTrue(reader.hasNext());
         Indexed<TestEntry> entry;
-        entry = (Indexed) reader.next();
+        entry = reader.next();
         assertEquals(i, entry.index());
         assertEquals(32, entry.entry().bytes().length);
         reader.reset(i);
-        entry = (Indexed) reader.next();
+        entry = reader.next();
         assertEquals(i, entry.index());
         assertEquals(32, entry.entry().bytes().length);
 
@@ -301,7 +298,7 @@ public abstract class AbstractJournalTest {
         assertTrue(reader.hasNext());
         reader.reset(i);
         assertTrue(reader.hasNext());
-        entry = (Indexed) reader.next();
+        entry = reader.next();
         assertEquals(i, entry.index());
         assertEquals(32, entry.entry().bytes().length);
       }
@@ -309,7 +306,6 @@ public abstract class AbstractJournalTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testWriteReadCommittedEntries() throws Exception {
     try (Journal<TestEntry> journal = createJournal()) {
       JournalWriter<TestEntry> writer = journal.writer();
@@ -321,11 +317,11 @@ public abstract class AbstractJournalTest {
         writer.commit(i);
         assertTrue(reader.hasNext());
         Indexed<TestEntry> entry;
-        entry = (Indexed) reader.next();
+        entry = reader.next();
         assertEquals(i, entry.index());
         assertEquals(32, entry.entry().bytes().length);
         reader.reset(i);
-        entry = (Indexed) reader.next();
+        entry = reader.next();
         assertEquals(i, entry.index());
         assertEquals(32, entry.entry().bytes().length);
       }

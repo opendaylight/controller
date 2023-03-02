@@ -45,7 +45,7 @@ import java.util.zip.Checksum;
  */
 class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
   private final FileChannel channel;
-  private final JournalSegment segment;
+  private final JournalSegment<E> segment;
   private final int maxEntrySize;
   private final JournalIndex index;
   private final Namespace namespace;
@@ -55,7 +55,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
 
   FileChannelJournalSegmentWriter(
       FileChannel channel,
-      JournalSegment segment,
+      JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
       Namespace namespace) {
