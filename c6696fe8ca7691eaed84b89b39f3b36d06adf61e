@@ -69,6 +69,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "18b7ead7_611a240d",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 5
+      },
+      "lineNbr": 1516,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2023-03-09T13:22:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "43b09e7e_3497f771",
+      "revId": "c6696fe8ca7691eaed84b89b39f3b36d06adf61e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dca9e8ca_50299120",
@@ -86,6 +104,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c45d86c5_f3d0910a",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 5
+      },
+      "lineNbr": 1519,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2023-03-09T13:22:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dca9e8ca_50299120",
+      "revId": "c6696fe8ca7691eaed84b89b39f3b36d06adf61e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1b0a676c_2a2f29c1",
@@ -99,6 +135,24 @@
       "writtenOn": "2023-03-06T18:53:23Z",
       "side": 1,
       "message": "IMO application is placed here: https://github.com/opendaylight/netconf/tree/master/restconf/websocket-client.\n\nIt means in `/restconf/websocket-client`. Have you tried it?",
+      "revId": "c6696fe8ca7691eaed84b89b39f3b36d06adf61e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e239e0e3_3b212cf7",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 5
+      },
+      "lineNbr": 1544,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2023-03-09T13:22:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b0a676c_2a2f29c1",
       "revId": "c6696fe8ca7691eaed84b89b39f3b36d06adf61e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
