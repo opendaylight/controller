@@ -60,12 +60,14 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
 
     @Override
     FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) {
-        return FrontendReadOnlyTransaction.create(this, tree.newReadOnlyTransaction(id));
+        return FrontendReadOnlyTransaction.create(this,
+            new ReadOnlyShardDataTreeTransaction(tree, id, tree.takeSnapshot()));
     }
 
     @Override
     FrontendTransaction createOpenTransaction(final TransactionIdentifier id) {
-        return FrontendReadWriteTransaction.createOpen(this, tree.newReadWriteTransaction(id));
+        return FrontendReadWriteTransaction.createOpen(this,
+            new ReadWriteShardDataTreeTransaction(tree, id, tree.takeSnapshot().newModification()));
     }
 
     @Override
