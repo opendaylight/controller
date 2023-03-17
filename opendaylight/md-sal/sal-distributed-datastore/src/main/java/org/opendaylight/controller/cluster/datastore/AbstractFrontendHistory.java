@@ -232,12 +232,10 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         if (request instanceof AbstractReadTransactionRequest
                 && ((AbstractReadTransactionRequest<?>) request).isSnapshotOnly()) {
             LOG.debug("{}: allocating new open snapshot {}", persistenceId(), id);
-            tree.getStats().incrementReadOnlyTransactionCount();
             return createOpenSnapshot(id);
         }
 
         LOG.debug("{}: allocating new open transaction {}", persistenceId(), id);
-        tree.getStats().incrementReadWriteTransactionCount();
         return createOpenTransaction(id);
     }
 
