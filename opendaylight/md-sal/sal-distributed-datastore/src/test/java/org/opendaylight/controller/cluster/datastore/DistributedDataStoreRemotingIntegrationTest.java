@@ -897,6 +897,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         leaderDatastoreContextBuilder.shardBatchedModificationCount(2);
         initDatastoresWithCarsAndPeople("testTransactionForwardedToLeaderAfterRetry");
 
+        // Verify backend statistics on start
+        IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+            stats -> assertEquals("getReadWriteTransactionCount", 0, stats.getReadWriteTransactionCount()));
+        IntegrationTestKit.verifyShardStats(followerDistributedDataStore, "cars",
+            stats -> assertEquals("getReadWriteTransactionCount", 0, stats.getReadWriteTransactionCount()));
+
         // Do an initial write to get the primary shard info cached.
 
         final DOMStoreWriteTransaction initialWriteTx = followerDistributedDataStore.newWriteOnlyTransaction();
@@ -936,6 +942,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx2.write(PeopleModel.PERSON_LIST_PATH, people);
         final DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
 
+        // At this point only leader should see the transactions
+        IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+            stats -> assertEquals("getReadWriteTransactionCount", 2, stats.getReadWriteTransactionCount()));
+        IntegrationTestKit.verifyShardStats(followerDistributedDataStore, "cars",
+            stats -> assertEquals("getReadWriteTransactionCount", 0, stats.getReadWriteTransactionCount()));
+
         // Prepare another WO that writes to a single shard and thus will be directly committed on ready. This
         // tx writes 5 cars so 2 BatchedModifications messages will be sent initially and cached in the leader shard
         // (with shardBatchedModificationCount set to 2). The 3rd BatchedModifications will be sent on ready.
@@ -959,12 +971,16 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
-        readWriteTx.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
+        final YangInstanceIdentifier carPath = CarsModel.newCarPath("car" + carIndex);
+        readWriteTx.write(carPath, cars.getLast());
 
-        // FIXME: CONTROLLER-2017: ClientBackedDataStore reports only 4 transactions
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
+        // There is a difference here between implementations: tell-based protocol will postpone write operations until
+        // either a read is made or the transaction is submitted. Here we flush out the last transaction, so we see
+        // three transactions, not just the ones we have started committing
+        assertTrue(readWriteTx.exists(carPath).get(2, TimeUnit.SECONDS));
+        final int earlyTxCount = DistributedDataStore.class.isAssignableFrom(testParameter) ? 5 : 3;
         IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-            stats -> assertEquals("getReadWriteTransactionCount", 5, stats.getReadWriteTransactionCount()));
+            stats -> assertEquals("getReadWriteTransactionCount", earlyTxCount, stats.getReadWriteTransactionCount()));
 
         // Disable elections on the leader so it switches to follower.
 
@@ -996,6 +1012,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerTestKit.doCommit(writeTx3Cohort);
         followerTestKit.doCommit(writeTx4Cohort);
         followerTestKit.doCommit(rwTxCohort);
+
+        // At this point everything is committed and the follower datastore should see 5 transactions, but leader should
+        // only see the initial transactions
+        IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
+            stats -> assertEquals("getReadWriteTransactionCount", earlyTxCount, stats.getReadWriteTransactionCount()));
+        IntegrationTestKit.verifyShardStats(followerDistributedDataStore, "cars",
+            stats -> assertEquals("getReadWriteTransactionCount", 5, stats.getReadWriteTransactionCount()));
 
         DOMStoreReadTransaction readTx = leaderDistributedDataStore.newReadOnlyTransaction();
         verifyCars(readTx, cars.toArray(new MapEntryNode[cars.size()]));
