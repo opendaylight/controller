@@ -170,6 +170,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
     private ActorSystem follower2System;
+    private int earlyTxCount;
 
     private final DatastoreContext.Builder leaderDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(2);
@@ -198,6 +199,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         follower2System = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member3"));
         Cluster.get(follower2System).join(MEMBER_1_ADDRESS);
+
+        earlyTxCount = DistributedDataStore.class.isAssignableFrom(testParameter) ? 5 : 2;
     }
 
     @After
@@ -937,8 +940,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
 
         // Prepare another WO that writes to a single shard and thus will be directly committed on ready. This
-        // tx writes 5 cars so 2 BatchedModidifications messages will be sent initially and cached in the
-        // leader shard (with shardBatchedModificationCount set to 2). The 3rd BatchedModidifications will be
+        // tx writes 5 cars so 2 BatchedModifications messages will be sent initially and cached in the
+        // leader shard (with shardBatchedModificationCount set to 2). The 3rd BatchedModifications will be
         // sent on ready.
 
         final DOMStoreWriteTransaction writeTx3 = followerDistributedDataStore.newWriteOnlyTransaction();
@@ -947,7 +950,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             writeTx3.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         }
 
-        // Prepare another WO that writes to a single shard. This will send a single BatchedModidifications
+        // Prepare another WO that writes to a single shard. This will send a single BatchedModifications
         // message on ready.
 
         final DOMStoreWriteTransaction writeTx4 = followerDistributedDataStore.newWriteOnlyTransaction();
@@ -955,17 +958,15 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx4.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
 
-        // Prepare a RW tx that will create a tx actor and send a ForwardedReadyTransaciton message to the
+        // Prepare a RW tx that will create a tx actor and send a ForwardedReadyTransaction message to the
         // leader shard on ready.
 
         final DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         readWriteTx.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
 
-        // FIXME: CONTROLLER-2017: ClientBackedDataStore reports only 4 transactions
-        assumeTrue(DistributedDataStore.class.isAssignableFrom(testParameter));
         IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars",
-            stats -> assertEquals("getReadWriteTransactionCount", 5, stats.getReadWriteTransactionCount()));
+            stats -> assertEquals("getReadWriteTransactionCount", earlyTxCount, stats.getReadWriteTransactionCount()));
 
         // Disable elections on the leader so it switches to follower.
 

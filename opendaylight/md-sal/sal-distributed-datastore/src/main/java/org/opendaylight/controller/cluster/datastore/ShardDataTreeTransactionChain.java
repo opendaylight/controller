@@ -54,6 +54,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
+        dataTree.getStats().incrementReadOnlyTransactionCount();
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
@@ -61,6 +62,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
+        dataTree.getStats().incrementReadWriteTransactionCount();
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
