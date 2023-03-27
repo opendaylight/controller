@@ -41,7 +41,7 @@
     <dependency>
       <groupId>com.esotericsoftware</groupId>
       <artifactId>kryo</artifactId>
-      <version>4.0.2</version>
+      <version>5.4.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -59,7 +59,7 @@
     <dependency>
       <groupId>org.objenesis</groupId>
       <artifactId>objenesis</artifactId>
-      <version>2.6</version>
+      <version>3.3</version>
       <scope>provided</scope>
     </dependency>
 

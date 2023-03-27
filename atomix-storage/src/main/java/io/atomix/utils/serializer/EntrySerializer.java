@@ -37,7 +37,7 @@ final class EntrySerializer<T> extends Serializer<T> {
     }
 
     @Override
-    public T read(final Kryo kryo, final Input input, final Class<T> type) {
+    public T read(final Kryo kryo, final Input input, final Class<? extends T> type) {
         try {
             return serdes.read(new KryoEntryInput(kryo, input, javaSerializer));
         } catch (IOException e) {
