@@ -23,9 +23,8 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
-import com.esotericsoftware.kryo.pool.KryoCallback;
-import com.esotericsoftware.kryo.pool.KryoFactory;
-import com.esotericsoftware.kryo.pool.KryoPool;
+import com.esotericsoftware.kryo.util.DefaultInstantiatorStrategy;
+import com.esotericsoftware.kryo.util.Pool;
 import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.JournalSerdes;
 import java.io.ByteArrayInputStream;
@@ -41,7 +40,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Pool of Kryo instances, with classes pre-registered.
  */
-final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
+final class KryoJournalSerdes extends Pool<Kryo> implements JournalSerdes {
     /**
      * Default buffer size used for serialization.
      *
@@ -57,8 +56,6 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     static final String NO_NAME = "(no name)";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KryoJournalSerdes.class);
-
-    private final KryoPool kryoPool = new KryoPool.Builder(this).softReferences().build();
 
     private final KryoOutputPool kryoOutputPool = new KryoOutputPool();
     private final KryoInputPool kryoInputPool = new KryoInputPool();
@@ -78,12 +75,13 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
             final List<RegisteredType> registeredTypes,
             final ClassLoader classLoader,
             final String friendlyName) {
+        super(true, true, Runtime.getRuntime().availableProcessors());
         this.registeredTypes = List.copyOf(registeredTypes);
         this.classLoader = requireNonNull(classLoader);
         this.friendlyName = requireNonNull(friendlyName);
 
         // Pre-populate with a single instance
-        release(create());
+        free(obtain());
     }
 
     @Override
@@ -93,22 +91,27 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
 
     @Override
     public byte[] serialize(final Object obj, final int bufferSize) {
-        return kryoOutputPool.run(output -> kryoPool.run(kryo -> {
-            kryo.writeClassAndObject(output, obj);
-            output.flush();
-            return output.getByteArrayOutputStream().toByteArray();
-        }), bufferSize);
+        return kryoOutputPool.run(output -> {
+            Kryo kryo = obtain();
+            try {
+                kryo.writeClassAndObject(output, obj);
+                output.flush();
+                return output.getByteArrayOutputStream().toByteArray();
+            } finally {
+                free(kryo);
+            }
+        }, bufferSize);
     }
 
     @Override
     public void serialize(final Object obj, final ByteBuffer buffer) {
         ByteBufferOutput out = new ByteBufferOutput(buffer);
-        Kryo kryo = borrow();
+        Kryo kryo = obtain();
         try {
             kryo.writeClassAndObject(out, obj);
             out.flush();
         } finally {
-            release(kryo);
+            free(kryo);
         }
     }
 
@@ -120,37 +123,39 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     @Override
     public void serialize(final Object obj, final OutputStream stream, final int bufferSize) {
         ByteBufferOutput out = new ByteBufferOutput(stream, bufferSize);
-        Kryo kryo = borrow();
+        Kryo kryo = obtain();
         try {
             kryo.writeClassAndObject(out, obj);
             out.flush();
         } finally {
-            release(kryo);
+            free(kryo);
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T deserialize(final byte[] bytes) {
-        return kryoInputPool.run(input -> {
+        return (T) kryoInputPool.run(input -> {
             input.setInputStream(new ByteArrayInputStream(bytes));
-            return kryoPool.run(kryo -> {
-                @SuppressWarnings("unchecked")
-                T obj = (T) kryo.readClassAndObject(input);
-                return obj;
-            });
+            Kryo kryo = obtain();
+            try {
+                return kryo.readClassAndObject(input);
+            } finally {
+                free(kryo);
+            }
         }, DEFAULT_BUFFER_SIZE);
     }
 
     @Override
     public <T> T deserialize(final ByteBuffer buffer) {
         ByteBufferInput in = new ByteBufferInput(buffer);
-        Kryo kryo = borrow();
+        Kryo kryo = obtain();
         try {
             @SuppressWarnings("unchecked")
             T obj = (T) kryo.readClassAndObject(in);
             return obj;
         } finally {
-            release(kryo);
+            free(kryo);
         }
     }
 
@@ -162,13 +167,13 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     @Override
     public <T> T deserialize(final InputStream stream, final int bufferSize) {
         ByteBufferInput in = new ByteBufferInput(stream, bufferSize);
-        Kryo kryo = borrow();
+        Kryo kryo = obtain();
         try {
             @SuppressWarnings("unchecked")
             T obj = (T) kryo.readClassAndObject(in);
             return obj;
         } finally {
-            release(kryo);
+            free(kryo);
         }
     }
 
@@ -178,7 +183,7 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
      * @return Kryo instance
      */
     @Override
-    public Kryo create() {
+    protected Kryo create() {
         LOGGER.trace("Creating Kryo instance for {}", this);
         Kryo kryo = new Kryo();
         kryo.setClassLoader(classLoader);
@@ -186,7 +191,7 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
 
         // TODO rethink whether we want to use StdInstantiatorStrategy
         kryo.setInstantiatorStrategy(
-            new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
+            new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
 
         int id = INITIAL_ID;
         for (RegisteredType registeredType : registeredTypes) {
@@ -244,21 +249,6 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
                 LOGGER.trace("{} registered as {}", r.getType(), r.getId());
             }
         }
-    }
-
-    @Override
-    public Kryo borrow() {
-        return kryoPool.borrow();
-    }
-
-    @Override
-    public void release(final Kryo kryo) {
-        kryoPool.release(kryo);
-    }
-
-    @Override
-    public <T> T run(final KryoCallback<T> callback) {
-        return kryoPool.run(callback);
     }
 
     @Override
