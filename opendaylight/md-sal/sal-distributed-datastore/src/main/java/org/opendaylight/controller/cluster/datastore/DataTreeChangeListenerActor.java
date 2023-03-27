@@ -60,9 +60,9 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         LOG.debug("{}: Notifying onInitialData to listener {}", logContext, listener);
 
         try {
-            this.listener.onInitialData();
+            listener.onInitialData();
         } catch (Exception e) {
-            LOG.error("{}: Error notifying listener {}", logContext, this.listener, e);
+            LOG.error("{}: Error notifying listener {}", logContext, listener, e);
         }
     }
 
@@ -75,15 +75,21 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
             return;
         }
 
-        LOG.debug("{}: Sending {} change notification(s) {} to listener {}", logContext, message.getChanges().size(),
-                message.getChanges(), listener);
+        final var changes = message.getChanges();
+        LOG.debug("{}: Sending {} change notification(s) to listener {}", logContext, changes.size(), listener);
+        if (LOG.isTraceEnabled() && !changes.isEmpty()) {
+            LOG.trace("{}: detailed change follow", logContext);
+            for (int i = 0, size = changes.size(); i < size; ++i) {
+                LOG.trace("{}: change {}: {}", logContext, i, changes.get(i));
+            }
+        }
 
         notificationCount++;
 
         try {
-            this.listener.onDataTreeChanged(message.getChanges());
+            listener.onDataTreeChanged(changes);
         } catch (Exception e) {
-            LOG.error("{}: Error notifying listener {}", logContext, this.listener, e);
+            LOG.error("{}: Error notifying listener {}", logContext, listener, e);
         }
 
         // TODO: do we really need this?
