@@ -80,13 +80,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>reflectasm</artifactId>
-            <version>1.11.8</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>5.2</version>
+            <version>1.11.9</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -128,7 +122,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                             *;inline=true;groupId=io.atomix,
                             *;inline=true;groupId=com.esotericsoftware,
                             *;inline=true;groupId=org.objenesis,
-                            *;inline=true;groupId=org.ow2.asm,
                         </Embed-Dependency>
                     </instructions>
                 </configuration>
