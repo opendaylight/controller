@@ -619,12 +619,27 @@ public class Follower extends AbstractRaftActorBehavior {
 
         leaderId = installSnapshot.getLeaderId();
 
+        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
+
+        // in case we are already applying/persisting a Snapshot, refuse any new InstallSnapshot messages. These will
+        // contain the last chunk, if the current Snapshot takes long enough. Processing the last chunk again would
+        // create a new SnapshotTracker, addChunk() would fail and InstallSnapshotReply(chunkIndex == -1) would
+        // be sent to the Leader - resetting the installation and having the Leader send the same Snapshot all over
+        // again. We would start collecting all the chunks again, which may end-up in us retaining 2 Snapshots
+        // in memory at the same time (CONTROLLER-2074)
+        if (context.getSnapshotManager().isApplying()) {
+            log.warn("{}: received InstallSnapshot(chunkIndex = {}, lastIncludedIndex = {}, lastIncludedTerm = {}) "
+                            + "while a Snapshot is currently being applied. This can happen if the Snapshot is very "
+                            + "large and the last chunk times-out due to long installation", logName(),
+                    installSnapshot.getChunkIndex(), installSnapshot.getLastIncludedIndex(),
+                    installSnapshot.getLastIncludedTerm());
+            return;
+        }
+
         if (snapshotTracker == null) {
             snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId(),
                     context);
         }
-
-        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
 
         try {
             final InstallSnapshotReply reply = new InstallSnapshotReply(
