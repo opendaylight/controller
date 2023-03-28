@@ -619,12 +619,32 @@ public class Follower extends AbstractRaftActorBehavior {
 
         leaderId = installSnapshot.getLeaderId();
 
+        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
+
+        // In the case we are already applying/persisting a Snapshot, refuse any new InstallSnapshot messages, so we do
+        // not retain 2 Snapshots in memory at the same time(CONTROLLER-2074). At this stage we may receive a new chunk
+        // in 2 cases:
+        //    1) The chunk comes from a different Leader. Either there was a Leader change, previous Leader became
+        //       Reachable again, or there was some sort of partition blocking this InstallSnapshot message until now.
+        //       We can update the SyncStatus with the info about the new Leader, but we still won't accept his
+        //       Snapshot, until we finish processing the current one.
+        //    2) It is the last chunk of the current Snapshot resent by the Leader due to chunk-timeout. This happens
+        //       if it takes us too long to apply/persist the Snapshot. Since we're just dropping the message and not
+        //       replying, the Leader won't reset the entire Snapshot Install process and simply wait for us to finish
+        //       the installation. In this case updating the syncStatus doesn't change anything.
+        if (context.getSnapshotManager().isApplying()) {
+            log.warn("{}: received InstallSnapshot(chunkIndex = {}, lastIncludedIndex = {}, lastIncludedTerm = {}) "
+                            + "while a Snapshot is currently being applied. This can happen if the Snapshot is very "
+                            + "large and the last chunk times-out due to long installation", logName(),
+                    installSnapshot.getChunkIndex(), installSnapshot.getLastIncludedIndex(),
+                    installSnapshot.getLastIncludedTerm());
+            return;
+        }
+
         if (snapshotTracker == null) {
             snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId(),
                     context);
         }
-
-        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
 
         try {
             final InstallSnapshotReply reply = new InstallSnapshotReply(
