@@ -8,13 +8,17 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
+import akka.persistence.SnapshotMetadata;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,6 +106,57 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
     }
+
+    private void setupLeaderWithSingleFollower(final DefaultConfigParamsImpl leaderConfig) {
+        leaderId = factory.generateActorId("leader");
+        follower1Id = factory.generateActorId("follower");
+
+        // Setup the persistent journal for the leader - just an election term and no journal/snapshots.
+        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(initialTerm, leaderId));
+
+        // Create actors for the leader and follower
+        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+                newFollowerConfigParams());
+
+        final Map<String, String> leaderPeerAddresses = Map.of(follower1Id, follower1Actor.path().toString());
+
+        leaderConfigParams = leaderConfig;
+        leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
+
+        waitUntilLeader(leaderActor);
+
+        leaderContext = leaderActor.underlyingActor().getRaftActorContext();
+        leader = leaderActor.underlyingActor().getCurrentBehavior();
+
+        follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
+        follower1 = follower1Actor.underlyingActor().getCurrentBehavior();
+
+        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        assertTrue("Current term > " + initialTerm, currentTerm > initialTerm);
+
+        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
+
+        testLog.info("Leader created and elected");
+    }
+
+    private void setupSecondLeaderForSingleFollower(final DefaultConfigParamsImpl leaderConfig) {
+        leaderId = factory.generateActorId("leader");
+
+        // Setup the persistent journal for the leader - just an election term and no journal/snapshots.
+        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(currentTerm, leaderId));
+
+        follower1Actor.underlyingActor().setPeerAddress(leaderId, testActorPath(leaderId));
+
+        final Map<String, String> leaderPeerAddresses = Map.of(follower1Id, follower1Actor.path().toString());
+        leaderConfigParams = leaderConfig;
+        leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
+
+        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        testLog.info("Leader created and elected");
+    }
+
 
     /**
      * Send 2 payload instances with follower 2 lagging then resume the follower and verifies it gets
@@ -703,6 +758,223 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
     }
 
     /**
+     * Test whether the Follower can receive second Snapshot while applying another one - thus retaining 2 Snapshots in
+     * memory (CONTROLLER-2074).
+     */
+    @Test
+    public void testDuplicativeSnapshotReplicationWhileSnapshotIsBeingApplied() {
+        testLog.info("testDuplicativeSnapshotReplicationWhileSnapshotIsBeingApplied starting");
+
+        leaderConfigParams = newLeaderConfigParams();
+        leaderConfigParams.setSnapshotBatchCount(4);
+        leaderConfigParams.setSnapshotChunkSize(100);
+        // use custom raft policy allowing state-modifications without consensus, as this test contains only 1 Follower
+        leaderConfigParams.setCustomRaftPolicyImplementationClass(
+                "org.opendaylight.controller.cluster.raft.policy.IndependentLeaderTestRaftPolicy");
+        setupLeaderWithSingleFollower(leaderConfigParams);
+        sendInitialPayloadsReplicatedToSingleFollower(Arrays.asList("zero", "one"));
+
+        // Configure follower to drop messages and lag.
+        follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
+
+        // Sleep for at least the election timeout interval so follower is deemed inactive by the leader.
+        Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
+                TimeUnit.MILLISECONDS);
+
+        // Send 5 payloads - the second should cause a leader snapshot.
+        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        sendPayloadData(leaderActor, "three");
+        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        sendPayloadData(leaderActor, "five");
+        final MockPayload payload6 = sendPayloadData(leaderActor, "six");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        // Verify the leader got consensus and applies each log entry even though the Follower didn't respond.
+        final List<ApplyState> applyStates2 =
+            MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
+        verifyApplyState(applyStates2.get(0), leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
+        verifyApplyState(applyStates2.get(2), leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
+        verifyApplyState(applyStates2.get(4), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+
+        // Send another payload to trigger a second leader snapshot.
+        sendPayloadData(leaderActor, "seven");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+        MessageCollectorActor.clearMessages(follower1CollectorActor);
+
+        // Re-enable AppendEntries on the Follower.
+        follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
+        // Drop SaveSnapshotSuccess to simulate prolonged Snapshot-apply/persistence
+        follower1Actor.underlyingActor().startDropMessages(SaveSnapshotSuccess.class);
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        // verify the Follower begins to receive Snapshot chunks
+        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(follower1CollectorActor,
+                InstallSnapshot.class);
+        assertEquals("InstallSnapshot getTerm", currentTerm, installSnapshot.getTerm());
+        assertEquals("InstallSnapshot getLeaderId", leaderId, installSnapshot.getLeaderId());
+        assertEquals("InstallSnapshot getChunkIndex", 1, installSnapshot.getChunkIndex());
+        assertEquals("InstallSnapshot getTotalChunks", 5, installSnapshot.getTotalChunks());
+
+        // all chunks should be followed by successful replies except for the last one. The reply for the last chunk
+        // will be delivered after the Snapshot-apply/persistence is finished.
+        final List<InstallSnapshotReply> installSnapshotReplies = MessageCollectorActor.expectMatching(
+                leaderCollectorActor, InstallSnapshotReply.class, 4);
+        assertSuccessfulInstallSnapshotReply(installSnapshotReplies);
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+
+        // keep the Snapshot-apply/persistence hanging for 10 seconds
+        Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
+        // enable the Follower to receive SaveSnapshotSuccess, which marks the end of Snapshot-apply/persistence stage
+        follower1Actor.underlyingActor().stopDropMessages(SaveSnapshotSuccess.class);
+        follower1Actor.tell(SaveSnapshotSuccess.apply(
+                SnapshotMetadata.apply(follower1Id, 6, System.nanoTime())), follower1Actor);
+
+        // verify the Follower received the last chunk repeatedly
+        MessageCollectorActor.expectMatching(follower1CollectorActor, InstallSnapshot.class, 4,
+                chunk -> chunk.getChunkIndex() == 5);
+
+        // verify that no failed InstallSnapshotReplies with chunkIndex == -1 were sent from the Follower. This
+        // means the Follower rejected every attempt of the Leader to send the last (delayed) chunk. This will stop the
+        // Leader from resetting the installation and replicating a new copy of this Snapshot
+        final InstallSnapshotReply installSnapshotReply =
+                MessageCollectorActor.expectFirstMatching(leaderCollectorActor, InstallSnapshotReply.class);
+        assertNotEquals(-1, installSnapshotReply.getChunkIndex());
+
+        // verify the Leader received the Reply for the last chunk.
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, InstallSnapshotReply.class,
+                lastReply -> lastReply.isSuccess() && lastReply.getChunkIndex() == 5);
+
+        testLog.info("testDuplicativeSnapshotReplicationWhileSnapshotIsBeingApplied complete");
+    }
+
+    /**
+     * Test whether the Follower rejects snapshot from another leader until it finishes processing
+     * snapshots from the current one (CONTROLLER-2074).
+     */
+    @Test
+    public void testReceivingSnapshotDuringInstallSnapshotFromDifferentLeader() {
+        testLog.info("testReceivingSnapshotDuringInstallSnapshotFromDifferentLeader");
+
+        leaderConfigParams = newLeaderConfigParams();
+        leaderConfigParams.setSnapshotBatchCount(4);
+        leaderConfigParams.setSnapshotChunkSize(100);
+        // use custom raft policy allowing state-modifications without consensus, as this test contains only 1 Follower
+        leaderConfigParams.setCustomRaftPolicyImplementationClass(
+                "org.opendaylight.controller.cluster.raft.policy.IndependentLeaderTestRaftPolicy");
+
+        setupLeaderWithSingleFollower(leaderConfigParams);
+        sendInitialPayloadsReplicatedToSingleFollower(Arrays.asList("zero", "one"));
+
+        // Configure follower to drop messages and lag.
+        follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
+
+        // Sleep for at least the election timeout interval so follower is deemed inactive by the leader.
+        Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
+                TimeUnit.MILLISECONDS);
+
+        // Send 5 payloads - the second should cause a leader snapshot.
+        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        sendPayloadData(leaderActor, "three");
+        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        sendPayloadData(leaderActor, "five");
+        final MockPayload payload6 = sendPayloadData(leaderActor, "six");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        // Verify the leader got consensus and applies each log entry even though the Follower didn't respond.
+        final List<ApplyState> applyStates2 =
+            MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
+        verifyApplyState(applyStates2.get(0), leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
+        verifyApplyState(applyStates2.get(2), leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
+        verifyApplyState(applyStates2.get(4), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+
+        // Re-enable AppendEntries on the Follower.
+        follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
+        // Drop SaveSnapshotSuccess to simulate prolonged Snapshot-apply/persistence
+        follower1Actor.underlyingActor().startDropMessages(SaveSnapshotSuccess.class);
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        // verify the Follower begins to receive Snapshot chunks
+        final InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(follower1CollectorActor,
+                InstallSnapshot.class);
+        assertEquals("InstallSnapshot getTerm", currentTerm, installSnapshot.getTerm());
+        assertEquals("InstallSnapshot getLeaderId", leaderId, installSnapshot.getLeaderId());
+        assertEquals("InstallSnapshot getChunkIndex", 1, installSnapshot.getChunkIndex());
+        assertEquals("InstallSnapshot getTotalChunks", 5, installSnapshot.getTotalChunks());
+
+        // all chunks should be followed by successful replies except for the last one. The reply for the last chunk
+        // will be delivered after the Snapshot-apply/persistence is finished.
+        final List<InstallSnapshotReply> installSnapshotReplies = MessageCollectorActor.expectMatching(
+                leaderCollectorActor, InstallSnapshotReply.class, 4);
+        assertSuccessfulInstallSnapshotReply(installSnapshotReplies);
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+        MessageCollectorActor.clearMessages(follower1CollectorActor);
+
+        // initiate other leader
+        setupSecondLeaderForSingleFollower(leaderConfigParams);
+
+        // Send 3 payloads from another leader - the second should cause a leader snapshot.
+        sendPayloadData(leaderActor, "eight");
+        sendPayloadData(leaderActor, "nine");
+        sendPayloadData(leaderActor, "ten");
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        // Verify the other leader was rejected and stuck on applying the first chunk.
+        MessageCollectorActor.expectMatching(follower1CollectorActor, InstallSnapshot.class, 3,
+                (chunk) -> chunk.getChunkIndex() == 1);
+
+        // enable the Follower to receive SaveSnapshotSuccess, which marks the end of Snapshot-apply/persistence stage
+        // of the previous Snapshot
+        follower1Actor.underlyingActor().stopDropMessages(SaveSnapshotSuccess.class);
+        follower1Actor.tell(SaveSnapshotSuccess.apply(
+                SnapshotMetadata.apply(follower1Id, 6, System.nanoTime())), follower1Actor);
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+        MessageCollectorActor.clearMessages(follower1CollectorActor);
+
+        // test rather new leader can apply InstallSnapshot after the end of Snapshot-apply/persistence stage
+        // send 5 payloads from another leader - the second should cause a leader snapshot.
+        sendPayloadData(leaderActor, "eleven");
+        sendPayloadData(leaderActor, "twelve");
+        sendPayloadData(leaderActor, "thirteen");
+        sendPayloadData(leaderActor, "fourteen");
+        sendPayloadData(leaderActor, "fifteen");
+
+        final List<InstallSnapshotReply> installSnapshotRepliesFromNewLeader = MessageCollectorActor.expectMatching(
+                leaderCollectorActor, InstallSnapshotReply.class, 4);
+        currentTerm = leaderActor.underlyingActor().getCurrentTerm();
+        assertSuccessfulInstallSnapshotReply(installSnapshotRepliesFromNewLeader);
+
+        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+
+        testLog.info("testReceivingSnapshotDuringInstallSnapshotFromDifferentLeader complete");
+    }
+
+    private void assertSuccessfulInstallSnapshotReply(List<InstallSnapshotReply> installSnapshotReplies) {
+        int index = 1;
+        for (InstallSnapshotReply installSnapshotReply : installSnapshotReplies) {
+            assertEquals("InstallSnapshotReply getTerm", currentTerm, installSnapshotReply.getTerm());
+            assertEquals("InstallSnapshotReply getChunkIndex", index++, installSnapshotReply.getChunkIndex());
+            assertEquals("InstallSnapshotReply getFollowerId", follower1Id,
+                    installSnapshotReply.getFollowerId());
+            assertTrue("InstallSnapshotReply isSuccess", installSnapshotReply.isSuccess());
+        }
+    }
+
+
+    /**
      * Do another round of payloads and snapshot to verify replicatedToAllIndex gets back on track and
      * snapshots works as expected after doing a follower snapshot. In this step we don't lag a follower.
      */
@@ -885,5 +1157,33 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
         MessageCollectorActor.clearMessages(follower2CollectorActor);
+    }
+
+    private void sendInitialPayloadsReplicatedToSingleFollower(final List<String> data) {
+
+        // Send the payloads.
+        for (final String d : data) {
+            expSnapshotState.add(sendPayloadData(leaderActor, d));
+        }
+
+        final int numEntries = data.size();
+
+        // Verify the Leader applies each initial log entry
+        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor,
+                ApplyState.class, numEntries);
+        for (int i = 0; i < expSnapshotState.size(); i++) {
+            MockPayload payload = expSnapshotState.get(i);
+            verifyApplyState(applyStates.get(i), leaderCollectorActor, payload.toString(), currentTerm, i, payload);
+        }
+
+        // Verify the Follower applies each initial log entry.
+        applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, numEntries);
+        for (int i = 0; i < expSnapshotState.size(); i++) {
+            final MockPayload payload = expSnapshotState.get(i);
+            verifyApplyState(applyStates.get(i), null, null, currentTerm, i, payload);
+        }
+
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+        MessageCollectorActor.clearMessages(follower1CollectorActor);
     }
 }
