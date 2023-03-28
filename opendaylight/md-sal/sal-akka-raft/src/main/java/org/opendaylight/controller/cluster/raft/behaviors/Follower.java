@@ -619,12 +619,21 @@ public class Follower extends AbstractRaftActorBehavior {
 
         leaderId = installSnapshot.getLeaderId();
 
+        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
+
+        if (context.getSnapshotManager().isApplying()) {
+            log.warn("{}: received InstallSnapshot(chunkIndex = {}, lastIncludedIndex = {}, lastIncludedTerm = {}) "
+                            + "while a Snapshot is currently being applied. This can happen if the Snapshot is very "
+                            + "large and the last chunk times-out due to long installation", logName(),
+                    installSnapshot.getChunkIndex(), installSnapshot.getLastIncludedIndex(),
+                    installSnapshot.getLastIncludedTerm());
+            return;
+        }
+
         if (snapshotTracker == null) {
             snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId(),
                     context);
         }
-
-        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
 
         try {
             final InstallSnapshotReply reply = new InstallSnapshotReply(
