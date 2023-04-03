@@ -18,11 +18,9 @@ import akka.actor.Status;
 import akka.persistence.JournalProtocol;
 import akka.persistence.SnapshotProtocol;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -454,7 +452,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-        OnDemandRaftState.AbstractBuilder<?, ?> builder = newOnDemandRaftStateBuilder()
+        final var builder = newOnDemandRaftStateBuilder()
                 .commitIndex(context.getCommitIndex())
                 .currentTerm(context.getTermInformation().getCurrentTerm())
                 .inMemoryJournalDataSize(replicatedLog().dataSize())
@@ -481,17 +479,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         if (getCurrentBehavior() instanceof AbstractLeader leader) {
-            Collection<String> followerIds = leader.getFollowerIds();
-            List<FollowerInfo> followerInfoList = new ArrayList<>(followerIds.size());
-            for (String id : followerIds) {
-                final FollowerLogInformation info = leader.getFollower(id);
-                followerInfoList.add(new FollowerInfo(id, info.getNextIndex(), info.getMatchIndex(),
-                        info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(
-                            TimeUnit.NANOSECONDS.toMillis(info.nanosSinceLastActivity())),
-                        context.getPeerInfo(info.getId()).isVoting()));
-            }
-
-            builder.followerInfoList(followerInfoList);
+            builder.followerInfoList(leader.getFollowerIds().stream()
+                .map(leader::getFollower)
+                .map(info -> new FollowerInfo(info.getId(), info.getNextIndex(), info.getMatchIndex(),
+                    info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(
+                        TimeUnit.NANOSECONDS.toMillis(info.nanosSinceLastActivity())),
+                    context.getPeerInfo(info.getId()).isVoting()))
+                .collect(ImmutableList.toImmutableList()));
         }
 
         sender().tell(builder.build(), self());
