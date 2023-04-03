@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
 /**
@@ -18,7 +14,7 @@ import org.opendaylight.yangtools.util.AbstractStringIdentifier;
  *
  * @author Thomas Pantelis
  */
-class FollowerIdentifier extends AbstractStringIdentifier<FollowerIdentifier> {
+final class FollowerIdentifier extends AbstractStringIdentifier<FollowerIdentifier> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,34 +25,5 @@ class FollowerIdentifier extends AbstractStringIdentifier<FollowerIdentifier> {
     @java.io.Serial
     private Object writeReplace() {
         return new FI(getValue());
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private FollowerIdentifier identifier;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            identifier = new FollowerIdentifier((String) in.readObject());
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return identifier;
-        }
     }
 }
