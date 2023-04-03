@@ -13,6 +13,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public final class InstallSnapshotReply extends AbstractRaftRPC {
+    @java.io.Serial
     private static final long serialVersionUID = 642227896390779503L;
 
     // The followerId - this will be used to figure out which follower is

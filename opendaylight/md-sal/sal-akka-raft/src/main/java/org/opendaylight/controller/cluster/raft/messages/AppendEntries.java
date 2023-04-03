@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
  * Invoked by leader to replicate log entries (§5.3); also used as heartbeat (§5.2).
  */
 public final class AppendEntries extends AbstractRaftRPC {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // So that follower can redirect clients

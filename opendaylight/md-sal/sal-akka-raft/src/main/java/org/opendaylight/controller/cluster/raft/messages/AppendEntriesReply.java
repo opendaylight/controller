@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
  * Reply for the AppendEntries message.
  */
 public final class AppendEntriesReply extends AbstractRaftRPC {
+    @java.io.Serial
     private static final long serialVersionUID = -7487547356392536683L;
 
     // true if follower contained entry matching
