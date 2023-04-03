@@ -53,11 +53,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Per-connection representation of a local history. This class handles state replication across a single connection.
- *
- * @author Robert Varga
  */
-abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
-    private abstract static class AbstractLocal extends ProxyHistory {
+abstract sealed class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
+    private abstract static sealed class AbstractLocal extends ProxyHistory {
         private final ReadOnlyDataTree dataTree;
 
         AbstractLocal(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
@@ -71,7 +69,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
     }
 
-    private abstract static class AbstractRemote extends ProxyHistory {
+    private abstract static sealed class AbstractRemote extends ProxyHistory {
         AbstractRemote(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
             super(parent, connection, identifier);
