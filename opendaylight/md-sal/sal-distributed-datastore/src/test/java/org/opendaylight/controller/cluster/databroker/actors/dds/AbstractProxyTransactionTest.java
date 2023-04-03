@@ -14,6 +14,7 @@ import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,6 +61,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -95,6 +98,11 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     private DataTreeSnapshot snapshot;
     @Mock
     private AbstractClientHistory history;
+    @Mock
+    private DatastoreContext datastoreContext;
+    @Mock
+    private ActorUtils actorUtils;
+
     private ActorSystem system;
     private TestProbe backendProbe;
     private TestProbe clientContextProbe;
@@ -113,9 +121,16 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
+
         final ProxyHistory parent = ProxyHistory.createClient(history, connection, HISTORY_ID);
         transaction = createTransaction(parent, TestUtils.TRANSACTION_ID, snapshot);
         tester = new TransactionTester<>(transaction, connection, backendProbe);
+    }
+
+    protected final void mockForRemote() {
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
+        doReturn(actorUtils).when(history).actorUtils();
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
@@ -322,6 +337,10 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         final TestProbe clientContextProbe = new TestProbe(system, "remoteClientContext");
         final TestProbe backendProbe = new TestProbe(system, "remoteBackend");
         final AbstractClientHistory history = mock(AbstractClientHistory.class);
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
+        doReturn(actorUtils).when(history).actorUtils();
+
         final ClientActorContext context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
         final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
@@ -329,6 +348,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         final AbstractClientConnection<ShardBackendInfo> connection =
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
         final ProxyHistory proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
+
         final RemoteProxyTransaction transaction =
                 new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false, false);
         return new TransactionTester<>(transaction, connection, backendProbe);

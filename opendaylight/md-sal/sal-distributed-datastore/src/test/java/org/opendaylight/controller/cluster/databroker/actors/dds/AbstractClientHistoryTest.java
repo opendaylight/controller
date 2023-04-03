@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -42,6 +43,8 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
 
     @Mock
     private DataTree tree;
+    @Mock
+    private DatastoreContext datastoreContext;
 
     protected abstract T object();
 
@@ -176,13 +179,16 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
         assertNull(reconnectCohort);
     }
 
-    protected static ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
+    protected final ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
         final ActorUtils mock = mock(ActorUtils.class);
         final Promise<PrimaryShardInfo> promise = new DefaultPromise<>();
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
         promise.success(shardInfo);
         doReturn(promise.future()).when(mock).findPrimaryShardAsync(any());
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(mock).getDatastoreContext();
+
         return mock;
     }
 }

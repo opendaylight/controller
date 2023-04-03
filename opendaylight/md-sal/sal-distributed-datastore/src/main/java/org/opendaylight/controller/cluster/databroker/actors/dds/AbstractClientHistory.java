@@ -123,7 +123,8 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         return client.resolveAllShards();
     }
 
-    final ActorUtils actorUtils() {
+    // Non-final for testing
+    ActorUtils actorUtils() {
         return client.actorUtils();
     }
 
