@@ -237,7 +237,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @return A state snapshot
      */
     @NonNull ShardDataTreeSnapshot takeStateSnapshot() {
-        final NormalizedNode rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
+        final NormalizedNode rootNode = takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
         final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                 ImmutableMap.builder();
 
@@ -279,7 +279,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             }
         }
 
-        final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
+        final DataTreeModification unwrapped = newModification();
         final DataTreeModification mod = wrapper.apply(unwrapped);
         // delete everything first
         mod.delete(YangInstanceIdentifier.empty());
@@ -335,7 +335,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
         final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.acquireCandidate();
-        final DataTreeModification unwrapped = dataTree.takeSnapshot().newModification();
+        final DataTreeModification unwrapped = newModification();
         final PruningDataTreeModification mod = createPruningModification(unwrapped,
             NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().getVersion()) > 0);
 
@@ -401,7 +401,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final TransactionIdentifier identifier = entry.getKey();
         LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
-        final DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        final DataTreeModification mod = newModification();
         // TODO: check version here, which will enable us to perform forward-compatibility transformations
         DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
         mod.ready();
@@ -618,24 +618,29 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return chain;
     }
 
-    final ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
+    final @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         shard.getShardMBean().incrementReadOnlyTransactionCount();
 
         final var historyId = txId.getHistoryId();
-        if (historyId.getHistoryId() == 0) {
-            return new ReadOnlyShardDataTreeTransaction(this, txId, dataTree.takeSnapshot());
-        }
-        return ensureTransactionChain(historyId, null).newReadOnlyTransaction(txId);
+        return historyId.getHistoryId() == 0 ? newStandaloneReadOnlyTransaction(txId)
+            : ensureTransactionChain(historyId, null).newReadOnlyTransaction(txId);
     }
 
-    final ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
+    final @NonNull ReadOnlyShardDataTreeTransaction newStandaloneReadOnlyTransaction(final TransactionIdentifier txId) {
+        return new ReadOnlyShardDataTreeTransaction(this, txId, takeSnapshot());
+    }
+
+    final @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         shard.getShardMBean().incrementReadWriteTransactionCount();
 
         final var historyId = txId.getHistoryId();
-        if (historyId.getHistoryId() == 0) {
-            return new ReadWriteShardDataTreeTransaction(this, txId, dataTree.takeSnapshot().newModification());
-        }
-        return ensureTransactionChain(historyId, null).newReadWriteTransaction(txId);
+        return historyId.getHistoryId() == 0 ? newStandaloneReadWriteTransaction(txId)
+            : ensureTransactionChain(historyId, null).newReadWriteTransaction(txId);
+    }
+
+    final @NonNull ReadWriteShardDataTreeTransaction newStandaloneReadWriteTransaction(
+            final TransactionIdentifier txId) {
+        return new ReadWriteShardDataTreeTransaction(this, txId, newModification());
     }
 
     @VisibleForTesting
@@ -728,8 +733,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final Optional<DataTreeCandidate> readCurrentData() {
-        return dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty())
-                .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), state));
+        return readNode(YangInstanceIdentifier.empty())
+            .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), state));
     }
 
     final void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
@@ -775,7 +780,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @VisibleForTesting
     public final Optional<NormalizedNode> readNode(final YangInstanceIdentifier path) {
-        return dataTree.takeSnapshot().readNode(path);
+        return takeSnapshot().readNode(path);
     }
 
     final DataTreeSnapshot takeSnapshot() {
@@ -784,7 +789,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @VisibleForTesting
     final DataTreeModification newModification() {
-        return dataTree.takeSnapshot().newModification();
+        return takeSnapshot().newModification();
     }
 
     final Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
