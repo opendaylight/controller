@@ -16,11 +16,10 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -110,7 +109,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.lastApplied = lastApplied;
         this.configParams = requireNonNull(configParams);
         this.persistenceProvider = requireNonNull(persistenceProvider);
-        this.log = requireNonNull(logger);
+        log = requireNonNull(logger);
         this.applyStateConsumer = requireNonNull(applyStateConsumer);
 
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
@@ -219,7 +218,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public Logger getLogger() {
-        return this.log;
+        return log;
     }
 
     @Override
@@ -258,7 +257,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     public void updatePeerIds(final ServerConfigurationPayload serverConfig) {
         votingMember = true;
         boolean foundSelf = false;
-        Set<String> currentPeers = new HashSet<>(this.getPeerIds());
+        Set<String> currentPeers = new HashSet<>(getPeerIds());
         for (ServerInfo server : serverConfig.getServerConfig()) {
             if (getId().equals(server.getId())) {
                 foundSelf = true;
@@ -268,16 +267,16 @@ public class RaftActorContextImpl implements RaftActorContext {
             } else {
                 VotingState votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
                 if (!currentPeers.contains(server.getId())) {
-                    this.addToPeers(server.getId(), null, votingState);
+                    addToPeers(server.getId(), null, votingState);
                 } else {
-                    this.getPeerInfo(server.getId()).setVotingState(votingState);
+                    getPeerInfo(server.getId()).setVotingState(votingState);
                     currentPeers.remove(server.getId());
                 }
             }
         }
 
         for (String peerIdToRemove : currentPeers) {
-            this.removePeer(peerIdToRemove);
+            removePeer(peerIdToRemove);
         }
 
         if (!foundSelf) {
@@ -367,7 +366,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setDynamicServerConfigurationInUse() {
-        this.dynamicServerConfiguration = true;
+        dynamicServerConfiguration = true;
     }
 
     @Override
@@ -375,9 +374,9 @@ public class RaftActorContextImpl implements RaftActorContext {
         if (!isDynamicServerConfigurationInUse()) {
             return null;
         }
-        Collection<PeerInfo> peers = getPeers();
-        List<ServerInfo> newConfig = new ArrayList<>(peers.size() + 1);
-        for (PeerInfo peer: peers) {
+        final var peers = getPeers();
+        final var newConfig = ImmutableList.<ServerInfo>builderWithExpectedSize(peers.size() + (includeSelf ? 1 : 0));
+        for (PeerInfo peer : peers) {
             newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
         }
 
@@ -385,7 +384,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             newConfig.add(new ServerInfo(getId(), votingMember));
         }
 
-        return new ServerConfigurationPayload(newConfig);
+        return new ServerConfigurationPayload(newConfig.build());
     }
 
     @Override
@@ -413,7 +412,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     void setCurrentBehavior(final RaftActorBehavior behavior) {
-        this.currentBehavior = requireNonNull(behavior);
+        currentBehavior = requireNonNull(behavior);
     }
 
     @Override

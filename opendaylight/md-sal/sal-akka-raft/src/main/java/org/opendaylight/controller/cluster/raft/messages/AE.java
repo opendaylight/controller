@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -75,7 +75,7 @@ final class AE implements Externalizable {
         short payloadVersion = in.readShort();
 
         int size = in.readInt();
-        var entries = new ArrayList<ReplicatedLogEntry>(size);
+        var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
             hdr = WritableObjects.readLongHeader(in);
             entries.add(new SimpleReplicatedLogEntry(WritableObjects.readFirstLong(in, hdr),
@@ -84,7 +84,7 @@ final class AE implements Externalizable {
 
         String leaderAddress = (String)in.readObject();
 
-        appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
+        appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries.build(), leaderCommit,
                 replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, leaderRaftVersion,
                 leaderAddress);
     }
