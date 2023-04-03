@@ -12,11 +12,10 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
@@ -748,7 +747,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         private boolean updateLocalPeerInfo() {
-            List<ServerInfo> newServerInfoList = newServerInfoList();
+            final var newServerInfoList = newServerInfoList();
 
             // Check if new voting state would leave us with no voting members.
             boolean atLeastOneVoting = false;
@@ -772,20 +771,21 @@ class RaftActorServerConfigurationSupport {
             return true;
         }
 
-        private List<ServerInfo> newServerInfoList() {
-            Map<String, Boolean> serverVotingStatusMap = changeVotingStatusContext.getOperation()
-                    .getServerVotingStatusMap();
-            List<ServerInfo> newServerInfoList = new ArrayList<>();
-            for (String peerId: raftContext.getPeerIds()) {
-                newServerInfoList.add(new ServerInfo(peerId, serverVotingStatusMap.containsKey(peerId)
-                        ? serverVotingStatusMap.get(peerId) : raftContext.getPeerInfo(peerId).isVoting()));
+        private ImmutableList<ServerInfo> newServerInfoList() {
+            final var serverVotingStatusMap = changeVotingStatusContext.getOperation().getServerVotingStatusMap();
+            final var peerInfos = raftContext.getPeers();
+            final var newServerInfoList = ImmutableList.<ServerInfo>builderWithExpectedSize(peerInfos.size() + 1);
+            for (var peerInfo : peerInfos) {
+                final var peerId = peerInfo.getId();
+                final var voting = serverVotingStatusMap.get(peerId);
+                newServerInfoList.add(new ServerInfo(peerId, voting != null ? voting : peerInfo.isVoting()));
             }
 
-            newServerInfoList.add(new ServerInfo(raftContext.getId(), serverVotingStatusMap.containsKey(
-                    raftContext.getId()) ? serverVotingStatusMap.get(raftContext.getId())
-                            : raftContext.isVotingMember()));
+            final var myId = raftContext.getId();
+            final var myVoting = serverVotingStatusMap.get(myId);
+            newServerInfoList.add(new ServerInfo(myId, myVoting != null ? myVoting : raftContext.isVotingMember()));
 
-            return newServerInfoList;
+            return newServerInfoList.build();
         }
     }
 
