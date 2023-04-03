@@ -937,9 +937,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
 
         // Prepare another WO that writes to a single shard and thus will be directly committed on ready. This
-        // tx writes 5 cars so 2 BatchedModidifications messages will be sent initially and cached in the
-        // leader shard (with shardBatchedModificationCount set to 2). The 3rd BatchedModidifications will be
-        // sent on ready.
+        // tx writes 5 cars so 2 BatchedModifications messages will be sent initially and cached in the leader shard
+        // (with shardBatchedModificationCount set to 2). The 3rd BatchedModifications will be sent on ready.
 
         final DOMStoreWriteTransaction writeTx3 = followerDistributedDataStore.newWriteOnlyTransaction();
         for (int i = 1; i <= 5; i++, carIndex++) {
@@ -947,16 +946,16 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             writeTx3.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         }
 
-        // Prepare another WO that writes to a single shard. This will send a single BatchedModidifications
-        // message on ready.
+        // Prepare another WO that writes to a single shard. This will send a single BatchedModifications message
+        // on ready.
 
         final DOMStoreWriteTransaction writeTx4 = followerDistributedDataStore.newWriteOnlyTransaction();
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         writeTx4.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
 
-        // Prepare a RW tx that will create a tx actor and send a ForwardedReadyTransaciton message to the
-        // leader shard on ready.
+        // Prepare a RW tx that will create a tx actor and send a ForwardedReadyTransaction message to the leader shard
+        // on ready.
 
         final DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
