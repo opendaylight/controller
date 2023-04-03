@@ -66,16 +66,9 @@ public final class InstallSnapshotReply extends AbstractRaftRPC {
         public Proxy() {
         }
 
-        Proxy(final InstallSnapshotReply installSnapshotReply) {
-            this.installSnapshotReply = installSnapshotReply;
-        }
-
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(installSnapshotReply.getTerm());
-            out.writeObject(installSnapshotReply.followerId);
-            out.writeInt(installSnapshotReply.chunkIndex);
-            out.writeBoolean(installSnapshotReply.success);
+        public void writeExternal(final ObjectOutput out) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
