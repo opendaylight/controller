@@ -121,20 +121,8 @@ public final class ServerConfigurationPayload extends Payload implements Persist
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-
-        ServerConfigurationPayload other = (ServerConfigurationPayload) obj;
-        return serverConfig.equals(other.serverConfig);
+        return this == obj || obj instanceof ServerConfigurationPayload other
+            && serverConfig.equals(other.serverConfig);
     }
 
     @Override
