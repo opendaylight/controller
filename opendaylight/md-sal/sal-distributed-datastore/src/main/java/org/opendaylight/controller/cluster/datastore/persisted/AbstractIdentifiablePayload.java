@@ -17,7 +17,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 import java.util.function.Function;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -27,11 +26,8 @@ import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Abstract base class for {@link IdentifiablePayload}s which hold a single {@link Identifier}.
- *
- * @author Robert Varga
  */
-public abstract class AbstractIdentifiablePayload<T extends Identifier> extends IdentifiablePayload<T>
-        implements Serializable {
+public abstract class AbstractIdentifiablePayload<T extends Identifier> extends IdentifiablePayload<T> {
     /**
      * An {@link Externalizable} with default implementations we expect our implementations to comply with. On-wire
      * serialization format is defined by {@link #bytes()}.
