@@ -16,6 +16,7 @@ import java.io.ObjectOutput;
  * Invoked by candidates to gather votes (§5.2).
  */
 public final class RequestVote extends AbstractRaftRPC {
+    @java.io.Serial
     private static final long serialVersionUID = -6967509186297108657L;
 
     // candidate requesting vote

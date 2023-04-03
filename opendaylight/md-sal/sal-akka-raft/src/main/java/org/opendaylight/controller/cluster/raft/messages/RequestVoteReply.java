@@ -13,6 +13,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public final class RequestVoteReply extends AbstractRaftRPC {
+    @java.io.Serial
     private static final long serialVersionUID = 8427899326488775660L;
 
     // true means candidate received vote
