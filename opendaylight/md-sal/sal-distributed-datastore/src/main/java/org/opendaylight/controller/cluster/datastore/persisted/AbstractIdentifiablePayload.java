@@ -11,8 +11,6 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.io.ByteStreams;
-import java.io.DataInput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -21,7 +19,6 @@ import java.util.function.Function;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
-import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
@@ -84,44 +81,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         }
     }
 
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    protected abstract static class AbstractProxy<T extends Identifier> implements SerialForm {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private byte[] serialized;
-        private T identifier;
-
-        public AbstractProxy() {
-            // For Externalizable
-        }
-
-        protected AbstractProxy(final byte[] serialized) {
-            this.serialized = requireNonNull(serialized);
-        }
-
-        @Override
-        public final byte[] bytes() {
-            return serialized;
-        }
-
-        @Override
-        public final void readExternal(final byte[] bytes) throws IOException {
-            serialized = requireNonNull(bytes);
-            identifier = verifyNotNull(readIdentifier(ByteStreams.newDataInput(serialized)));
-        }
-
-        @Override
-        public final Object readResolve() {
-            return verifyNotNull(createObject(identifier, serialized));
-        }
-
-        protected abstract @NonNull T readIdentifier(@NonNull DataInput in) throws IOException;
-
-        @SuppressWarnings("checkstyle:hiddenField")
-        protected abstract @NonNull Identifiable<T> createObject(@NonNull T identifier, byte @NonNull[] serialized);
-    }
-
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final byte @NonNull [] serialized;

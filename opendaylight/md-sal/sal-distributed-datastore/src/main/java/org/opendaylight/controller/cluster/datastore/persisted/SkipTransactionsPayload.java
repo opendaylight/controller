@@ -7,17 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.io.ByteStreams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.DataInput;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
-import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,45 +23,7 @@ import org.slf4j.LoggerFactory;
  * for other purposes. It contains a {@link LocalHistoryIdentifier} and a list of transaction identifiers within that
  * local history.
  */
-public sealed class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
-    private static final class Magnesium extends SkipTransactionsPayload implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Magnesium(final LocalHistoryIdentifier historyId, final byte[] serialized,
-                final ImmutableUnsignedLongSet transactionIds) {
-            super(historyId, serialized, transactionIds);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy extends AbstractProxy<LocalHistoryIdentifier> {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private ImmutableUnsignedLongSet transactionIds;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        protected LocalHistoryIdentifier readIdentifier(final DataInput in) throws IOException {
-            final var id = LocalHistoryIdentifier.readFrom(in);
-            transactionIds = ImmutableUnsignedLongSet.readFrom(in);
-            return id;
-        }
-
-        @Override
-        protected SkipTransactionsPayload createObject(final LocalHistoryIdentifier identifier,
-                final byte[] serialized) {
-            return new Magnesium(identifier, serialized, verifyNotNull(transactionIds));
-        }
-    }
-
+public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
