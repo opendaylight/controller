@@ -50,12 +50,6 @@ public sealed class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seri
             // For Externalizable
         }
 
-        Proxy(final SimpleReplicatedLogEntry replicatedLogEntry) {
-            index = replicatedLogEntry.getIndex();
-            term = replicatedLogEntry.getTerm();
-            data = replicatedLogEntry.getData();
-        }
-
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(index);
