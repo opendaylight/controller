@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db996ecd_2da7d6d3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-03T07:50:33Z",
+      "side": 1,
+      "message": "copy\u0026paste?",
+      "range": {
+        "startLine": 117,
+        "startChar": 33,
+        "endLine": 117,
+        "endChar": 34
+      },
+      "revId": "5aed42282a138e703bd6dc96f52e41e2e73d2a8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9b2d705a_52c8219e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-03T07:50:33Z",
+      "side": 1,
+      "message": "Map.of()",
+      "range": {
+        "startLine": 121,
+        "startChar": 50,
+        "endLine": 122,
+        "endChar": 76
+      },
+      "revId": "5aed42282a138e703bd6dc96f52e41e2e73d2a8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "655395b3_19c75a4c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-03T07:50:33Z",
+      "side": 1,
+      "message": "missing space",
+      "revId": "5aed42282a138e703bd6dc96f52e41e2e73d2a8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
