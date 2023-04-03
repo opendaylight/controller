@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -18,14 +16,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 
 /**
  * Represents the persisted snapshot state for the ShardManager.
  *
  * @author Thomas Pantelis
  */
-public sealed class ShardManagerSnapshot implements Serializable {
+public final class ShardManagerSnapshot implements Serializable {
     interface SerializedForm extends Externalizable {
         /**
          * Return the serial form of this object contents, corresponding to {@link ShardManagerSnapshot#shardList}.
@@ -69,51 +66,6 @@ public sealed class ShardManagerSnapshot implements Serializable {
         }
     }
 
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Magnesium extends ShardManagerSnapshot implements MigratedSerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Magnesium(final List<String> shardList) {
-            super(shardList);
-        }
-
-        @Override
-        public boolean isMigrated() {
-            return true;
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements SerializedForm {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private ShardManagerSnapshot snapshot = null;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        public List<String> shardNames() {
-            return snapshot.getShardList();
-        }
-
-        @Override
-        public void resolveTo(final ShardManagerSnapshot newSnapshot) {
-            snapshot = requireNonNull(newSnapshot);
-        }
-
-        @Override
-        public Object readResolve() {
-            return new Magnesium(snapshot.getShardList());
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -123,17 +75,17 @@ public sealed class ShardManagerSnapshot implements Serializable {
         this.shardList = ImmutableList.copyOf(shardList);
     }
 
-    public final List<String> getShardList() {
+    public List<String> getShardList() {
         return shardList;
     }
 
-    @java.io.Serial
-    public final Object writeReplace() {
-        return new SM(this);
+    @Override
+    public String toString() {
+        return "ShardManagerSnapshot [ShardList = " + shardList + " ]";
     }
 
-    @Override
-    public final String toString() {
-        return "ShardManagerSnapshot [ShardList = " + shardList + " ]";
+    @java.io.Serial
+    private Object writeReplace() {
+        return new SM(this);
     }
 }
