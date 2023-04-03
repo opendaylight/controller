@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
@@ -70,7 +70,7 @@ final class SS implements Externalizable {
         ServerConfigurationPayload serverConfig = (ServerConfigurationPayload) in.readObject();
 
         int size = in.readInt();
-        var unAppliedEntries = new ArrayList<ReplicatedLogEntry>(size);
+        var unAppliedEntries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
             hdr = WritableObjects.readLongHeader(in);
             unAppliedEntries.add(new SimpleReplicatedLogEntry(
@@ -80,8 +80,8 @@ final class SS implements Externalizable {
 
         State state = (State) in.readObject();
 
-        snapshot = Snapshot.create(state, unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
-                electionTerm, electionVotedFor, serverConfig);
+        snapshot = Snapshot.create(state, unAppliedEntries.build(), lastIndex, lastTerm, lastAppliedIndex,
+            lastAppliedTerm, electionTerm, electionVotedFor, serverConfig);
     }
 
     @java.io.Serial
