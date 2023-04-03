@@ -67,6 +67,7 @@ public final class ServerConfigurationPayload extends Payload implements Persist
             serverConfig = builder.build();
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return new ServerConfigurationPayload(serverConfig);
         }
