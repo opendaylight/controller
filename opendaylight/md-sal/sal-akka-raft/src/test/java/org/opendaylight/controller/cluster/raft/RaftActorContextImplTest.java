@@ -19,9 +19,7 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;
@@ -84,7 +82,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "test", new ElectionTermImpl(createProvider(), "test", LOG), -1, -1,
-                new HashMap<>(ImmutableMap.of("peer1", "peerAddress1")), configParams,
+                Map.of("peer1", "peerAddress1"), configParams,
                 createProvider(), applyState -> { }, LOG,  MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
@@ -98,24 +96,24 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "self", new ElectionTermImpl(createProvider(), "test", LOG), -1, -1,
-                new HashMap<>(ImmutableMap.of("peer1", "peerAddress1")),
+                Map.of("peer1", "peerAddress1"),
                 new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG,
                 MoreExecutors.directExecutor());
 
-        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", false),
+        context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", false),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", false))));
         verifyPeerInfo(context, "peer1", null);
         verifyPeerInfo(context, "peer2", true);
         verifyPeerInfo(context, "peer3", false);
         assertEquals("isVotingMember", false, context.isVotingMember());
 
-        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", true),
+        context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", true),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", true))));
         verifyPeerInfo(context, "peer2", true);
         verifyPeerInfo(context, "peer3", true);
         assertEquals("isVotingMember", true, context.isVotingMember());
 
-        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("peer2", true),
+        context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("peer2", true),
                 new ServerInfo("peer3", true))));
         verifyPeerInfo(context, "peer2", true);
         verifyPeerInfo(context, "peer3", true);
@@ -130,7 +128,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         PeerInfo peerInfo = context.getPeerInfo(peerId);
         if (voting != null) {
             assertNotNull("Expected peer " + peerId, peerInfo);
-            assertEquals("getVotingState for " + peerId, voting.booleanValue()
+            assertEquals("getVotingState for " + peerId, voting
                     ? VotingState.VOTING : VotingState.NON_VOTING, peerInfo.getVotingState());
         } else {
             assertNull("Unexpected peer " + peerId, peerInfo);

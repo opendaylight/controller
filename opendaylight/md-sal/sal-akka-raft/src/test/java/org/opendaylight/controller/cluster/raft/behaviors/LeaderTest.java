@@ -32,7 +32,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -616,7 +615,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
@@ -873,7 +872,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(),
                 lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm, -1, null, null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
@@ -925,7 +924,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(-1);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(),
                 lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm, -1, null, null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
@@ -980,7 +979,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
@@ -1049,8 +1048,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
-                -1, null, null);
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 
@@ -1123,8 +1121,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
-                -1, null, null);
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
 
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
@@ -1188,8 +1185,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
-                -1, null, null);
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 
@@ -2269,7 +2265,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testReplicationWithPayloadSizeThatExceedsThreshold");
 
         final int serializedSize = SerializationUtils.serialize(new AppendEntries(1, LEADER_ID, -1, -1,
-                Arrays.asList(new SimpleReplicatedLogEntry(0, 1,
+                List.of(new SimpleReplicatedLogEntry(0, 1,
                         new MockRaftActorContext.MockPayload("large"))), 0, -1, (short)0)).length;
         final MockRaftActorContext.MockPayload largePayload =
                 new MockRaftActorContext.MockPayload("large", serializedSize);
