@@ -7,22 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import com.google.common.collect.ImmutableList;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
  * Represents a snapshot of the raft data.
  *
  * @author Thomas Pantelis
  */
-public sealed class Snapshot implements Serializable {
+public final class Snapshot implements Serializable {
     /**
      * Implementations of this interface are used as the state payload for a snapshot.
      *
@@ -40,82 +34,6 @@ public sealed class Snapshot implements Serializable {
         }
     }
 
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Legacy extends Snapshot implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Legacy(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
-                final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
-                final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
-            super(state, unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, electionTerm,
-                electionVotedFor, serverConfig);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private Snapshot snapshot = null;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(snapshot.lastIndex);
-            out.writeLong(snapshot.lastTerm);
-            out.writeLong(snapshot.lastAppliedIndex);
-            out.writeLong(snapshot.lastAppliedTerm);
-            out.writeLong(snapshot.electionTerm);
-            out.writeObject(snapshot.electionVotedFor);
-            out.writeObject(snapshot.serverConfig);
-
-            out.writeInt(snapshot.unAppliedEntries.size());
-            for (ReplicatedLogEntry e: snapshot.unAppliedEntries) {
-                out.writeLong(e.getIndex());
-                out.writeLong(e.getTerm());
-                out.writeObject(e.getData());
-            }
-
-            out.writeObject(snapshot.state);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            long lastIndex = in.readLong();
-            long lastTerm = in.readLong();
-            long lastAppliedIndex = in.readLong();
-            long lastAppliedTerm = in.readLong();
-            long electionTerm = in.readLong();
-            String electionVotedFor = (String) in.readObject();
-            ServerConfigurationPayload serverConfig = (ServerConfigurationPayload) in.readObject();
-
-            int size = in.readInt();
-            var unAppliedEntries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
-            for (int i = 0; i < size; i++) {
-                unAppliedEntries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(),
-                        (Payload) in.readObject()));
-            }
-
-            State state = (State) in.readObject();
-
-            snapshot = new Legacy(state, unAppliedEntries.build(), lastIndex, lastTerm, lastAppliedIndex,
-                lastAppliedTerm, electionTerm, electionVotedFor, serverConfig);
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return snapshot;
-        }
-    }
-
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -129,7 +47,7 @@ public sealed class Snapshot implements Serializable {
     private final String electionVotedFor;
     private final ServerConfigurationPayload serverConfig;
 
-    Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
+    private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
             final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
             final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
         this.state = state;
@@ -186,16 +104,16 @@ public sealed class Snapshot implements Serializable {
         return serverConfig;
     }
 
-    @java.io.Serial
-    public final Object writeReplace() {
-        return new SS(this);
-    }
-
     @Override
-    public final String toString() {
+    public String toString() {
         return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
                 + ", state=" + state + ", electionTerm=" + electionTerm + ", electionVotedFor="
                 + electionVotedFor + ", ServerConfigPayload="  + serverConfig + "]";
+    }
+
+    @java.io.Serial
+    private Object writeReplace() {
+        return new SS(this);
     }
 }

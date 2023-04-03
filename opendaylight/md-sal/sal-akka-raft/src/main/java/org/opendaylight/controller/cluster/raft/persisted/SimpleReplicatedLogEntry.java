@@ -9,10 +9,6 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -23,53 +19,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-public sealed class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Legacy extends SimpleReplicatedLogEntry implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Legacy(final long index, final long term, final Payload payload) {
-            super(index, term, payload);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private long index;
-        private long term;
-        private Payload data;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(index);
-            out.writeLong(term);
-            out.writeObject(data);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            index = in.readLong();
-            term = in.readLong();
-            data = (Payload) in.readObject();
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return new Legacy(index, term, data);
-        }
-    }
-
+public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
     // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative.
@@ -94,47 +44,42 @@ public sealed class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seri
     }
 
     @Override
-    public final Payload getData() {
+    public Payload getData() {
         return payload;
     }
 
     @Override
-    public final long getTerm() {
+    public long getTerm() {
         return term;
     }
 
     @Override
-    public final long getIndex() {
+    public long getIndex() {
         return index;
     }
 
     @Override
-    public final int size() {
+    public int size() {
         return payload.size();
     }
 
     @Override
-    public final int serializedSize() {
+    public int serializedSize() {
         return PROXY_SIZE + payload.serializedSize();
     }
 
     @Override
-    public final boolean isPersistencePending() {
+    public boolean isPersistencePending() {
         return persistencePending;
     }
 
     @Override
-    public final void setPersistencePending(final boolean pending) {
+    public void setPersistencePending(final boolean pending) {
         persistencePending = pending;
     }
 
-    @java.io.Serial
-    public final Object writeReplace() {
-        return new LE(this);
-    }
-
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + payload.hashCode();
@@ -144,13 +89,18 @@ public sealed class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seri
     }
 
     @Override
-    public final boolean equals(final Object obj) {
+    public boolean equals(final Object obj) {
         return this == obj || obj instanceof SimpleReplicatedLogEntry other && index == other.index
             && term == other.term && payload.equals(other.payload);
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return "SimpleReplicatedLogEntry [index=" + index + ", term=" + term + ", payload=" + payload + "]";
+    }
+
+    @java.io.Serial
+    private Object writeReplace() {
+        return new LE(this);
     }
 }
