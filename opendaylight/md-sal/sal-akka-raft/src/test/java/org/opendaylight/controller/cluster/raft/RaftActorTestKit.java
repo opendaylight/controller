@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.fail;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
@@ -16,7 +18,6 @@ import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class RaftActorTestKit extends TestKit {
 
     public RaftActorTestKit(final ActorSystem actorSystem, final String actorName) {
         super(actorSystem);
-        raftActor = this.getSystem().actorOf(MockRaftActor.builder().id(actorName).props(), actorName);
+        raftActor = getSystem().actorOf(MockRaftActor.builder().id(actorName).props(), actorName);
     }
 
     public ActorRef getRaftActor() {
@@ -65,6 +66,6 @@ public class RaftActorTestKit extends TestKit {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail("Leader not found for actorRef " + actorRef.path());
+        fail("Leader not found for actorRef " + actorRef.path());
     }
 }

@@ -18,11 +18,10 @@ import akka.actor.Status;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -143,9 +142,9 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, Collections.emptyList(), -1, -1, -1, -1,
+        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
                 1, null, new org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload(
-                        Arrays.asList(new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
+                        List.of(new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
                                 new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false))));
 
         InMemorySnapshotStore.addSnapshot(leaderId, snapshot);
@@ -156,28 +155,28 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower1Id + "-notifier"));
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
+                Map.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
                         follower3Id, testActorPath(follower3Id)))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
 
         follower2NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower2Id + "-notifier"));
         follower2Actor = newTestRaftActor(follower2Id,TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
+                Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
                         follower3Id, testActorPath(follower3Id)))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
 
         follower3NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower3Id + "-notifier"));
         follower3Actor = newTestRaftActor(follower3Id,TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
+                Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
                         follower2Id, follower2Actor.path().toString()))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower3NotifierActor));
 
-        peerAddresses = ImmutableMap.<String, String>builder()
-                .put(follower1Id, follower1Actor.path().toString())
-                .put(follower2Id, follower2Actor.path().toString())
-                .put(follower3Id, follower3Actor.path().toString()).build();
+        peerAddresses = Map.of(
+                follower1Id, follower1Actor.path().toString(),
+                follower2Id, follower2Actor.path().toString(),
+                follower3Id, follower3Actor.path().toString());
 
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setElectionTimeoutFactor(3);
