@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static com.google.common.math.IntMath.ceilingPowerOfTwo;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
@@ -19,12 +17,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.SerializationUtils;
@@ -34,7 +29,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidate
 import org.opendaylight.controller.cluster.io.ChunkedByteArray;
 import org.opendaylight.controller.cluster.io.ChunkedOutputStream;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
-import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.opendaylight.yangtools.concepts.Either;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
@@ -45,10 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Payload persisted when a transaction commits. It contains the transaction identifier and the
  * {@link DataTreeCandidate}
- *
- * @author Robert Varga
  */
-@Beta
 public abstract sealed class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier>
         implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
@@ -154,7 +145,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return new CT(this);
     }
 
-    static sealed class Simple extends CommitTransactionPayload {
+    static final class Simple extends CommitTransactionPayload {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
@@ -180,7 +171,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
     }
 
-    static sealed class Chunked extends CommitTransactionPayload {
+    static final class Chunked extends CommitTransactionPayload {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
@@ -213,66 +204,6 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
         private ProxySizeHolder() {
             // Hidden on purpose
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class SimpleMagnesium extends Simple implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        SimpleMagnesium(final byte[] serialized) {
-            super(serialized);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class ChunkedMagnesium extends Chunked implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        ChunkedMagnesium(final ChunkedByteArray source) {
-            super(source);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private CommitTransactionPayload payload;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(payload.size());
-            payload.writeBytes(out);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            final int length = in.readInt();
-            if (length < 0) {
-                throw new StreamCorruptedException("Invalid payload length " + length);
-            } else if (length < MAX_ARRAY_SIZE) {
-                final byte[] serialized = new byte[length];
-                in.readFully(serialized);
-                payload = new SimpleMagnesium(serialized);
-            } else {
-                payload = new ChunkedMagnesium(ChunkedByteArray.readFrom(in, length, MAX_ARRAY_SIZE));
-            }
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return verifyNotNull(payload);
         }
     }
 }
