@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static com.google.common.math.IntMath.ceilingPowerOfTwo;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
@@ -40,10 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Payload persisted when a transaction commits. It contains the transaction identifier and the
  * {@link DataTreeCandidate}
- *
- * @author Robert Varga
  */
-@Beta
 public abstract sealed class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier>
         implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);

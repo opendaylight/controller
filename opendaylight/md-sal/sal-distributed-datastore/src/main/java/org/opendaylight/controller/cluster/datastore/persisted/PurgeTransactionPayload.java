@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Payload persisted when a transaction is purged from the frontend. It contains the transaction identifier.
- *
- * @author Robert Varga
  */
 public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);

@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Payload persisted when a local history is created. It contains a {@link LocalHistoryIdentifier}.
- *
- * @author Robert Varga
  */
 public final class CreateLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(CreateLocalHistoryPayload.class);

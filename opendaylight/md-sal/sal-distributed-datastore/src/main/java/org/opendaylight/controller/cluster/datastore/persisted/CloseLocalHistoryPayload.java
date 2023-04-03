@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Payload persisted when a local history is closed cleanly. It contains a {@link LocalHistoryIdentifier}.
- *
- * @author Robert Varga
  */
 public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(CloseLocalHistoryPayload.class);

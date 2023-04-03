@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Payload persisted when a local history is completely purged, i.e. the frontend has removed it from its tracking.
  * It contains a {@link LocalHistoryIdentifier}.
- *
- * @author Robert Varga
  */
 public final class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(PurgeLocalHistoryPayload.class);
