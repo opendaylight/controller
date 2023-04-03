@@ -187,20 +187,20 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     @Override
     TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
-        if (request instanceof ModifyTransactionRequest) {
-            return handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
-        } else if (request instanceof CommitLocalTransactionRequest) {
-            handleCommitLocalTransaction((CommitLocalTransactionRequest) request, envelope, now);
+        if (request instanceof ModifyTransactionRequest modifyRequest) {
+            return handleModifyTransaction(modifyRequest, envelope, now);
+        } else if (request instanceof CommitLocalTransactionRequest commitLocalRequest) {
+            handleCommitLocalTransaction(commitLocalRequest, envelope, now);
             return null;
-        } else if (request instanceof ExistsTransactionRequest) {
-            return handleExistsTransaction((ExistsTransactionRequest) request);
-        } else if (request instanceof ReadTransactionRequest) {
-            return handleReadTransaction((ReadTransactionRequest) request);
-        } else if (request instanceof TransactionPreCommitRequest) {
-            handleTransactionPreCommit((TransactionPreCommitRequest) request, envelope, now);
+        } else if (request instanceof ExistsTransactionRequest existsRequest) {
+            return handleExistsTransaction(existsRequest);
+        } else if (request instanceof ReadTransactionRequest readRequest) {
+            return handleReadTransaction(readRequest);
+        } else if (request instanceof TransactionPreCommitRequest preCommitRequest) {
+            handleTransactionPreCommit(preCommitRequest, envelope, now);
             return null;
-        } else if (request instanceof TransactionDoCommitRequest) {
-            handleTransactionDoCommit((TransactionDoCommitRequest) request, envelope, now);
+        } else if (request instanceof TransactionDoCommitRequest doCommitRequest) {
+            handleTransactionDoCommit(doCommitRequest, envelope, now);
             return null;
         } else if (request instanceof TransactionAbortRequest) {
             return handleTransactionAbort(request.getSequence(), envelope, now);
@@ -546,10 +546,10 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             for (TransactionModification m : modifications) {
                 if (m instanceof TransactionDelete) {
                     modification.delete(m.getPath());
-                } else if (m instanceof TransactionWrite) {
-                    modification.write(m.getPath(), ((TransactionWrite) m).getData());
-                } else if (m instanceof TransactionMerge) {
-                    modification.merge(m.getPath(), ((TransactionMerge) m).getData());
+                } else if (m instanceof TransactionWrite write) {
+                    modification.write(m.getPath(), write.getData());
+                } else if (m instanceof TransactionMerge merge) {
+                    modification.merge(m.getPath(), merge.getData());
                 } else {
                     LOG.warn("{}: ignoring unhandled modification {}", persistenceId(), m);
                 }
