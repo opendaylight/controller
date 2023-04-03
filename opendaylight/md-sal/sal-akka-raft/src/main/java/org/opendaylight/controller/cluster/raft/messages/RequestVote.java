@@ -73,10 +73,6 @@ public final class RequestVote extends AbstractRaftRPC {
         public Proxy() {
         }
 
-        Proxy(final RequestVote requestVote) {
-            this.requestVote = requestVote;
-        }
-
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(requestVote.getTerm());
