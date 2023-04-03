@@ -621,22 +621,22 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     final ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         shard.getShardMBean().incrementReadOnlyTransactionCount();
 
-        if (txId.getHistoryId().getHistoryId() == 0) {
+        final var historyId = txId.getHistoryId();
+        if (historyId.getHistoryId() == 0) {
             return new ReadOnlyShardDataTreeTransaction(this, txId, dataTree.takeSnapshot());
         }
-
-        return ensureTransactionChain(txId.getHistoryId(), null).newReadOnlyTransaction(txId);
+        return ensureTransactionChain(historyId, null).newReadOnlyTransaction(txId);
     }
 
     final ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         shard.getShardMBean().incrementReadWriteTransactionCount();
 
-        if (txId.getHistoryId().getHistoryId() == 0) {
+        final var historyId = txId.getHistoryId();
+        if (historyId.getHistoryId() == 0) {
             return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
                     .newModification());
         }
-
-        return ensureTransactionChain(txId.getHistoryId(), null).newReadWriteTransaction(txId);
+        return ensureTransactionChain(historyId, null).newReadWriteTransaction(txId);
     }
 
     @VisibleForTesting
@@ -1184,11 +1184,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     // the newReadWriteTransaction()
     final ShardDataTreeCohort newReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Optional<SortedSet<String>> participatingShardNames) {
-        if (txId.getHistoryId().getHistoryId() == 0) {
+        final var historyId = txId.getHistoryId();
+        if (historyId.getHistoryId() == 0) {
             return createReadyCohort(txId, mod, participatingShardNames);
         }
-
-        return ensureTransactionChain(txId.getHistoryId(), null).createReadyCohort(txId, mod, participatingShardNames);
+        return ensureTransactionChain(historyId, null).createReadyCohort(txId, mod, participatingShardNames);
     }
 
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
