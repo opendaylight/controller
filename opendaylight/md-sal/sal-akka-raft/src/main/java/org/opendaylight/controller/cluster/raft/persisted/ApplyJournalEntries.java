@@ -8,10 +8,6 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 
 /**
@@ -22,47 +18,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public sealed class ApplyJournalEntries implements Serializable, ControlMessage {
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Legacy extends ApplyJournalEntries implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Legacy(final long toIndex) {
-            super(toIndex);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private ApplyJournalEntries applyEntries = null;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(applyEntries.toIndex);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            applyEntries = new Legacy(in.readLong());
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return applyEntries;
-        }
-    }
-
+public final class ApplyJournalEntries implements Serializable, ControlMessage {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -72,17 +28,17 @@ public sealed class ApplyJournalEntries implements Serializable, ControlMessage 
         this.toIndex = toIndex;
     }
 
-    public final long getToIndex() {
+    public long getToIndex() {
         return toIndex;
     }
 
-    @java.io.Serial
-    public final Object writeReplace() {
-        return new AJE(this);
+    @Override
+    public String toString() {
+        return "ApplyJournalEntries [toIndex=" + toIndex + "]";
     }
 
-    @Override
-    public final String toString() {
-        return "ApplyJournalEntries [toIndex=" + toIndex + "]";
+    @java.io.Serial
+    private Object writeReplace() {
+        return new AJE(this);
     }
 }
