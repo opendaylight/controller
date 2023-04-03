@@ -9,8 +9,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import java.util.ArrayList;
-import java.util.Collection;
+import com.google.common.collect.ImmutableList;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -44,21 +43,18 @@ import scala.concurrent.duration.FiniteDuration;
  * </ul>
  */
 public final class Candidate extends AbstractRaftActorBehavior {
-
-    private int voteCount;
-
+    private final ImmutableList<String> votingPeers;
     private final int votesRequired;
 
-    private final Collection<String> votingPeers = new ArrayList<>();
+    private int voteCount;
 
     public Candidate(final RaftActorContext context) {
         super(context, RaftState.Candidate);
 
-        for (PeerInfo peer: context.getPeers()) {
-            if (peer.isVoting()) {
-                votingPeers.add(peer.getId());
-            }
-        }
+        votingPeers = context.getPeers().stream()
+            .filter(PeerInfo::isVoting)
+            .map(PeerInfo::getId)
+            .collect(ImmutableList.toImmutableList());
 
         log.debug("{}: Election: Candidate has following voting peers: {}", logName(), votingPeers);
 
@@ -157,9 +153,7 @@ public final class Candidate extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (message instanceof RaftRPC) {
-
-            RaftRPC rpc = (RaftRPC) message;
+        if (message instanceof RaftRPC rpc) {
 
             log.debug("{}: RaftRPC message received {}, my term is {}", logName(), rpc,
                         context.getTermInformation().getCurrentTerm());
