@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 public abstract class AbstractRaftRPC implements RaftRPC {
+    @java.io.Serial
     private static final long serialVersionUID = -6061342433962854822L;
 
     // term
@@ -23,5 +24,6 @@ public abstract class AbstractRaftRPC implements RaftRPC {
     }
 
     // All implementations must use Externalizable Proxy pattern
+    @java.io.Serial
     abstract Object writeReplace();
 }
