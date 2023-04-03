@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc;
 
 import java.io.Serializable;
@@ -25,10 +24,11 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
  * @author Thomas Pantelis
  */
 public class RpcErrorsException extends DOMRpcException {
-
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private static class RpcErrorData implements Serializable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         final ErrorSeverity severity;
@@ -56,7 +56,7 @@ public class RpcErrorsException extends DOMRpcException {
     public RpcErrorsException(final String message, final Iterable<? extends RpcError> rpcErrors) {
         super(message);
 
-        for (final RpcError rpcError: rpcErrors) {
+        for (var rpcError : rpcErrors) {
             rpcErrorDataList.add(new RpcErrorData(rpcError.getSeverity(), rpcError.getErrorType(),
                     rpcError.getTag(), rpcError.getApplicationTag(), rpcError.getMessage(),
                     rpcError.getInfo(), rpcError.getCause()));
@@ -64,8 +64,8 @@ public class RpcErrorsException extends DOMRpcException {
     }
 
     public Collection<RpcError> getRpcErrors() {
-        final Collection<RpcError> rpcErrors = new ArrayList<>();
-        for (final RpcErrorData ed: rpcErrorDataList) {
+        final var rpcErrors = new ArrayList<RpcError>();
+        for (var ed : rpcErrorDataList) {
             final RpcError rpcError = ed.severity == ErrorSeverity.ERROR
                     ? RpcResultBuilder.newError(ed.errorType, ed.tag, ed.message, ed.applicationTag,
                             ed.info, ed.cause) :
