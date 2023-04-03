@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertTrue;
+
 import akka.actor.Actor;
 import akka.actor.ActorIdentity;
 import akka.actor.ActorRef;
@@ -23,10 +25,9 @@ import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -49,7 +50,7 @@ public class TestActorFactory implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TestActorFactory.class);
 
     private final ActorSystem system;
-    List<ActorRef> createdActors = new LinkedList<>();
+    private final List<ActorRef> createdActors = new ArrayList<>();
     private static int actorCount = 1;
 
     public TestActorFactory(final ActorSystem system) {
@@ -152,7 +153,7 @@ public class TestActorFactory implements AutoCloseable {
                 ActorSelection actorSelection = system.actorSelection(actorRef.path().toString());
                 Future<Object> future = Patterns.ask(actorSelection, new Identify(""), timeout);
                 ActorIdentity reply = (ActorIdentity)Await.result(future, timeout.duration());
-                Assert.assertTrue("Identify returned non-present", reply.getActorRef().isPresent());
+                assertTrue("Identify returned non-present", reply.getActorRef().isPresent());
                 return;
             } catch (Exception | AssertionError e) {
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);

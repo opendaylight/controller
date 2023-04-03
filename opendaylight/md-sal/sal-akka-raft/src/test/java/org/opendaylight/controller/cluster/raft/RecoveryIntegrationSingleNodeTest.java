@@ -12,9 +12,8 @@ import static org.junit.Assert.assertEquals;
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.testkit.TestActorRef;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -43,7 +42,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         String persistenceId = factory.generateActorId("singleNode");
         TestActorRef<AbstractRaftActorIntegrationTest.TestRaftActor> singleNodeActorRef =
-                newTestRaftActor(persistenceId, ImmutableMap.<String, String>builder().build(), leaderConfigParams);
+                newTestRaftActor(persistenceId, Map.of(), leaderConfigParams);
 
         waitUntilLeader(singleNodeActorRef);
 
@@ -75,8 +74,9 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         assertEquals("Last applied", 5, singleNodeContext.getLastApplied());
 
-        assertEquals("Incorrect State after snapshot success is received ", Lists.newArrayList(payload0, payload1,
-                payload2, payload3, payload4, payload5), singleNodeActorRef.underlyingActor().getState());
+        assertEquals("Incorrect State after snapshot success is received ",
+                List.of(payload0, payload1, payload2, payload3, payload4, payload5),
+                singleNodeActorRef.underlyingActor().getState());
 
         InMemoryJournal.waitForWriteMessagesComplete(persistenceId);
 
@@ -87,19 +87,17 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         assertEquals(1, persistedSnapshots.size());
 
         List<Object> snapshottedState = MockRaftActor.fromState(persistedSnapshots.get(0).getState());
-        assertEquals("Incorrect Snapshot", Lists.newArrayList(payload0, payload1, payload2, payload3),
-                snapshottedState);
+        assertEquals("Incorrect Snapshot", List.of(payload0, payload1, payload2, payload3), snapshottedState);
 
         //recovery logic starts
         killActor(singleNodeActorRef);
 
-        singleNodeActorRef = newTestRaftActor(persistenceId,
-                ImmutableMap.<String, String>builder().build(), leaderConfigParams);
+        singleNodeActorRef = newTestRaftActor(persistenceId, Map.of(), leaderConfigParams);
 
         singleNodeActorRef.underlyingActor().waitForRecoveryComplete();
 
-        assertEquals("Incorrect State after Recovery ", Lists.newArrayList(payload0, payload1, payload2, payload3,
-                payload4, payload5), singleNodeActorRef.underlyingActor().getState());
-
+        assertEquals("Incorrect State after Recovery ",
+                List.of(payload0, payload1, payload2, payload3, payload4, payload5),
+                singleNodeActorRef.underlyingActor().getState());
     }
 }
