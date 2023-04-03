@@ -18,7 +18,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -641,7 +640,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 Snapshot snapshot = Snapshot.create(
                         context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes()),
-                        new ArrayList<>(),
+                        List.of(),
                         installSnapshot.getLastIncludedIndex(),
                         installSnapshot.getLastIncludedTerm(),
                         installSnapshot.getLastIncludedIndex(),
