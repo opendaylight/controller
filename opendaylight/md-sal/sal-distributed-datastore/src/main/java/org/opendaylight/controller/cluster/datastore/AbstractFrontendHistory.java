@@ -79,10 +79,10 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
-        if (request instanceof TransactionPurgeRequest) {
-            return handleTransactionPurgeRequest((TransactionPurgeRequest) request, envelope, now);
-        } else if (request instanceof SkipTransactionsRequest) {
-            return handleSkipTransactionsRequest((SkipTransactionsRequest) request, envelope, now);
+        if (request instanceof TransactionPurgeRequest purgeRequest) {
+            return handleTransactionPurgeRequest(purgeRequest, envelope, now);
+        } else if (request instanceof SkipTransactionsRequest skipRequest) {
+            return handleSkipTransactionsRequest(skipRequest, envelope, now);
         }
 
         final TransactionIdentifier id = request.getTarget();
@@ -224,13 +224,12 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id) {
-        if (request instanceof CommitLocalTransactionRequest) {
+        if (request instanceof CommitLocalTransactionRequest commitLocalRequest) {
             LOG.debug("{}: allocating new ready transaction {}", persistenceId(), id);
             tree.getStats().incrementReadWriteTransactionCount();
-            return createReadyTransaction(id, ((CommitLocalTransactionRequest) request).getModification());
+            return createReadyTransaction(id, commitLocalRequest.getModification());
         }
-        if (request instanceof AbstractReadTransactionRequest
-                && ((AbstractReadTransactionRequest<?>) request).isSnapshotOnly()) {
+        if (request instanceof AbstractReadTransactionRequest<?> readTxRequest && readTxRequest.isSnapshotOnly()) {
             LOG.debug("{}: allocating new open snapshot {}", persistenceId(), id);
             tree.getStats().incrementReadOnlyTransactionCount();
             return createOpenSnapshot(id);
