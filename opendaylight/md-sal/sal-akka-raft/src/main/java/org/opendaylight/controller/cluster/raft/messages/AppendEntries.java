@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
@@ -197,14 +197,14 @@ public final class AppendEntries extends AbstractRaftRPC {
             short payloadVersion = in.readShort();
 
             int size = in.readInt();
-            List<ReplicatedLogEntry> entries = new ArrayList<>(size);
+            var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
             for (int i = 0; i < size; i++) {
                 entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
             }
 
             String leaderAddress = (String)in.readObject();
 
-            appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
+            appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries.build(), leaderCommit,
                     replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, leaderRaftVersion,
                     leaderAddress);
         }
@@ -262,12 +262,12 @@ public final class AppendEntries extends AbstractRaftRPC {
             short payloadVersion = in.readShort();
 
             int size = in.readInt();
-            List<ReplicatedLogEntry> entries = new ArrayList<>(size);
+            var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
             for (int i = 0; i < size; i++) {
                 entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
             }
 
-            appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
+            appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries.build(), leaderCommit,
                 replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, RaftVersions.BORON_VERSION, null);
         }
 
