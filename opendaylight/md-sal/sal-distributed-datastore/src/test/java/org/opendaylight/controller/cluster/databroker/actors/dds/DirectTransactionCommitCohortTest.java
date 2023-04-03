@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
@@ -36,14 +37,20 @@ import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequ
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class DirectTransactionCommitCohortTest {
-
     private static final String PERSISTENCE_ID = "per-1";
 
     @Mock
     private AbstractClientHistory history;
+    @Mock
+    private DatastoreContext datastoreContext;
+    @Mock
+    private ActorUtils actorUtils;
+
     private ActorSystem system;
     private TransactionTester<?> transaction;
     private DirectTransactionCommitCohort cohort;
@@ -54,6 +61,10 @@ public class DirectTransactionCommitCohortTest {
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
         final ClientActorContext context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
+        doReturn(actorUtils).when(history).actorUtils();
+
         transaction = createTransactionTester(new TestProbe(system, "backend"), context, history);
         final AbstractProxyTransaction proxy = transaction.getTransaction();
         proxy.seal();

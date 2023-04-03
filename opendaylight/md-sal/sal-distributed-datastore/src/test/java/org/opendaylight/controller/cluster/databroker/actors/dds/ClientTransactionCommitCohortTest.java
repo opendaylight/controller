@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
@@ -48,19 +49,26 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitR
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.common.Empty;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientTransactionCommitCohortTest {
-
     private static final String PERSISTENCE_ID = "per-1";
     private static final int TRANSACTIONS = 3;
 
+    private final List<TransactionTester<RemoteProxyTransaction>> transactions = new ArrayList<>();
+
     @Mock
     private AbstractClientHistory history;
+    @Mock
+    private DatastoreContext datastoreContext;
+    @Mock
+    private ActorUtils actorUtils;
+
     private ActorSystem system;
-    private List<TransactionTester<RemoteProxyTransaction>> transactions;
     private ClientTransactionCommitCohort cohort;
 
     @Before
@@ -69,7 +77,10 @@ public class ClientTransactionCommitCohortTest {
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
         final ClientActorContext context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        transactions = new ArrayList<>();
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
+        doReturn(actorUtils).when(history).actorUtils();
+
         for (int i = 0; i < TRANSACTIONS; i++) {
             transactions.add(createTransactionTester(new TestProbe(system, "backend" + i), context, history));
         }
