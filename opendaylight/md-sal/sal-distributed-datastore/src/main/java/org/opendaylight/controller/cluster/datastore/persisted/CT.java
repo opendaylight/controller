@@ -57,6 +57,7 @@ final class CT implements Externalizable {
         }
     }
 
+    @java.io.Serial
     private Object readResolve() {
         return verifyNotNull(payload);
     }
