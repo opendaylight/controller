@@ -21,12 +21,10 @@ import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -187,7 +185,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
         public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
-            MockSnapshotState snapshotState = new MockSnapshotState(new ArrayList<>(getState()));
+            MockSnapshotState snapshotState = new MockSnapshotState(List.copyOf(getState()));
             if (installSnapshotStream.isPresent()) {
                 SerializationUtils.serialize(snapshotState, installSnapshotStream.get());
             }
@@ -240,10 +238,10 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected String follower2Id = factory.generateActorId("follower");
     protected TestActorRef<TestRaftActor> follower2Actor;
     protected ActorRef follower2CollectorActor;
-    protected  RaftActorBehavior follower2;
+    protected RaftActorBehavior follower2;
     protected RaftActorContext follower2Context;
 
-    protected ImmutableMap<String, String> peerAddresses;
+    protected Map<String, String> peerAddresses;
 
     protected long initialTerm = 5;
     protected long currentTerm;
@@ -285,7 +283,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final Map<String, String> newPeerAddresses,
             final ConfigParams configParams) {
         return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(newPeerAddresses != null
-                ? newPeerAddresses : Collections.<String, String>emptyMap()).config(configParams));
+                ? newPeerAddresses : Map.of()).config(configParams));
     }
 
     protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final TestRaftActor.Builder builder) {

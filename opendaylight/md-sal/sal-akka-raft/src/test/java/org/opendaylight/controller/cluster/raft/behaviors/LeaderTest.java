@@ -25,14 +25,11 @@ import akka.actor.Terminated;
 import akka.protobuf.ByteString;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -403,7 +400,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
             final int messageNr) {
         final AppendEntries commitReq = allMessages.get(2 * messageNr + 1);
         assertEquals(lastIndex + messageNr + 1, commitReq.getLeaderCommit());
-        assertEquals(ImmutableList.of(), commitReq.getEntries());
+        assertEquals(List.of(), commitReq.getEntries());
     }
 
     private static void assertRequestEntry(final long lastIndex, final List<AppendEntries> allMessages,
@@ -587,11 +584,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         final MockRaftActorContext actorContext = createActorContextWithFollower();
 
-        Map<String, String> leadersSnapshot = new HashMap<>();
-        leadersSnapshot.put("1", "A");
-        leadersSnapshot.put("2", "B");
-        leadersSnapshot.put("3", "C");
-
         //clears leaders log
         actorContext.getReplicatedLog().removeFrom(0);
 
@@ -614,9 +606,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
-        ByteString bs = toByteString(leadersSnapshot);
+        ByteString bs = toByteString(Map.of("1", "A", "2", "B", "3", "C"));
         leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
@@ -873,7 +865,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(),
                 lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm, -1, null, null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
@@ -925,7 +917,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(-1);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(),
                 lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm, -1, null, null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
@@ -980,7 +972,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
@@ -1049,8 +1041,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
-                -1, null, null);
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 
@@ -1123,8 +1114,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
-                -1, null, null);
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
 
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
@@ -1188,8 +1178,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
-                Collections.<ReplicatedLogEntry>emptyList(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
-                -1, null, null);
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 
@@ -1282,8 +1271,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     private MockRaftActorContext createActorContextWithFollower() {
         MockRaftActorContext actorContext = createActorContext();
-        actorContext.setPeerAddresses(ImmutableMap.<String, String>builder().put(FOLLOWER_ID,
-                followerActor.path().toString()).build());
+        actorContext.setPeerAddresses(Map.of(FOLLOWER_ID, followerActor.path().toString()));
         return actorContext;
     }
 
@@ -1292,7 +1280,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         DefaultConfigParamsImpl followerConfig = new DefaultConfigParamsImpl();
         followerConfig.setElectionTimeoutFactor(10000);
         followerActorContext.setConfigParams(followerConfig);
-        followerActorContext.setPeerAddresses(ImmutableMap.of(LEADER_ID, leaderActor.path().toString()));
+        followerActorContext.setPeerAddresses(Map.of(LEADER_ID, leaderActor.path().toString()));
         return followerActorContext;
     }
 
@@ -1358,7 +1346,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final MockRaftActorContext leaderActorContext = createActorContext();
 
         MockRaftActorContext followerActorContext = createActorContext(FOLLOWER_ID, followerActor);
-        followerActorContext.setPeerAddresses(ImmutableMap.of(LEADER_ID, leaderActor.path().toString()));
+        followerActorContext.setPeerAddresses(Map.of(LEADER_ID, leaderActor.path().toString()));
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -2269,7 +2257,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testReplicationWithPayloadSizeThatExceedsThreshold");
 
         final int serializedSize = SerializationUtils.serialize(new AppendEntries(1, LEADER_ID, -1, -1,
-                Arrays.asList(new SimpleReplicatedLogEntry(0, 1,
+                List.of(new SimpleReplicatedLogEntry(0, 1,
                         new MockRaftActorContext.MockPayload("large"))), 0, -1, (short)0)).length;
         final MockRaftActorContext.MockPayload largePayload =
                 new MockRaftActorContext.MockPayload("large", serializedSize);
