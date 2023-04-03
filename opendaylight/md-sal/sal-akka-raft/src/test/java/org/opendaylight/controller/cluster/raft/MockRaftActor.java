@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -52,10 +53,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
             Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
         state = Collections.synchronizedList(new ArrayList<>());
-        this.actorDelegate = mock(RaftActor.class);
-        this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
+        actorDelegate = mock(RaftActor.class);
+        recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
 
-        this.snapshotCohortDelegate = builder.snapshotCohort != null ? builder.snapshotCohort :
+        snapshotCohortDelegate = builder.snapshotCohort != null ? builder.snapshotCohort :
             mock(RaftActorSnapshotCohort.class);
 
         if (builder.dataPersistenceProvider == null) {
@@ -174,9 +175,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     private void applySnapshotState(final Snapshot.State newState) {
-        if (newState instanceof MockSnapshotState) {
+        if (newState instanceof MockSnapshotState mockState) {
             state.clear();
-            state.addAll(((MockSnapshotState)newState).getState());
+            state.addAll(mockState.getState());
         }
     }
 
@@ -213,7 +214,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override public String persistenceId() {
-        return this.getId();
+        return getId();
     }
 
     protected void newBehavior(final RaftActorBehavior newBehavior) {
@@ -243,15 +244,15 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     public static List<Object> fromState(final Snapshot.State from) {
-        if (from instanceof MockSnapshotState) {
-            return ((MockSnapshotState)from).getState();
+        if (from instanceof MockSnapshotState mockState) {
+            return mockState.getState();
         }
 
         throw new IllegalStateException("Unexpected snapshot State: " + from);
     }
 
     public ReplicatedLog getReplicatedLog() {
-        return this.getRaftActorContext().getReplicatedLog();
+        return getRaftActorContext().getReplicatedLog();
     }
 
     @Override
@@ -296,52 +297,52 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
 
         public T id(final String newId) {
-            this.id = newId;
+            id = newId;
             return self();
         }
 
         public T peerAddresses(final Map<String, String> newPeerAddresses) {
-            this.peerAddresses = newPeerAddresses;
+            peerAddresses = newPeerAddresses;
             return self();
         }
 
         public T config(final ConfigParams newConfig) {
-            this.config = newConfig;
+            config = newConfig;
             return self();
         }
 
         public T dataPersistenceProvider(final DataPersistenceProvider newDataPersistenceProvider) {
-            this.dataPersistenceProvider = newDataPersistenceProvider;
+            dataPersistenceProvider = newDataPersistenceProvider;
             return self();
         }
 
         public T roleChangeNotifier(final ActorRef newRoleChangeNotifier) {
-            this.roleChangeNotifier = newRoleChangeNotifier;
+            roleChangeNotifier = newRoleChangeNotifier;
             return self();
         }
 
         public T snapshotMessageSupport(final RaftActorSnapshotMessageSupport newSnapshotMessageSupport) {
-            this.snapshotMessageSupport = newSnapshotMessageSupport;
+            snapshotMessageSupport = newSnapshotMessageSupport;
             return self();
         }
 
         public T restoreFromSnapshot(final Snapshot newRestoreFromSnapshot) {
-            this.restoreFromSnapshot = newRestoreFromSnapshot;
+            restoreFromSnapshot = newRestoreFromSnapshot;
             return self();
         }
 
         public T persistent(final Optional<Boolean> newPersistent) {
-            this.persistent = newPersistent;
+            persistent = newPersistent;
             return self();
         }
 
         public T pauseLeaderFunction(final Function<Runnable, Void> newPauseLeaderFunction) {
-            this.pauseLeaderFunction = newPauseLeaderFunction;
+            pauseLeaderFunction = newPauseLeaderFunction;
             return self();
         }
 
         public T snapshotCohort(final RaftActorSnapshotCohort newSnapshotCohort) {
-            this.snapshotCohort = newSnapshotCohort;
+            snapshotCohort = newSnapshotCohort;
             return self();
         }
 
@@ -371,10 +372,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (state == null ? 0 : state.hashCode());
-            return result;
+            return Objects.hash(state);
         }
 
         @Override
@@ -389,11 +387,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
                 return false;
             }
             MockSnapshotState other = (MockSnapshotState) obj;
-            if (state == null) {
-                if (other.state != null) {
-                    return false;
-                }
-            } else if (!state.equals(other.state)) {
+            if (!Objects.equals(state, other.state)) {
                 return false;
             }
             return true;

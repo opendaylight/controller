@@ -9,20 +9,18 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -61,15 +59,15 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(initialTerm, leaderId));
 
         // Create the leader and 2 follower actors.
-        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+        follower1Actor = newTestRaftActor(follower1Id, Map.of(leaderId, testActorPath(leaderId),
                 follower2Id, testActorPath(follower2Id)), newFollowerConfigParams());
 
-        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+        follower2Actor = newTestRaftActor(follower2Id, Map.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), newFollowerConfigParams());
 
-        Map<String, String> leaderPeerAddresses = ImmutableMap.<String, String>builder()
-                .put(follower1Id, follower1Actor.path().toString())
-                .put(follower2Id, follower2Actor.path().toString()).build();
+        Map<String, String> leaderPeerAddresses = Map.of(
+                follower1Id, follower1Actor.path().toString(),
+                follower2Id, follower2Actor.path().toString());
 
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
@@ -96,7 +94,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
     }
 
     private void setupFollower2() {
-        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+        follower2Actor = newTestRaftActor(follower2Id, Map.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), newFollowerConfigParams());
 
         follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
@@ -169,7 +167,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // to catch it up because no snapshotting was done so the follower's next index was present in the log.
         InstallSnapshot installSnapshot = MessageCollectorActor.getFirstMatching(follower2CollectorActor,
                 InstallSnapshot.class);
-        Assert.assertNull("Follower 2 received unexpected InstallSnapshot", installSnapshot);
+        assertNull("Follower 2 received unexpected InstallSnapshot", installSnapshot);
 
         testLog.info("testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries complete");
     }
@@ -254,7 +252,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader did not try to install a snapshot to catch up follower 2.
         InstallSnapshot installSnapshot = MessageCollectorActor.getFirstMatching(follower2CollectorActor,
                 InstallSnapshot.class);
-        Assert.assertNull("Follower 2 received unexpected InstallSnapshot", installSnapshot);
+        assertNull("Follower 2 received unexpected InstallSnapshot", installSnapshot);
 
         // Ensure there's at least 1 more heartbeat.
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -364,7 +362,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Send a server config change to test that the install snapshot includes the server config.
 
-        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(Arrays.asList(
+        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo(leaderId, true),
                 new ServerInfo(follower1Id, false),
                 new ServerInfo(follower2Id, false)));
@@ -508,7 +506,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify a snapshot is not triggered.
         CaptureSnapshot captureSnapshot = MessageCollectorActor.getFirstMatching(leaderCollectorActor,
                 CaptureSnapshot.class);
-        Assert.assertNull("Leader received unexpected CaptureSnapshot", captureSnapshot);
+        assertNull("Leader received unexpected CaptureSnapshot", captureSnapshot);
 
         expSnapshotState.add(payload1);
 
@@ -581,7 +579,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyApplyState(applyState, leaderCollectorActor, payload3.toString(), currentTerm, 3, payload3);
 
         captureSnapshot = MessageCollectorActor.getFirstMatching(leaderCollectorActor, CaptureSnapshot.class);
-        Assert.assertNull("Leader received unexpected CaptureSnapshot", captureSnapshot);
+        assertNull("Leader received unexpected CaptureSnapshot", captureSnapshot);
 
         // Verify the follower 1 applies the state.
         applyState = MessageCollectorActor.expectFirstMatching(follower1CollectorActor, ApplyState.class);
@@ -633,7 +631,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // This is OK - the next snapshot should delete it. In production, even if the system restarted
         // before another snapshot, they would both get applied which wouldn't hurt anything.
         List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        Assert.assertTrue("Expected at least 1 persisted snapshots", persistedSnapshots.size() > 0);
+        assertTrue("Expected at least 1 persisted snapshots", persistedSnapshots.size() > 0);
         Snapshot persistedSnapshot = persistedSnapshots.get(persistedSnapshots.size() - 1);
         verifySnapshot("Persisted", persistedSnapshot, currentTerm, lastAppliedIndex, currentTerm, lastAppliedIndex);
         List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshot.getUnAppliedEntries();
@@ -683,18 +681,18 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyLeadersTrimmedLog(lastAppliedIndex);
 
         if (expServerConfig != null) {
-            Set<ServerInfo> expServerInfo = new HashSet<>(expServerConfig.getServerConfig());
+            Set<ServerInfo> expServerInfo = Set.copyOf(expServerConfig.getServerConfig());
             assertEquals("Leader snapshot server config", expServerInfo,
-                    new HashSet<>(persistedSnapshot.getServerConfiguration().getServerConfig()));
+                Set.copyOf(persistedSnapshot.getServerConfiguration().getServerConfig()));
 
             assertEquals("Follower 2 snapshot server config", expServerInfo,
-                    new HashSet<>(applySnapshot.getSnapshot().getServerConfiguration().getServerConfig()));
+                Set.copyOf(applySnapshot.getSnapshot().getServerConfiguration().getServerConfig()));
 
             ServerConfigurationPayload follower2ServerConfig = follower2Context.getPeerServerInfo(true);
             assertNotNull("Follower 2 server config is null", follower2ServerConfig);
 
             assertEquals("Follower 2 server config", expServerInfo,
-                    new HashSet<>(follower2ServerConfig.getServerConfig()));
+                Set.copyOf(follower2ServerConfig.getServerConfig()));
         }
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -765,8 +763,9 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leaders's persisted journal log - it should only contain the last 2 ReplicatedLogEntries
         // added after the snapshot as the persisted journal should've been purged to the snapshot
         // sequence number.
-        verifyPersistedJournal(leaderId, Arrays.asList(new SimpleReplicatedLogEntry(5, currentTerm, payload5),
-                new SimpleReplicatedLogEntry(6, currentTerm, payload6)));
+        verifyPersistedJournal(leaderId, List.of(
+            new SimpleReplicatedLogEntry(5, currentTerm, payload5),
+            new SimpleReplicatedLogEntry(6, currentTerm, payload6)));
 
         // Verify the leaders's persisted journal contains an ApplyJournalEntries for at least the last entry index.
         List<ApplyJournalEntries> persistedApplyJournalEntries =
@@ -779,8 +778,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
             }
         }
 
-        Assert.assertTrue(String.format("ApplyJournalEntries with index %d not found in leader's persisted journal", 6),
-                found);
+        assertTrue("ApplyJournalEntries with index 6 not found in leader's persisted journal", found);
 
         // Verify follower 1 applies the 3 log entries.
         applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
