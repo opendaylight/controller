@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 
 /**
@@ -18,47 +14,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public sealed class DeleteEntries implements Serializable {
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Legacy extends DeleteEntries implements LegacySerializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        Legacy(final long fromIndex) {
-            super(fromIndex);
-        }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static final class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private DeleteEntries deleteEntries = null;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-            // For Externalizable
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(deleteEntries.fromIndex);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException {
-            deleteEntries = new Legacy(in.readLong());
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return deleteEntries;
-        }
-    }
-
+public final class DeleteEntries implements Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -68,17 +24,17 @@ public sealed class DeleteEntries implements Serializable {
         this.fromIndex = fromIndex;
     }
 
-    public final long getFromIndex() {
+    public long getFromIndex() {
         return fromIndex;
     }
 
-    @java.io.Serial
-    public final Object writeReplace() {
-        return new DE(this);
+    @Override
+    public String toString() {
+        return "DeleteEntries [fromIndex=" + fromIndex + "]";
     }
 
-    @Override
-    public final String toString() {
-        return "DeleteEntries [fromIndex=" + fromIndex + "]";
+    @java.io.Serial
+    private Object writeReplace() {
+        return new DE(this);
     }
 }
