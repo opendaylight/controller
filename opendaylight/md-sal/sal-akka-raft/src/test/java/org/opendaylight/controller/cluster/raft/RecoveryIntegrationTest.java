@@ -11,9 +11,6 @@ import static org.junit.Assert.assertEquals;
 
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
-import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
@@ -38,15 +35,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
     @Before
     public void setup() {
-        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+        follower1Actor = newTestRaftActor(follower1Id, Map.of(leaderId, testActorPath(leaderId)),
                 newFollowerConfigParams());
 
-        Map<String, String> leaderPeerAddresses = new HashMap<>();
-        leaderPeerAddresses.put(follower1Id, follower1Actor.path().toString());
-        leaderPeerAddresses.put(follower2Id, "");
-
         leaderConfigParams = newLeaderConfigParams();
-        leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
+        leaderActor = newTestRaftActor(leaderId, Map.of(follower1Id, follower1Actor.path().toString(), follower2Id, ""),
+            leaderConfigParams);
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
@@ -96,7 +90,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Leader commit index", 4, leaderContext.getCommitIndex());
         assertEquals("Leader last applied", 4, leaderContext.getLastApplied());
 
-        assertEquals("Leader state", Arrays.asList(payload0, payload1, payload2, payload3, payload4),
+        assertEquals("Leader state", List.of(payload0, payload1, payload2, payload3, payload4),
                 leaderActor.underlyingActor().getState());
     }
 
@@ -135,7 +129,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Leader commit index", 4, leaderContext.getCommitIndex());
         assertEquals("Leader last applied", 4, leaderContext.getLastApplied());
 
-        assertEquals("Leader state", Arrays.asList(payload0, payload1, payload2, payload3, payload4),
+        assertEquals("Leader state", List.of(payload0, payload1, payload2, payload3, payload4),
                 leaderActor.underlyingActor().getState());
     }
 
@@ -146,8 +140,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         leader = leaderActor.underlyingActor().getCurrentBehavior();
 
-        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
-                newFollowerConfigParams());
+        follower2Actor = newTestRaftActor(follower2Id,
+                Map.of(leaderId, testActorPath(leaderId)), newFollowerConfigParams());
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
 
         leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
@@ -168,8 +162,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         InMemoryJournal.clear();
 
-        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
-                newFollowerConfigParams());
+        follower2Actor = newTestRaftActor(follower2Id,
+                Map.of(leaderId, testActorPath(leaderId)), newFollowerConfigParams());
         TestRaftActor follower2Underlying = follower2Actor.underlyingActor();
         follower2CollectorActor = follower2Underlying.collectorActor();
         follower2Context = follower2Underlying.getRaftActorContext();
@@ -182,7 +176,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Wait for the follower to persist the snapshot.
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
 
-        final List<MockPayload> expFollowerState = Arrays.asList(payload0, payload1, payload2);
+        final List<MockPayload> expFollowerState = List.of(payload0, payload1, payload2);
 
         assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
         assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
@@ -191,7 +185,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         killActor(follower2Actor);
 
-        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+        follower2Actor = newTestRaftActor(follower2Id, Map.of(leaderId, testActorPath(leaderId)),
                 newFollowerConfigParams());
 
         follower2Underlying = follower2Actor.underlyingActor();
