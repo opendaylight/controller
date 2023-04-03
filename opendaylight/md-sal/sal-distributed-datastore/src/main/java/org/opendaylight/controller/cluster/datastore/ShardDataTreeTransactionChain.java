@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import java.util.Optional;
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -53,19 +54,20 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         return previousTx.getSnapshot();
     }
 
-    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
+    @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
         return new ReadOnlyShardDataTreeTransaction(this, txId, snapshot);
     }
 
-    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
+    @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
-        openTransaction = new ReadWriteShardDataTreeTransaction(this, txId, snapshot.newModification());
-        return openTransaction;
+        final var ret = new ReadWriteShardDataTreeTransaction(this, txId, snapshot.newModification());
+        openTransaction = ret;
+        return ret;
     }
 
     void close() {
