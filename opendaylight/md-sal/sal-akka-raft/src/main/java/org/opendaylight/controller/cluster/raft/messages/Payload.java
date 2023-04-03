@@ -17,6 +17,7 @@ import java.io.Serializable;
  * Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the Payload class.
  */
 public abstract class Payload implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -40,5 +41,6 @@ public abstract class Payload implements Serializable {
      *
      * @return Serialization proxy
      */
+    @java.io.Serial
     protected abstract Object writeReplace();
 }

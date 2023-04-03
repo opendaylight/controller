@@ -11,6 +11,6 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public abstract class IdentifiablePayload<T extends Identifier> extends Payload implements Identifiable<T> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-
 }

@@ -98,6 +98,7 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     }
 
     static class TestNonPersistentPayload extends Payload {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -118,7 +119,7 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     }
 
     static class TestPersistentPayload extends TestNonPersistentPayload implements PersistentPayload {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
-
     }
 }
