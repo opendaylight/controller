@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.persistence.SnapshotSelectionCriteria;
 import java.io.OutputStream;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.After;
@@ -257,7 +256,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
                 8L, 2L, new MockRaftActorContext.MockPayload());
 
         doReturn(lastAppliedEntry).when(mockReplicatedLog).get(8L);
-        doReturn(Arrays.asList(lastLogEntry)).when(mockReplicatedLog).getFrom(9L);
+        doReturn(List.of(lastLogEntry)).when(mockReplicatedLog).getFrom(9L);
 
         // when replicatedToAllIndex = -1
         snapshotManager.capture(lastLogEntry, -1);
@@ -275,7 +274,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", 2L, snapshot.getLastAppliedTerm());
         assertEquals("getLastAppliedIndex", 8L, snapshot.getLastAppliedIndex());
         assertEquals("getState", snapshotState, snapshot.getState());
-        assertEquals("getUnAppliedEntries", Arrays.asList(lastLogEntry), snapshot.getUnAppliedEntries());
+        assertEquals("getUnAppliedEntries", List.of(lastLogEntry), snapshot.getUnAppliedEntries());
         assertEquals("electionTerm", mockElectionTerm.getCurrentTerm(), snapshot.getElectionTerm());
         assertEquals("electionVotedFor", mockElectionTerm.getVotedFor(), snapshot.getElectionVotedFor());
 
