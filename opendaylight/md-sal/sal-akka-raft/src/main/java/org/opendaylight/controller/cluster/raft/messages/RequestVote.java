@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
@@ -59,42 +54,5 @@ public final class RequestVote extends AbstractRaftRPC {
     @Override
     Object writeReplace() {
         return new RV(this);
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private static class Proxy implements Externalizable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private RequestVote requestVote;
-
-        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
-        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
-        @SuppressWarnings("checkstyle:RedundantModifier")
-        public Proxy() {
-        }
-
-        @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeLong(requestVote.getTerm());
-            out.writeObject(requestVote.candidateId);
-            out.writeLong(requestVote.lastLogIndex);
-            out.writeLong(requestVote.lastLogTerm);
-        }
-
-        @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            long term = in.readLong();
-            String candidateId = (String) in.readObject();
-            long lastLogIndex = in.readLong();
-            long lastLogTerm = in.readLong();
-
-            requestVote = new RequestVote(term, candidateId, lastLogIndex, lastLogTerm);
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return requestVote;
-        }
     }
 }
