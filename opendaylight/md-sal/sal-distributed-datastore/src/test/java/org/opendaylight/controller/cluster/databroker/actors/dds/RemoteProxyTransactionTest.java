@@ -44,10 +44,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
 public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<RemoteProxyTransaction> {
-
     @Override
     protected RemoteProxyTransaction createTransaction(final ProxyHistory parent, final TransactionIdentifier id,
                                                        final DataTreeSnapshot snapshot) {
+        mockForRemote();
         return new RemoteProxyTransaction(parent, TRANSACTION_ID, false, false, false);
     }
 

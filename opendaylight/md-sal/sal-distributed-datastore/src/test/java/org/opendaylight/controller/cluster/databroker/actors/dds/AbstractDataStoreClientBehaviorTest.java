@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.InternalCommand;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -50,16 +51,17 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     private TestProbe clientActorProbe;
     private TestProbe actorContextProbe;
     private AbstractDataStoreClientBehavior behavior;
+    private ActorUtils util;
 
     @Before
     public void setUp() {
         system = ActorSystem.apply();
         clientActorProbe = new TestProbe(system, "client");
         actorContextProbe = new TestProbe(system, "actor-context");
-        final ActorUtils context = createActorContextMock(system, actorContextProbe.ref());
+        util = createActorContextMock(system, actorContextProbe.ref());
         clientContext =
                 AccessClientUtil.createClientActorContext(system, clientActorProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        behavior = createBehavior(clientContext, context);
+        behavior = createBehavior(clientContext, util);
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
@@ -132,6 +134,10 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @Test
     public void testGetConnection() {
+        final var datastoreContext = mock(DatastoreContext.class);
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(util).getDatastoreContext();
+
         //set up data tree mock
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
         doReturn(Optional.empty()).when(modification).readNode(YangInstanceIdentifier.empty());
