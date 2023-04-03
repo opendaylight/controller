@@ -44,13 +44,9 @@ class FollowerIdentifier extends AbstractStringIdentifier<FollowerIdentifier> {
         public Proxy() {
         }
 
-        Proxy(final FollowerIdentifier identifier) {
-            this.identifier = identifier;
-        }
-
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeObject(identifier.getValue());
+        public void writeExternal(final ObjectOutput out) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
