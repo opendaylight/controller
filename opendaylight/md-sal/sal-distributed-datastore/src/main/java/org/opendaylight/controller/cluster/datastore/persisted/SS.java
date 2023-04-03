@@ -10,10 +10,15 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * Serialization proxy for {@link ShardSnapshotState}.
  */
-final class SS implements ShardSnapshotState.SerialForm {
+final class SS implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,17 +34,17 @@ final class SS implements ShardSnapshotState.SerialForm {
     }
 
     @Override
-    public ShardSnapshotState snapshotState() {
-        return snapshotState;
+    public void readExternal(final ObjectInput in) throws IOException {
+        snapshotState = ShardDataTreeSnapshot.deserialize(in);
     }
 
     @Override
-    public void resolveTo(final ShardSnapshotState newSnapshotState) {
-        snapshotState = requireNonNull(newSnapshotState);
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        snapshotState.getSnapshot().serialize(out);
     }
 
-    @Override
-    public Object readResolve() {
+    @java.io.Serial
+    private Object readResolve() {
         return verifyNotNull(snapshotState);
     }
 }
