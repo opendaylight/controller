@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ServerConfigurationPayload extends Payload implements PersistentPayload {
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private List<ServerInfo> serverConfig;
@@ -57,12 +57,14 @@ public final class ServerConfigurationPayload extends Payload implements Persist
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             final int size = in.readInt();
-            serverConfig = new ArrayList<>(size);
+
+            final var builder = ImmutableList.<ServerInfo>builderWithExpectedSize(size);
             for (int i = 0; i < size; ++i) {
                 final String id = (String) in.readObject();
                 final boolean voting = in.readBoolean();
-                serverConfig.add(new ServerInfo(id, voting));
+                builder.add(new ServerInfo(id, voting));
             }
+            serverConfig = builder.build();
         }
 
         private Object readResolve() {
@@ -71,6 +73,7 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigurationPayload.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
@@ -116,7 +119,7 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
@@ -98,7 +98,7 @@ public sealed class Snapshot implements Serializable {
             ServerConfigurationPayload serverConfig = (ServerConfigurationPayload) in.readObject();
 
             int size = in.readInt();
-            var unAppliedEntries = new ArrayList<ReplicatedLogEntry>(size);
+            var unAppliedEntries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
             for (int i = 0; i < size; i++) {
                 unAppliedEntries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(),
                         (Payload) in.readObject()));
@@ -106,8 +106,8 @@ public sealed class Snapshot implements Serializable {
 
             State state = (State) in.readObject();
 
-            snapshot = new Legacy(state, unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
-                    electionTerm, electionVotedFor, serverConfig);
+            snapshot = new Legacy(state, unAppliedEntries.build(), lastIndex, lastTerm, lastAppliedIndex,
+                lastAppliedTerm, electionTerm, electionVotedFor, serverConfig);
         }
 
         @java.io.Serial
