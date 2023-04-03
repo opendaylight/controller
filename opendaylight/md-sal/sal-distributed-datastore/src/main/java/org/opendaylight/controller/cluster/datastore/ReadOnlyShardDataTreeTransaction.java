@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
 final class ReadOnlyShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeSnapshot> {
     ReadOnlyShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
-        final DataTreeSnapshot snapshot) {
+            final DataTreeSnapshot snapshot) {
         super(parent, id, snapshot);
     }
 }
