@@ -70,12 +70,10 @@ import org.slf4j.LoggerFactory;
 final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteProxyTransaction.class);
 
-    // FIXME: make this tuneable
-    private static final int REQUEST_MAX_MODIFICATIONS = 1000;
-
     private final ModifyTransactionRequestBuilder builder;
     private final boolean sendReadyOnSeal;
     private final boolean snapshotOnly;
+    private final int maxModifications;
 
     private boolean builderBusy;
 
@@ -87,6 +85,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         this.snapshotOnly = snapshotOnly;
         this.sendReadyOnSeal = sendReadyOnSeal;
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
+        maxModifications = parent.parent().actorUtils().getDatastoreContext().getShardBatchedModificationCount();
     }
 
     @Override
@@ -184,7 +183,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             ensureInitializedBuilder();
 
             builder.addModification(modification);
-            if (builder.size() >= REQUEST_MAX_MODIFICATIONS) {
+            if (builder.size() >= maxModifications) {
                 flushBuilder(enqueuedTicks);
             }
         } else {
