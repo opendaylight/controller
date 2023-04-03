@@ -250,14 +250,9 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
             // For Externalizable
         }
 
-        Proxy(final CommitTransactionPayload payload) {
-            this.payload = requireNonNull(payload);
-        }
-
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(payload.size());
-            payload.writeBytes(out);
+        public void writeExternal(final ObjectOutput out) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
