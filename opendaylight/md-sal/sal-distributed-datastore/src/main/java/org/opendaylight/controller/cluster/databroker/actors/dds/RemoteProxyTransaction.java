@@ -205,8 +205,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private Exception recordFailedResponse(final Response<?, ?> response) {
         final Exception failure;
-        if (response instanceof RequestFailure) {
-            final RequestException cause = ((RequestFailure<?, ?>) response).getCause();
+        if (response instanceof RequestFailure<?, ?> requestFailure) {
+            final RequestException cause = requestFailure.getCause();
             failure = cause instanceof RequestTimeoutException
                     ? new DataStoreUnavailableException(cause.getMessage(), cause) : cause;
         } else {
@@ -230,8 +230,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final Response<?, ?> response) {
         LOG.debug("Exists request for {} completed with {}", path, response);
 
-        if (response instanceof ExistsTransactionSuccess) {
-            future.set(((ExistsTransactionSuccess) response).getExists());
+        if (response instanceof ExistsTransactionSuccess success) {
+            future.set(success.getExists());
         } else {
             failReadFuture(future, "Error executing exists request for path " + path, response);
         }
@@ -243,8 +243,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final Response<?, ?> response) {
         LOG.debug("Read request for {} completed with {}", path, response);
 
-        if (response instanceof ReadTransactionSuccess) {
-            future.set(((ReadTransactionSuccess) response).getData());
+        if (response instanceof ReadTransactionSuccess success) {
+            future.set(success.getData());
         } else {
             failReadFuture(future, "Error reading data for path " + path, response);
         }
@@ -303,19 +303,19 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
-        if (request instanceof ModifyTransactionRequest) {
-            handleForwardedModifyTransactionRequest(callback, (ModifyTransactionRequest) request);
-        } else if (request instanceof ReadTransactionRequest) {
+        if (request instanceof ModifyTransactionRequest modifyRequest) {
+            handleForwardedModifyTransactionRequest(callback, modifyRequest);
+        } else if (request instanceof ReadTransactionRequest readRequest) {
             ensureFlushedBuider();
             sendRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                ((ReadTransactionRequest) request).getPath(), isSnapshotOnly()), resp -> {
+                readRequest.getPath(), isSnapshotOnly()), resp -> {
                     recordFinishedRequest(resp);
                     callback.accept(resp);
                 });
-        } else if (request instanceof ExistsTransactionRequest) {
+        } else if (request instanceof ExistsTransactionRequest existsRequest) {
             ensureFlushedBuider();
             sendRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                ((ExistsTransactionRequest) request).getPath(), isSnapshotOnly()), resp -> {
+                existsRequest.getPath(), isSnapshotOnly()), resp -> {
                     recordFinishedRequest(resp);
                     callback.accept(resp);
                 });
@@ -399,8 +399,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        if (request instanceof CommitLocalTransactionRequest) {
-            replayLocalCommitRequest((CommitLocalTransactionRequest) request, callback, enqueuedTicks);
+        if (request instanceof CommitLocalTransactionRequest commitRequest) {
+            replayLocalCommitRequest(commitRequest, callback, enqueuedTicks);
         } else if (request instanceof AbortLocalTransactionRequest) {
             enqueueRequest(abortRequest(), callback, enqueuedTicks);
         } else {
@@ -439,19 +439,19 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         final Consumer<Response<?, ?>> cb = callback != null ? callback : resp -> { /* NOOP */ };
         final OptionalLong optTicks = OptionalLong.of(enqueuedTicks);
 
-        if (request instanceof ModifyTransactionRequest) {
-            handleReplayedModifyTransactionRequest(enqueuedTicks, cb, (ModifyTransactionRequest) request);
-        } else if (request instanceof ReadTransactionRequest) {
+        if (request instanceof ModifyTransactionRequest modifyRequest) {
+            handleReplayedModifyTransactionRequest(enqueuedTicks, cb, modifyRequest);
+        } else if (request instanceof ReadTransactionRequest readRequest) {
             ensureFlushedBuider(optTicks);
             enqueueRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                ((ReadTransactionRequest) request).getPath(), isSnapshotOnly()), resp -> {
+                readRequest.getPath(), isSnapshotOnly()), resp -> {
                     recordFinishedRequest(resp);
                     cb.accept(resp);
                 }, enqueuedTicks);
-        } else if (request instanceof ExistsTransactionRequest) {
+        } else if (request instanceof ExistsTransactionRequest existsRequest) {
             ensureFlushedBuider(optTicks);
             enqueueRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                ((ExistsTransactionRequest) request).getPath(), isSnapshotOnly()), resp -> {
+                existsRequest.getPath(), isSnapshotOnly()), resp -> {
                     recordFinishedRequest(resp);
                     cb.accept(resp);
                 }, enqueuedTicks);
@@ -472,8 +472,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             enqueueDoAbort(callback, enqueuedTicks);
         } else if (request instanceof TransactionPurgeRequest) {
             enqueuePurge(callback, enqueuedTicks);
-        } else if (request instanceof IncrementTransactionSequenceRequest) {
-            final IncrementTransactionSequenceRequest req = (IncrementTransactionSequenceRequest) request;
+        } else if (request instanceof IncrementTransactionSequenceRequest req) {
             ensureFlushedBuider(optTicks);
             enqueueRequest(new IncrementTransactionSequenceRequest(getIdentifier(), nextSequence(), localActor(),
                 snapshotOnly, req.getIncrement()), callback, enqueuedTicks);
