@@ -70,8 +70,8 @@ public class ChunkedOutputStreamTest {
         }
 
         int counter = 0;
-        for (byte[] chunk: assertFinishedStream(size, 2)) {
-            for (byte actual: chunk) {
+        for (byte[] chunk : assertFinishedStream(size, 2)) {
+            for (byte actual : chunk) {
                 assertEquals((byte) counter++, actual);
             }
         }

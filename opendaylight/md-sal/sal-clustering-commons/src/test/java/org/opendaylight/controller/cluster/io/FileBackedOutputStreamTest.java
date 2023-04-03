@@ -18,7 +18,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -98,16 +97,14 @@ public class FileBackedOutputStreamTest {
             assertEquals("Temp file", tempFileName, findTempFileName(TEMP_DIR));
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
 
-            InputStream inputStream = fbos.asByteSource().openStream();
+            try (var inputStream = fbos.asByteSource().openStream()) {
+                assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
 
-            assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
-
-            byte[] inBytes = new byte[bytes.length];
-            assertEquals("# bytes read", bytes.length, inputStream.read(inBytes));
-            assertArrayEquals("Read InputStream", bytes, inBytes);
-            assertEquals("End of stream", -1, inputStream.read());
-
-            inputStream.close();
+                byte[] inBytes = new byte[bytes.length];
+                assertEquals("# bytes read", bytes.length, inputStream.read(inBytes));
+                assertArrayEquals("Read InputStream", bytes, inBytes);
+                assertEquals("End of stream", -1, inputStream.read());
+            }
 
             fbos.cleanup();
 
@@ -182,27 +179,27 @@ public class FileBackedOutputStreamTest {
         fail("Temp file was not deleted");
     }
 
-    static String findTempFileName(String dirPath) {
+    static String findTempFileName(final String dirPath) {
         String[] files = new File(dirPath).list();
         assertNotNull(files);
         assertTrue("Found more than one temp file: " + Arrays.toString(files), files.length < 2);
         return files.length == 1 ? files[0] : null;
     }
 
-    static boolean deleteFile(String file) {
+    static boolean deleteFile(final String file) {
         return new File(file).delete();
     }
 
-    static void deleteTempFiles(String path) {
+    static void deleteTempFiles(final String path) {
         String[] files = new File(path).list();
         if (files != null) {
-            for (String file: files) {
+            for (String file : files) {
                 deleteFile(path + File.separator + file);
             }
         }
     }
 
-    static void createDir(String path) {
+    static void createDir(final String path) {
         File dir = new File(path);
         if (!dir.exists() && !dir.mkdirs()) {
             throw new RuntimeException("Failed to create temp dir " + path);
