@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutpu
  * this is that they are usually transmitted in bulk, hence it is advantageous to reuse
  * a {@link NormalizedNodeDataOutput} instance to achieve better compression.
  */
-public abstract class TransactionModification {
+public abstract sealed class TransactionModification permits TransactionDelete, TransactionDataModification {
     static final byte TYPE_DELETE = 1;
     static final byte TYPE_MERGE = 2;
     static final byte TYPE_WRITE = 3;
