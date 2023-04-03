@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -33,15 +33,15 @@ public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftAct
 
         DefaultConfigParamsImpl followerConfigParams = newFollowerConfigParams();
         followerConfigParams.setSnapshotBatchCount(snapshotBatchCount);
-        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+        follower1Actor = newTestRaftActor(follower1Id, Map.of(leaderId, testActorPath(leaderId),
                 follower2Id, testActorPath(follower2Id)), followerConfigParams);
 
-        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+        follower2Actor = newTestRaftActor(follower2Id, Map.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), followerConfigParams);
 
-        peerAddresses = ImmutableMap.<String, String>builder()
-                .put(follower1Id, follower1Actor.path().toString())
-                .put(follower2Id, follower2Actor.path().toString()).build();
+        peerAddresses = Map.of(
+                follower1Id, follower1Actor.path().toString(),
+                follower2Id, follower2Actor.path().toString());
 
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);

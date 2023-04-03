@@ -16,10 +16,8 @@ import static org.mockito.Mockito.verify;
 import akka.protobuf.ByteString;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
@@ -37,10 +35,11 @@ import org.slf4j.LoggerFactory;
 public class SnapshotTrackerTest {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotTrackerTest.class);
 
+    private final HashMap<String, String> data = new HashMap<>();
+
     @Mock
     private RaftActorContext mockContext;
     private FileBackedOutputStream fbos;
-    private Map<String, String> data;
     private ByteString byteString;
     private byte[] chunk1;
     private byte[] chunk2;
@@ -48,12 +47,11 @@ public class SnapshotTrackerTest {
 
     @Before
     public void setup() {
-        data = new HashMap<>();
         data.put("key1", "value1");
         data.put("key2", "value2");
         data.put("key3", "value3");
 
-        byteString = ByteString.copyFrom(SerializationUtils.serialize((Serializable) data));
+        byteString = ByteString.copyFrom(SerializationUtils.serialize(data));
         chunk1 = getNextChunk(byteString, 0, 10);
         chunk2 = getNextChunk(byteString, 10, 10);
         chunk3 = getNextChunk(byteString, 20, byteString.size());
@@ -123,10 +121,8 @@ public class SnapshotTrackerTest {
         int start = offset;
         if (size > snapshotLength) {
             size = snapshotLength;
-        } else {
-            if (start + size > snapshotLength) {
-                size = snapshotLength - start;
-            }
+        } else if (start + size > snapshotLength) {
+            size = snapshotLength - start;
         }
 
         byte[] nextChunk = new byte[size];
