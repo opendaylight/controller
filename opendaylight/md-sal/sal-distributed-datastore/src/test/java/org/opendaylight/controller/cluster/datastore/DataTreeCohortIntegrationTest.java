@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -95,7 +96,7 @@ public class DataTreeCohortIntegrationTest {
     public void testSuccessfulCanCommitWithNoopPostStep() throws Exception {
         final DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                any(SchemaContext.class), any(Collection.class));
+                any(SchemaContext.class), anyCollection());
         ArgumentCaptor<Collection> candidateCapt = ArgumentCaptor.forClass(Collection.class);
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
@@ -116,13 +117,13 @@ public class DataTreeCohortIntegrationTest {
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                    any(SchemaContext.class), any(Collection.class));
+                    any(SchemaContext.class), anyCollection());
 
             kit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
                     .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                     .build());
-            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), any(Collection.class));
+            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), anyCollection());
 
             cohortReg.close();
 
@@ -134,13 +135,12 @@ public class DataTreeCohortIntegrationTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFailedCanCommit() throws Exception {
         final DOMDataTreeCommitCohort failedCohort = mock(DOMDataTreeCommitCohort.class);
 
         doReturn(FAILED_CAN_COMMIT_FUTURE).when(failedCohort).canCommit(any(Object.class),
-                any(SchemaContext.class), any(Collection.class));
+                any(SchemaContext.class), anyCollection());
 
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
@@ -167,7 +167,7 @@ public class DataTreeCohortIntegrationTest {
     public void testCanCommitWithListEntries() throws Exception {
         final DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                any(SchemaContext.class), any(Collection.class));
+                any(SchemaContext.class), anyCollection());
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
         try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
@@ -208,7 +208,7 @@ public class DataTreeCohortIntegrationTest {
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                    any(SchemaContext.class), any(Collection.class));
+                    any(SchemaContext.class), anyCollection());
 
             writeTx = dataStore.newWriteOnlyTransaction();
             final YangInstanceIdentifier sportagePath = CarsModel.newCarPath("sportage");
@@ -237,7 +237,7 @@ public class DataTreeCohortIntegrationTest {
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                    any(SchemaContext.class), any(Collection.class));
+                    any(SchemaContext.class), anyCollection());
 
             writeTx = dataStore.newWriteOnlyTransaction();
             writeTx.delete(CarsModel.BASE_PATH);
@@ -275,7 +275,6 @@ public class DataTreeCohortIntegrationTest {
      * DataTreeCandidate) and since currently preCommit is a noop in the Shard backend (it is combined with commit),
      * we can't actually test abort after canCommit.
      */
-    @SuppressWarnings("unchecked")
     @Test
     @Ignore
     public void testAbortAfterCanCommit() throws Exception {
@@ -284,7 +283,7 @@ public class DataTreeCohortIntegrationTest {
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(stepToAbort).abort();
         doReturn(PostPreCommitStep.NOOP_FUTURE).when(stepToAbort).preCommit();
         doReturn(FluentFutures.immediateFluentFuture(stepToAbort)).when(cohortToAbort).canCommit(any(Object.class),
-                any(SchemaContext.class), any(Collection.class));
+                any(SchemaContext.class), anyCollection());
 
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
