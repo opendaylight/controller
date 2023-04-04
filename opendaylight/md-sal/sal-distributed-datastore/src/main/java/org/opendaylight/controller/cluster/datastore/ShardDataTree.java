@@ -1336,9 +1336,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 }
 
                 return true;
-            } else {
-                newTip = requireNonNullElse(e.cohort.getCandidate(), newTip);
             }
+
+            newTip = requireNonNullElse(e.cohort.getCandidate(), newTip);
         }
 
         LOG.debug("{}: aborted transaction {} not found in the queue", logContext, cohort.getIdentifier());
