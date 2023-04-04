@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -108,13 +109,12 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         askAndAwait(cohortActor, new Commit(txId2));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testAsyncCohort() throws Exception {
         ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
         doReturn(executeWithDelay(executor, mockPostCanCommit))
-                .when(mockCohort).canCommit(any(Object.class), any(SchemaContext.class), any(Collection.class));
+                .when(mockCohort).canCommit(any(Object.class), any(SchemaContext.class), anyCollection());
 
         doReturn(executor.submit(() -> mockPostPreCommit)).when(mockPostCanCommit).preCommit();
 
@@ -135,13 +135,12 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         executor.shutdownNow();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFailureOnCanCommit() throws Exception {
         DataValidationFailedException failure = new DataValidationFailedException(YangInstanceIdentifier.empty(),
                 "mock");
         doReturn(FluentFutures.immediateFailedFluentFuture(failure)).when(mockCohort).canCommit(any(Object.class),
-                any(SchemaContext.class), any(Collection.class));
+                any(SchemaContext.class), anyCollection());
 
         ActorRef cohortActor = newCohortActor("testFailureOnCanCommit");
 
@@ -199,13 +198,12 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         return actorFactory.createActor(DataTreeCohortActor.props(mockCohort, YangInstanceIdentifier.empty()), name);
     }
 
-    @SuppressWarnings("unchecked")
     private void resetMockCohort() {
         reset(mockCohort);
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(mockPostCanCommit).abort();
         doReturn(Futures.immediateFuture(mockPostPreCommit)).when(mockPostCanCommit).preCommit();
         doReturn(FluentFutures.immediateFluentFuture(mockPostCanCommit)).when(mockCohort).canCommit(any(Object.class),
-                any(SchemaContext.class), any(Collection.class));
+                any(SchemaContext.class), anyCollection());
 
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(mockPostPreCommit).abort();
         doReturn(Futures.immediateFuture(null)).when(mockPostPreCommit).commit();
