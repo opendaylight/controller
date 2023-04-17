@@ -29,7 +29,7 @@ import org.opendaylight.mdsal.common.api.ThreePhaseCommitStep;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 /**
  * Proxy actor which acts as a facade to the user-provided commit cohort. Responsible for
@@ -89,10 +89,10 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
         private final Collection<DOMDataTreeCandidate> candidates;
         private final ActorRef cohort;
-        private final SchemaContext schema;
+        private final EffectiveModelContext schema;
 
         CanCommit(final TransactionIdentifier txId, final Collection<DOMDataTreeCandidate> candidates,
-                final SchemaContext schema, final ActorRef cohort) {
+                final EffectiveModelContext schema, final ActorRef cohort) {
             super(txId);
             this.cohort = Objects.requireNonNull(cohort);
             this.candidates = Objects.requireNonNull(candidates);
@@ -103,7 +103,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             return candidates;
         }
 
-        SchemaContext getSchema() {
+        EffectiveModelContext getSchema() {
             return schema;
         }
 

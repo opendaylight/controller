@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public final class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCoho
     private static final NodeIdentifier YEAR_NODE_ID = new NodeIdentifier(YEAR_QNAME);
 
     @Override
-    public FluentFuture<PostCanCommitStep> canCommit(final Object txId, final SchemaContext ctx,
+    public FluentFuture<PostCanCommitStep> canCommit(final Object txId, final EffectiveModelContext ctx,
             final Collection<DOMDataTreeCandidate> candidates) {
 
         for (DOMDataTreeCandidate candidate : candidates) {
