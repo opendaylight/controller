@@ -63,7 +63,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
 
     @Test
     public void testGetDataTree() {
-        final ReadOnlyDataTree tree = OBJECT.getDataTree().get();
+        final ReadOnlyDataTree tree = OBJECT.getDataTree().orElseThrow();
         assertEquals(TREE, tree);
     }
 
