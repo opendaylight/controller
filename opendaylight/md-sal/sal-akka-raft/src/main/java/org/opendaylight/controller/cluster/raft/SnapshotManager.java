@@ -68,7 +68,7 @@ public class SnapshotManager implements SnapshotState {
      */
     public SnapshotManager(final RaftActorContext context, final Logger logger) {
         this.context = context;
-        this.log = logger;
+        log = logger;
     }
 
     public boolean isApplying() {
@@ -307,12 +307,12 @@ public class SnapshotManager implements SnapshotState {
 
             log.debug("{}: lastSequenceNumber prior to capture: {}", persistenceId(), lastSequenceNumber);
 
-            SnapshotManager.this.currentState = CREATING;
+            currentState = CREATING;
 
             try {
                 createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
             } catch (Exception e) {
-                SnapshotManager.this.currentState = IDLE;
+                currentState = IDLE;
                 log.error("Error creating snapshot", e);
                 return false;
             }
@@ -338,7 +338,7 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public void apply(final ApplySnapshot toApply) {
-            SnapshotManager.this.applySnapshot = toApply;
+            applySnapshot = toApply;
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
 
@@ -346,7 +346,7 @@ public class SnapshotManager implements SnapshotState {
 
             context.getPersistenceProvider().saveSnapshot(toApply.getSnapshot());
 
-            SnapshotManager.this.currentState = PERSISTING;
+            currentState = PERSISTING;
         }
 
         @Override
@@ -440,7 +440,8 @@ public class SnapshotManager implements SnapshotState {
             if (installSnapshotStream.isPresent()) {
                 if (context.getId().equals(currentBehavior.getLeaderId())) {
                     try {
-                        ByteSource snapshotBytes = ((FileBackedOutputStream)installSnapshotStream.get()).asByteSource();
+                        ByteSource snapshotBytes = ((FileBackedOutputStream)installSnapshotStream.orElseThrow())
+                            .asByteSource();
                         currentBehavior.handleMessage(context.getActor(),
                                 new SendInstallSnapshot(snapshot, snapshotBytes));
                     } catch (IOException e) {
@@ -448,12 +449,12 @@ public class SnapshotManager implements SnapshotState {
                                 context.getId(), e);
                     }
                 } else {
-                    ((FileBackedOutputStream)installSnapshotStream.get()).cleanup();
+                    ((FileBackedOutputStream)installSnapshotStream.orElseThrow()).cleanup();
                 }
             }
 
             captureSnapshot = null;
-            SnapshotManager.this.currentState = PERSISTING;
+            currentState = PERSISTING;
         }
 
         @Override
@@ -525,7 +526,7 @@ public class SnapshotManager implements SnapshotState {
         private void snapshotComplete() {
             lastSequenceNumber = -1;
             applySnapshot = null;
-            SnapshotManager.this.currentState = IDLE;
+            currentState = IDLE;
 
             context.getActor().tell(SnapshotComplete.INSTANCE, context.getActor());
         }
@@ -550,8 +551,8 @@ public class SnapshotManager implements SnapshotState {
         LastAppliedTermInformationReader init(final ReplicatedLog log, final long originalIndex,
                 final ReplicatedLogEntry lastLogEntry, final boolean hasFollowers) {
             ReplicatedLogEntry entry = log.get(originalIndex);
-            this.index = -1L;
-            this.term = -1L;
+            index = -1L;
+            term = -1L;
             if (!hasFollowers) {
                 if (lastLogEntry != null) {
                     // since we have persisted the last-log-entry to persistent journal before the capture,
@@ -571,12 +572,12 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public long getIndex() {
-            return this.index;
+            return index;
         }
 
         @Override
         public long getTerm() {
-            return this.term;
+            return term;
         }
     }
 
@@ -586,8 +587,8 @@ public class SnapshotManager implements SnapshotState {
 
         ReplicatedToAllTermInformationReader init(final ReplicatedLog log, final long originalIndex) {
             ReplicatedLogEntry entry = log.get(originalIndex);
-            this.index = -1L;
-            this.term = -1L;
+            index = -1L;
+            term = -1L;
 
             if (entry != null) {
                 index = entry.getIndex();
@@ -599,12 +600,12 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public long getIndex() {
-            return this.index;
+            return index;
         }
 
         @Override
         public long getTerm() {
-            return this.term;
+            return term;
         }
     }
 }

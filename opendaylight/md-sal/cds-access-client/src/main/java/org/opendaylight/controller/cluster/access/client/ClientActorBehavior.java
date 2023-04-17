@@ -210,7 +210,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
              * sessionId and if it does not match our current connection just ignore it.
              */
             final Optional<T> optBackend = conn.getBackendInfo();
-            if (optBackend.isPresent() && optBackend.get().getSessionId() != command.getSessionId()) {
+            if (optBackend.isPresent() && optBackend.orElseThrow().getSessionId() != command.getSessionId()) {
                 LOG.debug("{}: Mismatched current connection {} and envelope {}, ignoring response", persistenceId(),
                     conn, command);
                 return this;
@@ -415,7 +415,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
         final Long shard = oldConn.cookie();
         LOG.info("{}: refreshing backend for shard {}", persistenceId(), shard);
-        resolver().refreshBackendInfo(shard, conn.getBackendInfo().get()).whenComplete(
+        resolver().refreshBackendInfo(shard, conn.getBackendInfo().orElseThrow()).whenComplete(
             (backend, failure) -> context().executeInActor(behavior -> {
                 backendConnectFinished(shard, conn, backend, failure);
                 return behavior;

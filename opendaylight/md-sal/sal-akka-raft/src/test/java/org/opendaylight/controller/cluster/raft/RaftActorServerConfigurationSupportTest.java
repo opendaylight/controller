@@ -172,7 +172,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
         // Verify ServerConfigurationPayload entry in leader's log
 
@@ -251,7 +251,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
         // Verify ServerConfigurationPayload entry in leader's log
 
@@ -297,7 +297,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
         // Verify ServerConfigurationPayload entry in leader's log
 
@@ -439,7 +439,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
         expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
 
@@ -680,7 +680,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // The first AddServer should succeed with OK even though consensus wasn't reached
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
         // Verify ServerConfigurationPayload entry in leader's log
         verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
@@ -1476,7 +1476,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AbstractMockRaftActor(final String id, final Map<String, String> peerAddresses,
                 final Optional<ConfigParams> config, final boolean persistent, final ActorRef collectorActor) {
-            super(builder().id(id).peerAddresses(peerAddresses).config(config.get())
+            super(builder().id(id).peerAddresses(peerAddresses).config(config.orElseThrow())
                     .persistent(Optional.of(persistent)));
             this.collectorActor = collectorActor;
         }
@@ -1565,7 +1565,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
             MockSnapshotState snapshotState = new MockSnapshotState(List.copyOf(getState()));
             if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream.get());
+                SerializationUtils.serialize(snapshotState, installSnapshotStream.orElseThrow());
             }
 
             actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);

@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.testing.FakeTicker;
 import java.util.List;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -56,9 +56,8 @@ public class MessageTrackerTest {
         ticker.advance(20, MILLISECONDS);
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
-        Assert.assertEquals(true, context2.error().isPresent());
-        Assert.assertEquals(0, context2.error().get().getMessageProcessingTimesSinceLastExpectedMessage().size());
-
+        assertEquals(true, context2.error().isPresent());
+        assertEquals(0, context2.error().orElseThrow().getMessageProcessingTimesSinceLastExpectedMessage().size());
     }
 
     @Test
@@ -78,21 +77,21 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
 
-        Assert.assertEquals(true, context2.error().isPresent());
+        assertEquals(true, context2.error().isPresent());
 
-        MessageTracker.Error error = context2.error().get();
+        MessageTracker.Error error = context2.error().orElseThrow();
 
         List<MessageTracker.MessageProcessingTime> messageProcessingTimes =
                 error.getMessageProcessingTimesSinceLastExpectedMessage();
 
-        Assert.assertEquals(3, messageProcessingTimes.size());
+        assertEquals(3, messageProcessingTimes.size());
 
-        Assert.assertEquals(String.class, messageProcessingTimes.get(0).getMessageClass());
-        Assert.assertEquals(Long.class, messageProcessingTimes.get(1).getMessageClass());
-        Assert.assertEquals(Integer.class, messageProcessingTimes.get(2).getMessageClass());
-        Assert.assertTrue(messageProcessingTimes.get(2).getElapsedTimeInNanos() > MILLISECONDS.toNanos(10));
-        Assert.assertEquals(Foo.class, error.getLastExpectedMessage().getClass());
-        Assert.assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
+        assertEquals(String.class, messageProcessingTimes.get(0).getMessageClass());
+        assertEquals(Long.class, messageProcessingTimes.get(1).getMessageClass());
+        assertEquals(Integer.class, messageProcessingTimes.get(2).getMessageClass());
+        assertTrue(messageProcessingTimes.get(2).getElapsedTimeInNanos() > MILLISECONDS.toNanos(10));
+        assertEquals(Foo.class, error.getLastExpectedMessage().getClass());
+        assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
 
         LOG.error("An error occurred : {}" , error);
     }
@@ -107,8 +106,7 @@ public class MessageTrackerTest {
         ticker.advance(1, MILLISECONDS);
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
-        Assert.assertEquals(false, context2.error().isPresent());
-
+        assertEquals(false, context2.error().isPresent());
     }
 
     @Test
@@ -117,12 +115,7 @@ public class MessageTrackerTest {
 
         messageTracker.received(new Foo());
 
-        try {
-            messageTracker.received(new Foo());
-            fail("Expected an IllegalStateException");
-        } catch (IllegalStateException e) {
-            // expected
-        }
+        assertThrows(IllegalStateException.class, () -> messageTracker.received(new Foo()));
     }
 
     @Test
@@ -139,15 +132,15 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
-        Assert.assertEquals(true, context.error().isPresent());
+        assertEquals(true, context.error().isPresent());
 
-        MessageTracker.Error error = context.error().get();
+        MessageTracker.Error error = context.error().orElseThrow();
 
-        Assert.assertEquals(null, error.getLastExpectedMessage());
-        Assert.assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
+        assertEquals(null, error.getLastExpectedMessage());
+        assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
 
         String errorString = error.toString();
-        Assert.assertTrue(errorString.contains("Last Expected Message = null"));
+        assertTrue(errorString.contains("Last Expected Message = null"));
 
         LOG.error("An error occurred : {}", error);
     }
@@ -162,8 +155,7 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
-        Assert.assertEquals(true, context.error().isPresent());
-
+        assertEquals(true, context.error().isPresent());
     }
 
     @Test
@@ -172,20 +164,18 @@ public class MessageTrackerTest {
         messageTracker.begin();
 
         try (MessageTracker.Context ctx = messageTracker.received(45)) {
-            Assert.assertEquals(false, ctx.error().isPresent());
+            assertEquals(false, ctx.error().isPresent());
         }
         try (MessageTracker.Context ctx = messageTracker.received(45L)) {
-            Assert.assertEquals(false, ctx.error().isPresent());
+            assertEquals(false, ctx.error().isPresent());
         }
 
         List<MessageTracker.MessageProcessingTime> processingTimeList =
                 messageTracker.getMessagesSinceLastExpectedMessage();
 
-        Assert.assertEquals(2, processingTimeList.size());
+        assertEquals(2, processingTimeList.size());
 
         assertEquals(Integer.class, processingTimeList.get(0).getMessageClass());
         assertEquals(Long.class, processingTimeList.get(1).getMessageClass());
-
     }
-
 }

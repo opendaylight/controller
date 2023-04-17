@@ -95,12 +95,12 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // Private constructor to avoid code duplication.
     private AbstractClientConnection(final AbstractClientConnection<T> oldConn, final TransmitQueue newQueue,
             final String backendName) {
-        this.context = oldConn.context;
-        this.cookie = oldConn.cookie;
+        context = oldConn.context;
+        cookie = oldConn.cookie;
         this.backendName = requireNonNull(backendName);
-        this.queue = requireNonNull(newQueue);
+        queue = requireNonNull(newQueue);
         // Will be updated in finishReplay if needed.
-        this.lastReceivedTicks = oldConn.lastReceivedTicks;
+        lastReceivedTicks = oldConn.lastReceivedTicks;
     }
 
     // This constructor is only to be called by ConnectingClientConnection constructor.
@@ -110,8 +110,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.context = requireNonNull(context);
         this.cookie = requireNonNull(cookie);
         this.backendName = requireNonNull(backendName);
-        this.queue = new TransmitQueue.Halted(queueDepth);
-        this.lastReceivedTicks = currentTime();
+        queue = new TransmitQueue.Halted(queueDepth);
+        lastReceivedTicks = currentTime();
     }
 
     // This constructor is only to be called (indirectly) by ReconnectingClientConnection constructor.
@@ -489,7 +489,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
 
         if (maybeEntry.isPresent()) {
-            final TransmittedConnectionEntry entry = maybeEntry.get();
+            final TransmittedConnectionEntry entry = maybeEntry.orElseThrow();
             LOG.debug("Completing {} with {}", entry, envelope);
             entry.complete(envelope.getMessage());
         }

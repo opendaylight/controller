@@ -817,7 +817,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
         final byte[] bytes = new byte[]{1, 2, 3};
-        installSnapshotStream.get().get().write(bytes);
+        installSnapshotStream.get().orElseThrow().write(bytes);
         actorContext.getSnapshotManager().persist(ByteState.of(bytes), installSnapshotStream.get(),
                 Runtime.getRuntime().totalMemory());
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -2427,7 +2427,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertTrue(appendEntries.getLeaderAddress().isPresent());
-        assertEquals(leaderActor.path().toString(), appendEntries.getLeaderAddress().get());
+        assertEquals(leaderActor.path().toString(), appendEntries.getLeaderAddress().orElseThrow());
         MessageCollectorActor.clearMessages(followerActor);
 
         // Send AppendEntriesReply indicating the follower does not need the leader address

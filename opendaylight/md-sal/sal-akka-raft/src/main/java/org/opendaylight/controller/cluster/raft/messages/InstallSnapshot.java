@@ -37,9 +37,10 @@ public final class InstallSnapshot extends AbstractRaftRPC {
     private final Optional<ServerConfigurationPayload> serverConfig;
     private final short recipientRaftVersion;
 
-    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Stores a reference to an externally mutable byte[] "
-            + "object but this is OK since this class is merely a DTO and does not process byte[] internally. "
-            + "Also it would be inefficient to create a copy as the byte[] could be large.")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = """
+        Stores a reference to an externally mutable byte[] object but this is OK since this class is merely a DTO and \
+        does not process byte[] internally. Also it would be inefficient to create a copy as the byte[] could be \
+        large.""")
     public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
             final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
             final OptionalInt lastChunkHashCode, final Optional<ServerConfigurationPayload> serverConfig,
@@ -76,9 +77,10 @@ public final class InstallSnapshot extends AbstractRaftRPC {
         return lastIncludedTerm;
     }
 
-    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
-            + "this is OK since this class is merely a DTO and does not process the byte[] internally. "
-            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = """
+        Exposes a mutable object stored in a field but this is OK since this class is merely a DTO and does not \
+        process the byte[] internally. Also it would be inefficient to create a return copy as the byte[] could be \
+        large.""")
     public byte[] getData() {
         return data;
     }
@@ -139,12 +141,12 @@ public final class InstallSnapshot extends AbstractRaftRPC {
 
             out.writeByte(installSnapshot.lastChunkHashCode.isPresent() ? 1 : 0);
             if (installSnapshot.lastChunkHashCode.isPresent()) {
-                out.writeInt(installSnapshot.lastChunkHashCode.getAsInt());
+                out.writeInt(installSnapshot.lastChunkHashCode.orElseThrow());
             }
 
             out.writeByte(installSnapshot.serverConfig.isPresent() ? 1 : 0);
             if (installSnapshot.serverConfig.isPresent()) {
-                out.writeObject(installSnapshot.serverConfig.get());
+                out.writeObject(installSnapshot.serverConfig.orElseThrow());
             }
 
             out.writeObject(installSnapshot.data);

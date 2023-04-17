@@ -95,7 +95,6 @@ import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -162,7 +161,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     private DataTreeTip tip;
 
-    private SchemaContext schemaContext;
+    private EffectiveModelContext schemaContext;
     private DataSchemaContextTree dataSchemaContext;
 
     private int currentTransactionBatch;
@@ -217,7 +216,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @VisibleForTesting
-    final SchemaContext getSchemaContext() {
+    final EffectiveModelContext getSchemaContext() {
         return schemaContext;
     }
 

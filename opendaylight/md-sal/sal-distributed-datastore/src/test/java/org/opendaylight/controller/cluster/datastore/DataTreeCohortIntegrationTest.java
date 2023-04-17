@@ -57,7 +57,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public class DataTreeCohortIntegrationTest {
 
@@ -96,7 +96,7 @@ public class DataTreeCohortIntegrationTest {
     public void testSuccessfulCanCommitWithNoopPostStep() throws Exception {
         final DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                any(SchemaContext.class), anyCollection());
+                any(EffectiveModelContext.class), anyCollection());
         ArgumentCaptor<Collection> candidateCapt = ArgumentCaptor.forClass(Collection.class);
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
@@ -111,19 +111,19 @@ public class DataTreeCohortIntegrationTest {
 
             final ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             kit.testWriteTransaction(dataStore, TestModel.TEST_PATH, node);
-            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), candidateCapt.capture());
+            verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapt.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapt.getValue().iterator().next(), TEST_ID,
                     ModificationType.WRITE, Optional.of(node), Optional.empty());
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                    any(SchemaContext.class), anyCollection());
+                    any(EffectiveModelContext.class), anyCollection());
 
             kit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
                     .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                     .build());
-            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), anyCollection());
+            verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), anyCollection());
 
             cohortReg.close();
 
@@ -140,7 +140,7 @@ public class DataTreeCohortIntegrationTest {
         final DOMDataTreeCommitCohort failedCohort = mock(DOMDataTreeCommitCohort.class);
 
         doReturn(FAILED_CAN_COMMIT_FUTURE).when(failedCohort).canCommit(any(Object.class),
-                any(SchemaContext.class), anyCollection());
+                any(EffectiveModelContext.class), anyCollection());
 
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
@@ -167,7 +167,7 @@ public class DataTreeCohortIntegrationTest {
     public void testCanCommitWithListEntries() throws Exception {
         final DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                any(SchemaContext.class), anyCollection());
+                any(EffectiveModelContext.class), anyCollection());
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
         try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
@@ -197,7 +197,7 @@ public class DataTreeCohortIntegrationTest {
             kit.doCommit(writeTx.ready());
 
             ArgumentCaptor<Collection> candidateCapture = ArgumentCaptor.forClass(Collection.class);
-            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), candidateCapture.capture());
+            verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapture.getValue().iterator().next(),
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.WRITE,
                     Optional.of(optimaNode), Optional.empty());
@@ -208,7 +208,7 @@ public class DataTreeCohortIntegrationTest {
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                    any(SchemaContext.class), anyCollection());
+                    any(EffectiveModelContext.class), anyCollection());
 
             writeTx = dataStore.newWriteOnlyTransaction();
             final YangInstanceIdentifier sportagePath = CarsModel.newCarPath("sportage");
@@ -219,7 +219,7 @@ public class DataTreeCohortIntegrationTest {
             kit.doCommit(writeTx.ready());
 
             candidateCapture = ArgumentCaptor.forClass(Collection.class);
-            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), candidateCapture.capture());
+            verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
 
             assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.WRITE,
@@ -237,14 +237,14 @@ public class DataTreeCohortIntegrationTest {
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
-                    any(SchemaContext.class), anyCollection());
+                    any(EffectiveModelContext.class), anyCollection());
 
             writeTx = dataStore.newWriteOnlyTransaction();
             writeTx.delete(CarsModel.BASE_PATH);
             kit.doCommit(writeTx.ready());
 
             candidateCapture = ArgumentCaptor.forClass(Collection.class);
-            verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), candidateCapture.capture());
+            verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
 
             assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.DELETE,
@@ -283,7 +283,7 @@ public class DataTreeCohortIntegrationTest {
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(stepToAbort).abort();
         doReturn(PostPreCommitStep.NOOP_FUTURE).when(stepToAbort).preCommit();
         doReturn(FluentFutures.immediateFluentFuture(stepToAbort)).when(cohortToAbort).canCommit(any(Object.class),
-                any(SchemaContext.class), anyCollection());
+                any(EffectiveModelContext.class), anyCollection());
 
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
