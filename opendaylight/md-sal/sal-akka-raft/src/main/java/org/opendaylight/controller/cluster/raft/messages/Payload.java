@@ -16,7 +16,7 @@ import java.io.Serializable;
  * When an actor which is derived from RaftActor attempts to persistData it must pass an instance of the Payload class.
  * Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the Payload class.
  */
-public abstract class Payload implements Serializable {
+public abstract class Payload implements Serializable, SerializableMessage {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

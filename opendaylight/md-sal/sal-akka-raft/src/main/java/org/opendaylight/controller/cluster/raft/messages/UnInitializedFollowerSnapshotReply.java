@@ -8,12 +8,16 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import akka.dispatch.ControlMessage;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Local message sent to self on receiving the InstallSnapshotReply from a follower indicating that
  * the catch up of the follower has completed successfully for an AddServer operation.
  */
-public class UnInitializedFollowerSnapshotReply implements ControlMessage {
+public class UnInitializedFollowerSnapshotReply implements ControlMessage, SerializableMessage {
     private final String followerId;
 
     public UnInitializedFollowerSnapshotReply(String followerId) {
@@ -27,5 +31,14 @@ public class UnInitializedFollowerSnapshotReply implements ControlMessage {
     @Override
     public String toString() {
         return "UnInitializedFollowerSnapshotReply [followerId=" + followerId + "]";
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeUTF(followerId);
+    }
+
+    public static @NonNull UnInitializedFollowerSnapshotReply readFrom(final DataInput in) throws IOException {
+        return new UnInitializedFollowerSnapshotReply(in.readUTF());
     }
 }
