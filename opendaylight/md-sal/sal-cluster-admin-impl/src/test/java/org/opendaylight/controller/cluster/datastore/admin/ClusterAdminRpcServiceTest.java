@@ -151,7 +151,7 @@ public class ClusterAdminRpcServiceTest {
         node.configDataStore().getActorUtils().getShardManager().tell(node.datastoreContextBuilder()
                 .shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(), ActorRef.noSender());
 
-        ActorRef carsShardActor = node.configDataStore().getActorUtils().findLocalShard("cars").get();
+        ActorRef carsShardActor = node.configDataStore().getActorUtils().findLocalShard("cars").orElseThrow();
         node.kit().watch(carsShardActor);
         carsShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         node.kit().expectTerminated(carsShardActor);
@@ -328,8 +328,7 @@ public class ClusterAdminRpcServiceTest {
             final NormalizedNode expCarsNode) throws Exception {
         Optional<NormalizedNode> optional = readFromStore.newReadOnlyTransaction().read(CarsModel.BASE_PATH)
                 .get(15, TimeUnit.SECONDS);
-        assertTrue("isPresent", optional.isPresent());
-        assertEquals("Data node", expCarsNode, optional.get());
+        assertEquals("Data node", Optional.of(expCarsNode), optional);
     }
 
     private static void doAddShardReplica(final MemberNode memberNode, final String shardName,

@@ -356,7 +356,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         // Propagate state and seal the successor.
         final Optional<ModifyTransactionRequest> optState = flushState();
         if (optState.isPresent()) {
-            forwardToSuccessor(successor, optState.get(), null);
+            forwardToSuccessor(successor, optState.orElseThrow(), null);
         }
         successor.predecessorSealed();
     }
@@ -735,7 +735,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             final long enqueuedTicks = parent.currentTime();
             final Optional<ModifyTransactionRequest> optState = flushState();
             if (optState.isPresent()) {
-                successor.handleReplayedRemoteRequest(optState.get(), null, enqueuedTicks);
+                successor.handleReplayedRemoteRequest(optState.orElseThrow(), null, enqueuedTicks);
             }
             if (successor.markSealed()) {
                 successor.sealAndSend(OptionalLong.of(enqueuedTicks));

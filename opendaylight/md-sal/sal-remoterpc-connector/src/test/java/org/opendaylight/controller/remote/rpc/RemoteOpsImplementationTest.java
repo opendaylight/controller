@@ -19,6 +19,7 @@ import static org.mockito.Mockito.doThrow;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.Ignore;
@@ -81,7 +82,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
                 TEST_DATA_TREE_ID, (ContainerNode) invokeActionInput);
         assertThat(frontEndFuture, instanceOf(RemoteDOMActionFuture.class));
         final DOMActionResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
-        assertEquals(actionOutput, result.getOutput().get());
+        assertEquals(Optional.of(actionOutput), result.getOutput());
     }
 
     /**
@@ -121,7 +122,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
         assertThat(frontEndFuture, instanceOf(RemoteDOMActionFuture.class));
 
         final DOMActionResult result = frontEndFuture.get(5, TimeUnit.SECONDS);
-        assertEquals(actionOutput, result.getOutput().get());
+        assertEquals(Optional.of(actionOutput), result.getOutput());
     }
 
     /**

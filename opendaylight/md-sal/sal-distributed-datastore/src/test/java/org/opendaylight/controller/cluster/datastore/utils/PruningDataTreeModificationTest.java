@@ -168,9 +168,7 @@ public class PruningDataTreeModificationTest {
             .withChild(outerNode)
             .build();
 
-        Optional<NormalizedNode> actual = dataTree.takeSnapshot().readNode(path);
-        assertTrue("After pruning present", actual.isPresent());
-        assertEquals("After pruning", prunedNode, actual.get());
+        assertEquals("After pruning", Optional.of(prunedNode), dataTree.takeSnapshot().readNode(path));
     }
 
     @Test
@@ -206,13 +204,11 @@ public class PruningDataTreeModificationTest {
         localDataTree.validate(mod);
         localDataTree.commit(localDataTree.prepare(mod));
 
-        NormalizedNode normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).get();
+        NormalizedNode normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).orElseThrow();
         pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
         dataTree.commit(getCandidate());
 
-        Optional<NormalizedNode> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty());
-        assertTrue("Root present", actual.isPresent());
-        assertEquals("Root node", normalizedNode, actual.get());
+        assertEquals(Optional.of(normalizedNode), dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()));
     }
 
     @Test
@@ -220,7 +216,7 @@ public class PruningDataTreeModificationTest {
         final Shard mockShard = Mockito.mock(Shard.class);
 
         ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
-        NormalizedNode root = shardDataTree.readNode(YangInstanceIdentifier.empty()).get();
+        NormalizedNode root = shardDataTree.readNode(YangInstanceIdentifier.empty()).orElseThrow();
 
         NormalizedNode normalizedNode = Builders.containerBuilder()
             .withNodeIdentifier(new NodeIdentifier(root.getIdentifier().getNodeType()))
@@ -229,9 +225,7 @@ public class PruningDataTreeModificationTest {
         pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
         dataTree.commit(getCandidate());
 
-        Optional<NormalizedNode> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty());
-        assertEquals("Root present", true, actual.isPresent());
-        assertEquals("Root node", root, actual.get());
+        assertEquals(Optional.of(root), dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()));
 
     }
 
@@ -274,9 +268,7 @@ public class PruningDataTreeModificationTest {
             .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name"))
             .build();
 
-        Optional<NormalizedNode> actual = dataTree.takeSnapshot().readNode(path);
-        assertTrue("After pruning present", actual.isPresent());
-        assertEquals("After pruning", prunedNode, actual.get());
+        assertEquals(Optional.of(prunedNode), dataTree.takeSnapshot().readNode(path));
     }
 
     @Test

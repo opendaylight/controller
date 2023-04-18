@@ -12,7 +12,6 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 
 import akka.testkit.TestProbe;
@@ -101,8 +100,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final ListenableFuture<Boolean> result = transaction.directCommit();
         final TransactionTester<RemoteProxyTransaction> tester = getTester();
         final ModifyTransactionRequest req = tester.expectTransactionRequest(ModifyTransactionRequest.class);
-        assertTrue(req.getPersistenceProtocol().isPresent());
-        assertEquals(PersistenceProtocol.SIMPLE, req.getPersistenceProtocol().get());
+        assertEquals(Optional.of(PersistenceProtocol.SIMPLE), req.getPersistenceProtocol());
         tester.replySuccess(new TransactionCommitSuccess(TRANSACTION_ID, req.getSequence()));
         assertFutureEquals(true, result);
     }
@@ -181,8 +179,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         final ModifyTransactionRequest request = builder.build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
         assertEquals(request.getTarget(), received.getTarget());
-        assertTrue(received.getPersistenceProtocol().isPresent());
-        assertEquals(PersistenceProtocol.ABORT, received.getPersistenceProtocol().get());
+        assertEquals(Optional.of(PersistenceProtocol.ABORT), received.getPersistenceProtocol());
     }
 
     @Test

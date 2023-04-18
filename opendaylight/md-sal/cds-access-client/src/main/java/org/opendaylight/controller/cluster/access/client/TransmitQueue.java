@@ -219,7 +219,7 @@ abstract class TransmitQueue {
             return Optional.empty();
         }
 
-        final TransmittedConnectionEntry entry = maybeEntry.get();
+        final TransmittedConnectionEntry entry = maybeEntry.orElseThrow();
         tracker.closeTask(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
 
         // We have freed up a slot, try to transmit something
@@ -257,7 +257,7 @@ abstract class TransmitQueue {
             return false;
         }
 
-        inflight.addLast(maybeTransmitted.get());
+        inflight.addLast(maybeTransmitted.orElseThrow());
         return true;
     }
 

@@ -146,8 +146,8 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
 
         Optional<TransmittedConnectionEntry> transmitted = queue.transmit(entry, now);
         assertTrue(transmitted.isPresent());
-        assertEquals(request, transmitted.get().getRequest());
-        assertEquals(callback, transmitted.get().getCallback());
+        assertEquals(request, transmitted.orElseThrow().getRequest());
+        assertEquals(callback, transmitted.orElseThrow().getCallback());
 
         final RequestEnvelope requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
         assertEquals(request, requestEnvelope.getMessage());

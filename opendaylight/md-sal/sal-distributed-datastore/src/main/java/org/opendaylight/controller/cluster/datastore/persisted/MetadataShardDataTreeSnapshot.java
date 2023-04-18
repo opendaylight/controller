@@ -53,9 +53,9 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         }
 
         Proxy(final MetadataShardDataTreeSnapshot snapshot) {
-            this.rootNode = snapshot.getRootNode().get();
-            this.metadata = snapshot.getMetadata();
-            this.version = snapshot.version().getStreamVersion();
+            rootNode = snapshot.getRootNode().orElseThrow();
+            metadata = snapshot.getMetadata();
+            version = snapshot.version().getStreamVersion();
         }
 
         @Override

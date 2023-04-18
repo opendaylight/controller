@@ -60,7 +60,7 @@ public class ModifyTransactionRequestBuilderTest {
     public void testBuildReady() {
         modifyTransactionRequestBuilder.setReady();
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().get());
+        assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
         assertEquals(transactionModification, modifyTransactionRequest.getModifications().get(0));
     }
 
@@ -68,7 +68,7 @@ public class ModifyTransactionRequestBuilderTest {
     public void testBuildAbort() {
         modifyTransactionRequestBuilder.setAbort();
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().get());
+        assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
         assertTrue(modifyTransactionRequest.getModifications().isEmpty());
     }
 
@@ -76,14 +76,14 @@ public class ModifyTransactionRequestBuilderTest {
     public void testBuildCommitTrue() {
         modifyTransactionRequestBuilder.setCommit(true);
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().get());
+        assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
     }
 
     @Test
     public void testBuildCommitFalse() {
         modifyTransactionRequestBuilder.setCommit(false);
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().get());
+        assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
     }
 
 }

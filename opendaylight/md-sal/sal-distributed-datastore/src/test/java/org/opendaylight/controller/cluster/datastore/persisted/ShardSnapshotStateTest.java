@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -36,7 +37,7 @@ public class ShardSnapshotStateTest {
 
         assertNotNull("getSnapshot is null", cloned.getSnapshot());
         assertEquals("getSnapshot type", MetadataShardDataTreeSnapshot.class, cloned.getSnapshot().getClass());
-        assertEquals("getRootNode", expectedNode,
-                ((MetadataShardDataTreeSnapshot)cloned.getSnapshot()).getRootNode().get());
+        assertEquals("getRootNode", Optional.of(expectedNode),
+                ((MetadataShardDataTreeSnapshot)cloned.getSnapshot()).getRootNode());
     }
 }

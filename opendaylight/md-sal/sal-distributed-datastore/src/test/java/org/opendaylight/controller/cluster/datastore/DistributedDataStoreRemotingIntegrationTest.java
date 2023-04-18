@@ -119,8 +119,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
@@ -251,16 +249,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private static void verifyCars(final DOMStoreReadTransaction readTx, final MapEntryNode... entries)
             throws Exception {
-        final Optional<NormalizedNode> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-        assertTrue("isPresent", optional.isPresent());
-
-        final CollectionNodeBuilder<MapEntryNode, SystemMapNode> listBuilder = ImmutableNodes.mapNodeBuilder(
-                CarsModel.CAR_QNAME);
-        for (final NormalizedNode entry: entries) {
-            listBuilder.withChild((MapEntryNode) entry);
-        }
-
-        assertEquals("Car list node", listBuilder.build(), optional.get());
+        assertEquals("Car list node",
+            Optional.of(ImmutableNodes.mapNodeBuilder(CarsModel.CAR_QNAME).withValue(Arrays.asList(entries)).build()),
+            readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
     }
 
     private static void verifyNode(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path,
@@ -784,7 +775,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(tx1 , modification, true, Optional.empty());
 
-        carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
+        carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
         if (resp instanceof akka.actor.Status.Failure) {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
@@ -803,7 +794,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         readyLocal = new ReadyLocalTransaction(tx2 , modification, false, Optional.empty());
 
-        carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
+        carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
         if (resp instanceof akka.actor.Status.Failure) {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
@@ -833,7 +824,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 followerDistributedDataStore.getActorUtils().findLocalShard("cars");
         assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
 
-        carsFollowerShard.get().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
+        carsFollowerShard.orElseThrow().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
         final DataTree dataTree = followerTestKit.expectMsgClass(DataTree.class);
 
         // Send a tx with immediate commit.
@@ -849,7 +840,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             new ReadWriteShardDataTreeTransaction(mock(ShardDataTreeTransactionParent.class), tx1, modification),
             true, Optional.empty());
 
-        carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
+        carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
         if (resp instanceof akka.actor.Status.Failure) {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
@@ -869,7 +860,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             new ReadWriteShardDataTreeTransaction(mock(ShardDataTreeTransactionParent.class), tx2, modification),
             false, Optional.empty());
 
-        carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
+        carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
         if (resp instanceof akka.actor.Status.Failure) {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
@@ -1296,7 +1287,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // behavior is controlled by akka.coordinated-shutdown.run-by-actor-system-terminate configuration option
         TestKit.shutdownActorSystem(follower2System, true);
 
-        ActorRef cars = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").get();
+        ActorRef cars = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").orElseThrow();
         final OnDemandRaftState initialState = (OnDemandRaftState) leaderDistributedDataStore.getActorUtils()
                 .executeOperation(cars, GetOnDemandRaftState.INSTANCE);
 
@@ -1311,7 +1302,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         await().atMost(10, TimeUnit.SECONDS)
                 .until(() -> containsUnreachable(followerCluster, follower2Member));
 
-        ActorRef followerCars = followerDistributedDataStore.getActorUtils().findLocalShard("cars").get();
+        ActorRef followerCars = followerDistributedDataStore.getActorUtils().findLocalShard("cars").orElseThrow();
 
         // to simulate a follower not being able to receive messages, but still being able to send messages and becoming
         // candidate, we can just send a couple of RequestVotes to both leader and follower.
@@ -1529,7 +1520,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals("Snapshot state type", ShardSnapshotState.class, actual.getState().getClass());
         MetadataShardDataTreeSnapshot shardSnapshot =
                 (MetadataShardDataTreeSnapshot) ((ShardSnapshotState)actual.getState()).getSnapshot();
-        assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().get());
+        assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().orElseThrow());
     }
 
     private static void sendDatastoreContextUpdate(final AbstractDataStore dataStore, final Builder builder) {

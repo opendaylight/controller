@@ -314,13 +314,8 @@ public class ShardDataTreeTest extends AbstractTest {
 
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
-        Optional<NormalizedNode> optional = snapshot.readNode(carPath);
-        assertTrue("Car node present", optional.isPresent());
-        assertEquals("Car node", carNode, optional.get());
-
-        optional = snapshot.readNode(PeopleModel.BASE_PATH);
-        assertTrue("People node present", optional.isPresent());
-        assertEquals("People node", peopleNode, optional.get());
+        assertEquals("Car node", Optional.of(carNode), snapshot.readNode(carPath));
+        assertEquals("People node", Optional.of(peopleNode), snapshot.readNode(PeopleModel.BASE_PATH));
     }
 
     @Test
@@ -361,9 +356,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
-        Optional<NormalizedNode> optional = snapshot.readNode(carPath);
-        assertTrue("Car node present", optional.isPresent());
-        assertEquals("Car node", carNode, optional.get());
+        assertEquals("Car node", Optional.of(carNode), snapshot.readNode(carPath));
     }
 
     @Test
@@ -447,8 +440,7 @@ public class ShardDataTreeTest extends AbstractTest {
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
         Optional<NormalizedNode> optional = snapshot.readNode(carPath);
-        assertTrue("Car node present", optional.isPresent());
-        assertEquals("Car node", carNode, optional.get());
+        assertEquals("Car node", Optional.of(carNode), optional);
     }
 
     @SuppressWarnings("unchecked")
@@ -487,8 +479,7 @@ public class ShardDataTreeTest extends AbstractTest {
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
         Optional<NormalizedNode> optional = snapshot.readNode(PeopleModel.BASE_PATH);
-        assertTrue("People node present", optional.isPresent());
-        assertEquals("People node", peopleNode, optional.get());
+        assertEquals("People node", Optional.of(peopleNode), optional);
     }
 
     @Test
@@ -547,8 +538,8 @@ public class ShardDataTreeTest extends AbstractTest {
         dataTree.commit(third);
 
         // Apply first candidate as a snapshot
-        shardDataTree.applyRecoverySnapshot(
-            new ShardSnapshotState(new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter().get()), true));
+        shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(
+            new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter().orElseThrow()), true));
         // Apply the other two snapshots as transactions
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), second,
             PayloadVersion.SODIUM_SR1));
@@ -557,7 +548,6 @@ public class ShardDataTreeTest extends AbstractTest {
 
         // Verify uint translation
         final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
-        final NormalizedNode cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).get();
 
         assertEquals(Builders.mapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
@@ -565,12 +555,12 @@ public class ShardDataTreeTest extends AbstractTest {
             .withChild(createCar("one", Uint64.ONE))
             .withChild(createCar("two", Uint64.TWO))
             .withChild(createCar("three", Uint64.TEN))
-            .build(), cars);
+            .build(), snapshot.readNode(CarsModel.CAR_LIST_PATH).orElseThrow());
     }
 
     private void assertCarsUint64() {
         final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
-        final NormalizedNode cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).get();
+        final NormalizedNode cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).orElseThrow();
 
         assertEquals(Builders.mapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
@@ -633,7 +623,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         assertTrue(optional.isPresent());
 
-        return optional.get();
+        return optional.orElseThrow();
     }
 
     private static DataTreeCandidate addCar(final ShardDataTree shardDataTree) {

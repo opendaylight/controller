@@ -74,8 +74,7 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, batched.getVersion());
         assertTrue("isReady", batched.isReady());
         assertTrue("isDoCommitOnReady", batched.isDoCommitOnReady());
-        assertTrue("participatingShardNames present", batched.getParticipatingShardNames().isPresent());
-        assertEquals("participatingShardNames", shardNames, batched.getParticipatingShardNames().get());
+        assertEquals("participatingShardNames", Optional.of(shardNames), batched.getParticipatingShardNames());
 
         List<Modification> batchedMods = batched.getModifications();
         assertEquals("getModifications size", 2, batchedMods.size());

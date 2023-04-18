@@ -505,7 +505,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return true;
         }
 
-        final Cluster cluster = maybeCluster.get();
+        final Cluster cluster = maybeCluster.orElseThrow();
 
         final Set<Member> unreachable = cluster.state().getUnreachable();
         log.debug("{}: Cluster state: {}", logName(), unreachable);

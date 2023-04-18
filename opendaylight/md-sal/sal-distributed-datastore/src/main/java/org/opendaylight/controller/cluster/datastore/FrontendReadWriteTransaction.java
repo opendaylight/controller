@@ -512,7 +512,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final Optional<Exception> optFailure = request.getDelayedFailure();
         if (optFailure.isPresent()) {
-            state = new Ready(history().createFailedCohort(getIdentifier(), sealedModification, optFailure.get()));
+            state = new Ready(history().createFailedCohort(getIdentifier(), sealedModification,
+                optFailure.orElseThrow()));
         } else {
             state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification, Optional.empty()));
         }
@@ -567,7 +568,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             return replyModifySuccess(request.getSequence());
         }
 
-        switch (maybeProto.get()) {
+        switch (maybeProto.orElseThrow()) {
             case ABORT:
                 if (ABORTING.equals(state)) {
                     LOG.debug("{}: Transaction {} already aborting", persistenceId(), getIdentifier());
@@ -593,7 +594,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 coordinatedCommit(envelope, now);
                 return null;
             default:
-                LOG.warn("{}: rejecting unsupported protocol {}", persistenceId(), maybeProto.get());
+                LOG.warn("{}: rejecting unsupported protocol {}", persistenceId(), maybeProto.orElseThrow());
                 throw new UnsupportedRequestException(request);
         }
     }

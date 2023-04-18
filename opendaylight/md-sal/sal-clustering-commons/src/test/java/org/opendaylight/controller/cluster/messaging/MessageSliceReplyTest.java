@@ -65,9 +65,9 @@ public class MessageSliceReplyTest {
         assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());
         assertEquals("getSendTo", expected.getSendTo(), cloned.getSendTo());
         assertTrue("getFailure present", cloned.getFailure().isPresent());
-        assertEquals("getFailure message", expected.getFailure().get().getMessage(),
-                cloned.getFailure().get().getMessage());
-        assertEquals("getFailure isRetriable", expected.getFailure().get().isRetriable(),
-                cloned.getFailure().get().isRetriable());
+        assertEquals("getFailure message", expected.getFailure().orElseThrow().getMessage(),
+                cloned.getFailure().orElseThrow().getMessage());
+        assertEquals("getFailure isRetriable", expected.getFailure().orElseThrow().isRetriable(),
+                cloned.getFailure().orElseThrow().isRetriable());
     }
 }

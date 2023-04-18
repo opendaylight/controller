@@ -17,7 +17,6 @@ import akka.testkit.javadsl.EventFilter;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
@@ -48,10 +47,9 @@ public class ShardTestKit extends TestKit {
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final Optional<String> maybeLeader = ((FindLeaderReply) Await.result(future, duration))
-                        .getLeaderActor();
+                final var maybeLeader = ((FindLeaderReply) Await.result(future, duration)).getLeaderActor();
                 if (maybeLeader.isPresent()) {
-                    return maybeLeader.get();
+                    return maybeLeader.orElseThrow();
                 }
             } catch (TimeoutException e) {
                 LOG.trace("FindLeader timed out", e);
@@ -73,13 +71,12 @@ public class ShardTestKit extends TestKit {
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final Optional<String> maybeLeader = ((FindLeaderReply) Await.result(future, duration))
-                        .getLeaderActor();
+                final var maybeLeader = ((FindLeaderReply) Await.result(future, duration)).getLeaderActor();
                 if (!maybeLeader.isPresent()) {
                     return;
                 }
 
-                lastResponse = maybeLeader.get();
+                lastResponse = maybeLeader.orElseThrow();
             } catch (TimeoutException e) {
                 lastResponse = e;
             } catch (Exception e) {

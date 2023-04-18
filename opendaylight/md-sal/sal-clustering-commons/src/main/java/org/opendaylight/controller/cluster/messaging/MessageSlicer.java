@@ -235,7 +235,7 @@ public class MessageSlicer implements AutoCloseable {
                 final Optional<MessageSliceException> failure = reply.getFailure();
                 if (failure.isPresent()) {
                     LOG.warn("{}: Received failed {}", logContext, reply);
-                    processMessageSliceException(failure.get(), state, reply.getSendTo());
+                    processMessageSliceException(failure.orElseThrow(), state, reply.getSendTo());
                     return true;
                 }
 

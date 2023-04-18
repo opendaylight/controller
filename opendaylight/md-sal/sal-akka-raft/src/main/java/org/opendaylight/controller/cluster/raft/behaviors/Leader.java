@@ -139,7 +139,7 @@ public class Leader extends AbstractLeader {
 
         final Optional<String> requestedFollowerIdOptional
                 = leadershipTransferContext.transferCohort.getRequestedFollowerId();
-        if (requestedFollowerIdOptional.isPresent() && !requestedFollowerIdOptional.get().equals(followerId)) {
+        if (requestedFollowerIdOptional.isPresent() && !requestedFollowerIdOptional.orElseThrow().equals(followerId)) {
             // we want to transfer leadership to specific follower
             return;
         }
