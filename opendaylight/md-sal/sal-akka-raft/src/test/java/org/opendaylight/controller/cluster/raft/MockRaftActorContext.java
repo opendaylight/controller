@@ -16,6 +16,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -251,6 +254,18 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         @Override
         protected Object writeReplace() {
             return new MockPayloadProxy(data, size);
+        }
+
+        @Override
+        public void writeTo(DataOutput out) throws IOException {
+            out.writeUTF(data);
+            out.write(size);
+        }
+
+        public static @NonNull MockPayload readFrom(final DataInput in) throws IOException {
+            final String data = in.readUTF();
+            final int size = in.readInt();
+            return new MockPayload(data, size);
         }
     }
 

@@ -11,7 +11,9 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
 import java.io.IOException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.raft.persisted.LegacySerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,5 +89,10 @@ public sealed class PurgeLocalHistoryPayload extends AbstractIdentifiablePayload
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    public static @NonNull PurgeLocalHistoryPayload readFrom(final DataInput in) throws IOException {
+        return PurgeLocalHistoryPayload.create(LocalHistoryIdentifier.readFrom(in),
+                DatastoreContext.DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY);
     }
 }

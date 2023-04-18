@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -171,5 +172,10 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
 
     protected static final int externalizableProxySize(final Function<byte[], ? extends SerialForm> constructor) {
         return SerializationUtils.serialize(constructor.apply(new byte[0])).length;
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.write(serialized());
     }
 }

@@ -11,10 +11,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
@@ -22,6 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Invoked by leader to replicate log entries (§5.3); also used as heartbeat (§5.2).
@@ -145,6 +149,64 @@ public final class AppendEntries extends AbstractRaftRPC {
             return new Proxy(this);
         }
         return recipientRaftVersion == RaftVersions.FLUORINE_VERSION ? new ProxyV2(this) : new AE(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeShort(getLeaderRaftVersion());
+        WritableObjects.writeLong(out, getTerm());
+        out.writeUTF(getLeaderId());
+
+        WritableObjects.writeLongs(out, getPrevLogTerm(), getPrevLogIndex());
+        WritableObjects.writeLongs(out, getLeaderCommit(), getReplicatedToAllIndex());
+
+        out.writeShort(getPayloadVersion());
+
+        final var entries = getEntries();
+        out.writeInt(entries.size());
+        for (var e : entries) {
+            WritableObjects.writeLongs(out, e.getIndex(), e.getTerm());
+            PayloadRegistry.writePayloadTo(e.getData(), out);
+        }
+
+        final boolean leaderAddressPresent = getLeaderAddress().isPresent();
+        out.writeBoolean(leaderAddressPresent);
+        if (leaderAddressPresent) {
+            out.writeUTF(getLeaderAddress().get());
+        }
+    }
+
+    public static @NonNull AppendEntries readFrom(final DataInput in) throws IOException {
+        short leaderRaftVersion = in.readShort();
+        long term = WritableObjects.readLong(in);
+        String leaderId = in.readUTF();
+
+        byte hdr = WritableObjects.readLongHeader(in);
+        long prevLogTerm = WritableObjects.readFirstLong(in, hdr);
+        long prevLogIndex = WritableObjects.readSecondLong(in, hdr);
+
+        hdr = WritableObjects.readLongHeader(in);
+        long leaderCommit = WritableObjects.readFirstLong(in, hdr);
+        long replicatedToAllIndex = WritableObjects.readSecondLong(in, hdr);
+        short payloadVersion = in.readShort();
+
+        int size = in.readInt();
+        var entries = new ArrayList<ReplicatedLogEntry>(size);
+        for (int i = 0; i < size; i++) {
+            hdr = WritableObjects.readLongHeader(in);
+            entries.add(new SimpleReplicatedLogEntry(WritableObjects.readFirstLong(in, hdr),
+                    WritableObjects.readSecondLong(in, hdr), (Payload) PayloadRegistry.readPayloadFrom(in)));
+        }
+
+        final boolean leaderAddressPresent = in.readBoolean();
+        String leaderAddress = null;
+        if (leaderAddressPresent) {
+            leaderAddress = in.readUTF();
+        }
+
+        return new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
+                replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, leaderRaftVersion,
+                leaderAddress);
     }
 
     /**

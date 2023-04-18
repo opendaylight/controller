@@ -9,14 +9,18 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
 import java.util.OptionalInt;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Message sent from a leader to install a snapshot chunk on a follower.
@@ -24,6 +28,9 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 public final class InstallSnapshot extends AbstractRaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
+    // Flags
+    private static final int LAST_CHUNK_HASHCODE = 0x10;
+    private static final int SERVER_CONFIG       = 0x20;
 
     private final String leaderId;
     private final long lastIncludedIndex;
@@ -110,6 +117,65 @@ public final class InstallSnapshot extends AbstractRaftRPC {
     @Override
     Object writeReplace() {
         return recipientRaftVersion <= RaftVersions.FLUORINE_VERSION ? new Proxy(this) : new IS(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        int flags = 0;
+        final var lastChunkHashCode = getLastChunkHashCode();
+        if (lastChunkHashCode.isPresent()) {
+            flags |= LAST_CHUNK_HASHCODE;
+        }
+        final var serverConfig = getServerConfig();
+        if (serverConfig.isPresent()) {
+            flags |= SERVER_CONFIG;
+        }
+
+        WritableObjects.writeLong(out, getTerm(), flags);
+        out.writeUTF(getLeaderId());
+        WritableObjects.writeLongs(out, getLastIncludedIndex(), getLastIncludedTerm());
+        out.writeInt(getChunkIndex());
+        out.writeInt(getTotalChunks());
+
+        if (lastChunkHashCode.isPresent()) {
+            out.writeInt(lastChunkHashCode.getAsInt());
+        }
+        if (serverConfig.isPresent()) {
+            serverConfig.get().writeTo(out);;
+        }
+
+        out.write(getData().length);
+        out.write(getData());
+    }
+
+    public static @NonNull InstallSnapshot readFrom(final DataInput in) throws IOException {
+        byte hdr = WritableObjects.readLongHeader(in);
+        final int flags = WritableObjects.longHeaderFlags(hdr);
+
+        long term = WritableObjects.readLongBody(in, hdr);
+        String leaderId = in.readUTF();
+
+        hdr = WritableObjects.readLongHeader(in);
+        long lastIncludedIndex = WritableObjects.readFirstLong(in, hdr);
+        long lastIncludedTerm = WritableObjects.readSecondLong(in, hdr);
+        int chunkIndex = in.readInt();
+        int totalChunks = in.readInt();
+
+        OptionalInt lastChunkHashCode = getFlag(flags, LAST_CHUNK_HASHCODE) ? OptionalInt.of(in.readInt())
+                : OptionalInt.empty();
+        Optional<ServerConfigurationPayload> serverConfig = getFlag(flags, SERVER_CONFIG)
+                ? Optional.of((ServerConfigurationPayload.readFrom(in))) : Optional.empty();
+
+        int dataLength = in.readInt();
+        byte[] data = new byte[dataLength];
+        in.readFully(data);
+
+        return new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
+                chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION);
+    }
+
+    private static boolean getFlag(final int flags, final int bit) {
+        return (flags & bit) != 0;
     }
 
     private static class Proxy implements Externalizable {
