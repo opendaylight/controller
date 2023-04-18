@@ -8,6 +8,9 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -67,5 +70,14 @@ public final class NoopPayload extends Payload implements ControlMessage, Migrat
     @Override
     public Object writeReplace() {
         return PROXY;
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeBoolean(migrated);
+    }
+
+    public static @NonNull NoopPayload readFrom(final DataInput in) throws IOException {
+        return new NoopPayload(in.readBoolean());
     }
 }

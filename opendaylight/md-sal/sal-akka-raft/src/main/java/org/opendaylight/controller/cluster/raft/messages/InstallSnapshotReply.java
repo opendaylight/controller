@@ -7,14 +7,20 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class InstallSnapshotReply extends AbstractRaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = 642227896390779503L;
+    // Flags
+    private static final int SUCCESS = 0x10;
 
     // The followerId - this will be used to figure out which follower is
     // responding
@@ -52,6 +58,24 @@ public final class InstallSnapshotReply extends AbstractRaftRPC {
     @Override
     Object writeReplace() {
         return new IR(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        WritableObjects.writeLong(out, getTerm(), isSuccess() ? SUCCESS : 0);
+        out.writeUTF(getFollowerId());
+        out.writeInt(getChunkIndex());
+    }
+
+    public static @NonNull InstallSnapshotReply readFrom(final DataInput in) throws IOException {
+        final byte hdr = WritableObjects.readLongHeader(in);
+        final int flags = WritableObjects.longHeaderFlags(hdr);
+
+        long term = WritableObjects.readLongBody(in, hdr);
+        String followerId = in.readUTF();
+        int chunkIndex = in.readInt();
+
+        return new InstallSnapshotReply(term, followerId, chunkIndex, (flags & SUCCESS) != 0);
     }
 
     @Deprecated(since = "7.0.0", forRemoval = true)

@@ -7,10 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Invoked by candidates to gather votes (§5.2).
@@ -59,6 +63,24 @@ public final class RequestVote extends AbstractRaftRPC {
     @Override
     Object writeReplace() {
         return new RV(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        WritableObjects.writeLong(out, getTerm());
+        out.writeUTF(getCandidateId());
+        WritableObjects.writeLongs(out, getLastLogIndex(), getLastLogTerm());
+    }
+
+    public static @NonNull RequestVote readFrom(final DataInput in) throws IOException {
+        long term = WritableObjects.readLong(in);
+        String candidateId = in.readUTF();
+
+        final byte hdr = WritableObjects.readLongHeader(in);
+        long lastLogIndex = WritableObjects.readFirstLong(in, hdr);
+        long lastLogTerm = WritableObjects.readSecondLong(in, hdr);
+
+        return new RequestVote(term, candidateId, lastLogIndex, lastLogTerm);
     }
 
     @Deprecated(since = "7.0.0", forRemoval = true)
