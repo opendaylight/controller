@@ -85,22 +85,15 @@ public final class DataTreeCandidateInputOutput {
     private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in,
             final ReusableStreamReceiver receiver) throws IOException {
         final byte type = in.readByte();
-        switch (type) {
-            case APPEARED:
-                return readModifiedNode(ModificationType.APPEARED, in, receiver);
-            case DELETE:
-                return DeletedDataTreeCandidateNode.create(in.readPathArgument());
-            case DISAPPEARED:
-                return readModifiedNode(ModificationType.DISAPPEARED, in, receiver);
-            case SUBTREE_MODIFIED:
-                return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in, receiver);
-            case UNMODIFIED:
-                return null;
-            case WRITE:
-                return DataTreeCandidateNodes.written(in.readNormalizedNode(receiver));
-            default:
-                throw new IllegalArgumentException("Unhandled node type " + type);
-        }
+        return switch (type) {
+            case APPEARED -> readModifiedNode(ModificationType.APPEARED, in, receiver);
+            case DELETE -> DeletedDataTreeCandidateNode.create(in.readPathArgument());
+            case DISAPPEARED -> readModifiedNode(ModificationType.DISAPPEARED, in, receiver);
+            case SUBTREE_MODIFIED -> readModifiedNode(ModificationType.SUBTREE_MODIFIED, in, receiver);
+            case UNMODIFIED -> null;
+            case WRITE -> DataTreeCandidateNodes.written(in.readNormalizedNode(receiver));
+            default -> throw new IllegalArgumentException("Unhandled node type " + type);
+        };
     }
 
     @NonNullByDefault
@@ -129,33 +122,18 @@ public final class DataTreeCandidateInputOutput {
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
 
-        final DataTreeCandidateNode rootNode;
-        switch (type) {
-            case APPEARED:
-                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED,
-                    readChildren(reader, receiver));
-                break;
-            case DELETE:
-                rootNode = DeletedDataTreeCandidateNode.create();
-                break;
-            case DISAPPEARED:
-                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED,
-                    readChildren(reader, receiver));
-                break;
-            case SUBTREE_MODIFIED:
-                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.SUBTREE_MODIFIED,
-                        readChildren(reader, receiver));
-                break;
-            case WRITE:
-                rootNode = DataTreeCandidateNodes.written(reader.readNormalizedNode(receiver));
-                break;
-            case UNMODIFIED:
-                rootNode = AbstractDataTreeCandidateNode.createUnmodified();
-                break;
-            default:
-                throw new IllegalArgumentException("Unhandled node type " + type);
-        }
-
+        final DataTreeCandidateNode rootNode = switch (type) {
+            case APPEARED -> ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED,
+                                readChildren(reader, receiver));
+            case DELETE -> DeletedDataTreeCandidateNode.create();
+            case DISAPPEARED -> ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED,
+                                readChildren(reader, receiver));
+            case SUBTREE_MODIFIED -> ModifiedDataTreeCandidateNode.create(ModificationType.SUBTREE_MODIFIED,
+                                    readChildren(reader, receiver));
+            case WRITE -> DataTreeCandidateNodes.written(reader.readNormalizedNode(receiver));
+            case UNMODIFIED -> AbstractDataTreeCandidateNode.createUnmodified();
+            default -> throw new IllegalArgumentException("Unhandled node type " + type);
+        };
         return new DataTreeCandidateWithVersion(DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode),
             reader.getVersion());
     }
@@ -192,7 +170,7 @@ public final class DataTreeCandidateInputOutput {
                 break;
             case WRITE:
                 out.writeByte(WRITE);
-                out.writeNormalizedNode(node.getDataAfter().get());
+                out.writeNormalizedNode(node.getDataAfter().orElseThrow());
                 break;
             case UNMODIFIED:
                 out.writeByte(UNMODIFIED);
@@ -230,7 +208,7 @@ public final class DataTreeCandidateInputOutput {
                     break;
                 case WRITE:
                     writer.writeByte(WRITE);
-                    writer.writeNormalizedNode(node.getDataAfter().get());
+                    writer.writeNormalizedNode(node.getDataAfter().orElseThrow());
                     break;
                 default:
                     throwUnhandledNodeType(node);

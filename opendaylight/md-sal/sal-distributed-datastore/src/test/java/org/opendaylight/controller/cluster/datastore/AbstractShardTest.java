@@ -168,7 +168,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             final Optional<DataContainerChild> idLeaf =
                     mapEntry.findChildByArg(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
-            final Object value = idLeaf.get().body();
+            final Object value = idLeaf.orElseThrow().body();
             assertTrue("Unexpected value for leaf " + TestModel.ID_QNAME.getLocalName() + ": " + value,
                     listEntryKeys.remove(value));
         }
@@ -399,7 +399,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final Optional<DataContainerChild> idLeaf =
                 mapEntry.findChildByArg(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
         assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
-        assertEquals(TestModel.ID_QNAME.getLocalName() + " value", expIDValue, idLeaf.get().body());
+        assertEquals(TestModel.ID_QNAME.getLocalName() + " value", expIDValue, idLeaf.orElseThrow().body());
     }
 
     public static DataTreeCandidateTip mockCandidate(final String name) {

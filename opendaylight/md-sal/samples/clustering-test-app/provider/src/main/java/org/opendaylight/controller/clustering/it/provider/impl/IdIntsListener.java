@@ -60,10 +60,10 @@ public final class IdIntsListener implements ClusteredDOMDataTreeChangeListener 
             if (change.getRootNode().getDataAfter().isPresent()) {
                 LOG.trace("Received change, data before: {}, data after: {}",
                         change.getRootNode().getDataBefore().isPresent()
-                                ? change.getRootNode().getDataBefore().get() : "",
-                        change.getRootNode().getDataAfter().get());
+                                ? change.getRootNode().getDataBefore().orElseThrow() : "",
+                        change.getRootNode().getDataAfter().orElseThrow());
 
-                localCopy = change.getRootNode().getDataAfter().get();
+                localCopy = change.getRootNode().getDataAfter().orElseThrow();
             } else {
                 LOG.warn("getDataAfter() is missing from notification. change: {}", change);
             }
@@ -108,10 +108,10 @@ public final class IdIntsListener implements ClusteredDOMDataTreeChangeListener 
             }
 
             Map<NodeIdentifierWithPredicates, MapEntryNode> expItemMap = new HashMap<>();
-            ((MapNode)expIdInt.findChildByArg(itemNodeId).get()).body()
+            ((MapNode)expIdInt.findChildByArg(itemNodeId).orElseThrow()).body()
                 .forEach(node -> expItemMap.put(node.getIdentifier(), node));
 
-            ((MapNode)actIdInt.findChildByArg(itemNodeId).get()).body().forEach(actItem -> {
+            ((MapNode)actIdInt.findChildByArg(itemNodeId).orElseThrow()).body().forEach(actItem -> {
                 final MapEntryNode expItem = expItemMap.remove(actItem.getIdentifier());
                 if (expItem == null) {
                     builder.append('\n').append("  Unexpected item entry ").append(actItem.getIdentifier())

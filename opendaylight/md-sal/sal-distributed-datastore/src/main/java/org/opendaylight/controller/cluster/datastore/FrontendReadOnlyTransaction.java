@@ -40,7 +40,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
     private FrontendReadOnlyTransaction(final AbstractFrontendHistory history,
             final ReadOnlyShardDataTreeTransaction transaction) {
         super(history, transaction.getIdentifier());
-        this.openTransaction = requireNonNull(transaction);
+        openTransaction = requireNonNull(transaction);
     }
 
     static FrontendReadOnlyTransaction create(final AbstractFrontendHistory history,
@@ -75,7 +75,8 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
         // The only valid request here is with abort protocol
         final Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
         checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
-        checkArgument(optProto.get() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s", request);
+        checkArgument(optProto.orElseThrow() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s",
+            request);
         openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
             new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
     }

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.SerializationUtils;
@@ -817,7 +818,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
         final byte[] bytes = new byte[]{1, 2, 3};
-        installSnapshotStream.get().get().write(bytes);
+        installSnapshotStream.get().orElseThrow().write(bytes);
         actorContext.getSnapshotManager().persist(ByteState.of(bytes), installSnapshotStream.get(),
                 Runtime.getRuntime().totalMemory());
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -1187,8 +1188,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
-        assertEquals(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE,
-                installSnapshot.getLastChunkHashCode().getAsInt());
+        assertEquals(OptionalInt.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE),
+                installSnapshot.getLastChunkHashCode());
 
         final int hashCode = Arrays.hashCode(installSnapshot.getData());
 
@@ -1201,7 +1202,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(2, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
-        assertEquals(hashCode, installSnapshot.getLastChunkHashCode().getAsInt());
+        assertEquals(OptionalInt.of(hashCode), installSnapshot.getLastChunkHashCode());
     }
 
     @Test
@@ -2427,7 +2428,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertTrue(appendEntries.getLeaderAddress().isPresent());
-        assertEquals(leaderActor.path().toString(), appendEntries.getLeaderAddress().get());
+        assertEquals(leaderActor.path().toString(), appendEntries.getLeaderAddress().orElseThrow());
         MessageCollectorActor.clearMessages(followerActor);
 
         // Send AppendEntriesReply indicating the follower does not need the leader address

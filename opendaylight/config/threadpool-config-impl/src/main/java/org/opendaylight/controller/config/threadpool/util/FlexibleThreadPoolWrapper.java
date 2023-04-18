@@ -52,9 +52,8 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
      * This impl saturates threadpool first, then queue. When both are full caller will get blocked.
      */
     private static ForwardingBlockingQueue getQueue(final OptionalInt capacity) {
-        final BlockingQueue<Runnable> delegate = capacity.isPresent() ? new LinkedBlockingQueue<>(capacity.getAsInt())
-                : new LinkedBlockingQueue<>();
-        return new ForwardingBlockingQueue(delegate);
+        return new ForwardingBlockingQueue(
+            capacity.isPresent() ? new LinkedBlockingQueue<>(capacity.orElseThrow()) : new LinkedBlockingQueue<>());
     }
 
     @Override

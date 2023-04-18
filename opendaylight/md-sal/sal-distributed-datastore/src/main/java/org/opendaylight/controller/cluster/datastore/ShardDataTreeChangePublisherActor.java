@@ -31,12 +31,11 @@ public final class ShardDataTreeChangePublisherActor
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof RegisterListener) {
-            RegisterListener reg = (RegisterListener)message;
+        if (message instanceof RegisterListener reg) {
             LOG.debug("{}: Received {}", logContext(), reg);
             if (reg.initialState.isPresent()) {
                 DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
-                        reg.initialState.get(), logContext());
+                        reg.initialState.orElseThrow(), logContext());
             } else {
                 reg.listener.onInitialData();
             }

@@ -64,7 +64,7 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
                 try {
                     Optional<OuterList> optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                        OuterList outerList = optionalDataObject.get();
+                        OuterList outerList = optionalDataObject.orElseThrow();
 
                         String[] objectsArray = new String[outerList.nonnullInnerList().size()];
                         for (InnerList innerList : outerList.nonnullInnerList().values()) {

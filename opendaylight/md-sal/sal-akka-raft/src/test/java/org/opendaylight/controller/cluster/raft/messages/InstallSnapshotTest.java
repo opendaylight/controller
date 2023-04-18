@@ -79,8 +79,8 @@ public class InstallSnapshotTest {
         assertEquals("getServerConfig present", expected.getServerConfig().isPresent(),
                 actual.getServerConfig().isPresent());
         if (expected.getServerConfig().isPresent()) {
-            assertEquals("getServerConfig", expected.getServerConfig().get().getServerConfig(),
-                    actual.getServerConfig().get().getServerConfig());
+            assertEquals("getServerConfig", expected.getServerConfig().orElseThrow().getServerConfig(),
+                    actual.getServerConfig().orElseThrow().getServerConfig());
         }
     }
 }

@@ -133,7 +133,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
 
             MapNode cars = carMapBuilder.build();
 
-            assertEquals("cars not matching result", cars, optional.get());
+            assertEquals("cars not matching result", cars, optional.orElseThrow());
 
             txChain.close();
 
@@ -163,8 +163,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
 
             final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                     .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("restored cars do not match snapshot", cars, optional.get());
+            assertEquals("restored cars do not match snapshot", Optional.of(cars), optional);
 
             txChain.close();
         }

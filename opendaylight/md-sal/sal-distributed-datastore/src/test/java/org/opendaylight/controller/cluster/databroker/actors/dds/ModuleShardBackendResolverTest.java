@@ -120,7 +120,7 @@ public class ModuleShardBackendResolverTest {
         final CompletionStage<ShardBackendInfo> stage = moduleShardBackendResolver.getBackendInfo(0L);
         final ShardBackendInfo shardBackendInfo = TestUtils.getWithTimeout(stage.toCompletableFuture());
         assertEquals(0L, shardBackendInfo.getCookie().longValue());
-        assertEquals(dataTree, shardBackendInfo.getDataTree().get());
+        assertEquals(dataTree, shardBackendInfo.getDataTree().orElseThrow());
         assertEquals(DefaultShardStrategy.DEFAULT_SHARD, shardBackendInfo.getName());
     }
 

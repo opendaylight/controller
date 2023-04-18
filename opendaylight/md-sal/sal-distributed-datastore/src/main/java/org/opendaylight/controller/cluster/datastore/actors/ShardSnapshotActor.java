@@ -76,7 +76,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     private void onSerializeSnapshot(final SerializeSnapshot request) {
         Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
         if (installSnapshotStream.isPresent()) {
-            try (ObjectOutputStream out = getOutputStream(installSnapshotStream.get())) {
+            try (ObjectOutputStream out = getOutputStream(installSnapshotStream.orElseThrow())) {
                 request.getSnapshot().serialize(out);
             } catch (IOException e) {
                 // TODO - we should communicate the failure in the CaptureSnapshotReply.

@@ -187,7 +187,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
             MockSnapshotState snapshotState = new MockSnapshotState(List.copyOf(getState()));
             if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream.get());
+                SerializationUtils.serialize(snapshotState, installSnapshotStream.orElseThrow());
             }
 
             actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);

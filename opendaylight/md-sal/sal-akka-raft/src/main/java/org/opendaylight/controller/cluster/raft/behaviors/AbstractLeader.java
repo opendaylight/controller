@@ -571,7 +571,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 if (installSnapshotState.isLastChunk(reply.getChunkIndex())) {
                     //this was the last chunk reply
 
-                    long followerMatchIndex = snapshotHolder.get().getLastIncludedIndex();
+                    long followerMatchIndex = snapshotHolder.orElseThrow().getLastIncludedIndex();
                     followerLogInformation.setMatchIndex(followerMatchIndex);
                     followerLogInformation.setNextIndex(followerMatchIndex + 1);
                     followerLogInformation.clearLeaderInstallSnapshotState();
@@ -954,7 +954,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             try {
                 // Ensure the snapshot bytes are set - this is a no-op.
-                installSnapshotState.setSnapshotBytes(snapshotHolder.get().getSnapshotBytes());
+                installSnapshotState.setSnapshotBytes(snapshotHolder.orElseThrow().getSnapshotBytes());
 
                 if (!installSnapshotState.canSendNextChunk()) {
                     return;
@@ -993,8 +993,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         installSnapshotState.startChunkTimer();
         followerActor.tell(
                 new InstallSnapshot(currentTerm(), context.getId(),
-                        snapshotHolder.get().getLastIncludedIndex(),
-                        snapshotHolder.get().getLastIncludedTerm(),
+                        snapshotHolder.orElseThrow().getLastIncludedIndex(),
+                        snapshotHolder.orElseThrow().getLastIncludedTerm(),
                         snapshotChunk,
                         chunkIndex,
                         installSnapshotState.getTotalChunks(),

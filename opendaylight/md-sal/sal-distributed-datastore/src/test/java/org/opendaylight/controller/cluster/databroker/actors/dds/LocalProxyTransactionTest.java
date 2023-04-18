@@ -84,8 +84,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final Response<?, ?> value = captor.getValue();
         assertTrue(value instanceof ReadTransactionSuccess);
         final ReadTransactionSuccess success = (ReadTransactionSuccess) value;
-        assertTrue(success.getData().isPresent());
-        assertEquals(DATA_1, success.getData().get());
+        assertEquals(Optional.of(DATA_1), success.getData());
     }
 
     @Test
@@ -118,8 +117,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final TestProbe probe = createProbe();
         final AbortLocalTransactionRequest request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
-        assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
-        assertEquals(PersistenceProtocol.ABORT, modifyRequest.getPersistenceProtocol().get());
+        assertEquals(Optional.of(PersistenceProtocol.ABORT), modifyRequest.getPersistenceProtocol());
     }
 
     @Override
@@ -132,8 +130,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
         verify(modification).applyToCursor(any());
-        assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
-        assertEquals(PersistenceProtocol.THREE_PHASE, modifyRequest.getPersistenceProtocol().get());
+        assertEquals(Optional.of(PersistenceProtocol.THREE_PHASE), modifyRequest.getPersistenceProtocol());
         checkModifications(modifyRequest);
     }
 

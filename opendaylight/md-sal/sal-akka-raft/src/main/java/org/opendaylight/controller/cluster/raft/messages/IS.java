@@ -61,10 +61,10 @@ final class IS implements Externalizable {
         out.writeInt(installSnapshot.getTotalChunks());
 
         if (lastChunkHashCode.isPresent()) {
-            out.writeInt(lastChunkHashCode.getAsInt());
+            out.writeInt(lastChunkHashCode.orElseThrow());
         }
         if (serverConfig.isPresent()) {
-            out.writeObject(serverConfig.get());
+            out.writeObject(serverConfig.orElseThrow());
         }
 
         out.writeObject(installSnapshot.getData());

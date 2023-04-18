@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -102,21 +103,14 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
 
-        Optional<NormalizedNode> readOptional = transactionProxy.read(
-                TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-
-        assertFalse("NormalizedNode isPresent", readOptional.isPresent());
+        assertEquals(Optional.empty(), transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS));
 
         NormalizedNode expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
 
-        readOptional = transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-
-        assertTrue("NormalizedNode isPresent", readOptional.isPresent());
-
-        assertEquals("Response NormalizedNode", expectedNode, readOptional.get());
+        assertEquals(Optional.of(expectedNode), transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS));
     }
 
     @Test(expected = ReadFailedException.class)
@@ -201,11 +195,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         transactionProxy.write(TestModel.TEST_PATH, expectedNode);
 
-        Optional<NormalizedNode> readOptional = transactionProxy.read(
-                TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-
-        assertTrue("NormalizedNode isPresent", readOptional.isPresent());
-        assertEquals("Response NormalizedNode", expectedNode, readOptional.get());
+        assertEquals(Optional.of(expectedNode), transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS));
 
         InOrder inOrder = Mockito.inOrder(mockActorContext);
         inOrder.verify(mockActorContext).executeOperationAsync(
@@ -215,10 +205,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testReadPreConditionCheck() {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
-        transactionProxy.read(TestModel.TEST_PATH);
+        assertThrows(IllegalStateException.class, () -> transactionProxy.read(TestModel.TEST_PATH));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -572,20 +562,20 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ArgumentCaptor<BatchedModifications> batchedMods = ArgumentCaptor.forClass(BatchedModifications.class);
         verify(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef1)), batchedMods.capture(), any(Timeout.class));
-        assertTrue("Participating shards present", batchedMods.getValue().getParticipatingShardNames().isPresent());
-        assertEquals("Participating shards", expShardNames, batchedMods.getValue().getParticipatingShardNames().get());
+        assertEquals("Participating shards", Optional.of(expShardNames),
+            batchedMods.getValue().getParticipatingShardNames());
 
         batchedMods = ArgumentCaptor.forClass(BatchedModifications.class);
         verify(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef2)), batchedMods.capture(), any(Timeout.class));
-        assertTrue("Participating shards present", batchedMods.getValue().getParticipatingShardNames().isPresent());
-        assertEquals("Participating shards", expShardNames, batchedMods.getValue().getParticipatingShardNames().get());
+        assertEquals("Participating shards", Optional.of(expShardNames),
+            batchedMods.getValue().getParticipatingShardNames());
 
         ArgumentCaptor<ReadyLocalTransaction> readyLocalTx = ArgumentCaptor.forClass(ReadyLocalTransaction.class);
         verify(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef3)), readyLocalTx.capture(), any(Timeout.class));
-        assertTrue("Participating shards present", readyLocalTx.getValue().getParticipatingShardNames().isPresent());
-        assertEquals("Participating shards", expShardNames, readyLocalTx.getValue().getParticipatingShardNames().get());
+        assertEquals("Participating shards", Optional.of(expShardNames),
+            readyLocalTx.getValue().getParticipatingShardNames());
     }
 
     @Test
@@ -1408,8 +1398,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         Optional<NormalizedNode> readOptional = transactionProxy.read(writePath2).get(5, TimeUnit.SECONDS);
 
-        assertTrue("NormalizedNode isPresent", readOptional.isPresent());
-        assertEquals("Response NormalizedNode", writeNode2, readOptional.get());
+        assertEquals("Response NormalizedNode", Optional.of(writeNode2), readOptional);
 
         transactionProxy.merge(mergePath1, mergeNode1);
         transactionProxy.merge(mergePath2, mergeNode2);
@@ -1421,8 +1410,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).get();
         assertEquals("Exists response", Boolean.TRUE, exists);
 
-        assertTrue("NormalizedNode isPresent", readOptional.isPresent());
-        assertEquals("Response NormalizedNode", mergeNode2, readOptional.get());
+        assertEquals("Response NormalizedNode", Optional.of(mergeNode2), readOptional);
 
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 3, batchedModifications.size());
@@ -1480,7 +1468,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         assertTrue("NormalizedNode isPresent", readOptional.isPresent());
 
-        NormalizedNode normalizedNode = readOptional.get();
+        NormalizedNode normalizedNode = readOptional.orElseThrow();
 
         assertTrue("Expect value to be a Collection", normalizedNode.body() instanceof Collection);
 

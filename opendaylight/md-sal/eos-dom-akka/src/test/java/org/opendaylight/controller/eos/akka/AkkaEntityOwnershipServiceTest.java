@@ -252,9 +252,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
     private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,
                                                 final EntityOwnershipState expState) {
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
-            final Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
-            assertTrue("getOwnershipState present", state.isPresent());
-            assertEquals("EntityOwnershipState", expState, state.get());
+            assertEquals(Optional.of(expState), service.getOwnershipState(entity));
         });
     }
 

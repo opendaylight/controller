@@ -304,7 +304,7 @@ public class RpcRegistryTest {
         assertNotNull(maybeEndpoint);
         assertTrue(maybeEndpoint.isPresent());
 
-        final RemoteRpcEndpoint endpoint = maybeEndpoint.get();
+        final RemoteRpcEndpoint endpoint = maybeEndpoint.orElseThrow();
         final ActorRef router = endpoint.getRouter();
         assertNotNull(router);
 

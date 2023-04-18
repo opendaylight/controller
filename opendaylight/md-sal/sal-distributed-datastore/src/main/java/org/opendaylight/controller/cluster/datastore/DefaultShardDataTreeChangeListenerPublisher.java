@@ -64,7 +64,7 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
         registerTreeChangeListener(treeId, listener, onRegistration);
 
         if (initialState.isPresent()) {
-            notifySingleListener(treeId, listener, initialState.get(), logContext);
+            notifySingleListener(treeId, listener, initialState.orElseThrow(), logContext);
         } else {
             listener.onInitialData();
         }

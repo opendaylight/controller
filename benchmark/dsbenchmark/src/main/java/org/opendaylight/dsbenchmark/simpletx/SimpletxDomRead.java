@@ -66,7 +66,7 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
                 try {
                     Optional<NormalizedNode> optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                        NormalizedNode ret = optionalDataObject.get();
+                        NormalizedNode ret = optionalDataObject.orElseThrow();
                         LOG.trace("optionalDataObject is {}", ret);
                         txOk++;
                     } else {
