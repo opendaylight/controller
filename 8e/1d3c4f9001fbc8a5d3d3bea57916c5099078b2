@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng ODL
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 18 Apr 2023 17:56:02 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/105483
+Project: controller
+Branch: refs/heads/master
