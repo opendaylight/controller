@@ -210,6 +210,6 @@ public class UintAdaptingPrunerTest {
             writer.write(node);
         }
         pruner.close();
-        return pruner.getResult().get();
+        return pruner.getResult().orElseThrow();
     }
 }

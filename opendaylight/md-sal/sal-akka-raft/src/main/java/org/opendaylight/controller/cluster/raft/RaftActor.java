@@ -132,7 +132,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         context = new RaftActorContextImpl(getSelf(), getContext(), id,
             new ElectionTermImpl(persistentProvider, id, LOG), -1, -1, peerAddresses,
-            configParams.isPresent() ? configParams.get() : new DefaultConfigParamsImpl(),
+            configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
             delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
 
         context.setPayloadVersion(payloadVersion);
@@ -413,7 +413,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
         if (getRaftState() == RaftState.Follower && roleChangeNotifier.isPresent()
                 && leaderTransitioning.getLeaderId().equals(getCurrentBehavior().getLeaderId())) {
-            roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), null,
+            roleChangeNotifier.orElseThrow().tell(newLeaderStateChanged(getId(), null,
                 getCurrentBehavior().getLeaderPayloadVersion()), getSelf());
         }
     }
@@ -512,7 +512,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (!Objects.equals(lastLeaderId, currentBehavior.getLeaderId())
                 || oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if (roleChangeNotifier.isPresent()) {
-                roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId(),
+                roleChangeNotifier.orElseThrow().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId(),
                         currentBehavior.getLeaderPayloadVersion()), getSelf());
             }
 
@@ -529,7 +529,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         if (roleChangeNotifier.isPresent()
                 && (oldBehavior == null || oldBehavior.state() != currentBehavior.state())) {
-            roleChangeNotifier.get().tell(new RoleChanged(getId(), oldBehaviorStateName ,
+            roleChangeNotifier.orElseThrow().tell(new RoleChanged(getId(), oldBehaviorStateName ,
                     currentBehavior.state().name()), getSelf());
         }
     }

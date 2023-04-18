@@ -240,12 +240,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onCreateShard((CreateShard)message);
         } else if (message instanceof AddShardReplica) {
             onAddShardReplica((AddShardReplica) message);
-        } else if (message instanceof ForwardedAddServerReply) {
-            ForwardedAddServerReply msg = (ForwardedAddServerReply)message;
+        } else if (message instanceof ForwardedAddServerReply msg) {
             onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(), msg.leaderPath,
                     msg.removeShardOnFailure);
-        } else if (message instanceof ForwardedAddServerFailure) {
-            ForwardedAddServerFailure msg = (ForwardedAddServerFailure)message;
+        } else if (message instanceof ForwardedAddServerFailure msg) {
             onAddServerFailure(msg.shardName, msg.failureMessage, msg.failure, getSender(), msg.removeShardOnFailure);
         } else if (message instanceof RemoveShardReplica) {
             onRemoveShardReplica((RemoveShardReplica) message);
@@ -1024,7 +1022,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             sendResponse(info, message.isWaitUntilReady(), true, () -> {
                 String primaryPath = info.getSerializedLeaderActor();
                 Object found = canReturnLocalShardState && info.isLeader()
-                        ? new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().get()) :
+                        ? new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().orElseThrow()) :
                             new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion());
 
                 LOG.debug("{}: Found primary for {}: {}", persistenceId(), shardName, found);

@@ -137,7 +137,8 @@ public class SerializationUtilsTest {
     }
 
     private static NormalizedNode deserializeNormalizedNode(final byte[] bytes) throws IOException {
-        return SerializationUtils.readNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes))).get();
+        return SerializationUtils.readNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)))
+            .orElseThrow();
     }
 
     private static byte[] serializeNormalizedNode(final NormalizedNode node) throws IOException {

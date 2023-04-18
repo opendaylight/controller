@@ -85,8 +85,7 @@ public class ActorUtilsTest extends AbstractActorTest {
         }
 
         @Override public void onReceive(final Object message) {
-            if (message instanceof FindPrimary) {
-                FindPrimary fp = (FindPrimary)message;
+            if (message instanceof FindPrimary fp) {
                 Object resp = findPrimaryResponses.get(fp.getShardName());
                 if (resp == null) {
                     LOG.error("No expected FindPrimary response found for shard name {}", fp.getShardName());
@@ -149,9 +148,7 @@ public class ActorUtilsTest extends AbstractActorTest {
             ActorUtils actorUtils = new ActorUtils(getSystem(), shardManagerActorRef,
                 mock(ClusterWrapper.class), mock(Configuration.class));
 
-            Optional<ActorRef> out = actorUtils.findLocalShard("default");
-
-            assertEquals(shardActorRef, out.get());
+            assertEquals(Optional.of(shardActorRef), actorUtils.findLocalShard("default"));
 
             testKit.expectNoMessage();
             return null;
@@ -378,8 +375,7 @@ public class ActorUtilsTest extends AbstractActorTest {
         PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
-        assertTrue("LocalShardDataTree present", actual.getLocalShardDataTree().isPresent());
-        assertSame("LocalShardDataTree", mockDataTree, actual.getLocalShardDataTree().get());
+        assertSame("LocalShardDataTree", Optional.of(mockDataTree), actual.getLocalShardDataTree());
         assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
         assertEquals("getPrimaryShardVersion", DataStoreVersions.CURRENT_VERSION, actual.getPrimaryShardVersion());

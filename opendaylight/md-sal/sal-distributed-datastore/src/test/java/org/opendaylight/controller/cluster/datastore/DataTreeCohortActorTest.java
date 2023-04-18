@@ -47,7 +47,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import scala.concurrent.Await;
 
 /**
@@ -57,7 +57,7 @@ import scala.concurrent.Await;
  */
 public class DataTreeCohortActorTest extends AbstractActorTest {
     private static final Collection<DOMDataTreeCandidate> CANDIDATES = new ArrayList<>();
-    private static final SchemaContext MOCK_SCHEMA = mock(SchemaContext.class);
+    private static final EffectiveModelContext MOCK_SCHEMA = mock(EffectiveModelContext.class);
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
     private final DOMDataTreeCommitCohort mockCohort = mock(DOMDataTreeCommitCohort.class);
     private final PostCanCommitStep mockPostCanCommit = mock(PostCanCommitStep.class);
@@ -114,7 +114,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
         doReturn(executeWithDelay(executor, mockPostCanCommit))
-                .when(mockCohort).canCommit(any(Object.class), any(SchemaContext.class), anyCollection());
+                .when(mockCohort).canCommit(any(Object.class), any(EffectiveModelContext.class), anyCollection());
 
         doReturn(executor.submit(() -> mockPostPreCommit)).when(mockPostCanCommit).preCommit();
 
@@ -140,7 +140,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         DataValidationFailedException failure = new DataValidationFailedException(YangInstanceIdentifier.empty(),
                 "mock");
         doReturn(FluentFutures.immediateFailedFluentFuture(failure)).when(mockCohort).canCommit(any(Object.class),
-                any(SchemaContext.class), anyCollection());
+                any(EffectiveModelContext.class), anyCollection());
 
         ActorRef cohortActor = newCohortActor("testFailureOnCanCommit");
 
@@ -203,7 +203,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(mockPostCanCommit).abort();
         doReturn(Futures.immediateFuture(mockPostPreCommit)).when(mockPostCanCommit).preCommit();
         doReturn(FluentFutures.immediateFluentFuture(mockPostCanCommit)).when(mockCohort).canCommit(any(Object.class),
-                any(SchemaContext.class), anyCollection());
+                any(EffectiveModelContext.class), anyCollection());
 
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(mockPostPreCommit).abort();
         doReturn(Futures.immediateFuture(null)).when(mockPostPreCommit).commit();

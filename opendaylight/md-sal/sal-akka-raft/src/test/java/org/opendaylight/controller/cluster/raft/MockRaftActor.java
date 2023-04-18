@@ -60,7 +60,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             mock(RaftActorSnapshotCohort.class);
 
         if (builder.dataPersistenceProvider == null) {
-            setPersistence(builder.persistent.isPresent() ? builder.persistent.get() : true);
+            setPersistence(builder.persistent.isPresent() ? builder.persistent.orElseThrow() : true);
         } else {
             setPersistence(builder.dataPersistenceProvider);
         }

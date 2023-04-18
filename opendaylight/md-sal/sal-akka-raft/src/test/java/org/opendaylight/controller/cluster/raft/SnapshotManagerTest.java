@@ -377,7 +377,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         Optional<OutputStream> installSnapshotStream = installSnapshotStreamCapture.getValue();
         assertEquals("isPresent", true, installSnapshotStream.isPresent());
 
-        installSnapshotStream.get().write(snapshotState.getBytes());
+        installSnapshotStream.orElseThrow().write(snapshotState.getBytes());
 
         snapshotManager.persist(snapshotState, installSnapshotStream, Runtime.getRuntime().totalMemory());
 

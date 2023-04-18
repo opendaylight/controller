@@ -297,7 +297,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                 sealOnly();
             }
 
-            switch (maybeProtocol.get()) {
+            switch (maybeProtocol.orElseThrow()) {
                 case ABORT:
                     sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), cb);
                     break;
@@ -311,7 +311,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                     sendMethod.accept(commitRequest(true), cb);
                     break;
                 default:
-                    throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.get());
+                    throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.orElseThrow());
             }
         }
     }

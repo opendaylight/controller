@@ -57,7 +57,7 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
         assertNotNull(optional);
         assertTrue("Operational toaster not present", optional.isPresent());
 
-        Toaster toasterData = optional.get();
+        Toaster toasterData = optional.orElseThrow();
 
         assertEquals(Toaster.ToasterStatus.Up, toasterData.getToasterStatus());
         assertEquals(new DisplayString("Opendaylight"), toasterData.getToasterManufacturer());

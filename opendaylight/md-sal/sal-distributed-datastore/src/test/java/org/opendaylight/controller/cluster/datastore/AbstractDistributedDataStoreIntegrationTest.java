@@ -151,13 +151,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // Verify the data in the store
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            Optional<NormalizedNode> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", car, optional.get());
-
-            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", person, optional.get());
+            assertEquals(Optional.of(car), readTx.read(carPath).get(5, TimeUnit.SECONDS));
+            assertEquals(Optional.of(person), readTx.read(personPath).get(5, TimeUnit.SECONDS));
         }
     }
 
@@ -180,9 +175,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final Boolean exists = readWriteTx.exists(nodePath).get(5, TimeUnit.SECONDS);
             assertEquals("exists", Boolean.TRUE, exists);
 
-            Optional<NormalizedNode> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", nodeToWrite, optional.get());
+            assertEquals(Optional.of(nodeToWrite), readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS));
 
             // 4. Ready the Tx for commit
             final DOMStoreThreePhaseCommitCohort cohort = readWriteTx.ready();
@@ -193,9 +186,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // 6. Verify the data in the store
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", nodeToWrite, optional.get());
+            assertEquals(Optional.of(nodeToWrite), readTx.read(nodePath).get(5, TimeUnit.SECONDS));
         }
     }
 
@@ -233,22 +224,15 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final Boolean exists = readWriteTx.exists(carPath).get(5, TimeUnit.SECONDS);
             assertEquals("exists", Boolean.TRUE, exists);
 
-            Optional<NormalizedNode> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", car, optional.get());
+            assertEquals("Data node", Optional.of(car), readWriteTx.read(carPath).get(5, TimeUnit.SECONDS));
 
             testKit.doCommit(readWriteTx.ready());
 
             // Verify the data in the store
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", car, optional.get());
-
-            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", person, optional.get());
+            assertEquals(Optional.of(car), readTx.read(carPath).get(5, TimeUnit.SECONDS));
+            assertEquals(Optional.of(person), readTx.read(personPath).get(5, TimeUnit.SECONDS));
         }
     }
 
@@ -478,9 +462,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // the data from the first
             // Tx is visible after being readied.
             DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
-            Optional<NormalizedNode> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", testNode, optional.get());
+            assertEquals(Optional.of(testNode), readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS));
 
             // 6. Create a new RW Tx from the chain, write more data,
             // and ready it
@@ -496,9 +478,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // from the last RW Tx to
             // verify it is visible.
             readTx = txChain.newReadWriteTransaction();
-            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", outerNode, optional.get());
+            assertEquals(Optional.of(outerNode), readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS));
 
             // 8. Wait for the 2 commits to complete and close the
             // chain.
@@ -516,9 +496,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // 9. Create a new read Tx from the data store and verify
             // committed data.
             readTx = dataStore.newReadOnlyTransaction();
-            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", outerNode, optional.get());
+            assertEquals(Optional.of(outerNode), readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS));
         }
     }
 
@@ -551,13 +529,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
             readWriteTx.merge(personPath, person);
 
-            Optional<NormalizedNode> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", car, optional.get());
-
-            optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", person, optional.get());
+            assertEquals(Optional.of(car), readWriteTx.read(carPath).get(5, TimeUnit.SECONDS));
+            assertEquals(Optional.of(person), readWriteTx.read(personPath).get(5, TimeUnit.SECONDS));
 
             final DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
 
@@ -578,12 +551,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertFalse("isPresent", optional.isPresent());
-
-            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", person, optional.get());
+            assertEquals(Optional.empty(), readTx.read(carPath).get(5, TimeUnit.SECONDS));
+            assertEquals(Optional.of(person), readTx.read(personPath).get(5, TimeUnit.SECONDS));
         }
     }
 
@@ -625,7 +594,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
                     .read(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertTrue("isPresent", optional.isPresent());
-            assertEquals("# cars", numCars, ((Collection<?>) optional.get().body()).size());
+            assertEquals("# cars", numCars, ((Collection<?>) optional.orElseThrow().body()).size());
 
             txChain.close();
 
@@ -909,13 +878,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             // two reads
-            Optional<NormalizedNode> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", carsNode, optional.get());
-
-            optional = readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-            assertEquals("Data node", peopleNode, optional.get());
+            assertEquals(Optional.of(carsNode), readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS));
+            assertEquals(Optional.of(peopleNode), readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS));
         }
     }
 

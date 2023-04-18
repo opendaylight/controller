@@ -332,7 +332,7 @@ public class Shard extends RaftActor {
         switch (exportOnRecovery) {
             case Json:
                 if (message instanceof SnapshotOffer) {
-                    exportActor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().get(), name),
+                    exportActor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), name),
                             ActorRef.noSender());
                 } else if (message instanceof ReplicatedLogEntry) {
                     exportActor.tell(new JsonExportActor.ExportJournal((ReplicatedLogEntry) message),
@@ -359,7 +359,7 @@ public class Shard extends RaftActor {
             final Optional<Error> maybeError = context.error();
             if (maybeError.isPresent()) {
                 LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
-                    maybeError.get());
+                    maybeError.orElseThrow());
             }
 
             store.resetTransactionBatch();
@@ -399,7 +399,7 @@ public class Shard extends RaftActor {
             } else if (message instanceof DatastoreContext) {
                 onDatastoreContext((DatastoreContext)message);
             } else if (message instanceof RegisterRoleChangeListener) {
-                roleChangeNotifier.get().forward(message, context());
+                roleChangeNotifier.orElseThrow().forward(message, context());
             } else if (message instanceof FollowerInitialSyncUpStatus) {
                 shardMBean.setFollowerInitialSyncStatus(((FollowerInitialSyncUpStatus) message).isInitialSyncDone());
                 context().parent().tell(message, self());
@@ -1180,37 +1180,37 @@ public class Shard extends RaftActor {
 
         public T id(final ShardIdentifier newId) {
             checkSealed();
-            this.id = newId;
+            id = newId;
             return self();
         }
 
         public T peerAddresses(final Map<String, String> newPeerAddresses) {
             checkSealed();
-            this.peerAddresses = newPeerAddresses;
+            peerAddresses = newPeerAddresses;
             return self();
         }
 
         public T datastoreContext(final DatastoreContext newDatastoreContext) {
             checkSealed();
-            this.datastoreContext = newDatastoreContext;
+            datastoreContext = newDatastoreContext;
             return self();
         }
 
         public T schemaContextProvider(final EffectiveModelContextProvider newSchemaContextProvider) {
             checkSealed();
-            this.schemaContextProvider = requireNonNull(newSchemaContextProvider);
+            schemaContextProvider = requireNonNull(newSchemaContextProvider);
             return self();
         }
 
         public T restoreFromSnapshot(final DatastoreSnapshot.ShardSnapshot newRestoreFromSnapshot) {
             checkSealed();
-            this.restoreFromSnapshot = newRestoreFromSnapshot;
+            restoreFromSnapshot = newRestoreFromSnapshot;
             return self();
         }
 
         public T dataTree(final DataTree newDataTree) {
             checkSealed();
-            this.dataTree = newDataTree;
+            dataTree = newDataTree;
             return self();
         }
 

@@ -64,7 +64,7 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
                 try {
                     optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                        OuterList outerList = optionalDataObject.get();
+                        OuterList outerList = optionalDataObject.orElseThrow();
 
                         String[] objectsArray = new String[outerList.getInnerList().size()];
 

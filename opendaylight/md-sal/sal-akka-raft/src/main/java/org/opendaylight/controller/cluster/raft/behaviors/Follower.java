@@ -166,7 +166,7 @@ public class Follower extends AbstractRaftActorBehavior {
         leaderPayloadVersion = appendEntries.getPayloadVersion();
 
         if (appendEntries.getLeaderAddress().isPresent()) {
-            final String address = appendEntries.getLeaderAddress().get();
+            final String address = appendEntries.getLeaderAddress().orElseThrow();
             log.debug("New leader address: {}", address);
 
             context.setPeerAddress(leaderId, address);
@@ -550,7 +550,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         Address leaderAddress = leaderActor.anchorPath().address();
 
-        CurrentClusterState state = cluster.get().state();
+        CurrentClusterState state = cluster.orElseThrow().state();
         Set<Member> unreachable = state.getUnreachable();
 
         log.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName(), leaderAddress,
@@ -588,7 +588,7 @@ public class Follower extends AbstractRaftActorBehavior {
             return false;
         }
 
-        final Cluster cluster = maybeCluster.get();
+        final Cluster cluster = maybeCluster.orElseThrow();
         final Member selfMember = cluster.selfMember();
 
         final CurrentClusterState state = cluster.state();

@@ -33,7 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     }
 
     List<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
-            final DataTreeCandidate candidate, final SchemaContext schema) {
+            final DataTreeCandidate candidate, final EffectiveModelContext schema) {
         try (RegistrationTreeSnapshot<ActorRef> cohorts = takeSnapshot()) {
             return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
         }
@@ -131,10 +131,10 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         private final Multimap<ActorRef, DOMDataTreeCandidate> actorToCandidates = ArrayListMultimap.create();
         private final TransactionIdentifier txId;
         private final DataTreeCandidate candidate;
-        private final SchemaContext schema;
+        private final EffectiveModelContext schema;
 
         CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate,
-                final SchemaContext schema) {
+                final EffectiveModelContext schema) {
             this.txId = requireNonNull(txId);
             this.candidate = requireNonNull(candidate);
             this.schema = schema;
@@ -210,7 +210,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         }
     }
 
-    CompositeDataTreeCohort createCohort(final SchemaContext schemaContext, final TransactionIdentifier txId,
+    CompositeDataTreeCohort createCohort(final EffectiveModelContext schemaContext, final TransactionIdentifier txId,
             final Executor callbackExecutor, final Timeout commitStepTimeout) {
         return new CompositeDataTreeCohort(this, txId, schemaContext, callbackExecutor, commitStepTimeout);
     }

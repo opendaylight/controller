@@ -131,6 +131,6 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         dataTree.commit(dataTree.prepare(modification));
 
         return new ShardSnapshotState(new MetadataShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(
-                YangInstanceIdentifier.empty()).get()));
+                YangInstanceIdentifier.empty()).orElseThrow()));
     }
 }

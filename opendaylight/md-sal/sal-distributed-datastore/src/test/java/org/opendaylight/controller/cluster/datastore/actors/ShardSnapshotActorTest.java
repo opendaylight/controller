@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.actors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.testkit.javadsl.TestKit;
@@ -40,7 +39,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
         final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(STREAM_FACTORY), testName);
         kit.watch(snapshotActor);
 
-        final NormalizedNode expectedRoot = snapshot.getRootNode().get();
+        final NormalizedNode expectedRoot = snapshot.getRootNode().orElseThrow();
 
         ByteArrayOutputStream installSnapshotStream = withInstallSnapshot ? new ByteArrayOutputStream() : null;
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot,
@@ -59,10 +58,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
             }
 
             assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
-
-            final Optional<NormalizedNode> maybeNode = deserialized.getRootNode();
-            assertTrue("isPresent", maybeNode.isPresent());
-            assertEquals("Root node", expectedRoot, maybeNode.get());
+            assertEquals("Root node", Optional.of(expectedRoot), deserialized.getRootNode());
         }
     }
 

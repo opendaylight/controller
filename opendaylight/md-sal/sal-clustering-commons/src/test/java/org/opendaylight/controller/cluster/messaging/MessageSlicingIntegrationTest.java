@@ -328,7 +328,7 @@ public class MessageSlicingIntegrationTest {
         assertEquals("Identifier", identifier, ((MessageSliceIdentifier)reply.getIdentifier())
                 .getClientIdentifier());
         assertEquals("Failure present", Boolean.TRUE, reply.getFailure().isPresent());
-        assertEquals("isRetriable", isRetriable, reply.getFailure().get().isRetriable());
+        assertEquals("isRetriable", isRetriable, reply.getFailure().orElseThrow().isRetriable());
     }
 
     static void assertMessageSlice(final MessageSlice sliceMessage, final Identifier identifier, final int sliceIndex,

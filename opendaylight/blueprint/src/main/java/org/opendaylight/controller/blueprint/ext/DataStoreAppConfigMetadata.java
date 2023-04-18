@@ -219,7 +219,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         if (result) {
             DataObject localAppConfig;
             if (possibleAppConfig.isPresent()) {
-                localAppConfig = possibleAppConfig.get();
+                localAppConfig = possibleAppConfig.orElseThrow();
             } else {
                 // No app config data is present so create an empty instance via the bindingSerializer service.
                 // This will also return default values for leafs that haven't been explicitly set.

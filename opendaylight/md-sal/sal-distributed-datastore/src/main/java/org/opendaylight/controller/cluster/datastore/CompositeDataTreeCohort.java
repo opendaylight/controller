@@ -36,7 +36,7 @@ import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanComm
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.compat.java8.FutureConverters;
@@ -99,7 +99,7 @@ class CompositeDataTreeCohort {
 
     private final DataTreeCohortActorRegistry registry;
     private final TransactionIdentifier txId;
-    private final SchemaContext schema;
+    private final EffectiveModelContext schema;
     private final Executor callbackExecutor;
     private final Timeout timeout;
 
@@ -107,7 +107,7 @@ class CompositeDataTreeCohort {
     private State state = State.IDLE;
 
     CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
-        final SchemaContext schema, final Executor callbackExecutor, final Timeout timeout) {
+        final EffectiveModelContext schema, final Executor callbackExecutor, final Timeout timeout) {
         this.registry = requireNonNull(registry);
         txId = requireNonNull(transactionID);
         this.schema = requireNonNull(schema);
