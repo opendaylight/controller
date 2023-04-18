@@ -7,13 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class RequestVoteReply extends AbstractRaftRPC {
     private static final long serialVersionUID = 8427899326488775660L;
+    // Flags
+    private static final int VOTE_GRANTED = 0x10;
 
     // true means candidate received vote
     private final boolean voteGranted;
@@ -35,6 +41,17 @@ public final class RequestVoteReply extends AbstractRaftRPC {
     @Override
     Object writeReplace() {
         return new VR(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        WritableObjects.writeLong(out, getTerm(), isVoteGranted() ? VOTE_GRANTED : 0);
+    }
+
+    public static @NonNull RequestVoteReply readFrom(final DataInput in) throws IOException {
+        final byte hdr = WritableObjects.readLongHeader(in);
+        return new RequestVoteReply(WritableObjects.readLongBody(in, hdr),
+                (WritableObjects.longHeaderFlags(hdr) & VOTE_GRANTED) != 0);
     }
 
     @Deprecated(since = "7.0.0", forRemoval = true)

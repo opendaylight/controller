@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -141,5 +143,25 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     @Override
     protected Object writeReplace() {
         return new Proxy(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeInt(serverConfig.size());
+        for (ServerInfo i : serverConfig) {
+            out.writeUTF(i.getId());
+            out.writeBoolean(i.isVoting());
+        }
+    }
+
+    public static @NonNull ServerConfigurationPayload readFrom(final DataInput in) throws IOException {
+        final int size = in.readInt();
+        final List<ServerInfo> serverConfig = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
+            final String id = in.readUTF();
+            final boolean voting = in.readBoolean();
+            serverConfig.add(new ServerInfo(id, voting));
+        }
+        return new ServerConfigurationPayload(serverConfig);
     }
 }

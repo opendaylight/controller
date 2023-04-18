@@ -17,6 +17,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.Externalizable;
@@ -154,6 +155,19 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return new CT(this);
     }
 
+    public static @NonNull CommitTransactionPayload readFrom(final DataInput in) throws IOException {
+        final int length = in.readInt();
+        if (length < 0) {
+            throw new StreamCorruptedException("Invalid payload length " + length);
+        } else if (length < CommitTransactionPayload.MAX_ARRAY_SIZE) {
+            final byte[] serialized = new byte[length];
+            in.readFully(serialized);
+            return new Simple(serialized);
+        } else {
+            return new Chunked(ChunkedByteArray.readFrom(in, length, CommitTransactionPayload.MAX_ARRAY_SIZE));
+        }
+    }
+
     static sealed class Simple extends CommitTransactionPayload {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -176,6 +190,11 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
         @Override
         void writeBytes(final ObjectOutput out) throws IOException {
+            out.write(serialized);
+        }
+
+        @Override
+        public void writeTo(DataOutput out) throws IOException {
             out.write(serialized);
         }
     }
@@ -204,6 +223,11 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         @Override
         DataInput newDataInput() {
             return new DataInputStream(source.openStream());
+        }
+
+        @Override
+        public void writeTo(DataOutput out) throws IOException {
+            source.copyTo(out);
         }
     }
 

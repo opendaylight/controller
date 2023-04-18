@@ -8,17 +8,25 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Reply for the AppendEntries message.
  */
 public final class AppendEntriesReply extends AbstractRaftRPC {
     private static final long serialVersionUID = -7487547356392536683L;
+    // Flag bits
+    private static final int SUCCESS                = 0x10;
+    private static final int FORCE_INSTALL_SNAPSHOT = 0x20;
+    private static final int NEEDS_LEADER_ADDRESS   = 0x40;
 
     // true if follower contained entry matching
     // prevLogIndex and prevLogTerm
@@ -121,6 +129,53 @@ public final class AppendEntriesReply extends AbstractRaftRPC {
             return new Proxy(this);
         }
         return recipientRaftVersion == RaftVersions.FLUORINE_VERSION ? new Proxy2(this) : new AR(this);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeShort(getRaftVersion());
+
+        int flags = 0;
+        if (isSuccess()) {
+            flags |= SUCCESS;
+        }
+        if (isForceInstallSnapshot()) {
+            flags |= FORCE_INSTALL_SNAPSHOT;
+        }
+        if (isNeedsLeaderAddress()) {
+            flags |= NEEDS_LEADER_ADDRESS;
+        }
+        WritableObjects.writeLong(out, getTerm(), flags);
+
+        out.writeUTF(getFollowerId());
+
+        WritableObjects.writeLongs(out, getLogLastIndex(), getLogLastTerm());
+
+        out.writeShort(getPayloadVersion());
+    }
+
+    public static @NonNull AppendEntriesReply readFrom(final DataInput in) throws IOException {
+        short raftVersion = in.readShort();
+
+        byte hdr = WritableObjects.readLongHeader(in);
+        final int flags = WritableObjects.longHeaderFlags(hdr);
+
+        long term = WritableObjects.readLongBody(in, hdr);
+        String followerId = in.readUTF();
+
+        hdr = WritableObjects.readLongHeader(in);
+        long logLastIndex = WritableObjects.readFirstLong(in, hdr);
+        long logLastTerm = WritableObjects.readSecondLong(in, hdr);
+
+        short payloadVersion = in.readShort();
+
+        return new AppendEntriesReply(followerId, term, getFlag(flags, SUCCESS), logLastIndex,
+                logLastTerm, payloadVersion, getFlag(flags, FORCE_INSTALL_SNAPSHOT), getFlag(flags, NEEDS_LEADER_ADDRESS),
+                raftVersion, RaftVersions.CURRENT_VERSION);
+    }
+
+    private static boolean getFlag(final int flags, final int bit) {
+        return (flags & bit) != 0;
     }
 
     /**

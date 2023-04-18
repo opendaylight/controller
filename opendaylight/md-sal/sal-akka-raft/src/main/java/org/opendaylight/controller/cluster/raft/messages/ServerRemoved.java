@@ -7,15 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * The ServerRemoved message is sent to a server which has been removed successfully from the ServerConfiguration.
  * The Server can then choose to self destruct or notify it's parents as needed.
  */
-public class ServerRemoved implements Serializable {
+public class ServerRemoved implements Serializable, SerializableMessage {
     private static final long serialVersionUID = 1L;
 
     private final String serverId;
@@ -31,5 +35,14 @@ public class ServerRemoved implements Serializable {
     @Override
     public String toString() {
         return "ServerRemoved [serverId=" + serverId + "]";
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeUTF(serverId);
+    }
+
+    public static @NonNull ServerRemoved readFrom(final DataInput in) throws IOException {
+        return new ServerRemoved(in.readUTF());
     }
 }

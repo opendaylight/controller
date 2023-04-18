@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.example.messages;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 public final class KeyValue extends Payload {
@@ -50,5 +54,17 @@ public final class KeyValue extends Payload {
     @Override
     protected Object writeReplace() {
         return new KVv1(value, key);
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeUTF(key);
+        out.writeUTF(value);
+    }
+
+    public static @NonNull KeyValue readFrom(final DataInput in) throws IOException {
+        final String key = in.readUTF();
+        final String value = in.readUTF();
+        return new KeyValue(key, value);
     }
 }

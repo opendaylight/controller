@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -112,6 +114,12 @@ public class RaftActorDelegatingPersistentDataProviderTest {
 
         @Override
         protected Object writeReplace() {
+            // Not needed
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void writeTo(DataOutput out) throws IOException {
             // Not needed
             throw new UnsupportedOperationException();
         }
