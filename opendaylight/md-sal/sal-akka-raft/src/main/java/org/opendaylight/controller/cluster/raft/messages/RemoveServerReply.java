@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.DataInput;
+import java.io.IOException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -17,5 +20,16 @@ public final class RemoveServerReply extends AbstractServerChangeReply {
 
     public RemoveServerReply(ServerChangeStatus status, @Nullable String leaderHint) {
         super(status, leaderHint);
+    }
+
+    public static @NonNull RemoveServerReply readFrom(final DataInput in) throws IOException {
+        final ServerChangeStatus status = ServerChangeStatus.values()[in.readInt()];
+
+        String leaderHint = null;
+        if (in.readBoolean()) {
+            leaderHint = in.readUTF();
+        }
+
+        return new RemoveServerReply(status, leaderHint);
     }
 }

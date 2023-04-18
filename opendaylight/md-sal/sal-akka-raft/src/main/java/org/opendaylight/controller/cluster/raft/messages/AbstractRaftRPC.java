@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-public abstract class AbstractRaftRPC implements RaftRPC {
+public abstract class AbstractRaftRPC implements RaftRPC, SerializableMessage {
     @java.io.Serial
     private static final long serialVersionUID = -6061342433962854822L;
 

@@ -7,14 +7,18 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Message sent to add a new server/replica (§4.1).
  *
  * @author Thomas Pantelis
  */
-public class AddServer implements Serializable {
+public class AddServer implements Serializable, SerializableMessage {
     private static final long serialVersionUID = 1L;
 
     private final String newServerId;
@@ -43,5 +47,16 @@ public class AddServer implements Serializable {
     public String toString() {
         return "AddServer [newServerId=" + newServerId + ", newServerAddress=" + newServerAddress + ", votingMember="
                 + votingMember + "]";
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.writeUTF(newServerId);
+        out.writeUTF(newServerAddress);
+        out.writeBoolean(votingMember);
+    }
+
+    public static @NonNull AddServer readFrom(final DataInput in) throws IOException {
+        return new AddServer(in.readUTF(), in.readUTF(), in.readBoolean());
     }
 }

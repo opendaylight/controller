@@ -11,6 +11,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
@@ -21,7 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractServerChangeReply implements Serializable {
+public abstract class AbstractServerChangeReply implements Serializable, SerializableMessage {
     private static final long serialVersionUID = 1L;
 
     private final String leaderHint;
@@ -45,5 +47,16 @@ public abstract class AbstractServerChangeReply implements Serializable {
     public final String toString() {
         return MoreObjects.toStringHelper(getClass()).omitNullValues()
             .add("status", status).add("leaderHint", leaderHint).toString();
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws IOException {
+        out.write(status.ordinal());
+
+        final boolean hintPresent = leaderHint != null;
+        out.writeBoolean(hintPresent);
+        if (hintPresent){
+            out.writeUTF(leaderHint);
+        }
     }
 }
