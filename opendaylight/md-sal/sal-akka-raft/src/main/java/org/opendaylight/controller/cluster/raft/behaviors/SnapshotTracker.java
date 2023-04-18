@@ -64,10 +64,10 @@ class SnapshotTracker implements AutoCloseable {
             throw new InvalidChunkException("Expected chunkIndex " + (lastChunkIndex + 1) + " got " + chunkIndex);
         }
 
-        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.getAsInt() != lastChunkHashCode) {
+        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.orElseThrow() != lastChunkHashCode) {
             throw new InvalidChunkException("The hash code of the recorded last chunk does not match "
                     + "the senders hash code, expected " + lastChunkHashCode + " was "
-                    + maybeLastChunkHashCode.getAsInt());
+                    + maybeLastChunkHashCode.orElseThrow());
         }
 
         bufferedStream.write(chunk);

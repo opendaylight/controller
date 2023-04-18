@@ -308,7 +308,7 @@ public class ActionRegistryTest {
         assertNotNull(maybeEndpoint);
         assertTrue(maybeEndpoint.isPresent());
 
-        final RemoteActionEndpoint endpoint = maybeEndpoint.get();
+        final RemoteActionEndpoint endpoint = maybeEndpoint.orElseThrow();
         final ActorRef router = endpoint.getRouter();
         assertNotNull(router);
 

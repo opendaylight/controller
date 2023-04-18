@@ -8,12 +8,10 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateFluentFuture;
 import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateTrueFluentFuture;
 
-import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,10 +49,7 @@ public class ClientBackedReadWriteTransactionTest
 
     @Test
     public void testRead() throws Exception {
-        final FluentFuture<Optional<NormalizedNode>> result = object().read(YangInstanceIdentifier.empty());
-        final Optional<NormalizedNode> resultData = result.get();
-        assertTrue(resultData.isPresent());
-        assertEquals(data, resultData.get());
+        assertEquals(Optional.of(data), object().read(YangInstanceIdentifier.empty()).get());
     }
 
     @Test

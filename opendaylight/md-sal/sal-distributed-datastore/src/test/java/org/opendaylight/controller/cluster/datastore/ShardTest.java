@@ -1767,8 +1767,8 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static void verifySnapshot(final Snapshot snapshot, final NormalizedNode expectedRoot) {
-        final NormalizedNode actual = ((ShardSnapshotState)snapshot.getState()).getSnapshot().getRootNode().get();
-        assertEquals("Root node", expectedRoot, actual);
+        assertEquals("Root node", expectedRoot,
+            ((ShardSnapshotState)snapshot.getState()).getSnapshot().getRootNode().orElseThrow());
     }
 
     /**
@@ -1861,7 +1861,7 @@ public class ShardTest extends AbstractShardTest {
             ShardLeaderStateChanged.class);
         assertTrue("getLocalShardDataTree present", leaderStateChanged.getLocalShardDataTree().isPresent());
         assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(),
-            leaderStateChanged.getLocalShardDataTree().get());
+            leaderStateChanged.getLocalShardDataTree().orElseThrow());
 
         MessageCollectorActor.clearMessages(listener);
 

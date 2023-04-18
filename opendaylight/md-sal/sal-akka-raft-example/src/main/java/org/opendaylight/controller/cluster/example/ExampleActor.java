@@ -129,7 +129,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         try {
             if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize((Serializable) state, installSnapshotStream.get());
+                SerializationUtils.serialize((Serializable) state, installSnapshotStream.orElseThrow());
             }
         } catch (RuntimeException e) {
             LOG.error("Exception in creating snapshot", e);

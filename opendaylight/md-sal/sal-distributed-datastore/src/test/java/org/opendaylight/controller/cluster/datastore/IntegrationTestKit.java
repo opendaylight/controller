@@ -257,15 +257,14 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public static ActorRef findLocalShard(final ActorUtils actorUtils, final String shardName) {
-        ActorRef shard = null;
-        for (int i = 0; i < 20 * 5 && shard == null; i++) {
+        for (int i = 0; i < 20 * 5; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
             if (shardReply.isPresent()) {
-                shard = shardReply.get();
+                return shardReply.orElseThrow();
             }
         }
-        return shard;
+        return null;
     }
 
     public static void waitUntilShardIsDown(final ActorUtils actorUtils, final String shardName) {

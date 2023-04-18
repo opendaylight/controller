@@ -373,7 +373,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     static ProxyHistory createClient(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
         final Optional<ReadOnlyDataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new Local(parent, connection, identifier, dataTree.get())
+        return dataTree.isPresent() ? new Local(parent, connection, identifier, dataTree.orElseThrow())
              : new Remote(parent, connection, identifier);
     }
 
@@ -381,7 +381,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
         final Optional<ReadOnlyDataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new LocalSingle(parent, connection, identifier, dataTree.get())
+        return dataTree.isPresent() ? new LocalSingle(parent, connection, identifier, dataTree.orElseThrow())
              : new RemoteSingle(parent, connection, identifier);
     }
 

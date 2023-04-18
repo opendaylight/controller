@@ -448,10 +448,10 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
                     .buildFuture();
             }
 
-            final boolean nodesEqual = idIntsListener.checkEqual(readResult.get());
+            final boolean nodesEqual = idIntsListener.checkEqual(readResult.orElseThrow());
             if (!nodesEqual) {
                 LOG.error("Final read of id-int does not match IdIntsListener's copy. {}",
-                        idIntsListener.diffWithLocalCopy(readResult.get()));
+                        idIntsListener.diffWithLocalCopy(readResult.orElseThrow()));
             }
 
             return RpcResultBuilder.success(new UnsubscribeDtclOutputBuilder().setCopyMatches(nodesEqual).build())

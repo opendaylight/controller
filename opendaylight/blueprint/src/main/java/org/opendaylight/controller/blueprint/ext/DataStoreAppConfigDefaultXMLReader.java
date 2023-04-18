@@ -175,7 +175,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         if (!optionalURL.isPresent()) {
             return null;
         }
-        URL url = optionalURL.get();
+        URL url = optionalURL.orElseThrow();
         try (InputStream is = url.openStream()) {
             Document root = UntrustedXML.newDocumentBuilder().parse(is);
             NormalizedNode dataNode = bindingContext.parseDataElement(root.getDocumentElement(),

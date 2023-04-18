@@ -131,7 +131,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             return;
         }
 
-        maybeAborts.get().whenComplete((noop, failure) -> {
+        maybeAborts.orElseThrow().whenComplete((noop, failure) -> {
             if (failure != null) {
                 abortCallback.onFailure(failure);
             } else {
@@ -191,7 +191,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             return;
         }
 
-        maybeCanCommitFuture.get().whenComplete((noop, failure) -> {
+        maybeCanCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
             if (failure != null) {
                 futureCallback.onFailure(failure);
             } else {
@@ -207,7 +207,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             return;
         }
 
-        maybePreCommitFuture.get().whenComplete((noop, failure) -> {
+        maybePreCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
             if (failure != null) {
                 futureCallback.onFailure(failure);
             } else {
@@ -240,7 +240,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             return;
         }
 
-        maybeCommitFuture.get().whenComplete((noop, failure) -> {
+        maybeCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
             if (failure != null) {
                 LOG.error("User cohorts failed to commit", failure);
             }

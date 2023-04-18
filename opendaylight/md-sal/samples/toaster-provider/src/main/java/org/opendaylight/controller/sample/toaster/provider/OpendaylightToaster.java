@@ -293,7 +293,7 @@ public final class OpendaylightToaster extends AbstractMXBean
             Futures.transformAsync(readFuture, toasterData -> {
                 ToasterStatus toasterStatus = ToasterStatus.Up;
                 if (toasterData.isPresent()) {
-                    toasterStatus = toasterData.get().getToasterStatus();
+                    toasterStatus = toasterData.orElseThrow().getToasterStatus();
                 }
 
                 LOG.debug("Read toaster status: {}", toasterStatus);

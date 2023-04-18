@@ -314,13 +314,14 @@ public class DataTreeCohortIntegrationTest {
 
         assertEquals("dataAfter present", expDataAfter.isPresent(), candidate.getRootNode().getDataAfter().isPresent());
         if (expDataAfter.isPresent()) {
-            assertEquals("dataAfter", expDataAfter.get(), candidate.getRootNode().getDataAfter().get());
+            assertEquals("dataAfter", expDataAfter.orElseThrow(), candidate.getRootNode().getDataAfter().orElseThrow());
         }
 
         assertEquals("dataBefore present", expDataBefore.isPresent(),
                 candidate.getRootNode().getDataBefore().isPresent());
         if (expDataBefore.isPresent()) {
-            assertEquals("dataBefore", expDataBefore.get(), candidate.getRootNode().getDataBefore().get());
+            assertEquals("dataBefore", expDataBefore.orElseThrow(),
+                candidate.getRootNode().getDataBefore().orElseThrow());
         }
     }
 }

@@ -105,7 +105,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
 
             final MessageSliceReply reply = testProbe.expectMsgClass(MessageSliceReply.class);
             assertFailedMessageSliceReply(reply, IDENTIFIER, false);
-            assertEquals("Failure cause", mockFailure, reply.getFailure().get().getCause());
+            assertEquals("Failure cause", mockFailure, reply.getFailure().orElseThrow().getCause());
 
             assertFalse("MessageAssembler did not remove state for " + identifier, assembler.hasState(identifier));
             verify(mockFiledBackedStream).cleanup();
@@ -130,7 +130,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
 
             final MessageSliceReply reply = testProbe.expectMsgClass(MessageSliceReply.class);
             assertFailedMessageSliceReply(reply, IDENTIFIER, false);
-            assertEquals("Failure cause", mockFailure, reply.getFailure().get().getCause());
+            assertEquals("Failure cause", mockFailure, reply.getFailure().orElseThrow().getCause());
 
             assertFalse("MessageAssembler did not remove state for " + identifier, assembler.hasState(identifier));
             verify(mockFiledBackedStream).cleanup();
@@ -173,11 +173,11 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
         }
     }
 
-    private MessageAssembler newMessageAssembler(String logContext) {
+    private MessageAssembler newMessageAssembler(final String logContext) {
         return newMessageAssemblerBuilder(logContext).build();
     }
 
-    private Builder newMessageAssemblerBuilder(String logContext) {
+    private Builder newMessageAssemblerBuilder(final String logContext) {
         return MessageAssembler.builder().fileBackedStreamFactory(mockFiledBackedStreamFactory)
                 .assembledMessageCallback(mockAssembledMessageCallback).logContext(logContext);
     }

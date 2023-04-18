@@ -93,7 +93,7 @@ final class OpsRegistrar extends AbstractUntypedActor {
             final ObjectRegistration<DOMRpcImplementation> prevReg;
             final Optional<RemoteRpcEndpoint> maybeEndpoint = e.getValue();
             if (maybeEndpoint.isPresent()) {
-                final RemoteRpcEndpoint endpoint = maybeEndpoint.get();
+                final RemoteRpcEndpoint endpoint = maybeEndpoint.orElseThrow();
                 final RemoteRpcImplementation impl = new RemoteRpcImplementation(endpoint.getRouter(), config);
                 prevReg = rpcRegs.put(e.getKey(), rpcProviderService.registerRpcImplementation(impl,
                     endpoint.getRpcs()));
@@ -129,7 +129,7 @@ final class OpsRegistrar extends AbstractUntypedActor {
             final ObjectRegistration<DOMActionImplementation> prevReg;
             final Optional<RemoteActionEndpoint> maybeEndpoint = e.getValue();
             if (maybeEndpoint.isPresent()) {
-                final RemoteActionEndpoint endpoint = maybeEndpoint.get();
+                final RemoteActionEndpoint endpoint = maybeEndpoint.orElseThrow();
                 final RemoteActionImplementation impl = new RemoteActionImplementation(endpoint.getRouter(), config);
                 prevReg = actionRegs.put(e.getKey(), actionProviderService.registerActionImplementation(impl,
                     endpoint.getActions()));

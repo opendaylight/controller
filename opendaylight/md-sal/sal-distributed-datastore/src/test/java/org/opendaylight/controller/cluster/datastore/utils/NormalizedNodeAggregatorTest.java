@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -48,7 +47,7 @@ public class NormalizedNodeAggregatorTest {
                 schemaContext, LogicalDatastoreType.CONFIGURATION);
 
 
-        NormalizedNode normalizedNode = optional.get();
+        NormalizedNode normalizedNode = optional.orElseThrow();
 
         assertTrue("Expect value to be a Collection", normalizedNode.body() instanceof Collection);
 
@@ -88,11 +87,7 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
-            FluentFuture<Optional<NormalizedNode>> read = readTransaction.read(YangInstanceIdentifier.empty());
-
-            Optional<NormalizedNode> nodeOptional = read.get();
-
-            return nodeOptional.get();
+            return readTransaction.read(YangInstanceIdentifier.empty()).get().orElseThrow();
         }
     }
 

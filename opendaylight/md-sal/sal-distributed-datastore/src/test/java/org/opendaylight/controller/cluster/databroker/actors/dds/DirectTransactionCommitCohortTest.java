@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
@@ -80,8 +79,7 @@ public class DirectTransactionCommitCohortTest {
     public void testCanCommit() throws Exception {
         final ListenableFuture<Boolean> canCommit = cohort.canCommit();
         final ModifyTransactionRequest request = transaction.expectTransactionRequest(ModifyTransactionRequest.class);
-        assertTrue(request.getPersistenceProtocol().isPresent());
-        assertEquals(PersistenceProtocol.SIMPLE, request.getPersistenceProtocol().get());
+        assertEquals(Optional.of(PersistenceProtocol.SIMPLE), request.getPersistenceProtocol());
         final RequestSuccess<?, ?> success = new TransactionCommitSuccess(transaction.getTransaction().getIdentifier(),
                 transaction.getLastReceivedMessage().getSequence());
         transaction.replySuccess(success);

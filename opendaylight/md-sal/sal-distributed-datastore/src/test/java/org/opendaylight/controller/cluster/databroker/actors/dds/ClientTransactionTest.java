@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
@@ -75,9 +74,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     public void testRead() throws Exception {
         final FluentFuture<Optional<NormalizedNode>> resultFuture = getHandle().read(PATH);
         verify(modification).readNode(PATH);
-        final Optional<NormalizedNode> result = getWithTimeout(resultFuture);
-        assertTrue(result.isPresent());
-        assertEquals(DATA, result.get());
+        assertEquals(Optional.of(DATA), getWithTimeout(resultFuture));
     }
 
     @Test
