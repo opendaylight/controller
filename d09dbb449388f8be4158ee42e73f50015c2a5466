@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "4d1d039c_b36b2dc7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-19T06:33:11Z",
+      "side": 1,
+      "message": "this missing a reference to Jira",
+      "revId": "d09dbb449388f8be4158ee42e73f50015c2a5466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f0f3a390_b16f3f73",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 3
