@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f0f3a390_b16f3f73",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-19T06:32:50Z",
+      "side": 1,
+      "message": "Okay, so obviously before writing code we need a proper design. Write that up in the corresponding issue, please.",
+      "revId": "d09dbb449388f8be4158ee42e73f50015c2a5466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "76e09d36_240592d5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/PayloadRegistry.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-19T06:32:50Z",
+      "side": 1,
+      "message": "this is a design hotspot -- i.e. it has to know about everything.\n\nsee https://www.dictionary.com/browse/registry meaning 2\n\nat the end of the day, this should be an entity which can look up handlers for each payload type.",
+      "range": {
+        "startLine": 29,
+        "startChar": 13,
+        "endLine": 29,
+        "endChar": 28
+      },
+      "revId": "d09dbb449388f8be4158ee42e73f50015c2a5466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d43e2f8c_e516bd9b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/PayloadRegistry.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-19T06:32:50Z",
+      "side": 1,
+      "message": "this is slow: each Payload should expose a method akin to DataObject.implementedInterface()",
+      "range": {
+        "startLine": 58,
+        "startChar": 12,
+        "endLine": 58,
+        "endChar": 54
+      },
+      "revId": "d09dbb449388f8be4158ee42e73f50015c2a5466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e0da84a_e30897b6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/PayloadRegistry.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-19T06:32:50Z",
+      "side": 1,
+      "message": "serialization mechanics should not be directly implemented by each payload, but rather should be a separate object with a proper interface",
+      "range": {
+        "startLine": 142,
+        "startChar": 70,
+        "endLine": 142,
+        "endChar": 78
+      },
+      "revId": "d09dbb449388f8be4158ee42e73f50015c2a5466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "647b3bd8_6840b318",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/SerializableMessage.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-04-19T06:32:50Z",
+      "side": 1,
+      "message": "this is in the wrong layer AFAICT: how will segmented-journal take advantage of this?",
+      "range": {
+        "startLine": 12,
+        "startChar": 17,
+        "endLine": 12,
+        "endChar": 36
+      },
+      "revId": "d09dbb449388f8be4158ee42e73f50015c2a5466",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
