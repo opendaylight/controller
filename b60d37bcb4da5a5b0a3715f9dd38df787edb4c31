@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a839dcb_8ad2f6fb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/MessageSerializer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "maybe throw an IAE if o is no instance of Serializable message",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c3300154_9a352552",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "final. Similarly, prevLogTerm, prevLogIndex, leaderCommit, replicatedToAllIndex, payloadVersion, size, entries",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "598aeee3_18b01505",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "either use var in the whole method or use explicit typing.",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "93643690_3ef8e0a6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntriesReply.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "add final everywhere possible",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fcc3f5c1_041e001a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/InstallSnapshot.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "var or explicit everywhere",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0659aafd_2bf560fa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/InstallSnapshotReply.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "all 3 final",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "963a618a_858617af",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVote.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 9172
+      },
+      "writtenOn": "2023-04-25T08:34:09Z",
+      "side": 1,
+      "message": "all variables can be final",
+      "revId": "b60d37bcb4da5a5b0a3715f9dd38df787edb4c31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
