@@ -24,7 +24,6 @@ import java.io.StreamCorruptedException;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardDataTreeSnapshot
         implements Serializable {
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
         private static final Logger LOG = LoggerFactory.getLogger(MetadataShardDataTreeSnapshot.class);
 
@@ -52,22 +52,9 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
             // For Externalizable
         }
 
-        Proxy(final MetadataShardDataTreeSnapshot snapshot) {
-            rootNode = snapshot.getRootNode().orElseThrow();
-            metadata = snapshot.getMetadata();
-            version = snapshot.version().getStreamVersion();
-        }
-
         @Override
-        public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeInt(metadata.size());
-            for (ShardDataTreeSnapshotMetadata<?> m : metadata.values()) {
-                out.writeObject(m);
-            }
-            out.writeBoolean(true);
-            try (NormalizedNodeDataOutput stream = version.newDataOutput(out)) {
-                stream.writeNormalizedNode(rootNode);
-            }
+        public void writeExternal(final ObjectOutput out) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -103,6 +90,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
@@ -134,11 +122,12 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     @Override
     PayloadVersion version() {
-        return PayloadVersion.MAGNESIUM;
+        return PayloadVersion.CHLORINE_SR2;
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new MS(this);
     }
 
     @Override
