@@ -20,8 +20,8 @@ import java.util.List;
 
 public final class FrontendShardDataTreeSnapshotMetadata extends
         ShardDataTreeSnapshotMetadata<FrontendShardDataTreeSnapshotMetadata> {
-
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private List<FrontendClientMetadata> clients;
@@ -31,10 +31,6 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final FrontendShardDataTreeSnapshotMetadata metadata) {
-            this.clients = metadata.getClients();
         }
 
         @Override
@@ -52,7 +48,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
             for (int i = 0; i < size ; ++i) {
                 readedClients.add(FrontendClientMetadata.readFrom(in));
             }
-            this.clients = ImmutableList.copyOf(readedClients);
+            clients = ImmutableList.copyOf(readedClients);
         }
 
         private Object readResolve() {
@@ -60,6 +56,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
@@ -77,7 +74,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
 
     @Override
     protected Externalizable externalizableProxy() {
-        return new Proxy(this);
+        return new FM(this);
     }
 
     @Override
