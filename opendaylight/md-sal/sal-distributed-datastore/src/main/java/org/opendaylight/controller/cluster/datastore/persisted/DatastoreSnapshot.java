@@ -157,10 +157,6 @@ public final class DatastoreSnapshot implements Serializable {
                 // For Externalizable
             }
 
-            Proxy(final ShardSnapshot shardSnapshot) {
-                this.shardSnapshot = shardSnapshot;
-            }
-
             @Override
             public ShardSnapshot shardSnapshot() {
                 return shardSnapshot;
@@ -198,7 +194,7 @@ public final class DatastoreSnapshot implements Serializable {
 
         @java.io.Serial
         private Object writeReplace() {
-            return new Proxy(this);
+            return new DSS(this);
         }
     }
 }
