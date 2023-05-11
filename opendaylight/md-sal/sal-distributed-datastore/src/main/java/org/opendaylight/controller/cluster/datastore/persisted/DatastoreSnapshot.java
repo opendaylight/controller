@@ -75,10 +75,6 @@ public final class DatastoreSnapshot implements Serializable {
             // For Externalizable
         }
 
-        Proxy(final DatastoreSnapshot datastoreSnapshot) {
-            this.datastoreSnapshot = requireNonNull(datastoreSnapshot);
-        }
-
         @Override
         public DatastoreSnapshot datastoreSnapshot() {
             return datastoreSnapshot;
@@ -95,6 +91,7 @@ public final class DatastoreSnapshot implements Serializable {
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull String type;
@@ -120,8 +117,9 @@ public final class DatastoreSnapshot implements Serializable {
         return shardSnapshots;
     }
 
+    @java.io.Serial
     private Object writeReplace() {
-        return new Proxy(this);
+        return new DS(this);
     }
 
     public static final class ShardSnapshot implements Serializable {
@@ -147,6 +145,7 @@ public final class DatastoreSnapshot implements Serializable {
         }
 
         private static final class Proxy implements SerialForm {
+            @java.io.Serial
             private static final long serialVersionUID = 1L;
 
             private ShardSnapshot shardSnapshot;
@@ -178,6 +177,7 @@ public final class DatastoreSnapshot implements Serializable {
             }
         }
 
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private final @NonNull String name;
@@ -196,6 +196,7 @@ public final class DatastoreSnapshot implements Serializable {
             return snapshot;
         }
 
+        @java.io.Serial
         private Object writeReplace() {
             return new Proxy(this);
         }
