@@ -20,21 +20,17 @@ import java.util.List;
 
 public final class FrontendShardDataTreeSnapshotMetadata extends
         ShardDataTreeSnapshotMetadata<FrontendShardDataTreeSnapshotMetadata> {
-
     private static final class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        private List<FrontendClientMetadata> clients;
+        private List<FrontendClientMetadata> clients = null;
 
         // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
         // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
         @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
-        }
-
-        Proxy(final FrontendShardDataTreeSnapshotMetadata metadata) {
-            this.clients = metadata.getClients();
         }
 
         @Override
@@ -52,14 +48,16 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
             for (int i = 0; i < size ; ++i) {
                 readedClients.add(FrontendClientMetadata.readFrom(in));
             }
-            this.clients = ImmutableList.copyOf(readedClients);
+            clients = ImmutableList.copyOf(readedClients);
         }
 
+        @java.io.Serial
         private Object readResolve() {
             return new FrontendShardDataTreeSnapshotMetadata(clients);
         }
     }
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
@@ -77,7 +75,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
 
     @Override
     protected Externalizable externalizableProxy() {
-        return new Proxy(this);
+        return new FM(this);
     }
 
     @Override
@@ -87,7 +85,8 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(FrontendShardDataTreeSnapshotMetadata.class).add("clients", clients)
-                .toString();
+        return MoreObjects.toStringHelper(FrontendShardDataTreeSnapshotMetadata.class)
+            .add("clients", clients)
+            .toString();
     }
 }
