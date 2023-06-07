@@ -9,8 +9,13 @@ package org.opendaylight.controller.akka.segjournal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+//import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.reset;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -23,24 +28,34 @@ import com.google.common.base.Stopwatch;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import scala.concurrent.Future;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class Controller2043Test {
     private static final File DIRECTORY = new File("target/controller-2043-test");
+    private static final File EXISTING_DIRECTORY = new File("ExistingJournal");
     private static final int SEGMENT_SIZE = 1024;
     private static final int MESSAGE_SIZE = 1024;
     private static ActorSystem SYSTEM;
     private TestKit kit;
     private ActorRef actor;
+    @Mock
+    private Consumer<PersistentRepr> firstCallback;
 
     @BeforeClass
     public static void beforeClass() {
@@ -57,7 +72,7 @@ public class Controller2043Test {
     public void before() {
         kit = new TestKit(SYSTEM);
         FileUtils.deleteQuietly(DIRECTORY);
-        actor = actor();
+        //actor = actor();
     }
 
     @After
@@ -67,6 +82,7 @@ public class Controller2043Test {
 
     @Test
     public void controller2043Test() {
+        actor = actor();
         for (int i = 1; i < 10; ++i) {
             final LargePayload payload = new LargePayload();
             final WriteMessages write = new WriteMessages();
@@ -79,9 +95,36 @@ public class Controller2043Test {
         }
     }
 
+    @Test
+    public void controller2043TestNew() {
+        var callback = new MyConsumer<PersistentRepr>();
+        actor = actorSetup();
+        reset((Object) firstCallback);
+        //doNothing().when(firstCallback).accept(any(PersistentRepr.class));
+        SegmentedJournalActor.AsyncMessage<Void> replay = SegmentedJournalActor
+                .replayMessages(0, Long.MAX_VALUE, Long.MAX_VALUE, callback);
+        actor.tell(replay, ActorRef.noSender());
+        assertNull(get(replay));
+        assertEquals(9, callback.accepted.size());
+        callback.accepted.forEach(input -> {
+            assertTrue(input.payload() instanceof LargePayload);
+            assertNull(input.manifest());
+            assertEquals("uuid", input.writerUuid());
+        });
+    }
+
     private ActorRef actor() {
         return kit.childActorOf(SegmentedJournalActor.props("foo", DIRECTORY, StorageLevel.DISK, MESSAGE_SIZE,
                 SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
+    }
+
+    private ActorRef actorSetup() {
+        return kit.childActorOf(SegmentedJournalActor.props("foo", EXISTING_DIRECTORY,
+                StorageLevel.DISK, MESSAGE_SIZE, SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
+    }
+
+    private static <T> T get(final SegmentedJournalActor.AsyncMessage<T> message) {
+        return getFuture(message.promise.future());
     }
 
     private static <T> T getFuture(final Future<T> future) {
@@ -92,5 +135,18 @@ public class Controller2043Test {
     private static final class LargePayload implements Serializable {
         private static final long serialVersionUID = 1L;
         final byte[] bytes = new byte[8];
+    }
+
+    private static class MyConsumer<T> implements Consumer<T> {
+        List<T> accepted = new ArrayList<>();
+
+        public List<T> getAccepted() {
+            return accepted;
+        }
+
+        @Override
+        public void accept(T input) {
+            accepted.add(input);
+        }
     }
 }

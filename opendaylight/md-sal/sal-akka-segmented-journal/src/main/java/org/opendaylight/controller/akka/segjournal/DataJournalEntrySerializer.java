@@ -81,20 +81,35 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry>,
 
     @Override
     public void serialize(Object obj, ByteBuffer buffer) {
-        var kryoOut = new MyOutput(DEFAULT_BUFFER_SIZE);
-        kryoOut.writeVarInt(18, true);
-        kryoOut.writeVarInt(1, true);
-        final PersistentRepr repr = ((ToPersistence) obj).repr();
-        kryoOut.writeString(repr.manifest());
-        kryoOut.writeString(repr.writerUuid());
-
+//        var kryoOut = new MyOutput(DEFAULT_BUFFER_SIZE);
+//        kryoOut.writeVarInt(18, true);
+//        kryoOut.writeVarInt(1, true);
+//        final PersistentRepr repr = ((ToPersistence) obj).repr();
+//        kryoOut.writeString(repr.manifest());
+//        kryoOut.writeString(repr.writerUuid());
+//
+//        try (ByteArrayOutputStream b = new ByteArrayOutputStream()) {
+//            try (ObjectOutputStream o = new ObjectOutputStream(b)) {
+//                o.writeObject(repr.payload());
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            buffer.put(kryoOut.toBytes());
+//            buffer.put(b.toByteArray());
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+        // tag new serializer
+        buffer.put((byte) 19);
         try (ByteArrayOutputStream b = new ByteArrayOutputStream()) {
             try (ObjectOutputStream o = new ObjectOutputStream(b)) {
+                final PersistentRepr repr = ((ToPersistence) obj).repr();
+                o.writeObject(repr.manifest());
+                o.writeObject(repr.writerUuid());
                 o.writeObject(repr.payload());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            buffer.put(kryoOut.toBytes());
             buffer.put(b.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -131,25 +146,21 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry>,
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(ByteBuffer buffer) {
-        var stream = new ByteArrayInputStream(buffer.array());
-        if (stream.skip(buffer.position()) != buffer.position()) {
-            return null;
+        if (buffer.get() == 18) {
+            return legacyDeserialize(buffer);
         }
-        var legacyInput = new LegacyInput(stream);
-        int mark1 = legacyInput.readVarInt(true);
-        int mark2 = legacyInput.readVarInt(true);
-        if (mark1 != 18) {
-            throw new RuntimeException("actual mark1: " + mark1);
-        }
-        if (mark2 != 1) {
-            throw new RuntimeException("actual mark2: " + mark2);
-        }
-        final String manifest = legacyInput.readString();
-        final String uuid = legacyInput.readString();
-        try (ObjectInputStream o = new ObjectInputStream(legacyInput)) {
-            final Object payload = o.readObject();
-            return (T) new FromPersistence(manifest, uuid, payload);
-        } catch (IOException | ClassNotFoundException e) {
+        //ONLY this one is used
+        try (var byteBufferBackedInputStream = new ByteBufferBackedInputStream(buffer)) {
+            try (ObjectInputStream o = new ObjectInputStream(byteBufferBackedInputStream)) {
+                final String manifest = (String) o.readObject();
+                final String uuid = (String) o.readObject();
+                final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
+                        (Callable<Object>) o::readObject);
+                return (T) new FromPersistence(manifest, uuid, payload);
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -157,6 +168,7 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry>,
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(InputStream stream) {
+        //UNUSED
         var legacyInput = new LegacyInput(stream);
         int mark1 = legacyInput.readVarInt(true);
         int mark2 = legacyInput.readVarInt(true);
@@ -179,5 +191,49 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry>,
     @Override
     public <T> T deserialize(InputStream stream, int bufferSize) {
         return deserialize(stream);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T legacyDeserialize(ByteBuffer buffer) {
+        //ONLY this one is used
+        var legacyByteBufferInput = new LegacyByteBufferInput(buffer);
+        //int mark1 = legacyByteBufferInput.readVarInt(true);
+        int mark2 = legacyByteBufferInput.readVarInt(true);
+//        if (mark1 != 18) {
+//            throw new RuntimeException("actual mark1: " + mark1);
+//        }
+        if (mark2 != 1) {
+            throw new RuntimeException("actual mark2: " + mark2);
+        }
+        final String manifest = legacyByteBufferInput.readString();
+        final String uuid = legacyByteBufferInput.readString();
+        try (ObjectInputStream o = new ObjectInputStream(legacyByteBufferInput)) {
+            final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
+                    (Callable<Object>) o::readObject);
+            return (T) new FromPersistence(manifest, uuid, payload);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static final class ByteBufferBackedInputStream extends InputStream {
+        ByteBuffer buf;
+
+        ByteBufferBackedInputStream(ByteBuffer buf) {
+            this.buf = buf;
+        }
+
+        public synchronized int read() throws IOException {
+            if (!buf.hasRemaining()) {
+                return -1;
+            }
+            return buf.get();
+        }
+
+        public synchronized int read(byte[] bytes, int off, int len) throws IOException {
+            len = Math.min(len, buf.remaining());
+            buf.get(bytes, off, len);
+            return len;
+        }
     }
 }
