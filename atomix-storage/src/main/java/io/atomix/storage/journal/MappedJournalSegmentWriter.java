@@ -198,7 +198,7 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
 
     try {
       namespace.serialize(entry, buffer);
-    } catch (KryoException e) {
+    } catch (IllegalStateException e) {
       throw new BufferOverflowException();
     }
 

@@ -15,9 +15,11 @@
  */
 package io.atomix.utils.serializer;
 
+import io.atomix.storage.journal.JournalSerdes;
+
 import static java.util.Objects.requireNonNull;
 
-record RegisteredType(EntrySerializer<?> serializer, Class<?>[] types) {
+record RegisteredType(JournalSerdes.EntrySerdes<?> serializer, Class<?>[] types, byte id) {
     RegisteredType {
         requireNonNull(serializer);
         requireNonNull(types);

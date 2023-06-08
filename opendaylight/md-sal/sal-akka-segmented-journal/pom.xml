@@ -77,6 +77,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <artifactId>junit-4-13_2.13</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.13</artifactId>
+            <version>2.6.20</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-persistence_2.13</artifactId>
+            <version>2.6.20</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <scm>
