@@ -10,11 +10,12 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.raft.SerializableMessage;
 
 /**
  * Interface implemented by all requests exchanged in the Raft protocol.
  */
-public interface RaftRPC extends Serializable, ControlMessage {
+public interface RaftRPC extends SerializableMessage, Serializable, ControlMessage {
     /**
      * Return the term in which this call is being made.
      *

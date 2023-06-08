@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.RaftMessagedRegistry;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -56,7 +57,7 @@ public final class AppendEntries extends AbstractRaftRPC {
 
     private final String leaderAddress;
 
-    AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
+    public AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
             final long prevLogTerm, @NonNull final List<ReplicatedLogEntry> entries, final long leaderCommit,
             final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
             final short leaderRaftVersion, @Nullable final String leaderAddress) {
@@ -87,6 +88,11 @@ public final class AppendEntries extends AbstractRaftRPC {
             final long replicatedToAllIndex, final short payloadVersion) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
                 RaftVersions.CURRENT_VERSION, null);
+    }
+
+    @Override
+    public RaftMessagedRegistry.MessageType getMessageType() {
+        return RaftMessagedRegistry.MessageType.APPEND_ENTRIES;
     }
 
     public @NonNull String getLeaderId() {

@@ -15,6 +15,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
 import java.util.OptionalInt;
+import org.opendaylight.controller.cluster.raft.RaftMessagedRegistry;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
@@ -112,6 +113,11 @@ public final class InstallSnapshot extends AbstractRaftRPC {
     @Override
     Object writeReplace() {
         return recipientRaftVersion <= RaftVersions.FLUORINE_VERSION ? new Proxy(this) : new IS(this);
+    }
+
+    @Override
+    public RaftMessagedRegistry.MessageType getMessageType() {
+        return RaftMessagedRegistry.MessageType.INSTALL_SNAPSHOT;
     }
 
     private static class Proxy implements Externalizable {

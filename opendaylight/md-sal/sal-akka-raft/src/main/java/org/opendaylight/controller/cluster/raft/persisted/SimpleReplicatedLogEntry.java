@@ -9,6 +9,13 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -102,5 +109,25 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     @java.io.Serial
     private Object writeReplace() {
         return new LE(this);
+    }
+
+    @Override
+    public void writeTo(final DataOutput out) throws IOException {
+        out.writeLong(index);
+        out.writeLong(term);
+        final ObjectOutputStream objectOut = new ObjectOutputStream((OutputStream) out);
+        objectOut.writeObject(payload);
+    }
+
+    public static ReplicatedLogEntry readFrom(final DataInput in) throws IOException, ClassNotFoundException {
+        final long index = in.readLong();
+        final long term = in.readLong();
+        final ObjectInputStream payloadInput = new ObjectInputStream((InputStream) in);
+        final Object payload = payloadInput.readObject();
+        requireNonNull(payload, "Payload deserialization failed: payload missing");
+        if (!(payload instanceof Payload)) {
+            throw new IllegalArgumentException("Payload deserialization failed: payload not instance of Payload");
+        }
+        return new SimpleReplicatedLogEntry(index, term, (Payload)payload);
     }
 }

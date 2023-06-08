@@ -9,11 +9,12 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
  * Represents one entry in the replicated log.
  */
-public interface ReplicatedLogEntry {
+public interface ReplicatedLogEntry extends WritableObject {
     /**
      * Returns the payload/data to be replicated.
      *
