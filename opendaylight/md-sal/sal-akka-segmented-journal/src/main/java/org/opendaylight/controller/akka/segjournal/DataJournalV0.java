@@ -48,6 +48,7 @@ final class DataJournalV0 extends DataJournal {
                 .withNamespace(JournalSerdes.builder()
                     .register(new DataJournalEntrySerializer(system), FromPersistence.class, ToPersistence.class)
                     .build())
+                .withNamespace(new DataJournalEntrySerializer(system))
                 .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
                 .build();
     }
