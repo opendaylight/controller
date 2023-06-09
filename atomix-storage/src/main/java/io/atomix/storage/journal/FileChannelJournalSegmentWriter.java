@@ -15,7 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
 
 import java.io.IOException;
@@ -230,7 +229,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
       memory.position(Integer.BYTES + Integer.BYTES);
       try {
         namespace.serialize(entry, memory);
-      } catch (KryoException e) {
+      } catch (IllegalStateException e) {
         throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
       }
       memory.flip();
