@@ -19,7 +19,8 @@ final class LongSerdes implements EntrySerdes<Long> {
     }
 
     @Override
-    public void write(final EntryOutput output, final Long entry) throws IOException {
-        output.writeLong(entry);
+    public void write(final EntryOutput output, final Object entry) throws IOException {
+        Long longEntry = (Long) entry;
+        output.writeLong(longEntry);
     }
 }
