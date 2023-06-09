@@ -16,10 +16,9 @@
  */
 package io.atomix.storage.journal;
 
-import com.esotericsoftware.kryo.KryoException;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
+import io.atomix.utils.serializer.JournalSerdesImplBuilder;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,7 +133,7 @@ public interface JournalSerdes {
             final var nio = buf.nioBuffer();
             try {
                 serialize(obj, nio);
-            } catch (KryoException e) {
+            } catch (IllegalStateException e) {
                 throw newIOException(e);
             } finally {
                 // adjust writerIndex so that readableBytes() the bytes written
@@ -143,12 +142,12 @@ public interface JournalSerdes {
         };
     }
 
-    private static IOException newIOException(final KryoException cause) {
+    private static IOException newIOException(final IllegalStateException cause) {
         // We may have multiple nested KryoExceptions, intertwined with others, like IOExceptions. Let's find
         // the deepest one.
         var rootKryo = cause;
         for (var nextCause = rootKryo.getCause(); nextCause != null; nextCause = nextCause.getCause()) {
-            if (nextCause instanceof KryoException kryo) {
+            if (nextCause instanceof IllegalStateException kryo) {
                 rootKryo = kryo;
             }
         }
@@ -167,7 +166,7 @@ public interface JournalSerdes {
      * @return builder
      */
     static Builder builder() {
-        return new KryoJournalSerdesBuilder();
+        return new JournalSerdesImplBuilder();
     }
 
     /**

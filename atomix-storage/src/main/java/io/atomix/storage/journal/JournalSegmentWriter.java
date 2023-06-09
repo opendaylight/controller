@@ -21,8 +21,8 @@ import static java.util.Objects.requireNonNull;
 import io.atomix.storage.journal.JournalSegment.Inactive;
 import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
-import java.io.EOFException;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.raft.journal.ToByteBufMapper;
@@ -100,7 +100,7 @@ final class JournalSegmentWriter {
         final var bytes = diskEntry.slice(HEADER_BYTES, writeLimit);
         try {
             mapper.objectToBytes(entry, bytes);
-        } catch (EOFException e) {
+        } catch (BufferOverflowException e) {
             // We ran out of buffer space: let's decide who's fault it is:
             if (writeLimit == maxEntrySize) {
                 // - it is the entry and/or mapper. This is not exactly accurate, as there may be other serialization

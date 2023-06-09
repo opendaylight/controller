@@ -22,7 +22,6 @@
  */
 package io.atomix.utils.serializer;
 
-import com.esotericsoftware.kryo.io.ByteBufferInput;
 import java.nio.ByteBuffer;
 
 /**
@@ -33,7 +32,7 @@ import java.nio.ByteBuffer;
  * @author Robert Varga
  */
 @SuppressWarnings("all")
-public final class Kryo505ByteBufferInput extends ByteBufferInput {
+public final class Kryo505ByteBufferInput extends LegacyByteBufferInput {
 	Kryo505ByteBufferInput (ByteBuffer buffer) {
 		super(buffer);
 	}
@@ -222,7 +221,6 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		return new String(chars, 0, charCount);
 	}
 
-	@Override
 	public StringBuilder readStringBuilder () {
 		niobuffer.position(position);
 		int available = require(1);
