@@ -41,7 +41,7 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> 
     }
 
     @Override
-    public void write(final EntryOutput output, final DataJournalEntry entry) throws IOException {
+    public void write(final EntryOutput output, final Object entry) throws IOException {
         verify(entry instanceof ToPersistence);
         final PersistentRepr repr = ((ToPersistence) entry).repr();
         output.writeString(repr.manifest());

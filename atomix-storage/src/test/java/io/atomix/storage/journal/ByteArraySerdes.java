@@ -28,10 +28,11 @@ final class ByteArraySerdes implements EntrySerdes<byte[]> {
     }
 
     @Override
-    public void write(final EntryOutput output, final byte[] entry) throws IOException {
+    public void write(final EntryOutput output, final Object entry) throws IOException {
+        byte[] bytes = (byte[]) entry;
         if (entry != null) {
-            output.writeVarInt(entry.length + 1);
-            output.writeBytes(entry);
+            output.writeVarInt(bytes.length + 1);
+            output.writeBytes(bytes);
         } else {
             output.writeVarInt(0);
         }
