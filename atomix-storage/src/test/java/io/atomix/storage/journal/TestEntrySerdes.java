@@ -29,7 +29,8 @@ final class TestEntrySerdes implements EntrySerdes<TestEntry> {
     }
 
     @Override
-    public void write(final EntryOutput output, final TestEntry entry) throws IOException {
-        BA_SERIALIZER.write(output, entry.bytes());
+    public void write(final EntryOutput output, final Object entry) throws IOException {
+        final TestEntry testEntry = (TestEntry) entry;
+        BA_SERIALIZER.write(output, testEntry.bytes());
     }
 }
