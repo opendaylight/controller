@@ -11,6 +11,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,5 +46,10 @@ public final class DisableTrackingPayload extends AbstractIdentifiablePayload<Cl
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    @Override
+    public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+        return PayloadRegistry.PayloadTypeCommon.DISABLE_TRACKING_PAYLOAD;
     }
 }

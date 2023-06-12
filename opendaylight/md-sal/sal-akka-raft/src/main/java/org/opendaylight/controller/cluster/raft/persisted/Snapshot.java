@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.Serializable;
 import java.util.List;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 
 /**
  * Represents a snapshot of the raft data.

@@ -60,10 +60,24 @@ public class Controller2072Test {
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
+/*
+           METHOD USED TO GENERATE LEGACY DATA
+*/
+//    @Test
+//    public void createData() {
+//        actor = actor();
+//        for (int i = 1; i < 10; ++i) {
+//            final LargePayload payload = new LargePayload();
+//            final WriteMessages write = new WriteMessages();
+//            final Future<Optional<Exception>> requests = write.add(AtomicWrite.apply(PersistentRepr
+//                    .apply(payload, i, "foo", null, false, kit.getRef(), "uuid")));
+//            actor.tell(write, ActorRef.noSender());
+//        }
+//    }
 
     @Test
     public void legacyJournalReadTest() {
-        var callback = new TestConsumer<PersistentRepr>();
+        var callback = new MyConsumer<PersistentRepr>();
         SegmentedJournalActor.AsyncMessage<Void> replay = SegmentedJournalActor
                 .replayMessages(0, Long.MAX_VALUE, Long.MAX_VALUE, callback);
         actor.tell(replay, ActorRef.noSender());
@@ -95,7 +109,7 @@ public class Controller2072Test {
         final byte[] bytes = new byte[8];
     }
 
-    private static class TestConsumer<T> implements Consumer<T> {
+    private static class MyConsumer<T> implements Consumer<T> {
         List<T> accepted = new ArrayList<>();
 
         @Override

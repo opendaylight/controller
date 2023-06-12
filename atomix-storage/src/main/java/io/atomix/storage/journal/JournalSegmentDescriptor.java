@@ -15,12 +15,11 @@
  */
 package io.atomix.storage.journal;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import java.nio.ByteBuffer;
-
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
+
+import com.google.common.annotations.VisibleForTesting;
+import java.nio.ByteBuffer;
 
 /**
  * Stores information about a {@link JournalSegment} of the log.

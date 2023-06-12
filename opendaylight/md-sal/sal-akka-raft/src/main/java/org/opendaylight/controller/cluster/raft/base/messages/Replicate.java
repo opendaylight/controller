@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public class Replicate {

@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import akka.persistence.PersistentRepr;
 import io.atomix.storage.journal.JournalSegment;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 
 /**
  * A single entry in the data journal. We do not store {@code persistenceId} for each entry, as that is a
@@ -41,9 +42,9 @@ abstract class DataJournalEntry {
     static final class FromPersistence extends DataJournalEntry {
         private final String manifest;
         private final String writerUuid;
-        private final Object payload;
+        private final SerializablePayload payload;
 
-        FromPersistence(final String manifest, final String writerUuid, final Object payload) {
+        FromPersistence(final String manifest, final String writerUuid, final SerializablePayload payload) {
             this.manifest = manifest;
             this.writerUuid = requireNonNull(writerUuid);
             this.payload = requireNonNull(payload);

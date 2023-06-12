@@ -15,6 +15,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,5 +66,10 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    @Override
+    public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+        return PayloadRegistry.PayloadTypeCommon.SKIP_TRANSACTION_PAYLOAD;
     }
 }

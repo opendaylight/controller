@@ -11,6 +11,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,5 +51,10 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    @Override
+    public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+        return PayloadRegistry.PayloadTypeCommon.CLOSE_LOCAL_HISTORY_PAYLOAD;
     }
 }

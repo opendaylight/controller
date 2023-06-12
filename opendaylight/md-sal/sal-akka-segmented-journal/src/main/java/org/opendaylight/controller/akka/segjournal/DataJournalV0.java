@@ -46,7 +46,7 @@ final class DataJournalV0 extends DataJournal {
         entries = SegmentedJournal.<DataJournalEntry>builder()
                 .withStorageLevel(storage).withDirectory(directory).withName("data")
                 .withNamespace(JournalSerdes.builder()
-                    .register(new DataJournalEntrySerializer(system), FromPersistence.class, ToPersistence.class)
+                    .register(new DataJournalEntrySerializer(), FromPersistence.class, ToPersistence.class)
                     .build())
                 .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
                 .build();

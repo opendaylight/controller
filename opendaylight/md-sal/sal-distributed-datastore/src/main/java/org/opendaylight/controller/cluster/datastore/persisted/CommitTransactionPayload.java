@@ -17,9 +17,9 @@ import com.google.common.io.ByteStreams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.cluster.io.ChunkedByteArray;
 import org.opendaylight.controller.cluster.io.ChunkedOutputStream;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
 import org.opendaylight.yangtools.concepts.Either;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -46,12 +47,10 @@ import org.slf4j.LoggerFactory;
 @Beta
 public abstract sealed class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier>
         implements Serializable {
+    static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
+            "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
-
-    static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
-        "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
-
     private volatile Entry<TransactionIdentifier, DataTreeCandidateWithVersion> candidate = null;
 
     CommitTransactionPayload() {
@@ -140,7 +139,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return helper.add("size", size()).toString();
     }
 
-    abstract void writeBytes(ObjectOutput out) throws IOException;
+    abstract void writeBytes(DataOutput out) throws IOException;
 
     abstract DataInput newDataInput();
 
@@ -160,6 +159,11 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
 
         @Override
+        public PayloadTypeCommon getPayloadType() {
+            return PayloadTypeCommon.COMMIT_TRANSACTION_PAYLOAD_SIMPLE;
+        }
+
+        @Override
         public int size() {
             return serialized.length;
         }
@@ -170,7 +174,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
 
         @Override
-        void writeBytes(final ObjectOutput out) throws IOException {
+        void writeBytes(final DataOutput out) throws IOException {
             out.write(serialized);
         }
     }
@@ -187,7 +191,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
 
         @Override
-        void writeBytes(final ObjectOutput out) throws IOException {
+        void writeBytes(final DataOutput out) throws IOException {
             source.copyTo(out);
         }
 
@@ -199,6 +203,11 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         @Override
         DataInput newDataInput() {
             return new DataInputStream(source.openStream());
+        }
+
+        @Override
+        public PayloadTypeCommon getPayloadType() {
+            return PayloadTypeCommon.COMMIT_TRANSACTION_PAYLOAD_CHUNKED;
         }
     }
 

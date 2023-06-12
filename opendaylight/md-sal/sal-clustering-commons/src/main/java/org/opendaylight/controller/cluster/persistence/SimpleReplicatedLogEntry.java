@@ -5,14 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft.persisted;
+package org.opendaylight.controller.cluster.persistence;
 
 import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
-import org.apache.commons.lang3.SerializationUtils;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
+
 
 /**
  * A {@link ReplicatedLogEntry} implementation.
@@ -23,11 +22,14 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     @java.io.Serial
     private static final long serialVersionUID = 1L;
     // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative.
-    private static final int PROXY_SIZE = SerializationUtils.serialize(new LE((Void) null)).length;
+//    private static final int PROXY_SIZE = SerializationUtils.serialize(new LE((Void) null)).length;
+
+    //TODO: resolve this proxy size and the serialization proxies.
+    private static final int PROXY_SIZE = 0;
 
     private final long index;
     private final long term;
-    private final Payload payload;
+    private final SerializablePayload payload;
     private boolean persistencePending;
 
     /**
@@ -37,14 +39,19 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
      * @param term the term
      * @param payload the payload
      */
-    public SimpleReplicatedLogEntry(final long index, final long term, final Payload payload) {
+    public SimpleReplicatedLogEntry(final long index, final long term, final SerializablePayload payload) {
         this.index = index;
         this.term = term;
         this.payload = requireNonNull(payload);
     }
 
     @Override
-    public Payload getData() {
+    public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+        return PayloadRegistry.PayloadTypeCommon.REPLICATED_LOG_ENTRY;
+    }
+
+    @Override
+    public SerializablePayload getData() {
         return payload;
     }
 
@@ -60,12 +67,12 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     @Override
     public int size() {
-        return payload.size();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int serializedSize() {
-        return PROXY_SIZE + payload.serializedSize();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -101,6 +108,6 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     @java.io.Serial
     private Object writeReplace() {
-        return new LE(this);
+        throw new UnsupportedOperationException();
     }
 }

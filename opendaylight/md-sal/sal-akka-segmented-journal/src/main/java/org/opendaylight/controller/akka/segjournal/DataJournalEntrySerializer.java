@@ -8,18 +8,17 @@
 package org.opendaylight.controller.akka.segjournal;
 
 import static com.google.common.base.Verify.verify;
-import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
 import akka.persistence.PersistentRepr;
 import io.atomix.storage.journal.JournalSerdes.EntryInput;
 import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
+import org.opendaylight.controller.cluster.persistence.PayloadHandler;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 
 /**
  * Kryo serializer for {@link DataJournalEntry}. Each {@link SegmentedJournalActor} has its own instance, as well as
@@ -34,10 +33,10 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
  * @author Robert Varga
  */
 final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> {
-    private final ExtendedActorSystem actorSystem;
+    private final PayloadRegistry registry;
 
-    DataJournalEntrySerializer(final ActorSystem actorSystem) {
-        this.actorSystem = requireNonNull((ExtendedActorSystem) actorSystem);
+    DataJournalEntrySerializer() {
+        this.registry = PayloadRegistry.INSTANCE;
     }
 
     @Override
@@ -46,6 +45,9 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> 
         final PersistentRepr repr = ((ToPersistence) entry).repr();
         output.writeString(repr.manifest());
         output.writeString(repr.writerUuid());
+        SerializablePayload serialPayload = (SerializablePayload)repr.payload(); // ReplicatedLogEntry
+        PayloadHandler payloadHandler = registry.getHandler(serialPayload.getPayloadType());
+        payloadHandler.writeTo(output.getStream(), serialPayload);
         output.writeObject(repr.payload());
     }
 
@@ -53,8 +55,9 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> 
     public DataJournalEntry read(final EntryInput input) throws IOException {
         final String manifest = input.readString();
         final String uuid = input.readString();
-        final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
-            (Callable<Object>) input::readObject);
+        final byte entryType = input.readBytes(1)[0];
+        PayloadHandler handler = registry.getHandler(entryType);
+        SerializablePayload payload = handler.readFrom(input.getStream());
         return new FromPersistence(manifest, uuid, payload);
     }
 }

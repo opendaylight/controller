@@ -26,10 +26,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
@@ -251,6 +253,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         @Override
         protected Object writeReplace() {
             return new MockPayloadProxy(data, size);
+        }
+
+        @Override
+        public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+            throw new UnsupportedOperationException();
         }
     }
 

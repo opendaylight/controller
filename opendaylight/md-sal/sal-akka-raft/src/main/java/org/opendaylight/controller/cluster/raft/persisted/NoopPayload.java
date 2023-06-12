@@ -8,8 +8,14 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.persistence.PayloadHandler;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
@@ -44,5 +50,28 @@ public final class NoopPayload extends Payload implements ControlMessage {
     @Override
     protected Object writeReplace() {
         return PROXY;
+    }
+
+    @Override
+    public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+        return PayloadRegistry.PayloadTypeCommon.NOOP_PAYLOAD;
+    }
+
+    static class NoopPayloadHandler implements PayloadHandler {
+
+        static {
+            PayloadRegistry.INSTANCE.registerHandler(PayloadRegistry.PayloadTypeCommon.NOOP_PAYLOAD,
+                    new NoopPayloadHandler());
+        }
+
+        @Override
+        public void writeTo(DataOutput out, SerializablePayload payload) throws IOException {
+            out.write(payload.getPayloadType().getOrdinalByte());
+        }
+
+        @Override
+        public SerializablePayload readFrom(DataInput in) throws IOException {
+            return new NoopPayload();
+        }
     }
 }
