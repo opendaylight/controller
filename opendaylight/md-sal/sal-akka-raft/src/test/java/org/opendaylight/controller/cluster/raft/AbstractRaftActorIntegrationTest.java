@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
