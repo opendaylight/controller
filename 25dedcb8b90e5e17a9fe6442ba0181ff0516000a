@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ff23ed96_bbe9ae59",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSerdes.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-06-12T09:10:23Z",
+      "side": 1,
+      "message": "why are we losing \u003cT\u003e here? what function does it even have then?",
+      "range": {
+        "startLine": 204,
+        "startChar": 39,
+        "endLine": 204,
+        "endChar": 45
+      },
+      "revId": "25dedcb8b90e5e17a9fe6442ba0181ff0516000a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b40c0247_c6495913",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/EntryInputImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-06-12T09:10:23Z",
+      "side": 1,
+      "message": "why is it this public and non-final?",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 6
+      },
+      "revId": "25dedcb8b90e5e17a9fe6442ba0181ff0516000a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9934b904_d900142f",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/EntryInputImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-06-12T09:10:23Z",
+      "side": 1,
+      "message": "requireNonNull(), always?",
+      "range": {
+        "startLine": 19,
+        "startChar": 22,
+        "endLine": 19,
+        "endChar": 29
+      },
+      "revId": "25dedcb8b90e5e17a9fe6442ba0181ff0516000a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "72b3cf94_08def9ff",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/EntryInputImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-06-12T09:10:23Z",
+      "side": 1,
+      "message": "this should not be suppressed -- it is a very valid dinging",
+      "range": {
+        "startLine": 22,
+        "startChar": 25,
+        "endLine": 22,
+        "endChar": 39
+      },
+      "revId": "25dedcb8b90e5e17a9fe6442ba0181ff0516000a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
