@@ -15,9 +15,9 @@
  */
 package io.atomix.storage.journal;
 
-import java.io.File;
-
 import static java.util.Objects.requireNonNull;
+
+import java.io.File;
 
 /**
  * Segment file utility.

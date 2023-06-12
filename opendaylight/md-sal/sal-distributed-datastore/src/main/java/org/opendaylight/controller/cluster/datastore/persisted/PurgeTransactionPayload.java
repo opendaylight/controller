@@ -11,6 +11,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,12 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.PURGE_TRANSACTION_PAYLOAD,
+                new PurgeTransactionPayloadHandler());
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -50,5 +58,10 @@ public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<T
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.PURGE_TRANSACTION_PAYLOAD;
     }
 }

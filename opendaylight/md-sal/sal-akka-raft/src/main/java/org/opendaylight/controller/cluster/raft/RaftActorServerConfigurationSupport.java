@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -27,7 +28,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ChangeServersVotingStatus;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
@@ -139,7 +139,7 @@ class RaftActorServerConfigurationSupport {
     }
 
     private boolean onApplyState(final ApplyState applyState) {
-        Payload data = applyState.getReplicatedLogEntry().getData();
+        SerializablePayload data = applyState.getReplicatedLogEntry().getData();
         if (data instanceof ServerConfigurationPayload) {
             currentOperationState.onApplyState(applyState);
             return true;

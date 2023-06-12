@@ -10,6 +10,7 @@ package io.atomix.utils.serializer;
 import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.JournalSerdes;
+import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -18,6 +19,11 @@ final class EntryInputImpl implements JournalSerdes.EntryInput {
 
     public EntryInputImpl(final ObjectInputStream stream) {
         this.stream = requireNonNull(stream);
+    }
+
+    @Override
+    public DataInput getStream() {
+        return stream;
     }
 
     @Override

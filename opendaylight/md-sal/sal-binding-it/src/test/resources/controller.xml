@@ -174,12 +174,12 @@
                             </schema-service>
 
                    <config-data-store>
-                        <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
+                        <type>config-dom-store-spi:config-dom-datastore</type>
                         <name>config-store-service</name>
                     </config-data-store>
 
                     <operational-data-store>
-                        <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
+                        <type>operational-dom-store-spi:operational-dom-datastore</type>
                         <name>operational-store-service</name>
                     </operational-data-store>
                         </module>
@@ -231,35 +231,35 @@
                         </service>
 
                 <service>
-                    <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
+                    <type>config-dom-store-spi:config-dom-datastore</type>
                     <instance>
                         <name>config-store-service</name>
                         <provider>/modules/module[type='inmemory-config-datastore-provider'][name='config-store-service']</provider>
                     </instance>
                 </service>
                 <service>
-                    <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
+                    <type>operational-dom-store-spi:operational-dom-datastore</type>
                     <instance>
                         <name>operational-store-service</name>
                         <provider>/modules/module[type='inmemory-operational-datastore-provider'][name='operational-store-service']</provider>
                     </instance>
                 </service>
                         <service>
-                            <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-dom-mapping-service</type>
+                            <type>binding-impl:binding-dom-mapping-service</type>
                             <instance>
                                 <name>runtime-mapping-singleton</name>
                                 <provider>/modules/module[type='runtime-generated-mapping'][name='runtime-mapping-singleton']</provider>
                             </instance>
                         </service>
                         <service>
-                        <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-service</type>
+                        <type>binding-impl:binding-new-notification-service</type>
                         <instance>
                             <name>binding-notification-adapter</name>
                             <provider>/modules/module[type='binding-notification-adapter'][name='binding-notification-adapter']</provider>
                         </instance>
                     </service>
                     <service>
-                        <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-publish-service</type>
+                        <type>binding-impl:binding-new-notification-publish-service</type>
                         <instance>
                             <name>binding-notification-publish-adapter</name>
                             <provider>/modules/module[type='binding-notification-publish-adapter'][name='binding-notification-publish-adapter']</provider>

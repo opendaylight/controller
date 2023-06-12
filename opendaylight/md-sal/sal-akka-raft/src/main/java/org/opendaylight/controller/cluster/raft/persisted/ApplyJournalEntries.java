@@ -9,6 +9,9 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 
 /**
  * This is an internal message that is stored in the akka's persistent journal. During recovery, this
@@ -18,7 +21,13 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public final class ApplyJournalEntries implements Serializable, ControlMessage {
+public final class ApplyJournalEntries implements SerializablePayload, Serializable, ControlMessage {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.APPLY_JOURNAL_ENTRIES,
+                new ApplyJournalEntriesPayloadHandler());
+    }
+
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -40,5 +49,20 @@ public final class ApplyJournalEntries implements Serializable, ControlMessage {
     @java.io.Serial
     private Object writeReplace() {
         return new AJE(this);
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.APPLY_JOURNAL_ENTRIES;
+    }
+
+    @Override
+    public int size() {
+        return Long.SIZE;
+    }
+
+    @Override
+    public int serializedSize() {
+        return size();
     }
 }

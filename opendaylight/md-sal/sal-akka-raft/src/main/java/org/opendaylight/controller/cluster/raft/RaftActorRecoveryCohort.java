@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -32,7 +32,7 @@ public interface RaftActorRecoveryCohort {
      *
      * @param data the state data
      */
-    void appendRecoveredLogEntry(Payload data);
+    void appendRecoveredLogEntry(SerializablePayload data);
 
     /**
      * This method is called during recovery to reconstruct the state of the actor.

@@ -9,13 +9,17 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon.MOCK_PAYLOAD;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.google.common.base.Verify;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -26,10 +30,14 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.persistence.PayloadHandler;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
@@ -204,6 +212,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     public static final class MockPayload extends Payload {
+
+        static {
+            PayloadRegistry.INSTANCE.registerHandler(MOCK_PAYLOAD, new MockPayloadHandler());
+        }
+
         private static final long serialVersionUID = 3121380393130864247L;
 
         private final String data;
@@ -251,6 +264,27 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         @Override
         protected Object writeReplace() {
             return new MockPayloadProxy(data, size);
+        }
+
+        @Override
+        public PayloadRegistry.PayloadTypeCommon getPayloadType() {
+            return MOCK_PAYLOAD;
+        }
+    }
+
+    static final class MockPayloadHandler implements PayloadHandler {
+
+        @Override
+        public void writeTo(final DataOutput out, final SerializablePayload payload) throws IOException {
+            Verify.verify(payload instanceof MockPayload);
+            out.write(MOCK_PAYLOAD.getOrdinalByte());
+            out.writeUTF(((MockPayload) payload).data);
+        }
+
+        @Override
+        public SerializablePayload readFrom(final DataInput in) throws IOException {
+            final String data = in.readUTF();
+            return new MockPayload(data);
         }
     }
 

@@ -34,6 +34,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -373,7 +375,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,
-            final long expIndex, final Payload payload) {
+            final long expIndex, final SerializablePayload payload) {
         assertEquals("ReplicatedLogEntry getTerm", expTerm, replicatedLogEntry.getTerm());
         assertEquals("ReplicatedLogEntry getIndex", expIndex, replicatedLogEntry.getIndex());
         assertEquals("ReplicatedLogEntry getData", payload, replicatedLogEntry.getData());

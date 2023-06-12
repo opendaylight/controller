@@ -69,6 +69,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.SkipTransactionsP
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
@@ -374,7 +375,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @throws IOException when the snapshot fails to deserialize
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
-    final void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
+    final void applyRecoveryPayload(final @NonNull SerializablePayload payload) throws IOException {
         if (payload instanceof CommitTransactionPayload) {
             applyRecoveryCandidate((CommitTransactionPayload) payload);
         } else if (payload instanceof AbortTransactionPayload) {

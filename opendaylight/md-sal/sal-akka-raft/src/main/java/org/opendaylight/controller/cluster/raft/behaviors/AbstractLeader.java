@@ -30,16 +30,17 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CheckConsensusReached;
@@ -468,7 +469,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // Tracker is missing, this means that we switched behaviours between replicate and applystate
         // and became the leader again,. We still want to apply this as a local modification because
         // we have resumed leadership with that log entry having been committed.
-        final Payload payload = entry.getData();
+        final SerializablePayload payload = entry.getData();
         if (payload instanceof IdentifiablePayload<?> identifiable) {
             return new ApplyState(null, identifiable.getIdentifier(), entry);
         }
@@ -781,13 +782,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // If the first entry's size exceeds the max data size threshold, it will be returned from the call above. If
         // that is the case, then we need to slice it into smaller chunks.
-        if (entries.size() != 1 || entries.get(0).getData().serializedSize() <= maxDataSize) {
+        if (entries.size() != 1 || ((Payload)entries.get(0).getData()).serializedSize() <= maxDataSize) {
             // Don't need to slice.
             return entries;
         }
 
-        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(), entries.get(0).getData().size(),
-                maxDataSize);
+        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(),
+                ((Payload)entries.get(0).getData()).size(), maxDataSize);
 
         // If an AppendEntries has already been serialized for the log index then reuse the
         // SharedFileBackedOutputStream.

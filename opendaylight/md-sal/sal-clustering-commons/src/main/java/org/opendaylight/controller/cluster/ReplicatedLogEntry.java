@@ -6,20 +6,20 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.controller.cluster;
 
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 
 /**
  * Represents one entry in the replicated log.
  */
-public interface ReplicatedLogEntry {
+public interface ReplicatedLogEntry extends SerializablePayload {
     /**
      * Returns the payload/data to be replicated.
      *
      * @return the payload/data
      */
-    Payload getData();
+    SerializablePayload getData();
 
     /**
      * Returns the term of the entry.

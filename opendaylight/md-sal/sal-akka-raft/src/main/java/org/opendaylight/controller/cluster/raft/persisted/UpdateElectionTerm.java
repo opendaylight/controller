@@ -8,11 +8,20 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 
 /**
  * Message class to persist election term information.
  */
-public final class UpdateElectionTerm implements Serializable {
+public final class UpdateElectionTerm implements SerializablePayload, Serializable {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.UPDATE_ELECTION_TERM,
+                new UpdateElectionTermPayloadHandler());
+    }
+
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -40,6 +49,21 @@ public final class UpdateElectionTerm implements Serializable {
     @java.io.Serial
     private Object writeReplace() {
         return new UT(this);
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.UPDATE_ELECTION_TERM;
+    }
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public int serializedSize() {
+        return 0;
     }
 }
 
