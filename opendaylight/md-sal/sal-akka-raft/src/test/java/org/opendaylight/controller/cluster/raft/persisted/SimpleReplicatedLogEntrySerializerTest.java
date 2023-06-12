@@ -14,6 +14,7 @@ import akka.actor.ExtendedActorSystem;
 import akka.testkit.javadsl.TestKit;
 import java.io.NotSerializableException;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 
 /**
