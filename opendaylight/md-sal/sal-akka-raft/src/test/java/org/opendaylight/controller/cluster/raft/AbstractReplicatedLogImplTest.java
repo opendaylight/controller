@@ -20,8 +20,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 
 /**
 * Unit tests for AbstractReplicatedLogImplTest.

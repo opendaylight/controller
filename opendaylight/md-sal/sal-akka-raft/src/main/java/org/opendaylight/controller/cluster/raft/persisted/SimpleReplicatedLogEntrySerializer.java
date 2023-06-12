@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import java.io.OutputStream;
 import java.util.Optional;
+
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
