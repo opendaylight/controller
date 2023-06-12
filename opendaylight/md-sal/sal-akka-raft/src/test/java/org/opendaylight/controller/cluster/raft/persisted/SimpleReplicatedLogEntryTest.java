@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 
 /**
