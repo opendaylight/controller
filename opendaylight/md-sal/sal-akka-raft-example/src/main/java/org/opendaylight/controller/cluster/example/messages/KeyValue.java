@@ -7,9 +7,22 @@
  */
 package org.opendaylight.controller.cluster.example.messages;
 
+import com.google.common.base.Verify;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.opendaylight.controller.cluster.persistence.PayloadHandler;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 public final class KeyValue extends Payload {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.KEY_VALUE_PAYLOAD, new KeyValyePayloadHandler());
+    }
+
     private static final long serialVersionUID = 1L;
 
     private String key;
@@ -50,5 +63,29 @@ public final class KeyValue extends Payload {
     @Override
     protected Object writeReplace() {
         return new KVv1(value, key);
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.KEY_VALUE_PAYLOAD;
+    }
+
+    static final class KeyValyePayloadHandler implements PayloadHandler {
+
+        @Override
+        public void writeTo(final DataOutput out, final SerializablePayload payload) throws IOException {
+            Verify.verify(payload instanceof KeyValue);
+            final KeyValue keyVal = (KeyValue) payload;
+            out.writeInt(payload.getPayloadType().getOrdinalByte());
+            out.writeUTF(keyVal.getKey());
+            out.writeUTF(keyVal.getValue());
+        }
+
+        @Override
+        public SerializablePayload readFrom(final DataInput in) throws IOException {
+            String inKey = in.readUTF();
+            String inValue = in.readUTF();
+            return new KeyValue(inKey, inValue);
+        }
     }
 }

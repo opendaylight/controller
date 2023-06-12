@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
@@ -168,7 +169,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    public void appendRecoveredLogEntry(final Payload data) {
+    public void appendRecoveredLogEntry(final SerializablePayload data) {
     }
 
     @Override

@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.yangtools.concepts.Identifier;
 
@@ -148,7 +148,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void appendRecoveredLogEntry(final Payload data) {
+    public void appendRecoveredLogEntry(final SerializablePayload data) {
         state.add(data);
     }
 

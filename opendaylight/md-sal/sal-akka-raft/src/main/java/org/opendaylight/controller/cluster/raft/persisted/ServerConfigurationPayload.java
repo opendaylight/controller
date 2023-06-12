@@ -17,6 +17,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 import org.slf4j.Logger;
@@ -28,6 +30,17 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public final class ServerConfigurationPayload extends Payload implements PersistentPayload {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.SERVER_CONFIGURATION_PAYLOAD,
+                new ServerConfigurationPayloadHandler());
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.SERVER_CONFIGURATION_PAYLOAD;
+    }
+
     private static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;

@@ -10,6 +10,7 @@ package io.atomix.utils.serializer;
 import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.JournalSerdes;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
@@ -43,5 +44,10 @@ final class EntryOutputImpl implements JournalSerdes.EntryOutput {
     @Override
     public void writeVarInt(final int value) throws IOException {
         stream.write(value);
+    }
+
+    @Override
+    public DataOutput getStream() {
+        return stream;
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -82,7 +83,7 @@ public class SnapshotManager implements SnapshotState {
 
     @Override
     public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
-            final String targetFollower) {
+                                    final String targetFollower) {
         return currentState.captureToInstall(lastLogEntry, replicatedToAllIndex, targetFollower);
     }
 

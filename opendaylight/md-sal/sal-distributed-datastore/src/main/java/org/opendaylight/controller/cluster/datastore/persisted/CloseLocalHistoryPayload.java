@@ -11,6 +11,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,12 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.CLOSE_LOCAL_HISTORY_PAYLOAD,
+                new CloseLocalHistoryPayloadHandler());
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(CloseLocalHistoryPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -50,5 +58,10 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.CLOSE_LOCAL_HISTORY_PAYLOAD;
     }
 }

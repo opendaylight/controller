@@ -10,11 +10,6 @@ package io.atomix.utils.serializer;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-/*
- * This class is used to deserialize segmented journals created before Kryo was removed from atomix-storage in
- * CONTROLLER-2072. It contains methods form Kryo to read int and String values which are compatible with format
- * of written data.
- */
 final class LegacyByteBufferInput extends InputStream {
     private ByteBuffer niobuffer;
     private int position;
@@ -297,7 +292,7 @@ final class LegacyByteBufferInput extends InputStream {
         return optimizePositive ? result : ((result >>> 1) ^ -(result & 1));
     }
 
-    private int require(int required) throws IllegalStateException {
+    protected final int require(int required) throws IllegalStateException {
         int remaining = limit - position;
         if (remaining >= required) {
             return remaining;

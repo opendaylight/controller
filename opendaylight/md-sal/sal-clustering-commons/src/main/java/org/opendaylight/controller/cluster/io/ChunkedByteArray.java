@@ -14,10 +14,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteSink;
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -34,7 +34,7 @@ public final class ChunkedByteArray implements Immutable {
         this.chunks = requireNonNull(chunks);
     }
 
-    public static ChunkedByteArray readFrom(final ObjectInput in, final int size, final int chunkSize)
+    public static ChunkedByteArray readFrom(final DataInput in, final int size, final int chunkSize)
             throws IOException {
         final List<byte[]> chunks = new ArrayList<>(requiredChunks(size, chunkSize));
         int remaining = size;

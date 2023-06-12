@@ -15,9 +15,9 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**

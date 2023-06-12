@@ -15,6 +15,8 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,12 @@ import org.slf4j.LoggerFactory;
  * local history.
  */
 public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<LocalHistoryIdentifier> {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.SKIP_TRANSACTION_PAYLOAD,
+                new SkipTransactionPayloadHandler());
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SkipTransactionsPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -65,5 +73,10 @@ public final class SkipTransactionsPayload extends AbstractIdentifiablePayload<L
     @Override
     protected int externalizableProxySize() {
         return PROXY_SIZE;
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.SKIP_TRANSACTION_PAYLOAD;
     }
 }

@@ -19,6 +19,8 @@ package io.atomix.storage.journal;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.JournalSerdesImplBuilder;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -172,6 +174,8 @@ public interface JournalSerdes {
 
         @VisibleForTesting
         int readVarInt() throws IOException;
+
+        DataInput getStream();
     }
 
     /**
@@ -190,6 +194,8 @@ public interface JournalSerdes {
 
         @VisibleForTesting
         void writeVarInt(int value) throws IOException;
+
+        DataOutput getStream();
     }
 
     /**

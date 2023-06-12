@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 
 /**
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.

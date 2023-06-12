@@ -15,6 +15,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;

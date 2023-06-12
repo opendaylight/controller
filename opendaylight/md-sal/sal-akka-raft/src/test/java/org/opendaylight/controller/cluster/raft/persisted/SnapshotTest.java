@@ -12,8 +12,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.persistence.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
 /**
  * Unit tests for Snapshot.

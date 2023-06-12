@@ -8,7 +8,6 @@
 package io.atomix.utils.serializer;
 
 import io.atomix.storage.journal.JournalSerdes;
-
 import java.util.HashMap;
 import java.util.Map;
 

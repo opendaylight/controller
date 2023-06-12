@@ -14,8 +14,8 @@ import java.io.File;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void appendRecoveredLogEntry(final Payload payload) {
+    public void appendRecoveredLogEntry(final SerializablePayload payload) {
         checkState(open, "call startLogRecovery before calling appendRecoveredLogEntry");
 
         try {

@@ -15,9 +15,9 @@
  */
 package io.atomix.storage.journal;
 
-import java.util.Arrays;
-
 import static com.google.common.base.MoreObjects.toStringHelper;
+
+import java.util.Arrays;
 
 /**
  * Test entry.

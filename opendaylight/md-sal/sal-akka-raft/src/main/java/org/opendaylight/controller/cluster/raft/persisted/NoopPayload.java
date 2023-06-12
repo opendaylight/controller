@@ -8,8 +8,15 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.persistence.PayloadHandler;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry;
+import org.opendaylight.controller.cluster.persistence.PayloadRegistry.PayloadTypeCommon;
+import org.opendaylight.controller.cluster.persistence.SerializablePayload;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
@@ -19,6 +26,11 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  * @author Thomas Pantelis
  */
 public final class NoopPayload extends Payload implements ControlMessage {
+
+    static {
+        PayloadRegistry.INSTANCE.registerHandler(PayloadTypeCommon.NOOP_PAYLOAD, new NoopPayloadHandler());
+    }
+
     @java.io.Serial
     private static final long serialVersionUID = 1L;
     private static final @NonNull NP PROXY = new NP();
@@ -44,5 +56,23 @@ public final class NoopPayload extends Payload implements ControlMessage {
     @Override
     protected Object writeReplace() {
         return PROXY;
+    }
+
+    @Override
+    public PayloadTypeCommon getPayloadType() {
+        return PayloadTypeCommon.NOOP_PAYLOAD;
+    }
+
+    static class NoopPayloadHandler implements PayloadHandler {
+
+        @Override
+        public void writeTo(final DataOutput out, final SerializablePayload payload) throws IOException {
+            out.write(payload.getPayloadType().getOrdinalByte());
+        }
+
+        @Override
+        public SerializablePayload readFrom(final DataInput in) throws IOException {
+            return new NoopPayload();
+        }
     }
 }

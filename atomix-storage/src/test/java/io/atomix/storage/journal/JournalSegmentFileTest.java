@@ -15,12 +15,11 @@
  */
 package io.atomix.storage.journal;
 
-import java.io.File;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import org.junit.Test;
 
 /**
  * Journal segment file test.
