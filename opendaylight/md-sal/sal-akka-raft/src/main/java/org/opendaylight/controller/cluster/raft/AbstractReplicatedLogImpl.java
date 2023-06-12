@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.ReplicatedLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

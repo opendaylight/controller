@@ -6,9 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.raft;
-
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+package org.opendaylight.controller.cluster;
 
 /**
  * Represents one entry in the replicated log.
@@ -19,7 +17,7 @@ public interface ReplicatedLogEntry {
      *
      * @return the payload/data
      */
-    Payload getData();
+    byte[] getData();
 
     /**
      * Returns the term of the entry.
