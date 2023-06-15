@@ -22,7 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -322,31 +324,30 @@ public class RaftActorTest extends AbstractActorTest {
         // Wait for akka's recovery to complete so it doesn't interfere.
         mockRaftActor.waitForRecoveryComplete();
 
+        // register return value `true` for handleSnapshotMessage calls with any message
+        // check later the number of calls of this method with the specific values (message objects) passed
+        when(mockSupport.handleSnapshotMessage(any(), any(ActorRef.class))).thenReturn(true);
+
         ApplySnapshot applySnapshot = new ApplySnapshot(
             Snapshot.create(null, null, 0, 0, 0, 0, 0, persistenceId, null));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(applySnapshot);
 
         CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(ByteState.empty(), Optional.empty());
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshotReply);
 
         SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(new SnapshotMetadata("", 0L, 0L));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotSuccess);
 
         SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(new SnapshotMetadata("", 0L, 0L),
                 new Throwable());
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
-                any(ActorRef.class));
         mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
         mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
 
+
+        // verify exactly 1 call of handleSnapshotMessage with each message (default number of calls for verify() is 1)
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
@@ -354,6 +355,13 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
                 any(ActorRef.class));
         verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
+
+        /* this verification checks the number of calls to the method with any message argument
+         *
+         * the expected number accounts for the method call when stubbing "when(obj.method()).thenReturn()"
+         * (yep, that invokes the method and Mockito records it)
+         */
+        verify(mockSupport, times(7)).handleSnapshotMessage(any(), any(ActorRef.class));
     }
 
     @SuppressWarnings("unchecked")
