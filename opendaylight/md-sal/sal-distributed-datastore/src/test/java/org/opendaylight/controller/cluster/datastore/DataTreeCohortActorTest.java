@@ -137,7 +137,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
     @Test
     public void testFailureOnCanCommit() throws Exception {
-        DataValidationFailedException failure = new DataValidationFailedException(YangInstanceIdentifier.empty(),
+        DataValidationFailedException failure = new DataValidationFailedException(YangInstanceIdentifier.of(),
                 "mock");
         doReturn(FluentFutures.immediateFailedFluentFuture(failure)).when(mockCohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
@@ -195,7 +195,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
     }
 
     private ActorRef newCohortActor(final String name) {
-        return actorFactory.createActor(DataTreeCohortActor.props(mockCohort, YangInstanceIdentifier.empty()), name);
+        return actorFactory.createActor(DataTreeCohortActor.props(mockCohort, YangInstanceIdentifier.of()), name);
     }
 
     private void resetMockCohort() {

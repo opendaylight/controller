@@ -41,19 +41,19 @@ public class ClientBackedReadWriteTransactionTest
     public void setUp() {
         doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
 
-        doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.empty());
-        doReturn(immediateFluentFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.empty());
+        doReturn(immediateTrueFluentFuture()).when(delegate).exists(YangInstanceIdentifier.of());
+        doReturn(immediateFluentFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.of());
 
         object = new ClientBackedReadWriteTransaction(delegate, null);
     }
 
     @Test
     public void testRead() throws Exception {
-        assertEquals(Optional.of(data), object().read(YangInstanceIdentifier.empty()).get());
+        assertEquals(Optional.of(data), object().read(YangInstanceIdentifier.of()).get());
     }
 
     @Test
     public void testExists() throws Exception {
-        assertEquals(Boolean.TRUE, object().exists(YangInstanceIdentifier.empty()).get());
+        assertEquals(Boolean.TRUE, object().exists(YangInstanceIdentifier.of()).get());
     }
 }

@@ -17,12 +17,12 @@ import java.net.URISyntaxException;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
-import org.opendaylight.mdsal.binding.spec.naming.BindingMapping;
 import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.contract.Naming;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
 import org.opendaylight.yangtools.yang.data.codec.xml.XmlParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.data.impl.schema.NormalizationResultHolder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -87,12 +87,12 @@ public abstract class BindingContext {
 
     public NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
             throws XMLStreamException, IOException, SAXException, URISyntaxException {
-        final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
+        final NormalizationResultHolder resultHolder = new NormalizationResultHolder();
         final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
         final XmlParserStream xmlParser = XmlParserStream.create(writer, dataSchema);
         xmlParser.traverse(new DOMSource(element));
 
-        final NormalizedNode result = resultHolder.getResult();
+        final NormalizedNode result = resultHolder.getResult().data();
         return result instanceof MapNode mapNode ? mapNode.body().iterator().next() : result;
     }
 
@@ -133,7 +133,7 @@ public abstract class BindingContext {
                 final String listKeyValue) throws InstantiationException, IllegalAccessException,
                 IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
-            Identifier keyInstance = (Identifier) bindingClass.getMethod(BindingMapping.IDENTIFIABLE_KEY_NAME)
+            Identifier keyInstance = (Identifier) bindingClass.getMethod(Naming.IDENTIFIABLE_KEY_NAME)
                 .getReturnType().getConstructor(String.class).newInstance(listKeyValue);
             InstanceIdentifier appConfigPath = InstanceIdentifier.builder((Class)bindingClass, keyInstance).build();
             return new ListBindingContext(bindingClass, appConfigPath, listKeyValue);

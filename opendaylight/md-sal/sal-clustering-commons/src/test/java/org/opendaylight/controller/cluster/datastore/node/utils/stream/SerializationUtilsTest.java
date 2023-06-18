@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -18,10 +17,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 import javax.xml.transform.dom.DOMSource;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -29,9 +25,9 @@ import org.junit.Test;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DOMSourceAnyxmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
@@ -52,9 +48,9 @@ public class SerializationUtilsTest {
 
     @Test
     public void testSerializeDeserializeNodes() throws IOException {
-        final NormalizedNode normalizedNode = createNormalizedNode();
+        final ContainerNode normalizedNode = createNormalizedNode();
         final byte[] bytes = serializeNormalizedNode(normalizedNode);
-        assertEquals(10564, bytes.length);
+        assertEquals(10556, bytes.length);
         assertEquals(normalizedNode, deserializeNormalizedNode(bytes));
     }
 
@@ -82,14 +78,13 @@ public class SerializationUtilsTest {
         final DataOutput out = new DataOutputStream(bos);
         final YangInstanceIdentifier path = YangInstanceIdentifier.builder()
                 .node(id("container1"))
-                .node(autmentationId("list1", "list2"))
                 .node(listId("list1", "keyName1", "keyValue1"))
                 .node(leafSetId("leafSer1", "leafSetValue1"))
                 .build();
         SerializationUtils.writePath(out, path);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(119, bytes.length);
+        assertEquals(105, bytes.length);
 
         final YangInstanceIdentifier deserialized =
                 SerializationUtils.readPath(new DataInputStream(new ByteArrayInputStream(bytes)));
@@ -101,11 +96,11 @@ public class SerializationUtilsTest {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput out = new DataOutputStream(bos);
         final NormalizedNode node = createNormalizedNode();
-        final YangInstanceIdentifier path = YangInstanceIdentifier.create(id("container1"));
+        final YangInstanceIdentifier path = YangInstanceIdentifier.of(id("container1"));
         SerializationUtils.writeNodeAndPath(out, path, node);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(10566, bytes.length);
+        assertEquals(10558, bytes.length);
 
         final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
         final AtomicBoolean applierCalled = new AtomicBoolean(false);
@@ -115,25 +110,6 @@ public class SerializationUtilsTest {
             applierCalled.set(true);
         });
         assertTrue(applierCalled.get());
-    }
-
-    @Test
-    public void testSerializeDeserializeAugmentNoref() throws IOException {
-        final YangInstanceIdentifier expected = YangInstanceIdentifier.create(
-            AugmentationIdentifier.create(ImmutableSet.of(
-                QName.create("foo", "leaf1"),
-                QName.create("bar", "leaf2"))));
-
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final DataOutput out = new DataOutputStream(bos);
-        SerializationUtils.writePath(out, expected);
-
-        final byte[] bytes = bos.toByteArray();
-        assertEquals(37, bytes.length);
-
-        final DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
-        final YangInstanceIdentifier read = SerializationUtils.readPath(in);
-        assertEquals(expected, read);
     }
 
     private static NormalizedNode deserializeNormalizedNode(final byte[] bytes) throws IOException {
@@ -147,7 +123,7 @@ public class SerializationUtilsTest {
         return bos.toByteArray();
     }
 
-    private static NormalizedNode createNormalizedNode() {
+    private static ContainerNode createNormalizedNode() {
         final LeafSetNode<Object> leafSetNode = Builders.leafSetBuilder()
                 .withNodeIdentifier(id("leafSetNode"))
                 .withChild(createLeafSetEntry("leafSetNode", "leafSetValue1"))
@@ -166,7 +142,7 @@ public class SerializationUtilsTest {
         final LeafNode<String> stringLeaf = createLeaf("stringLeaf", "stringValue");
         final LeafNode<String> longStringLeaf = createLeaf("longStringLeaf", getLongString());
         final LeafNode<QName> qNameLeaf = createLeaf("stringLeaf", QName.create("base", "qName"));
-        final LeafNode<YangInstanceIdentifier> idLeaf = createLeaf("stringLeaf", YangInstanceIdentifier.empty());
+        final LeafNode<YangInstanceIdentifier> idLeaf = createLeaf("stringLeaf", YangInstanceIdentifier.of());
         final MapEntryNode entry1 = Builders.mapEntryBuilder()
                 .withNodeIdentifier(listId("mapNode", "key", "key1"))
                 .withChild(stringLeaf)
@@ -198,19 +174,12 @@ public class SerializationUtilsTest {
                 .withChild(unkeyedListEntry1)
                 .withChild(unkeyedListEntry2)
                 .build();
-        final ImmutableSet<QName> childNames =
-                ImmutableSet.of(QName.create(CONTAINER_Q_NAME, "aug1"), QName.create(CONTAINER_Q_NAME, "aug1"));
-        final AugmentationNode augmentationNode = Builders.augmentationBuilder()
-                .withNodeIdentifier(new YangInstanceIdentifier.AugmentationIdentifier(childNames))
-                .withChild(createLeaf("aug1", "aug1Value"))
-                .withChild(createLeaf("aug2", "aug2Value"))
-                .build();
         final ChoiceNode choiceNode = Builders.choiceBuilder()
                 .withNodeIdentifier(id("choiceNode"))
                 .withChild(createLeaf("choiceLeaf", 12))
                 .build();
         return Builders.containerBuilder()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CONTAINER_Q_NAME))
+                .withNodeIdentifier(new NodeIdentifier(CONTAINER_Q_NAME))
                 .withChild(booleanLeaf)
                 .withChild(byteLeaf)
                 .withChild(shortLeaf)
@@ -225,7 +194,8 @@ public class SerializationUtilsTest {
                 .withChild(unkeyedListNode)
                 .withChild(leafSetNode)
                 .withChild(orderedLeafSetNode)
-                .withChild(augmentationNode)
+                .withChild(createLeaf("aug1", "aug1Value"))
+                .withChild(createLeaf("aug2", "aug2Value"))
                 .withChild(choiceNode)
                 .build();
     }
@@ -254,13 +224,6 @@ public class SerializationUtilsTest {
 
     private static <T> YangInstanceIdentifier.NodeWithValue<T> leafSetId(final String node, final T value) {
         return new YangInstanceIdentifier.NodeWithValue<>(QName.create(CONTAINER_Q_NAME, node), value);
-    }
-
-    private static YangInstanceIdentifier.AugmentationIdentifier autmentationId(final String... nodes) {
-        final Set<QName> qNames = Arrays.stream(nodes)
-                .map(node -> QName.create(CONTAINER_Q_NAME, node))
-                .collect(Collectors.toSet());
-        return new YangInstanceIdentifier.AugmentationIdentifier(qNames);
     }
 
     private static String getLongString() {

@@ -39,7 +39,7 @@ public class ModifyTransactionRequestBuilderTest {
     private final NormalizedNode node = Builders.containerBuilder().withNodeIdentifier(
             YangInstanceIdentifier.NodeIdentifier.create(QName.create("namespace", "localName"))).build();
     private final TransactionModification transactionModification =
-            new TransactionWrite(YangInstanceIdentifier.empty(), node);
+            new TransactionWrite(YangInstanceIdentifier.of(), node);
     private final ModifyTransactionRequestBuilder modifyTransactionRequestBuilder =
             new ModifyTransactionRequestBuilder(transactionIdentifier, actorRef);
 

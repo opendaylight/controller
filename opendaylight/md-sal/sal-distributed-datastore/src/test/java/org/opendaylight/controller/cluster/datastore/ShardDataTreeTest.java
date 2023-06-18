@@ -36,7 +36,6 @@ import com.google.common.base.Ticker;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -195,14 +194,14 @@ public class ShardDataTreeTest extends AbstractTest {
         addCar(shardDataTree, "optima");
 
         verifyOnDataTreeChanged(listener, dtc -> {
-            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().getModificationType());
+            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().modificationType());
             assertEquals("getRootPath", CarsModel.newCarPath("optima"), dtc.getRootPath());
         });
 
         addCar(shardDataTree, "sportage");
 
         verifyOnDataTreeChanged(listener, dtc -> {
-            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().getModificationType());
+            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().modificationType());
             assertEquals("getRootPath", CarsModel.newCarPath("sportage"), dtc.getRootPath());
         });
 
@@ -220,7 +219,7 @@ public class ShardDataTreeTest extends AbstractTest {
         verifyOnDataTreeChanged(listener, dtc -> {
             ModificationType expType = expChanges.remove(dtc.getRootPath());
             assertNotNull("Got unexpected change for " + dtc.getRootPath(), expType);
-            assertEquals("getModificationType", expType, dtc.getRootNode().getModificationType());
+            assertEquals("getModificationType", expType, dtc.getRootNode().modificationType());
         });
 
         if (!expChanges.isEmpty()) {
@@ -485,8 +484,8 @@ public class ShardDataTreeTest extends AbstractTest {
     @Test
     public void testUintCommitPayload() throws IOException {
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(),
-            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), bigIntegerRoot()),
-            PayloadVersion.SODIUM_SR1));
+            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(), bigIntegerRoot()),
+            PayloadVersion.POTASSIUM));
 
         assertCarsUint64();
     }
@@ -512,7 +511,7 @@ public class ShardDataTreeTest extends AbstractTest {
                 .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
                 .withChild(Builders.mapBuilder()
                     .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
-                    .withChild(createCar("one", BigInteger.ONE))
+                    .withChild(createCar("one", Uint64.ONE))
                     .build())
                 .build());
         mod.ready();
@@ -521,7 +520,7 @@ public class ShardDataTreeTest extends AbstractTest {
         dataTree.commit(first);
 
         mod = dataTree.takeSnapshot().newModification();
-        mod.write(CarsModel.newCarPath("two"), createCar("two", BigInteger.TWO));
+        mod.write(CarsModel.newCarPath("two"), createCar("two", Uint64.TWO));
         mod.ready();
         dataTree.validate(mod);
         final DataTreeCandidate second = dataTree.prepare(mod);
@@ -530,7 +529,7 @@ public class ShardDataTreeTest extends AbstractTest {
         mod = dataTree.takeSnapshot().newModification();
         mod.merge(CarsModel.CAR_LIST_PATH, Builders.mapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
-            .withChild(createCar("three", BigInteger.TEN))
+            .withChild(createCar("three", Uint64.TEN))
             .build());
         mod.ready();
         dataTree.validate(mod);
@@ -539,12 +538,12 @@ public class ShardDataTreeTest extends AbstractTest {
 
         // Apply first candidate as a snapshot
         shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(
-            new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter().orElseThrow()), true));
+            new MetadataShardDataTreeSnapshot(first.getRootNode().findDataAfter().orElseThrow()), true));
         // Apply the other two snapshots as transactions
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), second,
-            PayloadVersion.SODIUM_SR1));
+            PayloadVersion.POTASSIUM));
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), third,
-            PayloadVersion.SODIUM_SR1));
+            PayloadVersion.POTASSIUM));
 
         // Verify uint translation
         final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
@@ -571,25 +570,24 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private static ContainerNode bigIntegerRoot() {
         return Builders.containerBuilder()
-                .withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME))
-                .withChild(Builders.containerBuilder()
-                    .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
-                    .withChild(Builders.mapBuilder()
-                        .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
-                        // Note: BigInteger
-                        .withChild(createCar("foo", BigInteger.ONE))
-                        .build())
+            .withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME))
+            .withChild(Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
+                .withChild(Builders.mapBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
+                    .withChild(createCar("foo", Uint64.ONE))
                     .build())
-                .build();
+                .build())
+            .build();
     }
 
     private static MapEntryNode createCar(final String name, final Object value) {
         return Builders.mapEntryBuilder()
-                .withNodeIdentifier(NodeIdentifierWithPredicates.of(CarsModel.CAR_QNAME,CarsModel.CAR_NAME_QNAME, name))
-                .withChild(ImmutableNodes.leafNode(CarsModel.CAR_NAME_QNAME, name))
-                // Note: old BigInteger
-                .withChild(ImmutableNodes.leafNode(CarsModel.CAR_PRICE_QNAME, value))
-                .build();
+            .withNodeIdentifier(NodeIdentifierWithPredicates.of(CarsModel.CAR_QNAME, CarsModel.CAR_NAME_QNAME, name))
+            .withChild(ImmutableNodes.leafNode(CarsModel.CAR_NAME_QNAME, name))
+            // Note: old BigInteger
+            .withChild(ImmutableNodes.leafNode(CarsModel.CAR_PRICE_QNAME, value))
+            .build();
     }
 
     private ShardDataTreeCohort newShardDataTreeCohort(final DataTreeOperation operation) {

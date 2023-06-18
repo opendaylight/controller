@@ -75,7 +75,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @Test
     public void testResolveShardForPath() {
-        assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.empty()).longValue());
+        assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.of()).longValue());
     }
 
     @Test
@@ -140,7 +140,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
         //set up data tree mock
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
-        doReturn(Optional.empty()).when(modification).readNode(YangInstanceIdentifier.empty());
+        doReturn(Optional.empty()).when(modification).readNode(YangInstanceIdentifier.of());
         final DataTreeSnapshot snapshot = mock(DataTreeSnapshot.class);
         doReturn(modification).when(snapshot).newModification();
         final DataTree dataTree = mock(DataTree.class);
@@ -149,7 +149,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final TestProbe backendProbe = new TestProbe(system, "backend");
         final long shard = 0L;
 
-        behavior.createTransaction().read(YangInstanceIdentifier.empty());
+        behavior.createTransaction().read(YangInstanceIdentifier.of());
         final AbstractClientConnection<ShardBackendInfo> connection = behavior.getConnection(shard);
         //check cached connection for same shard
         assertSame(connection, behavior.getConnection(shard));
@@ -165,7 +165,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final InternalCommand<ShardBackendInfo> command = clientActorProbe.expectMsgClass(InternalCommand.class);
         command.execute(behavior);
         //check, whether command was reaplayed
-        verify(modification).readNode(YangInstanceIdentifier.empty());
+        verify(modification).readNode(YangInstanceIdentifier.of());
     }
 
     private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {

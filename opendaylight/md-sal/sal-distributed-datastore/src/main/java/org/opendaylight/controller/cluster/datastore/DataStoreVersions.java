@@ -27,9 +27,12 @@ public final class DataStoreVersions {
     public static final short FLUORINE_VERSION    =  9;
     @Deprecated
     public static final short NEON_SR2_VERSION    = 10;
+    @Deprecated
     public static final short SODIUM_SR1_VERSION  = 11;
+    @Deprecated
     public static final short PHOSPHORUS_VERSION  = 12;
-    public static final short CURRENT_VERSION     = PHOSPHORUS_VERSION;
+    public static final short POTASSIUM_VERSION   = 13;
+    public static final short CURRENT_VERSION     = POTASSIUM_VERSION;
 
     private DataStoreVersions() {
 

@@ -153,7 +153,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
 
         // Subscribe to all shards
         final RegisterDataTreeChangeListener regMessage = new RegisterDataTreeChangeListener(
-            YangInstanceIdentifier.empty(), dtclActor, true);
+            YangInstanceIdentifier.of(), dtclActor, true);
         for (Entry<String, Object> entry : localShards.entrySet()) {
             // Do not retain references to localShards
             final String shardName = entry.getKey();

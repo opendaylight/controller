@@ -47,20 +47,20 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
 
     @Test
     public void testWrite() {
-        object().write(YangInstanceIdentifier.empty(), data);
-        verify(delegate).write(YangInstanceIdentifier.empty(), data);
+        object().write(YangInstanceIdentifier.of(), data);
+        verify(delegate).write(YangInstanceIdentifier.of(), data);
     }
 
     @Test
     public void testMerge() {
-        object().merge(YangInstanceIdentifier.empty(), data);
-        verify(delegate).merge(YangInstanceIdentifier.empty(), data);
+        object().merge(YangInstanceIdentifier.of(), data);
+        verify(delegate).merge(YangInstanceIdentifier.of(), data);
     }
 
     @Test
     public void testDelete() {
-        object().delete(YangInstanceIdentifier.empty());
-        verify(delegate).delete(YangInstanceIdentifier.empty());
+        object().delete(YangInstanceIdentifier.of());
+        verify(delegate).delete(YangInstanceIdentifier.of());
     }
 
     @Test
