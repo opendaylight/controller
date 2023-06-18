@@ -148,29 +148,29 @@ public final class DataTreeCandidateInputOutput {
 
     private static void writeNode(final NormalizedNodeDataOutput out, final DataTreeCandidateNode node)
             throws IOException {
-        switch (node.getModificationType()) {
+        switch (node.modificationType()) {
             case APPEARED:
                 out.writeByte(APPEARED);
-                out.writePathArgument(node.getIdentifier());
-                writeChildren(out, node.getChildNodes());
+                out.writePathArgument(node.name());
+                writeChildren(out, node.childNodes());
                 break;
             case DELETE:
                 out.writeByte(DELETE);
-                out.writePathArgument(node.getIdentifier());
+                out.writePathArgument(node.name());
                 break;
             case DISAPPEARED:
                 out.writeByte(DISAPPEARED);
-                out.writePathArgument(node.getIdentifier());
-                writeChildren(out, node.getChildNodes());
+                out.writePathArgument(node.name());
+                writeChildren(out, node.childNodes());
                 break;
             case SUBTREE_MODIFIED:
                 out.writeByte(SUBTREE_MODIFIED);
-                out.writePathArgument(node.getIdentifier());
-                writeChildren(out, node.getChildNodes());
+                out.writePathArgument(node.name());
+                writeChildren(out, node.childNodes());
                 break;
             case WRITE:
                 out.writeByte(WRITE);
-                out.writeNormalizedNode(node.getDataAfter().orElseThrow());
+                out.writeNormalizedNode(node.findDataAfter().orElseThrow());
                 break;
             case UNMODIFIED:
                 out.writeByte(UNMODIFIED);
@@ -187,28 +187,28 @@ public final class DataTreeCandidateInputOutput {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();
-            switch (node.getModificationType()) {
+            switch (node.modificationType()) {
                 case APPEARED:
                     writer.writeByte(APPEARED);
-                    writeChildren(writer, node.getChildNodes());
+                    writeChildren(writer, node.childNodes());
                     break;
                 case DELETE:
                     writer.writeByte(DELETE);
                     break;
                 case DISAPPEARED:
                     writer.writeByte(DISAPPEARED);
-                    writeChildren(writer, node.getChildNodes());
+                    writeChildren(writer, node.childNodes());
                     break;
                 case SUBTREE_MODIFIED:
                     writer.writeByte(SUBTREE_MODIFIED);
-                    writeChildren(writer, node.getChildNodes());
+                    writeChildren(writer, node.childNodes());
                     break;
                 case UNMODIFIED:
                     writer.writeByte(UNMODIFIED);
                     break;
                 case WRITE:
                     writer.writeByte(WRITE);
-                    writer.writeNormalizedNode(node.getDataAfter().orElseThrow());
+                    writer.writeNormalizedNode(node.findDataAfter().orElseThrow());
                     break;
                 default:
                     throwUnhandledNodeType(node);
@@ -222,6 +222,6 @@ public final class DataTreeCandidateInputOutput {
     }
 
     private static void throwUnhandledNodeType(final DataTreeCandidateNode node) {
-        throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+        throw new IllegalArgumentException("Unhandled node type " + node.modificationType());
     }
 }

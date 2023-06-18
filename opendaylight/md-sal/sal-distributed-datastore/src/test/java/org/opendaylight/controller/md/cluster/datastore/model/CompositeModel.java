@@ -12,10 +12,8 @@ import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.ma
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
-import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -107,10 +105,7 @@ public final class CompositeModel {
         return Builders.containerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(leafNode(DESC_QNAME, DESC))
-            .withChild(Builders.augmentationBuilder()
-                .withNodeIdentifier(new AugmentationIdentifier(Set.of(AUG_QNAME)))
-                .withChild(leafNode(AUG_QNAME, "First Test"))
-                .build())
+            .withChild(leafNode(AUG_QNAME, "First Test"))
             .withChild(Builders.leafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "shoe")))
                 .withChild(Builders.leafSetEntryBuilder()

@@ -202,9 +202,8 @@ public class UintAdaptingPrunerTest {
     }
 
     private static NormalizedNode prune(final NormalizedNode node) throws IOException {
-        final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forSchemaContext(CONTEXT)
-                .withUintAdaption();
-        pruner.initializeForPath(YangInstanceIdentifier.create(node.getIdentifier()));
+        final var pruner = ReusableNormalizedNodePruner.forSchemaContext(CONTEXT).withUintAdaption();
+        pruner.initializeForPath(YangInstanceIdentifier.of(node.name()));
 
         try (NormalizedNodeWriter writer = NormalizedNodeWriter.forStreamWriter(pruner)) {
             writer.write(node);

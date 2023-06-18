@@ -31,7 +31,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         compositeModification.apply(transaction);
         commitTransaction(transaction);
 
-        assertEquals(TestModel.TEST_QNAME, readData(TestModel.TEST_PATH).orElseThrow().getIdentifier().getNodeType());
+        assertEquals(TestModel.TEST_QNAME, readData(TestModel.TEST_PATH).orElseThrow().name().getNodeType());
     }
 
     @Test

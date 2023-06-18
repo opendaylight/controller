@@ -57,7 +57,7 @@ import scala.concurrent.Promise;
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<AbstractProxyTransaction>> {
     private static final String PERSISTENCE_ID = "per-1";
-    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
+    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of();
 
     @Mock
     private DataTree dataTree;

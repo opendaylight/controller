@@ -310,18 +310,20 @@ public class DataTreeCohortIntegrationTest {
             final Optional<NormalizedNode> expDataAfter, final Optional<NormalizedNode> expDataBefore) {
         assertNotNull("Expected candidate for path " + expTreeId.getRootIdentifier(), candidate);
         assertEquals("rootPath", expTreeId, candidate.getRootPath());
-        assertEquals("modificationType", expType, candidate.getRootNode().getModificationType());
+        assertEquals("modificationType", expType, candidate.getRootNode().modificationType());
 
-        assertEquals("dataAfter present", expDataAfter.isPresent(), candidate.getRootNode().getDataAfter().isPresent());
+        assertEquals("dataAfter present", expDataAfter.isPresent(),
+            candidate.getRootNode().findDataAfter().isPresent());
         if (expDataAfter.isPresent()) {
-            assertEquals("dataAfter", expDataAfter.orElseThrow(), candidate.getRootNode().getDataAfter().orElseThrow());
+            assertEquals("dataAfter", expDataAfter.orElseThrow(),
+                candidate.getRootNode().findDataAfter().orElseThrow());
         }
 
         assertEquals("dataBefore present", expDataBefore.isPresent(),
-                candidate.getRootNode().getDataBefore().isPresent());
+                candidate.getRootNode().findDataAfter().isPresent());
         if (expDataBefore.isPresent()) {
             assertEquals("dataBefore", expDataBefore.orElseThrow(),
-                candidate.getRootNode().getDataBefore().orElseThrow());
+                candidate.getRootNode().findDataAfter().orElseThrow());
         }
     }
 }

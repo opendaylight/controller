@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.opendaylight.controller.cluster.access.ABIVersion.CHLORINE_SR2;
+import static org.opendaylight.controller.cluster.access.ABIVersion.POTASSIUM;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_FUTURE_VERSION;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_PAST_VERSION;
 
@@ -23,15 +23,15 @@ public class ABIVersionTest {
     @Test
     public void testInvalidVersions() {
         assertTrue(TEST_PAST_VERSION.compareTo(TEST_FUTURE_VERSION) < 0);
-        assertTrue(TEST_PAST_VERSION.compareTo(CHLORINE_SR2) < 0);
-        assertTrue(TEST_FUTURE_VERSION.compareTo(CHLORINE_SR2) > 0);
+        assertTrue(TEST_PAST_VERSION.compareTo(POTASSIUM) < 0);
+        assertTrue(TEST_FUTURE_VERSION.compareTo(POTASSIUM) > 0);
     }
 
     @Test
     public void testMagnesiumVersion() throws Exception {
-        assertEquals((short)9, CHLORINE_SR2.shortValue());
-        assertEquals(CHLORINE_SR2, ABIVersion.valueOf(CHLORINE_SR2.shortValue()));
-        assertEquals(CHLORINE_SR2, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(CHLORINE_SR2))));
+        assertEquals((short)10, POTASSIUM.shortValue());
+        assertEquals(POTASSIUM, ABIVersion.valueOf(POTASSIUM.shortValue()));
+        assertEquals(POTASSIUM, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(POTASSIUM))));
     }
 
     @Test

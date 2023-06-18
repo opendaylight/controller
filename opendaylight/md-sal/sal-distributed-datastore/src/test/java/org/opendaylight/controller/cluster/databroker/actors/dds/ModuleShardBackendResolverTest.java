@@ -85,7 +85,7 @@ public class ModuleShardBackendResolverTest {
 
         moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorUtils);
         doReturn(shardStrategyFactory).when(actorUtils).getShardStrategyFactory();
-        doReturn(shardStrategy).when(shardStrategyFactory).getStrategy(YangInstanceIdentifier.empty());
+        doReturn(shardStrategy).when(shardStrategyFactory).getStrategy(YangInstanceIdentifier.of());
         final PrimaryShardInfoFutureCache cache = new PrimaryShardInfoFutureCache();
         doReturn(cache).when(actorUtils).getPrimaryShardInfoCache();
     }
@@ -97,15 +97,15 @@ public class ModuleShardBackendResolverTest {
 
     @Test
     public void testResolveShardForPathNonNullCookie() {
-        doReturn(DefaultShardStrategy.DEFAULT_SHARD).when(shardStrategy).findShard(YangInstanceIdentifier.empty());
-        final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.empty());
+        doReturn(DefaultShardStrategy.DEFAULT_SHARD).when(shardStrategy).findShard(YangInstanceIdentifier.of());
+        final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.of());
         assertEquals(0L, (long) cookie);
     }
 
     @Test
     public void testResolveShardForPathNullCookie() {
-        doReturn("foo").when(shardStrategy).findShard(YangInstanceIdentifier.empty());
-        final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.empty());
+        doReturn("foo").when(shardStrategy).findShard(YangInstanceIdentifier.of());
+        final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.of());
         assertEquals(1L, (long) cookie);
     }
 

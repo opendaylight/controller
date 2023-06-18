@@ -195,14 +195,14 @@ public class ShardDataTreeTest extends AbstractTest {
         addCar(shardDataTree, "optima");
 
         verifyOnDataTreeChanged(listener, dtc -> {
-            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().getModificationType());
+            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().modificationType());
             assertEquals("getRootPath", CarsModel.newCarPath("optima"), dtc.getRootPath());
         });
 
         addCar(shardDataTree, "sportage");
 
         verifyOnDataTreeChanged(listener, dtc -> {
-            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().getModificationType());
+            assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().modificationType());
             assertEquals("getRootPath", CarsModel.newCarPath("sportage"), dtc.getRootPath());
         });
 
@@ -220,7 +220,7 @@ public class ShardDataTreeTest extends AbstractTest {
         verifyOnDataTreeChanged(listener, dtc -> {
             ModificationType expType = expChanges.remove(dtc.getRootPath());
             assertNotNull("Got unexpected change for " + dtc.getRootPath(), expType);
-            assertEquals("getModificationType", expType, dtc.getRootNode().getModificationType());
+            assertEquals("getModificationType", expType, dtc.getRootNode().modificationType());
         });
 
         if (!expChanges.isEmpty()) {
@@ -485,8 +485,8 @@ public class ShardDataTreeTest extends AbstractTest {
     @Test
     public void testUintCommitPayload() throws IOException {
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(),
-            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), bigIntegerRoot()),
-            PayloadVersion.SODIUM_SR1));
+            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(), bigIntegerRoot()),
+            PayloadVersion.POTASSIUM));
 
         assertCarsUint64();
     }
@@ -539,12 +539,12 @@ public class ShardDataTreeTest extends AbstractTest {
 
         // Apply first candidate as a snapshot
         shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(
-            new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter().orElseThrow()), true));
+            new MetadataShardDataTreeSnapshot(first.getRootNode().findDataAfter().orElseThrow()), true));
         // Apply the other two snapshots as transactions
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), second,
-            PayloadVersion.SODIUM_SR1));
+            PayloadVersion.POTASSIUM));
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), third,
-            PayloadVersion.SODIUM_SR1));
+            PayloadVersion.POTASSIUM));
 
         // Verify uint translation
         final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();

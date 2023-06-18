@@ -347,7 +347,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.empty());
+        final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.of());
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -405,9 +405,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     public static DataTreeCandidateTip mockCandidate(final String name) {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
-        doReturn(ModificationType.WRITE).when(mockCandidateNode).getModificationType();
-        doReturn(Optional.of(ImmutableNodes.containerNode(CarsModel.CARS_QNAME)))
-                .when(mockCandidateNode).getDataAfter();
+        doReturn(ModificationType.WRITE).when(mockCandidateNode).modificationType();
+        doReturn(ImmutableNodes.containerNode(CarsModel.CARS_QNAME)).when(mockCandidateNode).dataAfter();
         doReturn(CarsModel.BASE_PATH).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
         return mockCandidate;
@@ -416,8 +415,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     static DataTreeCandidateTip mockUnmodifiedCandidate(final String name) {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
-        doReturn(ModificationType.UNMODIFIED).when(mockCandidateNode).getModificationType();
-        doReturn(YangInstanceIdentifier.empty()).when(mockCandidate).getRootPath();
+        doReturn(ModificationType.UNMODIFIED).when(mockCandidateNode).modificationType();
+        doReturn(YangInstanceIdentifier.of()).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
         return mockCandidate;
     }
