@@ -57,7 +57,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     @Override
     PayloadVersion version() {
-        return PayloadVersion.CHLORINE_SR2;
+        return PayloadVersion.POTASSIUM;
     }
 
     @java.io.Serial

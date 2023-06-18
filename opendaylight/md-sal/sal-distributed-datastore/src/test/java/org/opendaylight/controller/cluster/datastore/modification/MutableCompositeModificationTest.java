@@ -31,7 +31,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         compositeModification.apply(transaction);
         commitTransaction(transaction);
 
-        assertEquals(TestModel.TEST_QNAME, readData(TestModel.TEST_PATH).orElseThrow().getIdentifier().getNodeType());
+        assertEquals(TestModel.TEST_QNAME, readData(TestModel.TEST_PATH).orElseThrow().name().getNodeType());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
         MutableCompositeModification compositeModification =
-            new MutableCompositeModification(DataStoreVersions.SODIUM_SR1_VERSION);
+            new MutableCompositeModification(DataStoreVersions.POTASSIUM_VERSION);
         compositeModification.addModification(new WriteModification(writePath, writeData));
         compositeModification.addModification(new MergeModification(mergePath, mergeData));
         compositeModification.addModification(new DeleteModification(deletePath));
@@ -59,22 +59,22 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         assertEquals(360, bytes.length);
         MutableCompositeModification clone = (MutableCompositeModification) SerializationUtils.deserialize(bytes);
 
-        assertEquals("getVersion", DataStoreVersions.SODIUM_SR1_VERSION, clone.getVersion());
+        assertEquals("getVersion", DataStoreVersions.POTASSIUM_VERSION, clone.getVersion());
 
         assertEquals("getModifications size", 3, clone.getModifications().size());
 
         WriteModification write = (WriteModification)clone.getModifications().get(0);
-        assertEquals("getVersion", DataStoreVersions.SODIUM_SR1_VERSION, write.getVersion());
+        assertEquals("getVersion", DataStoreVersions.POTASSIUM_VERSION, write.getVersion());
         assertEquals("getPath", writePath, write.getPath());
         assertEquals("getData", writeData, write.getData());
 
         MergeModification merge = (MergeModification)clone.getModifications().get(1);
-        assertEquals("getVersion", DataStoreVersions.SODIUM_SR1_VERSION, merge.getVersion());
+        assertEquals("getVersion", DataStoreVersions.POTASSIUM_VERSION, merge.getVersion());
         assertEquals("getPath", mergePath, merge.getPath());
         assertEquals("getData", mergeData, merge.getData());
 
         DeleteModification delete = (DeleteModification)clone.getModifications().get(2);
-        assertEquals("getVersion", DataStoreVersions.SODIUM_SR1_VERSION, delete.getVersion());
+        assertEquals("getVersion", DataStoreVersions.POTASSIUM_VERSION, delete.getVersion());
         assertEquals("getPath", deletePath, delete.getPath());
     }
 

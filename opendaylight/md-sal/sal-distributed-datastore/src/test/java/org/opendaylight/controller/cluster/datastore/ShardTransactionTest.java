@@ -105,7 +105,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     private void testOnReceiveReadData(final ActorRef transaction) {
-        transaction.tell(new ReadData(YangInstanceIdentifier.empty(), DataStoreVersions.CURRENT_VERSION),
+        transaction.tell(new ReadData(YangInstanceIdentifier.of(), DataStoreVersions.CURRENT_VERSION),
             testKit.getRef());
 
         ReadDataReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ReadDataReply.class);
@@ -136,7 +136,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
-        transaction.tell(new DataExists(YangInstanceIdentifier.empty(), DataStoreVersions.CURRENT_VERSION),
+        transaction.tell(new DataExists(YangInstanceIdentifier.of(), DataStoreVersions.CURRENT_VERSION),
             testKit.getRef());
 
         DataExistsReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), DataExistsReply.class);

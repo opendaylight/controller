@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ClientSnapshotTest extends AbstractClientHandleTest<ClientSnapshot> {
-    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
+    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of();
 
     @Before
     @Override

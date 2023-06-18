@@ -29,7 +29,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
             NodeIdentifier.create(QName.create("namespace", "localName"))).build();
 
     private static final List<TransactionModification> MODIFICATIONS = List.of(
-            new TransactionWrite(YangInstanceIdentifier.empty(), NODE));
+            new TransactionWrite(YangInstanceIdentifier.of(), NODE));
 
     private static final PersistenceProtocol PROTOCOL = PersistenceProtocol.ABORT;
 
@@ -74,7 +74,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
         assertNotNull(deserialize.getModifications());
         assertEquals(1, deserialize.getModifications().size());
         final var modification = deserialize.getModifications().get(0);
-        assertEquals(YangInstanceIdentifier.empty(), modification.getPath());
+        assertEquals(YangInstanceIdentifier.of(), modification.getPath());
         assertEquals(TYPE_WRITE, modification.getType());
     }
 }

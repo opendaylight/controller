@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
-import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
@@ -24,41 +24,41 @@ import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
  * this component.
  */
 abstract class AbstractDataTreeCandidateNode implements DataTreeCandidateNode {
-    private final ModificationType type;
+    private final @NonNull ModificationType type;
 
     protected AbstractDataTreeCandidateNode(final ModificationType type) {
         this.type = requireNonNull(type);
     }
 
     @Override
-    public final Optional<DataTreeCandidateNode> getModifiedChild(final PathArgument identifier) {
+    public final DataTreeCandidateNode modifiedChild(final PathArgument identifier) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
-    public final ModificationType getModificationType() {
+    public final ModificationType modificationType() {
         return type;
     }
 
     @Override
-    public final Optional<NormalizedNode> getDataBefore() {
+    public final NormalizedNode dataBefore() {
         throw new UnsupportedOperationException("Before-image not available after serialization");
     }
 
     static DataTreeCandidateNode createUnmodified() {
         return new AbstractDataTreeCandidateNode(ModificationType.UNMODIFIED) {
             @Override
-            public PathArgument getIdentifier() {
+            public PathArgument name() {
                 throw new UnsupportedOperationException("Root node does not have an identifier");
             }
 
             @Override
-            public Optional<NormalizedNode> getDataAfter() {
+            public NormalizedNode dataAfter() {
                 throw new UnsupportedOperationException("After-image not available after serialization");
             }
 
             @Override
-            public Collection<DataTreeCandidateNode> getChildNodes() {
+            public Collection<DataTreeCandidateNode> childNodes() {
                 throw new UnsupportedOperationException("Children not available after serialization");
             }
         };

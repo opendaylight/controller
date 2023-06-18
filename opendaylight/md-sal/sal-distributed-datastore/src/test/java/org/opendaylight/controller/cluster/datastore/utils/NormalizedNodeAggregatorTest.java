@@ -40,7 +40,7 @@ public class NormalizedNodeAggregatorTest {
         NormalizedNode expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         NormalizedNode expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
-        Optional<NormalizedNode> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(),
+        Optional<NormalizedNode> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(),
                 ImmutableList.of(
                         Optional.<NormalizedNode>of(getRootNode(expectedNode1, schemaContext)),
                         Optional.<NormalizedNode>of(getRootNode(expectedNode2, schemaContext))),
@@ -77,7 +77,7 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
-            writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.getIdentifier().getNodeType()), moduleNode);
+            writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.name().getNodeType()), moduleNode);
 
             DOMStoreThreePhaseCommitCohort ready = writeTransaction.ready();
 
@@ -87,14 +87,14 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
-            return readTransaction.read(YangInstanceIdentifier.empty()).get().orElseThrow();
+            return readTransaction.read(YangInstanceIdentifier.of()).get().orElseThrow();
         }
     }
 
     public static NormalizedNode findChildWithQName(final Collection<NormalizedNode> collection,
             final QName qname) {
         for (NormalizedNode node : collection) {
-            if (node.getIdentifier().getNodeType().equals(qname)) {
+            if (node.name().getNodeType().equals(qname)) {
                 return node;
             }
         }
