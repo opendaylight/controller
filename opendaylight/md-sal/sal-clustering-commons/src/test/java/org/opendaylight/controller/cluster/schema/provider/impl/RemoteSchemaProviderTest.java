@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
@@ -21,7 +20,6 @@ import com.google.common.io.CharSource;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,14 +43,13 @@ public class RemoteSchemaProviderTest {
 
     @Test
     public void getExistingYangTextSchemaSource() throws IOException, InterruptedException, ExecutionException {
-        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(ID,
-            CharSource.wrap("Test").asByteSource(StandardCharsets.UTF_8));
+        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForCharSource(ID, CharSource.wrap("Test"));
         doReturn(Futures.successful(new YangTextSchemaSourceSerializationProxy(schemaSource)))
             .when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
 
         YangTextSchemaSource providedSource = remoteSchemaProvider.getSource(ID).get();
         assertEquals(ID, providedSource.getIdentifier());
-        assertArrayEquals(schemaSource.read(), providedSource.read());
+        assertEquals(schemaSource.read(), providedSource.read());
     }
 
     @Test

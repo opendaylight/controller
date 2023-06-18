@@ -40,6 +40,7 @@ public enum ABIVersion implements WritableObject {
     // NEON_SR2 was 6
     // SODIUM_SR1 was 7
     // MAGNESIUM was 8
+    // CHLORINE_SR2 was 9
 
     /**
      * Oldest ABI version we support. The messages remain the same as {@code MAGNESIUM}, the serialization proxies in
@@ -49,6 +50,17 @@ public enum ABIVersion implements WritableObject {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
             return NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    },
+
+    /**
+     * Oldest ABI version we support. The messages remain the same as {@code CHLORINE_SR2}, the serialization proxies in
+     * use are flat objects without any superclasses. Data encoding does not include augmentations as separate objects.
+     */
+    POTASSIUM(10) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.POTASSIUM;
         }
     },
 
@@ -88,7 +100,7 @@ public enum ABIVersion implements WritableObject {
      * @return Current {@link ABIVersion}
      */
     public static @NonNull ABIVersion current() {
-        return CHLORINE_SR2;
+        return POTASSIUM;
     }
 
     /**

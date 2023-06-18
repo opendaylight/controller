@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import com.google.common.annotations.Beta;
-import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 import java.io.IOException;
 import java.io.Serializable;
 import org.opendaylight.yangtools.yang.common.Revision;
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 public class YangTextSchemaSourceSerializationProxy implements Serializable {
     private static final long serialVersionUID = -6361268518176019477L;
 
-    private final byte[] schemaSource;
+    private final String schemaSource;
     private final Revision revision;
     private final String name;
 
@@ -35,7 +35,7 @@ public class YangTextSchemaSourceSerializationProxy implements Serializable {
     }
 
     public YangTextSchemaSource getRepresentation() {
-        return YangTextSchemaSource.delegateForByteSource(new SourceIdentifier(Unqualified.of(name), revision),
-            ByteSource.wrap(schemaSource));
+        return YangTextSchemaSource.delegateForCharSource(new SourceIdentifier(Unqualified.of(name), revision),
+            CharSource.wrap(schemaSource));
     }
 }
