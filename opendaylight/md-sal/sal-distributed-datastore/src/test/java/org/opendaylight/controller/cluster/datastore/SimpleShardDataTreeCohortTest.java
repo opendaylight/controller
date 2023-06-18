@@ -99,12 +99,12 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     @Test
     public void testCanCommitWithConflictingModEx() {
-        testValidatationPropagates(new ConflictingModificationAppliedException(YangInstanceIdentifier.empty(), "mock"));
+        testValidatationPropagates(new ConflictingModificationAppliedException(YangInstanceIdentifier.of(), "mock"));
     }
 
     @Test
     public void testCanCommitWithDataValidationEx() {
-        testValidatationPropagates(new DataValidationFailedException(YangInstanceIdentifier.empty(), "mock"));
+        testValidatationPropagates(new DataValidationFailedException(YangInstanceIdentifier.of(), "mock"));
     }
 
     @Test

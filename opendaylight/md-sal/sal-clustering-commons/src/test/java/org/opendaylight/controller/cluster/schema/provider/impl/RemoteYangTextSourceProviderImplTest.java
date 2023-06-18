@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
-import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 import com.google.common.util.concurrent.Futures;
 import java.util.Collections;
 import java.util.Set;
@@ -47,7 +46,7 @@ public class RemoteYangTextSourceProviderImplTest {
 
     @Test
     public void testGetExistingYangTextSchemaSource() throws Exception {
-        var schemaSource = YangTextSchemaSource.delegateForByteSource(ID, ByteSource.wrap("Test source.".getBytes()));
+        var schemaSource = YangTextSchemaSource.delegateForCharSource(ID, CharSource.wrap("Test source."));
 
         doReturn(Futures.immediateFuture(schemaSource)).when(mockedLocalRepository)
             .getSchemaSource(ID, YangTextSchemaSource.class);
@@ -56,7 +55,7 @@ public class RemoteYangTextSourceProviderImplTest {
         assertTrue(retrievedSourceFuture.isCompleted());
         var resultSchemaSource = Await.result(retrievedSourceFuture, FiniteDuration.Zero()).getRepresentation();
         assertEquals(resultSchemaSource.getIdentifier(), schemaSource.getIdentifier());
-        assertArrayEquals(resultSchemaSource.read(), schemaSource.read());
+        assertEquals(resultSchemaSource.read(), schemaSource.read());
     }
 
     @Test

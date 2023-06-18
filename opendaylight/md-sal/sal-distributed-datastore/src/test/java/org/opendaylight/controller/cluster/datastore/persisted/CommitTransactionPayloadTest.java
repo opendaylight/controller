@@ -44,7 +44,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     private static DataTreeCandidateNode findNode(final Collection<DataTreeCandidateNode> nodes,
             final PathArgument arg) {
         for (DataTreeCandidateNode node : nodes) {
-            if (arg.equals(node.getIdentifier())) {
+            if (arg.equals(node.name())) {
                 return node;
             }
         }
@@ -55,13 +55,13 @@ public class CommitTransactionPayloadTest extends AbstractTest {
             final Collection<DataTreeCandidateNode> actual) {
         // Make sure all expected nodes are there
         for (DataTreeCandidateNode exp : expected) {
-            final DataTreeCandidateNode act = findNode(actual, exp.getIdentifier());
+            final DataTreeCandidateNode act = findNode(actual, exp.name());
             assertNotNull("missing expected child", act);
             assertCandidateNodeEquals(exp, act);
         }
         // Make sure no nodes are present which are not in the expected set
         for (DataTreeCandidateNode act : actual) {
-            final DataTreeCandidateNode exp = findNode(expected, act.getIdentifier());
+            final DataTreeCandidateNode exp = findNode(expected, act.name());
             assertNull("unexpected child", exp);
         }
     }
@@ -75,22 +75,22 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
     private static void assertCandidateNodeEquals(final DataTreeCandidateNode expected,
             final DataTreeCandidateNode actual) {
-        assertEquals("child type", expected.getModificationType(), actual.getModificationType());
+        assertEquals("child type", expected.modificationType(), actual.modificationType());
 
-        switch (actual.getModificationType()) {
+        switch (actual.modificationType()) {
             case DELETE:
             case WRITE:
-                assertEquals("child identifier", expected.getIdentifier(), actual.getIdentifier());
-                assertEquals("child data", expected.getDataAfter(), actual.getDataAfter());
+                assertEquals("child identifier", expected.name(), actual.name());
+                assertEquals("child data", expected.dataAfter(), actual.dataAfter());
                 break;
             case SUBTREE_MODIFIED:
-                assertEquals("child identifier", expected.getIdentifier(), actual.getIdentifier());
-                assertChildrenEquals(expected.getChildNodes(), actual.getChildNodes());
+                assertEquals("child identifier", expected.name(), actual.name());
+                assertChildrenEquals(expected.childNodes(), actual.childNodes());
                 break;
             case UNMODIFIED:
                 break;
             default:
-                fail("Unexpect root type " + actual.getModificationType());
+                fail("Unexpect root type " + actual.modificationType());
                 break;
         }
     }

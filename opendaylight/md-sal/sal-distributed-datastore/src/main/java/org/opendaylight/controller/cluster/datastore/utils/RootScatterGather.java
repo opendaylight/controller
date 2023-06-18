@@ -103,7 +103,7 @@ public final class RootScatterGather {
         return FluentFuture.from(Futures.transform(
             Futures.allAsList(readFutures.collect(ImmutableList.toImmutableList())), input -> {
                 try {
-                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(), input,
+                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(), input,
                         actorUtils.getSchemaContext(), actorUtils.getDatastoreContext().getLogicalStoreType());
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
@@ -116,10 +116,10 @@ public final class RootScatterGather {
         final var builders = allShards
             .collect(Collectors.toUnmodifiableMap(Function.identity(), unused -> Builders.containerBuilder()));
         for (var child : rootNode.body()) {
-            final var shard = childToShard.apply(child.getIdentifier());
+            final var shard = childToShard.apply(child.name());
             verifyNotNull(builders.get(shard), "Failed to find builder for %s", shard).addChild(child);
         }
-        return streamContainers(rootNode.getIdentifier(), builders);
+        return streamContainers(rootNode.name(), builders);
     }
 
     /**
@@ -134,10 +134,10 @@ public final class RootScatterGather {
             final Function<PathArgument, T> childToShard) {
         final var builders = new HashMap<T, DataContainerNodeBuilder<NodeIdentifier, ContainerNode>>();
         for (var child : rootNode.body()) {
-            builders.computeIfAbsent(childToShard.apply(child.getIdentifier()), unused -> Builders.containerBuilder())
+            builders.computeIfAbsent(childToShard.apply(child.name()), unused -> Builders.containerBuilder())
                 .addChild(child);
         }
-        return streamContainers(rootNode.getIdentifier(), builders);
+        return streamContainers(rootNode.name(), builders);
     }
 
     private static <T> @NonNull Stream<ShardContainer<T>> streamContainers(final NodeIdentifier rootId,

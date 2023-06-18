@@ -5,19 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
@@ -28,11 +25,9 @@ public class YangTextSourceSerializationProxyTest {
 
     @Before
     public void setUp() {
-        String source = "Test source.";
-        schemaSource = YangTextSchemaSource.delegateForByteSource(new SourceIdentifier("test", "2015-10-30"),
-            ByteSource.wrap(source.getBytes(StandardCharsets.UTF_8)));
+        schemaSource = YangTextSchemaSource.delegateForCharSource(new SourceIdentifier("test", "2015-10-30"),
+            CharSource.wrap("Test source."));
     }
-
 
     @Test
     public void serializeAndDeserializeProxy() throws ClassNotFoundException, IOException {
@@ -43,7 +38,7 @@ public class YangTextSourceSerializationProxyTest {
         oos.writeObject(proxy);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(353, bytes.length);
+        assertEquals(333, bytes.length);
 
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
 
@@ -51,7 +46,7 @@ public class YangTextSourceSerializationProxyTest {
                 (YangTextSchemaSourceSerializationProxy) ois.readObject();
 
         assertEquals(deserializedProxy.getRepresentation().getIdentifier(), proxy.getRepresentation().getIdentifier());
-        assertArrayEquals(deserializedProxy.getRepresentation().read(), proxy.getRepresentation().read());
+        assertEquals(deserializedProxy.getRepresentation().read(), proxy.getRepresentation().read());
     }
 
     @Test
@@ -60,6 +55,6 @@ public class YangTextSourceSerializationProxyTest {
                 new YangTextSchemaSourceSerializationProxy(schemaSource);
 
         assertEquals(serializationProxy.getRepresentation().getIdentifier(), schemaSource.getIdentifier());
-        assertArrayEquals(serializationProxy.getRepresentation().read(), schemaSource.read());
+        assertEquals(serializationProxy.getRepresentation().read(), schemaSource.read());
     }
 }

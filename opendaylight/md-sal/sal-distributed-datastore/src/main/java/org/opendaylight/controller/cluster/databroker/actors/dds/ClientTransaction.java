@@ -69,12 +69,12 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
 
     private FluentFuture<Optional<NormalizedNode>> readRoot() {
         return RootScatterGather.gather(parent().actorUtils(), ensureAllProxies()
-            .map(proxy -> proxy.read(YangInstanceIdentifier.empty())));
+            .map(proxy -> proxy.read(YangInstanceIdentifier.of())));
     }
 
     public void delete(final YangInstanceIdentifier path) {
         if (path.isEmpty()) {
-            ensureAllProxies().forEach(proxy -> proxy.delete(YangInstanceIdentifier.empty()));
+            ensureAllProxies().forEach(proxy -> proxy.delete(YangInstanceIdentifier.of()));
         } else {
             ensureProxy(path).delete(path);
         }
@@ -91,7 +91,7 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
     private void mergeRoot(final @NonNull ContainerNode rootData) {
         if (!rootData.isEmpty()) {
             RootScatterGather.scatterTouched(rootData, this::ensureProxy).forEach(
-                scattered -> scattered.shard().merge(YangInstanceIdentifier.empty(), scattered.container()));
+                scattered -> scattered.shard().merge(YangInstanceIdentifier.of(), scattered.container()));
         }
     }
 
@@ -105,11 +105,11 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
 
     private void writeRoot(final @NonNull ContainerNode rootData) {
         RootScatterGather.scatterAll(rootData, this::ensureProxy, ensureAllProxies()).forEach(
-            scattered -> scattered.shard().write(YangInstanceIdentifier.empty(), scattered.container()));
+            scattered -> scattered.shard().write(YangInstanceIdentifier.of(), scattered.container()));
     }
 
     private AbstractProxyTransaction ensureProxy(final PathArgument childId) {
-        return ensureProxy(YangInstanceIdentifier.create(childId));
+        return ensureProxy(YangInstanceIdentifier.of(childId));
     }
 
     public DOMStoreThreePhaseCommitCohort ready() {
@@ -123,19 +123,11 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         final AbstractClientHistory parent = parent();
         parent.onTransactionShardsBound(txId, participants.keySet());
 
-        final AbstractTransactionCommitCohort cohort;
-        switch (toReady.size()) {
-            case 0:
-                cohort = new EmptyTransactionCommitCohort(parent, txId);
-                break;
-            case 1:
-                cohort = new DirectTransactionCommitCohort(parent, txId, toReady.iterator().next());
-                break;
-            default:
-                cohort = new ClientTransactionCommitCohort(parent, txId, toReady);
-                break;
-        }
-
+        final AbstractTransactionCommitCohort cohort = switch (toReady.size()) {
+            case 0 -> new EmptyTransactionCommitCohort(parent, txId);
+            case 1 -> new DirectTransactionCommitCohort(parent, txId, toReady.iterator().next());
+            default -> new ClientTransactionCommitCohort(parent, txId, toReady);
+        };
         return parent.onTransactionReady(this, cohort);
     }
 

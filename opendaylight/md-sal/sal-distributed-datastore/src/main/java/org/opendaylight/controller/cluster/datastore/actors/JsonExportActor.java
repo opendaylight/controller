@@ -98,7 +98,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         final Path filePath = snapshotDir.resolve(exportSnapshot.id + "-snapshot.json");
         LOG.debug("Creating JSON file : {}", filePath);
 
-        final NormalizedNode root = exportSnapshot.dataTreeCandidate.getRootNode().getDataAfter().orElseThrow();
+        final NormalizedNode root = exportSnapshot.dataTreeCandidate.getRootNode().findDataAfter().orElseThrow();
         checkState(root instanceof NormalizedNodeContainer, "Unexpected root %s", root);
 
         writeSnapshot(filePath, (NormalizedNodeContainer<?>) root);
@@ -171,11 +171,11 @@ public final class JsonExportActor extends AbstractUntypedActor {
 
     private static void doWriteNode(final JsonWriter writer, final YangInstanceIdentifier path,
             final DataTreeCandidateNode node) throws IOException {
-        switch (node.getModificationType()) {
+        switch (node.modificationType()) {
             case APPEARED:
             case DISAPPEARED:
             case SUBTREE_MODIFIED:
-                NodeIterator iterator = new NodeIterator(null, path, node.getChildNodes().iterator());
+                NodeIterator iterator = new NodeIterator(null, path, node.childNodes().iterator());
                 do {
                     iterator = iterator.next(writer);
                 } while (iterator != null);
@@ -192,14 +192,14 @@ public final class JsonExportActor extends AbstractUntypedActor {
 
     private static void outputNodeInfo(final JsonWriter writer, final YangInstanceIdentifier path,
                                        final DataTreeCandidateNode node) throws IOException {
-        final ModificationType modificationType = node.getModificationType();
+        final ModificationType modificationType = node.modificationType();
 
         writer.beginObject().name("Node");
         writer.beginArray();
         writer.beginObject().name("Path").value(path.toString()).endObject();
         writer.beginObject().name("ModificationType").value(modificationType.toString()).endObject();
         if (modificationType == ModificationType.WRITE) {
-            writer.beginObject().name("Data").value(node.getDataAfter().orElseThrow().body().toString()).endObject();
+            writer.beginObject().name("Data").value(node.findDataAfter().orElseThrow().body().toString()).endObject();
         }
         writer.endArray();
         writer.endObject();
@@ -211,7 +211,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         writer.beginArray();
         writer.beginObject().name("Path").value(path.toString()).endObject();
         writer.beginObject().name("ModificationType")
-                .value("UNSUPPORTED MODIFICATION: " + node.getModificationType()).endObject();
+                .value("UNSUPPORTED MODIFICATION: " + node.modificationType()).endObject();
         writer.endArray();
         writer.endObject();
     }
@@ -239,13 +239,13 @@ public final class JsonExportActor extends AbstractUntypedActor {
         NodeIterator next(final JsonWriter writer) throws IOException {
             while (iterator.hasNext()) {
                 final DataTreeCandidateNode node = iterator.next();
-                final YangInstanceIdentifier child = path.node(node.getIdentifier());
+                final YangInstanceIdentifier child = path.node(node.name());
 
-                switch (node.getModificationType()) {
+                switch (node.modificationType()) {
                     case APPEARED:
                     case DISAPPEARED:
                     case SUBTREE_MODIFIED:
-                        return new NodeIterator(this, child, node.getChildNodes().iterator());
+                        return new NodeIterator(this, child, node.childNodes().iterator());
                     case DELETE:
                     case UNMODIFIED:
                     case WRITE:

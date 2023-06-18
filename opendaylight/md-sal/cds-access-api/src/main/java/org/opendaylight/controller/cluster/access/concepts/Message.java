@@ -146,12 +146,12 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      */
     @SuppressWarnings("unchecked")
     public final @NonNull C toVersion(final @NonNull ABIVersion toVersion) {
-        if (this.version == toVersion) {
+        if (version == toVersion) {
             return (C)this;
         }
 
         return switch (toVersion) {
-            case CHLORINE_SR2 -> verifyNotNull(cloneAsVersion(toVersion));
+            case POTASSIUM -> verifyNotNull(cloneAsVersion(toVersion));
             default -> throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
         };
     }
