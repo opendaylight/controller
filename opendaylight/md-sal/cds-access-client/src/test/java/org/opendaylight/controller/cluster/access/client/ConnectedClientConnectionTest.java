@@ -70,7 +70,7 @@ public class ConnectedClientConnectionTest
                 new TransactionIdentifier(new LocalHistoryIdentifier(CLIENT_ID, 0L), 0L);
         ModifyTransactionRequestBuilder reqBuilder =
                 new ModifyTransactionRequestBuilder(identifier, replyToProbe.ref());
-        reqBuilder.addModification(new TransactionWrite(YangInstanceIdentifier.empty(), Builders.containerBuilder()
+        reqBuilder.addModification(new TransactionWrite(YangInstanceIdentifier.of(), Builders.containerBuilder()
                 .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(
                         QName.create("namespace", "localName"))).build()));
         reqBuilder.setSequence(0L);

@@ -133,7 +133,7 @@ public class FrontendReadWriteTransactionTest {
         assertNotNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
-        handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.empty(), true));
+        handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -160,6 +160,6 @@ public class FrontendReadWriteTransactionTest {
         assertNull(handleRequest(abortReq));
         verify(mockParent).abortTransaction(same(shardTransaction), any(Runnable.class));
 
-        handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.empty(), true));
+        handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true));
     }
 }

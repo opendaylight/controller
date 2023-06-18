@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public abstract class AbstractReadTransactionRequestTest<T extends AbstractReadPathTransactionRequest<T>>
         extends AbstractTransactionRequestTest<T> {
-    protected static final YangInstanceIdentifier PATH = YangInstanceIdentifier.empty();
+    protected static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of();
     protected static final boolean SNAPSHOT_ONLY = true;
 
     protected AbstractReadTransactionRequestTest(final T object, final int baseSize) {

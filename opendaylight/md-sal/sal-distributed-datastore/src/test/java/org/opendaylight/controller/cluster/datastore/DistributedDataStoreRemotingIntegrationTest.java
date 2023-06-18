@@ -1345,7 +1345,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", Uint64.valueOf(20000))));
         AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
 
-        final NormalizedNode snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.empty());
+        final NormalizedNode snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.of());
         final Snapshot initialSnapshot = Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
                 Collections.emptyList(), 5, 1, 5, 1, 1, null, null);
@@ -1460,7 +1460,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .withChild(CarsModel.create())
                 .build();
 
-        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
+        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
 
         // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
         //                         the snapshot index seems to fluctuate
@@ -1490,7 +1490,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
 
         // root overwrite so expect a snapshot
-        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.empty(), rootNode);
+        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
 
         // this was a real snapshot so everything should be in it(1(DisableTrackingPayload) + 1 + 10 + 1)
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
