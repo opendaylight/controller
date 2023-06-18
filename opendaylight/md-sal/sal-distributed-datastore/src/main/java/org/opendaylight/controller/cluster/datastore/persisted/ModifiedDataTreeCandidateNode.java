@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
-import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
  * one of its children.
  */
 abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNode {
-    private final Collection<DataTreeCandidateNode> children;
+    private final @NonNull Collection<DataTreeCandidateNode> children;
 
     private ModifiedDataTreeCandidateNode(final ModificationType type,
             final Collection<DataTreeCandidateNode> children) {
@@ -32,7 +32,7 @@ abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNo
     static DataTreeCandidateNode create(final ModificationType type, final Collection<DataTreeCandidateNode> children) {
         return new ModifiedDataTreeCandidateNode(type, children) {
             @Override
-            public PathArgument getIdentifier() {
+            public PathArgument name() {
                 throw new UnsupportedOperationException("Root node does not have an identifier");
             }
         };
@@ -42,19 +42,19 @@ abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNo
             final Collection<DataTreeCandidateNode> children) {
         return new ModifiedDataTreeCandidateNode(type, children) {
             @Override
-            public PathArgument getIdentifier() {
+            public PathArgument name() {
                 return identifier;
             }
         };
     }
 
     @Override
-    public final Optional<NormalizedNode> getDataAfter() {
+    public final NormalizedNode dataAfter() {
         throw new UnsupportedOperationException("After-image not available after serialization");
     }
 
     @Override
-    public final Collection<DataTreeCandidateNode> getChildNodes() {
+    public final Collection<DataTreeCandidateNode> childNodes() {
         return children;
     }
 }

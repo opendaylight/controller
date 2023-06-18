@@ -18,7 +18,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
@@ -26,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContext;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -58,12 +57,12 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNormalizedNodePruner.class);
 
-    private final Deque<DataSchemaContextNode<?>> stack = new ArrayDeque<>();
+    private final Deque<DataSchemaContext> stack = new ArrayDeque<>();
     private final ReusableImmutableNormalizedNodeStreamWriter delegate =
             ReusableImmutableNormalizedNodeStreamWriter.create();
     private final DataSchemaContextTree tree;
 
-    private DataSchemaContextNode<?> nodePathSchemaNode;
+    private DataSchemaContext nodePathSchemaNode;
     private NormalizedNode normalizedNode;
     private State state = State.UNITIALIZED;
     private int unknown;
@@ -146,11 +145,6 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
     }
 
     @Override
-    public final void startAugmentationNode(final AugmentationIdentifier identifier) throws IOException {
-        enter(ReusableImmutableNormalizedNodeStreamWriter::startAugmentationNode, identifier);
-    }
-
-    @Override
     public final  boolean startAnyxmlNode(final NodeIdentifier name, final Class<?> objectModel) throws IOException {
         if (enter(name)) {
             verify(delegate.startAnyxmlNode(name, objectModel),
@@ -181,7 +175,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         }
     }
 
-    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) {
+    Object translateScalar(final DataSchemaContext context, final Object value) {
         // Default is pass-through
         return value;
     }
@@ -206,7 +200,8 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         }
 
         if (stack.isEmpty()) {
-            normalizedNode = delegate.getResult();
+            final var result = delegate.result();
+            normalizedNode = result != null ? result.data() : null;
             state = State.CLOSED;
         }
     }
@@ -247,10 +242,11 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
             return false;
         }
 
-        final DataSchemaContextNode<?> schema;
-        final DataSchemaContextNode<?> parent = currentSchema();
+        final DataSchemaContext schema;
+        final DataSchemaContext parent = currentSchema();
         if (parent != null) {
-            schema = parent.getChild(name);
+            schema = parent instanceof DataSchemaContext.Composite compositeParent ? compositeParent.childByArg(name)
+                : null;
         } else {
             schema = nodePathSchemaNode;
         }
@@ -262,7 +258,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         }
 
         stack.push(schema);
-        final DataSchemaNode dataSchema = schema.getDataSchemaNode();
+        final DataSchemaNode dataSchema = schema.dataSchemaNode();
         if (dataSchema != null) {
             delegate.nextDataSchemaNode(dataSchema);
         }
@@ -282,7 +278,7 @@ abstract class AbstractNormalizedNodePruner implements NormalizedNodeStreamWrite
         }
     }
 
-    final DataSchemaContextNode<?> currentSchema() {
+    final DataSchemaContext currentSchema() {
         return stack.peek();
     }
 }

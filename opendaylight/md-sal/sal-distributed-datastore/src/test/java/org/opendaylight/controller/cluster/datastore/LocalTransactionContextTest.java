@@ -66,7 +66,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testWrite() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         NormalizedNode normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.executeWrite(yangInstanceIdentifier, normalizedNode, null);
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
@@ -74,7 +74,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testMerge() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         NormalizedNode normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.executeMerge(yangInstanceIdentifier, normalizedNode, null);
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
@@ -82,14 +82,14 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testDelete() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         localTransactionContext.executeDelete(yangInstanceIdentifier, null);
         verify(readWriteTransaction).delete(yangInstanceIdentifier);
     }
 
     @Test
     public void testRead() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         NormalizedNode normalizedNode = mock(NormalizedNode.class);
         doReturn(FluentFutures.immediateFluentFuture(Optional.of(normalizedNode))).when(readWriteTransaction)
             .read(yangInstanceIdentifier);
@@ -100,7 +100,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testExists() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         doReturn(FluentFutures.immediateTrueFluentFuture()).when(readWriteTransaction).exists(yangInstanceIdentifier);
         localTransactionContext.executeRead(new DataExists(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
                 SettableFuture.create(), null);
@@ -121,7 +121,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testReadyWithWriteError() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         NormalizedNode normalizedNode = mock(NormalizedNode.class);
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
@@ -136,7 +136,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testReadyWithMergeError() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         NormalizedNode normalizedNode = mock(NormalizedNode.class);
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
@@ -151,7 +151,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testReadyWithDeleteError() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.empty();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.of();
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).delete(yangInstanceIdentifier);
 
