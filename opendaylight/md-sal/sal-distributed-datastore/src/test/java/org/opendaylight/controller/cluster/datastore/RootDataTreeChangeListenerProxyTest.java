@@ -47,7 +47,7 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         ClusteredDOMDataTreeChangeListener mockClusteredListener = mock(
             ClusteredDOMDataTreeChangeListener.class);
 
-        final YangInstanceIdentifier path = YangInstanceIdentifier.empty();
+        final YangInstanceIdentifier path = YangInstanceIdentifier.of();
         final RootDataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> rootListenerProxy =
             new RootDataTreeChangeListenerProxy<>(actorUtils, mockClusteredListener,
             Set.of("shard-1", "shard-2"));
@@ -79,7 +79,7 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         final TestKit kit2 = new TestKit(getSystem());
         final ActorSelection rootListenerActor = getSystem().actorSelection(registerForShard1.getListenerActorPath());
         rootListenerActor.tell(new EnableNotification(true, "test"), kit.getRef());
-        final DataTreeCandidate peopleCandidate = DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(),
+        final DataTreeCandidate peopleCandidate = DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(),
             PeopleModel.create());
         rootListenerActor.tell(new DataTreeChanged(ImmutableList.of(peopleCandidate)), kit.getRef());
         rootListenerActor.tell(new DataTreeChanged(ImmutableList.of(peopleCandidate)), kit2.getRef());

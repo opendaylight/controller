@@ -31,8 +31,6 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVer
  * participant instance should oppose RAFT candidates which produce persistence of an unsupported version. If a follower
  * encounters an unsupported version it must not become fully-operational, as it does not have an accurate view
  * of shard state.
- *
- * @author Robert Varga
  */
 @Beta
 public enum PayloadVersion implements WritableObject {
@@ -50,37 +48,27 @@ public enum PayloadVersion implements WritableObject {
     },
 
     /**
-     * ABI version as shipped in Sodium SR1 Simultaneous Release. QName-bearing messages are using
-     * {@link NormalizedNodeStreamVersion#SODIUM_SR1}, which improves encoding.
-     */
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    SODIUM_SR1(7) {
-        @Override
-        public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.SODIUM_SR1;
-        }
-    },
-
-    /**
-     * Revised payload version. Payloads remain the same as {@link #SODIUM_SR1}, but messages bearing QNames in any
-     * shape are using {@link NormalizedNodeStreamVersion#MAGNESIUM}, which improves encoding.
-     */
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    MAGNESIUM(8) {
-        @Override
-        public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.MAGNESIUM;
-        }
-    },
-
-    /**
      * ABI version shipped enabled {@code 2022.09 Chlorine SR2}. This version revises the serialization format of
-     * payloads proxies to reduce their size. Otherwise this format is equivalent to {@link #MAGNESIUM}.
+     * payloads proxies to reduce their size. Otherwise this format is equivalent to {@code #MAGNESIUM}.
+     *
+     * @deprecated Use {@link #POTASSIUM} instead.
      */
+    @Deprecated(since = "8.0.0", forRemoval = true)
     CHLORINE_SR2(9) {
         @Override
         public NormalizedNodeStreamVersion getStreamVersion() {
             return NormalizedNodeStreamVersion.MAGNESIUM;
+        }
+    },
+
+    /**
+     * ABI version shipped enabled {@code 2023.09 Potassium}. This version removes Augmentation identifier and nodes.
+     * Otherwise this format is equivalent to {@link #CHLORINE_SR2}.
+     */
+    POTASSIUM(10) {
+        @Override
+        public NormalizedNodeStreamVersion getStreamVersion() {
+            return NormalizedNodeStreamVersion.POTASSIUM;
         }
     },
 
@@ -125,7 +113,7 @@ public enum PayloadVersion implements WritableObject {
      * @return Current {@link PayloadVersion}
      */
     public static @NonNull PayloadVersion current() {
-        return CHLORINE_SR2;
+        return POTASSIUM;
     }
 
     /**
@@ -140,10 +128,9 @@ public enum PayloadVersion implements WritableObject {
     public static @NonNull PayloadVersion valueOf(final short version)
             throws FutureVersionException, PastVersionException {
         return switch (Short.toUnsignedInt(version)) {
-            case 0, 1, 2, 3, 4, 5, 6 -> throw new PastVersionException(version, SODIUM_SR1);
-            case 7 -> SODIUM_SR1;
-            case 8 -> MAGNESIUM;
+            case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> throw new PastVersionException(version, CHLORINE_SR2);
             case 9 -> CHLORINE_SR2;
+            case 10 -> POTASSIUM;
             default -> throw new FutureVersionException(version, CHLORINE_SR2);
         };
     }

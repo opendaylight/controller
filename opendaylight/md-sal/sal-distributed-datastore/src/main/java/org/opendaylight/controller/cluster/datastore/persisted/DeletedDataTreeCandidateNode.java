@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import java.util.Collection;
-import java.util.Optional;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
@@ -25,7 +24,7 @@ abstract class DeletedDataTreeCandidateNode extends AbstractDataTreeCandidateNod
     static DataTreeCandidateNode create() {
         return new DeletedDataTreeCandidateNode() {
             @Override
-            public PathArgument getIdentifier() {
+            public PathArgument name() {
                 throw new UnsupportedOperationException("Root node does not have an identifier");
             }
         };
@@ -34,21 +33,20 @@ abstract class DeletedDataTreeCandidateNode extends AbstractDataTreeCandidateNod
     static DataTreeCandidateNode create(final PathArgument identifier) {
         return new DeletedDataTreeCandidateNode() {
             @Override
-            public PathArgument getIdentifier() {
+            public PathArgument name() {
                 return identifier;
             }
         };
     }
 
     @Override
-    public final Optional<NormalizedNode> getDataAfter() {
-        return Optional.empty();
+    public final NormalizedNode dataAfter() {
+        return null;
     }
 
     @Override
-    public final Collection<DataTreeCandidateNode> getChildNodes() {
-        // We would require the before-image to reconstruct the list of nodes which
-        // were deleted.
+    public final Collection<DataTreeCandidateNode> childNodes() {
+        // We would require the before-image to reconstruct the list of nodes which were deleted.
         throw new UnsupportedOperationException("Children not available after serialization");
     }
 }

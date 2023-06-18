@@ -199,7 +199,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final TreeType treeType) {
-        this(shard, schemaContext, treeType, YangInstanceIdentifier.empty(),
+        this(shard, schemaContext, treeType, YangInstanceIdentifier.of(),
                 new DefaultShardDataTreeChangeListenerPublisher(""), "");
     }
 
@@ -236,7 +236,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @return A state snapshot
      */
     @NonNull ShardDataTreeSnapshot takeStateSnapshot() {
-        final NormalizedNode rootNode = takeSnapshot().readNode(YangInstanceIdentifier.empty()).orElseThrow();
+        final NormalizedNode rootNode = takeSnapshot().readNode(YangInstanceIdentifier.of()).orElseThrow();
         final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                 ImmutableMap.builder();
 
@@ -281,12 +281,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeModification unwrapped = newModification();
         final DataTreeModification mod = wrapper.apply(unwrapped);
         // delete everything first
-        mod.delete(YangInstanceIdentifier.empty());
+        mod.delete(YangInstanceIdentifier.of());
 
         final Optional<NormalizedNode> maybeNode = snapshot.getRootNode();
         if (maybeNode.isPresent()) {
             // Add everything from the remote node back
-            mod.write(YangInstanceIdentifier.empty(), maybeNode.orElseThrow());
+            mod.write(YangInstanceIdentifier.of(), maybeNode.orElseThrow());
         }
         mod.ready();
 
@@ -499,8 +499,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         // top level container ie "/"
-        if (candidate.getRootPath().isEmpty()
-                && candidate.getRootNode().getModificationType() == ModificationType.WRITE) {
+        if (candidate.getRootPath().isEmpty() && candidate.getRootNode().modificationType() == ModificationType.WRITE) {
             LOG.debug("{}: shard root overwritten, enqueuing snapshot", logContext);
             shard.self().tell(new InitiateCaptureSnapshot(), noSender());
         }
@@ -732,8 +731,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final Optional<DataTreeCandidate> readCurrentData() {
-        return readNode(YangInstanceIdentifier.empty())
-            .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), state));
+        return readNode(YangInstanceIdentifier.of())
+            .map(state -> DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(), state));
     }
 
     final void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,

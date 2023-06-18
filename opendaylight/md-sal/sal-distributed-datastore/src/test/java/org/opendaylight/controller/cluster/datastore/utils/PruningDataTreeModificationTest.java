@@ -141,7 +141,7 @@ public class PruningDataTreeModificationTest {
         verify(mockModification, times(1)).merge(path, normalizedNode);
 
         DataTreeCandidate candidate = getCandidate();
-        assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().getModificationType());
+        assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().modificationType());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class PruningDataTreeModificationTest {
         verify(mockModification, times(1)).merge(path, normalizedNode);
 
         DataTreeCandidate candidate = getCandidate();
-        assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().getModificationType());
+        assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().modificationType());
     }
 
     @Test
@@ -204,11 +204,11 @@ public class PruningDataTreeModificationTest {
         localDataTree.validate(mod);
         localDataTree.commit(localDataTree.prepare(mod));
 
-        NormalizedNode normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()).orElseThrow();
-        pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
+        NormalizedNode normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.of()).orElseThrow();
+        pruningDataTreeModification.write(YangInstanceIdentifier.of(), normalizedNode);
         dataTree.commit(getCandidate());
 
-        assertEquals(Optional.of(normalizedNode), dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()));
+        assertEquals(Optional.of(normalizedNode), dataTree.takeSnapshot().readNode(YangInstanceIdentifier.of()));
     }
 
     @Test
@@ -216,16 +216,16 @@ public class PruningDataTreeModificationTest {
         final Shard mockShard = Mockito.mock(Shard.class);
 
         ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
-        NormalizedNode root = shardDataTree.readNode(YangInstanceIdentifier.empty()).orElseThrow();
+        NormalizedNode root = shardDataTree.readNode(YangInstanceIdentifier.of()).orElseThrow();
 
         NormalizedNode normalizedNode = Builders.containerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(root.getIdentifier().getNodeType()))
+            .withNodeIdentifier(new NodeIdentifier(root.name().getNodeType()))
             .withChild(ImmutableNodes.containerNode(AUG_CONTAINER))
             .build();
-        pruningDataTreeModification.write(YangInstanceIdentifier.empty(), normalizedNode);
+        pruningDataTreeModification.write(YangInstanceIdentifier.of(), normalizedNode);
         dataTree.commit(getCandidate());
 
-        assertEquals(Optional.of(root), dataTree.takeSnapshot().readNode(YangInstanceIdentifier.empty()));
+        assertEquals(Optional.of(root), dataTree.takeSnapshot().readNode(YangInstanceIdentifier.of()));
 
     }
 
@@ -239,7 +239,7 @@ public class PruningDataTreeModificationTest {
         verify(mockModification, times(1)).write(path, normalizedNode);
 
         DataTreeCandidate candidate = getCandidate();
-        assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().getModificationType());
+        assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().modificationType());
     }
 
     @Test

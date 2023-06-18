@@ -97,7 +97,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
         this.actorUtils = requireNonNull(actorUtils);
-        connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.CHLORINE_SR2,
+        connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.POTASSIUM,
             ABIVersion.current()));
     }
 

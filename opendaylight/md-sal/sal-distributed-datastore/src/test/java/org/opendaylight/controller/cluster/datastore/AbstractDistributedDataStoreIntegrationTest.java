@@ -850,7 +850,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
-        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
+        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
 
         final Snapshot carsSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -862,7 +862,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         final NormalizedNode peopleNode = PeopleModel.create();
         AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
 
-        root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
+        root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
 
         final Snapshot peopleSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -901,7 +901,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 .withChild(CarsModel.create())
                 .build();
 
-            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
+            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.of(), rootNode);
             IntegrationTestKit.verifyShardState(dataStore, "cars",
                 state -> assertEquals(1, state.getSnapshotIndex()));
 
@@ -921,7 +921,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             verifySnapshot("member-1-shard-cars-testRootOverwrite", 1, 1);
 
             // root overwrite so expect a snapshot
-            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.empty(), rootNode);
+            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.of(), rootNode);
 
             // this was a real snapshot so everything should be in it(1 + 10 + 1)
             IntegrationTestKit.verifyShardState(dataStore, "cars",
