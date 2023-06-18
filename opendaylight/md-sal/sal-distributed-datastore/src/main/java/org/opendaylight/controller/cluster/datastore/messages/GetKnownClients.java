@@ -14,6 +14,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * Request a shard to report the clients it knows about. Shard is required to respond with {@link GetKnownClientsReply}.
  */
 public final class GetKnownClients implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public static final @NonNull GetKnownClients INSTANCE = new GetKnownClients();
@@ -22,6 +23,7 @@ public final class GetKnownClients implements Serializable {
 
     }
 
+    @java.io.Serial
     private Object readResolve() {
         return INSTANCE;
     }

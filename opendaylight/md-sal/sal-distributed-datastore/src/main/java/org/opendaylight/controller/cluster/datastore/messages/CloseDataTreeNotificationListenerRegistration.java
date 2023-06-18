@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import java.io.Serializable;
 
 public final class CloseDataTreeNotificationListenerRegistration implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
     private static final CloseDataTreeNotificationListenerRegistration INSTANCE =
             new CloseDataTreeNotificationListenerRegistration();
@@ -21,6 +22,7 @@ public final class CloseDataTreeNotificationListenerRegistration implements Seri
         return INSTANCE;
     }
 
+    @java.io.Serial
     private Object readResolve() {
         return INSTANCE;
     }
