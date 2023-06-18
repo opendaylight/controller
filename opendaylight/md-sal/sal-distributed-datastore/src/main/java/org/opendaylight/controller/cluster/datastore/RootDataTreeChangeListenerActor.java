@@ -43,7 +43,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
     private Deque<DataTreeChanged> otherMessages = new ArrayDeque<>();
 
     private RootDataTreeChangeListenerActor(final DOMDataTreeChangeListener listener, final int shardCount) {
-        super(listener, YangInstanceIdentifier.empty());
+        super(listener, YangInstanceIdentifier.of());
         this.shardCount = shardCount;
     }
 
@@ -85,7 +85,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
         /*
          * We need to make-pretend that the data coming into the listener is coming from a single logical entity, where
          * ordering is partially guaranteed (on shard boundaries). The data layout in shards is such that each DataTree
-         * is rooted at YangInstanceIdentifier.empty(), but their contents vary:
+         * is rooted at YangInstanceIdentifier.of(), but their contents vary:
          *
          * 1) non-default shards contain immediate children of root from one module
          * 2) default shard contains everything else
@@ -116,7 +116,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
                     initial = Iterables.get(changes, 0);
                 }
 
-                final NormalizedNode root = initial.getRootNode().getDataAfter().orElseThrow();
+                final NormalizedNode root = initial.getRootNode().findDataAfter().orElseThrow();
                 verify(root instanceof ContainerNode, "Unexpected root node %s", root);
                 ((ContainerNode) root).body().forEach(rootBuilder::withChild);
             }
@@ -125,7 +125,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
         initialMessages = null;
 
         // Replace first element with the combined initial change, report initial changes and clear the map
-        initialChanges.set(0, DataTreeCandidates.newDataTreeCandidate(YangInstanceIdentifier.empty(),
+        initialChanges.set(0, DataTreeCandidates.newDataTreeCandidate(YangInstanceIdentifier.of(),
             DataTreeCandidateNodes.written(rootBuilder.build())));
         super.dataTreeChanged(new DataTreeChanged(initialChanges));
 

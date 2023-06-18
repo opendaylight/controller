@@ -88,17 +88,16 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
         for (int i = 0; i < expPaths.length; i++) {
             final DataTreeCandidate candidate = changeList.get(i);
-            final Optional<NormalizedNode> maybeDataAfter = candidate.getRootNode().getDataAfter();
-            if (!maybeDataAfter.isPresent()) {
+            final NormalizedNode dataAfter = candidate.getRootNode().dataAfter();
+            if (dataAfter == null) {
                 fail(String.format("Change %d does not contain data after. Actual: %s", i + 1,
-                        candidate.getRootNode()));
+                    candidate.getRootNode()));
             }
 
-            final NormalizedNode dataAfter = maybeDataAfter.orElseThrow();
             final Optional<YangInstanceIdentifier> relativePath = expPaths[i].relativeTo(candidate.getRootPath());
             if (!relativePath.isPresent()) {
                 assertEquals(String.format("Change %d does not contain %s. Actual: %s", i + 1, expPaths[i],
-                        dataAfter), expPaths[i].getLastPathArgument(), dataAfter.getIdentifier());
+                        dataAfter), expPaths[i].getLastPathArgument(), dataAfter.name());
             } else {
                 NormalizedNode nextChild = dataAfter;
                 for (PathArgument pathArg: relativePath.orElseThrow().getPathArguments()) {

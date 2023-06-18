@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContext;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
@@ -133,15 +133,14 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
     }
 
     @Override
-    Object translateScalar(final DataSchemaContextNode<?> context, final Object value) {
-        final DataSchemaNode schema = context.getDataSchemaNode();
-        return schema instanceof TypedDataSchemaNode ? adaptValue(((TypedDataSchemaNode) schema).getType(), value)
-                : value;
+    Object translateScalar(final DataSchemaContext context, final Object value) {
+        final DataSchemaNode schema = context.dataSchemaNode();
+        return schema instanceof TypedDataSchemaNode typed ? adaptValue(typed.getType(), value) : value;
     }
 
     private void adaptEntry(final ReusableImmutableNormalizedNodeStreamWriter writer, final NodeWithValue<?> name) {
         final NodeWithValue<?> adapted;
-        final DataSchemaNode schema = currentSchema().getDataSchemaNode();
+        final DataSchemaNode schema = currentSchema().dataSchemaNode();
         if (schema instanceof TypedDataSchemaNode typed) {
             final Object oldValue = name.getValue();
             final Object newValue = adaptValue(typed.getType(), oldValue);
@@ -156,7 +155,7 @@ final class UintAdaptingPruner extends ReusableNormalizedNodePruner {
     private void adaptEntry(final ReusableImmutableNormalizedNodeStreamWriter writer,
             final NodeIdentifierWithPredicates name, final int size) {
         final NodeIdentifierWithPredicates adapted;
-        final DataSchemaNode schema = currentSchema().getDataSchemaNode();
+        final DataSchemaNode schema = currentSchema().dataSchemaNode();
         if (schema instanceof ListSchemaNode list) {
             adapted = NIP_ADAPTERS.getUnchecked(list).apply(name);
         } else {

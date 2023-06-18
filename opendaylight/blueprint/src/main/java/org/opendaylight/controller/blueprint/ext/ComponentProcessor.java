@@ -20,7 +20,6 @@ import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholder;
 import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
 import org.apache.aries.blueprint.mutable.MutableServiceReferenceMetadata;
 import org.apache.aries.util.AriesFrameworkUtil;
-import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -133,7 +132,6 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
         }
     }
 
-    @SuppressModernizer
     private void registerManagedService(final String persistentId) {
         // Register a ManagedService so we get updates from the ConfigAdmin when the cfg file corresponding
         // to the persistentId changes.

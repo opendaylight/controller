@@ -159,26 +159,24 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
         private void lookupAndCreateCanCommits(final YangInstanceIdentifier path,
                 final RegistrationTreeNode<ActorRef> regNode, final DataTreeCandidateNode candNode) {
-            if (candNode.getModificationType() == ModificationType.UNMODIFIED) {
+            if (candNode.modificationType() == ModificationType.UNMODIFIED) {
                 LOG.debug("Skipping unmodified candidate {}", path);
                 return;
             }
-            final Collection<ActorRef> regs = regNode.getRegistrations();
+            final var regs = regNode.getRegistrations();
             if (!regs.isEmpty()) {
                 createCanCommits(regs, path, candNode);
             }
 
-            for (final DataTreeCandidateNode candChild : candNode.getChildNodes()) {
-                if (candChild.getModificationType() != ModificationType.UNMODIFIED) {
-                    final RegistrationTreeNode<ActorRef> regChild =
-                            regNode.getExactChild(candChild.getIdentifier());
+            for (var candChild : candNode.childNodes()) {
+                if (candChild.modificationType() != ModificationType.UNMODIFIED) {
+                    final RegistrationTreeNode<ActorRef> regChild = regNode.getExactChild(candChild.name());
                     if (regChild != null) {
-                        lookupAndCreateCanCommits(path.node(candChild.getIdentifier()), regChild, candChild);
+                        lookupAndCreateCanCommits(path.node(candChild.name()), regChild, candChild);
                     }
 
-                    for (final RegistrationTreeNode<ActorRef> rc : regNode
-                            .getInexactChildren(candChild.getIdentifier())) {
-                        lookupAndCreateCanCommits(path.node(candChild.getIdentifier()), rc, candChild);
+                    for (var rc : regNode.getInexactChildren(candChild.name())) {
+                        lookupAndCreateCanCommits(path.node(candChild.name()), rc, candChild);
                     }
                 }
             }

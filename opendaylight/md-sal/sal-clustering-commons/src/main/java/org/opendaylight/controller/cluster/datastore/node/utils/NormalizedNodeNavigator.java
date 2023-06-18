@@ -35,7 +35,7 @@ public class NormalizedNodeNavigator {
             final DataContainerNode dataContainerNode) {
         visitor.visitNode(level, parentPath, dataContainerNode);
 
-        String newParentPath = parentPath + "/" + dataContainerNode.getIdentifier().toString();
+        String newParentPath = parentPath + "/" + dataContainerNode.name().toString();
 
         for (var node : dataContainerNode.body()) {
             if (node instanceof MixinNode && node instanceof NormalizedNodeContainer<?> container) {
@@ -50,7 +50,7 @@ public class NormalizedNodeNavigator {
             final NormalizedNodeContainer<?> node) {
         visitor.visitNode(level, parentPath, node);
 
-        String newParentPath = parentPath + "/" + node.getIdentifier().toString();
+        String newParentPath = parentPath + "/" + node.name().toString();
 
         for (var normalizedNode : node.body()) {
             if (normalizedNode instanceof MixinNode && normalizedNode instanceof NormalizedNodeContainer<?> container) {
