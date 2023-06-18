@@ -103,7 +103,7 @@ public final class RootScatterGather {
         return FluentFuture.from(Futures.transform(
             Futures.allAsList(readFutures.collect(ImmutableList.toImmutableList())), input -> {
                 try {
-                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.empty(), input,
+                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(), input,
                         actorUtils.getSchemaContext(), actorUtils.getDatastoreContext().getLogicalStoreType());
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);

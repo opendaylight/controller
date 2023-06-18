@@ -55,7 +55,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
-    private static final DeleteOperation ROOT_DELETE_OPERATION = new DeleteOperation(YangInstanceIdentifier.empty());
+    private static final DeleteOperation ROOT_DELETE_OPERATION = new DeleteOperation(YangInstanceIdentifier.of());
 
     private final Map<String, AbstractTransactionContextWrapper> txContextWrappers = new TreeMap<>();
     private final AbstractTransactionContextFactory<?> txContextFactory;
@@ -111,7 +111,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private FluentFuture<Optional<NormalizedNode>> readAllData() {
         final var actorUtils = getActorUtils();
         return RootScatterGather.gather(actorUtils, actorUtils.getConfiguration().getAllShardNames().stream()
-            .map(shardName -> singleShardRead(shardName, YangInstanceIdentifier.empty())));
+            .map(shardName -> singleShardRead(shardName, YangInstanceIdentifier.of())));
     }
 
     @Override
@@ -146,7 +146,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         if (!rootData.isEmpty()) {
             RootScatterGather.scatterTouched(rootData, this::wrapperFromRootChild).forEach(
                 scattered -> scattered.shard().maybeExecuteTransactionOperation(
-                    new MergeOperation(YangInstanceIdentifier.empty(), scattered.container())));
+                    new MergeOperation(YangInstanceIdentifier.of(), scattered.container())));
         }
     }
 
@@ -165,7 +165,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         RootScatterGather.scatterAll(rootData, this::wrapperFromRootChild,
             getActorUtils().getConfiguration().getAllShardNames().stream().map(this::wrapperFromShardName)).forEach(
                 scattered -> scattered.shard().maybeExecuteTransactionOperation(
-                    new WriteOperation(YangInstanceIdentifier.empty(), scattered.container())));
+                    new WriteOperation(YangInstanceIdentifier.of(), scattered.container())));
     }
 
     private void executeModification(final TransactionModificationOperation operation) {

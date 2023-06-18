@@ -13,6 +13,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-akka</artifactId>
         </dependency>

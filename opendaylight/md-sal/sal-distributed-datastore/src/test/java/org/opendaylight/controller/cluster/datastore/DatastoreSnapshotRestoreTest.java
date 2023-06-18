@@ -130,7 +130,7 @@ public class DatastoreSnapshotRestoreTest {
         DataTree dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, path, node);
-        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.empty());
+        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
 
         return Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
                 Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);

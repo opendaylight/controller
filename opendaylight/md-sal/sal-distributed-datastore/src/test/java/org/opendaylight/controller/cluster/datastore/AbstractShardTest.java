@@ -347,7 +347,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.empty());
+        final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.of());
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
@@ -417,7 +417,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.UNMODIFIED).when(mockCandidateNode).getModificationType();
-        doReturn(YangInstanceIdentifier.empty()).when(mockCandidate).getRootPath();
+        doReturn(YangInstanceIdentifier.of()).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
         return mockCandidate;
     }

@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import static org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion.MAGNESIUM;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -45,7 +43,7 @@ public final class SerializationUtils {
 
     public static void writeNormalizedNode(final DataOutput out, final @Nullable NormalizedNode node)
             throws IOException {
-        writeNormalizedNode(out, MAGNESIUM, node);
+        writeNormalizedNode(out, NormalizedNodeStreamVersion.POTASSIUM, node);
     }
 
     public static void writeNormalizedNode(final DataOutput out, final NormalizedNodeStreamVersion version,
@@ -67,7 +65,7 @@ public final class SerializationUtils {
 
     public static void writePath(final DataOutput out, final @NonNull YangInstanceIdentifier path)
             throws IOException {
-        writePath(out, MAGNESIUM, path);
+        writePath(out, NormalizedNodeStreamVersion.POTASSIUM, path);
     }
 
     public static void writePath(final DataOutput out, final NormalizedNodeStreamVersion version,
@@ -95,7 +93,7 @@ public final class SerializationUtils {
 
     public static void writeNodeAndPath(final DataOutput out, final YangInstanceIdentifier path,
             final NormalizedNode node) throws IOException {
-        writeNodeAndPath(out, MAGNESIUM, path, node);
+        writeNodeAndPath(out, NormalizedNodeStreamVersion.POTASSIUM, path, node);
     }
 
     public static <T> void readPathAndNode(final DataInput in, final T instance, final Applier<T> applier)
@@ -117,6 +115,6 @@ public final class SerializationUtils {
 
     public static void writePathAndNode(final DataOutput out, final YangInstanceIdentifier path,
             final NormalizedNode node) throws IOException {
-        writePathAndNode(out, MAGNESIUM, path, node);
+        writePathAndNode(out, NormalizedNodeStreamVersion.POTASSIUM, path, node);
     }
 }

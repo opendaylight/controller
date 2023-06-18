@@ -38,7 +38,7 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
 
     private FluentFuture<Optional<NormalizedNode>> readRoot() {
         return RootScatterGather.gather(parent().actorUtils(), ensureAllProxies()
-            .map(proxy -> proxy.read(YangInstanceIdentifier.empty())));
+            .map(proxy -> proxy.read(YangInstanceIdentifier.of())));
     }
 
     @Override

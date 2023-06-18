@@ -485,7 +485,7 @@ public class ShardDataTreeTest extends AbstractTest {
     @Test
     public void testUintCommitPayload() throws IOException {
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(),
-            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.empty(), bigIntegerRoot()),
+            DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(), bigIntegerRoot()),
             PayloadVersion.SODIUM_SR1));
 
         assertCarsUint64();
