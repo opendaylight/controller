@@ -24,16 +24,35 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-
-        <!-- Akka -->
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>org.eclipse.jdt.annotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>atomix-storage</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-akka</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-clustering-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-testkit_2.13</artifactId>
@@ -42,31 +61,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-persistence-tck_2.13</artifactId>
         </dependency>
-
-        <!-- Codahale -->
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-        </dependency>
-
-        <!-- Scala -->
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-        </dependency>
-
-        <!-- Clustering commons for metrics -->
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-clustering-commons</artifactId>
-        </dependency>
-
-        <!-- Atomix -->
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>atomix-storage</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
