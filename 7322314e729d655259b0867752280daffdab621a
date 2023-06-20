@@ -35,6 +35,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b69583f3_3aca4b7d",
+        "filename": "opendaylight/md-sal/mdsal-it-parent/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-06-20T11:15:30Z",
+      "side": 1,
+      "message": "Not really, as it is triggered by third-party classes :(",
+      "parentUuid": "50a04a01_400dcfd7",
+      "revId": "7322314e729d655259b0867752280daffdab621a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1a4f544b_25e6c27b",
