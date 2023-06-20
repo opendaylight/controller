@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f3dc3605_fbae606e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-06-20T06:27:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e531458e_e298566d",
+      "range": {
+        "startLine": 630,
+        "startChar": 17,
+        "endLine": 630,
+        "endChar": 70
+      },
+      "revId": "432310971aaf314bddadbb4b4ac18b5d4f5adecc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b0b23af8_10eaddf7",
@@ -47,6 +71,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0815a3c1_ca2e22c0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-06-20T06:27:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0b23af8_10eaddf7",
+      "range": {
+        "startLine": 853,
+        "startChar": 12,
+        "endLine": 853,
+        "endChar": 13
+      },
+      "revId": "432310971aaf314bddadbb4b4ac18b5d4f5adecc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4baca6b5_8d06c58a",
@@ -60,6 +108,30 @@
       "writtenOn": "2023-04-03T13:14:24Z",
       "side": 1,
       "message": "superfluous parentheses",
+      "range": {
+        "startLine": 864,
+        "startChar": 16,
+        "endLine": 864,
+        "endChar": 17
+      },
+      "revId": "432310971aaf314bddadbb4b4ac18b5d4f5adecc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0facfce6_88b21cfd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-06-20T06:27:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4baca6b5_8d06c58a",
       "range": {
         "startLine": 864,
         "startChar": 16,
