@@ -68,6 +68,24 @@
       "message": "When this will be deprecated?",
       "revId": "7322314e729d655259b0867752280daffdab621a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "89a76985_3ae67628",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/PayloadVersion.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-06-20T11:20:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a4f544b_25e6c27b",
+      "revId": "7322314e729d655259b0867752280daffdab621a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
