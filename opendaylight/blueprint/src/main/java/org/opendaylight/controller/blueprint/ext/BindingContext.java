@@ -19,9 +19,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.opendaylight.yangtools.yang.binding.contract.Naming;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -49,7 +49,7 @@ import org.xml.sax.SAXException;
 public abstract class BindingContext {
     public static BindingContext create(final String logName, final Class<? extends DataObject> klass,
             final String appConfigListKeyValue) {
-        if (Identifiable.class.isAssignableFrom(klass)) {
+        if (KeyAware.class.isAssignableFrom(klass)) {
             // The binding class corresponds to a yang list.
             if (Strings.isNullOrEmpty(appConfigListKeyValue)) {
                 throw new ComponentDefinitionException(String.format(
@@ -133,7 +133,7 @@ public abstract class BindingContext {
                 final String listKeyValue) throws InstantiationException, IllegalAccessException,
                 IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
-            Identifier keyInstance = (Identifier) bindingClass.getMethod(Naming.IDENTIFIABLE_KEY_NAME)
+            Key keyInstance = (Key) bindingClass.getMethod(Naming.KEY_AWARE_KEY_NAME)
                 .getReturnType().getConstructor(String.class).newInstance(listKeyValue);
             InstanceIdentifier appConfigPath = InstanceIdentifier.builder((Class)bindingClass, keyInstance).build();
             return new ListBindingContext(bindingClass, appConfigPath, listKeyValue);
