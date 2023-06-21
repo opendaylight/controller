@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f9b65478_c886d175",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 786,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-06-21T13:04:22Z",
+      "side": 1,
+      "message": "payload3 a payload5 are not used. No need to retain variables.",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ecdd572a_bfc2c25f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-06-21T13:04:22Z",
+      "side": 1,
+      "message": "add documentation about this test",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c0b94383_329336ff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 879,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-06-21T13:04:22Z",
+      "side": 1,
+      "message": "payload3 a payload5 are not used. No need to retain variables.",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a06b294_5a08aea8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 923,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-06-21T13:04:22Z",
+      "side": 1,
+      "message": "No need to retain payload variables.",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "843a9007_ea1d460b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-06-21T13:04:22Z",
+      "side": 1,
+      "message": "\"end of Snapshot-apply/persistence stage of the previous Snapshot\"",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0bd22ba5_2ce4c1ff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-06-21T13:04:22Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
