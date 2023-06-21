@@ -57,13 +57,12 @@ public final class IdIntsListener implements ClusteredDOMDataTreeChangeListener 
         LOG.debug("Received data tree changed");
 
         changes.forEach(change -> {
-            if (change.getRootNode().getDataAfter().isPresent()) {
-                LOG.trace("Received change, data before: {}, data after: {}",
-                        change.getRootNode().getDataBefore().isPresent()
-                                ? change.getRootNode().getDataBefore().orElseThrow() : "",
-                        change.getRootNode().getDataAfter().orElseThrow());
-
-                localCopy = change.getRootNode().getDataAfter().orElseThrow();
+            final var root = change.getRootNode();
+            final var after = root.dataAfter();
+            if (after != null) {
+                final var before = root.dataBefore();
+                LOG.trace("Received change, data before: {}, data after: {}", before != null ? before : "", after);
+                localCopy = after;
             } else {
                 LOG.warn("getDataAfter() is missing from notification. change: {}", change);
             }

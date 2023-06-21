@@ -28,7 +28,6 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
@@ -113,7 +112,7 @@ public class DataTreeCohortIntegrationTest {
             kit.testWriteTransaction(dataStore, TestModel.TEST_PATH, node);
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapt.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapt.getValue().iterator().next(), TEST_ID,
-                    ModificationType.WRITE, Optional.of(node), Optional.empty());
+                    ModificationType.WRITE, node, null);
 
             reset(cohort);
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
@@ -200,7 +199,7 @@ public class DataTreeCohortIntegrationTest {
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapture.getValue().iterator().next(),
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.WRITE,
-                    Optional.of(optimaNode), Optional.empty());
+                    optimaNode, null);
 
             // Write replace the cars container with 2 new car entries. The cohort should get invoked with 3
             // DOMDataTreeCandidates: once for each of the 2 new car entries (WRITE mod) and once for the deleted prior
@@ -223,15 +222,15 @@ public class DataTreeCohortIntegrationTest {
 
             assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.WRITE,
-                    Optional.of(sportageNode), Optional.empty());
+                    sportageNode, null);
 
             assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, soulPath), ModificationType.WRITE,
-                    Optional.of(soulNode), Optional.empty());
+                    soulNode, null);
 
             assertDataTreeCandidate(findCandidate(candidateCapture, optimaPath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.DELETE,
-                    Optional.empty(), Optional.of(optimaNode));
+                    null, optimaNode);
 
             // Delete the cars container - cohort should be invoked for the 2 deleted car entries.
 
@@ -248,11 +247,11 @@ public class DataTreeCohortIntegrationTest {
 
             assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.DELETE,
-                    Optional.empty(), Optional.of(sportageNode));
+                    null, sportageNode);
 
             assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), new DOMDataTreeIdentifier(
                     LogicalDatastoreType.CONFIGURATION, soulPath), ModificationType.DELETE,
-                    Optional.empty(), Optional.of(soulNode));
+                    null, soulNode);
 
         }
     }
@@ -307,23 +306,11 @@ public class DataTreeCohortIntegrationTest {
 
     private static void assertDataTreeCandidate(final DOMDataTreeCandidate candidate,
             final DOMDataTreeIdentifier expTreeId, final ModificationType expType,
-            final Optional<NormalizedNode> expDataAfter, final Optional<NormalizedNode> expDataBefore) {
+            final NormalizedNode expDataAfter, final NormalizedNode expDataBefore) {
         assertNotNull("Expected candidate for path " + expTreeId.getRootIdentifier(), candidate);
         assertEquals("rootPath", expTreeId, candidate.getRootPath());
         assertEquals("modificationType", expType, candidate.getRootNode().modificationType());
-
-        assertEquals("dataAfter present", expDataAfter.isPresent(),
-            candidate.getRootNode().findDataAfter().isPresent());
-        if (expDataAfter.isPresent()) {
-            assertEquals("dataAfter", expDataAfter.orElseThrow(),
-                candidate.getRootNode().findDataAfter().orElseThrow());
-        }
-
-        assertEquals("dataBefore present", expDataBefore.isPresent(),
-                candidate.getRootNode().findDataBefore().isPresent());
-        if (expDataBefore.isPresent()) {
-            assertEquals("dataBefore", expDataBefore.orElseThrow(),
-                candidate.getRootNode().findDataBefore().orElseThrow());
-        }
+        assertEquals("dataAfter", expDataAfter, candidate.getRootNode().dataAfter());
+        assertEquals("dataBefore", expDataBefore, candidate.getRootNode().dataBefore());
     }
 }

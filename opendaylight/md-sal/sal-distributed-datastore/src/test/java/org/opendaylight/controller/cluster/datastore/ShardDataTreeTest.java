@@ -538,7 +538,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         // Apply first candidate as a snapshot
         shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(
-            new MetadataShardDataTreeSnapshot(first.getRootNode().findDataAfter().orElseThrow()), true));
+            new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter()), true));
         // Apply the other two snapshots as transactions
         shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), second,
             PayloadVersion.POTASSIUM));

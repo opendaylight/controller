@@ -17,11 +17,10 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 
 /**
- * Abstract base class for our internal implementation of {@link DataTreeCandidateNode},
- * which we instantiate from a serialized stream. We do not retain the before-image and
- * do not implement {@link #getModifiedChild(PathArgument)}, as that method is only
- * useful for end users. Instances based on this class should never be leaked outside of
- * this component.
+ * Abstract base class for our internal implementation of {@link DataTreeCandidateNode}, which we instantiate from a
+ * serialized stream. We do not retain the before-image and do not implement {@link #modifiedChild(PathArgument)}, as
+ * that method is only useful for end users. Instances based on this class should never be leaked outside of this
+ * component.
  */
 abstract class AbstractDataTreeCandidateNode implements DataTreeCandidateNode {
     private final @NonNull ModificationType type;

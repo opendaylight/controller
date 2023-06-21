@@ -170,7 +170,7 @@ public final class DataTreeCandidateInputOutput {
                 break;
             case WRITE:
                 out.writeByte(WRITE);
-                out.writeNormalizedNode(node.findDataAfter().orElseThrow());
+                out.writeNormalizedNode(node.getDataAfter());
                 break;
             case UNMODIFIED:
                 out.writeByte(UNMODIFIED);
@@ -208,7 +208,7 @@ public final class DataTreeCandidateInputOutput {
                     break;
                 case WRITE:
                     writer.writeByte(WRITE);
-                    writer.writeNormalizedNode(node.findDataAfter().orElseThrow());
+                    writer.writeNormalizedNode(node.getDataAfter());
                     break;
                 default:
                     throwUnhandledNodeType(node);

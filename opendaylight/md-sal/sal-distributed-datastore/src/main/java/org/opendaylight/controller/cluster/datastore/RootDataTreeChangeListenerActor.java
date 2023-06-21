@@ -116,7 +116,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
                     initial = Iterables.get(changes, 0);
                 }
 
-                final NormalizedNode root = initial.getRootNode().findDataAfter().orElseThrow();
+                final NormalizedNode root = initial.getRootNode().getDataAfter();
                 verify(root instanceof ContainerNode, "Unexpected root node %s", root);
                 ((ContainerNode) root).body().forEach(rootBuilder::withChild);
             }

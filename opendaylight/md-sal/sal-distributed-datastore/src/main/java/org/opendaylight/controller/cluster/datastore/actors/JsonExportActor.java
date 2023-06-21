@@ -98,7 +98,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         final Path filePath = snapshotDir.resolve(exportSnapshot.id + "-snapshot.json");
         LOG.debug("Creating JSON file : {}", filePath);
 
-        final NormalizedNode root = exportSnapshot.dataTreeCandidate.getRootNode().findDataAfter().orElseThrow();
+        final NormalizedNode root = exportSnapshot.dataTreeCandidate.getRootNode().getDataAfter();
         checkState(root instanceof NormalizedNodeContainer, "Unexpected root %s", root);
 
         writeSnapshot(filePath, (NormalizedNodeContainer<?>) root);
@@ -199,7 +199,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         writer.beginObject().name("Path").value(path.toString()).endObject();
         writer.beginObject().name("ModificationType").value(modificationType.toString()).endObject();
         if (modificationType == ModificationType.WRITE) {
-            writer.beginObject().name("Data").value(node.findDataAfter().orElseThrow().body().toString()).endObject();
+            writer.beginObject().name("Data").value(node.getDataAfter().body().toString()).endObject();
         }
         writer.endArray();
         writer.endObject();

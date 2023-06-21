@@ -47,19 +47,18 @@ public final class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCoho
             // Simple data validation - verify the year, if present, is >= 1990
 
             final DataTreeCandidateNode rootNode = candidate.getRootNode();
-            final Optional<NormalizedNode> dataAfter = rootNode.getDataAfter();
+            final NormalizedNode dataAfter = rootNode.dataAfter();
 
             LOG.info("In canCommit: modificationType: {}, dataBefore: {}, dataAfter: {}",
-                    rootNode.getModificationType(), rootNode.getDataBefore(), dataAfter);
+                    rootNode.modificationType(), rootNode.dataBefore(), dataAfter);
 
             // Note: we don't want to process DELETE modifications but we don't need to explicitly check the
             // ModificationType because dataAfter will not be present. Also dataAfter *should* always contain a
             // MapEntryNode but we verify anyway.
-            if (dataAfter.isPresent()) {
-                final NormalizedNode normalizedNode = dataAfter.orElseThrow();
-                Verify.verify(normalizedNode instanceof DataContainerNode,
-                        "Expected type DataContainerNode, actual was %s", normalizedNode.getClass());
-                DataContainerNode entryNode = (DataContainerNode) normalizedNode;
+            if (dataAfter != null) {
+                Verify.verify(dataAfter instanceof DataContainerNode,
+                        "Expected type DataContainerNode, actual was %s", dataAfter.getClass());
+                DataContainerNode entryNode = (DataContainerNode) dataAfter;
                 final Optional<DataContainerChild> possibleYear = entryNode.findChildByArg(YEAR_NODE_ID);
                 if (possibleYear.isPresent()) {
                     final Number year = (Number) possibleYear.orElseThrow().body();
