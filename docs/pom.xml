@@ -226,11 +226,11 @@
                 <configuration combine.children="append">
                     <links>
                         <link>https://junit.org/junit4/javadoc/4.13/</link>
-                        <link>http://hamcrest.org/JavaHamcrest/javadoc/2.2/</link>
-                        <link>http://www.slf4j.org/apidocs/</link>
-                        <link>https://google.github.io/guava/releases/31.1-jre/api/docs/</link>
-                        <link>http://doc.akka.io/japi/akka/2.6.21/</link>
-                        <link>http://netty.io/4.1/api/</link>
+                        <link>https://hamcrest.org/JavaHamcrest/javadoc/2.2/</link>
+                        <link>https://www.slf4j.org/apidocs/</link>
+                        <link>https://guava.dev/releases/32.0.1-jre/api/docs/</link>
+                        <link>https://doc.akka.io/japi/akka/2.6/</link>
+                        <link>https://netty.io/4.1/api/</link>
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-release/</link>
 
                         <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/13.0.3/</link>
