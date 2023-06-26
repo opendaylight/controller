@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dde58f84_bcb095e7",
+        "filename": "atomix-storage/pom.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ee3bbe9_ca1e7cdb",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "31c11874_9735de94",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-06-21T13:52:34Z",
       "side": 1,
       "message": "Since we\u0027re mapping the registered types to IDs, why not use map here?",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7b3ab0f5_f4edb67a",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31c11874_9735de94",
       "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -52,6 +88,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9856bd8_4e55eee4",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52454164_13b97f45",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5bf03538_d73b187f",
@@ -65,6 +119,24 @@
       "writtenOn": "2023-06-21T13:52:34Z",
       "side": 1,
       "message": "why not use the LegacyEntryInput here?",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7eb0f9e8_e60369f9",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "LegacyByteBufferInput can\u0027t handle InputStream\nso it would require more code from kryo, and these methods are currently unused by atomix-storage.",
+      "parentUuid": "5bf03538_d73b187f",
       "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -86,6 +158,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a260e43_6aea62ec",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImplBuilder.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f01a6d09_d5c2dfdc",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e944e882_b0866244",
@@ -99,6 +189,24 @@
       "writtenOn": "2023-06-21T13:52:34Z",
       "side": 1,
       "message": "add documentation to explain what this class is and why we need it.",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "df124eac_7935f8c3",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e944e882_b0866244",
       "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -120,6 +228,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "40b61b8c_d80deb85",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/LongSerdes.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da257bb9_9e97f927",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8b3aa9ef_5393077a",
@@ -137,6 +263,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7a95adff_5c05701f",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b3aa9ef_5393077a",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "98398864_8646988b",
@@ -150,6 +294,24 @@
       "writtenOn": "2023-06-21T13:52:34Z",
       "side": 1,
       "message": "MyConsumer is a weird name... rename to TestConsumer",
+      "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "47ec475f_aa908696",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-06-26T07:35:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98398864_8646988b",
       "revId": "01d94ee5389b498fd84ec8f2bd982342576fd79a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
