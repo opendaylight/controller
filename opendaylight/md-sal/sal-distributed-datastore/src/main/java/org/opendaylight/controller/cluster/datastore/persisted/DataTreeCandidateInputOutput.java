@@ -11,16 +11,14 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
@@ -36,11 +34,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility serialization/deserialization for {@link DataTreeCandidate}. Note that this utility does not maintain
  * before-image information across serialization.
- *
- * @author Robert Varga
  */
 @Beta
 public final class DataTreeCandidateInputOutput {
+    public record DataTreeCandidateWithVersion(
+            @NonNull DataTreeCandidate candidate,
+            @NonNull NormalizedNodeStreamVersion version) implements Immutable {
+        public DataTreeCandidateWithVersion {
+            requireNonNull(candidate);
+            requireNonNull(version);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCandidateInputOutput.class);
     private static final byte DELETE = 0;
     private static final byte SUBTREE_MODIFIED = 1;
@@ -55,26 +60,26 @@ public final class DataTreeCandidateInputOutput {
 
     private static DataTreeCandidateNode readModifiedNode(final ModificationType type, final NormalizedNodeDataInput in,
             final ReusableStreamReceiver receiver) throws IOException {
-        final PathArgument identifier = in.readPathArgument();
-        final Collection<DataTreeCandidateNode> children = readChildren(in, receiver);
+        final var pathArg = in.readPathArgument();
+        final var children = readChildren(in, receiver);
         if (children.isEmpty()) {
-            LOG.debug("Modified node {} does not have any children, not instantiating it", identifier);
+            LOG.debug("Modified node {} does not have any children, not instantiating it", pathArg);
             return null;
         }
 
-        return ModifiedDataTreeCandidateNode.create(identifier, type, children);
+        return ModifiedDataTreeCandidateNode.create(pathArg, type, children);
     }
 
-    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in,
+    private static List<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput in,
             final ReusableStreamReceiver receiver) throws IOException {
         final int size = in.readInt();
         if (size == 0) {
-            return ImmutableList.of();
+            return List.of();
         }
 
-        final Collection<DataTreeCandidateNode> ret = new ArrayList<>(size);
+        final var ret = new ArrayList<DataTreeCandidateNode>(size);
         for (int i = 0; i < size; ++i) {
-            final DataTreeCandidateNode child = readNode(in, receiver);
+            final var child = readNode(in, receiver);
             if (child != null) {
                 ret.add(child);
             }
@@ -96,40 +101,20 @@ public final class DataTreeCandidateInputOutput {
         };
     }
 
-    @NonNullByDefault
-    public static final class DataTreeCandidateWithVersion implements Immutable {
-        private final DataTreeCandidate candidate;
-        private final NormalizedNodeStreamVersion version;
-
-        public DataTreeCandidateWithVersion(final DataTreeCandidate candidate,
-                final NormalizedNodeStreamVersion version) {
-            this.candidate = requireNonNull(candidate);
-            this.version = requireNonNull(version);
-        }
-
-        public DataTreeCandidate getCandidate() {
-            return candidate;
-        }
-
-        public NormalizedNodeStreamVersion getVersion() {
-            return version;
-        }
-    }
-
     public static DataTreeCandidateWithVersion readDataTreeCandidate(final DataInput in,
             final ReusableStreamReceiver receiver) throws IOException {
-        final NormalizedNodeDataInput reader = NormalizedNodeDataInput.newDataInput(in);
-        final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
+        final var reader = NormalizedNodeDataInput.newDataInput(in);
+        final var rootPath = reader.readYangInstanceIdentifier();
         final byte type = reader.readByte();
 
         final DataTreeCandidateNode rootNode = switch (type) {
             case APPEARED -> ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED,
-                                readChildren(reader, receiver));
+                readChildren(reader, receiver));
             case DELETE -> DeletedDataTreeCandidateNode.create();
             case DISAPPEARED -> ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED,
-                                readChildren(reader, receiver));
+                readChildren(reader, receiver));
             case SUBTREE_MODIFIED -> ModifiedDataTreeCandidateNode.create(ModificationType.SUBTREE_MODIFIED,
-                                    readChildren(reader, receiver));
+                readChildren(reader, receiver));
             case WRITE -> DataTreeCandidateNodes.written(reader.readNormalizedNode(receiver));
             case UNMODIFIED -> AbstractDataTreeCandidateNode.createUnmodified();
             default -> throw new IllegalArgumentException("Unhandled node type " + type);
@@ -141,7 +126,7 @@ public final class DataTreeCandidateInputOutput {
     private static void writeChildren(final NormalizedNodeDataOutput out,
             final Collection<DataTreeCandidateNode> children) throws IOException {
         out.writeInt(children.size());
-        for (DataTreeCandidateNode child : children) {
+        for (var child : children) {
             writeNode(out, child);
         }
     }
@@ -149,69 +134,61 @@ public final class DataTreeCandidateInputOutput {
     private static void writeNode(final NormalizedNodeDataOutput out, final DataTreeCandidateNode node)
             throws IOException {
         switch (node.modificationType()) {
-            case APPEARED:
+            case APPEARED -> {
                 out.writeByte(APPEARED);
                 out.writePathArgument(node.name());
                 writeChildren(out, node.childNodes());
-                break;
-            case DELETE:
+            }
+            case DELETE -> {
                 out.writeByte(DELETE);
                 out.writePathArgument(node.name());
-                break;
-            case DISAPPEARED:
+            }
+            case DISAPPEARED -> {
                 out.writeByte(DISAPPEARED);
                 out.writePathArgument(node.name());
                 writeChildren(out, node.childNodes());
-                break;
-            case SUBTREE_MODIFIED:
+            }
+            case SUBTREE_MODIFIED -> {
                 out.writeByte(SUBTREE_MODIFIED);
                 out.writePathArgument(node.name());
                 writeChildren(out, node.childNodes());
-                break;
-            case WRITE:
+            }
+            case WRITE -> {
                 out.writeByte(WRITE);
                 out.writeNormalizedNode(node.getDataAfter());
-                break;
-            case UNMODIFIED:
-                out.writeByte(UNMODIFIED);
-                break;
-            default:
-                throwUnhandledNodeType(node);
+            }
+            case UNMODIFIED -> out.writeByte(UNMODIFIED);
+            default -> throwUnhandledNodeType(node);
         }
     }
 
     @VisibleForTesting
     public static void writeDataTreeCandidate(final DataOutput out, final PayloadVersion version,
             final DataTreeCandidate candidate) throws IOException {
-        try (NormalizedNodeDataOutput writer = version.getStreamVersion().newDataOutput(out)) {
+        try (var writer = version.getStreamVersion().newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
-            final DataTreeCandidateNode node = candidate.getRootNode();
+            final var node = candidate.getRootNode();
             switch (node.modificationType()) {
-                case APPEARED:
+                case APPEARED -> {
                     writer.writeByte(APPEARED);
                     writeChildren(writer, node.childNodes());
-                    break;
-                case DELETE:
-                    writer.writeByte(DELETE);
-                    break;
-                case DISAPPEARED:
+                }
+                case DELETE -> writer.writeByte(DELETE);
+                case DISAPPEARED -> {
                     writer.writeByte(DISAPPEARED);
                     writeChildren(writer, node.childNodes());
-                    break;
-                case SUBTREE_MODIFIED:
+                }
+                case SUBTREE_MODIFIED -> {
                     writer.writeByte(SUBTREE_MODIFIED);
                     writeChildren(writer, node.childNodes());
-                    break;
-                case UNMODIFIED:
-                    writer.writeByte(UNMODIFIED);
-                    break;
-                case WRITE:
+                }
+                case UNMODIFIED -> writer.writeByte(UNMODIFIED);
+                case WRITE -> {
                     writer.writeByte(WRITE);
                     writer.writeNormalizedNode(node.getDataAfter());
-                    break;
-                default:
-                    throwUnhandledNodeType(node);
+                }
+                default -> throwUnhandledNodeType(node);
             }
         }
     }

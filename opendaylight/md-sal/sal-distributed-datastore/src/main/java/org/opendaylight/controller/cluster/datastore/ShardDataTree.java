@@ -263,14 +263,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> snapshotMeta;
-        if (snapshot instanceof MetadataShardDataTreeSnapshot) {
-            snapshotMeta = ((MetadataShardDataTreeSnapshot) snapshot).getMetadata();
+        if (snapshot instanceof MetadataShardDataTreeSnapshot metaSnapshot) {
+            snapshotMeta = metaSnapshot.getMetadata();
         } else {
             snapshotMeta = ImmutableMap.of();
         }
 
-        for (ShardDataTreeMetadata<?> m : metadata) {
-            final ShardDataTreeSnapshotMetadata<?> s = snapshotMeta.get(m.getSupportedType());
+        for (var m : metadata) {
+            final var s = snapshotMeta.get(m.getSupportedType());
             if (s != null) {
                 m.applySnapshot(s);
             } else {
@@ -283,11 +283,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         // delete everything first
         mod.delete(YangInstanceIdentifier.of());
 
-        final Optional<NormalizedNode> maybeNode = snapshot.getRootNode();
-        if (maybeNode.isPresent()) {
+        snapshot.getRootNode().ifPresent(rootNode -> {
             // Add everything from the remote node back
-            mod.write(YangInstanceIdentifier.of(), maybeNode.orElseThrow());
-        }
+            mod.write(YangInstanceIdentifier.of(), rootNode);
+        });
+
         mod.ready();
 
         dataTree.validate(unwrapped);
@@ -336,9 +336,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.acquireCandidate();
         final DataTreeModification unwrapped = newModification();
         final PruningDataTreeModification mod = createPruningModification(unwrapped,
-            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().getVersion()) > 0);
+            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().version()) > 0);
 
-        DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
+        DataTreeCandidates.applyToModification(mod, entry.getValue().candidate());
         mod.ready();
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
@@ -375,20 +375,20 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
     final void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
-        if (payload instanceof CommitTransactionPayload) {
-            applyRecoveryCandidate((CommitTransactionPayload) payload);
-        } else if (payload instanceof AbortTransactionPayload) {
-            allMetadataAbortedTransaction(((AbortTransactionPayload) payload).getIdentifier());
-        } else if (payload instanceof PurgeTransactionPayload) {
-            allMetadataPurgedTransaction(((PurgeTransactionPayload) payload).getIdentifier());
-        } else if (payload instanceof CreateLocalHistoryPayload) {
-            allMetadataCreatedLocalHistory(((CreateLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof CloseLocalHistoryPayload) {
-            allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof PurgeLocalHistoryPayload) {
-            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof SkipTransactionsPayload) {
-            allMetadataSkipTransactions((SkipTransactionsPayload) payload);
+        if (payload instanceof CommitTransactionPayload commit) {
+            applyRecoveryCandidate(commit);
+        } else if (payload instanceof AbortTransactionPayload abort) {
+            allMetadataAbortedTransaction(abort.getIdentifier());
+        } else if (payload instanceof PurgeTransactionPayload purge) {
+            allMetadataPurgedTransaction(purge.getIdentifier());
+        } else if (payload instanceof CreateLocalHistoryPayload create) {
+            allMetadataCreatedLocalHistory(create.getIdentifier());
+        } else if (payload instanceof CloseLocalHistoryPayload close) {
+            allMetadataClosedLocalHistory(close.getIdentifier());
+        } else if (payload instanceof PurgeLocalHistoryPayload purge) {
+            allMetadataPurgedLocalHistory(purge.getIdentifier());
+        } else if (payload instanceof SkipTransactionsPayload skip) {
+            allMetadataSkipTransactions(skip);
         } else {
             LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
         }
@@ -402,7 +402,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         final DataTreeModification mod = newModification();
         // TODO: check version here, which will enable us to perform forward-compatibility transformations
-        DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
+        DataTreeCandidates.applyToModification(mod, entry.getValue().candidate());
         mod.ready();
 
         LOG.trace("{}: Applying foreign modification {}", logContext, mod);
@@ -436,52 +436,51 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
          * In any case, we know that this is an entry coming from replication, hence we can be sure we will not observe
          * pre-Boron state -- which limits the number of options here.
          */
-        if (payload instanceof CommitTransactionPayload) {
+        if (payload instanceof CommitTransactionPayload commit) {
             if (identifier == null) {
-                applyReplicatedCandidate((CommitTransactionPayload) payload);
+                applyReplicatedCandidate(commit);
             } else {
                 verify(identifier instanceof TransactionIdentifier);
                 // if we did not track this transaction before, it means that it came from another leader and we are in
                 // the process of commiting it while in PreLeader state. That means that it hasnt yet been committed to
                 // the local DataTree and would be lost if it was only applied via payloadReplicationComplete().
                 if (!payloadReplicationComplete((TransactionIdentifier) identifier)) {
-                    applyReplicatedCandidate((CommitTransactionPayload) payload);
+                    applyReplicatedCandidate(commit);
                 }
             }
 
             // make sure acquireCandidate() is the last call touching the payload data as we want it to be GC-ed.
-            checkRootOverwrite(((CommitTransactionPayload) payload).acquireCandidate().getValue()
-                    .getCandidate());
-        } else if (payload instanceof AbortTransactionPayload) {
+            checkRootOverwrite(((CommitTransactionPayload) payload).acquireCandidate().getValue().candidate());
+        } else if (payload instanceof AbortTransactionPayload abort) {
             if (identifier != null) {
-                payloadReplicationComplete((AbortTransactionPayload) payload);
+                payloadReplicationComplete(abort);
             }
-            allMetadataAbortedTransaction(((AbortTransactionPayload) payload).getIdentifier());
-        } else if (payload instanceof PurgeTransactionPayload) {
+            allMetadataAbortedTransaction(abort.getIdentifier());
+        } else if (payload instanceof PurgeTransactionPayload purge) {
             if (identifier != null) {
-                payloadReplicationComplete((PurgeTransactionPayload) payload);
+                payloadReplicationComplete(purge);
             }
-            allMetadataPurgedTransaction(((PurgeTransactionPayload) payload).getIdentifier());
-        } else if (payload instanceof CloseLocalHistoryPayload) {
+            allMetadataPurgedTransaction(purge.getIdentifier());
+        } else if (payload instanceof CloseLocalHistoryPayload close) {
             if (identifier != null) {
-                payloadReplicationComplete((CloseLocalHistoryPayload) payload);
+                payloadReplicationComplete(close);
             }
-            allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof CreateLocalHistoryPayload) {
+            allMetadataClosedLocalHistory(close.getIdentifier());
+        } else if (payload instanceof CreateLocalHistoryPayload create) {
             if (identifier != null) {
-                payloadReplicationComplete((CreateLocalHistoryPayload)payload);
+                payloadReplicationComplete(create);
             }
-            allMetadataCreatedLocalHistory(((CreateLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof PurgeLocalHistoryPayload) {
+            allMetadataCreatedLocalHistory(create.getIdentifier());
+        } else if (payload instanceof PurgeLocalHistoryPayload purge) {
             if (identifier != null) {
-                payloadReplicationComplete((PurgeLocalHistoryPayload)payload);
+                payloadReplicationComplete(purge);
             }
-            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof SkipTransactionsPayload) {
+            allMetadataPurgedLocalHistory(purge.getIdentifier());
+        } else if (payload instanceof SkipTransactionsPayload skip) {
             if (identifier != null) {
-                payloadReplicationComplete((SkipTransactionsPayload)payload);
+                payloadReplicationComplete(skip);
             }
-            allMetadataSkipTransactions((SkipTransactionsPayload) payload);
+            allMetadataSkipTransactions(skip);
         } else {
             LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
         }
