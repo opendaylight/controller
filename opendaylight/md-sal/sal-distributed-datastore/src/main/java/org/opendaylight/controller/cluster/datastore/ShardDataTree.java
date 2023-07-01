@@ -336,9 +336,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.acquireCandidate();
         final DataTreeModification unwrapped = newModification();
         final PruningDataTreeModification mod = createPruningModification(unwrapped,
-            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().getVersion()) > 0);
+            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().version()) > 0);
 
-        DataTreeCandidates.applyToModification(mod, entry.getValue().getCandidate());
+        DataTreeCandidates.applyToModification(mod, entry.getValue().candidate());
         mod.ready();
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
