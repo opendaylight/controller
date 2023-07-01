@@ -123,8 +123,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         try (JsonWriter jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
             jsonWriter.beginObject();
 
-            try (NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(
-                JSONNormalizedNodeStreamWriter.createNestedWriter(
+            try (var nnWriter = NormalizedNodeWriter.forStreamWriter(JSONNormalizedNodeStreamWriter.createNestedWriter(
                     JSONCodecFactorySupplier.RFC7951.getShared(schemaContext),
                     SchemaInferenceStack.of(schemaContext).toInference(), null, jsonWriter),
                 true)) {
@@ -143,11 +142,10 @@ public final class JsonExportActor extends AbstractUntypedActor {
         try (JsonWriter jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
             jsonWriter.beginObject().name("Entries");
             jsonWriter.beginArray();
-            for (ReplicatedLogEntry entry : entries) {
+            for (var entry : entries) {
                 final var data = entry.getData();
-                if (data instanceof CommitTransactionPayload) {
-                    final CommitTransactionPayload payload = (CommitTransactionPayload) entry.getData();
-                    final DataTreeCandidate candidate = payload.getCandidate().getValue().getCandidate();
+                if (data instanceof CommitTransactionPayload payload) {
+                    final var candidate = payload.getCandidate().getValue().candidate();
                     writeNode(jsonWriter, candidate);
                 } else {
                     jsonWriter.beginObject().name("Payload").value(data.toString()).endObject();
@@ -161,12 +159,9 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     private static void writeNode(final JsonWriter writer, final DataTreeCandidate candidate) throws IOException {
-        writer.beginObject();
-        writer.name("Entry");
-        writer.beginArray();
+        writer.beginObject().name("Entry").beginArray();
         doWriteNode(writer, candidate.getRootPath(), candidate.getRootNode());
-        writer.endArray();
-        writer.endObject();
+        writer.endArray().endObject();
     }
 
     private static void doWriteNode(final JsonWriter writer, final YangInstanceIdentifier path,
@@ -238,8 +233,8 @@ public final class JsonExportActor extends AbstractUntypedActor {
 
         NodeIterator next(final JsonWriter writer) throws IOException {
             while (iterator.hasNext()) {
-                final DataTreeCandidateNode node = iterator.next();
-                final YangInstanceIdentifier child = path.node(node.name());
+                final var node = iterator.next();
+                final var child = path.node(node.name());
 
                 switch (node.modificationType()) {
                     case APPEARED:

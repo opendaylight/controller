@@ -68,7 +68,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
     private static void assertCandidateEquals(final DataTreeCandidate expected,
             final DataTreeCandidateWithVersion actual) {
-        final DataTreeCandidate candidate = actual.getCandidate();
+        final var candidate = actual.candidate();
         assertEquals("root path", expected.getRootPath(), candidate.getRootPath());
         assertCandidateNodeEquals(expected.getRootNode(), candidate.getRootNode());
     }
