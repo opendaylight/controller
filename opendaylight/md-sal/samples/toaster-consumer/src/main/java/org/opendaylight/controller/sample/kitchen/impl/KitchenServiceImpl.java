@@ -11,10 +11,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -57,7 +57,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
     private static final Logger LOG = LoggerFactory.getLogger(KitchenServiceImpl.class);
     private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
 
-    private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final ToasterService toaster;
     private final Registration reg;
 
@@ -115,7 +115,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
     }
 
     private ListenableFuture<RpcResult<Void>> makeEggs(final EggsType eggsType) {
-        return executor.submit(() -> RpcResultBuilder.<Void>success().build());
+        return Futures.submit(() -> RpcResultBuilder.<Void>success().build(), executor);
     }
 
     private ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final ToastType toastType, final int toastDoneness) {
