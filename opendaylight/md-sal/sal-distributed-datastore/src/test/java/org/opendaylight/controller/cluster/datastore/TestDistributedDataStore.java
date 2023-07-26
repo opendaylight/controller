@@ -22,7 +22,7 @@ public class TestDistributedDataStore extends DistributedDataStore implements Lo
                                     final Configuration configuration,
                                     final DatastoreContextFactory datastoreContextFactory,
                                     final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, null);
     }
 
     TestDistributedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {

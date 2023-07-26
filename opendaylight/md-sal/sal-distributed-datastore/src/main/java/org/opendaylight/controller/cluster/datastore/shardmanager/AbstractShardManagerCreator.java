@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.controller.cluster.datastore.persistance.PersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.yangtools.yang.common.Empty;
@@ -28,6 +29,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     private AbstractDataStore distributedDataStore;
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
+    private PersistenceProvider persistenceProvider;
     private volatile boolean sealed;
 
     AbstractShardManagerCreator() {
@@ -110,6 +112,16 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     public T restoreFromSnapshot(final DatastoreSnapshot newRestoreFromSnapshot) {
         checkSealed();
         this.restoreFromSnapshot = newRestoreFromSnapshot;
+        return self();
+    }
+
+    PersistenceProvider getPersistenceProvider() {
+        return persistenceProvider;
+    }
+
+    public T persistenceProvider(final PersistenceProvider newPersistenceProvider) {
+        checkSealed();
+        persistenceProvider = newPersistenceProvider;
         return self();
     }
 

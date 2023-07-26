@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
+import org.opendaylight.controller.cluster.datastore.persistance.PersistenceProvider;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.osgi.framework.FrameworkUtil;
@@ -119,6 +120,8 @@ public final class OSGiDistributedDataStore {
     ModuleShardConfigProvider configProvider = null;
     @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
     ComponentFactory<OSGiDOMStore> datastoreFactory = null;
+    @Reference
+    PersistenceProvider persistenceProvider = null;
 
     private DatastoreState configDatastore;
     private DatastoreState operDatastore;
@@ -150,7 +153,7 @@ public final class OSGiDistributedDataStore {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType, properties);
         final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
-            introspector.getContext(), introspector, snapshotRestore, config);
+            introspector.getContext(), introspector, snapshotRestore, config, persistenceProvider);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
         final DatastoreState state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
 

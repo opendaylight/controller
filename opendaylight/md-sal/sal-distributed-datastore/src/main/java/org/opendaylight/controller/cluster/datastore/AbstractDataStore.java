@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
+import org.opendaylight.controller.cluster.datastore.persistance.PersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
@@ -72,11 +73,17 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
     private DatastoreInfoMXBeanImpl datastoreInfoMXBean;
 
+    protected AbstractDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+            final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
+            final DatastoreSnapshot restoreFromSnapshot) {
+        this(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, null);
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Testing overrides")
     protected AbstractDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
-            final DatastoreSnapshot restoreFromSnapshot) {
+            final DatastoreSnapshot restoreFromSnapshot, final PersistenceProvider persistenceProvider) {
         requireNonNull(actorSystem, "actorSystem should not be null");
         requireNonNull(cluster, "cluster should not be null");
         requireNonNull(configuration, "configuration should not be null");
@@ -97,7 +104,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 .readinessFuture(readinessFuture)
                 .primaryShardInfoCache(primaryShardInfoCache)
                 .restoreFromSnapshot(restoreFromSnapshot)
-                .distributedDataStore(this);
+                .distributedDataStore(this)
+                .persistenceProvider(persistenceProvider);
 
         actorUtils = new ActorUtils(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
                 shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(),

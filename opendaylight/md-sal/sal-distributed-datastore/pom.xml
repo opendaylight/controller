@@ -224,6 +224,11 @@
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-binding-test-utils</artifactId>
     </dependency>
+      <dependency>
+          <groupId>com.guicedee.services</groupId>
+          <artifactId>javax.inject</artifactId>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
   <build>

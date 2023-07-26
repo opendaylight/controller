@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
+import org.opendaylight.controller.cluster.datastore.persistance.PersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -64,16 +65,19 @@ public final class ShardInformation {
     private DatastoreContext datastoreContext;
     private Shard.AbstractBuilder<?, ?> builder;
     private boolean activeMember = true;
+    private PersistenceProvider persistenceProvider;
 
     ShardInformation(final String shardName, final ShardIdentifier shardId,
             final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
-            final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
+            final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver,
+            final PersistenceProvider persistenceProvider) {
         this.shardName = shardName;
         this.shardId = shardId;
         this.initialPeerAddresses = initialPeerAddresses;
         this.datastoreContext = datastoreContext;
         this.builder = builder;
         this.addressResolver = addressResolver;
+        this.persistenceProvider = persistenceProvider;
     }
 
     Props newProps() {
@@ -261,6 +265,10 @@ public final class ShardInformation {
 
     void setSchemaContext(final EffectiveModelContext schemaContext) {
         schemaContextProvider.set(requireNonNull(schemaContext));
+    }
+
+    void setPersistenceProvider(final PersistenceProvider persistenceProvider) {
+        this.persistenceProvider = persistenceProvider;
     }
 
     @VisibleForTesting

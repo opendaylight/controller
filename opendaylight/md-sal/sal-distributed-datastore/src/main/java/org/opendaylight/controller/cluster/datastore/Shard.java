@@ -90,6 +90,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.persistance.PersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPayload;
@@ -218,6 +219,8 @@ public class Shard extends RaftActor {
 
     private final ActorRef exportActor;
 
+    private final PersistenceProvider persistenceProvider;
+
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -229,6 +232,8 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
         frontendMetadata = new FrontendMetadata(name);
         exportOnRecovery = datastoreContext.getExportOnRecovery();
+        persistenceProvider = builder.getPersistenceProvider();
+        LOG.info("Shard created : {}, persistenceProvider : {}", name, persistenceProvider);
 
         exportActor = switch (exportOnRecovery) {
             case Json -> getContext().actorOf(JsonExportActor.props(builder.getSchemaContext(),
@@ -236,6 +241,7 @@ public class Shard extends RaftActor {
             case Off -> null;
         };
 
+        //requireNonNull(persistenceProvider.name);
         setPersistence(datastoreContext.isPersistent());
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
@@ -1160,8 +1166,9 @@ public class Shard extends RaftActor {
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private EffectiveModelContextProvider schemaContextProvider;
-        private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
+        private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot; // hmmm
         private DataTree dataTree;
+        private PersistenceProvider persistenceProvider;
 
         private volatile boolean sealed;
 
@@ -1214,6 +1221,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T persistenceProvider(final PersistenceProvider newPersistenceProvider) {
+            checkSealed();
+            persistenceProvider = newPersistenceProvider;
+            return self();
+        }
+
         public ShardIdentifier getId() {
             return id;
         }
@@ -1227,7 +1240,7 @@ public class Shard extends RaftActor {
         }
 
         public EffectiveModelContext getSchemaContext() {
-            return verifyNotNull(schemaContextProvider.getEffectiveModelContext());
+            return verifyNotNull(schemaContextProvider.getEffectiveModelContext());  // hmmm
         }
 
         public DatastoreSnapshot.ShardSnapshot getRestoreFromSnapshot() {
@@ -1243,6 +1256,10 @@ public class Shard extends RaftActor {
                 case CONFIGURATION -> TreeType.CONFIGURATION;
                 case OPERATIONAL -> TreeType.OPERATIONAL;
             };
+        }
+
+        public PersistenceProvider getPersistenceProvider() {
+            return persistenceProvider;
         }
 
         protected void verify() {

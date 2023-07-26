@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.controller.cluster.datastore.persistance.PersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -29,8 +30,8 @@ public class ClientBackedDataStore extends AbstractDataStore {
 
     public ClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
-            final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+            final DatastoreSnapshot restoreFromSnapshot, PersistenceProvider persistenceProvider) {
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, persistenceProvider);
     }
 
     @VisibleForTesting

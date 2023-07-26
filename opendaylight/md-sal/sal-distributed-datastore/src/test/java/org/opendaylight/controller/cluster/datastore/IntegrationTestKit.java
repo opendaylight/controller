@@ -186,7 +186,7 @@ public class IntegrationTestKit extends ShardTestKit {
         doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
         final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
-                configuration, mockContextFactory, restoreFromSnapshot);
+                configuration, mockContextFactory, restoreFromSnapshot, null);
 
         dataStore.onModelContextUpdated(schemaContext);
 
@@ -211,7 +211,7 @@ public class IntegrationTestKit extends ShardTestKit {
         doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
         final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
-                configuration, mockContextFactory, restoreFromSnapshot);
+                configuration, mockContextFactory, restoreFromSnapshot, null);
 
         dataStore.onModelContextUpdated(schemaContext);
 

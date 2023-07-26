@@ -42,7 +42,7 @@ public class TestShardManager extends ShardManager {
                 info.getDatastoreContext(),
                 TestShard.builder()
                         .restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
-                peerAddressResolver);
+                peerAddressResolver, null);
         newInfo.setSchemaContext(info.getSchemaContext());
         newInfo.setActiveMember(info.isActiveMember());
 
@@ -59,7 +59,7 @@ public class TestShardManager extends ShardManager {
                                         Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
         return new ShardInformation(shardName, shardId, peerAddresses,
                 datastoreContext, TestShard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
-                peerAddressResolver);
+                peerAddressResolver, null);
     }
 
     public static class TestShardManagerCreator extends AbstractShardManagerCreator<TestShardManagerCreator> {

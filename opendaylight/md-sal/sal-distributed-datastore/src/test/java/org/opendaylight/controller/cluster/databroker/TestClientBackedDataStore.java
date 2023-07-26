@@ -27,7 +27,7 @@ public class TestClientBackedDataStore extends ClientBackedDataStore implements 
                                      final Configuration configuration,
                                      final DatastoreContextFactory datastoreContextFactory,
                                      final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, null);
     }
 
     TestClientBackedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
