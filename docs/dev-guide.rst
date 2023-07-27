@@ -880,9 +880,9 @@ RESTCONF operations overview
 RESTCONF supports **OPTIONS**, **GET**, **PUT**, **POST**, and
 **DELETE** operations. Request and response data can either be in the
 XML or JSON format. XML structures according to yang are defined at:
-`XML-YANG <http://tools.ietf.org/html/rfc6020>`__. JSON structures are
+`XML-YANG <https://www.rfc-editor.org/rfc/rfc6020>`__. JSON structures are
 defined at:
-`JSON-YANG <http://tools.ietf.org/html/draft-lhotka-netmod-yang-json-02>`__.
+`JSON-YANG <https://datatracker.ietf.org/doc/html/draft-lhotka-netmod-yang-json-02>`__.
 Data in the request must have a correctly set **Content-Type** field in
 the http header with the allowed value of the media type. The media type
 of the requested data has to be set in the **Accept** field. Get the
@@ -910,7 +910,7 @@ Identifier <https://wiki-archive.opendaylight.org/view/OpenDaylight_Controller:M
      be known which node is X (for example: C:X). For more details about
      encoding, see: `RESTCONF 02 - Encoding YANG Instance Identifiers in
      the Request
-     URI. <http://tools.ietf.org/html/draft-bierman-netconf-restconf-02#section-5.3.1>`__
+     URI. <https://datatracker.ietf.org/doc/html/draft-bierman-netconf-restconf-02#section-5.3.1>`__
 
 Mount point
 ~~~~~~~~~~~
@@ -1086,7 +1086,7 @@ DELETE /restconf/config/<identifier>
 -  <identifier> points to a data node which must be removed.
 
 More information is available in the `RESTCONF
-RFC <http://tools.ietf.org/html/draft-bierman-netconf-restconf-02>`__.
+RFC <https://datatracker.ietf.org/doc/html/draft-bierman-netconf-restconf-02>`__.
 
 How RESTCONF works
 ~~~~~~~~~~~~~~~~~~
