@@ -10,7 +10,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>config-aggregator</artifactId>
-  <version>0.18.9</version>
+  <version>0.18.10-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
