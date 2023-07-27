@@ -893,7 +893,7 @@ the http header with the allowed value of the media type. The media type
 of the requested data has to be set in the **Accept** field. Get the
 media types for each resource by calling the OPTIONS operation. Most of
 the paths of the pathsRestconf endpoints use `Instance
-Identifier <https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:Concepts#Instance_Identifier>`__.
+Identifier <https://wiki-archive.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:Concepts#Instance_Identifier>`__.
 ``<identifier>`` is used in the explanation of the operations.
 
 | **<identifier>**
@@ -927,7 +927,7 @@ Mount point
   point itself by using <identifier>/**yang-ext:mount**.
 | More information on how to actually use mountpoints is available at:
   `OpenDaylight
-  Controller:Config:Examples:Netconf <https://wiki.opendaylight.org/view/OpenDaylight_Controller:Config:Examples:Netconf>`__.
+  Controller:Config:Examples:Netconf <https://wiki-archive.opendaylight.org/view/OpenDaylight_Controller:Config:Examples:Netconf>`__.
 
 HTTP methods
 ~~~~~~~~~~~~
