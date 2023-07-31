@@ -35,6 +35,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f6f30b68_e7ffdf28",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1db082fb_b743fc84",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cdb99756_388bfee4",
@@ -48,6 +66,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "use assertTrue(\"Current term \u003e \" + initialTerm, currentTerm \u003e initialTerm);",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8fa1e87e_f88c9c90",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cdb99756_388bfee4",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -69,6 +105,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d5013aa5_2d1593ae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "044d2b29_21c5963a",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b47dde4d_c1ca71fb",
@@ -82,6 +136,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "final",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "291a2530_2fc96b72",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 794,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b47dde4d_c1ca71fb",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -103,6 +175,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "161d62f2_c5c87f4a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 825,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b70bd57_8b69f264",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1bc3f067_30a330fa",
@@ -116,6 +206,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "final",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ac31f8d_e77f99be",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 845,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bc3f067_30a330fa",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -137,6 +245,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "598d3497_09119582",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f7222ee_cc56f64c",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6a238f29_216ed2a2",
@@ -150,6 +276,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "final",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8eb0c9e2_70689a44",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a238f29_216ed2a2",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -171,6 +315,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "286acfe9_8f1fc445",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 915,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0bd8e51f_1f397da3",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d1bf64ce_0676812a",
@@ -188,6 +350,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3900c94b_c935c1c4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 917,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1bf64ce_0676812a",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d05c8976_f312d958",
@@ -201,6 +381,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "final",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b4141d49_f1746ce7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 954,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d05c8976_f312d958",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -228,6 +426,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6bbc4e0a_89a455ff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 971,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "082342d8_5401d259",
+      "range": {
+        "startLine": 971,
+        "startChar": 12,
+        "endLine": 971,
+        "endChar": 99
+      },
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0881ae60_9a41ae30",
@@ -241,6 +463,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "final (optional)",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "943908bb_67f70201",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1164,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0881ae60_9a41ae30",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -262,6 +502,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d423688_1d53ecec",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ad650da_ac631a90",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2784c5fa_3e0e2de7",
@@ -279,6 +537,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b5062a2_e4d9e4af",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1181,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2784c5fa_3e0e2de7",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "34f1a3b1_6626bcf9",
@@ -292,6 +568,24 @@
       "writtenOn": "2023-07-27T11:59:05Z",
       "side": 1,
       "message": "this class is never used, how is related to this patch?",
+      "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "94ecaac2_42eff944",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/policy/IndependentLeaderTestRaftPolicy.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-07-31T09:59:24Z",
+      "side": 1,
+      "message": "It is set as custom RAFT policy in testDuplicativeSnapshotReplicationWhileSnapshotIsBeingApplied()",
+      "parentUuid": "34f1a3b1_6626bcf9",
       "revId": "2999a44ba759e6d46d0854715bb4cb26e8a199cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
