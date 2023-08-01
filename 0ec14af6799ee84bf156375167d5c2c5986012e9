@@ -129,6 +129,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3618e031_8e3d7504",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:40:08Z",
+      "side": 1,
+      "message": "okay, there are no details in JIRA and there is zero documentation. What is this supposed to achieve? JavaDocs, JavaDocs, JavaDocs!",
+      "range": {
+        "startLine": 18,
+        "startChar": 13,
+        "endLine": 18,
+        "endChar": 32
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "ba55dc51_72663bad",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
         "patchSetId": 1
