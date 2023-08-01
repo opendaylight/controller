@@ -43,6 +43,115 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "72a8abc1_40f9f24a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "inappropriate info()",
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5b894167_ace98622",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "wrong check",
+      "range": {
+        "startLine": 244,
+        "startChar": 8,
+        "endLine": 244,
+        "endChar": 51
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "39edc420_b4e7193f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "okay, so what is the interface being provided? That needs to be defined as a separate interface.",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 28
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd1b5f0b_b5393752",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "@Components are also @Singleton (with @Inject/@Activate constructor) and classes are always final.",
+      "range": {
+        "startLine": 18,
+        "startChar": 7,
+        "endLine": 18,
+        "endChar": 12
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ba55dc51_72663bad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "nope, everything datastore-related needs to be configurable via distributed-datastore-provider.yang",
+      "range": {
+        "startLine": 23,
+        "startChar": 4,
+        "endLine": 23,
+        "endChar": 30
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "cb781d88_9aecbb41",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
         "patchSetId": 1
@@ -59,6 +168,75 @@
         "startChar": 16,
         "endLine": 25,
         "endChar": 29
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd926806_75ee6f92",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "Nope, use constuctor injection",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 13
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "29939885_e6962d26",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 33,
+        "startChar": 16,
+        "endLine": 33,
+        "endChar": 19
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ec58f315_ea0b188f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardInformation.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:37:21Z",
+      "side": 1,
+      "message": "certainly not: PersistenceProvider is at most an implementation detail",
+      "range": {
+        "startLine": 68,
+        "startChar": 12,
+        "endLine": 68,
+        "endChar": 52
       },
       "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
