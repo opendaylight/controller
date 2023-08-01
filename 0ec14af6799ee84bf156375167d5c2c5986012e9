@@ -240,6 +240,29 @@
       },
       "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d9558efb_4f724163",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/IntegrationTestKit.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-08-01T21:38:34Z",
+      "side": 1,
+      "message": "nope, there should be a separate constructor, if really need be (potentially @VisibleForTesting)",
+      "range": {
+        "startLine": 214,
+        "startChar": 72,
+        "endLine": 214,
+        "endChar": 76
+      },
+      "revId": "0ec14af6799ee84bf156375167d5c2c5986012e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
