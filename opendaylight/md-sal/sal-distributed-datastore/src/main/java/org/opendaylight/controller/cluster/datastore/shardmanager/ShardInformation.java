@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -64,21 +65,25 @@ public final class ShardInformation {
     private DatastoreContext datastoreContext;
     private Shard.AbstractBuilder<?, ?> builder;
     private boolean activeMember = true;
+    private SnapshotPersistenceProvider persistenceProvider;
 
     ShardInformation(final String shardName, final ShardIdentifier shardId,
             final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
-            final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
+            final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver,
+            final SnapshotPersistenceProvider persistenceProvider) {
         this.shardName = shardName;
         this.shardId = shardId;
         this.initialPeerAddresses = initialPeerAddresses;
         this.datastoreContext = datastoreContext;
         this.builder = builder;
         this.addressResolver = addressResolver;
+        this.persistenceProvider = persistenceProvider;
     }
 
     Props newProps() {
         Props props = requireNonNull(builder).id(shardId).peerAddresses(initialPeerAddresses)
-                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider).props();
+                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider)
+                .persistenceProvider(persistenceProvider).props();
         builder = null;
         return props;
     }
@@ -261,6 +266,10 @@ public final class ShardInformation {
 
     void setSchemaContext(final EffectiveModelContext schemaContext) {
         schemaContextProvider.set(requireNonNull(schemaContext));
+    }
+
+    void setPersistenceProvider(final SnapshotPersistenceProvider persistenceProvider) {
+        this.persistenceProvider = persistenceProvider;
     }
 
     @VisibleForTesting

@@ -1,4 +1,3 @@
-// vi: set smarttab et sw=4 tabstop=4:
 module distributed-datastore-provider {
 
     yang-version 1;
@@ -279,6 +278,28 @@ module distributed-datastore-provider {
             type boolean;
             description "Use lz4 compression for snapshots, sent from leader to follower, for snapshots stored
                         by LocalSnapshotStore, use akka.conf configuration.";
+        }
+
+        leaf lz4-block-size {
+            default "256KB";
+            type string;
+            description "Size of blocks for lz4 compression: 64KB, 256KB, 1MB or 4MB";
+        }
+
+        leaf snapshots-dir {
+            default "snapshots";
+            type string;
+            description "Storage location of snapshot files.";
+        }
+
+        leaf max-load-attempts {
+            default 3;
+            type non-zero-uint32-type;
+            description "Number load attempts when recovering from the latest snapshot fails
+                        yet older snapshot files are available. Each recovery attempt will try
+                        to recover using an older than previously failed-on snapshot file
+                        (if any are present). If all attempts fail the recovery will fail and
+                        the persistent actor will be stopped.";
         }
 
         leaf export-on-recovery {

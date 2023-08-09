@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker;
 
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -29,8 +30,8 @@ public class ClientBackedDataStore extends AbstractDataStore {
 
     public ClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
-            final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+            final DatastoreSnapshot restoreFromSnapshot, SnapshotPersistenceProvider persistenceProvider) {
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, persistenceProvider);
     }
 
     @VisibleForTesting

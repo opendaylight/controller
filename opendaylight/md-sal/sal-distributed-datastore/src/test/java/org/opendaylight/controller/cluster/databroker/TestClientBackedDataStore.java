@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -26,8 +27,10 @@ public class TestClientBackedDataStore extends ClientBackedDataStore implements 
     public TestClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
                                      final Configuration configuration,
                                      final DatastoreContextFactory datastoreContextFactory,
-                                     final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+                                     final DatastoreSnapshot restoreFromSnapshot,
+                                     final SnapshotPersistenceProvider snapshotPersistenceProvider) {
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot,
+                snapshotPersistenceProvider);
     }
 
     TestClientBackedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,

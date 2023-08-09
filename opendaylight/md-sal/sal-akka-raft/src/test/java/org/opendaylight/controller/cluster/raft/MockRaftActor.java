@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -51,7 +52,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
         super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION,
+            new DefaultSnapshotPersistenceProvider());
         state = Collections.synchronizedList(new ArrayList<>());
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
