@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.Props;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
@@ -28,6 +29,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     private AbstractDataStore distributedDataStore;
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
+    private SnapshotPersistenceProvider persistenceProvider;
     private volatile boolean sealed;
 
     AbstractShardManagerCreator() {
@@ -110,6 +112,16 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     public T restoreFromSnapshot(final DatastoreSnapshot newRestoreFromSnapshot) {
         checkSealed();
         this.restoreFromSnapshot = newRestoreFromSnapshot;
+        return self();
+    }
+
+    SnapshotPersistenceProvider getPersistenceProvider() {
+        return persistenceProvider;
+    }
+
+    public T persistenceProvider(final SnapshotPersistenceProvider newPersistenceProvider) {
+        checkSealed();
+        persistenceProvider = newPersistenceProvider;
         return self();
     }
 

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -53,7 +54,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     public ExampleActor(final String id, final Map<String, String> peerAddresses,
         final Optional<ConfigParams> configParams) {
-        super(id, peerAddresses, configParams, (short)0);
+        super(id, peerAddresses, configParams, (short)0, new DefaultSnapshotPersistenceProvider());
         setPersistence(true);
         roleChangeNotifier = createRoleChangeNotifier(id);
     }
