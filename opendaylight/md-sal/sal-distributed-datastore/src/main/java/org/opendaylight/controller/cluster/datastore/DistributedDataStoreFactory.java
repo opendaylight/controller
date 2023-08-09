@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -27,19 +28,20 @@ public final class DistributedDataStoreFactory {
     public static AbstractDataStore createInstance(final DOMSchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final DatastoreContextIntrospector introspector,
-            final DatastoreContextPropertiesUpdater updater) {
+            final DatastoreContextPropertiesUpdater updater, final SnapshotPersistenceProvider persistenceProvider) {
         return createInstance(schemaService, initialDatastoreContext, datastoreSnapshotRestore, actorSystemProvider,
-                introspector, updater, null);
+                introspector, updater, null, persistenceProvider);
     }
 
     // TODO: separate out settle wait so it is better controlled
     public static AbstractDataStore createInstance(final DOMSchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final DatastoreContextIntrospector introspector,
-            final DatastoreContextPropertiesUpdater updater, final Configuration orgConfig) {
+            final DatastoreContextPropertiesUpdater updater, final Configuration orgConfig,
+            final SnapshotPersistenceProvider persistenceProvider) {
 
         final AbstractDataStore dataStore = createInstance(actorSystemProvider, initialDatastoreContext,
-            introspector, datastoreSnapshotRestore, orgConfig);
+            introspector, datastoreSnapshotRestore, orgConfig, persistenceProvider);
 
         updater.setListener(dataStore);
 
@@ -53,7 +55,8 @@ public final class DistributedDataStoreFactory {
 
     public static AbstractDataStore createInstance(final ActorSystemProvider actorSystemProvider,
             final DatastoreContext initialDatastoreContext, final DatastoreContextIntrospector introspector,
-            final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig) {
+            final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig,
+            final SnapshotPersistenceProvider persistenceProvider) {
 
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
@@ -71,7 +74,7 @@ public final class DistributedDataStoreFactory {
         final var contextFactory = introspector.newContextFactory();
 
         final var ret = new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory,
-            restoreFromSnapshot);
+            restoreFromSnapshot, persistenceProvider);
         LOG.info("Data store {} is using tell-based protocol", datastoreName);
         return ret;
     }
