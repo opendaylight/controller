@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import java.util.Map;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.TestShard;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -42,7 +43,7 @@ public class TestShardManager extends ShardManager {
                 info.getDatastoreContext(),
                 TestShard.builder()
                         .restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
-                peerAddressResolver);
+                peerAddressResolver, new DefaultSnapshotPersistenceProvider());
         newInfo.setSchemaContext(info.getSchemaContext());
         newInfo.setActiveMember(info.isActiveMember());
 
@@ -59,7 +60,7 @@ public class TestShardManager extends ShardManager {
                                         Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
         return new ShardInformation(shardName, shardId, peerAddresses,
                 datastoreContext, TestShard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
-                peerAddressResolver);
+                peerAddressResolver, new DefaultSnapshotPersistenceProvider());
     }
 
     public static class TestShardManagerCreator extends AbstractShardManagerCreator<TestShardManagerCreator> {

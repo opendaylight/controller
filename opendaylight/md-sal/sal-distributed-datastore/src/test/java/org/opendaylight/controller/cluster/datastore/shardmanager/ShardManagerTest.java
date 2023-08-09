@@ -72,6 +72,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractClusterRefActorTest;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -203,12 +204,14 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     private TestShardManager.Builder newTestShardMgrBuilder() {
-        return TestShardManager.builder(datastoreContextBuilder).distributedDataStore(mock(AbstractDataStore.class));
+        return TestShardManager.builder(datastoreContextBuilder).distributedDataStore(mock(AbstractDataStore.class))
+                .persistenceProvider(new DefaultSnapshotPersistenceProvider());
     }
 
     private TestShardManager.Builder newTestShardMgrBuilder(final Configuration config) {
         return TestShardManager.builder(datastoreContextBuilder).configuration(config)
-                .distributedDataStore(mock(AbstractDataStore.class));
+                .distributedDataStore(mock(AbstractDataStore.class))
+                .persistenceProvider(new DefaultSnapshotPersistenceProvider());
     }
 
     private Props newShardMgrProps() {
