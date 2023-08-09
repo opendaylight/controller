@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -129,7 +130,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     protected Shard.Builder newShardBuilder() {
         return Shard.builder().id(shardID).datastoreContext(newDatastoreContext())
-            .schemaContextProvider(() -> SCHEMA_CONTEXT);
+            .schemaContextProvider(() -> SCHEMA_CONTEXT)
+            .persistenceProvider(new DefaultSnapshotPersistenceProvider());
     }
 
     protected void testRecovery(final Set<Integer> listEntryKeys, final boolean stopActorOnFinish) throws Exception {

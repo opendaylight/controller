@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -21,8 +22,10 @@ public class TestDistributedDataStore extends DistributedDataStore implements Lo
     public TestDistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
                                     final Configuration configuration,
                                     final DatastoreContextFactory datastoreContextFactory,
-                                    final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+                                    final DatastoreSnapshot restoreFromSnapshot,
+                                    final SnapshotPersistenceProvider snapshotPersistenceProvider) {
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot,
+                snapshotPersistenceProvider);
     }
 
     TestDistributedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {

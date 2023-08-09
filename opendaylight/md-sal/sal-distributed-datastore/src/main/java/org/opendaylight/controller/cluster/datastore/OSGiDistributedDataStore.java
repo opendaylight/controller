@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.Futures;
 import java.util.Map;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
@@ -119,6 +120,8 @@ public final class OSGiDistributedDataStore {
     ModuleShardConfigProvider configProvider = null;
     @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
     ComponentFactory<OSGiDOMStore> datastoreFactory = null;
+    @Reference
+    SnapshotPersistenceProvider persistenceProvider = null;
 
     private DatastoreState configDatastore;
     private DatastoreState operDatastore;
@@ -150,7 +153,7 @@ public final class OSGiDistributedDataStore {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType, properties);
         final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
-            introspector.getContext(), introspector, snapshotRestore, config);
+            introspector.getContext(), introspector, snapshotRestore, config, persistenceProvider);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
         final DatastoreState state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
 

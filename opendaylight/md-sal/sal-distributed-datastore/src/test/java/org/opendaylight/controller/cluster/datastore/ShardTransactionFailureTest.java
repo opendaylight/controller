@@ -16,6 +16,7 @@ import akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -52,7 +53,8 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     private ActorRef createShard() {
         ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)
-                .schemaContextProvider(() -> TEST_SCHEMA_CONTEXT).props());
+                .schemaContextProvider(() -> TEST_SCHEMA_CONTEXT)
+                .persistenceProvider(new DefaultSnapshotPersistenceProvider()).props());
         ShardTestKit.waitUntilLeader(shard);
         return shard;
     }

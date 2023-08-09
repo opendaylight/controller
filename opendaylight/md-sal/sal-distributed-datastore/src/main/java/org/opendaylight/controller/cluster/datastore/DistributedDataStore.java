@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -28,10 +29,16 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 public class DistributedDataStore extends AbstractDataStore {
     private final TransactionContextFactory txContextFactory;
 
+//    public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+//            final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
+//            final DatastoreSnapshot restoreFromSnapshot) {
+//        this(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, null);
+//    }
+
     public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
-            final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+            final DatastoreSnapshot restoreFromSnapshot, final SnapshotPersistenceProvider persistenceProvider) {
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, persistenceProvider);
         txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
     }
 

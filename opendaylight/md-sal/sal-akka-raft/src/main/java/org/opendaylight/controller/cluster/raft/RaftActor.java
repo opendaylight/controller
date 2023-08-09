@@ -30,8 +30,10 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.NewPersistentDataProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -125,9 +127,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected RaftActor(final String id, final Map<String, String> peerAddresses,
-         final Optional<ConfigParams> configParams, final short payloadVersion) {
+                        final Optional<ConfigParams> configParams, final short payloadVersion,
+                        final SnapshotPersistenceProvider snapshotPersistenceProvider) {
 
-        persistentProvider = new PersistentDataProvider(this);
+//        if (snapshotPersistenceProvider == null) {
+//            persistentProvider = new PersistentDataProvider(this);
+//        } else {
+//            persistentProvider = new NewPersistentDataProvider(this, snapshotPersistenceProvider);
+//        }
+        persistentProvider = new NewPersistentDataProvider(this, snapshotPersistenceProvider);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
         context = new RaftActorContextImpl(getSelf(), getContext(), id,
