@@ -30,6 +30,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -123,10 +126,10 @@ public class IntegrationTestKit extends ShardTestKit {
 
         final Constructor<? extends AbstractDataStore> constructor = implementation.getDeclaredConstructor(
                 ActorSystem.class, ClusterWrapper.class, Configuration.class,
-                DatastoreContextFactory.class, DatastoreSnapshot.class);
+                DatastoreContextFactory.class, DatastoreSnapshot.class, SnapshotPersistenceProvider.class);
 
         final AbstractDataStore dataStore = constructor.newInstance(getSystem(), cluster, config, mockContextFactory,
-            restoreFromSnapshot);
+            restoreFromSnapshot, new DefaultSnapshotPersistenceProvider());
 
         dataStore.onModelContextUpdated(schemaContext);
 
