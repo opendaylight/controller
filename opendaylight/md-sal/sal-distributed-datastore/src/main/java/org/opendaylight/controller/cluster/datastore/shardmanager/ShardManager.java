@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
@@ -162,6 +163,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final Set<Consumer<String>> shardAvailabilityCallbacks = new HashSet<>();
 
     private final String persistenceId;
+    private final SnapshotPersistenceProvider persistenceProvider;
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     ShardManager(final AbstractShardManagerCreator<?> builder) {
@@ -174,6 +176,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         readinessFuture = builder.getReadinessFuture();
         primaryShardInfoCache = builder.getPrimaryShardInfoCache();
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
+        persistenceProvider = builder.getPersistenceProvider();
 
         String possiblePersistenceId = datastoreContextFactory.getBaseDatastoreContext().getShardManagerPersistenceId();
         persistenceId = possiblePersistenceId != null ? possiblePersistenceId : "shard-manager-" + type;
@@ -584,7 +587,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 isActiveMember);
 
         ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
-                shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
+                shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver, persistenceProvider);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
 
@@ -1119,7 +1122,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                         final Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
         return new ShardInformation(shardName, shardId, peerAddresses,
                 datastoreContext, Shard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
-                peerAddressResolver);
+                peerAddressResolver, persistenceProvider);
     }
 
     /**
@@ -1242,7 +1245,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
 
             shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
+                    Shard.builder(), peerAddressResolver, persistenceProvider);
             shardInfo.setActiveMember(false);
             shardInfo.setSchemaContext(modelContext);
             localShards.put(shardName, shardInfo);

@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.Futures;
 import java.util.Map;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
@@ -117,13 +118,14 @@ public final class OSGiDistributedDataStore {
             @Reference final DatastoreContextIntrospectorFactory introspectorFactory,
             @Reference final DatastoreSnapshotRestore snapshotRestore,
             @Reference final ModuleShardConfigProvider configProvider,
+            @Reference final SnapshotPersistenceProvider persistenceProvider,
             @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
             final ComponentFactory<OSGiDOMStore> datastoreFactory, final Map<String, Object> properties) {
         this.datastoreFactory = requireNonNull(datastoreFactory);
         configDatastore = createDatastore(schemaService, actorSystemProvider, snapshotRestore, introspectorFactory,
-            LogicalDatastoreType.CONFIGURATION, "distributed-config", properties, null);
+            LogicalDatastoreType.CONFIGURATION, "distributed-config", persistenceProvider, properties, null);
         operDatastore = createDatastore(schemaService, actorSystemProvider, snapshotRestore, introspectorFactory,
-            LogicalDatastoreType.OPERATIONAL, "distributed-operational", properties,
+            LogicalDatastoreType.OPERATIONAL, "distributed-operational", persistenceProvider, properties,
             new ConfigurationImpl(configProvider));
     }
 
@@ -145,12 +147,13 @@ public final class OSGiDistributedDataStore {
     private DatastoreState createDatastore(final DOMSchemaService schemaService,
             final ActorSystemProvider actorSystemProvider, final DatastoreSnapshotRestore snapshotRestore,
             final DatastoreContextIntrospectorFactory introspectorFactory, final LogicalDatastoreType datastoreType,
-            final String serviceType, final Map<String, Object> properties,final Configuration config) {
+            final String serviceType, final SnapshotPersistenceProvider persistenceProvider,
+            final Map<String, Object> properties,final Configuration config) {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final var introspector = introspectorFactory.newInstance(datastoreType, properties);
         final var datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
-            introspector.getContext(), introspector, snapshotRestore, config);
-        datastore.setCloseable(schemaService.registerSchemaContextListener(datastore::onModelContextUpdated));
+            introspector.getContext(), introspector, snapshotRestore, config, persistenceProvider);
+        datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
         final var state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
 
         Futures.addCallback(datastore.initialSettleFuture(), state,
