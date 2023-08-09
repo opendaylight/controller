@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
@@ -72,15 +73,22 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
     private DatastoreInfoMXBeanImpl datastoreInfoMXBean;
 
+//    protected AbstractDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+//            final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
+//            final DatastoreSnapshot restoreFromSnapshot) {
+//        this(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, null);
+//    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Testing overrides")
     protected AbstractDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
-            final DatastoreSnapshot restoreFromSnapshot) {
+            final DatastoreSnapshot restoreFromSnapshot, final SnapshotPersistenceProvider persistenceProvider) {
         requireNonNull(actorSystem, "actorSystem should not be null");
         requireNonNull(cluster, "cluster should not be null");
         requireNonNull(configuration, "configuration should not be null");
         requireNonNull(datastoreContextFactory, "datastoreContextFactory should not be null");
+        requireNonNull(persistenceProvider, "persistenceProvider should not be null");
 
         String shardManagerId = ShardManagerIdentifier.builder()
                 .type(datastoreContextFactory.getBaseDatastoreContext().getDataStoreName()).build().toString();
@@ -97,7 +105,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 .readinessFuture(readinessFuture)
                 .primaryShardInfoCache(primaryShardInfoCache)
                 .restoreFromSnapshot(restoreFromSnapshot)
-                .distributedDataStore(this);
+                .distributedDataStore(this)
+                .persistenceProvider(persistenceProvider);
 
         actorUtils = new ActorUtils(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
                 shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(),
