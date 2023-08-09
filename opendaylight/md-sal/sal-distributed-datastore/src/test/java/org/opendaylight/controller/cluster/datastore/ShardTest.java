@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.DefaultSnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -1806,13 +1807,15 @@ public class ShardTest extends AbstractShardTest {
                 .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(true).build();
 
         final Props persistentProps = Shard.builder().id(shardID).datastoreContext(persistentContext)
-                .schemaContextProvider(() -> SCHEMA_CONTEXT).props();
+                .schemaContextProvider(() -> SCHEMA_CONTEXT)
+                .persistenceProvider(new DefaultSnapshotPersistenceProvider()).props();
 
         final DatastoreContext nonPersistentContext = DatastoreContext.newBuilder()
                 .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
 
         final Props nonPersistentProps = Shard.builder().id(shardID).datastoreContext(nonPersistentContext)
-                .schemaContextProvider(() -> SCHEMA_CONTEXT).props();
+                .schemaContextProvider(() -> SCHEMA_CONTEXT)
+                .persistenceProvider(new DefaultSnapshotPersistenceProvider()).props();
 
         final TestActorRef<Shard> shard1 = actorFactory.createTestActor(persistentProps, "testPersistence1");
 
@@ -1969,14 +1972,16 @@ public class ShardTest extends AbstractShardTest {
                     .datastoreContext(dataStoreContextBuilder.shardElectionTimeoutFactor(1000).build())
                     .peerAddresses(Collections.singletonMap(leaderShardID.toString(),
                         "akka://test/user/" + leaderShardID.toString()))
-                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
+                    .schemaContextProvider(() -> SCHEMA_CONTEXT)
+                    .persistenceProvider(new DefaultSnapshotPersistenceProvider()).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), followerShardID.toString());
 
         final TestActorRef<Shard> leaderShard = actorFactory
                 .createTestActor(Shard.builder().id(leaderShardID).datastoreContext(newDatastoreContext())
                     .peerAddresses(Collections.singletonMap(followerShardID.toString(),
                         "akka://test/user/" + followerShardID.toString()))
-                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
+                    .schemaContextProvider(() -> SCHEMA_CONTEXT)
+                    .persistenceProvider(new DefaultSnapshotPersistenceProvider()).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
         leaderShard.tell(TimeoutNow.INSTANCE, ActorRef.noSender());

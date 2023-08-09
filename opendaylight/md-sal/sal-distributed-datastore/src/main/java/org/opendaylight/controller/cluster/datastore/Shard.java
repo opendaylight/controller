@@ -22,6 +22,7 @@ import akka.actor.Status;
 import akka.actor.Status.Failure;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
+import akka.persistence.SnapshotSelectionCriteria;
 import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
@@ -30,6 +31,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,6 +46,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.SnapshotPersistenceProvider;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
@@ -218,10 +223,13 @@ public class Shard extends RaftActor {
 
     private final ActorRef exportActor;
 
+    private final SnapshotPersistenceProvider persistenceProvider;
+
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
-                Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
+                Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION,
+                builder.getPersistenceProvider());
 
         name = builder.getId().toString();
         shardName = builder.getId().getShardName();
@@ -229,6 +237,9 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
         frontendMetadata = new FrontendMetadata(name);
         exportOnRecovery = datastoreContext.getExportOnRecovery();
+        persistenceProvider = builder.getPersistenceProvider();
+
+        tryLoadSnapshot();
 
         exportActor = switch (exportOnRecovery) {
             case Json -> getContext().actorOf(JsonExportActor.props(builder.getSchemaContext(),
@@ -291,6 +302,23 @@ public class Shard extends RaftActor {
         listenerInfoMXBean = new ShardDataTreeListenerInfoMXBeanImpl(name, datastoreContext.getDataStoreMXBeanType(),
                 self());
         listenerInfoMXBean.register();
+    }
+
+    private void tryLoadSnapshot() {
+        Futures.addCallback(persistenceProvider.loadSnapshot(persistenceId(),
+                new SnapshotSelectionCriteria(scala.Long.MaxValue(), scala.Long.MaxValue(), 0L, 0L)),
+                new FutureCallback<Optional<SnapshotOffer>>() {
+                    @Override
+                    public void onSuccess(final Optional<SnapshotOffer> result) {
+                        result.ifPresent(offer -> handleRecover(offer));
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        LOG.debug("Failed to load snapshot: {}", exception.getMessage());
+                    }
+
+                }, MoreExecutors.directExecutor());
     }
 
     private void setTransactionCommitTimeout() {
@@ -1162,6 +1190,7 @@ public class Shard extends RaftActor {
         private EffectiveModelContextProvider schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private DataTree dataTree;
+        private SnapshotPersistenceProvider persistenceProvider;
 
         private volatile boolean sealed;
 
@@ -1214,6 +1243,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T persistenceProvider(final SnapshotPersistenceProvider newPersistenceProvider) {
+            checkSealed();
+            persistenceProvider = newPersistenceProvider;
+            return self();
+        }
+
         public ShardIdentifier getId() {
             return id;
         }
@@ -1245,11 +1280,16 @@ public class Shard extends RaftActor {
             };
         }
 
+        public SnapshotPersistenceProvider getPersistenceProvider() {
+            return persistenceProvider;
+        }
+
         protected void verify() {
             requireNonNull(id, "id should not be null");
             requireNonNull(peerAddresses, "peerAddresses should not be null");
             requireNonNull(datastoreContext, "dataStoreContext should not be null");
             requireNonNull(schemaContextProvider, "schemaContextProvider should not be null");
+            requireNonNull(persistenceProvider, "persistenceProvider should not be null");
         }
 
         public Props props() {

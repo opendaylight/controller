@@ -69,6 +69,9 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
     public static final ExportOnRecovery DEFAULT_EXPORT_ON_RECOVERY = ExportOnRecovery.Off;
     public static final String DEFAULT_RECOVERY_EXPORT_BASE_DIR = "persistence-export";
+    public static final String DEFAULT_LZ4_BLOCK_SIZE = "256KB";
+    public static final String DEFAULT_SNAPSHOTS_DIR = "snapshots";
+    public static final int DEFAULT_MAX_LOAD_ATTEMPTS = 3;
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
@@ -106,6 +109,9 @@ public class DatastoreContext implements ClientActorConfig {
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
     private boolean useLz4Compression = false;
+    private String lz4BlockSize = DEFAULT_LZ4_BLOCK_SIZE;
+    private String snapshotsDir = DEFAULT_SNAPSHOTS_DIR;
+    private int maxLoadAttempts = DEFAULT_MAX_LOAD_ATTEMPTS;
     private ExportOnRecovery exportOnRecovery = DEFAULT_EXPORT_ON_RECOVERY;
     private String recoveryExportBaseDir = DEFAULT_RECOVERY_EXPORT_BASE_DIR;
 
@@ -154,6 +160,9 @@ public class DatastoreContext implements ClientActorConfig {
         noProgressTimeout = other.noProgressTimeout;
         initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
         useLz4Compression = other.useLz4Compression;
+        lz4BlockSize = other.lz4BlockSize;
+        snapshotsDir = other.snapshotsDir;
+        maxLoadAttempts = other.maxLoadAttempts;
         exportOnRecovery = other.exportOnRecovery;
         recoveryExportBaseDir = other.recoveryExportBaseDir;
 
@@ -373,6 +382,18 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isUseLz4Compression() {
         return useLz4Compression;
+    }
+
+    public String getLz4BlockSize() {
+        return lz4BlockSize;
+    }
+
+    public String getSnapshotsDir() {
+        return snapshotsDir;
+    }
+
+    public int getMaxLoadAttempts() {
+        return maxLoadAttempts;
     }
 
     public ExportOnRecovery getExportOnRecovery() {
@@ -612,6 +633,21 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder useLz4Compression(final boolean value) {
             datastoreContext.useLz4Compression = value;
+            return this;
+        }
+
+        public Builder lz4BlockSize(final String value) {
+            datastoreContext.lz4BlockSize = value;
+            return this;
+        }
+
+        public Builder snapshotsDir(final String value) {
+            datastoreContext.snapshotsDir = value;
+            return this;
+        }
+
+        public Builder maxLoadAttempts(final int value) {
+            datastoreContext.maxLoadAttempts = value;
             return this;
         }
 
