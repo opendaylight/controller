@@ -1,0 +1,544 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9fc1a9a8_1b28ae4c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "You can a bit improve code style",
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f42bb4a3_0bb40013",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 34,
+        "startChar": 13,
+        "endLine": 34,
+        "endChar": 35
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c2b4b730_9ff75748",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final var?",
+      "range": {
+        "startLine": 56,
+        "startChar": 13,
+        "endLine": 56,
+        "endChar": 35
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "69b0ebe4_b5e3b85b",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final var?",
+      "range": {
+        "startLine": 57,
+        "startChar": 17,
+        "endLine": 57,
+        "endChar": 36
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "91bec02b_1ebc9ea7",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "var",
+      "range": {
+        "startLine": 74,
+        "startChar": 14,
+        "endLine": 74,
+        "endChar": 18
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7803e987_d6f03667",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final var?",
+      "range": {
+        "startLine": 79,
+        "startChar": 13,
+        "endLine": 79,
+        "endChar": 32
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f4729a9_ab1913ff",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "var pls here for all variables - let\u0027s make it consistent",
+      "range": {
+        "startLine": 95,
+        "startChar": 14,
+        "endLine": 95,
+        "endChar": 19
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3936c437_40e143cb",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final var?",
+      "range": {
+        "startLine": 101,
+        "startChar": 21,
+        "endLine": 101,
+        "endChar": 39
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "481883b3_ef96213a",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "var?",
+      "range": {
+        "startLine": 126,
+        "startChar": 14,
+        "endLine": 126,
+        "endChar": 18
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a9cfeaf9_24e4718d",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final var?",
+      "range": {
+        "startLine": 134,
+        "startChar": 21,
+        "endLine": 134,
+        "endChar": 39
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e86cf47c_4cb7d493",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 149,
+        "startChar": 13,
+        "endLine": 149,
+        "endChar": 17
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "02c8d625_0648f000",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 151,
+        "startChar": 17,
+        "endLine": 151,
+        "endChar": 21
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bbb5f1e0_97979704",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 161,
+        "startChar": 8,
+        "endLine": 161,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6f5483cd_0ad2a3db",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 25,
+        "startChar": 33,
+        "endLine": 25,
+        "endChar": 44
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "79f76fc3_4729c3c6",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "Why is this explicit method? It used only once inside the constructor.",
+      "range": {
+        "startLine": 29,
+        "startChar": 16,
+        "endLine": 29,
+        "endChar": 25
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6a5b1df4_a5ad6d2f",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 29,
+        "startChar": 26,
+        "endLine": 29,
+        "endChar": 37
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eff1bc0f_718ff00d",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aaf9fce4_43ca5a48",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 117,
+        "startChar": 26,
+        "endLine": 117,
+        "endChar": 30
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8e71c3c3_45dd21d9",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "142c23f0_772422d5",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 313,
+        "startChar": 8,
+        "endLine": 313,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0a99e02_35f1c3ad",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyEntryInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 45,
+        "startChar": 13,
+        "endLine": 45,
+        "endChar": 31
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4913bb96_b781ec0d",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 66,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c933aa6_d3ff6014",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "4 spaces",
+      "range": {
+        "startLine": 68,
+        "startChar": 8,
+        "endLine": 68,
+        "endChar": 16
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "047d8582_b46f50b5",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-08-15T17:35:37Z",
+      "side": 1,
+      "message": "4 spaces",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 16
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
