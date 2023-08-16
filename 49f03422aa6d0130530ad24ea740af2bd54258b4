@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "da6a87ec_89c2eafa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-08-16T08:49:19Z",
+      "side": 1,
+      "message": "One extra line, other than that everything is fine",
+      "revId": "49f03422aa6d0130530ad24ea740af2bd54258b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "026fc97f_f70a610f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 9155
+      },
+      "writtenOn": "2023-08-16T08:49:19Z",
+      "side": 1,
+      "message": "Extra line",
+      "revId": "49f03422aa6d0130530ad24ea740af2bd54258b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
