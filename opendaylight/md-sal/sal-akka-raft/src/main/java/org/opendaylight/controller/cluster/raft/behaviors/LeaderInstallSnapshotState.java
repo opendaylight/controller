@@ -38,9 +38,9 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private final int snapshotChunkSize;
     private final String logName;
     private ByteSource snapshotBytes;
-    private int offset = INITIAL_OFFSET;
+    private long offset = INITIAL_OFFSET;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
-    private int replyReceivedForOffset = -1;
+    private long replyReceivedForOffset = -1;
     // if replyStatus is false, the previous chunk is attempted
     private boolean replyStatus = false;
     private int chunkIndex = FIRST_CHUNK_INDEX;
@@ -75,7 +75,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         chunkIndex = FIRST_CHUNK_INDEX;
     }
 
-    int incrementOffset() {
+    long incrementOffset() {
         // if offset is -1 doesnt matter whether it was the initial value or reset, move the offset to 0 to begin with
         if (offset == INITIAL_OFFSET) {
             offset = 0;
@@ -139,7 +139,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     byte[] getNextChunk() throws IOException {
         // increment offset to indicate next chunk is in flight, canSendNextChunk() wont let us hit this again until,
         // markSendStatus() is called with either success or failure
-        int start = incrementOffset();
+        final var start = incrementOffset();
         if (replyStatus || currentChunk == null) {
             int size = snapshotChunkSize;
             if (snapshotChunkSize > snapshotSize) {
@@ -149,11 +149,14 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
             }
 
             currentChunk = new byte[size];
-            int numRead = snapshotInputStream.read(currentChunk);
+            final var numRead = snapshotInputStream.read(currentChunk);
             if (numRead != size) {
-                throw new IOException(String.format(
-                        "The # of bytes read from the input stream, %d,"
-                                + "does not match the expected # %d", numRead, size));
+                final var advanceRead = snapshotInputStream.read(currentChunk, numRead, size - numRead);
+                if (advanceRead + numRead != size) {
+                    throw new IOException(String.format(
+                        "The # of bytes read from the input stream, %d, does not match the expected # %d",
+                        advanceRead + numRead, size));
+                }
             }
 
             nextChunkHashCode = Arrays.hashCode(currentChunk);
