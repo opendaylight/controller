@@ -44,6 +44,7 @@ import org.opendaylight.controller.cluster.messaging.MessageSlice;
 import org.opendaylight.controller.cluster.messaging.MessageSliceReply;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
+import org.opendaylight.controller.cluster.raft.MockRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
@@ -1000,6 +1001,136 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(commitIndex + 1, fli.getNextIndex());
         assertFalse(leader.hasSnapshot());
     }
+
+    @Test
+    public void testSnapshotLongerThanInteger() throws IOException {
+        logStart("testHandleInstallSnapshotReplyLastChunk");
+
+        MockRaftActorContext actorContext = createActorContextWithFollower();
+
+        final int commitIndex = 3;
+        final int snapshotIndex = 2;
+        final int snapshotTerm = 1;
+        final int currentTerm = 2;
+
+        actorContext.setCommitIndex(commitIndex);
+
+        leader = new Leader(actorContext);
+        actorContext.setCurrentBehavior(leader);
+
+        leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
+        leader.getFollower(FOLLOWER_ID).setNextIndex(0);
+
+        // Ignore initial heartbeat.
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+
+        // set the snapshot variables in replicatedlog
+
+        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+
+        final int chunkSize = 2048000;
+        final byte[] barray1 = new byte[Integer.MAX_VALUE - 100];
+        final byte[] barray2 = new byte[Integer.MAX_VALUE / 2];
+        final long barrayLength = (long) barray1.length + (long) barray2.length;
+        final ByteSource bs = ByteSource.concat(ByteSource.wrap(barray1), ByteSource.wrap(barray2));
+        final LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(chunkSize, "test");
+        fts.setSnapshotBytes(bs);
+        assertEquals(barrayLength, bs.size());
+
+        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(new MockRaftActor.MockSnapshotState(List.of(bs)),
+                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
+                -1, null, null), bs));
+
+        leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
+        // infinite loops
+//        while (!fts.isLastChunk(fts.getChunkIndex())) {
+//            fts.getNextChunk();
+//            fts.incrementChunkIndex();
+//        }
+
+        //clears leaders log
+        actorContext.getReplicatedLog().removeFrom(0);
+
+        RaftActorBehavior raftBehavior = leader.handleMessage(followerActor,
+                new InstallSnapshotReply(currentTerm, FOLLOWER_ID, fts.getChunkIndex(), true));
+
+        assertTrue(raftBehavior instanceof Leader);
+
+        assertEquals(1, leader.followerLogSize());
+        FollowerLogInformation fli = leader.getFollower(FOLLOWER_ID);
+        assertNotNull(fli);
+        assertNull(fli.getInstallSnapshotState());
+        assertEquals(commitIndex, fli.getMatchIndex());
+        assertEquals(commitIndex + 1, fli.getNextIndex());
+        assertFalse(leader.hasSnapshot());
+    }
+
+//    @Test
+//    public void testSnapshotLongerThanIntegerRecive() {
+//        logStart("testHandleInstallSnapshotReplyWithInvalidChunkIndex");
+//
+//        MockRaftActorContext actorContext = createActorContextWithFollower();
+//
+//        final int commitIndex = 3;
+//        final int snapshotIndex = 2;
+//        final int snapshotTerm = 1;
+//        final int currentTerm = 2;
+//
+//        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
+//            @Override
+//            public int getSnapshotChunkSize() {
+//                return 50;
+//            }
+//        });
+//
+//        actorContext.setCommitIndex(commitIndex);
+//
+//        leader = new Leader(actorContext);
+//
+//        leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
+//        leader.getFollower(FOLLOWER_ID).setNextIndex(0);
+//
+//        // set the snapshot variables in replicatedlog
+//        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+//        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+//        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+//
+//
+//        final int chunkSize = 2048000;
+//        final byte[] barray1 = new byte[Integer.MAX_VALUE - 100];
+//        final byte[] barray2 = new byte[Integer.MAX_VALUE / 2];
+//        final long barrayLength = (long) barray1.length + (long) barray2.length;
+//        final ByteSource bs = ByteSource.concat(ByteSource.wrap(barray1), ByteSource.wrap(barray2));
+//
+//        Snapshot snapshot = Snapshot.create(new MockRaftActor.MockSnapshotState(List.of(bs)),
+//                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, -1, null, null);
+//
+//        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+//        leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, bs));
+//
+//        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
+//                InstallSnapshot.class);
+//
+//        assertEquals(1, installSnapshot.getChunkIndex());
+//        assertEquals(3, installSnapshot.getTotalChunks());
+//
+//        followerActor.underlyingActor().clear();
+//
+//        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation()
+//              .getCurrentTerm(), FOLLOWER_ID, -1, false));
+//
+//        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
+//                TimeUnit.MILLISECONDS);
+//
+//        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
+//
+//        installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
+//
+//        assertEquals(1, installSnapshot.getChunkIndex());
+//        assertEquals(3, installSnapshot.getTotalChunks());
+//    }
 
     @Test
     public void testSendSnapshotfromInstallSnapshotReply() {
