@@ -41,6 +41,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a6dd470e_05f26b8c",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f42bb4a3_0bb40013",
+      "range": {
+        "startLine": 34,
+        "startChar": 13,
+        "endLine": 34,
+        "endChar": 35
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c2b4b730_9ff75748",
@@ -54,6 +78,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "final var?",
+      "range": {
+        "startLine": 56,
+        "startChar": 13,
+        "endLine": 56,
+        "endChar": 35
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53e15489_aa588906",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2b4b730_9ff75748",
       "range": {
         "startLine": 56,
         "startChar": 13,
@@ -87,6 +135,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c28aebd1_be1dcab2",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69b0ebe4_b5e3b85b",
+      "range": {
+        "startLine": 57,
+        "startChar": 17,
+        "endLine": 57,
+        "endChar": 36
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "91bec02b_1ebc9ea7",
@@ -100,6 +172,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "var",
+      "range": {
+        "startLine": 74,
+        "startChar": 14,
+        "endLine": 74,
+        "endChar": 18
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "51778086_72921681",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "91bec02b_1ebc9ea7",
       "range": {
         "startLine": 74,
         "startChar": 14,
@@ -133,6 +229,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9e4e15e_d56ecbd2",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7803e987_d6f03667",
+      "range": {
+        "startLine": 79,
+        "startChar": 13,
+        "endLine": 79,
+        "endChar": 32
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1f4729a9_ab1913ff",
@@ -146,6 +266,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "var pls here for all variables - let\u0027s make it consistent",
+      "range": {
+        "startLine": 95,
+        "startChar": 14,
+        "endLine": 95,
+        "endChar": 19
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "642fd860_513861dd",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f4729a9_ab1913ff",
       "range": {
         "startLine": 95,
         "startChar": 14,
@@ -179,6 +323,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "af6c6617_ae3e6cf3",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3936c437_40e143cb",
+      "range": {
+        "startLine": 101,
+        "startChar": 21,
+        "endLine": 101,
+        "endChar": 39
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "481883b3_ef96213a",
@@ -192,6 +360,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "var?",
+      "range": {
+        "startLine": 126,
+        "startChar": 14,
+        "endLine": 126,
+        "endChar": 18
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1760fffa_10ef5ef8",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "481883b3_ef96213a",
       "range": {
         "startLine": 126,
         "startChar": 14,
@@ -225,6 +417,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b053ec8_c3473ea7",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9cfeaf9_24e4718d",
+      "range": {
+        "startLine": 134,
+        "startChar": 21,
+        "endLine": 134,
+        "endChar": 39
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e86cf47c_4cb7d493",
@@ -238,6 +454,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "final?",
+      "range": {
+        "startLine": 149,
+        "startChar": 13,
+        "endLine": 149,
+        "endChar": 17
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a5a1208_30f0a5d2",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e86cf47c_4cb7d493",
       "range": {
         "startLine": 149,
         "startChar": 13,
@@ -271,6 +511,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "11581103_b2a7f5f4",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02c8d625_0648f000",
+      "range": {
+        "startLine": 151,
+        "startChar": 17,
+        "endLine": 151,
+        "endChar": 21
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bbb5f1e0_97979704",
@@ -294,6 +558,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9426864d_0a912358",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/JournalSerdesImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bbb5f1e0_97979704",
+      "range": {
+        "startLine": 161,
+        "startChar": 8,
+        "endLine": 161,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6f5483cd_0ad2a3db",
@@ -307,6 +595,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "final?",
+      "range": {
+        "startLine": 25,
+        "startChar": 33,
+        "endLine": 25,
+        "endChar": 44
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1dd9c178_2aed975a",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "these methods were taken from Kryo library so I didn\u0027t modified them to comply with code style of rest of the ODL as there is lot of differences. I would prefer to leave it this way. Additionally copyright for this file should be probably resolved and there might be some further changes.",
+      "parentUuid": "6f5483cd_0ad2a3db",
       "range": {
         "startLine": 25,
         "startChar": 33,
@@ -363,6 +675,54 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "68e2b5d6_2206f7b7",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6a5b1df4_a5ad6d2f",
+      "range": {
+        "startLine": 29,
+        "startChar": 26,
+        "endLine": 29,
+        "endChar": 37
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "039e12ed_c374d7c6",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "79f76fc3_4729c3c6",
+      "range": {
+        "startLine": 29,
+        "startChar": 16,
+        "endLine": 29,
+        "endChar": 25
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "eff1bc0f_718ff00d",
@@ -376,6 +736,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "final",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d3b6f18_404f7977",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "eff1bc0f_718ff00d",
       "range": {
         "startLine": 41,
         "startChar": 8,
@@ -409,6 +793,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1e8be39e_97744884",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "aaf9fce4_43ca5a48",
+      "range": {
+        "startLine": 117,
+        "startChar": 26,
+        "endLine": 117,
+        "endChar": 30
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8e71c3c3_45dd21d9",
@@ -426,6 +834,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ee26ff4_b0119e75",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8e71c3c3_45dd21d9",
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "142c23f0_772422d5",
@@ -439,6 +865,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "final?",
+      "range": {
+        "startLine": 313,
+        "startChar": 8,
+        "endLine": 313,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4fed89e4_77079836",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyByteBufferInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "142c23f0_772422d5",
       "range": {
         "startLine": 313,
         "startChar": 8,
@@ -472,6 +922,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a73435b4_f067e95e",
+        "filename": "atomix-storage/src/main/java/io/atomix/utils/serializer/LegacyEntryInput.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0a99e02_35f1c3ad",
+      "range": {
+        "startLine": 45,
+        "startChar": 13,
+        "endLine": 45,
+        "endChar": 31
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4913bb96_b781ec0d",
@@ -485,6 +959,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "final?",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 66,
+        "endChar": 12
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cf59d0b0_34083be0",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4913bb96_b781ec0d",
       "range": {
         "startLine": 66,
         "startChar": 8,
@@ -518,6 +1016,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f8596b83_ee62c852",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4c933aa6_d3ff6014",
+      "range": {
+        "startLine": 68,
+        "startChar": 8,
+        "endLine": 68,
+        "endChar": 16
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "047d8582_b46f50b5",
@@ -531,6 +1053,30 @@
       "writtenOn": "2023-08-15T17:35:37Z",
       "side": 1,
       "message": "4 spaces",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 16
+      },
+      "revId": "e5f59253db19f7d8d082ff40881cd9392c4269b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2c892001_a521bc21",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/test/java/org/opendaylight/controller/akka/segjournal/Controller2072Test.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-08-17T11:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "047d8582_b46f50b5",
       "range": {
         "startLine": 81,
         "startChar": 8,
