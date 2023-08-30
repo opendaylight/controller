@@ -33,6 +33,24 @@
       "message": "Extra line",
       "revId": "49f03422aa6d0130530ad24ea740af2bd54258b4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc057643_a52b323d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 9171
+      },
+      "writtenOn": "2023-08-30T11:34:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "026fc97f_f70a610f",
+      "revId": "49f03422aa6d0130530ad24ea740af2bd54258b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
