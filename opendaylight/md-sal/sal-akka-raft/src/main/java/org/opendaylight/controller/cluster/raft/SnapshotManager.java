@@ -195,7 +195,7 @@ public class SnapshotManager implements SnapshotState {
                 newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, mandatoryTrim);
     }
 
-    private class AbstractSnapshotState implements SnapshotState {
+    private abstract class AbstractSnapshotState implements SnapshotState {
 
         @Override
         public boolean isCapturing() {
@@ -282,8 +282,7 @@ public class SnapshotManager implements SnapshotState {
         }
     }
 
-    private class Idle extends AbstractSnapshotState {
-
+    private final class Idle extends AbstractSnapshotState {
         @Override
         public boolean isCapturing() {
             return false;
@@ -360,8 +359,7 @@ public class SnapshotManager implements SnapshotState {
         }
     }
 
-    private class Creating extends AbstractSnapshotState {
-
+    private final class Creating extends AbstractSnapshotState {
         @Override
         public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
                 final long totalMemory) {
@@ -464,8 +462,7 @@ public class SnapshotManager implements SnapshotState {
 
     }
 
-    private class Persisting extends AbstractSnapshotState {
-
+    private final class Persisting extends AbstractSnapshotState {
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
         public void commit(final long sequenceNumber, final long timeStamp) {
@@ -544,7 +541,7 @@ public class SnapshotManager implements SnapshotState {
         long getTerm();
     }
 
-    static class LastAppliedTermInformationReader implements TermInformationReader {
+    static final class LastAppliedTermInformationReader implements TermInformationReader {
         private long index;
         private long term;
 
@@ -581,7 +578,7 @@ public class SnapshotManager implements SnapshotState {
         }
     }
 
-    private static class ReplicatedToAllTermInformationReader implements TermInformationReader {
+    private static final class ReplicatedToAllTermInformationReader implements TermInformationReader {
         private long index;
         private long term;
 
