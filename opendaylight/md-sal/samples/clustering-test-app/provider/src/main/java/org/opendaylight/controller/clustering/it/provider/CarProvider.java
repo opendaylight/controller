@@ -31,7 +31,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
@@ -97,7 +96,9 @@ public class CarProvider implements CarService {
     private final AtomicLong succcessCounter = new AtomicLong();
     private final AtomicLong failureCounter = new AtomicLong();
 
-    private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
+    private final EntityOwnershipListener ownershipListener =
+        ownershipChange -> LOG_CAR_PROVIDER.info("ownershipChanged: {}", ownershipChange);
+
     private final AtomicBoolean registeredListener = new AtomicBoolean();
 
     private final Set<ListenerRegistration<?>> carsDclRegistrations = ConcurrentHashMap.newKeySet();
@@ -260,13 +261,6 @@ public class CarProvider implements CarService {
     public ListenableFuture<RpcResult<UnregisterOwnershipOutput>> unregisterOwnership(
             final UnregisterOwnershipInput input) {
         return RpcResultBuilder.success(new UnregisterOwnershipOutputBuilder().build()).buildFuture();
-    }
-
-    private static class CarEntityOwnershipListener implements EntityOwnershipListener {
-        @Override
-        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
-            LOG_CAR_PROVIDER.info("ownershipChanged: {}", ownershipChange);
-        }
     }
 
     @Override
