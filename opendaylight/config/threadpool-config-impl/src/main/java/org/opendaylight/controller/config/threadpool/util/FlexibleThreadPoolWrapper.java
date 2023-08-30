@@ -102,7 +102,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
     /**
      * if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
      */
-    private static class FlexibleRejectionHandler implements RejectedExecutionHandler {
+    private static final class FlexibleRejectionHandler implements RejectedExecutionHandler {
         @Override
         @SuppressWarnings("checkstyle:parameterName")
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
@@ -114,7 +114,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
         }
     }
 
-    private static class ForwardingBlockingQueue
+    private static final class ForwardingBlockingQueue
             extends com.google.common.util.concurrent.ForwardingBlockingQueue<Runnable> {
         private final BlockingQueue<Runnable> delegate;
 
