@@ -91,7 +91,7 @@ public class FileBackedOutputStream extends OutputStream {
                         if (file != null) {
                             return Files.newInputStream(file.toPath());
                         } else {
-                            return new ByteArrayInputStream(memory.getBuffer(), 0, memory.getCount());
+                            return new ByteArrayInputStream(memory.buf(), 0, memory.count());
                         }
                     }
                 }
@@ -178,20 +178,20 @@ public class FileBackedOutputStream extends OutputStream {
             throw new IOException("Stream already closed");
         }
 
-        if (file == null && memory.getCount() + len > fileThreshold) {
+        if (file == null && memory.count() + len > fileThreshold) {
             final File temp = File.createTempFile("FileBackedOutputStream", null,
                     fileDirectory == null ? null : new File(fileDirectory));
             temp.deleteOnExit();
             final Cleaner.Cleanable cleanup = FILE_CLEANER.register(this, () -> deleteFile(temp));
 
-            LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", memory.getCount() + len,
+            LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", memory.count() + len,
                     fileThreshold, temp);
 
             final OutputStream transfer;
             try {
                 transfer = Files.newOutputStream(temp.toPath());
                 try {
-                    transfer.write(memory.getBuffer(), 0, memory.getCount());
+                    transfer.write(memory.buf(), 0, memory.count());
                     transfer.flush();
                 } catch (IOException e) {
                     try {
@@ -224,12 +224,12 @@ public class FileBackedOutputStream extends OutputStream {
     /**
      * ByteArrayOutputStream that exposes its internals for efficiency.
      */
-    private static class MemoryOutputStream extends ByteArrayOutputStream {
-        byte[] getBuffer() {
+    private static final class MemoryOutputStream extends ByteArrayOutputStream {
+        byte[] buf() {
             return buf;
         }
 
-        int getCount() {
+        int count() {
             return count;
         }
     }
