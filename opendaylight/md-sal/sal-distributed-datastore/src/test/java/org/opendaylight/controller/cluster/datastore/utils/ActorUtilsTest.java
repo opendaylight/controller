@@ -67,10 +67,10 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ActorUtilsTest extends AbstractActorTest {
-
     static final Logger LOG = LoggerFactory.getLogger(ActorUtilsTest.class);
 
-    private static class TestMessage {
+    private static final class TestMessage {
+
     }
 
     private static final class MockShardManager extends UntypedAbstractActor {
