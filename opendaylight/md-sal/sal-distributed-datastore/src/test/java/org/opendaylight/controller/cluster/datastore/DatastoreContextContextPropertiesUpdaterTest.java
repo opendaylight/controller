@@ -88,8 +88,7 @@ public class DatastoreContextContextPropertiesUpdaterTest {
         return currProps.get(obj);
     }
 
-    private class DummyListenerImpl implements Listener {
-
+    private static final class DummyListenerImpl implements Listener {
         private DatastoreContextFactory contextFactory;
 
         @Override
