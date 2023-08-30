@@ -26,14 +26,12 @@ import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 
 public class BucketStoreTest {
-
     /**
      * Dummy class to eliminate rawtype warnings.
      *
      * @author gwu
-     *
      */
-    private static class T implements BucketData<T> {
+    private static final class T implements BucketData<T> {
         @Override
         public Optional<ActorRef> getWatchActor() {
             return Optional.empty();
