@@ -144,7 +144,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
     private final Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>>
             routedRegistrations = new HashMap<>();
 
-    private final Map<String, ListenerRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
+    private final Map<String, YnlListener> ynlListeners = new HashMap<>();
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
@@ -263,15 +263,16 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
     public ListenableFuture<RpcResult<SubscribeYnlOutput>> subscribeYnl(final SubscribeYnlInput input) {
         LOG.info("In subscribeYnl - input: {}", input);
 
-        if (ynlRegistrations.containsKey(input.getId())) {
+        if (ynlListeners.containsKey(input.getId())) {
             return RpcResultBuilder.<SubscribeYnlOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.DATA_EXISTS,
                     "There is already a listener registered for id: " + input.getId())
                 .buildFuture();
         }
 
-        ynlRegistrations.put(input.getId(),
-                notificationService.registerNotificationListener(new YnlListener(input.getId())));
+        final var listener = new YnlListener(input.getId());
+        listener.register(notificationService);
+        ynlListeners.put(input.getId(), listener);
 
         return RpcResultBuilder.success(new SubscribeYnlOutputBuilder().build()).buildFuture();
     }
@@ -468,17 +469,15 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
     public ListenableFuture<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
         LOG.info("In unsubscribeYnl - input: {}", input);
 
-        if (!ynlRegistrations.containsKey(input.getId())) {
+        if (!ynlListeners.containsKey(input.getId())) {
             return RpcResultBuilder.<UnsubscribeYnlOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.DATA_MISSING,
                     "No prior listener was registered for " + input.getId())
                 .buildFuture();
         }
-
-        final ListenerRegistration<YnlListener> reg = ynlRegistrations.remove(input.getId());
-        final UnsubscribeYnlOutput output = reg.getInstance().getOutput();
-
-        reg.close();
+        final var listener = ynlListeners.remove(input.getId());
+        listener.unregister();
+        final var output = listener.getOutput();
 
         return RpcResultBuilder.<UnsubscribeYnlOutput>success().withResult(output).buildFuture();
     }

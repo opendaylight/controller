@@ -24,7 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarBought;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseListener;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 @Component(service = { })
-public final class PeopleCarListener implements CarPurchaseListener {
+public final class PeopleCarListener {
     private static final Logger LOG = LoggerFactory.getLogger(PeopleCarListener.class);
 
     private final DataBroker dataProvider;
@@ -47,7 +46,7 @@ public final class PeopleCarListener implements CarPurchaseListener {
     public PeopleCarListener(@Reference final DataBroker dataProvider,
             @Reference final NotificationService notifService) {
         this.dataProvider = requireNonNull(dataProvider);
-        reg = notifService.registerNotificationListener(this);
+        reg = notifService.registerListener(CarBought.class, this::onCarBought);
     }
 
     @PreDestroy
@@ -56,9 +55,7 @@ public final class PeopleCarListener implements CarPurchaseListener {
         reg.close();
     }
 
-    @Override
-    public void onCarBought(final CarBought notification) {
-
+    private void onCarBought(final CarBought notification) {
         final CarPerson carPerson = new CarPersonBuilder()
             .withKey(new CarPersonKey(notification.getCarId(), notification.getPersonId()))
             .build();
@@ -67,7 +64,6 @@ public final class PeopleCarListener implements CarPurchaseListener {
 
         InstanceIdentifier<CarPerson> carPersonIId = InstanceIdentifier.builder(CarPeople.class)
                 .child(CarPerson.class, carPerson.key()).build();
-
 
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson);
