@@ -9,15 +9,16 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.OdlMdsalLowlevelTargetListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class YnlListener implements OdlMdsalLowlevelTargetListener {
+public class YnlListener {
     private static final Logger LOG = LoggerFactory.getLogger(YnlListener.class);
 
     private final String id;
@@ -26,13 +27,16 @@ public class YnlListener implements OdlMdsalLowlevelTargetListener {
     private final AtomicLong allNot = new AtomicLong();
     private final AtomicLong idNot = new AtomicLong();
     private final AtomicLong errNot = new AtomicLong();
+    private final NotificationService.CompositeListener reg;
 
     public YnlListener(final String id) {
         this.id = requireNonNull(id);
+        reg = new NotificationService.CompositeListener(Set.of(
+            new NotificationService.CompositeListener.Component<>(IdSequence.class, this::onIdSequence)
+        ));
     }
 
-    @Override
-    public void onIdSequence(final IdSequence notification) {
+    private void onIdSequence(final IdSequence notification) {
         LOG.debug("Received id-sequence notification, : {}", notification);
 
         allNot.incrementAndGet();
@@ -48,6 +52,10 @@ public class YnlListener implements OdlMdsalLowlevelTargetListener {
                 return value;
             });
         }
+    }
+
+    public NotificationService.CompositeListener getCompositeListener() {
+        return reg;
     }
 
     public UnsubscribeYnlOutput getOutput() {

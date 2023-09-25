@@ -127,7 +127,7 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 @Singleton
-@Component(service = {})
+@Component(service = {YnlListener.class})
 public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalLowLevelTestProvider.class);
 
@@ -144,7 +144,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
     private final Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>>
             routedRegistrations = new HashMap<>();
 
-    private final Map<String, ListenerRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
+    private final Map<String, Registration> ynlRegistrations = new HashMap<>();
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
@@ -271,7 +271,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         }
 
         ynlRegistrations.put(input.getId(),
-                notificationService.registerNotificationListener(new YnlListener(input.getId())));
+            notificationService.registerCompositeListener(new YnlListener(input.getId()).getCompositeListener()));
 
         return RpcResultBuilder.success(new SubscribeYnlOutputBuilder().build()).buildFuture();
     }
@@ -474,7 +474,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
                     "No prior listener was registered for " + input.getId())
                 .buildFuture();
         }
-
+//here
         final ListenerRegistration<YnlListener> reg = ynlRegistrations.remove(input.getId());
         final UnsubscribeYnlOutput output = reg.getInstance().getOutput();
 
