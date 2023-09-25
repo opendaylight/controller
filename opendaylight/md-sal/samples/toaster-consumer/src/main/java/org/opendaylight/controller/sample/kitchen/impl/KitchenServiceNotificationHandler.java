@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,7 +31,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToastType;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterListener;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBread;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
@@ -51,10 +51,10 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 @Component(service = KitchenService.class, immediate = true)
-public final class KitchenServiceImpl extends AbstractMXBean
-        implements KitchenService, KitchenServiceRuntimeMXBean, ToasterListener {
+public final class KitchenServiceNotificationHandler extends AbstractMXBean
+    implements KitchenService, KitchenServiceRuntimeMXBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KitchenServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KitchenServiceNotificationHandler.class);
     private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
@@ -65,11 +65,15 @@ public final class KitchenServiceImpl extends AbstractMXBean
 
     @Inject
     @Activate
-    public KitchenServiceImpl(@Reference final RpcConsumerRegistry rpcRegistry,
+    public KitchenServiceNotificationHandler(@Reference final RpcConsumerRegistry rpcRegistry,
             @Reference final NotificationService notifService) {
         super("KitchenService", "toaster-consumer", null);
         toaster = rpcRegistry.getRpcService(ToasterService.class);
-        reg = notifService.registerNotificationListener(this);
+        reg = notifService.registerCompositeListener(new NotificationService.CompositeListener(Set.of(
+            new NotificationService.CompositeListener.Component<>(ToasterOutOfBread.class, this::onToasterOutOfBread),
+            new NotificationService.CompositeListener.Component<>(ToasterRestocked.class, this::onToasterRestocked)
+        )));
+
         register();
     }
 
@@ -157,8 +161,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
     /**
      * Implemented from the ToasterListener interface.
      */
-    @Override
-    public void onToasterOutOfBread(final ToasterOutOfBread notification) {
+    private void onToasterOutOfBread(final ToasterOutOfBread notification) {
         LOG.info("ToasterOutOfBread notification");
         toasterOutOfBread = true;
     }
@@ -166,8 +169,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
     /**
      * Implemented from the ToasterListener interface.
      */
-    @Override
-    public void onToasterRestocked(final ToasterRestocked notification) {
+    private void onToasterRestocked(final ToasterRestocked notification) {
         LOG.info("ToasterRestocked notification - amountOfBread: {}", notification.getAmountOfBread());
         toasterOutOfBread = false;
     }
