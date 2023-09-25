@@ -18,8 +18,7 @@ import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OpendaylightTestNotificationListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.notification.rev150205.OutOfPixieDustNotificationBuilder;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.ops4j.pax.exam.util.Filter;
 import org.slf4j.Logger;
@@ -45,8 +44,7 @@ public class NotificationIT extends AbstractIT {
     @Test
     public void notificationTest() throws Exception {
         NotificationTestListener listener1 = new NotificationTestListener();
-        ListenerRegistration<NotificationListener> listener1Reg =
-                notificationService.registerNotificationListener(listener1);
+        listener1.register(notificationService);
 
         LOG.info("The notification of type FlowAdded with cookie ID 0 is created. The "
                 + "delay 100ms to make sure that the notification was delivered to "
@@ -65,8 +63,7 @@ public class NotificationIT extends AbstractIT {
                 + "registered as notification listener.");
 
         NotificationTestListener listener2 = new NotificationTestListener();
-        final ListenerRegistration<NotificationListener> listener2Reg =
-                notificationService.registerNotificationListener(listener2);
+        listener2.register(notificationService);
 
         LOG.info("3 notifications are published");
         notificationPublishService.putNotification(noDustNotification("rainy day", 5));
@@ -90,7 +87,7 @@ public class NotificationIT extends AbstractIT {
          * The second listener is closed (unregistered)
          *
          */
-        listener2Reg.close();
+        listener2.unregister();
 
         LOG.info("The notification 5 is published");
         notificationPublishService.putNotification(noDustNotification("entomologist hunt", 10));
@@ -126,12 +123,21 @@ public class NotificationIT extends AbstractIT {
      * Implements {@link OpendaylightTestNotificationListener} and contains attributes which keep lists of objects of
      * the type {@link OutOfPixieDustNotification}.
      */
-    public static class NotificationTestListener implements OpendaylightTestNotificationListener {
+    public static class NotificationTestListener {
         List<OutOfPixieDustNotification> notificationBag = new ArrayList<>();
+        private Registration reg;
 
-        @Override
-        public void onOutOfPixieDustNotification(final OutOfPixieDustNotification arg0) {
+        private void onOutOfPixieDustNotification(final OutOfPixieDustNotification arg0) {
             notificationBag.add(arg0);
+        }
+
+        public void register(final NotificationService notificationService) {
+            reg = notificationService.registerListener(
+                OutOfPixieDustNotification.class, this::onOutOfPixieDustNotification);
+        }
+
+        public void unregister() {
+            reg.close();
         }
     }
 }
