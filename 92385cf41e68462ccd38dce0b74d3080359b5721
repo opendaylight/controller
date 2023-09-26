@@ -22,6 +22,30 @@
       },
       "revId": "92385cf41e68462ccd38dce0b74d3080359b5721",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a12b684_42daaaf3",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 9229
+      },
+      "writtenOn": "2023-09-26T06:31:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb3b43d1_366d2253",
+      "range": {
+        "startLine": 130,
+        "startChar": 22,
+        "endLine": 130,
+        "endChar": 39
+      },
+      "revId": "92385cf41e68462ccd38dce0b74d3080359b5721",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
