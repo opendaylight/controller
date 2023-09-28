@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,22 +68,16 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingStateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
@@ -124,17 +118,17 @@ public class ClusterAdminRpcServiceTest {
                 .moduleShardsConfig("module-shards-member1.conf").waitForShardLeader("cars", "people")
                 .testName("testBackupDatastore").build();
 
-        String fileName = "target/testBackupDatastore";
-        new File(fileName).delete();
+        final var fileName = "target/testBackupDatastore";
+        final var file = new File(fileName);
+        file.delete();
 
-        final ClusterAdminRpcService service = new ClusterAdminRpcService(node.configDataStore(), node.operDataStore(),
-                null, null);
+        final var service = new ClusterAdminRpcService(node.configDataStore(), node.operDataStore(), null);
 
-        RpcResult<BackupDatastoreOutput> rpcResult = service .backupDatastore(new BackupDatastoreInputBuilder()
-                .setFilePath(fileName).build()).get(5, TimeUnit.SECONDS);
+        var rpcResult = service.backupDatastore(new BackupDatastoreInputBuilder().setFilePath(fileName).build())
+            .get(5, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
-        try (FileInputStream fis = new FileInputStream(fileName)) {
+        try (var fis = Files.newInputStream(file.toPath())) {
             List<DatastoreSnapshot> snapshots = SerializationUtils.deserialize(fis);
             assertEquals("DatastoreSnapshot size", 2, snapshots.size());
 
@@ -292,19 +286,22 @@ public class ClusterAdminRpcServiceTest {
         MemberNode memberNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig("module-shards-cars-member-1.conf").build();
 
-        final ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
-                memberNode.operDataStore(), null, null);
+        final var service = new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), null);
 
-        RpcResult<AddShardReplicaOutput> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
-                .setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        var rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+                .setDataStoreType(DataStoreType.Config)
+                .build())
+            .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
-        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("cars")
-                .build()).get(10, TimeUnit.SECONDS);
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("cars").build())
+            .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
         rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("people")
-                .setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+                .setDataStoreType(DataStoreType.Config)
+                .build())
+            .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
     }
 
@@ -335,11 +332,12 @@ public class ClusterAdminRpcServiceTest {
             final String... peerMemberNames) throws Exception {
         memberNode.waitForMembersUp(peerMemberNames);
 
-        final ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
-                memberNode.operDataStore(), null, null);
+        final var service = new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), null);
 
-        RpcResult<AddShardReplicaOutput> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
-            .setShardName(shardName).setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        var rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+            .setShardName(shardName)
+            .setDataStoreType(DataStoreType.Config)
+            .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
@@ -347,8 +345,10 @@ public class ClusterAdminRpcServiceTest {
         Optional<ActorRef> optional = memberNode.operDataStore().getActorUtils().findLocalShard(shardName);
         assertFalse("Oper shard present", optional.isPresent());
 
-        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName(shardName)
-                .setDataStoreType(DataStoreType.Operational).build()).get(10, TimeUnit.SECONDS);
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+            .setShardName(shardName)
+            .setDataStoreType(DataStoreType.Operational)
+            .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.operDataStore(), shardName, peerMemberNames);
@@ -356,12 +356,12 @@ public class ClusterAdminRpcServiceTest {
 
     private static void doMakeShardLeaderLocal(final MemberNode memberNode, final String shardName,
             final String newLeader) throws Exception {
-        final ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
-                memberNode.operDataStore(), null, null);
+        final var service = new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), null);
 
-        final RpcResult<MakeLeaderLocalOutput> rpcResult = service.makeLeaderLocal(new MakeLeaderLocalInputBuilder()
-                .setDataStoreType(DataStoreType.Config).setShardName(shardName).build())
-                .get(10, TimeUnit.SECONDS);
+        final var rpcResult = service.makeLeaderLocal(new MakeLeaderLocalInputBuilder()
+            .setDataStoreType(DataStoreType.Config)
+            .setShardName(shardName)
+            .build()).get(10, TimeUnit.SECONDS);
 
         verifySuccessfulRpcResult(rpcResult);
 
@@ -412,12 +412,13 @@ public class ClusterAdminRpcServiceTest {
 
         // Invoke RPC service on member-3 to remove it's local shard
 
-        final ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
-                replicaNode3.operDataStore(), null, null);
+        final var service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(), replicaNode3.operDataStore(),
+            null);
 
-        RpcResult<RemoveShardReplicaOutput> rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder()
-                .setShardName("cars").setMemberName("member-3").setDataStoreType(DataStoreType.Config).build())
-                .get(10, TimeUnit.SECONDS);
+        var rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder()
+            .setShardName("cars").setMemberName("member-3")
+            .setDataStoreType(DataStoreType.Config)
+            .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2");
@@ -437,11 +438,14 @@ public class ClusterAdminRpcServiceTest {
 
         // Invoke RPC service on member-1 to remove member-2
 
-        final ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
-                leaderNode1.operDataStore(), null, null);
+        final var service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            null);
 
-        rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder().setShardName("cars")
-                .setMemberName("member-2").setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
+            .setShardName("cars")
+            .setMemberName("member-2")
+            .setDataStoreType(DataStoreType.Config)
+            .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars");
@@ -473,12 +477,14 @@ public class ClusterAdminRpcServiceTest {
 
         // Invoke RPC service on leader member-1 to remove it's local shard
 
-        final ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
-                leaderNode1.operDataStore(), null, null);
+        final var service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            null);
 
-        RpcResult<RemoveShardReplicaOutput> rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
-                .setShardName("cars").setMemberName("member-1").setDataStoreType(DataStoreType.Config).build())
-                .get(10, TimeUnit.SECONDS);
+        final var rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
+            .setShardName("cars")
+            .setMemberName("member-1")
+            .setDataStoreType(DataStoreType.Config)
+            .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftState(replicaNode2.configDataStore(), "cars", raftState ->
@@ -521,11 +527,11 @@ public class ClusterAdminRpcServiceTest {
                                 newReplicaNode2.kit().getRef());
         newReplicaNode2.kit().expectMsgClass(Success.class);
 
-        final ClusterAdminRpcService service = new ClusterAdminRpcService(newReplicaNode2.configDataStore(),
-                newReplicaNode2.operDataStore(), null, null);
+        final var service = new ClusterAdminRpcService(newReplicaNode2.configDataStore(),
+            newReplicaNode2.operDataStore(), null);
 
-        RpcResult<AddReplicasForAllShardsOutput> rpcResult = service.addReplicasForAllShards(
-            new AddReplicasForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
+        var rpcResult = service.addReplicasForAllShards(new AddReplicasForAllShardsInputBuilder().build())
+            .get(10, TimeUnit.SECONDS);
         AddReplicasForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -579,11 +585,12 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "pets", "member-1", "member-3");
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "pets", "member-1", "member-2");
 
-        final ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
-                replicaNode3.operDataStore(), null, null);
+        final var service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(), replicaNode3.operDataStore(),
+            null);
 
-        RpcResult<RemoveAllShardReplicasOutput> rpcResult = service3.removeAllShardReplicas(
-                new RemoveAllShardReplicasInputBuilder().setMemberName("member-3").build()).get(10, TimeUnit.SECONDS);
+        var rpcResult = service3.removeAllShardReplicas(
+                new RemoveAllShardReplicasInputBuilder().setMemberName("member-3").build())
+            .get(10, TimeUnit.SECONDS);
         RemoveAllShardReplicasOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -625,17 +632,16 @@ public class ClusterAdminRpcServiceTest {
 
         // Invoke RPC service on member-3 to change voting status
 
-        final ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
-                replicaNode3.operDataStore(), null, null);
+        final var service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(), replicaNode3.operDataStore(),
+            null);
 
-        RpcResult<ChangeMemberVotingStatesForShardOutput> rpcResult = service3
-                .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
-                        .setShardName("cars").setDataStoreType(DataStoreType.Config)
-                        .setMemberVotingState(List.of(
-                                new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
-                                new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
-                        .build())
-                .get(10, TimeUnit.SECONDS);
+        var rpcResult = service3.changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
+            .setShardName("cars").setDataStoreType(DataStoreType.Config)
+            .setMemberVotingState(List.of(
+                new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
+                new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
+            .build())
+            .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
@@ -659,18 +665,17 @@ public class ClusterAdminRpcServiceTest {
 
         // Invoke RPC service on member-3 to change voting status
 
-        final ClusterAdminRpcService service = new ClusterAdminRpcService(leaderNode.configDataStore(),
-                leaderNode.operDataStore(), null, null);
+        final var service = new ClusterAdminRpcService(leaderNode.configDataStore(), leaderNode.operDataStore(), null);
 
-        RpcResult<ChangeMemberVotingStatesForShardOutput> rpcResult = service
-                .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
-                        .setShardName("cars").setDataStoreType(DataStoreType.Config)
-                        .setMemberVotingState(List.of(new MemberVotingStateBuilder()
-                            .setMemberName("member-1")
-                            .setVoting(FALSE)
-                            .build()))
-                        .build())
-                .get(10, TimeUnit.SECONDS);
+        final var rpcResult = service.changeMemberVotingStatesForShard(
+            new ChangeMemberVotingStatesForShardInputBuilder()
+                .setShardName("cars").setDataStoreType(DataStoreType.Config)
+                .setMemberVotingState(List.of(new MemberVotingStateBuilder()
+                    .setMemberName("member-1")
+                    .setVoting(FALSE)
+                    .build()))
+                .build())
+            .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
         verifyVotingStates(leaderNode.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE));
@@ -680,10 +685,14 @@ public class ClusterAdminRpcServiceTest {
     public void testChangeMemberVotingStatesForAllShards() throws Exception {
         String name = "testChangeMemberVotingStatesForAllShards";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
-                .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
-                        DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
-                .build();
+        final MemberNode leaderNode1 = MemberNode.builder(memberNodes)
+            .akkaConfig("Member1")
+            .testName(name)
+            .moduleShardsConfig(moduleShardsConfig)
+            .datastoreContextBuilder(DatastoreContext.newBuilder()
+                .shardHeartbeatIntervalInMillis(300)
+                .shardElectionTimeoutFactor(1))
+            .build();
 
         final MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
@@ -701,15 +710,17 @@ public class ClusterAdminRpcServiceTest {
 
         // Invoke RPC service on member-3 to change voting status
 
-        final ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
-                replicaNode3.operDataStore(), null, null);
+        final var service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
+                replicaNode3.operDataStore(), null);
 
-        RpcResult<ChangeMemberVotingStatesForAllShardsOutput> rpcResult = service3.changeMemberVotingStatesForAllShards(
-                new ChangeMemberVotingStatesForAllShardsInputBuilder().setMemberVotingState(List.of(
+        final var rpcResult = service3.changeMemberVotingStatesForAllShards(
+            new ChangeMemberVotingStatesForAllShardsInputBuilder()
+                .setMemberVotingState(List.of(
                         new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
-                        new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build())).build())
+                        new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
+                .build())
                 .get(10, TimeUnit.SECONDS);
-        ChangeMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
+        final var result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
                 successShardResult("cars", DataStoreType.Operational),
@@ -753,11 +764,12 @@ public class ClusterAdminRpcServiceTest {
         verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
                 new SimpleEntry<>("member-2", TRUE), new SimpleEntry<>("member-3", FALSE));
 
-        final ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
-                replicaNode3.operDataStore(), null, null);
+        final var service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(), replicaNode3.operDataStore(),
+            null);
 
-        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service3.flipMemberVotingStatesForAllShards(
-            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
+        var rpcResult = service3.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build())
+            .get(10, TimeUnit.SECONDS);
         FlipMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -787,7 +799,8 @@ public class ClusterAdminRpcServiceTest {
         // Flip the voting states back to the original states.
 
         rpcResult = service3.flipMemberVotingStatesForAllShards(
-            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build())
+            .get(10, TimeUnit.SECONDS);
         result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -848,11 +861,12 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftState(replicaNode1.configDataStore(), "cars", raftState ->
             assertEquals("Expected raft state", RaftState.Follower.toString(), raftState.getRaftState()));
 
-        final ClusterAdminRpcService service1 = new ClusterAdminRpcService(replicaNode1.configDataStore(),
-                replicaNode1.operDataStore(), null, null);
+        final var service1 = new ClusterAdminRpcService(replicaNode1.configDataStore(), replicaNode1.operDataStore(),
+            null);
 
-        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service1.flipMemberVotingStatesForAllShards(
-            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
+        var rpcResult = service1.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build())
+            .get(10, TimeUnit.SECONDS);
         FlipMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -915,11 +929,12 @@ public class ClusterAdminRpcServiceTest {
                 new SimpleEntry<>("member-4", FALSE), new SimpleEntry<>("member-5", FALSE),
                 new SimpleEntry<>("member-6", FALSE));
 
-        final ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
-                leaderNode1.operDataStore(), null, null);
+        final var service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            null);
 
-        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service1.flipMemberVotingStatesForAllShards(
-            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
+        final var rpcResult = service1.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build())
+            .get(10, TimeUnit.SECONDS);
         FlipMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
