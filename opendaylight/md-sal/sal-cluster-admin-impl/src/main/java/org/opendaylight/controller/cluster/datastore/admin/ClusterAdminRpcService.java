@@ -15,6 +15,8 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
@@ -56,42 +58,51 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.eos.akka.DataCenterControl;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShards;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShards;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShard;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenterOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShards;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShards;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetKnownClientsForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.LocateShard;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.LocateShardInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.LocateShardOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.LocateShardOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicas;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutputBuilder;
@@ -107,6 +118,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -121,7 +133,7 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
-public class ClusterAdminRpcService implements ClusterAdminService {
+public class ClusterAdminRpcService {
     private static final Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
@@ -152,8 +164,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         this.dataCenterControl = dataCenterControl;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
+    private ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -185,8 +196,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(
+    private ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(
             final RemoveShardReplicaInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
@@ -225,8 +235,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<LocateShardOutput>> locateShard(final LocateShardInput input) {
+    private ListenableFuture<RpcResult<LocateShardOutput>> locateShard(final LocateShardInput input) {
         final ActorUtils utils;
         switch (input.getDataStoreType()) {
             case Config:
@@ -267,8 +276,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return ret;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<MakeLeaderLocalOutput>> makeLeaderLocal(final MakeLeaderLocalInput input) {
+    private ListenableFuture<RpcResult<MakeLeaderLocalOutput>> makeLeaderLocal(final MakeLeaderLocalInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -322,8 +330,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return future;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<AddReplicasForAllShardsOutput>> addReplicasForAllShards(
+    private ListenableFuture<RpcResult<AddReplicasForAllShardsOutput>> addReplicasForAllShards(
             final AddReplicasForAllShardsInput input) {
         LOG.info("Adding replicas for all shards");
 
@@ -337,9 +344,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 "Failed to add replica");
     }
 
-
-    @Override
-    public ListenableFuture<RpcResult<RemoveAllShardReplicasOutput>> removeAllShardReplicas(
+    private ListenableFuture<RpcResult<RemoveAllShardReplicasOutput>> removeAllShardReplicas(
             final RemoveAllShardReplicasInput input) {
         LOG.info("Removing replicas for all shards");
 
@@ -360,8 +365,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         "       Failed to remove replica");
     }
 
-    @Override
-    public ListenableFuture<RpcResult<ChangeMemberVotingStatesForShardOutput>> changeMemberVotingStatesForShard(
+    private ListenableFuture<RpcResult<ChangeMemberVotingStatesForShardOutput>> changeMemberVotingStatesForShard(
             final ChangeMemberVotingStatesForShardInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
@@ -403,8 +407,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<ChangeMemberVotingStatesForAllShardsOutput>> changeMemberVotingStatesForAllShards(
+    private ListenableFuture<RpcResult<ChangeMemberVotingStatesForAllShardsOutput>> changeMemberVotingStatesForAllShards(
             final ChangeMemberVotingStatesForAllShardsInput input) {
         List<MemberVotingState> memberVotingStates = input.getMemberVotingState();
         if (memberVotingStates == null || memberVotingStates.isEmpty()) {
@@ -425,8 +428,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 "Failed to change member voting states");
     }
 
-    @Override
-    public ListenableFuture<RpcResult<FlipMemberVotingStatesForAllShardsOutput>> flipMemberVotingStatesForAllShards(
+    private ListenableFuture<RpcResult<FlipMemberVotingStatesForAllShardsOutput>> flipMemberVotingStatesForAllShards(
             final FlipMemberVotingStatesForAllShardsInput input) {
         final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
         Function<String, Object> messageSupplier = FlipShardMembersVotingStatus::new;
@@ -441,8 +443,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 "Failed to change member voting states");
     }
 
-    @Override
-    public ListenableFuture<RpcResult<GetShardRoleOutput>> getShardRole(final GetShardRoleInput input) {
+    private ListenableFuture<RpcResult<GetShardRoleOutput>> getShardRole(final GetShardRoleInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -484,8 +485,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<BackupDatastoreOutput>> backupDatastore(final BackupDatastoreInput input) {
+    private ListenableFuture<RpcResult<BackupDatastoreOutput>> backupDatastore(final BackupDatastoreInput input) {
         LOG.debug("backupDatastore: {}", input);
 
         if (Strings.isNullOrEmpty(input.getFilePath())) {
@@ -513,9 +513,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-
-    @Override
-    public ListenableFuture<RpcResult<GetKnownClientsForAllShardsOutput>> getKnownClientsForAllShards(
+    private ListenableFuture<RpcResult<GetKnownClientsForAllShardsOutput>> getKnownClientsForAllShards(
             final GetKnownClientsForAllShardsInput input) {
         final ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> allShardReplies =
                 getAllShardLeadersClients();
@@ -523,8 +521,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             MoreExecutors.directExecutor());
     }
 
-    @Override
-    public ListenableFuture<RpcResult<ActivateEosDatacenterOutput>> activateEosDatacenter(
+    private ListenableFuture<RpcResult<ActivateEosDatacenterOutput>> activateEosDatacenter(
             final ActivateEosDatacenterInput input) {
         LOG.debug("Activating EOS Datacenter");
         final SettableFuture<RpcResult<ActivateEosDatacenterOutput>> future = SettableFuture.create();
@@ -545,8 +542,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return future;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<DeactivateEosDatacenterOutput>> deactivateEosDatacenter(
+    private ListenableFuture<RpcResult<DeactivateEosDatacenterOutput>> deactivateEosDatacenter(
             final DeactivateEosDatacenterInput input) {
         LOG.debug("Deactivating EOS Datacenter");
         final SettableFuture<RpcResult<DeactivateEosDatacenterOutput>> future = SettableFuture.create();
@@ -787,5 +783,24 @@ public class ClusterAdminRpcService implements ClusterAdminService {
 
     private static <T> RpcResult<T> newSuccessfulResult(final T data) {
         return RpcResultBuilder.success(data).build();
+    }
+
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplica.class, this::addShardReplica)
+            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplica.class, this::removeShardReplica)
+            .put(LocateShard.class, this::locateShard)
+            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocal.class, this::makeLeaderLocal)
+            .put(AddReplicasForAllShards.class, this::addReplicasForAllShards)
+            .put(RemoveAllShardReplicas.class, this::removeAllShardReplicas)
+            .put(ChangeMemberVotingStatesForShard.class, this::changeMemberVotingStatesForShard)
+            .put(ChangeMemberVotingStatesForAllShards.class, this::changeMemberVotingStatesForAllShards)
+            .put(FlipMemberVotingStatesForAllShards.class, this::flipMemberVotingStatesForAllShards)
+            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRole.class, this::getShardRole)
+            .put(BackupDatastore.class, this::backupDatastore)
+            .put(GetKnownClientsForAllShards.class, this::getKnownClientsForAllShards)
+            .put(ActivateEosDatacenter.class, this::activateEosDatacenter)
+            .put(DeactivateEosDatacenter.class, this::deactivateEosDatacenter)
+            .build();
     }
 }
