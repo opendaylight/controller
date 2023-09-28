@@ -14,21 +14,18 @@ import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOut
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOutput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOutputBuilder;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-abstract class AbstractRpcbenchPayloadService implements RpcbenchPayloadService {
+abstract class AbstractRpcbenchPayloadService {
     private int numRpcs = 0;
 
-    @Override
-    public final ListenableFuture<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(final GlobalRpcBenchInput input) {
+    final ListenableFuture<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(final GlobalRpcBenchInput input) {
         numRpcs++;
         return RpcResultBuilder.success(new GlobalRpcBenchOutputBuilder(input).build()).buildFuture();
     }
 
-    @Override
-    public final ListenableFuture<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(final RoutedRpcBenchInput input) {
+    final ListenableFuture<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(final RoutedRpcBenchInput input) {
         numRpcs++;
         return RpcResultBuilder.success(new RoutedRpcBenchOutputBuilder(input).build()).buildFuture();
     }
