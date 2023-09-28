@@ -17,10 +17,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInputBuilder;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOutput;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.Payload;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadBuilder;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadKey;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class RoutedBindingRTClient implements RTCClient {
     private static final Logger LOG = LoggerFactory.getLogger(RoutedBindingRTClient.class);
-    private final RpcbenchPayloadService service;
+    private final RpcConsumerRegistry registry;
     private final AtomicLong rpcOk = new AtomicLong(0);
     private final AtomicLong rpcError = new AtomicLong(0);
     private final List<RoutedRpcBenchInput> inVal = new ArrayList<>();
@@ -39,7 +39,7 @@ public class RoutedBindingRTClient implements RTCClient {
 
     public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize,
             final List<InstanceIdentifier<?>> routeIid) {
-        service = registry.getRpcService(RpcbenchPayloadService.class);
+        this.registry = registry;
         this.inSize = inSize;
 
         Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
@@ -72,7 +72,7 @@ public class RoutedBindingRTClient implements RTCClient {
         int rpcServerCnt = inVal.size();
         for (int i = 0; i < iterations; i++) {
             RoutedRpcBenchInput input = inVal.get(ThreadLocalRandom.current().nextInt(rpcServerCnt));
-            Future<RpcResult<RoutedRpcBenchOutput>> output = service.routedRpcBench(input);
+            Future<RpcResult<RoutedRpcBenchOutput>> output = registry.getRpc(RoutedRpcBench.class).invoke(input);
             try {
                 RpcResult<RoutedRpcBenchOutput> rpcResult = output.get();
 
