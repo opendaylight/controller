@@ -15,7 +15,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.clustering.it.karaf.cli.InstanceIdentifierSupport;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -33,8 +33,8 @@ public class RegisterBoundConstantCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(OdlMdsalLowlevelControlService.class)
-                .registerBoundConstant(new RegisterBoundConstantInputBuilder()
+        return rpcService.getRpc(RegisterBoundConstant.class)
+                .invoke(new RegisterBoundConstantInputBuilder()
                         .setConstant(constant)
                         .setContext(iidSupport.parseArgument(context))
                         .build());

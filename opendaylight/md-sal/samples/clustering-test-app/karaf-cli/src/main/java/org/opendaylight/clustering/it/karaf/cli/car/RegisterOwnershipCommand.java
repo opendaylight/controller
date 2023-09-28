@@ -14,7 +14,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnership;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnershipInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -28,7 +28,7 @@ public class RegisterOwnershipCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(CarService.class)
-            .registerOwnership(new RegisterOwnershipInputBuilder().setCarId(carId).build());
+        return rpcService.getRpc(RegisterOwnership.class)
+            .invoke(new RegisterOwnershipInputBuilder().setCarId(carId).build());
     }
 }
