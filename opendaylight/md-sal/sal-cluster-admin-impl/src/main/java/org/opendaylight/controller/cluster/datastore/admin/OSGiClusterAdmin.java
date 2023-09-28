@@ -11,7 +11,6 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterfa
 import org.opendaylight.controller.eos.akka.DataCenterControl;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -34,8 +33,9 @@ public final class OSGiClusterAdmin {
             @Reference final RpcProviderService rpcProviderService,
             @Reference final DataCenterControl dataCenterControls,
             @Reference final DataCenterControl dataCenterControl) {
-        reg = rpcProviderService.registerRpcImplementation(ClusterAdminService.class,
-            new ClusterAdminRpcService(configDatastore, operDatastore, serializer, dataCenterControl));
+        reg = rpcProviderService.registerRpcImplementations(
+            new ClusterAdminRpcService(configDatastore, operDatastore, serializer, dataCenterControl)
+                .getRpcClassToInstanceMap());
         LOG.info("Cluster Admin services started");
     }
 
