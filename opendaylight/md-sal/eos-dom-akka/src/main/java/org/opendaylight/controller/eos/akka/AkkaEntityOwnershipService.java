@@ -15,6 +15,7 @@ import akka.actor.typed.javadsl.AskPattern;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.cluster.typed.Cluster;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -62,14 +63,17 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistratio
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntities;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwner;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.OdlEntityOwnersService;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.binding.RpcOutput;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -88,8 +92,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @Component(immediate = true, service = { DOMEntityOwnershipService.class, DataCenterControl.class })
-public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable,
-        OdlEntityOwnersService {
+public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AkkaEntityOwnershipService.class);
     private static final String DATACENTER_PREFIX = "dc";
     private static final Duration DATACENTER_OP_TIMEOUT = Duration.ofSeconds(20);
@@ -148,7 +151,11 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
             throws ExecutionException, InterruptedException {
         this(actorProvider.getActorSystem(), codecTree);
 
-        reg = rpcProvider.registerRpcImplementation(OdlEntityOwnersService.class, this);
+        reg = rpcProvider.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(GetEntity.class, this::getEntity)
+            .put(GetEntities.class, this::getEntities)
+            .put(GetEntityOwner.class, this::getEntityOwner)
+            .build());
     }
 
     @PreDestroy
@@ -224,21 +231,21 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
             AskPattern.ask(ownerSupervisor, DeactivateDataCenter::new, DATACENTER_OP_TIMEOUT, scheduler));
     }
 
-    @Override
-    public ListenableFuture<RpcResult<GetEntitiesOutput>> getEntities(final GetEntitiesInput input) {
+    @VisibleForTesting
+    final ListenableFuture<RpcResult<GetEntitiesOutput>> getEntities(final GetEntitiesInput input) {
         return toRpcFuture(AskPattern.ask(ownerStateChecker, GetEntitiesRequest::new, QUERY_TIMEOUT, scheduler),
                 reply -> reply.toOutput(iidCodec));
     }
 
-    @Override
-    public ListenableFuture<RpcResult<GetEntityOutput>> getEntity(final GetEntityInput input) {
+    @VisibleForTesting
+    final ListenableFuture<RpcResult<GetEntityOutput>> getEntity(final GetEntityInput input) {
         return toRpcFuture(AskPattern.ask(ownerStateChecker,
             (final ActorRef<GetEntityReply> replyTo) -> new GetEntityRequest(replyTo, input), QUERY_TIMEOUT, scheduler),
             GetEntityReply::toOutput);
     }
 
-    @Override
-    public ListenableFuture<RpcResult<GetEntityOwnerOutput>> getEntityOwner(final GetEntityOwnerInput input) {
+    @VisibleForTesting
+    final ListenableFuture<RpcResult<GetEntityOwnerOutput>> getEntityOwner(final GetEntityOwnerInput input) {
         return toRpcFuture(AskPattern.ask(ownerStateChecker,
             (final ActorRef<GetEntityOwnerReply> replyTo) -> new GetEntityOwnerRequest(replyTo, input), QUERY_TIMEOUT,
             scheduler), GetEntityOwnerReply::toOutput);

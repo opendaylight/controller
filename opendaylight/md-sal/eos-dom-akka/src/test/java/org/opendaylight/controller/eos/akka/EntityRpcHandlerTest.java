@@ -30,18 +30,14 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistratio
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.get.entities.output.EntitiesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -64,7 +60,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         service2 = new AkkaEntityOwnershipService(system2, CODEC_CONTEXT);
 
         // need to wait until all nodes are ready
-        final Cluster cluster = Cluster.get(Adapter.toTyped(system2));
+        final var cluster = Cluster.get(Adapter.toTyped(system2));
         Awaitility.await().atMost(Duration.ofSeconds(20)).until(() -> {
             final List<Member> members = new ArrayList<>();
             cluster.state().getMembers().forEach(members::add);
@@ -97,7 +93,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
      */
     @Test
     public void testEntityRetrievalWithUnavailableSupervisor() throws Exception {
-        final YangInstanceIdentifier entityId = YangInstanceIdentifier.create(new NodeIdentifier(NetworkTopology.QNAME),
+        final YangInstanceIdentifier entityId = YangInstanceIdentifier.of(new NodeIdentifier(NetworkTopology.QNAME),
                 new NodeIdentifier(Topology.QNAME),
                 NodeIdentifierWithPredicates.of(Topology.QNAME, QName.create(Topology.QNAME, "topology-id"), "test"),
                 new NodeIdentifier(Node.QNAME),
@@ -108,11 +104,10 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         final DOMEntityOwnershipCandidateRegistration reg = service1.registerCandidate(entity);
 
         await().untilAsserted(() -> {
-            final RpcResult<GetEntityOutput> getEntityResult = service1.getEntity(new GetEntityInputBuilder()
-                            .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
-                            .setType(new EntityType(ENTITY_TYPE))
-                            .build())
-                    .get();
+            final var getEntityResult = service1.getEntity(new GetEntityInputBuilder()
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setType(new EntityType(ENTITY_TYPE))
+                .build()).get();
 
             assertEquals(getEntityResult.getResult().getOwnerNode().getValue(), "member-1");
             assertEquals(getEntityResult.getResult().getCandidateNodes().get(0).getValue(), "member-1");
@@ -121,8 +116,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         // keep this under ask timeout to make sure the singleton actor in the inactive datacenter responds with failure
         // immediately, so that the rpc actor retries with distributed-data asap
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            final GetEntitiesOutput getEntitiesResult =
-                    service2.getEntities(new GetEntitiesInputBuilder().build()).get().getResult();
+            final var getEntitiesResult = service2.getEntities(new GetEntitiesInputBuilder().build()).get().getResult();
 
             assertEquals(getEntitiesResult.getEntities().size(), 1);
             assertTrue(getEntitiesResult.getEntities().get(new EntitiesKey(
@@ -136,22 +130,20 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            final GetEntityOutput getEntityResult = service2.getEntity(new GetEntityInputBuilder()
-                            .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
-                            .setType(new EntityType(ENTITY_TYPE))
-                            .build())
-                    .get().getResult();
+            final var getEntityResult = service2.getEntity(new GetEntityInputBuilder()
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setType(new EntityType(ENTITY_TYPE))
+                .build()).get().getResult();
 
             assertEquals(getEntityResult.getOwnerNode().getValue(), "member-1");
             assertEquals(getEntityResult.getCandidateNodes().get(0).getValue(), "member-1");
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            final GetEntityOwnerOutput getOwnerResult = service2.getEntityOwner(new GetEntityOwnerInputBuilder()
-                            .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
-                            .setType(new EntityType(ENTITY_TYPE))
-                            .build())
-                    .get().getResult();
+            final var getOwnerResult = service2.getEntityOwner(new GetEntityOwnerInputBuilder()
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setType(new EntityType(ENTITY_TYPE))
+                .build()).get().getResult();
 
             assertEquals(getOwnerResult.getOwnerNode().getValue(), "member-1");
         });
