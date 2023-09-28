@@ -14,10 +14,9 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnership;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
 
 @Service
 @Command(scope = "test-app", name = "unregister-ownership", description = "Run an unregister-ownership test")
@@ -29,7 +28,7 @@ public class UnregisterOwnershipCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(CarService.class)
-            .unregisterOwnership(new UnregisterOwnershipInputBuilder().setCarId(carId).build());
+        return rpcService.getRpc(UnregisterOwnership.class)
+            .invoke(new UnregisterOwnershipInputBuilder().setCarId(carId).build());
     }
 }
