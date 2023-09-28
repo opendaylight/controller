@@ -13,8 +13,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicRpcTestService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 @Service
@@ -25,6 +25,6 @@ public class BasicGlobalCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(BasicRpcTestService.class).basicGlobal(new BasicGlobalInputBuilder().build());
+        return rpcService.getRpc(BasicGlobal.class).invoke(new BasicGlobalInputBuilder().build());
     }
 }
