@@ -15,8 +15,8 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShard;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingStateBuilder;
@@ -44,8 +44,8 @@ public class ChangeMemberVotingStatesForShardCommand extends AbstractRpcAction {
                 .setVoting(voting)
                 .build();
 
-        return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
-                .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
+        return rpcConsumerRegistry.getRpc(ChangeMemberVotingStatesForShard.class)
+                .invoke(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName(shardName)
                         .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .setMemberVotingState(List.of(memberVotingState))
