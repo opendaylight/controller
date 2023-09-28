@@ -24,15 +24,13 @@ import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.AddPersonOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.People;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PeopleService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.Person;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.PersonBuilder;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -46,29 +44,28 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 @Component(service = { })
-public final class PeopleProvider implements PeopleService, AutoCloseable {
+public final class PeopleProvider implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(PeopleProvider.class);
 
-    private final Set<ObjectRegistration<?>> regs = new HashSet<>();
+    private final Set<Registration> regs = new HashSet<>();
     private final DataBroker dataProvider;
     private final RpcProviderService rpcProviderService;
-    private final CarPurchaseService rpcImplementation;
+    private final PurchaseCarProvider rpcImplementation;
 
     @Inject
     @Activate
     public PeopleProvider(@Reference final DataBroker dataProvider,
             @Reference final RpcProviderService rpcProviderService,
-            @Reference final CarPurchaseService rpcImplementation) {
+            @Reference final PurchaseCarProvider rpcImplementation) {
         this.dataProvider = requireNonNull(dataProvider);
         this.rpcProviderService = requireNonNull(rpcProviderService);
         this.rpcImplementation = requireNonNull(rpcImplementation);
 
         // Add global registration
-        regs.add(rpcProviderService.registerRpcImplementation(CarPurchaseService.class, rpcImplementation));
+        regs.add(rpcProviderService.registerRpcImplementations(rpcImplementation.getRpcClassToInstanceMap()));
     }
 
-    @Override
-    public ListenableFuture<RpcResult<AddPersonOutput>> addPerson(final AddPersonInput input) {
+    private ListenableFuture<RpcResult<AddPersonOutput>> addPerson(final AddPersonInput input) {
         LOG.info("RPC addPerson : adding person [{}]", input);
 
         PersonBuilder builder = new PersonBuilder(input);
@@ -86,7 +83,7 @@ public final class PeopleProvider implements PeopleService, AutoCloseable {
             @Override
             public void onSuccess(final CommitInfo result) {
                 LOG.info("RPC addPerson : person added successfully [{}]", person);
-                regs.add(rpcProviderService.registerRpcImplementation(CarPurchaseService.class, rpcImplementation,
+                regs.add(rpcProviderService.registerRpcImplementations(rpcImplementation.getRpcClassToInstanceMap(),
                     ImmutableSet.of(personId)));
                 LOG.info("RPC addPerson : routed rpc registered for instance ID [{}]", personId);
                 futureResult.set(RpcResultBuilder.success(new AddPersonOutputBuilder().build()).build());
@@ -106,7 +103,7 @@ public final class PeopleProvider implements PeopleService, AutoCloseable {
     @Deactivate
     @Override
     public void close() {
-        regs.forEach(ObjectRegistration::close);
+        regs.forEach(Registration::close);
         regs.clear();
     }
 }
