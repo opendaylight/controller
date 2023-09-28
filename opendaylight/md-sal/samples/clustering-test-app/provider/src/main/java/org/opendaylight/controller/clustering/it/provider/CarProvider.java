@@ -8,6 +8,7 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,38 +41,46 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterCommitCohort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterCommitCohortInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterCommitCohortOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterCommitCohortOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterLoggingDtcl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterLoggingDtclInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterLoggingDtclOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterLoggingDtclOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnership;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnershipInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnershipOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnershipOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTestOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTestOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterCommitCohort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterCommitCohortInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterCommitCohortOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterCommitCohortOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterLoggingDtcls;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterLoggingDtclsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterLoggingDtclsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterLoggingDtclsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnership;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -92,8 +101,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Component(service = { })
 @SuppressFBWarnings("SLF4J_ILLEGAL_PASSED_CLASS")
-public final class CarProvider implements CarService {
-    private static final Logger LOG_PURCHASE_CAR = LoggerFactory.getLogger(PurchaseCarProvider.class);
+public final class CarProvider {
+    private static final Logger LOG_PURCHASE_CAR = LoggerFactory.getLogger(BuyCarImpl.class);
 
     private static final Logger LOG_CAR_PROVIDER = LoggerFactory.getLogger(CarProvider.class);
 
@@ -115,7 +124,7 @@ public final class CarProvider implements CarService {
 
     private final Set<ListenerRegistration<?>> carsDclRegistrations = ConcurrentHashMap.newKeySet();
 
-    private final Set<ObjectRegistration<?>> regs = new HashSet<>();
+    private final Set<Registration> regs = new HashSet<>();
     private final Set<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
             ConcurrentHashMap.newKeySet();
 
@@ -132,7 +141,16 @@ public final class CarProvider implements CarService {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
         this.domDataBroker = domDataBroker;
-        regs.add(rpcProviderService.registerRpcImplementation(CarService.class, this));
+        regs.add(rpcProviderService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(StressTest.class, this::stressTest)
+            .put(StopStressTest.class, this::stopStressTest)
+            .put(RegisterOwnership.class, this::registerOwnership)
+            .put(UnregisterOwnership.class, this::unregisterOwnership)
+            .put(RegisterLoggingDtcl.class, this::registerLoggingDtcl)
+            .put(UnregisterLoggingDtcls.class, this::unregisterLoggingDtcls)
+            .put(RegisterCommitCohort.class, this::registerCommitCohort)
+            .put(UnregisterCommitCohort.class, this::unregisterCommitCohort)
+            .build()));
     }
 
     @PreDestroy
@@ -140,7 +158,7 @@ public final class CarProvider implements CarService {
     public void close() {
         stopThread();
         closeCommitCohortRegistration();
-        regs.forEach(ObjectRegistration::close);
+        regs.forEach(Registration::close);
         regs.clear();
     }
 
@@ -157,8 +175,7 @@ public final class CarProvider implements CarService {
         }
     }
 
-    @Override
-    public ListenableFuture<RpcResult<StressTestOutput>> stressTest(final StressTestInput input) {
+    private ListenableFuture<RpcResult<StressTestOutput>> stressTest(final StressTestInput input) {
         final int inputRate;
         final long inputCount;
 
@@ -244,8 +261,7 @@ public final class CarProvider implements CarService {
         return Futures.immediateFuture(RpcResultBuilder.success(new StressTestOutputBuilder().build()).build());
     }
 
-    @Override
-    public ListenableFuture<RpcResult<StopStressTestOutput>> stopStressTest(final StopStressTestInput input) {
+    private ListenableFuture<RpcResult<StopStressTestOutput>> stopStressTest(final StopStressTestInput input) {
         stopThread();
         StopStressTestOutputBuilder stopStressTestOutput;
         stopStressTestOutput = new StopStressTestOutputBuilder()
@@ -261,9 +277,7 @@ public final class CarProvider implements CarService {
         return Futures.immediateFuture(RpcResultBuilder.<StopStressTestOutput>success(result).build());
     }
 
-
-    @Override
-    public ListenableFuture<RpcResult<RegisterOwnershipOutput>> registerOwnership(final RegisterOwnershipInput input) {
+    private ListenableFuture<RpcResult<RegisterOwnershipOutput>> registerOwnership(final RegisterOwnershipInput input) {
         if (registeredListener.compareAndSet(false, true)) {
             ownershipService.registerListener(ENTITY_TYPE, ownershipListener);
         }
@@ -279,14 +293,12 @@ public final class CarProvider implements CarService {
         return RpcResultBuilder.success(new RegisterOwnershipOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnregisterOwnershipOutput>> unregisterOwnership(
+    private ListenableFuture<RpcResult<UnregisterOwnershipOutput>> unregisterOwnership(
             final UnregisterOwnershipInput input) {
         return RpcResultBuilder.success(new UnregisterOwnershipOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RegisterLoggingDtclOutput>> registerLoggingDtcl(
+    private ListenableFuture<RpcResult<RegisterLoggingDtclOutput>> registerLoggingDtcl(
             final RegisterLoggingDtclInput input) {
         LOG_CAR_PROVIDER.info("Registering a new CarDataTreeChangeListener");
         final ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration =
@@ -296,8 +308,7 @@ public final class CarProvider implements CarService {
         return RpcResultBuilder.success(new RegisterLoggingDtclOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnregisterLoggingDtclsOutput>> unregisterLoggingDtcls(
+    private ListenableFuture<RpcResult<UnregisterLoggingDtclsOutput>> unregisterLoggingDtcls(
             final UnregisterLoggingDtclsInput input) {
         LOG_CAR_PROVIDER.info("Unregistering the CarDataTreeChangeListener(s)");
         synchronized (carsDtclRegistrations) {
@@ -312,9 +323,8 @@ public final class CarProvider implements CarService {
         return RpcResultBuilder.success(new UnregisterLoggingDtclsOutputBuilder().build()).buildFuture();
     }
 
-    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public ListenableFuture<RpcResult<UnregisterCommitCohortOutput>> unregisterCommitCohort(
+    private ListenableFuture<RpcResult<UnregisterCommitCohortOutput>> unregisterCommitCohort(
             final UnregisterCommitCohortInput input) {
         closeCommitCohortRegistration();
 
@@ -329,8 +339,7 @@ public final class CarProvider implements CarService {
         }
     }
 
-    @Override
-    public synchronized ListenableFuture<RpcResult<RegisterCommitCohortOutput>> registerCommitCohort(
+    private synchronized ListenableFuture<RpcResult<RegisterCommitCohortOutput>> registerCommitCohort(
             final RegisterCommitCohortInput input) {
         if (commitCohortReg.get() != null) {
             return RpcResultBuilder.success(new RegisterCommitCohortOutputBuilder().build()).buildFuture();
