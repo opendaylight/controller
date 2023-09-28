@@ -25,6 +25,7 @@ import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.api.KitchenServiceRuntimeMXBean;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToast;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
@@ -33,7 +34,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterListener;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBread;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
@@ -58,7 +58,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
     private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private final ToasterService toaster;
+    private final RpcConsumerRegistry rpcRegistry;
     private final Registration reg;
 
     private volatile boolean toasterOutOfBread;
@@ -68,7 +68,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
     public KitchenServiceImpl(@Reference final RpcConsumerRegistry rpcRegistry,
             @Reference final NotificationService notifService) {
         super("KitchenService", "toaster-consumer", null);
-        toaster = rpcRegistry.getRpcService(ToasterService.class);
+        this.rpcRegistry = rpcRegistry;
         reg = notifService.registerNotificationListener(this);
         register();
     }
@@ -132,7 +132,7 @@ public final class KitchenServiceImpl extends AbstractMXBean
         MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness(Uint32.valueOf(toastDoneness))
                 .setToasterToastType(toastType).build();
 
-        return toaster.makeToast(toastInput);
+        return rpcRegistry.getRpc(MakeToast.class).invoke(toastInput);
     }
 
     @Override
