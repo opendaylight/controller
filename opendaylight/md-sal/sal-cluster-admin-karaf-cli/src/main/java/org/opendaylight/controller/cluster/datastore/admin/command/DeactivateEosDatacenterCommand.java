@@ -12,7 +12,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DeactivateEosDatacenterInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -25,7 +25,7 @@ public class DeactivateEosDatacenterCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
-                .deactivateEosDatacenter(new DeactivateEosDatacenterInputBuilder().build());
+        return rpcConsumerRegistry.getRpc(DeactivateEosDatacenter.class)
+                .invoke(new DeactivateEosDatacenterInputBuilder().build());
     }
 }
