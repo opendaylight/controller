@@ -32,6 +32,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
 
     private ListenerRegistration<DOMRpcAvailabilityListener> rpcListenerReg;
     private RpcConsumerRegistry rpcRegistry;
+    //TODO Remove usage of RpcService in this class
     private Class<RpcService> rpcInterface;
     private Set<QName> rpcSchemaPaths;
 
