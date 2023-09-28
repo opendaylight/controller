@@ -14,6 +14,7 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATI
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
 import static org.opendaylight.yangtools.yang.common.ErrorType.APPLICATION;
 
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -47,13 +48,16 @@ import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToast;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastOutputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToast;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutputBuilder;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterOutputBuilder;
@@ -63,10 +67,10 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBreadBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -84,10 +88,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-@Component(service = ToasterService.class, immediate = true)
+@Component(service = MakeToast.class, immediate = true)
 @Designate(ocd = OpendaylightToaster.Configuration.class)
 public final class OpendaylightToaster extends AbstractMXBean
-        implements ToasterService, ToasterProviderRuntimeMXBean, DataTreeChangeListener<Toaster>, AutoCloseable {
+        implements MakeToast, ToasterProviderRuntimeMXBean, DataTreeChangeListener<Toaster>, AutoCloseable {
     @ObjectClassDefinition
     public @interface Configuration {
         @AttributeDefinition(description = "The name of the toaster's manufacturer", max = "255")
@@ -140,7 +144,11 @@ public final class OpendaylightToaster extends AbstractMXBean
         this.maxMakeToastTries = maxMakeToastTries;
 
         executor = Executors.newFixedThreadPool(1);
-        reg = rpcProviderService.registerRpcImplementation(ToasterService.class, this);
+        reg = rpcProviderService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(CancelToast.class, this::cancelToast)
+            .put(MakeToast.class, this)
+            .put(RestockToaster.class, this::restockToaster)
+            .build());
 
         LOG.info("Initializing...");
 
@@ -247,8 +255,7 @@ public final class OpendaylightToaster extends AbstractMXBean
     /**
      * RPC call implemented from the ToasterService interface that cancels the current toast, if any.
      */
-    @Override
-    public ListenableFuture<RpcResult<CancelToastOutput>> cancelToast(final CancelToastInput input) {
+    private ListenableFuture<RpcResult<CancelToastOutput>> cancelToast(final CancelToastInput input) {
         Future<?> current = currentMakeToastTask.getAndSet(null);
         if (current != null) {
             current.cancel(true);
@@ -262,13 +269,10 @@ public final class OpendaylightToaster extends AbstractMXBean
      * RPC call implemented from the ToasterService interface that attempts to make toast.
      */
     @Override
-    public ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final MakeToastInput input) {
+    public ListenableFuture<RpcResult<MakeToastOutput>> invoke(final MakeToastInput input) {
         LOG.info("makeToast: {}", input);
-
-        final SettableFuture<RpcResult<MakeToastOutput>> futureResult = SettableFuture.create();
-
+        final var futureResult = SettableFuture.<RpcResult<MakeToastOutput>>create();
         checkStatusAndMakeToast(input, futureResult, maxMakeToastTries);
-
         return futureResult;
     }
 
@@ -368,8 +372,7 @@ public final class OpendaylightToaster extends AbstractMXBean
      * Restocks the bread for the toaster, resets the toastsMade counter to 0, and sends a
      * ToasterRestocked notification.
      */
-    @Override
-    public ListenableFuture<RpcResult<RestockToasterOutput>> restockToaster(final RestockToasterInput input) {
+    private ListenableFuture<RpcResult<RestockToasterOutput>> restockToaster(final RestockToasterInput input) {
         LOG.info("restockToaster: {}", input);
 
         amountOfBreadInStock.set(input.getAmountOfBreadToStock().toJava());

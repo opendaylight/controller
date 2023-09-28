@@ -78,7 +78,7 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
         // NOTE: In a real test we would want to override the Thread.sleep() to
         // prevent our junit test
         // for sleeping for a second...
-        Future<RpcResult<MakeToastOutput>> makeToast = toaster.makeToast(toastInput);
+        Future<RpcResult<MakeToastOutput>> makeToast = toaster.invoke(toastInput);
 
         RpcResult<MakeToastOutput> rpcResult = makeToast.get();
 
