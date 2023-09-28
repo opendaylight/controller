@@ -9,11 +9,11 @@ package org.opendaylight.controller.test.sal.binding.it;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import java.util.Set;
 import javax.inject.Inject;
@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.OpendaylightTestRoutedRpcService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRoute;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteOutput;
@@ -30,7 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.ops4j.pax.exam.util.Filter;
@@ -45,8 +45,8 @@ public class RoutedServiceIT extends AbstractIT {
     private static final Logger LOG = LoggerFactory
             .getLogger(RoutedServiceIT.class);
 
-    protected OpendaylightTestRoutedRpcService odlRoutedService1;
-    protected OpendaylightTestRoutedRpcService odlRoutedService2;
+    protected RoutedSimpleRoute routedSimpleRouteRpc1;
+    protected RoutedSimpleRoute routedSimpleRouteRpc2;
 
     @Inject
     @Filter(timeout = 120 * 1000)
@@ -61,88 +61,84 @@ public class RoutedServiceIT extends AbstractIT {
      */
     @Before
     public void setUp() {
-        odlRoutedService1 = mock(OpendaylightTestRoutedRpcService.class, "First Flow Service");
-        odlRoutedService2 = mock(OpendaylightTestRoutedRpcService.class, "Second Flow Service");
-        Mockito.when(odlRoutedService1.routedSimpleRoute(Mockito.<RoutedSimpleRouteInput>any()))
+        routedSimpleRouteRpc1 = mock(RoutedSimpleRoute.class, "First Flow Rpc");
+        routedSimpleRouteRpc2 = mock(RoutedSimpleRoute.class, "Second Flow Rpc");
+        Mockito.when(routedSimpleRouteRpc1.invoke(Mockito.<RoutedSimpleRouteInput>any()))
             .thenReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null));
-        Mockito.when(odlRoutedService2.routedSimpleRoute(Mockito.<RoutedSimpleRouteInput>any()))
+        Mockito.when(routedSimpleRouteRpc2.invoke(Mockito.<RoutedSimpleRouteInput>any()))
             .thenReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null));
     }
 
     @Test
     public void testServiceRegistration() {
-        LOG.info("Register provider 1 with first implementation of routeSimpleService - service1 of node 1");
+        LOG.info("Register provider 1 with first implementation of routeSimpleService - rpc1 of node 1");
         final InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
         final InstanceIdentifier<UnorderedList> nodeTwo = createNodeRef("foo:node:2");
 
-        ObjectRegistration<OpendaylightTestRoutedRpcService> firstReg = rpcProviderService.registerRpcImplementation(
-            OpendaylightTestRoutedRpcService.class, odlRoutedService1,  Set.of(nodeOnePath));
+        Registration firstReg = rpcProviderService.registerRpcImplementations(
+            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc1),  Set.of(nodeOnePath));
         assertNotNull("Registration should not be null", firstReg);
-        assertSame(odlRoutedService1, firstReg.getInstance());
 
-        LOG.info("Register provider 2 with second implementation of routeSimpleService - service2 of node 2");
+        LOG.info("Register provider 2 with second implementation of routeSimpleService - rpc2 of node 2");
 
-        ObjectRegistration<OpendaylightTestRoutedRpcService> secondReg = rpcProviderService.registerRpcImplementation(
-            OpendaylightTestRoutedRpcService.class, odlRoutedService2, Set.of(nodeTwo));
+        Registration secondReg = rpcProviderService.registerRpcImplementations(
+            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc2), Set.of(nodeTwo));
         assertNotNull("Registration should not be null", firstReg);
-        assertSame(odlRoutedService2, secondReg.getInstance());
         assertNotSame(secondReg, firstReg);
 
-        OpendaylightTestRoutedRpcService consumerService =
-                rpcConsumerRegistry.getRpcService(OpendaylightTestRoutedRpcService.class);
+        RoutedSimpleRoute consumerService = rpcConsumerRegistry.getRpc(RoutedSimpleRoute.class);
         assertNotNull("MD-SAL instance of test Service should be returned", consumerService);
-        assertNotSame("Provider instance and consumer instance should not be same.", odlRoutedService1,
+        assertNotSame("Provider instance and consumer instance should not be same.", routedSimpleRouteRpc1,
                 consumerService);
 
         /**
          * Consumer creates addFlow message for node one and sends it to the MD-SAL.
          */
         final RoutedSimpleRouteInput simpleRouteFirstFoo = createSimpleRouteInput(nodeOnePath);
-        consumerService.routedSimpleRoute(simpleRouteFirstFoo);
+        consumerService.invoke(simpleRouteFirstFoo);
 
         /**
-         * Verifies that implementation of the first provider received the same message from MD-SAL.
+         * Verifies that implementation of the first instance received the same message from MD-SAL.
          */
-        verify(odlRoutedService1).routedSimpleRoute(simpleRouteFirstFoo);
+        verify(routedSimpleRouteRpc1).invoke(simpleRouteFirstFoo);
         /**
          * Verifies that second instance was not invoked with first message
          */
-        verify(odlRoutedService2, times(0)).routedSimpleRoute(simpleRouteFirstFoo);
+        verify(routedSimpleRouteRpc2, times(0)).invoke(simpleRouteFirstFoo);
 
         /**
          * Consumer sends message to nodeTwo for three times. Should be processed by second instance.
          */
         final RoutedSimpleRouteInput simpleRouteSecondFoo = createSimpleRouteInput(nodeTwo);
-        consumerService.routedSimpleRoute(simpleRouteSecondFoo);
-        consumerService.routedSimpleRoute(simpleRouteSecondFoo);
-        consumerService.routedSimpleRoute(simpleRouteSecondFoo);
+        consumerService.invoke(simpleRouteSecondFoo);
+        consumerService.invoke(simpleRouteSecondFoo);
+        consumerService.invoke(simpleRouteSecondFoo);
 
         /**
          * Verifies that second instance was invoked 3 times with second message and first instance wasn't invoked.
          */
-        verify(odlRoutedService2, times(3)).routedSimpleRoute(simpleRouteSecondFoo);
-        verify(odlRoutedService1, times(0)).routedSimpleRoute(simpleRouteSecondFoo);
+        verify(routedSimpleRouteRpc2, times(3)).invoke(simpleRouteSecondFoo);
+        verify(routedSimpleRouteRpc1, times(0)).invoke(simpleRouteSecondFoo);
 
         LOG.info("Unregistration of the path for the node one in the first provider");
         firstReg.close();
 
         LOG.info("Provider 2 registers path of node 1");
         secondReg.close();
-        secondReg = rpcProviderService.registerRpcImplementation(
-            OpendaylightTestRoutedRpcService.class, odlRoutedService2, Set.of(nodeOnePath));
+        secondReg = rpcProviderService.registerRpcImplementations(
+            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc2), Set.of(nodeOnePath));
 
         /**
          * A consumer sends third message to node 1.
          */
         final RoutedSimpleRouteInput simpleRouteThirdFoo = createSimpleRouteInput(nodeOnePath);
-        consumerService.routedSimpleRoute(simpleRouteThirdFoo);
+        consumerService.invoke(simpleRouteThirdFoo);
 
         /**
          * Verifies that provider 1 wasn't invoked and provider 2 was invoked 1 time.
          * TODO: fix unregister path
          */
-        //verify(odlRoutedService1, times(0)).routedSimpleRoute(simpleRouteThirdFoo);
-        verify(odlRoutedService2).routedSimpleRoute(simpleRouteThirdFoo);
+        verify(routedSimpleRouteRpc2).invoke(simpleRouteThirdFoo);
     }
 
     /**
