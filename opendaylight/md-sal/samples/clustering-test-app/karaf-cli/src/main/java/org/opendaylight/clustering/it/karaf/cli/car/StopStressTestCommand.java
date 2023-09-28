@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTestInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -25,6 +25,6 @@ public class StopStressTestCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(CarService.class).stopStressTest(new StopStressTestInputBuilder().build());
+        return rpcService.getRpc(StopStressTest.class).invoke(new StopStressTestInputBuilder().build());
     }
 }
