@@ -17,6 +17,7 @@ import akka.actor.typed.javadsl.Adapter;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.cluster.typed.Cluster;
+import com.google.common.collect.ClassToInstanceMap;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +30,13 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntities;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwner;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
@@ -40,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -54,6 +59,8 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
     private AkkaEntityOwnershipService service1;
     private AkkaEntityOwnershipService service2;
+    private ClassToInstanceMap<Rpc<?, ?>> rpcMap1;
+    private ClassToInstanceMap<Rpc<?, ?>> rpcMap2;
 
     @Before
     public void setUp() throws Exception {
@@ -62,6 +69,8 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
         service1 = new AkkaEntityOwnershipService(system1, CODEC_CONTEXT);
         service2 = new AkkaEntityOwnershipService(system2, CODEC_CONTEXT);
+        rpcMap1 = service1.getRpcClassToInstanceMap();
+        rpcMap2 = service2.getRpcClassToInstanceMap();
 
         // need to wait until all nodes are ready
         final Cluster cluster = Cluster.get(Adapter.toTyped(system2));
@@ -108,7 +117,8 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         final DOMEntityOwnershipCandidateRegistration reg = service1.registerCandidate(entity);
 
         await().untilAsserted(() -> {
-            final RpcResult<GetEntityOutput> getEntityResult = service1.getEntity(new GetEntityInputBuilder()
+            final RpcResult<GetEntityOutput> getEntityResult = rpcMap1.getInstance(GetEntity.class)
+                .invoke(new GetEntityInputBuilder()
                             .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
                             .setType(new EntityType(ENTITY_TYPE))
                             .build())
@@ -122,7 +132,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         // immediately, so that the rpc actor retries with distributed-data asap
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
             final GetEntitiesOutput getEntitiesResult =
-                    service2.getEntities(new GetEntitiesInputBuilder().build()).get().getResult();
+                rpcMap2.getInstance(GetEntities.class).invoke(new GetEntitiesInputBuilder().build()).get().getResult();
 
             assertEquals(getEntitiesResult.getEntities().size(), 1);
             assertTrue(getEntitiesResult.getEntities().get(new EntitiesKey(
@@ -136,7 +146,8 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            final GetEntityOutput getEntityResult = service2.getEntity(new GetEntityInputBuilder()
+            final GetEntityOutput getEntityResult = rpcMap2.getInstance(GetEntity.class)
+                .invoke(new GetEntityInputBuilder()
                             .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
                             .setType(new EntityType(ENTITY_TYPE))
                             .build())
@@ -147,7 +158,8 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            final GetEntityOwnerOutput getOwnerResult = service2.getEntityOwner(new GetEntityOwnerInputBuilder()
+            final GetEntityOwnerOutput getOwnerResult = rpcMap2.getInstance(GetEntityOwner.class)
+                .invoke(new GetEntityOwnerInputBuilder()
                             .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
                             .setType(new EntityType(ENTITY_TYPE))
                             .build())
