@@ -13,8 +13,8 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplica;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -30,8 +30,8 @@ public class AddShardReplicaCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcConsumerRegistry.getRpcService(ClusterAdminService.class)
-                .addShardReplica(new AddShardReplicaInputBuilder()
+        return rpcConsumerRegistry.getRpc(AddShardReplica.class)
+                .invoke(new AddShardReplicaInputBuilder()
                         .setShardName(shardName)
                         .setDataStoreType(DataStoreType.forName(dataStoreType))
                         .build());
