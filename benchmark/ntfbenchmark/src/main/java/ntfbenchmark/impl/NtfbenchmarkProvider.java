@@ -10,6 +10,7 @@ package ntfbenchmark.impl;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +24,17 @@ import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.NtfbenchmarkService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput.ProducerType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -46,7 +49,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Component(service = {})
 @RequireServiceComponentRuntime
-public final class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService {
+public final class NtfbenchmarkProvider implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NtfbenchmarkProvider.class);
     private static final int TEST_TIMEOUT = 5;
 
@@ -61,7 +64,10 @@ public final class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkSe
             @Reference final RpcProviderService rpcService) {
         this.listenService = requireNonNull(listenService);
         this.publishService = requireNonNull(publishService);
-        reg = rpcService.registerRpcImplementation(NtfbenchmarkService.class, this);
+        reg = rpcService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(TestStatus.class, this::testStatus)
+            .put(StartTest.class, this::startTest)
+            .build());
         LOG.debug("NtfbenchmarkProvider initiated");
     }
 
@@ -73,8 +79,7 @@ public final class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkSe
         LOG.info("NtfbenchmarkProvider closed");
     }
 
-    @Override
-    public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
+    private ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         final int producerCount = input.getProducers().intValue();
         final int listenerCount = input.getListeners().intValue();
         final int iterations = input.getIterations().intValue();
@@ -155,8 +160,7 @@ public final class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkSe
         }
     }
 
-    @Override
-    public ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
+    private ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }
