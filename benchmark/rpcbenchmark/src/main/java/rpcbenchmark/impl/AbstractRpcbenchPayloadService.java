@@ -7,30 +7,39 @@
  */
 package rpcbenchmark.impl;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOutput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOutputBuilder;
+import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOutput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOutputBuilder;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-abstract class AbstractRpcbenchPayloadService implements RpcbenchPayloadService {
+abstract class AbstractRpcbenchPayloadService {
     private int numRpcs = 0;
 
-    @Override
-    public final ListenableFuture<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(final GlobalRpcBenchInput input) {
+    private ListenableFuture<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(final GlobalRpcBenchInput input) {
         numRpcs++;
         return RpcResultBuilder.success(new GlobalRpcBenchOutputBuilder(input).build()).buildFuture();
     }
 
-    @Override
-    public final ListenableFuture<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(final RoutedRpcBenchInput input) {
+    private ListenableFuture<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(final RoutedRpcBenchInput input) {
         numRpcs++;
         return RpcResultBuilder.success(new RoutedRpcBenchOutputBuilder(input).build()).buildFuture();
+    }
+
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(GlobalRpcBench.class, this::globalRpcBench)
+            .put(RoutedRpcBench.class, this::routedRpcBench)
+            .build();
     }
 
     final int getNumRpcs() {

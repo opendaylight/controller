@@ -9,7 +9,6 @@ package rpcbenchmark.impl;
 
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -17,7 +16,7 @@ final class RoutedBindingRTCServer extends AbstractRpcbenchPayloadService implem
     private final Registration reg;
 
     RoutedBindingRTCServer(final RpcProviderService rpcProvider, final Set<InstanceIdentifier<?>> paths) {
-        reg = rpcProvider.registerRpcImplementation(RpcbenchPayloadService.class, this, paths);
+        reg = rpcProvider.registerRpcImplementations(getRpcClassToInstanceMap(), paths);
     }
 
     @Override

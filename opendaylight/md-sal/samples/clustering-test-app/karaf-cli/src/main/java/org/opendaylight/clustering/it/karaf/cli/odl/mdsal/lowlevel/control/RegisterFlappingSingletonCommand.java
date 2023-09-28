@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingleton;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -26,7 +26,7 @@ public class RegisterFlappingSingletonCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(OdlMdsalLowlevelControlService.class)
-                .registerFlappingSingleton(new RegisterFlappingSingletonInputBuilder().build());
+        return rpcService.getRpc(RegisterFlappingSingleton.class)
+            .invoke(new RegisterFlappingSingletonInputBuilder().build());
     }
 }

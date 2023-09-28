@@ -10,6 +10,8 @@ package rpcbenchmark.impl;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +28,18 @@ import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchRpcRoutes;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.rpcbench.rpc.routes.RpcRoute;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.rpcbench.rpc.routes.RpcRouteKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.RpcbenchmarkService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTestOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput.ExecStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutputBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -50,7 +54,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Component(service = {})
 @RequireServiceComponentRuntime
-public final class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService {
+public final class RpcbenchmarkProvider implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(RpcbenchmarkProvider.class);
     private static final int TEST_TIMEOUT = 5;
 
@@ -67,7 +71,7 @@ public final class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkSe
         this.providerRegistry = requireNonNull(providerRegistry);
         this.consumerRegistry = requireNonNull(consumerRegistry);
         globalServer = new GlobalBindingRTCServer(providerRegistry);
-        reg = providerRegistry.registerRpcImplementation(RpcbenchmarkService.class, this);
+        reg = providerRegistry.registerRpcImplementations(getRpcClassToInstanceMap());
         LOG.info("RpcbenchmarkProvider initiated");
     }
 
@@ -80,8 +84,7 @@ public final class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkSe
         LOG.info("RpcbenchmarkProvider closed");
     }
 
-    @Override
-    public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
+    private ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         LOG.debug("startTest {}", input);
 
         final RTCClient client;
@@ -149,8 +152,7 @@ public final class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkSe
         }
     }
 
-    @Override
-    public ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
+    private ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
         LOG.info("testStatus");
         TestStatusOutput output = new TestStatusOutputBuilder()
                                         .setGlobalServerCnt(Uint32.valueOf(globalServer.getNumRpcs()))
@@ -159,4 +161,10 @@ public final class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkSe
         return RpcResultBuilder.success(output).buildFuture();
     }
 
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(TestStatus.class, this::testStatus)
+            .put(StartTest.class, this::startTest)
+            .build();
+    }
 }

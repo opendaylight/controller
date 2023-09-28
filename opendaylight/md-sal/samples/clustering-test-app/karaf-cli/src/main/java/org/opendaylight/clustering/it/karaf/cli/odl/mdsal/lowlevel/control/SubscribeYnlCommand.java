@@ -14,7 +14,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -28,7 +28,7 @@ public class SubscribeYnlCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(OdlMdsalLowlevelControlService.class)
-                .subscribeYnl(new SubscribeYnlInputBuilder().setId(id).build());
+        return rpcService.getRpc(SubscribeYnl.class)
+            .invoke(new SubscribeYnlInputBuilder().setId(id).build());
     }
 }

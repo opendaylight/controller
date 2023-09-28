@@ -34,8 +34,9 @@ public final class OSGiClusterAdmin {
             @Reference final RpcProviderService rpcProviderService,
             @Reference final DataCenterControl dataCenterControls,
             @Reference final DataCenterControl dataCenterControl) {
-        reg = rpcProviderService.registerRpcImplementation(ClusterAdminService.class,
-            new ClusterAdminRpcService(configDatastore, operDatastore, serializer, dataCenterControl));
+        reg = rpcProviderService.registerRpcImplementations(
+            new ClusterAdminRpcService(configDatastore, operDatastore, serializer, dataCenterControl)
+                .getRpcClassToInstanceMap());
         LOG.info("Cluster Admin services started");
     }
 

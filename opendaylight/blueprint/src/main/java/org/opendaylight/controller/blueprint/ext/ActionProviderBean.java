@@ -44,6 +44,7 @@ public class ActionProviderBean {
     private DOMRpcProviderService domRpcProvider;
     private RpcProviderService bindingRpcProvider;
     private DOMSchemaService schemaService;
+    // TODO Remove RpcService from here
     private RpcService implementation;
     private String interfaceName;
     private Registration reg;

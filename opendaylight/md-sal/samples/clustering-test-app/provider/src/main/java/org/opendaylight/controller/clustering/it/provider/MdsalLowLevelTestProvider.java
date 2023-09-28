@@ -12,6 +12,8 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import com.google.common.base.Strings;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.HashMap;
@@ -49,70 +51,93 @@ import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplica;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotifications;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAborted;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedOutput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingleton;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplica;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplica;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotifications;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtcl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstantOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterDefaultConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterDefaultConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterDefaultConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingleton;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtcl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnl;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactions;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -128,7 +153,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 @Singleton
 @Component(service = {})
-public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService {
+public final class MdsalLowLevelTestProvider {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalLowLevelTestProvider.class);
 
     private final Registration registration;
@@ -175,7 +200,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
 
         domDataTreeChangeService = domDataBroker.getExtensions().getInstance(DOMDataTreeChangeService.class);
 
-        registration = rpcRegistry.registerRpcImplementation(OdlMdsalLowlevelControlService.class, this);
+        registration = rpcRegistry.registerRpcImplementations(getRpcClassToInstanceMap());
     }
 
     @PreDestroy
@@ -184,9 +209,8 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         registration.close();
     }
 
-    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public ListenableFuture<RpcResult<UnregisterSingletonConstantOutput>> unregisterSingletonConstant(
+    private ListenableFuture<RpcResult<UnregisterSingletonConstantOutput>> unregisterSingletonConstant(
             final UnregisterSingletonConstantInput input) {
         LOG.info("In unregisterSingletonConstant");
 
@@ -209,8 +233,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         }
     }
 
-    @Override
-    public ListenableFuture<RpcResult<StartPublishNotificationsOutput>> startPublishNotifications(
+    private ListenableFuture<RpcResult<StartPublishNotificationsOutput>> startPublishNotifications(
             final StartPublishNotificationsInput input) {
         LOG.info("In startPublishNotifications - input: {}", input);
 
@@ -224,8 +247,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new StartPublishNotificationsOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<SubscribeDtclOutput>> subscribeDtcl(final SubscribeDtclInput input) {
+    private ListenableFuture<RpcResult<SubscribeDtclOutput>> subscribeDtcl(final SubscribeDtclInput input) {
         LOG.info("In subscribeDtcl - input: {}", input);
 
         if (dtclReg != null) {
@@ -243,24 +265,20 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new SubscribeDtclOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<WriteTransactionsOutput>> writeTransactions(final WriteTransactionsInput input) {
+    private ListenableFuture<RpcResult<WriteTransactionsOutput>> writeTransactions(final WriteTransactionsInput input) {
         return WriteTransactionsHandler.start(domDataBroker, input);
     }
 
-    @Override
-    public ListenableFuture<RpcResult<IsClientAbortedOutput>> isClientAborted(final IsClientAbortedInput input) {
+    private ListenableFuture<RpcResult<IsClientAbortedOutput>> isClientAborted(final IsClientAbortedInput input) {
         return null;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(
+    private ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(
             final RemoveShardReplicaInput input) {
         return null;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<SubscribeYnlOutput>> subscribeYnl(final SubscribeYnlInput input) {
+    private ListenableFuture<RpcResult<SubscribeYnlOutput>> subscribeYnl(final SubscribeYnlInput input) {
         LOG.info("In subscribeYnl - input: {}", input);
 
         if (ynlRegistrations.containsKey(input.getId())) {
@@ -277,8 +295,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
     }
 
 
-    @Override
-    public ListenableFuture<RpcResult<UnregisterBoundConstantOutput>> unregisterBoundConstant(
+    private ListenableFuture<RpcResult<UnregisterBoundConstantOutput>> unregisterBoundConstant(
             final UnregisterBoundConstantInput input) {
         LOG.info("In unregisterBoundConstant - {}", input);
 
@@ -296,8 +313,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new UnregisterBoundConstantOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RegisterSingletonConstantOutput>> registerSingletonConstant(
+    private ListenableFuture<RpcResult<RegisterSingletonConstantOutput>> registerSingletonConstant(
             final RegisterSingletonConstantInput input) {
         LOG.info("In registerSingletonConstant - input: {}", input);
 
@@ -313,14 +329,12 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new RegisterSingletonConstantOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RegisterDefaultConstantOutput>> registerDefaultConstant(
+    private ListenableFuture<RpcResult<RegisterDefaultConstantOutput>> registerDefaultConstant(
             final RegisterDefaultConstantInput input) {
         return null;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnregisterConstantOutput>> unregisterConstant(
+    private ListenableFuture<RpcResult<UnregisterConstantOutput>> unregisterConstant(
             final UnregisterConstantInput input) {
         LOG.info("In unregisterConstant");
 
@@ -336,8 +350,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new UnregisterConstantOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton(
+    private ListenableFuture<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton(
             final UnregisterFlappingSingletonInput input) {
         LOG.info("In unregisterFlappingSingleton");
 
@@ -354,18 +367,15 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
                 .buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
+    private ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<SubscribeDdtlOutput>> subscribeDdtl(final SubscribeDdtlInput input) {
+    private ListenableFuture<RpcResult<SubscribeDdtlOutput>> subscribeDdtl(final SubscribeDdtlInput input) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RegisterBoundConstantOutput>> registerBoundConstant(
+    private ListenableFuture<RpcResult<RegisterBoundConstantOutput>> registerBoundConstant(
             final RegisterBoundConstantInput input) {
         LOG.info("In registerBoundConstant - input: {}", input);
 
@@ -393,8 +403,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new RegisterBoundConstantOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RegisterFlappingSingletonOutput>> registerFlappingSingleton(
+    private ListenableFuture<RpcResult<RegisterFlappingSingletonOutput>> registerFlappingSingleton(
             final RegisterFlappingSingletonInput input) {
         LOG.info("In registerFlappingSingleton");
 
@@ -409,8 +418,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new RegisterFlappingSingletonOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl(final UnsubscribeDtclInput input) {
+    private ListenableFuture<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl(final UnsubscribeDtclInput input) {
         LOG.info("In unsubscribeDtcl");
 
         if (idIntsListener == null || dtclReg == null) {
@@ -464,8 +472,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         }
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
+    private ListenableFuture<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
         LOG.info("In unsubscribeYnl - input: {}", input);
 
         if (!ynlRegistrations.containsKey(input.getId())) {
@@ -483,8 +490,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.<UnsubscribeYnlOutput>success().withResult(output).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<CheckPublishNotificationsOutput>> checkPublishNotifications(
+    private ListenableFuture<RpcResult<CheckPublishNotificationsOutput>> checkPublishNotifications(
             final CheckPublishNotificationsInput input) {
         LOG.info("In checkPublishNotifications - input: {}", input);
 
@@ -509,8 +515,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(output).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<ShutdownShardReplicaOutput>> shutdownShardReplica(
+    private ListenableFuture<RpcResult<ShutdownShardReplicaOutput>> shutdownShardReplica(
             final ShutdownShardReplicaInput input) {
         LOG.info("In shutdownShardReplica - input: {}", input);
 
@@ -561,8 +566,7 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return rpcResult;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<RegisterConstantOutput>> registerConstant(final RegisterConstantInput input) {
+    private ListenableFuture<RpcResult<RegisterConstantOutput>> registerConstant(final RegisterConstantInput input) {
         LOG.info("In registerConstant - input: {}", input);
 
         if (input.getConstant() == null) {
@@ -581,15 +585,41 @@ public final class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlS
         return RpcResultBuilder.success(new RegisterConstantOutputBuilder().build()).buildFuture();
     }
 
-    @Override
-    public ListenableFuture<RpcResult<UnregisterDefaultConstantOutput>> unregisterDefaultConstant(
+    private ListenableFuture<RpcResult<UnregisterDefaultConstantOutput>> unregisterDefaultConstant(
             final UnregisterDefaultConstantInput input) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public ListenableFuture<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl(final UnsubscribeDdtlInput input) {
+    private ListenableFuture<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl(final UnsubscribeDdtlInput input) {
         throw new UnsupportedOperationException();
+    }
+
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(UnregisterSingletonConstant.class, this::unregisterSingletonConstant)
+            .put(StartPublishNotifications.class, this::startPublishNotifications)
+            .put(SubscribeDdtl.class, this::subscribeDdtl)
+            .put(WriteTransactions.class, this::writeTransactions)
+            .put(IsClientAborted.class, this::isClientAborted)
+            .put(RemoveShardReplica.class, this::removeShardReplica)
+            .put(SubscribeYnl.class, this::subscribeYnl)
+            .put(UnregisterBoundConstant.class, this::unregisterBoundConstant)
+            .put(RegisterSingletonConstant.class, this::registerSingletonConstant)
+            .put(RegisterDefaultConstant.class, this::registerDefaultConstant)
+            .put(UnregisterConstant.class, this::unregisterConstant)
+            .put(UnregisterFlappingSingleton.class, this::unregisterFlappingSingleton)
+            .put(AddShardReplica.class, this::addShardReplica)
+            .put(RegisterBoundConstant.class, this::registerBoundConstant)
+            .put(RegisterFlappingSingleton.class, this::registerFlappingSingleton)
+            .put(UnsubscribeDdtl.class, this::unsubscribeDdtl)
+            .put(UnsubscribeYnl.class, this::unsubscribeYnl)
+            .put(CheckPublishNotifications.class, this::checkPublishNotifications)
+            .put(ShutdownShardReplica.class, this::shutdownShardReplica)
+            .put(RegisterConstant.class, this::registerConstant)
+            .put(UnregisterDefaultConstant.class, this::unregisterDefaultConstant)
+            .put(SubscribeDtcl.class, this::subscribeDtcl)
+            .put(UnsubscribeDtcl.class, this::unsubscribeDtcl)
+            .build();
     }
 }

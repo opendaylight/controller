@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.collect.ClassToInstanceMap;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import org.junit.Before;
@@ -26,12 +27,14 @@ import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToast;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
@@ -39,11 +42,13 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
 
     private static final InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
     private OpendaylightToaster toaster;
+    private ClassToInstanceMap<Rpc<?, ?>> rpcMap;
 
     @Before
     public void setupToaster() {
         toaster = new OpendaylightToaster(getDataBroker(), mock(NotificationPublishService.class),
             mock(RpcProviderService.class));
+        rpcMap = toaster.getRpcClassToInstanceMap();
     }
 
     @Test
@@ -78,7 +83,7 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
         // NOTE: In a real test we would want to override the Thread.sleep() to
         // prevent our junit test
         // for sleeping for a second...
-        Future<RpcResult<MakeToastOutput>> makeToast = toaster.makeToast(toastInput);
+        Future<RpcResult<MakeToastOutput>> makeToast = rpcMap.getInstance(MakeToast.class).invoke(toastInput);
 
         RpcResult<MakeToastOutput> rpcResult = makeToast.get();
 

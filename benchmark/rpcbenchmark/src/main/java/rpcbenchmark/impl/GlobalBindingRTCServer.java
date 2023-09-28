@@ -8,7 +8,6 @@
 package rpcbenchmark.impl;
 
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ final class GlobalBindingRTCServer extends AbstractRpcbenchPayloadService implem
     private final Registration reg;
 
     GlobalBindingRTCServer(@Reference final RpcProviderService rpcProvider) {
-        reg = rpcProvider.registerRpcImplementation(RpcbenchPayloadService.class, this);
+        reg = rpcProvider.registerRpcImplementations(getRpcClassToInstanceMap());
         LOG.debug("GlobalBindingRTCServer started");
     }
 

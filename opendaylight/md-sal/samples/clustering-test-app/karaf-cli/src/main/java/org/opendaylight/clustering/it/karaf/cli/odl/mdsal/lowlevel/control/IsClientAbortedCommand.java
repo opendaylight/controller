@@ -13,8 +13,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAborted;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedInputBuilder;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 @Service
@@ -25,7 +25,7 @@ public class IsClientAbortedCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(OdlMdsalLowlevelControlService.class)
-                .isClientAborted(new IsClientAbortedInputBuilder().build());
+        return rpcService.getRpc(IsClientAborted.class)
+            .invoke(new IsClientAbortedInputBuilder().build());
     }
 }

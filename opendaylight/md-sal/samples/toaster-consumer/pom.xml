@@ -43,6 +43,10 @@
       <artifactId>javax.inject</artifactId>
       <optional>true</optional>
     </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller.samples</groupId>
+          <artifactId>sample-toaster-provider</artifactId>
+      </dependency>
   </dependencies>
 
   <scm>

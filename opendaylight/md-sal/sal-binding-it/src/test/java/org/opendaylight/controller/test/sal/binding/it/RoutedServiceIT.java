@@ -45,6 +45,7 @@ public class RoutedServiceIT extends AbstractIT {
     private static final Logger LOG = LoggerFactory
             .getLogger(RoutedServiceIT.class);
 
+    // TODO Find way to replace mocking services with mocking rpcs and correctly adapt this test
     protected OpendaylightTestRoutedRpcService odlRoutedService1;
     protected OpendaylightTestRoutedRpcService odlRoutedService2;
 

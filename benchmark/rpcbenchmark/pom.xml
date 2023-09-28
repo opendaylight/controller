@@ -42,5 +42,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>jakarta.annotation-api</artifactId>
       <optional>true</optional>
     </dependency>
+      <dependency>
+          <groupId>com.google.collections</groupId>
+          <artifactId>google-collections</artifactId>
+          <version>1.0</version>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 </project>

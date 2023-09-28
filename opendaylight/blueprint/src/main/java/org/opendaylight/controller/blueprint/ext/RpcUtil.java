@@ -29,6 +29,7 @@ final class RpcUtil {
         // Hidden on purpose
     }
 
+    // TODO Remove RpcService from here
     static List<QName> decomposeRpcService(final Class<RpcService> service,
             final EffectiveModelContext schemaContext, final Predicate<ContentRoutedRpcContext> filter) {
         final var moduleName = BindingReflections.getQNameModule(service);

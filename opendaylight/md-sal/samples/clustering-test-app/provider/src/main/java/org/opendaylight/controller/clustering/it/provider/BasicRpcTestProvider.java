@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import javax.annotation.PreDestroy;
@@ -16,12 +18,13 @@ import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicRpcTestService;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.osgi.service.component.annotations.Activate;
@@ -33,14 +36,14 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 @Component(service = { })
-public final class BasicRpcTestProvider implements ClusterSingletonService, BasicRpcTestService {
+public final class BasicRpcTestProvider implements ClusterSingletonService {
     private static final Logger LOG = LoggerFactory.getLogger(BasicRpcTestProvider.class);
     private static final ServiceGroupIdentifier IDENTIFIER = ServiceGroupIdentifier.create("Basic-rpc-test");
 
     private final RpcProviderService rpcProviderRegistry;
     private final Registration singletonRegistration;
 
-    private ObjectRegistration<?> rpcRegistration;
+    private Registration rpcRegistration;
 
     @Inject
     @Activate
@@ -59,7 +62,7 @@ public final class BasicRpcTestProvider implements ClusterSingletonService, Basi
     @Override
     public void instantiateServiceInstance() {
         LOG.info("Basic testing rpc registered as global");
-        rpcRegistration = rpcProviderRegistry.registerRpcImplementation(BasicRpcTestService.class, this);
+        rpcRegistration = rpcProviderRegistry.registerRpcImplementations(getRpcClassToInstanceMap());
     }
 
     @Override
@@ -75,10 +78,15 @@ public final class BasicRpcTestProvider implements ClusterSingletonService, Basi
         return IDENTIFIER;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<BasicGlobalOutput>> basicGlobal(final BasicGlobalInput input) {
+    private ListenableFuture<RpcResult<BasicGlobalOutput>> basicGlobal(final BasicGlobalInput input) {
         LOG.info("Basic test global rpc invoked");
 
         return Futures.immediateFuture(RpcResultBuilder.success(new BasicGlobalOutputBuilder().build()).build());
+    }
+
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(BasicGlobal.class, this::basicGlobal)
+            .build();
     }
 }

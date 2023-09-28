@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterLoggingDtcl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterLoggingDtclInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -25,7 +25,7 @@ public class RegisterLoggingDtclCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcService.getRpcService(CarService.class)
-            .registerLoggingDtcl(new RegisterLoggingDtclInputBuilder().build());
+        return rpcService.getRpc(RegisterLoggingDtcl.class)
+            .invoke(new RegisterLoggingDtclInputBuilder().build());
     }
 }

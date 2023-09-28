@@ -9,6 +9,8 @@ package org.opendaylight.dsbenchmark;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
@@ -35,10 +37,11 @@ import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStoreInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStoreOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStoreOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.DsbenchmarkService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestOutputBuilder;
@@ -49,6 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatusBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -63,7 +67,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Component(service = { })
 @RequireServiceComponentRuntime
-public final class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
+public final class DsbenchmarkProvider implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID = InstanceIdentifier.create(TestExec.class);
     private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID = InstanceIdentifier.create(TestStatus.class);
@@ -95,7 +99,7 @@ public final class DsbenchmarkProvider implements DsbenchmarkService, AutoClosea
             LOG.warn("Working around Bugs 8829 and 6793 by ignoring exception from setTestOperData", e);
         }
 
-        rpcReg = rpcService.registerRpcImplementation(DsbenchmarkService.class, this);
+        rpcReg = rpcService.registerRpcImplementations(getRpcClassToInstanceMap());
         LOG.info("DsbenchmarkProvider initiated");
     }
 
@@ -107,16 +111,14 @@ public final class DsbenchmarkProvider implements DsbenchmarkService, AutoClosea
         LOG.info("DsbenchmarkProvider closed");
     }
 
-    @Override
-    public ListenableFuture<RpcResult<CleanupStoreOutput>> cleanupStore(final CleanupStoreInput input) {
+    private ListenableFuture<RpcResult<CleanupStoreOutput>> cleanupStore(final CleanupStoreInput input) {
         cleanupTestStore();
         LOG.debug("Data Store cleaned up");
         return Futures.immediateFuture(RpcResultBuilder.success(new CleanupStoreOutputBuilder().build()).build());
     }
 
-    @Override
     @SuppressWarnings("checkstyle:illegalCatch")
-    public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
+    private ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
         // Check if there is a test in progress
@@ -285,5 +287,12 @@ public final class DsbenchmarkProvider implements DsbenchmarkService, AutoClosea
             execStatus.set(ExecStatus.Idle);
         }
         return retVal;
+    }
+
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(StartTest.class, this::startTest)
+            .put(CleanupStore.class, this::cleanupStore)
+            .build();
     }
 }
