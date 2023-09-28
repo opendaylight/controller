@@ -45,6 +45,7 @@ public class RoutedServiceIT extends AbstractIT {
     private static final Logger LOG = LoggerFactory
             .getLogger(RoutedServiceIT.class);
 
+    // TODO Refactor this test in way that not rely on usage of OpendaylightTestRoutedRpcService
     protected OpendaylightTestRoutedRpcService odlRoutedService1;
     protected OpendaylightTestRoutedRpcService odlRoutedService2;
 
