@@ -32,6 +32,7 @@ public class RpcImplementationBean {
     private RpcProviderService rpcProvider;
     private Bundle bundle;
     private String interfaceName;
+    //TODO Remove usage of RpcService in this class
     private RpcService implementation;
     private final List<ObjectRegistration<RpcService>> rpcRegistrations = new ArrayList<>();
 
