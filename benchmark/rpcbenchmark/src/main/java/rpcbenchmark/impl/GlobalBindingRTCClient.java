@@ -14,10 +14,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInputBuilder;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOutput;
-import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.Payload;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadBuilder;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadKey;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class GlobalBindingRTCClient implements RTCClient {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBindingRTCClient.class);
 
-    private final RpcbenchPayloadService service;
+    private final GlobalRpcBench globalRpcBench;
     private final AtomicLong rpcOk = new AtomicLong(0);
     private final AtomicLong rpcError = new AtomicLong(0);
     private final GlobalRpcBenchInput inVal;
@@ -45,11 +45,7 @@ public class GlobalBindingRTCClient implements RTCClient {
     }
 
     public GlobalBindingRTCClient(final RpcConsumerRegistry registry, final int inSize) {
-        if (registry != null) {
-            this.service = registry.getRpcService(RpcbenchPayloadService.class);
-        } else {
-            this.service = null;
-        }
+        this.globalRpcBench = registry.getRpc(GlobalRpcBench.class);
 
         this.inSize = inSize;
         Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
@@ -66,7 +62,7 @@ public class GlobalBindingRTCClient implements RTCClient {
         int error = 0;
 
         for (int i = 0; i < iterations; i++) {
-            Future<RpcResult<GlobalRpcBenchOutput>> output = service.globalRpcBench(inVal);
+            Future<RpcResult<GlobalRpcBenchOutput>> output = globalRpcBench.invoke(inVal);
             try {
                 RpcResult<GlobalRpcBenchOutput> rpcResult = output.get();
 
