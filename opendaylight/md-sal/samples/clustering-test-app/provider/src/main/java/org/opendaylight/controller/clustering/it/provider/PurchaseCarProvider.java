@@ -9,17 +9,20 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCar;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarBoughtBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
+import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.osgi.service.component.annotations.Activate;
@@ -29,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-@Component(service = CarPurchaseService.class)
-public final class PurchaseCarProvider implements CarPurchaseService {
+@Component(service = PurchaseCarProvider.class)
+public final class PurchaseCarProvider {
     private static final Logger LOG = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
     private final NotificationPublishService notificationProvider;
@@ -41,8 +44,7 @@ public final class PurchaseCarProvider implements CarPurchaseService {
         this.notificationProvider = requireNonNull(notificationProvider);
     }
 
-    @Override
-    public ListenableFuture<RpcResult<BuyCarOutput>> buyCar(final BuyCarInput input) {
+    private ListenableFuture<RpcResult<BuyCarOutput>> buyCar(final BuyCarInput input) {
         LOG.info("Routed RPC buyCar : generating notification for buying car [{}]", input);
 
         return Futures.transform(notificationProvider.offerNotification(new CarBoughtBuilder()
@@ -51,5 +53,11 @@ public final class PurchaseCarProvider implements CarPurchaseService {
             .build()),
             result -> RpcResultBuilder.success(new BuyCarOutputBuilder().build()).build(),
             MoreExecutors.directExecutor());
+    }
+
+    public ClassToInstanceMap<Rpc<?, ?>> getRpcClassToInstanceMap() {
+        return ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
+            .put(BuyCar.class, this::buyCar)
+            .build();
     }
 }
