@@ -22,6 +22,29 @@
       },
       "revId": "2e510753c1fa295269a304ed031ca1c1b4d4cc11",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce504de7_d5ebc7a4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-10-02T16:43:54Z",
+      "side": 1,
+      "message": "err... or you could just create a single class unit test ...",
+      "range": {
+        "startLine": 1006,
+        "startChar": 16,
+        "endLine": 1006,
+        "endChar": 45
+      },
+      "revId": "2e510753c1fa295269a304ed031ca1c1b4d4cc11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
