@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7f57f8ad_be5d1114",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderInstallSnapshotState.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-10-03T14:06:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52ac88f2_99f3c061",
+      "range": {
+        "startLine": 78,
+        "startChar": 9,
+        "endLine": 78,
+        "endChar": 24
+      },
+      "revId": "2e510753c1fa295269a304ed031ca1c1b4d4cc11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ce504de7_d5ebc7a4",
@@ -37,6 +61,30 @@
       "writtenOn": "2023-10-02T16:43:54Z",
       "side": 1,
       "message": "err... or you could just create a single class unit test ...",
+      "range": {
+        "startLine": 1006,
+        "startChar": 16,
+        "endLine": 1006,
+        "endChar": 45
+      },
+      "revId": "2e510753c1fa295269a304ed031ca1c1b4d4cc11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99c15168_5e2dd7ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2023-10-03T14:06:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce504de7_d5ebc7a4",
       "range": {
         "startLine": 1006,
         "startChar": 16,
