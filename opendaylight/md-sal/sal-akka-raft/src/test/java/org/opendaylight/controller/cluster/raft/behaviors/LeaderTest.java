@@ -1002,6 +1002,36 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
+    public void testSnapshotLongerThanInteger() throws IOException {
+        logStart("testSnapshotLongerThanInteger");
+        final int chunkSize = 2048000;
+        final byte[] barray1 = new byte[Integer.MAX_VALUE - 100];
+        final byte[] barray2 = new byte[Integer.MAX_VALUE / 2];
+        final long barrayLength = (long) barray1.length + (long) barray2.length;
+        final ByteSource bs = ByteSource.concat(ByteSource.wrap(barray1), ByteSource.wrap(barray2));
+        final LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(chunkSize, "test");
+        fts.setSnapshotBytes(bs);
+        assertEquals(barrayLength, bs.size());
+        int chunkIndex = 0;
+        for (long i = 0; i < barrayLength; i = i + chunkSize) {
+            long length = i + chunkSize;
+            chunkIndex++;
+            if (i + chunkSize > barrayLength) {
+                length = barrayLength;
+            }
+            final byte[] chunk = fts.getNextChunk();
+            assertEquals("bytestring size not matching for chunk:" + chunkIndex, length - i, chunk.length);
+            assertEquals("chunkindex not matching", chunkIndex, fts.getChunkIndex());
+            fts.markSendStatus(true);
+            if (!fts.isLastChunk(chunkIndex)) {
+                fts.incrementChunkIndex();
+            }
+        }
+        assertEquals("totalChunks not matching", chunkIndex, fts.getTotalChunks());
+        fts.close();
+    }
+
+    @Test
     public void testSendSnapshotfromInstallSnapshotReply() {
         logStart("testSendSnapshotfromInstallSnapshotReply");
 
