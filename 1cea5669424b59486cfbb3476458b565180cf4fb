@@ -74,6 +74,30 @@
       },
       "revId": "1cea5669424b59486cfbb3476458b565180cf4fb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e06ddda2_0cfd08e6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/LeaderInstallSnapshotState.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 8324
+      },
+      "writtenOn": "2023-10-05T08:32:21Z",
+      "side": 1,
+      "message": "Removed - this is not necessary. It was introduced to support MultiInputStream-based ByteSource (like ConcatenatedByteSource). But such use-case will not occur.",
+      "parentUuid": "c754c8ac_89a7f699",
+      "range": {
+        "startLine": 154,
+        "startChar": 39,
+        "endLine": 154,
+        "endChar": 64
+      },
+      "revId": "1cea5669424b59486cfbb3476458b565180cf4fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
