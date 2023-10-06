@@ -34,6 +34,24 @@
       "parentUuid": "faae4ca3_f0697323",
       "revId": "1f9f8c73e1dea0cf94113fc9e3ab96c8ed35d170",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb197c2b_351c8660",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-10-06T12:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41ee7393_91b37ed4",
+      "revId": "1f9f8c73e1dea0cf94113fc9e3ab96c8ed35d170",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
