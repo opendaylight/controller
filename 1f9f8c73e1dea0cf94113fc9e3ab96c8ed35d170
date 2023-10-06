@@ -16,6 +16,24 @@
       "message": "Must be this Set ?",
       "revId": "1f9f8c73e1dea0cf94113fc9e3ab96c8ed35d170",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "41ee7393_91b37ed4",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-10-06T12:53:37Z",
+      "side": 1,
+      "message": "Well. I don\u0027t see why it should be Set. But I just did my task which was Remove usage of RpcService. If I\u0027m gonna do also refactoring then it will take more time + I will mess up git history.",
+      "parentUuid": "faae4ca3_f0697323",
+      "revId": "1f9f8c73e1dea0cf94113fc9e3ab96c8ed35d170",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
