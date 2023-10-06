@@ -69,13 +69,13 @@ module distributed-datastore-provider {
 
 
         leaf shard-heartbeat-interval-in-millis {
-            default 500;
+            default 200;
             type heartbeat-interval-type;
             description "The interval at which a shard will send a heart beat message to its remote shard.";
         }
 
         leaf shard-election-timeout-factor {
-            default 20;
+            default 5;
             type non-zero-uint32-type;
             description "The multiplication factor to be used to determine shard election timeout. The shard election timeout
                          is determined by multiplying shard-heartbeat-interval-in-millis with the shard-election-timeout-factor";
@@ -177,7 +177,7 @@ module distributed-datastore-provider {
         }
 
         leaf shard-isolated-leader-check-interval-in-millis {
-            default 5000;
+            default 500;
             type heartbeat-interval-type;
             description "The interval at which the leader of the shard will check if its majority
                         followers are active and term itself as isolated";
