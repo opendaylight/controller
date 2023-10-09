@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "83e5bdaf_071c30e3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-10-09T16:20:54Z",
+      "side": 1,
+      "message": "Really? I need to rebase and reset votes in this and 5 other patches in this chain just over 1 symbol over line? And it\u0027s not affecting patch in any way as well. Can there be a bit of flexibility over 1 symbol in commit message, please?",
+      "parentUuid": "2d0c385c_490fe770",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 73
+      },
+      "revId": "e9aa1ddb3065eebea712e3c19b33d6ad03e7ea5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "180d08c2_029392fa",
