@@ -74,7 +74,10 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-graphite</artifactId>
+      <!-- 4.2.21 requires ampq-client-5.19.0 which has a hard dependency on micronaut -->
+      <version>4.2.20</version>
     </dependency>
+
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-jmx</artifactId>
