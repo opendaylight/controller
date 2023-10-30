@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng ODL
+Code-Review+1: Lubos Cicut <lubos.cicut@pantheon.tech>
+Code-Review+1: Matej Sramcik <matej.sramcik@pantheon.tech>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Mon, 30 Oct 2023 10:58:52 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/108004
+Project: controller
+Branch: refs/heads/master
