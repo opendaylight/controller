@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8312ffbf_7bbd3b9e",
+        "filename": "benchmark/rpcbenchmark/src/main/java/rpcbenchmark/impl/GlobalBindingRTCClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-10-30T10:59:53Z",
+      "side": 1,
+      "message": "this is expensive and should be done at initialization time",
+      "range": {
+        "startLine": 65,
+        "startChar": 61,
+        "endLine": 65,
+        "endChar": 76
+      },
+      "revId": "0021ddcc4ef76e4d2796a8c7ab395748a3c288f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
