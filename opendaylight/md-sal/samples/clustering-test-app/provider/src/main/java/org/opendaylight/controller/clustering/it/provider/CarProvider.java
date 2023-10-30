@@ -262,7 +262,7 @@ public class CarProvider implements CarService {
         return RpcResultBuilder.success(new UnregisterOwnershipOutputBuilder().build()).buildFuture();
     }
 
-    private static class CarEntityOwnershipListener implements EntityOwnershipListener {
+    private static final class CarEntityOwnershipListener implements EntityOwnershipListener {
         @Override
         public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
             LOG_CAR_PROVIDER.info("ownershipChanged: {}", ownershipChange);
