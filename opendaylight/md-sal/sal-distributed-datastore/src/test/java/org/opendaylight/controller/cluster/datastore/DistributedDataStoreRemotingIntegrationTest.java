@@ -16,7 +16,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1397,17 +1396,14 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
 
-        // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
-        //                         the snapshot index seems to fluctuate
-        assumeTrue(false);
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(1, state.getSnapshotIndex()));
+            state -> assertEquals(0, state.getSnapshotIndex()));
 
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(1, state.getSnapshotIndex()));
+            state -> assertEquals(0, state.getSnapshotIndex()));
 
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 1);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0);
 
         for (int i = 0; i < 10; i++) {
             leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.newCarPath("car " + i),
@@ -1416,25 +1412,25 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // fake snapshot causes the snapshotIndex to move
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(10, state.getSnapshotIndex()));
+            state -> assertEquals(20, state.getSnapshotIndex()));
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(10, state.getSnapshotIndex()));
+            state -> assertEquals(20, state.getSnapshotIndex()));
 
-        // however the real snapshot still has not changed and was taken at index 1
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 1);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
+        // however the real snapshot still has not changed and was taken at index 0
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0);
 
         // root overwrite so expect a snapshot
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
 
-        // this was a real snapshot so everything should be in it(1(DisableTrackingPayload) + 1 + 10 + 1)
+        // this was a real snapshot so everything should be in it
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(12, state.getSnapshotIndex()));
+            state -> assertEquals(22, state.getSnapshotIndex()));
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(12, state.getSnapshotIndex()));
+            state -> assertEquals(22, state.getSnapshotIndex()));
 
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 12);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 12);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 22);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 22);
     }
 
     private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
