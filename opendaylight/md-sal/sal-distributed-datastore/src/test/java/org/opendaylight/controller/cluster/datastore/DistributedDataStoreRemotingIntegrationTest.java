@@ -16,7 +16,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,6 +42,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -80,11 +80,13 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
@@ -1384,6 +1386,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testSnapshotOnRootOverwrite() throws Exception {
+        final var payloads = new ArrayList<ReplicatedLogEntry>();
         initDatastores("testSnapshotOnRootOverwrite", "module-shards-default-cars-member1-and-2.conf",
             new String[] {"cars", "default"},
             leaderDatastoreContextBuilder.snapshotOnRootOverwrite(true),
@@ -1395,53 +1398,68 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .withChild(CarsModel.create())
                 .build();
 
-        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
+        leaderTestKit.testWriteTransactionAndSavePayload(leaderDistributedDataStore, YangInstanceIdentifier.of(),
+            rootNode, payloads);
 
-        // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
-        //                         the snapshot index seems to fluctuate
-        assumeTrue(false);
+        // In the case of aborted transaction, it increases the snapshotIndex so if we want to test the snapshotIndex we
+        // need to know how many aborted transactions there are.
+        int aborted = getNumOfAbortedTransactions(payloads);
+
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(1, state.getSnapshotIndex()));
+            state -> assertEquals(0, state.getSnapshotIndex() - aborted));
 
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(1, state.getSnapshotIndex()));
+            state -> assertEquals(0, state.getSnapshotIndex() - aborted));
 
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 1);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0, aborted);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0, aborted);
 
         for (int i = 0; i < 10; i++) {
-            leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.newCarPath("car " + i),
-                    CarsModel.newCarEntry("car " + i, Uint64.ONE));
+            leaderTestKit.testWriteTransactionAndSavePayload(leaderDistributedDataStore,
+                CarsModel.newCarPath("car " + i), CarsModel.newCarEntry("car " + i, Uint64.ONE), payloads);
         }
 
         // fake snapshot causes the snapshotIndex to move
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(10, state.getSnapshotIndex()));
+            state -> assertEquals(20, state.getSnapshotIndex() - getNumOfAbortedTransactions(payloads)));
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(10, state.getSnapshotIndex()));
+            state -> assertEquals(20, state.getSnapshotIndex() - getNumOfAbortedTransactions(payloads)));
 
-        // however the real snapshot still has not changed and was taken at index 1
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 1);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
+        // however the real snapshot still has not changed and was taken at index 0
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 0, aborted);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 0, aborted);
 
         // root overwrite so expect a snapshot
-        leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
+        leaderTestKit.testWriteTransactionAndSavePayload(leaderDistributedDataStore, YangInstanceIdentifier.of(),
+            rootNode, payloads);
 
-        // this was a real snapshot so everything should be in it(1(DisableTrackingPayload) + 1 + 10 + 1)
+        // this was a real snapshot so everything should be in it
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(12, state.getSnapshotIndex()));
+            state -> assertEquals(22, state.getSnapshotIndex() - getNumOfAbortedTransactions(payloads)));
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(12, state.getSnapshotIndex()));
+            state -> assertEquals(22, state.getSnapshotIndex() - getNumOfAbortedTransactions(payloads)));
 
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 12);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 12);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 22, aborted);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 22, aborted);
     }
 
-    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
+    private static int getNumOfAbortedTransactions(final List<ReplicatedLogEntry> payloads) {
+        int count = 0;
+        for (int i = payloads.size() - 1; i >= 0; i--) {
+            if (payloads.get(i).getData() instanceof AbortTransactionPayload) {
+                //AbortTransactionPayload + Simple
+                count = count + 2;
+            }
+        }
+        return count;
+    }
+
+    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex,
+            final long numOfAborted) {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
                 List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
                 assertEquals(1, snap.size());
-                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex() - numOfAborted);
             }
         );
     }
