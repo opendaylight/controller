@@ -25,6 +25,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +37,10 @@ import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -250,6 +254,18 @@ public class IntegrationTestKit extends ShardTestKit {
         }
 
         throw lastError;
+    }
+
+    void testWriteTransactionAndSavePayload(final ClientBackedDataStore dataStore,
+            final YangInstanceIdentifier nodePath, final NormalizedNode nodeToWrite,
+            final List<ReplicatedLogEntry> payloads) throws Exception {
+
+        testWriteTransaction(dataStore, nodePath, nodeToWrite);
+
+        List<Snapshot> snap = InMemorySnapshotStore
+            .getSnapshots("member-1-shard-cars-testSnapshotOnRootOverwrite", Snapshot.class);
+
+        payloads.addAll(snap.isEmpty() ? List.of() : snap.get(0).getUnAppliedEntries());
     }
 
     void testWriteTransaction(final ClientBackedDataStore dataStore, final YangInstanceIdentifier nodePath,
