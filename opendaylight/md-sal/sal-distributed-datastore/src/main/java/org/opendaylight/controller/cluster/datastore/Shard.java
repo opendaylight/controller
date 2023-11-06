@@ -88,6 +88,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPayload;
@@ -699,7 +700,7 @@ public class Shard extends RaftActor {
     // non-final for mocking
     void persistPayload(final Identifier id, final Payload payload, final boolean batchHint) {
         final boolean canSkipPayload = !hasFollowers() && !persistence().isRecoveryApplicable();
-        if (canSkipPayload) {
+        if (canSkipPayload || payload instanceof AbortTransactionPayload) {
             applyState(self(), id, payload);
         } else {
             // We are faking the sender
