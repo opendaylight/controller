@@ -199,7 +199,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @After
     public void tearDown() {
         if (followerDistributedDataStore != null) {
-            leaderDistributedDataStore.close();
+            followerDistributedDataStore.close();
         }
         if (leaderDistributedDataStore != null) {
             leaderDistributedDataStore.close();
@@ -1395,19 +1395,20 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .withChild(CarsModel.create())
                 .build();
 
+        final boolean isDistributedDataStore = DistributedDataStore.class.isAssignableFrom(testParameter);
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
 
         // FIXME: CONTROLLER-2020: ClientBackedDatastore does not have stable indexes/term,
         //                         the snapshot index seems to fluctuate
         assumeTrue(false);
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(1, state.getSnapshotIndex()));
+            state -> assertEquals(isDistributedDataStore ? 1L : 0L, state.getSnapshotIndex()));
 
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(1, state.getSnapshotIndex()));
+            state -> assertEquals(isDistributedDataStore ? 1L : 0L, state.getSnapshotIndex()));
 
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 1);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", isDistributedDataStore ? 1L : 0L);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", isDistributedDataStore ? 1L : 0L);
 
         for (int i = 0; i < 10; i++) {
             leaderTestKit.testWriteTransaction(leaderDistributedDataStore, CarsModel.newCarPath("car " + i),
@@ -1416,25 +1417,25 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // fake snapshot causes the snapshotIndex to move
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(10, state.getSnapshotIndex()));
+            state -> assertEquals(isDistributedDataStore ? 10L : 20L, state.getSnapshotIndex()));
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(10, state.getSnapshotIndex()));
+            state -> assertEquals(isDistributedDataStore ? 10L : 20L, state.getSnapshotIndex()));
 
         // however the real snapshot still has not changed and was taken at index 1
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 1);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 1);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", isDistributedDataStore ? 1L : 0L);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", isDistributedDataStore ? 1L : 0L);
 
         // root overwrite so expect a snapshot
         leaderTestKit.testWriteTransaction(leaderDistributedDataStore, YangInstanceIdentifier.of(), rootNode);
 
         // this was a real snapshot so everything should be in it(1(DisableTrackingPayload) + 1 + 10 + 1)
         IntegrationTestKit.verifyShardState(leaderDistributedDataStore, "cars",
-            state -> assertEquals(12, state.getSnapshotIndex()));
+            state -> assertEquals(isDistributedDataStore ? 12L : 22L, state.getSnapshotIndex()));
         IntegrationTestKit.verifyShardState(followerDistributedDataStore, "cars",
-            state -> assertEquals(12, state.getSnapshotIndex()));
+            state -> assertEquals(isDistributedDataStore ? 12L : 22L, state.getSnapshotIndex()));
 
-        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", 12);
-        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 12);
+        verifySnapshot("member-1-shard-cars-testSnapshotOnRootOverwrite", isDistributedDataStore ? 12L : 22L);
+        verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", isDistributedDataStore ? 12L : 22L);
     }
 
     private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
