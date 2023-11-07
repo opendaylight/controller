@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -65,14 +64,12 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
 import org.opendaylight.controller.cluster.datastore.TestShard.StartDropMessages;
 import org.opendaylight.controller.cluster.datastore.TestShard.StopDropMessages;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
@@ -373,21 +370,15 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // wait to let the shard catch up with purged
         await("Range set leak test").atMost(5, TimeUnit.SECONDS)
-                .pollInterval(500, TimeUnit.MILLISECONDS)
-                .untilAsserted(() -> {
-                    final var localShard = leaderDistributedDataStore.getActorUtils().findLocalShard("cars")
-                        .orElseThrow();
-                    final var frontendMetadata =
-                        (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
-                            .executeOperation(localShard, new RequestFrontendMetadata());
+            .pollInterval(500, TimeUnit.MILLISECONDS)
+            .untilAsserted(() -> {
+                final var localShard = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").orElseThrow();
+                final var frontendMetadata =
+                    (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
+                    .executeOperation(localShard, new RequestFrontendMetadata());
 
-                    final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2);
-                    } else {
-                        assertAskClientMetadata(clientMeta);
-                    }
-                });
+                assertClientMetadata(frontendMetadata.getClients().get(0), numCars * 2);
+            });
 
         try (var tx = txChain.newReadOnlyTransaction()) {
             final var body = tx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS).orElseThrow().body();
@@ -396,12 +387,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         }
     }
 
-    private static void assertAskClientMetadata(final FrontendClientMetadata clientMeta) {
-        // ask based should track no metadata
-        assertEquals(List.of(), clientMeta.getCurrentHistories());
-    }
-
-    private static void assertTellClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
+    private static void assertClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
         final var iterator = clientMeta.getCurrentHistories().iterator();
         var metadata = iterator.next();
         while (iterator.hasNext() && metadata.getHistoryId() != 1) {
@@ -414,19 +400,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testCloseTransactionMetadataLeak() throws Exception {
-        // FIXME: CONTROLLER-2016: ask-based frontend triggers this:
-        //
-        // java.lang.IllegalStateException: Previous transaction
-        //            member-2-datastore-testCloseTransactionMetadataLeak-fe-0-chn-1-txn-1-0 is not ready yet
-        //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy$Allocated.checkReady()
-        //        at org.opendaylight.controller.cluster.datastore.TransactionChainProxy.newReadOnlyTransaction()
-        assumeTrue(testParameter.isAssignableFrom(ClientBackedDataStore.class));
-
         initDatastoresWithCars("testCloseTransactionMetadataLeak");
 
-        final DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
+        final var txChain = followerDistributedDataStore.createTransactionChain();
 
-        DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+        var writeTx = txChain.newWriteOnlyTransaction();
         writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
         followerTestKit.doCommit(writeTx.ready());
@@ -444,21 +422,15 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // wait to let the shard catch up with purged
         await("wait for purges to settle").atMost(5, TimeUnit.SECONDS)
-                .pollInterval(500, TimeUnit.MILLISECONDS)
-                .untilAsserted(() -> {
-                    final var localShard = leaderDistributedDataStore.getActorUtils().findLocalShard("cars")
-                        .orElseThrow();
-                    final var frontendMetadata =
-                            (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
-                                    .executeOperation(localShard, new RequestFrontendMetadata());
+            .pollInterval(500, TimeUnit.MILLISECONDS)
+            .untilAsserted(() -> {
+                final var localShard = leaderDistributedDataStore.getActorUtils().findLocalShard("cars").orElseThrow();
+                final var frontendMetadata =
+                    (FrontendShardDataTreeSnapshotMetadata) leaderDistributedDataStore.getActorUtils()
+                    .executeOperation(localShard, new RequestFrontendMetadata());
 
-                    final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2);
-                    } else {
-                        assertAskClientMetadata(clientMeta);
-                    }
-                });
+                assertClientMetadata(frontendMetadata.getClients().get(0), numCars * 2);
+            });
     }
 
     @Test
@@ -1113,23 +1085,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             raftState -> assertEquals("getRaftState", "IsolatedLeader", raftState.getRaftState()));
 
         final var noShardLeaderCohort = noShardLeaderWriteTx.ready();
-        final ListenableFuture<Boolean> canCommit;
-
-        // There is difference in behavior here:
-        if (!leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-            // ask-based canCommit() times out and aborts
-            final var ex = assertThrows(ExecutionException.class,
-                () -> leaderTestKit.doCommit(noShardLeaderCohort)).getCause();
-            assertThat(ex, instanceOf(NoShardLeaderException.class));
-            assertThat(ex.getMessage(), containsString(
-                "Shard member-1-shard-cars-testTransactionWithIsolatedLeader currently has no leader."));
-            canCommit = null;
-        } else {
-            // tell-based canCommit() does not have a real timeout and hence continues
-            canCommit = noShardLeaderCohort.canCommit();
-            Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
-            assertFalse(canCommit.isDone());
-        }
+        // tell-based canCommit() does not have a real timeout and hence continues
+        final var canCommit = noShardLeaderCohort.canCommit();
+        Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
+        assertFalse(canCommit.isDone());
 
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
@@ -1142,18 +1101,16 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         leaderTestKit.doCommit(preIsolatedLeaderTxCohort);
         leaderTestKit.doCommit(successTxCohort);
 
-        // continuation of tell-based protocol: readied transaction will complete commit, but will report an OLFE
-        if (canCommit != null) {
-            final var ex = assertThrows(ExecutionException.class,
-                () -> canCommit.get(commitTimeout, TimeUnit.SECONDS)).getCause();
-            assertThat(ex, instanceOf(OptimisticLockFailedException.class));
-            assertEquals("Optimistic lock failed for path " + CarsModel.BASE_PATH, ex.getMessage());
-            final var cause = ex.getCause();
-            assertThat(cause, instanceOf(ConflictingModificationAppliedException.class));
-            final var cmae = (ConflictingModificationAppliedException) cause;
-            assertEquals("Node was created by other transaction.", cmae.getMessage());
-            assertEquals(CarsModel.BASE_PATH, cmae.getPath());
-        }
+        // continuation of canCommit(): readied transaction will complete commit, but will report an OLFE
+        final var ex = assertThrows(ExecutionException.class,
+            () -> canCommit.get(commitTimeout, TimeUnit.SECONDS)).getCause();
+        assertThat(ex, instanceOf(OptimisticLockFailedException.class));
+        assertEquals("Optimistic lock failed for path " + CarsModel.BASE_PATH, ex.getMessage());
+        final var cause = ex.getCause();
+        assertThat(cause, instanceOf(ConflictingModificationAppliedException.class));
+        final var cmae = (ConflictingModificationAppliedException) cause;
+        assertEquals("Node was created by other transaction.", cmae.getMessage());
+        assertEquals(CarsModel.BASE_PATH, cmae.getPath());
     }
 
     @Test
@@ -1354,9 +1311,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testReadWriteMessageSlicing() throws Exception {
-        // The slicing is only implemented for tell-based protocol
-        assumeTrue(ClientBackedDataStore.class.isAssignableFrom(testParameter));
-
         leaderDatastoreContextBuilder.maximumMessageSliceSize(100);
         followerDatastoreContextBuilder.maximumMessageSliceSize(100);
         initDatastoresWithCars("testLargeReadReplySlicing");

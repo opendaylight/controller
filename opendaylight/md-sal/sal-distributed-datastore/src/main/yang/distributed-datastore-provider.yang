@@ -1,13 +1,16 @@
 // vi: set smarttab et sw=4 tabstop=4:
 module distributed-datastore-provider {
-
     yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider";
     prefix "distributed-datastore-provider";
 
     description
         "This module contains the base YANG definitions for
-        the distributed datastore provider implementation";
+         the distributed datastore provider implementation";
+
+    revision "2023-12-29" {
+        description "Remote use-tell-based-protocol leaf";
+    }
 
     revision "2014-06-12" {
         description
@@ -222,14 +225,6 @@ module distributed-datastore-provider {
             type non-zero-uint32-type;
             description "When fragmenting messages thru the akka remoting framework, this is the
                          maximum size in bytes for a message slice.";
-        }
-
-        leaf use-tell-based-protocol {
-            status obsolete;
-            default false;
-            type boolean;
-            description "Use a newer protocol between the frontend and backend. This feature is considered
-                         exprerimental at this point.";
         }
 
         leaf file-backed-streaming-threshold-in-megabytes {

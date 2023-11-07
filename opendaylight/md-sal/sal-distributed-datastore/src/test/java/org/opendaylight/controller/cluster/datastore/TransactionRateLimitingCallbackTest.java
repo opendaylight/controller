@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class TransactionRateLimitingCallbackTest {
     @Mock

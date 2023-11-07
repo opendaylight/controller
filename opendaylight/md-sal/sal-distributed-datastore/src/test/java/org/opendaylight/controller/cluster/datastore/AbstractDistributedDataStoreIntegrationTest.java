@@ -47,7 +47,6 @@ import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMe
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
@@ -238,13 +237,13 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testSingleTransactionsWritesInQuickSuccession() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testSingleTransactionsWritesInQuickSuccession", "cars-1")) {
+        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        try (var dataStore = testKit.setupAbstractDataStore(testParameter,
+                "testSingleTransactionsWritesInQuickSuccession", "cars-1")) {
 
-            final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+            final var txChain = dataStore.createTransactionChain();
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            var writeTx = txChain.newWriteOnlyTransaction();
             writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
             writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
             testKit.doCommit(writeTx.ready());
@@ -267,16 +266,16 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 .untilAsserted(() -> {
                     // verify frontend metadata has no holes in purged transactions causing overtime memory leak
                     final var localShard = dataStore.getActorUtils().findLocalShard("cars-1") .orElseThrow();
-                    FrontendShardDataTreeSnapshotMetadata frontendMetadata =
-                        (FrontendShardDataTreeSnapshotMetadata) dataStore.getActorUtils()
+                    final var frontendMetadata = (FrontendShardDataTreeSnapshotMetadata) dataStore.getActorUtils()
                             .executeOperation(localShard, new RequestFrontendMetadata());
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (dataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellMetadata(clientMeta);
-                    } else {
-                        assertAskMetadata(clientMeta);
+                    final var iterator = clientMeta.getCurrentHistories().iterator();
+                    var metadata = iterator.next();
+                    while (iterator.hasNext() && metadata.getHistoryId() != 1) {
+                        metadata = iterator.next();
                     }
+                    assertEquals("[[0..10]]", metadata.getPurgedTransactions().ranges().toString());
                 });
 
             final var body = txChain.newReadOnlyTransaction().read(CarsModel.CAR_LIST_PATH)
@@ -286,20 +285,6 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             assertThat(body, instanceOf(Collection.class));
             assertEquals("# cars", numCars, ((Collection<?>) body).size());
         }
-    }
-
-    private static void assertAskMetadata(final FrontendClientMetadata clientMeta) {
-        // ask based should track no metadata
-        assertEquals(List.of(), clientMeta.getCurrentHistories());
-    }
-
-    private static void assertTellMetadata(final FrontendClientMetadata clientMeta) {
-        final var iterator = clientMeta.getCurrentHistories().iterator();
-        var metadata = iterator.next();
-        while (iterator.hasNext() && metadata.getHistoryId() != 1) {
-            metadata = iterator.next();
-        }
-        assertEquals("[[0..10]]", metadata.getPurgedTransactions().ranges().toString());
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
