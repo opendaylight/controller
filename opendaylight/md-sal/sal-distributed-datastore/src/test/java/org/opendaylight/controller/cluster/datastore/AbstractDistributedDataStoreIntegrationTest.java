@@ -272,11 +272,11 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                             .executeOperation(localShard, new RequestFrontendMetadata());
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (dataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellMetadata(clientMeta);
-                    } else {
+                 //   if (dataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
+                    assertTellMetadata(clientMeta);
+                   /* } else {
                         assertAskMetadata(clientMeta);
-                    }
+                    }*/
                 });
 
             final var body = txChain.newReadOnlyTransaction().read(CarsModel.CAR_LIST_PATH)

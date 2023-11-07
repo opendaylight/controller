@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
+//import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -383,11 +383,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                             .executeOperation(localShard, new RequestFrontendMetadata());
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2);
-                    } else {
-                        assertAskClientMetadata(clientMeta);
-                    }
+                  //if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
+                    assertTellClientMetadata(clientMeta, numCars * 2);
+                   // } else {
+                   //     assertAskClientMetadata(clientMeta);
+                   // }
                 });
 
         try (var tx = txChain.newReadOnlyTransaction()) {
@@ -454,11 +454,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                                     .executeOperation(localShard, new RequestFrontendMetadata());
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
-                    if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
-                        assertTellClientMetadata(clientMeta, numCars * 2);
-                    } else {
-                        assertAskClientMetadata(clientMeta);
-                    }
+                  // if (leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
+                    assertTellClientMetadata(clientMeta, numCars * 2);
+                   // } else {
+                  //      assertAskClientMetadata(clientMeta);
+                  //  }
                 });
     }
 
@@ -1119,9 +1119,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final var noShardLeaderCohort = noShardLeaderWriteTx.ready();
         final ListenableFuture<Boolean> canCommit;
-
-        // There is difference in behavior here:
-        if (!leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
+        // There is difference in behavior here
+       /* if (!leaderDistributedDataStore.getActorUtils().getDatastoreContext().isUseTellBasedProtocol()) {
             // ask-based canCommit() times out and aborts
             final var ex = assertThrows(ExecutionException.class,
                 () -> leaderTestKit.doCommit(noShardLeaderCohort)).getCause();
@@ -1129,12 +1128,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             assertThat(ex.getMessage(), containsString(
                 "Shard member-1-shard-cars-testTransactionWithIsolatedLeader currently has no leader."));
             canCommit = null;
-        } else {
+        } else {*/
             // tell-based canCommit() does not have a real timeout and hence continues
-            canCommit = noShardLeaderCohort.canCommit();
-            Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
-            assertFalse(canCommit.isDone());
-        }
+        canCommit = noShardLeaderCohort.canCommit();
+        Uninterruptibles.sleepUninterruptibly(commitTimeout, TimeUnit.SECONDS);
+        assertFalse(canCommit.isDone());
+        //}
 
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
