@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -31,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +41,11 @@ import scala.concurrent.Future;
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies.
  */
-public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<ActorSelection> {
-
+@Deprecated(since = "9.0.0", forRemoval = true)
+final class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
+    private static final @NonNull ListenableFuture<Empty> IMMEDIATE_EMPTY_SUCCESS =
+        Futures.immediateFuture(Empty.value());
 
     private static final MessageSupplier COMMIT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
@@ -67,13 +71,36 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         }
     };
 
+    private static final OperationCallback NO_OP_CALLBACK = new OperationCallback() {
+        @Override
+        public void run() {
+        }
+
+        @Override
+        public void success() {
+        }
+
+        @Override
+        public void failure() {
+        }
+
+        @Override
+        public void pause() {
+        }
+
+        @Override
+        public void resume() {
+        }
+    };
+
+
     private final ActorUtils actorUtils;
     private final List<CohortInfo> cohorts;
     private final SettableFuture<Empty> cohortsResolvedFuture = SettableFuture.create();
     private final TransactionIdentifier transactionId;
     private volatile OperationCallback commitOperationCallback;
 
-    public ThreePhaseCommitCohortProxy(final ActorUtils actorUtils, final List<CohortInfo> cohorts,
+    ThreePhaseCommitCohortProxy(final ActorUtils actorUtils, final List<CohortInfo> cohorts,
             final TransactionIdentifier transactionId) {
         this.actorUtils = actorUtils;
         this.cohorts = cohorts;
@@ -242,13 +269,13 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         // it's the original exception that is the root cause and of more interest to the client.
 
         return operation("abort", Empty.value(), ABORT_MESSAGE_SUPPLIER, AbortTransactionReply.class, false,
-            OperationCallback.NO_OP_CALLBACK);
+            NO_OP_CALLBACK);
     }
 
     @Override
     public ListenableFuture<? extends CommitInfo> commit() {
         OperationCallback operationCallback = commitOperationCallback != null ? commitOperationCallback :
-            OperationCallback.NO_OP_CALLBACK;
+            NO_OP_CALLBACK;
 
         return operation("commit", CommitInfo.empty(), COMMIT_MESSAGE_SUPPLIER, CommitTransactionReply.class, true,
             operationCallback);
@@ -353,16 +380,6 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                 }
             }
         }, actorUtils.getClientDispatcher());
-    }
-
-    @Override
-    List<Future<ActorSelection>> getCohortFutures() {
-        List<Future<ActorSelection>> cohortFutures = new ArrayList<>(cohorts.size());
-        for (CohortInfo info: cohorts) {
-            cohortFutures.add(info.getActorFuture());
-        }
-
-        return cohortFutures;
     }
 
     static class CohortInfo {
