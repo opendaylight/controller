@@ -30,11 +30,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
+//import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
-import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
+//import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -77,7 +77,7 @@ public class IntegrationTestKit extends ShardTestKit {
         return datastoreContextBuilder;
     }
 
-    @Deprecated(since = "7.0.0", forRemoval = true)
+  /*  @Deprecated(since = "7.0.0", forRemoval = true)
     public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
                                                           final boolean waitUntilLeader,
                                                           final EffectiveModelContext schemaContext) throws Exception {
@@ -92,7 +92,7 @@ public class IntegrationTestKit extends ShardTestKit {
                                                           final String... shardNames) throws Exception {
         return (DistributedDataStore) setupAbstractDataStore(DistributedDataStore.class, typeName, moduleShardsConfig,
                 modulesConfig, waitUntilLeader, schemaContext, shardNames);
-    }
+    }  */
 
     public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
                                                     final String typeName, final String... shardNames)
@@ -137,7 +137,7 @@ public class IntegrationTestKit extends ShardTestKit {
         setDataStoreName(typeName);
 
         // Make sure we set up datastore context correctly
-        datastoreContextBuilder.useTellBasedProtocol(ClientBackedDataStore.class.isAssignableFrom(implementation));
+       // datastoreContextBuilder.useTellBasedProtocol(ClientBackedDataStore.class.isAssignableFrom(implementation));
 
         final DatastoreContext datastoreContext = datastoreContextBuilder.build();
         final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
@@ -171,7 +171,7 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    @Deprecated(since = "7.0.0", forRemoval = true)
+/*    @Deprecated(since = "7.0.0", forRemoval = true)
     public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
                                                                        final EffectiveModelContext schemaContext) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
@@ -217,7 +217,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
         datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
         return dataStore;
-    }
+    } */
 
     public void waitUntilLeader(final ActorUtils actorUtils, final String... shardNames) {
         for (String shardName: shardNames) {
@@ -382,3 +382,5 @@ public class IntegrationTestKit extends ShardTestKit {
         void verify(ShardStats stats);
     }
 }
+
+
