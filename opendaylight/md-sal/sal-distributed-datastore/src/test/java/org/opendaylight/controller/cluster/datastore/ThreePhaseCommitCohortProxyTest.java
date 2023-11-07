@@ -51,6 +51,7 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     static class TestException extends RuntimeException {
