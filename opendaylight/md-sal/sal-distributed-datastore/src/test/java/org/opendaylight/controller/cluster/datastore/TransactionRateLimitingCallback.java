@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import com.codahale.metrics.Timer;
@@ -19,7 +18,8 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
  * TransactionRateLimitingCallback computes the new transaction rate limit on the successful completion of a
  * transaction.
  */
-public class TransactionRateLimitingCallback implements OperationCallback {
+@Deprecated(since = "9.0.0", forRemoval = true)
+final class TransactionRateLimitingCallback implements OperationCallback {
     private static Ticker TICKER = Ticker.systemTicker();
 
     private enum State {
@@ -33,7 +33,7 @@ public class TransactionRateLimitingCallback implements OperationCallback {
     private long elapsedTime;
     private volatile State state = State.STOPPED;
 
-    TransactionRateLimitingCallback(ActorUtils actorUtils) {
+    TransactionRateLimitingCallback(final ActorUtils actorUtils) {
         commitTimer = actorUtils.getOperationTimer(ActorUtils.COMMIT);
     }
 
@@ -75,7 +75,7 @@ public class TransactionRateLimitingCallback implements OperationCallback {
     }
 
     @VisibleForTesting
-    static void setTicker(Ticker ticker) {
+    static void setTicker(final Ticker ticker) {
         TICKER = ticker;
     }
 }
