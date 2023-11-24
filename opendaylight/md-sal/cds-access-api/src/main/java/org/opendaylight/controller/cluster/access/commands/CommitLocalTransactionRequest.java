@@ -11,7 +11,10 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,9 +30,6 @@ public final class CommitLocalTransactionRequest
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
-            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
-            + "aren't serialized. FindBugs does not recognize this.")
     private final DataTreeModification mod;
     private final Exception delayedFailure;
     private final boolean coordinated;
@@ -73,5 +73,20 @@ public final class CommitLocalTransactionRequest
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
         return super.addToStringAttributes(toStringHelper).add("coordinated", coordinated)
                 .add("delayedError", delayedFailure);
+    }
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
     }
 }

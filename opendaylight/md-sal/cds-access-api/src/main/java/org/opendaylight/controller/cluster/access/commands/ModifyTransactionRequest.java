@@ -10,10 +10,12 @@ package org.opendaylight.controller.cluster.access.commands;
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,9 +76,6 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
-            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
-            + "aren't serialized. FindBugs does not recognize this.")
     private final List<TransactionModification> modifications;
     private final PersistenceProtocol protocol;
 
@@ -115,5 +114,20 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     @Override
     protected ModifyTransactionRequest cloneAsVersion(final ABIVersion version) {
         return new ModifyTransactionRequest(this, version);
+    }
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
     }
 }

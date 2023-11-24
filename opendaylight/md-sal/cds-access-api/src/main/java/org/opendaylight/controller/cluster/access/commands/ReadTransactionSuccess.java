@@ -9,7 +9,10 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
@@ -25,7 +28,6 @@ public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransac
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "interface-based best effort")
     private final Optional<NormalizedNode> data;
 
     private ReadTransactionSuccess(final ReadTransactionSuccess request, final ABIVersion version) {
@@ -51,5 +53,20 @@ public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransac
     @Override
     protected ReadTransactionSuccess cloneAsVersion(final ABIVersion version) {
         return new ReadTransactionSuccess(this, version);
+    }
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
     }
 }

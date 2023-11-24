@@ -16,8 +16,12 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.DataInput;
 import java.io.Externalizable;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -197,5 +201,24 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
     @java.io.Serial
     protected final Object writeReplace() {
         return externalizableProxy(version);
+    }
+
+    protected final void throwNSE() throws NotSerializableException {
+        throw new NotSerializableException(getClass().getName());
+    }
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
     }
 }

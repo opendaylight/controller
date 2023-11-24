@@ -16,11 +16,13 @@ import akka.serialization.JavaSerializer;
 import akka.serialization.Serialization;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,8 +78,6 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     private static final long serialVersionUID = 1L;
 
     private final @NonNull ImmutableList<ActorSelection> alternates;
-
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See justification above.")
     private final ReadOnlyDataTree dataTree;
     private final @NonNull ActorRef backend;
     private final int maxMessages;
@@ -141,5 +141,20 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
         return super.addToStringAttributes(toStringHelper).add("alternates", alternates)
                 .add("dataTree present", getDataTree().isPresent()).add("maxMessages", maxMessages);
+    }
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
     }
 }
