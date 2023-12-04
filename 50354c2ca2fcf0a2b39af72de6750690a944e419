@@ -50,6 +50,23 @@
       "message": "Commit message",
       "revId": "50354c2ca2fcf0a2b39af72de6750690a944e419",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7b90374b_bd652d16",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 16
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-12-04T16:55:37Z",
+      "side": 1,
+      "message": "fix commit message pls",
+      "revId": "50354c2ca2fcf0a2b39af72de6750690a944e419",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
