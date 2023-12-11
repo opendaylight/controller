@@ -874,7 +874,7 @@ RESTCONF operations overview
 
 .. note::
 
-    | Each request must start with the URI /restconf.
+    | Each request must start with the URI /rests.
     | RESTCONF listens on port 8080 for HTTP requests.
 
 RESTCONF supports **OPTIONS**, **GET**, **PUT**, **POST**, and
@@ -901,16 +901,16 @@ Identifier <https://wiki-archive.opendaylight.org/view/OpenDaylight_Controller:M
 -  <nodeName> can represent a data node which is a list or container
    yang built-in type. If the data node is a list, there must be defined
    keys of the list behind the data node name for example,
-   <nodeName>/<valueOfKey1>/<valueOfKey2>.
+   <nodeName>=<valueOfKey1>,<valueOfKey2>.
 
 -  | The format <moduleName>:<nodeName> has to be used in this case as
      well:
    | Module A has node A1. Module B augments node A1 by adding node X.
      Module C augments node A1 by adding node X. For clarity, it has to
      be known which node is X (for example: C:X). For more details about
-     encoding, see: `RESTCONF 02 - Encoding YANG Instance Identifiers in
+     encoding, see: `RESTCONF RFC 8040 - Encoding YANG Instance Identifiers in
      the Request
-     URI. <https://datatracker.ietf.org/doc/html/draft-bierman-netconf-restconf-02#section-5.3.1>`__
+     URI. <https://datatracker.ietf.org/doc/html/rfc8040#section-3.5.3>`__
 
 Mount point
 ~~~~~~~~~~~
@@ -927,29 +927,29 @@ Mount point
 HTTP methods
 ~~~~~~~~~~~~
 
-OPTIONS /restconf
-^^^^^^^^^^^^^^^^^
+OPTIONS /rests
+^^^^^^^^^^^^^^
 
 -  Returns the XML description of the resources with the required
    request and response media types in Web Application Description
    Language (WADL)
 
-GET /restconf/config/<identifier>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GET /rests/data/<identifier>?content=config
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Returns a data node from the Config datastore.
 
 -  <identifier> points to a data node which must be retrieved.
 
-GET /restconf/operational/<identifier>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GET /rests/data/<identifier>?content=nonconfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  Returns the value of the data node from the Operational datastore.
+-  Returns the value of the data node from the non-configuration datastore.
 
 -  <identifier> points to a data node which must be retrieved.
 
-PUT /restconf/config/<identifier>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PUT /rests/data/<identifier>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Updates or creates data in the Config datastore and returns the state
    about success.
@@ -960,7 +960,7 @@ PUT /restconf/config/<identifier>
 
 ::
 
-    PUT http://<controllerIP>:8080/restconf/config/module1:foo/bar
+    PUT http://<controllerIP>:8080/rests/data/module1:foo/bar
     Content-Type: applicaton/xml
     <bar>
       …
@@ -970,14 +970,14 @@ PUT /restconf/config/<identifier>
 
 ::
 
-    PUT http://<controllerIP>:8080/restconf/config/module1:foo1/foo2/yang-ext:mount/module2:foo/bar
+    PUT http://<controllerIP>:8080/rests/data/module1:foo1/foo2/yang-ext:mount/module2:foo/bar
     Content-Type: applicaton/xml
     <bar>
       …
     </bar>
 
-POST /restconf/config
-^^^^^^^^^^^^^^^^^^^^^
+POST /rests/data
+^^^^^^^^^^^^^^^^
 
 -  Creates the data if it does not exist
 
@@ -985,7 +985,7 @@ POST /restconf/config
 
 ::
 
-    POST URL: http://localhost:8080/restconf/config/
+    POST URL: http://localhost:8080/rests/data/
     content-type: application/yang.data+json
     JSON payload:
 
@@ -998,8 +998,8 @@ POST /restconf/config
          }
       }
 
-POST /restconf/config/<identifier>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+POST /rests/data/<identifier>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Creates the data if it does not exist in the Config datastore, and
    returns the state about success.
@@ -1013,7 +1013,7 @@ POST /restconf/config/<identifier>
 
 ::
 
-    POST http://<controllerIP>:8080/restconf/config/module1:foo
+    POST http://<controllerIP>:8080/rests/data/module1:foo
     Content-Type: applicaton/xml/
     <bar xmlns=“module1namespace”>
       …
@@ -1023,14 +1023,14 @@ POST /restconf/config/<identifier>
 
 ::
 
-    http://<controllerIP>:8080/restconf/config/module1:foo1/foo2/yang-ext:mount/module2:foo
+    http://<controllerIP>:8080/rests/data/module1:foo1/foo2/yang-ext:mount/module2:foo
     Content-Type: applicaton/xml
     <bar xmlns=“module2namespace”>
       …
     </bar>
 
-POST /restconf/operations/<moduleName>:<rpcName>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+POST /rests/operations/<moduleName>:<rpcName>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Invokes RPC.
 
@@ -1046,7 +1046,7 @@ POST /restconf/operations/<moduleName>:<rpcName>
 
 ::
 
-    POST http://<controllerIP>:8080/restconf/operations/module1:fooRpc
+    POST http://<controllerIP>:8080/rests/operations/module1:fooRpc
     Content-Type: applicaton/xml
     Accept: applicaton/xml
     <input>
@@ -1062,7 +1062,7 @@ POST /restconf/operations/<moduleName>:<rpcName>
 
 ::
 
-    POST http://localhost:8080/restconf/operations/toaster:make-toast
+    POST http://localhost:8080/rests/operations/toaster:make-toast
     Content-Type: application/yang.data+json
     {
       "input" :
@@ -1077,8 +1077,8 @@ POST /restconf/operations/<moduleName>:<rpcName>
     Even though this is a default for the toasterToastType value in the
     yang, you still need to define it.
 
-DELETE /restconf/config/<identifier>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+DELETE /rests/data/<identifier>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Removes the data node in the Config datastore and returns the state
    about success.
@@ -1086,7 +1086,7 @@ DELETE /restconf/config/<identifier>
 -  <identifier> points to a data node which must be removed.
 
 More information is available in the `RESTCONF
-RFC <https://datatracker.ietf.org/doc/html/draft-bierman-netconf-restconf-02>`__.
+RFC <https://datatracker.ietf.org/doc/html/rfc8040>`__.
 
 How RESTCONF works
 ~~~~~~~~~~~~~~~~~~
@@ -1126,8 +1126,8 @@ CompositeNode
 GET in action
 ~~~~~~~~~~~~~
 
-Figure 1 shows the GET operation with URI restconf/config/M:N where M is
-the module name, and N is the node name.
+Figure 1 shows the GET operation with URI rests/data/M:N?content=config
+where M is the module name, and N is the node name.
 
 .. figure:: ./images/Get.png
    :alt: Get
@@ -1154,7 +1154,7 @@ the module name, and N is the node name.
 PUT in action
 ~~~~~~~~~~~~~
 
-Figure 2 shows the PUT operation with the URI restconf/config/M:N where
+Figure 2 shows the PUT operation with the URI rests/data/M:N where
 M is the module name, and N is the node name. Data is sent in the
 request either in the XML or JSON format.
 
@@ -1192,7 +1192,7 @@ Something practical
 ::
 
     Operation: POST
-    URI: http://192.168.11.1:8080/restconf/config/opendaylight-inventory:nodes/node/openflow:1/table/2
+    URI: http://192.168.11.1:8080/rests/data/opendaylight-inventory:nodes/node=openflow:1/table=2
     Content-Type: application/xml
 
 ::
@@ -1247,7 +1247,7 @@ Something practical
 ::
 
     Operation: PUT
-    URI: http://192.168.11.1:8080/restconf/config/opendaylight-inventory:nodes/node/openflow:1/table/2/flow/111
+    URI: http://192.168.11.1:8080/rests/data/opendaylight-inventory:nodes/node=openflow:1/table=2/flow=111
     Content-Type: application/xml
 
 ::
@@ -1302,7 +1302,7 @@ Something practical
 ::
 
     Operation: GET
-    URI: http://192.168.11.1:8080/restconf/config/opendaylight-inventory:nodes/node/openflow:1/table/2/flow/111
+    URI: http://192.168.11.1:8080/rests/data/opendaylight-inventory:nodes/node=openflow:1/table=2/flow=111?content=config
     Accept: application/xml
 
 | **HTTP response**
@@ -1357,7 +1357,7 @@ Something practical
 ::
 
     Operation: DELETE
-    URI: http://192.168.11.1:8080/restconf/config/opendaylight-inventory:nodes/node/openflow:1/table/2/flow/111
+    URI: http://192.168.11.1:8080/rests/data/opendaylight-inventory:nodes/node=openflow:1/table=2/flow=111
 
 | **HTTP response**
 
