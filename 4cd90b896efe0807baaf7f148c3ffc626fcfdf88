@@ -16,6 +16,24 @@
       "message": "/rests/data ?",
       "revId": "4cd90b896efe0807baaf7f148c3ffc626fcfdf88",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2f4b4feb_5817b5b7",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2023-12-12T18:57:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4af8ea27_da5b784a",
+      "revId": "4cd90b896efe0807baaf7f148c3ffc626fcfdf88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
