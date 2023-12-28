@@ -24,10 +24,10 @@ public class NotificationListenerBean {
     private static final Logger LOG = LoggerFactory.getLogger(NotificationListenerBean.class);
     static final String NOTIFICATION_LISTENER = "notification-listener";
 
-    private Bundle bundle;
-    private NotificationService notificationService;
-    private NotificationListener notificationListener;
-    private ListenerRegistration<?> registration;
+    private Bundle bundle = null;
+    private NotificationService notificationService = null;
+    private NotificationListener notificationListener = null;
+    private ListenerRegistration<?> registration = null;
 
     public void setNotificationService(final NotificationService notificationService) {
         this.notificationService = notificationService;

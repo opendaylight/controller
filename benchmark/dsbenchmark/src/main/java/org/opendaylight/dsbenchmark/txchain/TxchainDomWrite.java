@@ -14,10 +14,8 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
 import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
@@ -32,35 +30,34 @@ import org.slf4j.LoggerFactory;
 
 public class TxchainDomWrite extends DatastoreAbstractWriter implements DOMTransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomWrite.class);
-    private final DOMDataBroker domDataBroker;
-    private List<MapEntryNode> list;
 
-    public TxchainDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
+    private final DOMDataBroker dataBroker;
+    private List<MapEntryNode> list = null;
+
+    public TxchainDomWrite(final DOMDataBroker dataBroker, final StartTestInput.Operation oper,
             final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
-        this.domDataBroker = domDataBroker;
+        this.dataBroker = dataBroker;
         LOG.debug("Created TxchainDomWrite");
     }
 
     @Override
     public void createList() {
-        list = DomListBuilder.buildOuterList(this.outerListElem, this.innerListElem);
+        list = DomListBuilder.buildOuterList(outerListElem, innerListElem);
     }
 
     @Override
     public void executeList() {
-        final LogicalDatastoreType dsType = getDataStoreType();
-        final YangInstanceIdentifier pid =
-                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
-        final DOMTransactionChain chain = domDataBroker.createMergingTransactionChain(this);
+        final var dsType = getDataStoreType();
+        final var pid = YangInstanceIdentifier.of(TestExec.QNAME, OuterList.QNAME);
+        final var chain = dataBroker.createMergingTransactionChain(this);
 
-        DOMDataTreeWriteTransaction tx = chain.newWriteOnlyTransaction();
+        var tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
         int writeCnt = 0;
 
-        for (MapEntryNode element : this.list) {
-            YangInstanceIdentifier yid =
-                    pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, element.getIdentifier().asMap()));
+        for (var element : list) {
+            var yid = pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, element.name().asMap()));
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, yid, element);

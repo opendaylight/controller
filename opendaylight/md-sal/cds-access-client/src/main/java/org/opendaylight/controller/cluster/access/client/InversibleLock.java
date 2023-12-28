@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +34,8 @@ public final class InversibleLock {
 
     private final StampedLock lock = new StampedLock();
 
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD",
+        justification = "https://github.com/spotbugs/spotbugs/issues/2749")
     private volatile CountDownLatch latch;
 
     /**
@@ -69,8 +72,7 @@ public final class InversibleLock {
     }
 
     public void unlockWrite(final long stamp) {
-        final CountDownLatch local = (CountDownLatch) LATCH.getAndSet(this, null);
-        verifyNotNull(local);
+        final var local = verifyNotNull((CountDownLatch) LATCH.getAndSet(this, null));
         lock.unlockWrite(stamp);
         local.countDown();
     }
