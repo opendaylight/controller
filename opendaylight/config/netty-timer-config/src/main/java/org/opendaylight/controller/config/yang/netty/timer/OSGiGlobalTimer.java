@@ -56,6 +56,7 @@ public final class OSGiGlobalTimer implements Timer {
 
     @Override
     public Set<Timeout> stop() {
-        return delegate.stop();
+        LOG.warn("Attepted to stop global timer", new Throwable());
+        return Set.of();
     }
 }
