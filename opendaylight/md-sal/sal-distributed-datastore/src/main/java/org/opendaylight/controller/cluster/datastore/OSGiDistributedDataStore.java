@@ -107,26 +107,23 @@ public final class OSGiDistributedDataStore {
 
     private static final Logger LOG = LoggerFactory.getLogger(OSGiDistributedDataStore.class);
 
-    @Reference
-    DOMSchemaService schemaService = null;
-    @Reference
-    ActorSystemProvider actorSystemProvider = null;
-    @Reference
-    DatastoreContextIntrospectorFactory introspectorFactory = null;
-    @Reference
-    DatastoreSnapshotRestore snapshotRestore = null;
-    @Reference
-    ModuleShardConfigProvider configProvider = null;
-    @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
-    ComponentFactory<OSGiDOMStore> datastoreFactory = null;
-
+    private final ComponentFactory<OSGiDOMStore> datastoreFactory;
     private DatastoreState configDatastore;
     private DatastoreState operDatastore;
 
     @Activate
-    void activate(final Map<String, Object> properties) {
-        configDatastore = createDatastore(LogicalDatastoreType.CONFIGURATION, "distributed-config", properties, null);
-        operDatastore = createDatastore(LogicalDatastoreType.OPERATIONAL, "distributed-operational", properties,
+    public OSGiDistributedDataStore(@Reference final DOMSchemaService schemaService,
+            @Reference final ActorSystemProvider actorSystemProvider,
+            @Reference final DatastoreContextIntrospectorFactory introspectorFactory,
+            @Reference final DatastoreSnapshotRestore snapshotRestore,
+            @Reference final ModuleShardConfigProvider configProvider,
+            @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
+            final ComponentFactory<OSGiDOMStore> datastoreFactory, final Map<String, Object> properties) {
+        this.datastoreFactory = requireNonNull(datastoreFactory);
+        configDatastore = createDatastore(schemaService, actorSystemProvider, snapshotRestore, introspectorFactory,
+            LogicalDatastoreType.CONFIGURATION, "distributed-config", properties, null);
+        operDatastore = createDatastore(schemaService, actorSystemProvider, snapshotRestore, introspectorFactory,
+            LogicalDatastoreType.OPERATIONAL, "distributed-operational", properties,
             new ConfigurationImpl(configProvider));
     }
 
@@ -145,14 +142,16 @@ public final class OSGiDistributedDataStore {
         configDatastore = null;
     }
 
-    private DatastoreState createDatastore(final LogicalDatastoreType datastoreType, final String serviceType,
-            final Map<String, Object> properties, final Configuration config) {
+    private DatastoreState createDatastore(final DOMSchemaService schemaService,
+            final ActorSystemProvider actorSystemProvider, final DatastoreSnapshotRestore snapshotRestore,
+            final DatastoreContextIntrospectorFactory introspectorFactory, final LogicalDatastoreType datastoreType,
+            final String serviceType, final Map<String, Object> properties,final Configuration config) {
         LOG.info("Distributed Datastore type {} starting", datastoreType);
-        final DatastoreContextIntrospector introspector = introspectorFactory.newInstance(datastoreType, properties);
-        final AbstractDataStore datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
+        final var introspector = introspectorFactory.newInstance(datastoreType, properties);
+        final var datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
             introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
-        final DatastoreState state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
+        final var state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
 
         Futures.addCallback(datastore.initialSettleFuture(), state,
             // Note we are invoked from shard manager and therefore could block it, hence the round-trip to executor
