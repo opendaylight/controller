@@ -25,7 +25,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, configurationPid = "org.opendaylight.controller.remoterpc")
+@Component(configurationPid = "org.opendaylight.controller.remoterpc")
 @Designate(ocd = OSGiRemoteOpsProvider.Config.class)
 public final class OSGiRemoteOpsProvider {
     @ObjectClassDefinition()
@@ -38,21 +38,13 @@ public final class OSGiRemoteOpsProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OSGiRemoteOpsProvider.class);
 
-    @Reference
-    ActorSystemProvider actorSystemProvider = null;
-    @Reference
-    DOMRpcProviderService rpcProviderService = null;
-    @Reference
-    DOMRpcService rpcService = null;
-    @Reference
-    DOMActionProviderService actionProviderService = null;
-    @Reference
-    DOMActionService actionService = null;
-
     private ActorRef opsManager;
 
     @Activate
-    void activate(final Config config) {
+    public OSGiRemoteOpsProvider(@Reference final ActorSystemProvider actorSystemProvider,
+            @Reference final DOMRpcProviderService rpcProviderService, @Reference final DOMRpcService rpcService,
+            @Reference final DOMActionProviderService actionProviderService,
+            @Reference final DOMActionService actionService, final Config config) {
         LOG.info("Remote Operations service starting");
         final ActorSystem actorSystem = actorSystemProvider.getActorSystem();
         final RemoteOpsProviderConfig opsConfig = RemoteOpsProviderConfig.newInstance(actorSystem.name(),
