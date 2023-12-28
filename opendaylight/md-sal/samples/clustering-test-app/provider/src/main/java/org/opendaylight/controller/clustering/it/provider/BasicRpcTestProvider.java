@@ -40,7 +40,7 @@ public final class BasicRpcTestProvider implements ClusterSingletonService, Basi
     private final RpcProviderService rpcProviderRegistry;
     private final Registration singletonRegistration;
 
-    private ObjectRegistration<?> rpcRegistration;
+    private ObjectRegistration<?> rpcRegistration = null;
 
     @Inject
     @Activate

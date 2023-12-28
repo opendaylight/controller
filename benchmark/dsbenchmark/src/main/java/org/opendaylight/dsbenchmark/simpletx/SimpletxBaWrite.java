@@ -5,16 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.simpletx;
+
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.WriteTransaction;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -25,31 +24,31 @@ import org.slf4j.LoggerFactory;
 
 public class SimpletxBaWrite extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxBaWrite.class);
+
     private final DataBroker dataBroker;
-    private List<OuterList> list;
+    private List<OuterList> list = null;
 
     public SimpletxBaWrite(final DataBroker dataBroker, final StartTestInput.Operation oper,
             final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
-        this.dataBroker = dataBroker;
+        this.dataBroker = requireNonNull(dataBroker);
         LOG.debug("Created SimpletxBaWrite");
     }
 
     @Override
     public void createList() {
-        list = BaListBuilder.buildOuterList(this.outerListElem, this.innerListElem);
+        list = BaListBuilder.buildOuterList(outerListElem, innerListElem);
     }
 
     @Override
     public void executeList() {
-        final LogicalDatastoreType dsType = getDataStoreType();
+        final var dsType = getDataStoreType();
 
-        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        var tx = dataBroker.newWriteOnlyTransaction();
         long writeCnt = 0;
 
-        for (OuterList element : this.list) {
-            InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                                                    .child(OuterList.class, element.key());
+        for (var element : list) {
+            final var iid = InstanceIdentifier.create(TestExec.class).child(OuterList.class, element.key());
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, iid, element);
             } else {
@@ -80,5 +79,4 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
             }
         }
     }
-
 }

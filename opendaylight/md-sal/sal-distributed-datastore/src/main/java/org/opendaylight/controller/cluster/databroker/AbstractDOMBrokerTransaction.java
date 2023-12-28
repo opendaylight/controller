@@ -10,8 +10,10 @@ package org.opendaylight.controller.cluster.databroker;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Map;
@@ -39,6 +41,8 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
     private final @NonNull Object identifier;
     private final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories;
 
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD",
+        justification = "https://github.com/spotbugs/spotbugs/issues/2749")
     private volatile Entry<LogicalDatastoreType, T> backingTx;
 
     /**
@@ -47,7 +51,7 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
      * @param identifier Identifier of transaction.
      */
     protected AbstractDOMBrokerTransaction(final Object identifier,
-            Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         this.identifier = requireNonNull(identifier, "Identifier should not be null");
         this.storeTxFactories = requireNonNull(storeTxFactories, "Store Transaction Factories should not be null");
         checkArgument(!storeTxFactories.isEmpty(), "Store Transaction Factories should not be empty");
@@ -91,6 +95,7 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
     /**
      * Returns sub-transaction if initialized.
      */
+    @VisibleForTesting
     protected T getSubtransaction() {
         final Entry<LogicalDatastoreType, T> entry;
         return (entry = backingTx) == null ? null : entry.getValue();
@@ -105,16 +110,17 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     protected void closeSubtransaction() {
-        if (backingTx != null) {
+        final var local = backingTx;
+        if (local != null) {
             try {
-                backingTx.getValue().close();
+                local.getValue().close();
             } catch (Exception e) {
                 throw new IllegalStateException("Uncaught exception occurred during closing transaction", e);
             }
         }
     }
 
-    protected DOMStoreTransactionFactory getTxFactory(LogicalDatastoreType type) {
+    protected DOMStoreTransactionFactory getTxFactory(final LogicalDatastoreType type) {
         return storeTxFactories.get(type);
     }
 

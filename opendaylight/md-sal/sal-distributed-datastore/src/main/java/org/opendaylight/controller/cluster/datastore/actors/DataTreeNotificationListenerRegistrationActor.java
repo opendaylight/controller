@@ -15,10 +15,11 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -30,10 +31,9 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
     @VisibleForTesting
     static long killDelay = TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS);
 
-    private ListenerRegistration<?> registration;
-    private Runnable onClose;
+    private SetRegistration registration = null;
+    private Cancellable killSchedule = null;
     private boolean closed;
-    private Cancellable killSchedule;
 
     @Override
     protected void handleReceive(final Object message) {
@@ -42,9 +42,8 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
             if (isValidSender(getSender())) {
                 getSender().tell(CloseDataTreeNotificationListenerRegistrationReply.getInstance(), getSelf());
             }
-        } else if (message instanceof SetRegistration) {
-            registration = ((SetRegistration)message).registration;
-            onClose = ((SetRegistration)message).onClose;
+        } else if (message instanceof SetRegistration setRegistration) {
+            registration = setRegistration;
             if (closed) {
                 closeListenerRegistration();
             }
@@ -55,10 +54,12 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
 
     private void closeListenerRegistration() {
         closed = true;
-        if (registration != null) {
-            registration.close();
-            onClose.run();
+
+        final var reg = registration;
+        if (reg != null) {
             registration = null;
+            reg.registration.close();
+            reg.onClose.run();
 
             if (killSchedule == null) {
                 killSchedule = getContext().system().scheduler().scheduleOnce(FiniteDuration.create(killDelay,
@@ -72,13 +73,11 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
         return Props.create(DataTreeNotificationListenerRegistrationActor.class);
     }
 
-    public static class SetRegistration {
-        private final ListenerRegistration<?> registration;
-        private final Runnable onClose;
-
-        public SetRegistration(final ListenerRegistration<?> registration, final Runnable onClose) {
-            this.registration = requireNonNull(registration);
-            this.onClose = requireNonNull(onClose);
+    @NonNullByDefault
+    public record SetRegistration(Registration registration, Runnable onClose) {
+        public SetRegistration {
+            requireNonNull(registration);
+            requireNonNull(onClose);
         }
     }
 }

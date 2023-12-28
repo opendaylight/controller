@@ -25,8 +25,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.blueprint.reflect.BeanProperty;
-import org.osgi.service.blueprint.reflect.ComponentMetadata;
 import org.osgi.service.blueprint.reflect.ValueMetadata;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -45,8 +43,8 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     private static final String CM_PERSISTENT_ID_PROPERTY = "persistentId";
 
     private final List<ServiceRegistration<?>> managedServiceRegs = new ArrayList<>();
-    private Bundle bundle;
-    private BlueprintContainerRestartService blueprintContainerRestartService;
+    private Bundle bundle = null;
+    private BlueprintContainerRestartService blueprintContainerRestartService = null;
     private boolean restartDependentsOnUpdates;
     private boolean useDefaultForReferenceTypes;
 
@@ -67,21 +65,19 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     }
 
     public void destroy() {
-        for (ServiceRegistration<?> reg: managedServiceRegs) {
-            AriesFrameworkUtil.safeUnregisterService(reg);
-        }
+        managedServiceRegs.forEach(AriesFrameworkUtil::safeUnregisterService);
     }
 
     @Override
     public void process(final ComponentDefinitionRegistry registry) {
         LOG.debug("{}: In process",  logName());
 
-        for (String name : registry.getComponentDefinitionNames()) {
-            ComponentMetadata component = registry.getComponentDefinition(name);
-            if (component instanceof MutableBeanMetadata) {
-                processMutableBeanMetadata((MutableBeanMetadata) component);
-            } else if (component instanceof MutableServiceReferenceMetadata) {
-                processServiceReferenceMetadata((MutableServiceReferenceMetadata)component);
+        for (var name : registry.getComponentDefinitionNames()) {
+            final var component = registry.getComponentDefinition(name);
+            if (component instanceof MutableBeanMetadata bean) {
+                processMutableBeanMetadata(bean);
+            } else if (component instanceof MutableServiceReferenceMetadata serviceRef) {
+                processServiceReferenceMetadata(serviceRef);
             }
         }
     }
@@ -112,18 +108,15 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
             LOG.debug("{}: Found PropertyPlaceholder bean: {}, runtime {}", logName(), bean.getId(),
                     bean.getRuntimeClass());
 
-            for (BeanProperty prop : bean.getProperties()) {
+            for (var prop : bean.getProperties()) {
                 if (CM_PERSISTENT_ID_PROPERTY.equals(prop.getName())) {
-                    if (prop.getValue() instanceof ValueMetadata) {
-                        ValueMetadata persistentId = (ValueMetadata)prop.getValue();
-
-                        LOG.debug("{}: Found {} property, value : {}", logName(),
-                                CM_PERSISTENT_ID_PROPERTY, persistentId.getStringValue());
-
+                    if (prop.getValue() instanceof ValueMetadata persistentId) {
+                        LOG.debug("{}: Found {} property, value : {}", logName(), CM_PERSISTENT_ID_PROPERTY,
+                            persistentId.getStringValue());
                         registerManagedService(persistentId.getStringValue());
                     } else {
-                        LOG.debug("{}: {} property metadata {} is not instanceof ValueMetadata",
-                                logName(), CM_PERSISTENT_ID_PROPERTY, prop.getValue());
+                        LOG.debug("{}: {} property metadata {} is not instanceof ValueMetadata", logName(),
+                            CM_PERSISTENT_ID_PROPERTY, prop.getValue());
                     }
 
                     break;
@@ -135,7 +128,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     private void registerManagedService(final String persistentId) {
         // Register a ManagedService so we get updates from the ConfigAdmin when the cfg file corresponding
         // to the persistentId changes.
-        final ManagedService managedService = new ManagedService() {
+        final var managedService = new ManagedService() {
             private final AtomicBoolean initialUpdate = new AtomicBoolean(true);
             private volatile Dictionary<String, ?> previousProperties;
 

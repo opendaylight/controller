@@ -47,7 +47,8 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
 
     private final DOMRpcProviderService rpcProviderService;
     private final String constant;
-    private DOMRpcImplementationRegistration<SingletonGetConstantService> rpcRegistration;
+
+    private DOMRpcImplementationRegistration<SingletonGetConstantService> rpcRegistration = null;
 
     private SingletonGetConstantService(final DOMRpcProviderService rpcProviderService, final String constant) {
         this.rpcProviderService = rpcProviderService;

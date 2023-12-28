@@ -5,16 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.simpletx;
+
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -27,33 +26,32 @@ import org.slf4j.LoggerFactory;
 
 public class SimpletxDomWrite extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxDomWrite.class);
-    private final DOMDataBroker domDataBroker;
-    private List<MapEntryNode> list;
 
-    public SimpletxDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
+    private final DOMDataBroker dataBroker;
+    private List<MapEntryNode> list = null;
+
+    public SimpletxDomWrite(final DOMDataBroker dataBroker, final StartTestInput.Operation oper,
             final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, putsPerTx, dataStore);
-        this.domDataBroker = domDataBroker;
+        this.dataBroker = requireNonNull(dataBroker);
         LOG.debug("Created SimpletxDomWrite");
     }
 
     @Override
     public void createList() {
-        list = DomListBuilder.buildOuterList(this.outerListElem, this.innerListElem);
+        list = DomListBuilder.buildOuterList(outerListElem, innerListElem);
     }
 
     @Override
     public void executeList() {
-        final LogicalDatastoreType dsType = getDataStoreType();
-        final YangInstanceIdentifier pid =
-                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+        final var dsType = getDataStoreType();
+        final var pid = YangInstanceIdentifier.of(TestExec.QNAME, OuterList.QNAME);
 
-        DOMDataTreeWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
+        var tx = dataBroker.newWriteOnlyTransaction();
         long writeCnt = 0;
 
-        for (MapEntryNode element : this.list) {
-            YangInstanceIdentifier yid =
-                    pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, element.getIdentifier().asMap()));
+        for (var element : list) {
+            final var yid = pid.node(NodeIdentifierWithPredicates.of(OuterList.QNAME, element.name().asMap()));
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, yid, element);
@@ -71,7 +69,7 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
                     LOG.error("Transaction failed", e);
                     txError++;
                 }
-                tx = domDataBroker.newWriteOnlyTransaction();
+                tx = dataBroker.newWriteOnlyTransaction();
                 writeCnt = 0;
             }
         }

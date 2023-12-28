@@ -9,9 +9,7 @@ package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
-import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException;
@@ -20,7 +18,6 @@ import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.osgi.framework.Bundle;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
@@ -41,13 +38,13 @@ public class ActionProviderBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionProviderBean.class);
 
-    private DOMRpcProviderService domRpcProvider;
-    private RpcProviderService bindingRpcProvider;
-    private DOMSchemaService schemaService;
-    private RpcService implementation;
-    private String interfaceName;
+    private DOMRpcProviderService domRpcProvider = null;
+    private RpcProviderService bindingRpcProvider = null;
+    private DOMSchemaService schemaService = null;
+    private RpcService implementation = null;
+    private String interfaceName = null;
     private Registration reg;
-    private Bundle bundle;
+    private Bundle bundle = null;
 
     public void setBundle(final Bundle bundle) {
         this.bundle = bundle;
@@ -119,14 +116,14 @@ public class ActionProviderBean {
     }
 
     private void registerFallback(final Class<RpcService> interfaceClass) {
-        final Collection<QName> paths = RpcUtil.decomposeRpcService(interfaceClass,
-            schemaService.getGlobalContext(), Objects::nonNull);
+        final var paths = RpcUtil.decomposeRpcService(interfaceClass, schemaService.getGlobalContext(),
+            Objects::nonNull);
         if (paths.isEmpty()) {
             LOG.warn("{}: interface {} has no actions defined", ACTION_PROVIDER, interfaceClass);
             return;
         }
 
-        final Set<DOMRpcIdentifier> rpcs = ImmutableSet.copyOf(Collections2.transform(paths, DOMRpcIdentifier::create));
+        final var rpcs = ImmutableSet.copyOf(Collections2.transform(paths, DOMRpcIdentifier::create));
         reg = domRpcProvider.registerRpcImplementation(
             (rpc, input) -> FluentFutures.immediateFailedFluentFuture(new DOMRpcImplementationNotAvailableException(
                 "Action %s has no instance matching %s", rpc, input)), rpcs);
