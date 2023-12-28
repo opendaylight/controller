@@ -29,11 +29,11 @@ public class RpcImplementationBean {
     private static final Logger LOG = LoggerFactory.getLogger(RpcImplementationBean.class);
     static final String RPC_IMPLEMENTATION = "rpc-implementation";
 
-    private RpcProviderService rpcProvider;
-    private Bundle bundle;
-    private String interfaceName;
-    private RpcService implementation;
     private final List<ObjectRegistration<RpcService>> rpcRegistrations = new ArrayList<>();
+    private RpcProviderService rpcProvider = null;
+    private Bundle bundle = null;
+    private String interfaceName = null;
+    private RpcService implementation = null;
 
     public void setRpcProvider(final RpcProviderService rpcProvider) {
         this.rpcProvider = rpcProvider;
@@ -54,13 +54,13 @@ public class RpcImplementationBean {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void init() {
         try {
-            List<Class<RpcService>> rpcInterfaces = getImplementedRpcServiceInterfaces(interfaceName,
+            final var rpcInterfaces = getImplementedRpcServiceInterfaces(interfaceName,
                     implementation.getClass(), bundle, RPC_IMPLEMENTATION);
 
             LOG.debug("{}: init - adding implementation {} for RpcService interface(s) {}", bundle.getSymbolicName(),
                     implementation, rpcInterfaces);
 
-            for (Class<RpcService> rpcInterface : rpcInterfaces) {
+            for (var rpcInterface : rpcInterfaces) {
                 rpcRegistrations.add(rpcProvider.registerRpcImplementation(rpcInterface, implementation));
             }
         } catch (final ComponentDefinitionException e) {
@@ -93,8 +93,8 @@ public class RpcImplementationBean {
             return Collections.singletonList((Class<RpcService>)rpcInterface);
         }
 
-        List<Class<RpcService>> rpcInterfaces = new ArrayList<>();
-        for (Class<?> intface : implementationClass.getInterfaces()) {
+        final var rpcInterfaces = new ArrayList<Class<RpcService>>();
+        for (var intface : implementationClass.getInterfaces()) {
             if (RpcService.class.isAssignableFrom(intface)) {
                 rpcInterfaces.add((Class<RpcService>) intface);
             }
