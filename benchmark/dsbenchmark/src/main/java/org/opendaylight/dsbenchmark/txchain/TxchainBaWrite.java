@@ -7,6 +7,8 @@
  */
 package org.opendaylight.dsbenchmark.txchain;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
@@ -17,9 +19,7 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
 import org.opendaylight.mdsal.binding.api.TransactionChainListener;
-import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.Operation;
@@ -31,33 +31,33 @@ import org.slf4j.LoggerFactory;
 
 public class TxchainBaWrite extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaWrite.class);
-    private final DataBroker bindingDataBroker;
-    private List<OuterList> list;
 
-    public TxchainBaWrite(final DataBroker bindingDataBroker, final Operation oper,
-            final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+    private final DataBroker dataBroker;
+    private List<OuterList> list = null;
+
+    public TxchainBaWrite(final DataBroker dataBroker, final Operation oper, final int outerListElem,
+            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
-        this.bindingDataBroker = bindingDataBroker;
+        this.dataBroker = requireNonNull(dataBroker);
         LOG.debug("Created TxchainBaWrite");
     }
 
     @Override
     public void createList() {
-        list = BaListBuilder.buildOuterList(this.outerListElem, this.innerListElem);
+        list = BaListBuilder.buildOuterList(outerListElem, innerListElem);
     }
 
     @Override
     public void executeList() {
-        final TransactionChain chain = bindingDataBroker.createMergingTransactionChain(this);
-        final LogicalDatastoreType dsType = getDataStoreType();
+        final var chain = dataBroker.createMergingTransactionChain(this);
+        final var dsType = getDataStoreType();
 
-        WriteTransaction tx = chain.newWriteOnlyTransaction();
+        var tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
         int writeCnt = 0;
 
-        for (OuterList element : this.list) {
-            InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                                                    .child(OuterList.class, element.key());
+        for (var element : list) {
+            final var iid = InstanceIdentifier.create(TestExec.class).child(OuterList.class, element.key());
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, iid, element);
