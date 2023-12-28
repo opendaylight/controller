@@ -36,6 +36,19 @@ public final class OSGiGlobalTimer implements Timer {
 
     private Timer delegate;
 
+    @Activate
+    public OSGiGlobalTimer(final Config config) {
+        delegate = HashedWheelTimerCloseable.newInstance(config.tickDuration(), config.ticksPerWheel());
+        LOG.info("Global Netty timer started");
+    }
+
+    @Deactivate
+    void deactivate() {
+        delegate.stop();
+        delegate = null;
+        LOG.info("Global Netty timer stopped");
+    }
+
     @Override
     public Timeout newTimeout(final TimerTask task, final long delay, final TimeUnit unit) {
         return delegate.newTimeout(task, delay, unit);
@@ -44,17 +57,5 @@ public final class OSGiGlobalTimer implements Timer {
     @Override
     public Set<Timeout> stop() {
         return delegate.stop();
-    }
-
-    @Activate
-    void activate(final Config config) {
-        delegate = HashedWheelTimerCloseable.newInstance(config.tickDuration(), config.ticksPerWheel());
-        LOG.info("Global Netty timer started");
-    }
-
-    @Deactivate
-    void deactivate() {
-        delegate.stop();
-        LOG.info("Global Netty timer stopped");
     }
 }
