@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.akka.osgi.impl;
 
 import akka.actor.ActorSystem;
-import com.typesafe.config.Config;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
@@ -30,26 +29,12 @@ import scala.concurrent.duration.Duration;
 public final class OSGiActorSystemProvider implements ActorSystemProvider {
     private static final Logger LOG = LoggerFactory.getLogger(OSGiActorSystemProvider.class);
 
-    @Reference
-    AkkaConfigurationReader reader = null;
-
     private ActorSystemProviderImpl delegate;
 
-    @Override
-    public ActorSystem getActorSystem() {
-        return delegate.getActorSystem();
-    }
-
-    @Override
-    public ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
-            final ActorSystemProviderListener listener) {
-        return delegate.registerActorSystemProviderListener(listener);
-    }
-
     @Activate
-    void activate(final BundleContext bundleContext) {
+    public OSGiActorSystemProvider(@Reference final AkkaConfigurationReader reader, final BundleContext bundleContext) {
         LOG.info("Actor System provider starting");
-        final Config akkaConfig = AkkaConfigFactory.createAkkaConfig(reader);
+        final var akkaConfig = AkkaConfigFactory.createAkkaConfig(reader);
         delegate = new ActorSystemProviderImpl(BundleClassLoaderFactory.createClassLoader(bundleContext),
             QuarantinedMonitorActorPropsFactory.createProps(bundleContext, akkaConfig), akkaConfig);
         LOG.info("Actor System provider started");
@@ -61,6 +46,17 @@ public final class OSGiActorSystemProvider implements ActorSystemProvider {
         Await.result(delegate.asyncClose(), Duration.Inf());
         delegate = null;
         LOG.info("Actor System provider stopped");
+    }
+
+    @Override
+    public ActorSystem getActorSystem() {
+        return delegate.getActorSystem();
+    }
+
+    @Override
+    public ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
+            final ActorSystemProviderListener listener) {
+        return delegate.registerActorSystemProviderListener(listener);
     }
 }
 
