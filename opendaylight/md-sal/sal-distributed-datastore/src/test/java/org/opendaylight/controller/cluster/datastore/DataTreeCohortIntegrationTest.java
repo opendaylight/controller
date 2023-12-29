@@ -35,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.DataValidationFailedException;
@@ -47,11 +48,9 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -93,22 +92,21 @@ public class DataTreeCohortIntegrationTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testSuccessfulCanCommitWithNoopPostStep() throws Exception {
-        final DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
+        final var cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
         ArgumentCaptor<Collection> candidateCapt = ArgumentCaptor.forClass(Collection.class);
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
-        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
-                DistributedDataStore.class, "testSuccessfulCanCommitWithNoopPostStep", "test-1")) {
-            final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(TEST_ID,
-                    cohort);
+        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class,
+                "testSuccessfulCanCommitWithNoopPostStep", "test-1")) {
+            final var cohortReg = dataStore.registerCommitCohort(TEST_ID, cohort);
             assertNotNull(cohortReg);
 
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
                 state -> assertEquals("Cohort registrations", 1, state.getCommitCohortActors().size()));
 
-            final ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final var node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             kit.testWriteTransaction(dataStore, TestModel.TEST_PATH, node);
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapt.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapt.getValue().iterator().next(), TEST_ID,
@@ -136,14 +134,13 @@ public class DataTreeCohortIntegrationTest {
 
     @Test
     public void testFailedCanCommit() throws Exception {
-        final DOMDataTreeCommitCohort failedCohort = mock(DOMDataTreeCommitCohort.class);
+        final var failedCohort = mock(DOMDataTreeCommitCohort.class);
 
         doReturn(FAILED_CAN_COMMIT_FUTURE).when(failedCohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
 
-        IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
-                DistributedDataStore.class, "testFailedCanCommit", "test-1")) {
+        final var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class, "testFailedCanCommit", "test-1")) {
             dataStore.registerCommitCohort(TEST_ID, failedCohort);
 
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
@@ -164,14 +161,14 @@ public class DataTreeCohortIntegrationTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testCanCommitWithListEntries() throws Exception {
-        final DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
+        final var cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
-        IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
-        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
-                DistributedDataStore.class, "testCanCommitWithMultipleListEntries", "cars-1")) {
-            final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(
+        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class,
+                "testCanCommitWithMultipleListEntries", "cars-1")) {
+            final var cohortReg = dataStore.registerCommitCohort(
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH
                             .node(CarsModel.CAR_QNAME)), cohort);
             assertNotNull(cohortReg);
@@ -277,25 +274,25 @@ public class DataTreeCohortIntegrationTest {
     @Test
     @Ignore
     public void testAbortAfterCanCommit() throws Exception {
-        final DOMDataTreeCommitCohort cohortToAbort = mock(DOMDataTreeCommitCohort.class);
-        final PostCanCommitStep stepToAbort = mock(PostCanCommitStep.class);
+        final var cohortToAbort = mock(DOMDataTreeCommitCohort.class);
+        final var stepToAbort = mock(PostCanCommitStep.class);
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(stepToAbort).abort();
         doReturn(PostPreCommitStep.NOOP_FUTURE).when(stepToAbort).preCommit();
         doReturn(FluentFutures.immediateFluentFuture(stepToAbort)).when(cohortToAbort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
 
-        IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
-                DistributedDataStore.class, "testAbortAfterCanCommit", "test-1", "cars-1")) {
+        var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class, "testAbortAfterCanCommit",
+                "test-1", "cars-1")) {
             dataStore.registerCommitCohort(TEST_ID, cohortToAbort);
 
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
                 state -> assertEquals("Cohort registrations", 1, state.getCommitCohortActors().size()));
 
-            DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+            var writeTx = dataStore.newWriteOnlyTransaction();
             writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
             writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            DOMStoreThreePhaseCommitCohort dsCohort = writeTx.ready();
+            var dsCohort = writeTx.ready();
 
             dsCohort.canCommit().get(5, TimeUnit.SECONDS);
             dsCohort.preCommit().get(5, TimeUnit.SECONDS);
