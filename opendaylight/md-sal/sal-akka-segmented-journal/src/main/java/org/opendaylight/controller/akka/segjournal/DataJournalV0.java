@@ -7,13 +7,10 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import static com.google.common.base.Verify.verify;
-
 import akka.actor.ActorSystem;
-import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
-import io.atomix.storage.journal.Indexed;
+import com.google.common.base.VerifyException;
 import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.SegmentedJournalReader;
@@ -32,8 +29,6 @@ import scala.jdk.javaapi.CollectionConverters;
 
 /**
  * Version 0 data journal, where every journal entry maps to exactly one segmented file entry.
- *
- * @author Robert Varga
  */
 final class DataJournalV0 extends DataJournal {
     private static final Logger LOG = LoggerFactory.getLogger(DataJournalV0.class);
@@ -75,25 +70,8 @@ final class DataJournalV0 extends DataJournal {
     @Override
     @SuppressWarnings("checkstyle:illegalCatch")
     void handleReplayMessages(final ReplayMessages message, final long fromSequenceNr) {
-        try (SegmentedJournalReader<DataJournalEntry> reader = entries.openReader(fromSequenceNr)) {
-            int count = 0;
-            while (reader.hasNext() && count < message.max) {
-                final Indexed<DataJournalEntry> next = reader.next();
-                if (next.index() > message.toSequenceNr) {
-                    break;
-                }
-
-                LOG.trace("{}: replay {}", persistenceId, next);
-                updateLargestSize(next.size());
-                final DataJournalEntry entry = next.entry();
-                verify(entry instanceof FromPersistence, "Unexpected entry %s", entry);
-
-                final PersistentRepr repr = ((FromPersistence) entry).toRepr(persistenceId, next.index());
-                LOG.debug("{}: replaying {}", persistenceId, repr);
-                message.replayCallback.accept(repr);
-                count++;
-            }
-            LOG.debug("{}: successfully replayed {} entries", persistenceId, count);
+        try (var reader = entries.openReader(fromSequenceNr)) {
+            handleReplayMessages(reader, message);
         } catch (Exception e) {
             LOG.warn("{}: failed to replay messages for {}", persistenceId, message, e);
             message.promise.failure(e);
@@ -102,18 +80,42 @@ final class DataJournalV0 extends DataJournal {
         }
     }
 
+    private void handleReplayMessages(final SegmentedJournalReader<DataJournalEntry> reader,
+            final ReplayMessages message) {
+        int count = 0;
+        while (reader.hasNext() && count < message.max) {
+            final var next = reader.next();
+            if (next.index() > message.toSequenceNr) {
+                break;
+            }
+
+            LOG.trace("{}: replay {}", persistenceId, next);
+            updateLargestSize(next.size());
+            final var entry = next.entry();
+            if (entry instanceof FromPersistence fromPersistence) {
+                final var repr = fromPersistence.toRepr(persistenceId, next.index());
+                LOG.debug("{}: replaying {}", persistenceId, repr);
+                message.replayCallback.accept(repr);
+                count++;
+            } else {
+                throw new VerifyException("Unexpected entry " + entry);
+            }
+        }
+        LOG.debug("{}: successfully replayed {} entries", persistenceId, count);
+    }
+
     @Override
     @SuppressWarnings("checkstyle:illegalCatch")
     long handleWriteMessages(final WriteMessages message) {
         final int count = message.size();
-        final SegmentedJournalWriter<DataJournalEntry> writer = entries.writer();
+        final var writer = entries.writer();
         long bytes = 0;
 
         for (int i = 0; i < count; ++i) {
             final long mark = writer.getLastIndex();
-            final AtomicWrite request = message.getRequest(i);
+            final var request = message.getRequest(i);
 
-            final List<PersistentRepr> reprs = CollectionConverters.asJava(request.payload());
+            final var reprs = CollectionConverters.asJava(request.payload());
             LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, reprs.size(), mark);
             try {
                 bytes += writePayload(writer, reprs);
@@ -132,7 +134,7 @@ final class DataJournalV0 extends DataJournal {
 
     private long writePayload(final SegmentedJournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {
         long bytes = 0;
-        for (PersistentRepr repr : reprs) {
+        for (var repr : reprs) {
             final Object payload = repr.payload();
             if (!(payload instanceof Serializable)) {
                 throw new UnsupportedOperationException("Non-serializable payload encountered "
