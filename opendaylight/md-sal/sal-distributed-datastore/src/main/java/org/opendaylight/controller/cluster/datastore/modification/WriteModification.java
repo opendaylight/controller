@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * WriteModification stores all the parameters required to write data to the specified path.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class WriteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;
 

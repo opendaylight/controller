@@ -55,6 +55,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ShardTransactionTest extends AbstractActorTest {
 
     private static final TransactionType RO = TransactionType.READ_ONLY;

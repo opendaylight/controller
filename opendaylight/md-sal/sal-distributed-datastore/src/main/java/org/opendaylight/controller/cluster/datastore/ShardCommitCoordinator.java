@@ -47,6 +47,7 @@ import org.slf4j.Logger;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 final class ShardCommitCoordinator {
 
     // Interface hook for unit tests to replace or decorate the ShardDataTreeCohorts.
@@ -206,6 +207,7 @@ final class ShardCommitCoordinator {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     Collection<BatchedModifications> createForwardedBatchedModifications(final BatchedModifications from,
             final int maxModificationsPerBatch) {
         CohortEntry cohortEntry = cohortCache.remove(from.getTransactionId());

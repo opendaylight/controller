@@ -12,14 +12,12 @@ public enum TransactionType {
     WRITE_ONLY,
     READ_WRITE;
 
-    // Cache all values
-    private static final TransactionType[] VALUES = values();
-
     public static TransactionType fromInt(final int type) {
-        try {
-            return VALUES[type];
-        } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("In TransactionType enum value " + type, e);
-        }
+        return switch (type) {
+            case 0 -> READ_ONLY;
+            case 1 -> WRITE_ONLY;
+            case 2 -> READ_WRITE;
+            default -> throw new IllegalArgumentException("In TransactionType enum value " + type);
+        };
     }
 }

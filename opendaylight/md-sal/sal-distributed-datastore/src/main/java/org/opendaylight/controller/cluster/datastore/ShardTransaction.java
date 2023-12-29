@@ -29,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 /**
  * The ShardTransaction Actor represents a remote transaction that delegates all actions to DOMDataReadWriteTransaction.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
     private final ActorRef shardActor;
     private final ShardStats shardStats;
@@ -119,7 +120,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Some fields are not Serializable but we don't "
             + "create remote instances of this actor and thus don't need it to be Serializable.")
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
-
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         final AbstractShardDataTreeTransaction<?> transaction;
@@ -139,23 +140,14 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
         @Override
         public ShardTransaction create() {
-            final ShardTransaction tx;
-            switch (type) {
-                case READ_ONLY:
-                    tx = new ShardReadTransaction(transaction, shardActor, shardStats);
-                    break;
-                case READ_WRITE:
-                    tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor,
-                            shardStats);
-                    break;
-                case WRITE_ONLY:
-                    tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor,
-                            shardStats);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unhandled transaction type " + type);
-            }
-
+            final var tx = switch (type) {
+                case READ_ONLY -> new ShardReadTransaction(transaction, shardActor, shardStats);
+                case READ_WRITE -> new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction) transaction,
+                    shardActor, shardStats);
+                case WRITE_ONLY -> new ShardWriteTransaction((ReadWriteShardDataTreeTransaction) transaction,
+                    shardActor, shardStats);
+                default -> throw new IllegalArgumentException("Unhandled transaction type " + type);
+            };
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());
             return tx;
         }

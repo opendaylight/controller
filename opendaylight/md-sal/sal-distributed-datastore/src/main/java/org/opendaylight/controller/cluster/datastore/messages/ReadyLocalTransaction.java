@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
  * to be sent out to a remote system, it needs to be intercepted by {@link ReadyLocalTransactionSerializer}
  * and turned into {@link BatchedModifications}.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public final class ReadyLocalTransaction {
     private final DataTreeModification modification;
     private final TransactionIdentifier transactionId;
