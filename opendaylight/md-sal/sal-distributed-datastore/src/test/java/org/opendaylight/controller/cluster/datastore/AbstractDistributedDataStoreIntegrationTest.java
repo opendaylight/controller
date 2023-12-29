@@ -13,8 +13,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -37,13 +37,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameter;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -364,18 +364,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 // leader was elected in time, the Tx
                 // should have timed out and throw an appropriate
                 // exception cause.
-                try {
-                    txCohort.get().canCommit().get(10, TimeUnit.SECONDS);
-                    fail("Expected NoShardLeaderException");
-                } catch (final ExecutionException e) {
-                    final String msg = "Unexpected exception: "
-                            + Throwables.getStackTraceAsString(e.getCause());
-                    if (DistributedDataStore.class.isAssignableFrom(testParameter)) {
-                        assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
-                    } else {
-                        assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
-                    }
-                }
+                final var ex = assertThrows(ExecutionException.class,
+                    () -> txCohort.get().canCommit().get(10, TimeUnit.SECONDS));
+                assertTrue("Unexpected exception: " + Throwables.getStackTraceAsString(ex.getCause()),
+                    Throwables.getRootCause(ex) instanceof RequestTimeoutException);
             } finally {
                 try {
                     if (writeTxToClose != null) {
@@ -703,36 +695,31 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testChainedTransactionFailureWithSingleShard", "cars-1")) {
+        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        try (var dataStore = testKit.setupAbstractDataStore(testParameter,
+                "testChainedTransactionFailureWithSingleShard", "cars-1")) {
 
-            final ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+            final var broker = new ConcurrentDOMDataBroker(
                 ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final DOMTransactionChainListener listener = Mockito.mock(DOMTransactionChainListener.class);
-            final DOMTransactionChain txChain = broker.createTransactionChain(listener);
+            final var listener = Mockito.mock(DOMTransactionChainListener.class);
+            final var txChain = broker.createTransactionChain(listener);
 
-            final DOMDataTreeReadWriteTransaction writeTx = txChain.newReadWriteTransaction();
+            final var writeTx = txChain.newReadWriteTransaction();
 
             writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH,
                 PeopleModel.emptyContainer());
 
-            final ContainerNode invalidData = Builders.containerBuilder()
+            final var invalidData = Builders.containerBuilder()
                     .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
                     .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
                     .build();
 
             writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
-            try {
-                writeTx.commit().get(5, TimeUnit.SECONDS);
-                fail("Expected TransactionCommitFailedException");
-            } catch (final ExecutionException e) {
-                // Expected
-            }
+            assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
 
             verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx),
                 any(Throwable.class));
@@ -771,12 +758,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // Note that merge will validate the data and fail but put
             // succeeds b/c deep validation is not
             // done for put for performance reasons.
-            try {
-                writeTx.commit().get(5, TimeUnit.SECONDS);
-                fail("Expected TransactionCommitFailedException");
-            } catch (final ExecutionException e) {
-                // Expected
-            }
+            assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
 
             verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx),
                 any(Throwable.class));
@@ -884,19 +866,15 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     }
 
     @Test
+    @Ignore("ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate")
+    // FIXME: re-enable this test
     public void testSnapshotOnRootOverwrite() throws Exception {
-        if (!DistributedDataStore.class.isAssignableFrom(testParameter)) {
-            // FIXME: ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate
-            return;
-        }
-
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(),
-                datastoreContextBuilder.snapshotOnRootOverwrite(true));
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
+        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder.snapshotOnRootOverwrite(true));
+        try (var dataStore = testKit.setupAbstractDataStore(
                 testParameter, "testRootOverwrite", "module-shards-default-cars-member1.conf",
                 true, "cars", "default")) {
 
-            ContainerNode rootNode = Builders.containerBuilder()
+            final var rootNode = Builders.containerBuilder()
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME))
                 .withChild(CarsModel.create())
                 .build();
