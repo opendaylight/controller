@@ -51,12 +51,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- FIXME: default mockito-inline does not work with ActorBehaviorTest -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-subclass</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
