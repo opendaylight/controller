@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -22,34 +22,50 @@ import akka.persistence.SnapshotMetadata;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
-import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import scala.concurrent.duration.FiniteDuration;
 
-public class ActorBehaviorTest {
-
+@ExtendWith(MockitoExtension.class)
+class ActorBehaviorTest {
     private static final String MEMBER_1_FRONTEND_TYPE_1 = "member-1-frontend-type-1";
     private static final FiniteDuration TIMEOUT = FiniteDuration.create(5, TimeUnit.SECONDS);
 
+    @Mock
+    private InternalCommand<BackendInfo> cmd;
+    @Mock(answer = Answers.CALLS_REAL_METHODS)
+    private ClientActorBehavior<BackendInfo> initialBehavior;
+    @Mock
+    private AbstractClientActorContext ctx;
+
     private ActorSystem system;
     private TestProbe probe;
-    private ClientActorBehavior<BackendInfo> initialBehavior;
     private MockedSnapshotStore.SaveRequest saveRequest;
     private FrontendIdentifier id;
     private ActorRef mockedActor;
 
-    @Before
-    public void setUp() throws Exception {
-        initialBehavior = createInitialBehaviorMock();
+    @BeforeEach
+    void beforeEach() throws Exception {
+        //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
+        //use reflection to work around this
+        final var context = AbstractClientActorBehavior.class.getDeclaredField("context");
+        context.setAccessible(true);
+        context.set(initialBehavior, ctx);
+        final var persistenceId = AbstractClientActorContext.class.getDeclaredField("persistenceId");
+        persistenceId.setAccessible(true);
+        persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
+
         system = ActorSystem.apply("system1");
         final ActorRef storeRef = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null,
             ConfigFactory.empty());
@@ -62,25 +78,23 @@ public class ActorBehaviorTest {
         saveRequest = handleRecovery(null);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testInitialBehavior() {
-        final InternalCommand<BackendInfo> cmd = mock(InternalCommand.class);
-        when(cmd.execute(any())).thenReturn(initialBehavior);
+    void testInitialBehavior() {
+        doReturn(initialBehavior).when(cmd).execute(any());
         mockedActor.tell(cmd, ActorRef.noSender());
         verify(cmd, timeout(1000)).execute(initialBehavior);
     }
 
     @Test
-    public void testCommandStashing() {
+    void testCommandStashing() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
-        final InternalCommand<BackendInfo> cmd = mock(InternalCommand.class);
-        when(cmd.execute(any())).thenReturn(initialBehavior);
+        doReturn(initialBehavior).when(cmd).execute(any());
         //send messages before recovery is completed
         mockedActor.tell(cmd, ActorRef.noSender());
         mockedActor.tell(cmd, ActorRef.noSender());
@@ -91,16 +105,16 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestart() {
+    void testRecoveryAfterRestart() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         final MockedSnapshotStore.SaveRequest newSaveRequest =
                 handleRecovery(new SelectedSnapshot(saveRequest.getMetadata(), saveRequest.getSnapshot()));
-        Assert.assertEquals(MEMBER_1_FRONTEND_TYPE_1, newSaveRequest.getMetadata().persistenceId());
+        assertEquals(MEMBER_1_FRONTEND_TYPE_1, newSaveRequest.getMetadata().persistenceId());
     }
 
     @Test
-    public void testRecoveryAfterRestartFrontendIdMismatch() {
+    void testRecoveryAfterRestartFrontendIdMismatch() {
         system.stop(mockedActor);
         //start actor again
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
@@ -117,7 +131,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestartSaveSnapshotFail() {
+    void testRecoveryAfterRestartSaveSnapshotFail() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         probe.watch(mockedActor);
@@ -130,7 +144,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestartDeleteSnapshotsFail() {
+    void testRecoveryAfterRestartDeleteSnapshotsFail() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         probe.watch(mockedActor);
@@ -142,21 +156,6 @@ public class ActorBehaviorTest {
         probe.reply(new RuntimeException("delete failed"));
         //actor shouldn't terminate
         probe.expectNoMessage();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static ClientActorBehavior<BackendInfo> createInitialBehaviorMock() throws Exception {
-        final ClientActorBehavior<BackendInfo> initialBehavior = mock(ClientActorBehavior.class);
-        //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
-        //use reflection to work around this
-        final Field context = AbstractClientActorBehavior.class.getDeclaredField("context");
-        context.setAccessible(true);
-        final AbstractClientActorContext ctx = mock(AbstractClientActorContext.class);
-        context.set(initialBehavior, ctx);
-        final Field persistenceId = AbstractClientActorContext.class.getDeclaredField("persistenceId");
-        persistenceId.setAccessible(true);
-        persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
-        return initialBehavior;
     }
 
     private MockedSnapshotStore.SaveRequest handleRecovery(final SelectedSnapshot savedState) {
@@ -173,7 +172,6 @@ public class ActorBehaviorTest {
     }
 
     private static class MockedActor extends AbstractClientActor {
-
         private final ClientActorBehavior<?> initialBehavior;
         private final ClientActorConfig mockConfig = AccessClientUtil.newMockClientActorConfig();
 
@@ -196,5 +194,4 @@ public class ActorBehaviorTest {
             return mockConfig;
         }
     }
-
 }
