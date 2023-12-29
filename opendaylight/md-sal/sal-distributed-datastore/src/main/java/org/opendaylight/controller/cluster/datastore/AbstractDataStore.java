@@ -335,7 +335,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @VisibleForTesting
-    SettableFuture<Empty> readinessFuture() {
+    public final SettableFuture<Empty> readinessFuture() {
         return readinessFuture;
     }
 
