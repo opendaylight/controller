@@ -29,10 +29,6 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransacti
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedDataStoreTest {
@@ -49,16 +45,12 @@ public class ClientBackedDataStoreTest {
 
     @Mock
     private DataStoreClient clientActor;
-
     @Mock
     private ActorUtils actorUtils;
-
     @Mock
     private ClientLocalHistory clientLocalHistory;
-
     @Mock
     private ClientTransaction clientTransaction;
-
     @Mock
     private ClientSnapshot clientSnapshot;
 
@@ -75,40 +67,32 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testCreateTransactionChain() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
-                actorUtils, UNKNOWN_ID, clientActor)) {
-            final DOMStoreTransactionChain txChain = clientBackedDataStore.createTransactionChain();
-            assertNotNull(txChain);
+        try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
+            assertNotNull(clientBackedDataStore.createTransactionChain());
             verify(clientActor, times(1)).createLocalHistory();
         }
     }
 
     @Test
     public void testNewReadOnlyTransaction() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
-                actorUtils, UNKNOWN_ID, clientActor)) {
-            final DOMStoreReadTransaction tx = clientBackedDataStore.newReadOnlyTransaction();
-            assertNotNull(tx);
+        try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
+            assertNotNull(clientBackedDataStore.newReadOnlyTransaction());
             verify(clientActor, times(1)).createSnapshot();
         }
     }
 
     @Test
     public void testNewWriteOnlyTransaction() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
-                actorUtils, UNKNOWN_ID, clientActor)) {
-            final DOMStoreWriteTransaction tx = clientBackedDataStore.newWriteOnlyTransaction();
-            assertNotNull(tx);
+        try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
+            assertNotNull(clientBackedDataStore.newWriteOnlyTransaction());
             verify(clientActor, times(1)).createTransaction();
         }
     }
 
     @Test
     public void testNewReadWriteTransaction() {
-        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
-                actorUtils, UNKNOWN_ID, clientActor)) {
-            final DOMStoreReadWriteTransaction tx = clientBackedDataStore.newReadWriteTransaction();
-            assertNotNull(tx);
+        try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
+            assertNotNull(clientBackedDataStore.newReadWriteTransaction());
             verify(clientActor, times(1)).createTransaction();
         }
     }
