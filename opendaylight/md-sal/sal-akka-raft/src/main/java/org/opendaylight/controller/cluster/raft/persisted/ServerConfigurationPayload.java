@@ -48,9 +48,9 @@ public final class ServerConfigurationPayload extends Payload implements Persist
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeInt(serverConfig.size());
-            for (ServerInfo i : serverConfig) {
-                out.writeObject(i.getId());
-                out.writeBoolean(i.isVoting());
+            for (var serverInfo : serverConfig) {
+                out.writeObject(serverInfo.peerId());
+                out.writeBoolean(serverInfo.isVoting());
             }
         }
 
