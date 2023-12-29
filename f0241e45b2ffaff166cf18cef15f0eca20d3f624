@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7af25525_4f2d0b2d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-12-29T04:07:40Z",
+      "side": 1,
+      "message": "we do not comment-out code, but straight delete it.\n\nI have cleaned up other instances of that, but this bit needs a bit of thought -- each frontend can be either enabled or disabled and I think we should be checking that, or the nuking is always okay.",
+      "range": {
+        "startLine": 1085,
+        "startChar": 8,
+        "endLine": 1085,
+        "endChar": 58
+      },
+      "revId": "f0241e45b2ffaff166cf18cef15f0eca20d3f624",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
