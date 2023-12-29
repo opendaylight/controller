@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
 import akka.persistence.PersistentRepr;
+import akka.serialization.JavaSerializer;
+import com.google.common.base.VerifyException;
 import io.atomix.storage.journal.JournalSerdes.EntryInput;
 import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
@@ -30,8 +31,6 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
  * {@link #write(EntryOutput, DataJournalEntry)} only accepts {@link ToPersistence} subclass, which is a wrapper
  * around a {@link PersistentRepr}, while {@link #read(EntryInput)} produces an {@link FromPersistence}, which
  * needs further processing to reconstruct a {@link PersistentRepr}.
- *
- * @author Robert Varga
  */
 final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> {
     private final ExtendedActorSystem actorSystem;
@@ -42,19 +41,19 @@ final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> 
 
     @Override
     public void write(final EntryOutput output, final DataJournalEntry entry) throws IOException {
-        verify(entry instanceof ToPersistence);
-        final PersistentRepr repr = ((ToPersistence) entry).repr();
-        output.writeString(repr.manifest());
-        output.writeString(repr.writerUuid());
-        output.writeObject(repr.payload());
+        if (entry instanceof ToPersistence toPersistence) {
+            final var repr = toPersistence.repr();
+            output.writeString(repr.manifest());
+            output.writeString(repr.writerUuid());
+            output.writeObject(repr.payload());
+        } else {
+            throw new VerifyException("Unexpected entry " + entry);
+        }
     }
 
     @Override
     public DataJournalEntry read(final EntryInput input) throws IOException {
-        final String manifest = input.readString();
-        final String uuid = input.readString();
-        final Object payload = akka.serialization.JavaSerializer.currentSystem().withValue(actorSystem,
-            (Callable<Object>) input::readObject);
-        return new FromPersistence(manifest, uuid, payload);
+        return new FromPersistence(input.readString(), input.readString(),
+            JavaSerializer.currentSystem().withValue(actorSystem, (Callable<Object>) input::readObject));
     }
 }
