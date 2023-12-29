@@ -8,10 +8,16 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import akka.util.Timeout;
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +35,8 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransacti
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.yangtools.yang.common.Empty;
+import scala.concurrent.duration.FiniteDuration;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedDataStoreTest {
@@ -46,6 +54,10 @@ public class ClientBackedDataStoreTest {
     @Mock
     private DataStoreClient clientActor;
     @Mock
+    private DatastoreContext datastoreContext;
+    @Mock
+    private Timeout shardElectionTimeout;
+    @Mock
     private ActorUtils actorUtils;
     @Mock
     private ClientLocalHistory clientLocalHistory;
@@ -53,6 +65,7 @@ public class ClientBackedDataStoreTest {
     private ClientTransaction clientTransaction;
     @Mock
     private ClientSnapshot clientSnapshot;
+
 
     @Before
     public void setUp() {
@@ -94,6 +107,39 @@ public class ClientBackedDataStoreTest {
         try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
             assertNotNull(clientBackedDataStore.newReadWriteTransaction());
             verify(clientActor, times(1)).createTransaction();
+        }
+    }
+
+    @Test
+    public void testWaitTillReadyBlocking() {
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
+        doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
+        doReturn(1).when(datastoreContext).getInitialSettleTimeoutMultiplier();
+        doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
+        try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
+            final var sw = Stopwatch.createStarted();
+            clientBackedDataStore.waitTillReady();
+            final var elapsedMillis = sw.stop().elapsed(TimeUnit.MILLISECONDS);
+
+            assertTrue("Expected to be blocked for 50 millis", elapsedMillis >= 50);
+        }
+    }
+
+    @Test
+    public void testWaitTillReadyCountDown() {
+        try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
+            doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
+
+            ForkJoinPool.commonPool().submit(() -> {
+                Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+                clientBackedDataStore.readinessFuture().set(Empty.value());
+            });
+
+            final var sw = Stopwatch.createStarted();
+            clientBackedDataStore.waitTillReady();
+            final var elapsedMillis = sw.stop().elapsed(TimeUnit.MILLISECONDS);
+
+            assertTrue("Expected to be released in 500 millis", elapsedMillis < 5000);
         }
     }
 }
