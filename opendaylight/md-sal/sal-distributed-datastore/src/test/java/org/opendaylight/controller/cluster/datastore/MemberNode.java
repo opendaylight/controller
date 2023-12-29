@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -124,7 +125,7 @@ public class MemberNode {
             }
 
             try {
-                IntegrationTestKit.shutdownActorSystem(kit.getSystem(), Boolean.TRUE);
+                IntegrationTestKit.shutdownActorSystem(kit.getSystem(), true);
             } catch (RuntimeException e) {
                 LoggerFactory.getLogger(MemberNode.class).warn("Failed to shutdown actor system", e);
             }
@@ -204,7 +205,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder moduleShardsConfig(final String newModuleShardsConfig) {
-            this.moduleShardsConfig = newModuleShardsConfig;
+            moduleShardsConfig = newModuleShardsConfig;
             return this;
         }
 
@@ -214,7 +215,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder akkaConfig(final String newAkkaConfig) {
-            this.akkaConfig = newAkkaConfig;
+            akkaConfig = newAkkaConfig;
             return this;
         }
 
@@ -224,7 +225,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder useAkkaArtery(final boolean newUseAkkaArtery) {
-            this.useAkkaArtery = newUseAkkaArtery;
+            useAkkaArtery = newUseAkkaArtery;
             return this;
         }
 
@@ -234,7 +235,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder testName(final String newTestName) {
-            this.testName = newTestName;
+            testName = newTestName;
             return this;
         }
 
@@ -244,7 +245,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder waitForShardLeader(final String... shardNames) {
-            this.waitForshardLeader = shardNames;
+            waitForshardLeader = shardNames;
             return this;
         }
 
@@ -254,7 +255,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder createOperDatastore(final boolean value) {
-            this.createOperDatastore = value;
+            createOperDatastore = value;
             return this;
         }
 
@@ -264,7 +265,7 @@ public class MemberNode {
          * @return this Builder
          */
         public Builder schemaContext(final EffectiveModelContext newSchemaContext) {
-            this.schemaContext = newSchemaContext;
+            schemaContext = newSchemaContext;
             return this;
         }
 
@@ -307,12 +308,12 @@ public class MemberNode {
 
             String memberName = new ClusterWrapperImpl(system).getCurrentMemberName().getName();
             node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-config-" + memberName);
-            node.configDataStore = node.kit.setupAbstractDataStore(DistributedDataStore.class,
+            node.configDataStore = node.kit.setupAbstractDataStore(ClientBackedDataStore.class,
                     "config_" + testName, moduleShardsConfig, true, schemaContext, waitForshardLeader);
 
             if (createOperDatastore) {
                 node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-oper-" + memberName);
-                node.operDataStore = node.kit.setupAbstractDataStore(DistributedDataStore.class,
+                node.operDataStore = node.kit.setupAbstractDataStore(ClientBackedDataStore.class,
                         "oper_" + testName, moduleShardsConfig, true, schemaContext, waitForshardLeader);
             }
 
