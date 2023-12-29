@@ -55,7 +55,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { TestDistributedDataStore.class }, { TestClientBackedDataStore.class }
+            { TestClientBackedDataStore.class }
         });
     }
 
