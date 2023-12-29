@@ -28,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * MutableCompositeModification is just a mutable version of a CompositeModification.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class MutableCompositeModification extends VersionedExternalizableMessage implements CompositeModification {
     private static final long serialVersionUID = 1L;
 

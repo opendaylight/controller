@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class CommitTransactionTest extends AbstractTest {
 
     @Test

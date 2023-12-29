@@ -15,7 +15,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public class CreateTransaction extends VersionedExternalizableMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class CreateTransaction extends VersionedExternalizableMessage {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private TransactionIdentifier transactionId;

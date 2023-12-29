@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 final class CohortEntry {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final TransactionIdentifier transactionId;

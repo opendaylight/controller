@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class BatchedModificationsTest extends AbstractTest {
     @Test
     public void testSerialization() {

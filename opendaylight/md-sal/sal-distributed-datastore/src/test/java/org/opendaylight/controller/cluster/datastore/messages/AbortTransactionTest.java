@@ -22,8 +22,8 @@ import org.opendaylight.controller.cluster.datastore.MockIdentifiers;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class AbortTransactionTest {
-
     @Test
     public void testSerialization() {
         AbortTransaction expected = new AbortTransaction(
