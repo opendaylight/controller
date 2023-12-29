@@ -18,7 +18,8 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
  *
  * @author syedbahm
  */
-public class ShardReadTransaction extends ShardTransaction {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class ShardReadTransaction extends ShardTransaction {
     private final AbstractShardDataTreeTransaction<?> transaction;
 
     public ShardReadTransaction(final AbstractShardDataTreeTransaction<?> transaction, final ActorRef shardActor,

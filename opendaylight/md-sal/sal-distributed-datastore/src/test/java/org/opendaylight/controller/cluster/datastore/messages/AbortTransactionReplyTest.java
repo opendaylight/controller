@@ -21,8 +21,8 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class AbortTransactionReplyTest {
-
     @Test
     public void testSerialization() {
         AbortTransactionReply expected = AbortTransactionReply.instance(DataStoreVersions.CURRENT_VERSION);

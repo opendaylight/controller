@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ShardCommitCoordinationTest extends AbstractShardTest {
     private static final Logger LOG = LoggerFactory.getLogger(ShardCommitCoordinationTest.class);
 
@@ -553,7 +554,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         LOG.info("{} ending", testName);
     }
 
-    static void verifyInnerListEntry(TestActorRef<Shard> shard, int outerID, String innerID) {
+    static void verifyInnerListEntry(final TestActorRef<Shard> shard, final int outerID, final String innerID) {
         final YangInstanceIdentifier path = innerEntryPath(outerID, innerID);
         final NormalizedNode innerListEntry = readStore(shard, path);
         assertNotNull(path + " not found", innerListEntry);
