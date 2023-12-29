@@ -129,13 +129,6 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @VisibleForTesting
-    protected AbstractDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {
-        this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
-        client = null;
-        this.identifier = requireNonNull(identifier);
-    }
-
-    @VisibleForTesting
     protected AbstractDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
                                 final DataStoreClient clientActor) {
         this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
