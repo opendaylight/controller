@@ -34,7 +34,6 @@ import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
-import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -169,54 +168,6 @@ public class IntegrationTestKit extends ShardTestKit {
         } else {
             datastoreContextBuilder.dataStoreName(typeName);
         }
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
-                                                                       final EffectiveModelContext schemaContext) {
-        final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
-        final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
-
-        setDataStoreName(typeName);
-
-        final DatastoreContext datastoreContext = getDatastoreContextBuilder().build();
-
-        final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
-        doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
-        doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
-
-        final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
-                configuration, mockContextFactory, restoreFromSnapshot);
-
-        dataStore.onModelContextUpdated(schemaContext);
-
-        datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
-        return dataStore;
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
-                                                                       final EffectiveModelContext schemaContext,
-                                                                       final LogicalDatastoreType storeType) {
-        final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
-        final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
-
-        setDataStoreName(typeName);
-
-        final DatastoreContext datastoreContext =
-                getDatastoreContextBuilder().logicalStoreType(storeType).build();
-
-        final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
-        doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
-        doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
-
-        final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
-                configuration, mockContextFactory, restoreFromSnapshot);
-
-        dataStore.onModelContextUpdated(schemaContext);
-
-        datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
-        return dataStore;
     }
 
     public void waitUntilLeader(final ActorUtils actorUtils, final String... shardNames) {
