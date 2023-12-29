@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class AbstractBatchedModificationsCursor extends AbstractDataTreeModificationCursor {
     protected abstract BatchedModifications getModifications();
 

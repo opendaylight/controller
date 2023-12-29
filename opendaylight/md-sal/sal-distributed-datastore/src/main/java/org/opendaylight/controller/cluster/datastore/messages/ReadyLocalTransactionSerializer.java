@@ -24,8 +24,8 @@ import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModifi
  * into akka serialization to allow forwarding of ReadyLocalTransaction to remote
  * shards.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public final class ReadyLocalTransactionSerializer extends JSerializer {
-
     private final ExtendedActorSystem system;
 
     public ReadyLocalTransactionSerializer(final ExtendedActorSystem system) {

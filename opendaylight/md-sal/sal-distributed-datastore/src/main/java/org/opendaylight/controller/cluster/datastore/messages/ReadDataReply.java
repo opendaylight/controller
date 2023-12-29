@@ -13,6 +13,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ReadDataReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 

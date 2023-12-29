@@ -22,8 +22,8 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class CreateTransactionReplyTest extends AbstractTest {
-
     @Test
     public void testSerialization() {
         CreateTransactionReply expected = new CreateTransactionReply("txPath", nextTransactionId(),

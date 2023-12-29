@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class DataExistsReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
@@ -31,13 +31,13 @@ public class DataExistsReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         exists = in.readBoolean();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeBoolean(exists);
     }
@@ -47,7 +47,7 @@ public class DataExistsReply extends VersionedExternalizableMessage {
         return (DataExistsReply)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof DataExistsReply;
     }
 }

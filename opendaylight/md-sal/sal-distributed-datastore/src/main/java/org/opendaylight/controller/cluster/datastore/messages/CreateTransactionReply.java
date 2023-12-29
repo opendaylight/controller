@@ -15,7 +15,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public class CreateTransactionReply extends VersionedExternalizableMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class CreateTransactionReply extends VersionedExternalizableMessage {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private String transactionPath;
@@ -40,14 +42,14 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         transactionId = TransactionIdentifier.readFrom(in);
         transactionPath = in.readUTF();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         transactionId.writeTo(out);
         out.writeUTF(transactionPath);
@@ -60,12 +62,12 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
                 + ", version=" + getVersion() + "]";
     }
 
-    public static CreateTransactionReply fromSerializable(Object serializable) {
+    public static CreateTransactionReply fromSerializable(final Object serializable) {
         checkArgument(serializable instanceof CreateTransactionReply);
         return (CreateTransactionReply)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof CreateTransactionReply;
     }
 }

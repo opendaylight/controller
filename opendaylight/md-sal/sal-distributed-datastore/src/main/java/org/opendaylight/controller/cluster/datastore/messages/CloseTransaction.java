@@ -5,20 +5,21 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class CloseTransaction extends VersionedExternalizableMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class CloseTransaction extends VersionedExternalizableMessage {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public CloseTransaction() {
     }
 
-    public CloseTransaction(short version) {
+    public CloseTransaction(final short version) {
         super(version);
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof CloseTransaction;
     }
 }

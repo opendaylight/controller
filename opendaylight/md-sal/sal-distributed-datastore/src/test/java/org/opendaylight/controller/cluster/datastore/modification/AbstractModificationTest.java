@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class AbstractModificationTest {
     private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
 

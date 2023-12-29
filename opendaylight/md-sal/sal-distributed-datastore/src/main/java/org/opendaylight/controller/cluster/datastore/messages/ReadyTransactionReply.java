@@ -13,6 +13,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ReadyTransactionReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
@@ -21,11 +22,11 @@ public class ReadyTransactionReply extends VersionedExternalizableMessage {
     public ReadyTransactionReply() {
     }
 
-    public ReadyTransactionReply(String cohortPath) {
+    public ReadyTransactionReply(final String cohortPath) {
         this(cohortPath, DataStoreVersions.CURRENT_VERSION);
     }
 
-    public ReadyTransactionReply(String cohortPath, short version) {
+    public ReadyTransactionReply(final String cohortPath, final short version) {
         super(version);
         this.cohortPath = cohortPath;
     }
@@ -35,22 +36,22 @@ public class ReadyTransactionReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         cohortPath = in.readUTF();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeUTF(cohortPath);
     }
 
-    public static ReadyTransactionReply fromSerializable(Object serializable) {
+    public static ReadyTransactionReply fromSerializable(final Object serializable) {
         return (ReadyTransactionReply)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof ReadyTransactionReply;
     }
 }

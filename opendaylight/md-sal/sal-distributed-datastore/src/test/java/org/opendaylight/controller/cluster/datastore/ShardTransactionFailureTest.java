@@ -34,6 +34,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Basheeruddin Ahmed
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final EffectiveModelContext TEST_SCHEMA_CONTEXT = TestModel.createTestContext();
     private static final TransactionType RO = TransactionType.READ_ONLY;

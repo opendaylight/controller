@@ -19,7 +19,8 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * MergeModification stores all the parameters required to merge data into the specified path.
  */
-public class MergeModification extends WriteModification {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class MergeModification extends WriteModification {
     private static final long serialVersionUID = 1L;
 
     public MergeModification() {

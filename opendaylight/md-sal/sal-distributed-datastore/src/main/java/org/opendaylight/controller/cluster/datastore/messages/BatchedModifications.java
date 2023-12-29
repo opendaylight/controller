@@ -26,7 +26,9 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
  *
  * @author Thomas Pantelis
  */
-public class BatchedModifications extends MutableCompositeModification {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class BatchedModifications extends MutableCompositeModification {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private boolean ready;
@@ -39,7 +41,7 @@ public class BatchedModifications extends MutableCompositeModification {
     public BatchedModifications() {
     }
 
-    public BatchedModifications(TransactionIdentifier transactionId, short version) {
+    public BatchedModifications(final TransactionIdentifier transactionId, final short version) {
         super(version);
         this.transactionId = requireNonNull(transactionId, "transactionID can't be null");
     }
@@ -48,10 +50,10 @@ public class BatchedModifications extends MutableCompositeModification {
         return ready;
     }
 
-    public void setReady(Optional<SortedSet<String>> possibleParticipatingShardNames) {
-        this.ready = true;
-        this.participatingShardNames = requireNonNull(possibleParticipatingShardNames).orElse(null);
-        Preconditions.checkArgument(this.participatingShardNames == null || this.participatingShardNames.size() > 1);
+    public void setReady(final Optional<SortedSet<String>> possibleParticipatingShardNames) {
+        ready = true;
+        participatingShardNames = requireNonNull(possibleParticipatingShardNames).orElse(null);
+        Preconditions.checkArgument(participatingShardNames == null || participatingShardNames.size() > 1);
     }
 
     public void setReady() {
@@ -66,7 +68,7 @@ public class BatchedModifications extends MutableCompositeModification {
         return doCommitOnReady;
     }
 
-    public void setDoCommitOnReady(boolean doCommitOnReady) {
+    public void setDoCommitOnReady(final boolean doCommitOnReady) {
         this.doCommitOnReady = doCommitOnReady;
     }
 
@@ -74,7 +76,7 @@ public class BatchedModifications extends MutableCompositeModification {
         return totalMessagesSent;
     }
 
-    public void setTotalMessagesSent(int totalMessagesSent) {
+    public void setTotalMessagesSent(final int totalMessagesSent) {
         this.totalMessagesSent = totalMessagesSent;
     }
 
@@ -83,7 +85,7 @@ public class BatchedModifications extends MutableCompositeModification {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         transactionId = TransactionIdentifier.readFrom(in);
         ready = in.readBoolean();
@@ -104,7 +106,7 @@ public class BatchedModifications extends MutableCompositeModification {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         transactionId.writeTo(out);
         out.writeBoolean(ready);
@@ -114,7 +116,7 @@ public class BatchedModifications extends MutableCompositeModification {
         if (getVersion() >= DataStoreVersions.FLUORINE_VERSION) {
             if (participatingShardNames != null) {
                 out.writeInt(participatingShardNames.size());
-                for (String shardName: participatingShardNames) {
+                for (String shardName : participatingShardNames) {
                     out.writeObject(shardName);
                 }
             } else {

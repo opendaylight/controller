@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
@@ -17,14 +16,15 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
  *
  * @author syedbahm
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ShardReadWriteTransaction extends ShardWriteTransaction {
-    public ShardReadWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
-            ShardStats shardStats) {
+    public ShardReadWriteTransaction(final ReadWriteShardDataTreeTransaction transaction, final ActorRef shardActor,
+            final ShardStats shardStats) {
         super(transaction, shardActor, shardStats);
     }
 
     @Override
-    public void handleReceive(Object message) {
+    public void handleReceive(final Object message) {
         if (ReadData.isSerializedType(message)) {
             readData(ReadData.fromSerializable(message));
         } else if (DataExists.isSerializedType(message)) {
