@@ -17,7 +17,6 @@ import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
 import akka.persistence.journal.japi.AsyncWriteJournal;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigMemorySize;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
@@ -25,7 +24,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -39,8 +37,6 @@ import scala.concurrent.Future;
  * An Akka persistence journal implementation on top of {@link SegmentedJournal}. This actor represents aggregation
  * of multiple journals and performs a receptionist job between Akka and invidual per-persistenceId actors. See
  * {@link SegmentedJournalActor} for details on how the persistence works.
- *
- * @author Robert Varga
  */
 public class SegmentedFileJournal extends AsyncWriteJournal {
     public static final String STORAGE_ROOT_DIRECTORY = "root-directory";
@@ -80,12 +76,12 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
 
     @Override
     public Future<Iterable<Optional<Exception>>> doAsyncWriteMessages(final Iterable<AtomicWrite> messages) {
-        final Map<ActorRef, WriteMessages> map = new HashMap<>();
-        final List<Future<Optional<Exception>>> result = new ArrayList<>();
+        final var map = new HashMap<ActorRef, WriteMessages>();
+        final var result = new ArrayList<Future<Optional<Exception>>>();
 
-        for (AtomicWrite message : messages) {
-            final String persistenceId = message.persistenceId();
-            final ActorRef handler = handlers.computeIfAbsent(persistenceId, this::createHandler);
+        for (var message : messages) {
+            final var persistenceId = message.persistenceId();
+            final var handler = handlers.computeIfAbsent(persistenceId, this::createHandler);
             result.add(map.computeIfAbsent(handler, key -> new WriteMessages()).add(message));
         }
 
@@ -116,18 +112,18 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     }
 
     private ActorRef createHandler(final String persistenceId) {
-        final String directoryName = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8);
-        final File directory = new File(rootDir, directoryName);
+        final var directoryName = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8);
+        final var directory = new File(rootDir, directoryName);
         LOG.debug("Creating handler for {} in directory {}", persistenceId, directory);
 
-        final ActorRef handler = context().actorOf(SegmentedJournalActor.props(persistenceId, directory, storage,
+        final var handler = context().actorOf(SegmentedJournalActor.props(persistenceId, directory, storage,
             maxEntrySize, maxSegmentSize));
         LOG.debug("Directory {} handled by {}", directory, handler);
         return handler;
     }
 
     private <T> Future<T> delegateMessage(final String persistenceId, final AsyncMessage<T> message) {
-        final ActorRef handler = handlers.get(persistenceId);
+        final var handler = handlers.get(persistenceId);
         if (handler == null) {
             return Futures.failed(new IllegalStateException("Cannot find handler for " + persistenceId));
         }
@@ -145,7 +141,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         if (!config.hasPath(path)) {
             return defaultValue;
         }
-        final ConfigMemorySize value = config.getMemorySize(path);
+        final var value = config.getMemorySize(path);
         final long result = value.toBytes();
         checkArgument(result <= Integer.MAX_VALUE, "Size %s exceeds maximum allowed %s", Integer.MAX_VALUE);
         return (int) result;
