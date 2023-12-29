@@ -5,28 +5,29 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public class AbortTransaction extends AbstractThreePhaseCommitMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class AbortTransaction extends AbstractThreePhaseCommitMessage {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public AbortTransaction() {
     }
 
-    public AbortTransaction(TransactionIdentifier transactionID, final short version) {
+    public AbortTransaction(final TransactionIdentifier transactionID, final short version) {
         super(transactionID, version);
     }
 
-    public static AbortTransaction fromSerializable(Object serializable) {
+    public static AbortTransaction fromSerializable(final Object serializable) {
         Preconditions.checkArgument(serializable instanceof AbortTransaction);
         return (AbortTransaction)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof AbortTransaction;
     }
 }
