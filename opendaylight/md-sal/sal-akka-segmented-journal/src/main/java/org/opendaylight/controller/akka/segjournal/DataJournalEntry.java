@@ -16,10 +16,8 @@ import io.atomix.storage.journal.JournalSegment;
  * A single entry in the data journal. We do not store {@code persistenceId} for each entry, as that is a
  * journal-invariant, nor do we store {@code sequenceNr}, as that information is maintained by {@link JournalSegment}'s
  * index.
- *
- * @author Robert Varga
  */
-abstract class DataJournalEntry {
+abstract sealed class DataJournalEntry {
     /**
      * A single data journal entry on its way to the backing file.
      */
