@@ -1407,8 +1407,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     .getLocalShards().get("cars").getActor();
             final ActorRef member2Cars = ((LocalShardStore)followerDistributedDataStore).getLocalShards()
                     .getLocalShards().get("cars").getActor();
-            member2Cars.tell(new StartDropMessages(AppendEntries.class), null);
-            member3Cars.tell(new StartDropMessages(AppendEntries.class), null);
+            member2Cars.tell(new StartDropMessages<>(AppendEntries.class), null);
+            member3Cars.tell(new StartDropMessages<>(AppendEntries.class), null);
 
             final DOMStoreWriteTransaction newTx = leaderDistributedDataStore.newWriteOnlyTransaction();
             newTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
@@ -1436,8 +1436,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     "member-3-shard-cars-testRaftCallbackDuringLeadershipDrop", -1,
                             -1), member3Cars);
 
-            member2Cars.tell(new StopDropMessages(AppendEntries.class), null);
-            member3Cars.tell(new StopDropMessages(AppendEntries.class), null);
+            member2Cars.tell(new StopDropMessages<>(AppendEntries.class), null);
+            member3Cars.tell(new StopDropMessages<>(AppendEntries.class), null);
 
             await("Is tx stuck in COMMIT_PENDING")
                     .atMost(10, TimeUnit.SECONDS).untilAtomic(submitDone, equalTo(true));
