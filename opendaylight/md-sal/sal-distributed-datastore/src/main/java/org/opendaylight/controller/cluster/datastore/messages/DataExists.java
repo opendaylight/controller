@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
@@ -15,6 +14,7 @@ import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class DataExists extends AbstractRead<Boolean> {
     private static final long serialVersionUID = 1L;
 
@@ -26,12 +26,12 @@ public class DataExists extends AbstractRead<Boolean> {
     }
 
     @Override
-    public FluentFuture<Boolean> apply(DOMStoreReadTransaction readDelegate) {
+    public FluentFuture<Boolean> apply(final DOMStoreReadTransaction readDelegate) {
         return readDelegate.exists(getPath());
     }
 
     @Override
-    public void processResponse(Object response, SettableFuture<Boolean> returnFuture) {
+    public void processResponse(final Object response, final SettableFuture<Boolean> returnFuture) {
         if (DataExistsReply.isSerializedType(response)) {
             returnFuture.set(Boolean.valueOf(DataExistsReply.fromSerializable(response).exists()));
         } else {
@@ -41,7 +41,7 @@ public class DataExists extends AbstractRead<Boolean> {
     }
 
     @Override
-    protected AbstractRead<Boolean> newInstance(short withVersion) {
+    protected AbstractRead<Boolean> newInstance(final short withVersion) {
         return new DataExists(getPath(), withVersion);
     }
 
@@ -50,7 +50,7 @@ public class DataExists extends AbstractRead<Boolean> {
         return (DataExists)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof DataExists;
     }
 }

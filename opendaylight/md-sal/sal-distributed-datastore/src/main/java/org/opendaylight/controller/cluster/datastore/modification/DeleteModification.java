@@ -21,7 +21,9 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * DeleteModification store all the parameters required to delete a path from the data tree.
  */
-public class DeleteModification extends AbstractModification {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class DeleteModification extends AbstractModification {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public DeleteModification() {

@@ -22,8 +22,8 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ReadDataTest {
-
     @Test
     public void testSerialization() {
         ReadData expected = new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION);

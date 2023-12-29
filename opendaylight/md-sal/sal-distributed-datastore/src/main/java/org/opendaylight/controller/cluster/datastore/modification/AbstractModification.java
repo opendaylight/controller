@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -13,6 +12,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 /**
  * Base class to be used for all simple modifications that can be applied to a DOMStoreTransaction.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class AbstractModification implements Modification {
     @java.io.Serial
     private static final long serialVersionUID = 2647778426312509718L;

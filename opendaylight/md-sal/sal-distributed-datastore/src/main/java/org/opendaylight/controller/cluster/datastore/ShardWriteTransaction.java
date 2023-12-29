@@ -6,7 +6,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
@@ -24,8 +23,8 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
  *
  * @author syedbahm
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ShardWriteTransaction extends ShardTransaction {
-
     private int totalBatchedModificationsReceived;
     private Exception lastBatchedModificationsException;
     private final ReadWriteShardDataTreeTransaction transaction;

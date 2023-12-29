@@ -16,8 +16,10 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
-public class CloseTransactionChain extends VersionedExternalizableMessage
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class CloseTransactionChain extends VersionedExternalizableMessage
         implements Identifiable<LocalHistoryIdentifier> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private LocalHistoryIdentifier transactionChainId;

@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVer
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class VersionedExternalizableMessage implements Externalizable, SerializableMessage {
     private static final long serialVersionUID = 1L;
 
