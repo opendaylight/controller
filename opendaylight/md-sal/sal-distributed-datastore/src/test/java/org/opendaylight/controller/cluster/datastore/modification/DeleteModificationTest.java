@@ -17,6 +17,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class DeleteModificationTest extends AbstractModificationTest {
     @Test
     public void testApply() throws Exception {

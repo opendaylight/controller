@@ -9,7 +9,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
-public class CommitTransactionReply extends VersionedExternalizableMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class CommitTransactionReply extends VersionedExternalizableMessage {
     @java.io.Serial
     private static final long serialVersionUID = -8342450250867395000L;
 
@@ -18,15 +19,15 @@ public class CommitTransactionReply extends VersionedExternalizableMessage {
     public CommitTransactionReply() {
     }
 
-    private CommitTransactionReply(short version) {
+    private CommitTransactionReply(final short version) {
         super(version);
     }
 
-    public static CommitTransactionReply instance(short version) {
+    public static CommitTransactionReply instance(final short version) {
         return version == DataStoreVersions.CURRENT_VERSION ? INSTANCE : new CommitTransactionReply(version);
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof CommitTransactionReply;
     }
 }

@@ -647,6 +647,7 @@ public class ShardTest extends AbstractShardTest {
         verifyOuterListEntry(shard, 1);
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     @Test(expected = IllegalStateException.class)
     public void testBatchedModificationsReadyWithIncorrectTotalMessageCount() throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
@@ -673,6 +674,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
+    @Deprecated(since = "9.0.0", forRemoval = true)
     public void testBatchedModificationsWithOperationFailure() {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -762,6 +764,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
+    @Deprecated(since = "9.0.0", forRemoval = true)
     public void testOnBatchedModificationsWhenNotLeader() {
         final AtomicBoolean overrideLeaderCalls = new AtomicBoolean();
         final ShardTestKit testKit = new ShardTestKit(getSystem());
@@ -802,6 +805,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
+    @Deprecated(since = "9.0.0", forRemoval = true)
     public void testTransactionMessagesWithNoLeader() {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         dataStoreContextBuilder.customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName())
