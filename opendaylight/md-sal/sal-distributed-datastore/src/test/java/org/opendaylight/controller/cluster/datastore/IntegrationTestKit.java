@@ -76,23 +76,6 @@ public class IntegrationTestKit extends ShardTestKit {
         return datastoreContextBuilder;
     }
 
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
-                                                          final boolean waitUntilLeader,
-                                                          final EffectiveModelContext schemaContext) throws Exception {
-        return setupDistributedDataStore(typeName, moduleShardsConfig, "modules.conf", waitUntilLeader, schemaContext);
-    }
-
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
-                                                          final String modulesConfig,
-                                                          final boolean waitUntilLeader,
-                                                          final EffectiveModelContext schemaContext,
-                                                          final String... shardNames) throws Exception {
-        return (DistributedDataStore) setupAbstractDataStore(DistributedDataStore.class, typeName, moduleShardsConfig,
-                modulesConfig, waitUntilLeader, schemaContext, shardNames);
-    }
-
     public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
                                                     final String typeName, final String... shardNames)
             throws Exception {
