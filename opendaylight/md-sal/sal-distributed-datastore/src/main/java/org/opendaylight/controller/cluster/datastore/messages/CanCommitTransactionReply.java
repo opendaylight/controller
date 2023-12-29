@@ -14,7 +14,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
-public class CanCommitTransactionReply extends VersionedExternalizableMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class CanCommitTransactionReply extends VersionedExternalizableMessage {
     @java.io.Serial
     private static final long serialVersionUID = 4355566635423934872L;
 
@@ -38,13 +39,13 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         canCommit = in.readBoolean();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeBoolean(canCommit);
     }
@@ -54,11 +55,11 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
         return "CanCommitTransactionReply [canCommit=" + canCommit + ", version=" + getVersion() + "]";
     }
 
-    public static CanCommitTransactionReply yes(short version) {
+    public static CanCommitTransactionReply yes(final short version) {
         return version == DataStoreVersions.CURRENT_VERSION ? YES : new CanCommitTransactionReply(true, version);
     }
 
-    public static CanCommitTransactionReply no(short version) {
+    public static CanCommitTransactionReply no(final short version) {
         return version == DataStoreVersions.CURRENT_VERSION ? NO : new CanCommitTransactionReply(false, version);
     }
 
@@ -67,7 +68,7 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
         return (CanCommitTransactionReply)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof CanCommitTransactionReply;
     }
 }

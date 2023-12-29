@@ -25,6 +25,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 class ShardTransactionMessageRetrySupport implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(ShardTransactionMessageRetrySupport.class);
 
@@ -81,7 +82,7 @@ class ShardTransactionMessageRetrySupport implements Closeable {
         messagesToRetry.clear();
     }
 
-    private static class MessageInfo {
+    private static final class MessageInfo {
         final Object message;
         final ActorRef replyTo;
         final String failureMessage;

@@ -39,8 +39,8 @@ import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ReadyLocalTransactionSerializerTest extends AbstractTest {
-
     @Test
     public void testToAndFromBinary() throws NotSerializableException {
         DataTree dataTree = new InMemoryDataTreeFactory().create(

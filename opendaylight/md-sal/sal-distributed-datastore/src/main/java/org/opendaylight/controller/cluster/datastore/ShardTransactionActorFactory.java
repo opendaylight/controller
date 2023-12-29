@@ -22,7 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @author Thomas Pantelis
  */
-class ShardTransactionActorFactory {
+@Deprecated(since = "9.0.0", forRemoval = true)
+final class ShardTransactionActorFactory {
     private static final AtomicLong ACTOR_NAME_COUNTER = new AtomicLong();
 
     private final ShardDataTree dataTree;
@@ -33,9 +34,9 @@ class ShardTransactionActorFactory {
     private final ActorRef shardActor;
     private final String shardName;
 
-    ShardTransactionActorFactory(ShardDataTree dataTree, DatastoreContext datastoreContext,
-            String txnDispatcherPath, ActorRef shardActor, ActorContext actorContext, ShardStats shardMBean,
-            String shardName) {
+    ShardTransactionActorFactory(final ShardDataTree dataTree, final DatastoreContext datastoreContext,
+            final String txnDispatcherPath, final ActorRef shardActor, final ActorContext actorContext,
+            final ShardStats shardMBean, final String shardName) {
         this.dataTree = requireNonNull(dataTree);
         this.datastoreContext = requireNonNull(datastoreContext);
         this.txnDispatcherPath = requireNonNull(txnDispatcherPath);
@@ -62,20 +63,12 @@ class ShardTransactionActorFactory {
         return sb.append(txId.getTransactionId()).append('_').append(ACTOR_NAME_COUNTER.incrementAndGet()).toString();
     }
 
-    ActorRef newShardTransaction(TransactionType type, TransactionIdentifier transactionID) {
-        final AbstractShardDataTreeTransaction<?> transaction;
-        switch (type) {
-            case READ_ONLY:
-                transaction = dataTree.newReadOnlyTransaction(transactionID);
-                break;
-            case READ_WRITE:
-            case WRITE_ONLY:
-                transaction = dataTree.newReadWriteTransaction(transactionID);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported transaction type " + type);
-        }
-
+    ActorRef newShardTransaction(final TransactionType type, final TransactionIdentifier transactionID) {
+        final AbstractShardDataTreeTransaction<?> transaction = switch (type) {
+            case READ_ONLY -> dataTree.newReadOnlyTransaction(transactionID);
+            case READ_WRITE, WRITE_ONLY -> dataTree.newReadWriteTransaction(transactionID);
+            default -> throw new IllegalArgumentException("Unsupported transaction type " + type);
+        };
         return actorContext.actorOf(ShardTransaction.props(type, transaction, shardActor, datastoreContext, shardMBean)
             .withDispatcher(txnDispatcherPath), actorNameFor(transactionID));
     }

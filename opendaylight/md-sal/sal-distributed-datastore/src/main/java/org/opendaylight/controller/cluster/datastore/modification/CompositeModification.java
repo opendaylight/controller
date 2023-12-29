@@ -16,6 +16,7 @@ import java.util.List;
  * A CompositeModification gets stored in the transaction log for a Shard. During recovery when the transaction log
  * is being replayed a DOMStoreWriteTransaction could be created and a CompositeModification could be applied to it.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public interface CompositeModification extends Modification {
     /**
      * Get a list of modifications contained by this composite.
