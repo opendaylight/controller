@@ -16,6 +16,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class ReadData extends AbstractRead<Optional<NormalizedNode>> {
     private static final long serialVersionUID = 1L;
 

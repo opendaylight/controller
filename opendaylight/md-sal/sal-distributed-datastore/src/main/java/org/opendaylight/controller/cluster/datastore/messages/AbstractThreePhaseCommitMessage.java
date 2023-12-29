@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class AbstractThreePhaseCommitMessage extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 

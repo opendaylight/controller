@@ -51,7 +51,6 @@ import org.opendaylight.controller.cluster.access.commands.OutOfSequenceEnvelope
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
@@ -181,6 +180,7 @@ public class Shard extends RaftActor {
 
     private DatastoreContext datastoreContext;
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private final ShardCommitCoordinator commitCoordinator;
 
     private long transactionCommitTimeout;
@@ -191,6 +191,7 @@ public class Shard extends RaftActor {
 
     private final MessageTracker appendEntriesReplyTracker;
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private final ShardTransactionActorFactory transactionActorFactory;
 
     private final ShardSnapshotCohort snapshotCohort;
@@ -199,6 +200,7 @@ public class Shard extends RaftActor {
 
     private ShardSnapshot restoreFromSnapshot;
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
     @VisibleForTesting
@@ -702,13 +704,14 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleCommitTransaction(final CommitTransaction commit) {
-        final TransactionIdentifier txId = commit.getTransactionId();
+        final var txId = commit.getTransactionId();
         if (isLeader()) {
             askProtocolEncountered(txId);
             commitCoordinator.handleCommit(txId, getSender(), this);
         } else {
-            ActorSelection leader = getLeader();
+            final var leader = getLeader();
             if (leader == null) {
                 messageRetrySupport.addMessageToRetry(commit, getSender(), "Could not commit transaction " + txId);
             } else {
@@ -718,15 +721,16 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleCanCommitTransaction(final CanCommitTransaction canCommit) {
-        final TransactionIdentifier txId = canCommit.getTransactionId();
+        final var txId = canCommit.getTransactionId();
         LOG.debug("{}: Can committing transaction {}", persistenceId(), txId);
 
         if (isLeader()) {
             askProtocolEncountered(txId);
             commitCoordinator.handleCanCommit(txId, getSender(), this);
         } else {
-            ActorSelection leader = getLeader();
+            final var leader = getLeader();
             if (leader == null) {
                 messageRetrySupport.addMessageToRetry(canCommit, getSender(),
                         "Could not canCommit transaction " + txId);
@@ -738,6 +742,7 @@ public class Shard extends RaftActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleBatchedModificationsLocal(final BatchedModifications batched, final ActorRef sender) {
         askProtocolEncountered(batched.getTransactionId());
 
@@ -750,6 +755,7 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleBatchedModifications(final BatchedModifications batched) {
         // This message is sent to prepare the modifications transaction directly on the Shard as an
         // optimization to avoid the extra overhead of a separate ShardTransaction actor. On the last
@@ -767,7 +773,7 @@ public class Shard extends RaftActor {
         if (isLeader() && isLeaderActive) {
             handleBatchedModificationsLocal(batched, getSender());
         } else {
-            ActorSelection leader = getLeader();
+            final var leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(batched, getSender(),
                         "Could not process BatchedModifications " + batched.getTransactionId());
@@ -776,9 +782,8 @@ public class Shard extends RaftActor {
                 // we need to reconstruct previous BatchedModifications from the transaction
                 // DataTreeModification, honoring the max batched modification count, and forward all the
                 // previous BatchedModifications to the new leader.
-                Collection<BatchedModifications> newModifications = commitCoordinator
-                        .createForwardedBatchedModifications(batched,
-                                datastoreContext.getShardBatchedModificationCount());
+                final var newModifications = commitCoordinator.createForwardedBatchedModifications(batched,
+                    datastoreContext.getShardBatchedModificationCount());
 
                 LOG.debug("{}: Forwarding {} BatchedModifications to leader {}", persistenceId(),
                         newModifications.size(), leader);
@@ -807,11 +812,12 @@ public class Shard extends RaftActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void handleReadyLocalTransaction(final ReadyLocalTransaction message) {
-        final TransactionIdentifier txId = message.getTransactionId();
+    @Deprecated(since = "9.0.0", forRemoval = true)
+   private void handleReadyLocalTransaction(final ReadyLocalTransaction message) {
+        final var txId = message.getTransactionId();
         LOG.debug("{}: handleReadyLocalTransaction for {}", persistenceId(), txId);
 
-        boolean isLeaderActive = isLeaderActive();
+        final var isLeaderActive = isLeaderActive();
         if (isLeader() && isLeaderActive) {
             askProtocolEncountered(txId);
             try {
@@ -821,7 +827,7 @@ public class Shard extends RaftActor {
                 getSender().tell(new Failure(e), getSelf());
             }
         } else {
-            ActorSelection leader = getLeader();
+            final var leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(message, getSender(),
                         "Could not process ready local transaction " + txId);
@@ -833,22 +839,23 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleForwardedReadyTransaction(final ForwardedReadyTransaction forwardedReady) {
         LOG.debug("{}: handleForwardedReadyTransaction for {}", persistenceId(), forwardedReady.getTransactionId());
 
-        boolean isLeaderActive = isLeaderActive();
+        final var isLeaderActive = isLeaderActive();
         if (isLeader() && isLeaderActive) {
             askProtocolEncountered(forwardedReady.getTransactionId());
             commitCoordinator.handleForwardedReadyTransaction(forwardedReady, getSender(), this);
         } else {
-            ActorSelection leader = getLeader();
+            final var leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(forwardedReady, getSender(),
                         "Could not process forwarded ready transaction " + forwardedReady.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding ForwardedReadyTransaction to leader {}", persistenceId(), leader);
 
-                ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(forwardedReady.getTransactionId(),
+                final var readyLocal = new ReadyLocalTransaction(forwardedReady.getTransactionId(),
                         forwardedReady.getTransaction().getSnapshot(), forwardedReady.isDoImmediateCommit(),
                         forwardedReady.getParticipatingShardNames());
                 readyLocal.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
@@ -857,8 +864,9 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleAbortTransaction(final AbortTransaction abort) {
-        final TransactionIdentifier transactionId = abort.getTransactionId();
+        final var transactionId = abort.getTransactionId();
         askProtocolEncountered(transactionId);
         doAbortTransaction(transactionId, getSender());
     }
@@ -867,6 +875,7 @@ public class Shard extends RaftActor {
         commitCoordinator.handleAbort(transactionID, sender, this);
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void handleCreateTransaction(final Object message) {
         if (isLeader()) {
             createTransaction(CreateTransaction.fromSerializable(message));
@@ -878,9 +887,10 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
         if (isLeader()) {
-            final LocalHistoryIdentifier id = closeTransactionChain.getIdentifier();
+            final var id = closeTransactionChain.getIdentifier();
             askProtocolEncountered(id.getClientId());
             store.closeTransactionChain(id);
         } else if (getLeader() != null) {
@@ -890,6 +900,7 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void createTransaction(final CreateTransaction createTransaction) {
         askProtocolEncountered(createTransaction.getTransactionId());
@@ -900,7 +911,7 @@ public class Shard extends RaftActor {
                 return;
             }
 
-            ActorRef transactionActor = createTransaction(createTransaction.getTransactionType(),
+            final var transactionActor = createTransaction(createTransaction.getTransactionType(),
                 createTransaction.getTransactionId());
 
             getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
@@ -910,6 +921,7 @@ public class Shard extends RaftActor {
         }
     }
 
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private ActorRef createTransaction(final int transactionType, final TransactionIdentifier transactionId) {
         LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
         return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
@@ -917,14 +929,16 @@ public class Shard extends RaftActor {
     }
 
     // Called on leader only
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void askProtocolEncountered(final TransactionIdentifier transactionId) {
         askProtocolEncountered(transactionId.getHistoryId().getClientId());
     }
 
     // Called on leader only
+    @Deprecated(since = "9.0.0", forRemoval = true)
     private void askProtocolEncountered(final ClientIdentifier clientId) {
-        final FrontendIdentifier frontend = clientId.getFrontendId();
-        final LeaderFrontendState state = knownFrontends.get(frontend);
+        final var frontend = clientId.getFrontendId();
+        final var state = knownFrontends.get(frontend);
         if (!(state instanceof LeaderFrontendState.Disabled)) {
             LOG.debug("{}: encountered ask-based client {}, disabling transaction tracking", persistenceId(), clientId);
             if (knownFrontends.isEmpty()) {

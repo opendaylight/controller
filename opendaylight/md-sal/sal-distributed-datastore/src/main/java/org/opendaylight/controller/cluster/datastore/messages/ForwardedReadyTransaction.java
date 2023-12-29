@@ -20,7 +20,8 @@ import org.opendaylight.controller.cluster.datastore.ReadWriteShardDataTreeTrans
  *
  * @author Thomas Pantelis
  */
-public class ForwardedReadyTransaction {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class ForwardedReadyTransaction {
     private final TransactionIdentifier transactionId;
     private final ReadWriteShardDataTreeTransaction transaction;
     private final boolean doImmediateCommit;

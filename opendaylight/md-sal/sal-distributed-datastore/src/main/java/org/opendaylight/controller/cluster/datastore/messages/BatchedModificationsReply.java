@@ -16,7 +16,9 @@ import java.io.ObjectOutput;
  *
  * @author Thomas Pantelis
  */
-public class BatchedModificationsReply extends VersionedExternalizableMessage {
+@Deprecated(since = "9.0.0", forRemoval = true)
+public final class BatchedModificationsReply extends VersionedExternalizableMessage {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private int numBatched;
@@ -24,7 +26,7 @@ public class BatchedModificationsReply extends VersionedExternalizableMessage {
     public BatchedModificationsReply() {
     }
 
-    public BatchedModificationsReply(int numBatched) {
+    public BatchedModificationsReply(final int numBatched) {
         this.numBatched = numBatched;
     }
 
@@ -33,13 +35,13 @@ public class BatchedModificationsReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         numBatched = in.readInt();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeInt(numBatched);
     }

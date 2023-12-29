@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * @author gwu
  *
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
