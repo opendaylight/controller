@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5acc6cd1_c31d6109",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 5
+      },
+      "lineNbr": 1305,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-12-29T02:13:32Z",
+      "side": 1,
+      "message": "URI format is different here",
+      "range": {
+        "startLine": 1305,
+        "startChar": 74,
+        "endLine": 1305,
+        "endChar": 106
+      },
+      "revId": "f67ebb16a92e0d25a553dcde0765ceaec246d7c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
