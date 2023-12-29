@@ -259,18 +259,18 @@ public class RaftActorContextImpl implements RaftActorContext {
         boolean foundSelf = false;
         Set<String> currentPeers = new HashSet<>(getPeerIds());
         for (ServerInfo server : serverConfig.getServerConfig()) {
-            if (getId().equals(server.getId())) {
+            if (getId().equals(server.id())) {
                 foundSelf = true;
                 if (!server.isVoting()) {
                     votingMember = false;
                 }
             } else {
                 VotingState votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
-                if (!currentPeers.contains(server.getId())) {
-                    addToPeers(server.getId(), null, votingState);
+                if (!currentPeers.contains(server.id())) {
+                    addToPeers(server.id(), null, votingState);
                 } else {
-                    getPeerInfo(server.getId()).setVotingState(votingState);
-                    currentPeers.remove(server.getId());
+                    getPeerInfo(server.id()).setVotingState(votingState);
+                    currentPeers.remove(server.id());
                 }
             }
         }

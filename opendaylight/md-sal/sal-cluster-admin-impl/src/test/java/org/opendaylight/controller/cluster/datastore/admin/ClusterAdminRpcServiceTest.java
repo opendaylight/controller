@@ -950,7 +950,7 @@ public class ClusterAdminRpcServiceTest {
             for (String shard : shards) {
                 List<ServerInfo> newServerInfo = new ArrayList<>(serverConfig.getServerConfig().size());
                 for (ServerInfo info : serverConfig.getServerConfig()) {
-                    newServerInfo.add(new ServerInfo(ShardIdentifier.create(shard, MemberName.forName(info.getId()),
+                    newServerInfo.add(new ServerInfo(ShardIdentifier.create(shard, MemberName.forName(info.id()),
                             type + datastoreTypeSuffix).toString(), info.isVoting()));
                 }
 
