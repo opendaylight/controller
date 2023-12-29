@@ -17,39 +17,8 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
-public final class ServerInfo {
-    private final @NonNull String id;
-    private final boolean isVoting;
-
-    public ServerInfo(final @NonNull String id, final boolean isVoting) {
-        this.id = requireNonNull(id);
-        this.isVoting = isVoting;
-    }
-
-    public @NonNull String getId() {
-        return id;
-    }
-
-    public boolean isVoting() {
-        return isVoting;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Boolean.hashCode(isVoting);
-        result = prime * result + id.hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return this == obj || obj instanceof ServerInfo other && isVoting == other.isVoting && id.equals(other.id);
-    }
-
-    @Override
-    public String toString() {
-        return "ServerInfo [id=" + id + ", isVoting=" + isVoting + "]";
+public record ServerInfo(@NonNull String peerId, boolean isVoting) {
+    public ServerInfo {
+        requireNonNull(peerId);
     }
 }

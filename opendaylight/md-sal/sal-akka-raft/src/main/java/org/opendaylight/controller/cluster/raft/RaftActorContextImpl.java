@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
@@ -255,22 +254,18 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void updatePeerIds(final ServerConfigurationPayload serverConfig) {
-        votingMember = true;
-        boolean foundSelf = false;
-        Set<String> currentPeers = new HashSet<>(getPeerIds());
-        for (ServerInfo server : serverConfig.getServerConfig()) {
-            if (getId().equals(server.getId())) {
-                foundSelf = true;
-                if (!server.isVoting()) {
-                    votingMember = false;
-                }
+        boolean newVotingMember = false;
+        var currentPeers = new HashSet<>(getPeerIds());
+        for (var server : serverConfig.getServerConfig()) {
+            if (getId().equals(server.peerId())) {
+                newVotingMember = server.isVoting();
             } else {
-                VotingState votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
-                if (!currentPeers.contains(server.getId())) {
-                    addToPeers(server.getId(), null, votingState);
+                final var votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
+                if (currentPeers.contains(server.peerId())) {
+                    getPeerInfo(server.peerId()).setVotingState(votingState);
+                    currentPeers.remove(server.peerId());
                 } else {
-                    getPeerInfo(server.getId()).setVotingState(votingState);
-                    currentPeers.remove(server.getId());
+                    addToPeers(server.peerId(), null, votingState);
                 }
             }
         }
@@ -279,10 +274,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             removePeer(peerIdToRemove);
         }
 
-        if (!foundSelf) {
-            votingMember = false;
-        }
-
+        votingMember = newVotingMember;
         log.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
 
         setDynamicServerConfigurationInUse();
