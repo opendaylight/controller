@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static akka.pattern.Patterns.ask;
 import static com.google.common.base.Verify.verifyNotNull;
 
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.OnComplete;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.collect.ImmutableBiMap;
 import java.util.concurrent.CompletionStage;
@@ -58,8 +58,9 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     ModuleShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
         super(clientId, actorUtils);
 
-        shardAvailabilityChangesRegFuture = ask(actorUtils.getShardManager(), new RegisterForShardAvailabilityChanges(
-            this::onShardAvailabilityChange), Timeout.apply(60, TimeUnit.MINUTES))
+        shardAvailabilityChangesRegFuture = Patterns.ask(actorUtils.getShardManager(),
+            new RegisterForShardAvailabilityChanges(this::onShardAvailabilityChange),
+            Timeout.apply(60, TimeUnit.MINUTES))
                 .map(reply -> (Registration)reply, ExecutionContexts.global());
 
         shardAvailabilityChangesRegFuture.onComplete(new OnComplete<Registration>() {

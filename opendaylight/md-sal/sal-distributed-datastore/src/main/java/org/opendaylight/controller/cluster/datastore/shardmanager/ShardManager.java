@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
-import static akka.pattern.Patterns.ask;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
@@ -396,7 +395,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 primaryPath, shardId);
 
         Timeout removeServerTimeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration());
-        Future<Object> futureObj = ask(getContext().actorSelection(primaryPath),
+        Future<Object> futureObj = Patterns.ask(getContext().actorSelection(primaryPath),
                 new RemoveServer(shardId.toString()), removeServerTimeout);
 
         futureObj.onComplete(new OnComplete<>() {
@@ -1061,7 +1060,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         Timeout findPrimaryTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext()
                 .getShardInitializationTimeout().duration().$times(2));
 
-        Future<Object> futureObj = ask(getSelf(), new FindPrimary(shardName, true), findPrimaryTimeout);
+        Future<Object> futureObj = Patterns.ask(getSelf(), new FindPrimary(shardName, true), findPrimaryTimeout);
         futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
@@ -1276,7 +1275,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         final Timeout addServerTimeout = new Timeout(shardInfo.getDatastoreContext()
                 .getShardLeaderElectionTimeout().duration());
-        final Future<Object> futureObj = ask(getContext().actorSelection(response.getPrimaryPath()),
+        final Future<Object> futureObj = Patterns.ask(getContext().actorSelection(response.getPrimaryPath()),
                 new AddServer(shardInfo.getShardId().toString(), localShardAddress, true), addServerTimeout);
 
         futureObj.onComplete(new OnComplete<>() {
@@ -1449,7 +1448,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         ActorRef sender = getSender();
         final String shardName = flipMembersVotingStatus.getShardName();
         findLocalShard(shardName, sender, localShardFound -> {
-            Future<Object> future = ask(localShardFound.getPath(), GetOnDemandRaftState.INSTANCE,
+            Future<Object> future = Patterns.ask(localShardFound.getPath(), GetOnDemandRaftState.INSTANCE,
                     Timeout.apply(30, TimeUnit.SECONDS));
 
             future.onComplete(new OnComplete<>() {
@@ -1500,7 +1499,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         Timeout findLocalTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext()
                 .getShardInitializationTimeout().duration().$times(2));
 
-        Future<Object> futureObj = ask(getSelf(), new FindLocalShard(shardName, true), findLocalTimeout);
+        Future<Object> futureObj = Patterns.ask(getSelf(), new FindLocalShard(shardName, true), findLocalTimeout);
         futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
@@ -1541,7 +1540,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 changeServersVotingStatus, shardActorRef.path());
 
         Timeout timeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration().$times(2));
-        Future<Object> futureObj = ask(shardActorRef, changeServersVotingStatus, timeout);
+        Future<Object> futureObj = Patterns.ask(shardActorRef, changeServersVotingStatus, timeout);
 
         futureObj.onComplete(new OnComplete<>() {
             @Override

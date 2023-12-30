@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static akka.pattern.Patterns.ask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -17,6 +16,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.dispatch.Mailboxes;
+import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
@@ -419,7 +419,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             try {
-                OnDemandRaftState raftState = (OnDemandRaftState)Await.result(ask(raftActor,
+                OnDemandRaftState raftState = (OnDemandRaftState)Await.result(Patterns.ask(raftActor,
                         GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());
                 verifier.accept(raftState);
                 return;

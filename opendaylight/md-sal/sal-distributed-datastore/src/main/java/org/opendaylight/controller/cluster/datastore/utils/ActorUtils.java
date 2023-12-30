@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import static akka.pattern.Patterns.ask;
-
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -557,11 +555,11 @@ public class ActorUtils {
     }
 
     protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-        return ask(actorRef, message, timeout);
+        return Patterns.ask(actorRef, message, timeout);
     }
 
     protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
-        final var ret = ask(actorRef, message, timeout);
+        final var ret = Patterns.ask(actorRef, message, timeout);
         ret.onComplete(askTimeoutCounter, askTimeoutCounter);
         return ret;
     }
