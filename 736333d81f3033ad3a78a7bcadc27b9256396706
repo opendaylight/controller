@@ -22,6 +22,30 @@
       },
       "revId": "736333d81f3033ad3a78a7bcadc27b9256396706",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8140b9d_108c97f6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2023-12-30T22:19:23Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b5933217_23b6568d",
+      "range": {
+        "startLine": 45,
+        "startChar": 12,
+        "endLine": 45,
+        "endChar": 39
+      },
+      "revId": "736333d81f3033ad3a78a7bcadc27b9256396706",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
