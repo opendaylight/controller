@@ -16,15 +16,16 @@ import java.io.ObjectOutput;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "8.0.5", forRemoval = true)
 public class EmptyExternalizable implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 8413772905242947276L;
 
     @Override
-    public void readExternal(ObjectInput in) {
+    public void readExternal(final ObjectInput in) {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) {
+    public void writeExternal(final ObjectOutput out) {
     }
 }
