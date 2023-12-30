@@ -14,6 +14,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "8.0.5", forRemoval = true)
 public final class SuccessReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
