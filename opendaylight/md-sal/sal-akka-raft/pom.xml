@@ -12,6 +12,18 @@
   <packaging>bundle</packaging>
 
   <dependencies>
+
+    <dependency>
+      <groupId>net.openhft</groupId>
+      <artifactId>chronicle-queue</artifactId>
+      <version>5.25ea1</version>
+      <exclusions>
+          <exclusion>
+              <groupId>net.openhft</groupId>
+              <artifactId>compiler</artifactId>
+          </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>

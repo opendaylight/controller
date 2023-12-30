@@ -9,6 +9,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
+import net.openhft.chronicle.bytes.WriteBytesMarshallable;
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public class ClientRequestTrackerImpl implements ClientRequestTracker {
@@ -17,7 +19,26 @@ public class ClientRequestTrackerImpl implements ClientRequestTracker {
     private final Identifier identifier;
     private final long logIndex;
 
-    public ClientRequestTrackerImpl(ActorRef clientActor, Identifier identifier, long logIndex) {
+    public ClientRequestTrackerImpl(final ActorRef clientActor, final Identifier identifier, final long logIndex) {
+
+        final var queue = SingleChronicleQueueBuilder.builder()
+            //
+            .build();
+
+        final var appender = queue.acquireAppender();
+
+
+        appender.writeBytes((WriteBytesMarshallable) bytes -> {
+            // TODO Auto-generated method stub
+        });
+
+        final var tailer = queue.createTailer();
+
+        tailer.readBytes(bytes -> {
+
+        });
+
+
 
         this.clientActor = clientActor;
 
