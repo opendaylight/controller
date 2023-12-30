@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -40,10 +39,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Frontend state as observed by the shard leader. This class is responsible for tracking generations and sequencing
  * in the frontend/backend conversation. This class is NOT thread-safe.
- *
- * @author Robert Varga
  */
-abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
+abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     static final class Disabled extends LeaderFrontendState {
         Disabled(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
             super(persistenceId, clientId, tree);
@@ -95,12 +92,12 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             checkRequestSequence(envelope);
 
             try {
-                if (request instanceof CreateLocalHistoryRequest) {
-                    return handleCreateHistory((CreateLocalHistoryRequest) request, envelope, now);
-                } else if (request instanceof DestroyLocalHistoryRequest) {
-                    return handleDestroyHistory((DestroyLocalHistoryRequest) request, envelope, now);
-                } else if (request instanceof PurgeLocalHistoryRequest) {
-                    return handlePurgeHistory((PurgeLocalHistoryRequest) request, envelope, now);
+                if (request instanceof CreateLocalHistoryRequest req) {
+                    return handleCreateHistory(req, envelope, now);
+                } else if (request instanceof DestroyLocalHistoryRequest req) {
+                    return handleDestroyHistory(req, envelope, now);
+                } else if (request instanceof PurgeLocalHistoryRequest req) {
+                    return handlePurgeHistory(req, envelope, now);
                 } else {
                     LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
                     throw new UnsupportedRequestException(request);
@@ -116,7 +113,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             checkRequestSequence(envelope);
 
             try {
-                final LocalHistoryIdentifier lhId = request.getTarget().getHistoryId();
+                final var lhId = request.getTarget().getHistoryId();
                 final AbstractFrontendHistory history;
 
                 if (lhId.getHistoryId() != 0) {
@@ -163,8 +160,8 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
         private LocalHistorySuccess handleCreateHistory(final CreateLocalHistoryRequest request,
                 final RequestEnvelope envelope, final long now) throws RequestException {
-            final LocalHistoryIdentifier historyId = request.getTarget();
-            final AbstractFrontendHistory existing = localHistories.get(historyId);
+            final var historyId = request.getTarget();
+            final var existing = localHistories.get(historyId);
             if (existing != null) {
                 // History already exists: report success
                 LOG.debug("{}: history {} already exists", persistenceId(), historyId);
@@ -184,7 +181,7 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             }
 
             // We have to send the response only after persistence has completed
-            final ShardDataTreeTransactionChain chain = tree().ensureTransactionChain(historyId, () -> {
+            final var chain = tree().ensureTransactionChain(historyId, () -> {
                 LOG.debug("{}: persisted history {}", persistenceId(), historyId);
                 envelope.sendSuccess(new LocalHistorySuccess(historyId, request.getSequence()),
                     tree().readTime() - now);
@@ -197,8 +194,8 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
         private LocalHistorySuccess handleDestroyHistory(final DestroyLocalHistoryRequest request,
                 final RequestEnvelope envelope, final long now) {
-            final LocalHistoryIdentifier id = request.getTarget();
-            final LocalFrontendHistory existing = localHistories.get(id);
+            final var id = request.getTarget();
+            final var existing = localHistories.get(id);
             if (existing == null) {
                 // History does not exist: report success
                 LOG.debug("{}: history {} does not exist, nothing to destroy", persistenceId(), id);
@@ -211,8 +208,8 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
         private LocalHistorySuccess handlePurgeHistory(final PurgeLocalHistoryRequest request,
                 final RequestEnvelope envelope, final long now) {
-            final LocalHistoryIdentifier id = request.getTarget();
-            final LocalFrontendHistory existing = localHistories.remove(id);
+            final var id = request.getTarget();
+            final var existing = localHistories.remove(id);
             if (existing == null) {
                 LOG.debug("{}: history {} has already been purged", persistenceId(), id);
                 return new LocalHistorySuccess(id, request.getSequence());
@@ -297,9 +294,9 @@ abstract class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
     void retire() {
         // Hunt down any transactions associated with this frontend
-        final Iterator<SimpleShardDataTreeCohort> it = tree.cohortIterator();
+        final var it = tree.cohortIterator();
         while (it.hasNext()) {
-            final SimpleShardDataTreeCohort cohort = it.next();
+            final var cohort = it.next();
             if (clientId.equals(cohort.getIdentifier().getHistoryId().getClientId())) {
                 if (cohort.getState() != State.COMMIT_PENDING) {
                     LOG.debug("{}: Retiring transaction {}", persistenceId, cohort.getIdentifier());
