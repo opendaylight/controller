@@ -1348,21 +1348,18 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private static Exception getServerChangeException(final Class<?> serverChange,
             final ServerChangeStatus serverChangeStatus, final String leaderPath, final ShardIdentifier shardId) {
-        switch (serverChangeStatus) {
-            case TIMEOUT:
-                return new TimeoutException(String.format(
-                        "The shard leader %s timed out trying to replicate the initial data to the new shard %s."
-                        + "Possible causes - there was a problem replicating the data or shard leadership changed "
-                        + "while replicating the shard data", leaderPath, shardId.getShardName()));
-            case NO_LEADER:
-                return new NoShardLeaderException(shardId);
-            case NOT_SUPPORTED:
-                return new UnsupportedOperationException(String.format("%s request is not supported for shard %s",
-                        serverChange.getSimpleName(), shardId.getShardName()));
-            default :
-                return new RuntimeException(String.format("%s request to leader %s for shard %s failed with status %s",
-                        serverChange.getSimpleName(), leaderPath, shardId.getShardName(), serverChangeStatus));
-        }
+        return switch (serverChangeStatus) {
+            case TIMEOUT -> new TimeoutException("""
+                The shard leader %s timed out trying to replicate the initial data to the new shard %s. Possible \
+                causes - there was a problem replicating the data or shard leadership changed while replicating the \
+                shard data""".formatted(leaderPath, shardId.getShardName()));
+            case NO_LEADER -> new NoShardLeaderException(shardId);
+            case NOT_SUPPORTED -> new UnsupportedOperationException(
+                "%s request is not supported for shard %s".formatted(
+                    serverChange.getSimpleName(), shardId.getShardName()));
+            default -> new RuntimeException("%s request to leader %s for shard %s failed with status %s".formatted(
+                serverChange.getSimpleName(), leaderPath, shardId.getShardName(), serverChangeStatus));
+        };
     }
 
     private void onRemoveShardReplica(final RemoveShardReplica shardReplicaMsg) {
