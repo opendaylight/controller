@@ -131,12 +131,12 @@ public class SegmentedFileJournalTest {
         actor.tell(write, ActorRef.noSender());
         requests.forEach(future -> assertFalse(getFuture(future).isPresent()));
 
-        assertFileCount(2, 1);
+        assertFileCount(2, 1, 1);
 
         // Delete all but the last entry
         deleteEntries(requests.size());
 
-        assertFileCount(1, 1);
+        assertFileCount(1, 1, 1);
     }
 
     @Test
@@ -145,19 +145,19 @@ public class SegmentedFileJournalTest {
             writeBigPaylod();
         }
 
-        assertFileCount(10, 1);
+        assertFileCount(10, 1, 1);
 
         // delete including index 3, so get rid of the first segment
         deleteEntries(3);
-        assertFileCount(9, 1);
+        assertFileCount(9, 1, 1);
 
         // get rid of segments 2(index 4-6) and 3(index 7-9)
         deleteEntries(9);
-        assertFileCount(7, 1);
+        assertFileCount(7, 1, 1);
 
         // get rid of all segments except the last one
         deleteEntries(27);
-        assertFileCount(1, 1);
+        assertFileCount(1, 1, 1);
 
         restartActor();
 
@@ -165,7 +165,6 @@ public class SegmentedFileJournalTest {
         assertHighestSequenceNr(30);
         // 28,29,30 replayed
         assertReplayCount(3);
-
 
         deleteEntries(28);
         restartActor();
@@ -185,6 +184,67 @@ public class SegmentedFileJournalTest {
 
         // nothing replayed
         assertReplayCount(0);
+    }
+
+    @Test
+    public void testUuidSegmentationAndDeletes() throws Exception {
+
+        final LargePayload payload = new LargePayload();
+
+        //  Large uuid to test segmentation with same size as LargePayload
+        final char[] chars = new char[MESSAGE_SIZE / 2];
+        for (int i = 0; i < MESSAGE_SIZE / 2 ; i++) {
+            chars[i] = 'a';
+        }
+
+        final WriteMessages write = new WriteMessages();
+        final List<Future<Optional<Exception>>> requests = new ArrayList<>();
+
+        // Create 2 segments of data and unique uuids
+        for (int i = 1; i <= SEGMENT_SIZE * 3 / MESSAGE_SIZE; ++i) {
+            chars[i] = 'b';
+            requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
+                    new String(chars)))));
+        }
+
+        // Create 2 segments of data but use same uuid as last message so no new uuid should be written
+        for (int i = 1; i <= SEGMENT_SIZE * 3 / MESSAGE_SIZE; ++i) {
+            requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
+                    new String(chars)))));
+        }
+
+        // Create 2 more segments of data and unique uuids
+        for (int i = 1; i <= SEGMENT_SIZE * 3 / MESSAGE_SIZE; ++i) {
+            chars[i + 10] = 'b';
+            requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
+                    new String(chars)))));
+        }
+
+        actor.tell(write, ActorRef.noSender());
+        requests.forEach(future -> assertFalse(getFuture(future).isPresent()));
+
+        // 6 segments of data and 4 of uuides present
+        assertFileCount(6, 4, 1);
+
+        // delete including index 6, so get rid of the first 2 segments of data
+        // there is 3 segments of uuids present 1 uuid used fo multiple messages + 2 segments of unique uuides
+        deleteEntries(6);
+        assertFileCount(4, 3, 1);
+
+        // check if uuides are loaded correctly on actor restart
+        assertReplayCount(12);
+        restartActor();
+        assertReplayCount(12);
+
+        // delete 2 segments which use the same uuid, now only 2 segments of unique uuides are left
+        deleteEntries(12);
+        assertFileCount(2, 2, 1);
+
+        // get rid of all segments except the last one
+        deleteEntries(17);
+        assertFileCount(1, 1, 1);
+
+        assertReplayCount(1);
     }
 
     private void restartActor() {
@@ -236,9 +296,11 @@ public class SegmentedFileJournalTest {
         verify(firstCallback, times(expected)).accept(any(PersistentRepr.class));
     }
 
-    private static void assertFileCount(final long dataFiles, final long deleteFiles) throws IOException {
+    private static void assertFileCount(final long dataFiles, final long uuideFiles,
+            final long deleteFiles) throws IOException {
         List<File> contents = Files.list(DIRECTORY.toPath()).map(Path::toFile).collect(Collectors.toList());
         assertEquals(dataFiles, contents.stream().filter(file -> file.getName().startsWith("data-")).count());
+        assertEquals(uuideFiles, contents.stream().filter(file -> file.getName().startsWith("uuides-")).count());
         assertEquals(deleteFiles, contents.stream().filter(file -> file.getName().startsWith("delete-")).count());
     }
 
