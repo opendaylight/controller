@@ -145,7 +145,7 @@ final class SegmentedJournalActor extends AbstractActor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedJournalActor.class);
     private static final JournalSerdes DELETE_NAMESPACE = JournalSerdes.builder()
-        .register(new LongSerdes(), Long.class)
+        .register(LongEntrySerdes.LONG_ENTRY_SERDES, Long.class)
         .build();
     private static final int DELETE_SEGMENT_SIZE = 64 * 1024;
 
