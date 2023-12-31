@@ -615,7 +615,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         ShardInformation shardInformation = findShardInformation(leaderStateChanged.getMemberId());
         if (shardInformation != null) {
-            shardInformation.setLocalDataTree(leaderStateChanged.getLocalShardDataTree());
+            shardInformation.setLocalDataTree(leaderStateChanged.localShardDataTree());
             shardInformation.setLeaderVersion(leaderStateChanged.getLeaderPayloadVersion());
             if (shardInformation.setLeaderId(leaderStateChanged.getLeaderId())) {
                 primaryShardInfoCache.remove(shardInformation.getShardName());

@@ -100,8 +100,8 @@ public final class ShardInformation {
         return shardId;
     }
 
-    void setLocalDataTree(final Optional<ReadOnlyDataTree> dataTree) {
-        localShardDataTree = dataTree;
+    void setLocalDataTree(final ReadOnlyDataTree dataTree) {
+        localShardDataTree = Optional.ofNullable(dataTree);
     }
 
     Optional<ReadOnlyDataTree> getLocalShardDataTree() {
