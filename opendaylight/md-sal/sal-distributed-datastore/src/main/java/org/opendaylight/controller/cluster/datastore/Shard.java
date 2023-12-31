@@ -463,7 +463,7 @@ public class Shard extends RaftActor {
     }
 
     private OptionalLong updateAccess(final SimpleShardDataTreeCohort cohort) {
-        final FrontendIdentifier frontend = cohort.getIdentifier().getHistoryId().getClientId().getFrontendId();
+        final FrontendIdentifier frontend = cohort.transactionId().getHistoryId().getClientId().getFrontendId();
         final LeaderFrontendState state = knownFrontends.get(frontend);
         if (state == null) {
             // Not tell-based protocol, do nothing

@@ -297,13 +297,13 @@ abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifi
         final var it = tree.cohortIterator();
         while (it.hasNext()) {
             final var cohort = it.next();
-            if (clientId.equals(cohort.getIdentifier().getHistoryId().getClientId())) {
+            final var transactionId = cohort.transactionId();
+            if (clientId.equals(transactionId.getHistoryId().getClientId())) {
                 if (cohort.getState() != State.COMMIT_PENDING) {
-                    LOG.debug("{}: Retiring transaction {}", persistenceId, cohort.getIdentifier());
+                    LOG.debug("{}: Retiring transaction {}", persistenceId, transactionId);
                     it.remove();
                 } else {
-                    LOG.debug("{}: Transaction {} already committing, not retiring it", persistenceId,
-                        cohort.getIdentifier());
+                    LOG.debug("{}: Transaction {} already committing, not retiring it", persistenceId, transactionId);
                 }
             }
         }
