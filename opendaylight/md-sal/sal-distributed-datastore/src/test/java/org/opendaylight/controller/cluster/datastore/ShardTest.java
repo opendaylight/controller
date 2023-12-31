@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -1859,9 +1860,9 @@ public class ShardTest extends AbstractShardTest {
 
         ShardLeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
             ShardLeaderStateChanged.class);
-        assertTrue("getLocalShardDataTree present", leaderStateChanged.getLocalShardDataTree().isPresent());
-        assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(),
-            leaderStateChanged.getLocalShardDataTree().orElseThrow());
+        final var dataTree = leaderStateChanged.localShardDataTree();
+        assertNotNull("getLocalShardDataTree present", dataTree);
+        assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(), dataTree);
 
         MessageCollectorActor.clearMessages(listener);
 
@@ -1870,7 +1871,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new RequestVote(10000, "member2", 50, 50), testKit.getRef());
 
         leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener, ShardLeaderStateChanged.class);
-        assertFalse("getLocalShardDataTree present", leaderStateChanged.getLocalShardDataTree().isPresent());
+        assertNull("getLocalShardDataTree present", leaderStateChanged.localShardDataTree());
     }
 
     @Test
