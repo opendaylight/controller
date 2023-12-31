@@ -65,11 +65,9 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This class interacts with the queueing mechanism in ClientActorBehavior, hence once we arrive at a decision
  * to use either a local or remote implementation, we are stuck with it. We can re-evaluate on the next transaction.
- *
- * @author Robert Varga
  */
-// FIXME: sealed when we have JDK17+
-abstract class AbstractProxyTransaction implements Identifiable<TransactionIdentifier> {
+abstract sealed class AbstractProxyTransaction implements Identifiable<TransactionIdentifier>
+        permits LocalProxyTransaction, RemoteProxyTransaction {
     /**
      * Marker object used instead of read-type of requests, which are satisfied only once. This has a lower footprint
      * and allows compressing multiple requests into a single entry. This class is not thread-safe.

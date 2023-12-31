@@ -51,11 +51,9 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This class is not thread-safe as usual with transactions. Since it does not interact with the backend until the
  * transaction is submitted, at which point this class gets out of the picture, this is not a cause for concern.
- *
- * @author Robert Varga
  */
-// FIXME: sealed when we have JDK17+
-abstract class LocalProxyTransaction extends AbstractProxyTransaction {
+abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
+        permits LocalReadOnlyProxyTransaction, LocalReadWriteProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalProxyTransaction.class);
 
     private final @NonNull TransactionIdentifier identifier;
@@ -198,8 +196,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     @Override
     final void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
                          final Consumer<Response<?, ?>> callback) {
-        if (request instanceof CommitLocalTransactionRequest) {
-            final CommitLocalTransactionRequest req = (CommitLocalTransactionRequest) request;
+        if (request instanceof final CommitLocalTransactionRequest req) {
             final DataTreeModification mod = req.getModification();
 
             LOG.debug("Applying modification {} to successor {}", mod, successor);
