@@ -86,11 +86,8 @@ public class RaftActorLeadershipTransferCohort {
 
         transferTimer.start();
 
-        final var roleChangeNotifier = raftActor.roleChangeNotifier();
-        if (roleChangeNotifier != null) {
-            roleChangeNotifier.tell(raftActor.newLeaderStateChanged(context.getId(), null,
-                currentBehavior.getLeaderPayloadVersion()), raftActor.self());
-        }
+        raftActor.notifySupervisor(raftActor.newLeaderChanged(context.getId(), null,
+            currentBehavior.getLeaderPayloadVersion()));
 
         for (var peerId : context.getPeerIds()) {
             final var followerActor = context.getPeerActorSelection(peerId);

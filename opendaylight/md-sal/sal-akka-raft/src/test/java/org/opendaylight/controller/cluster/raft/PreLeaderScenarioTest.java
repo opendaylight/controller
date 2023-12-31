@@ -14,11 +14,10 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 
 import akka.actor.ActorRef;
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -74,10 +73,10 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         follower1Actor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         // Verify the expected raft state changes. It should go to PreLeader since it has an uncommitted entry.
-        List<RoleChanged> roleChange = expectMatching(follower1NotifierActor, RoleChanged.class, 3);
-        assertEquals("Role change 1", RaftState.Candidate.name(), roleChange.get(0).getNewRole());
-        assertEquals("Role change 2", RaftState.PreLeader.name(), roleChange.get(1).getNewRole());
-        assertEquals("Role change 3", RaftState.Leader.name(), roleChange.get(2).getNewRole());
+        final var roleChange = expectMatching(follower1NotifierActor, RoleChanged.class, 3);
+        assertEquals("Role change 1", RaftState.Candidate, roleChange.get(0).newRole());
+        assertEquals("Role change 2", RaftState.PreLeader, roleChange.get(1).newRole());
+        assertEquals("Role change 3", RaftState.Leader, roleChange.get(2).newRole());
 
         final long previousTerm = currentTerm;
         currentTerm = follower1Context.getTermInformation().getCurrentTerm();
