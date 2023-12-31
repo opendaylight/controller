@@ -41,10 +41,9 @@ final class DataJournalEntrySerdes implements EntrySerdes<DataJournalEntry> {
     @Override
     public void write(final EntryOutput output, final DataJournalEntry entry) throws IOException {
         if (entry instanceof ToPersistence toPersistence) {
-            final var repr = toPersistence.repr();
-            output.writeString(repr.manifest());
-            output.writeString(repr.writerUuid());
-            output.writeObject(repr.payload());
+            output.writeString(toPersistence.manifest());
+            output.writeString(toPersistence.writerUuid());
+            output.writeObject(toPersistence.payload());
         } else {
             throw new VerifyException("Unexpected entry " + entry);
         }

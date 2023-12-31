@@ -8,9 +8,18 @@
 package org.opendaylight.controller.akka.segjournal;
 
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.akka.segjournal.UuidEntrySerdes.UUID_ENTRY_SERDES;
 
+import akka.actor.ActorSystem;
 import com.codahale.metrics.Histogram;
+import io.atomix.storage.journal.JournalSerdes;
+import io.atomix.storage.journal.SegmentedByteBufJournal;
+import io.atomix.storage.journal.SegmentedJournal;
+import io.atomix.storage.journal.StorageLevel;
+import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WrittenMessages;
@@ -19,7 +28,7 @@ import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.Written
  * Abstraction of a data journal. This provides a unified interface towards {@link SegmentedJournalActor}, allowing
  * specialization for various formats.
  */
-abstract class DataJournal {
+abstract sealed class DataJournal permits DataJournalV0 {
     // Mirrors fields from associated actor
     final @NonNull String persistenceId;
     private final Histogram messageSize;
@@ -30,6 +39,53 @@ abstract class DataJournal {
     DataJournal(final String persistenceId, final Histogram messageSize) {
         this.persistenceId = requireNonNull(persistenceId);
         this.messageSize = requireNonNull(messageSize);
+    }
+
+    static DataJournal create(final String persistenceId, final Histogram messageSize, final ActorSystem system,
+            final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize,
+            final int autoUpgrade) {
+        final boolean oldVersion = isOldVersion(directory);
+
+        final var entriesSerdes = JournalSerdes.builder()
+            .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
+            .build();
+
+        var entries = new SegmentedJournal<DataJournalEntry>(SegmentedByteBufJournal.builder()
+            .withStorageLevel(storage)
+            .withDirectory(directory)
+            .withName("data")
+            .withMaxEntrySize(maxEntrySize)
+            .withMaxSegmentSize(maxSegmentSize)
+            .build(), entriesSerdes.toReadMapper(), entriesSerdes.toWriteMapper());
+
+        if (oldVersion && autoUpgrade < 1) {
+            return new DataJournalV0(persistenceId, messageSize, entries);
+        }
+
+        final var uuidsSerdes = JournalSerdes.builder()
+            .register(UUID_ENTRY_SERDES, UuidEntry.class, UuidEntry.class)
+            .build();
+
+        final var uuids = new SegmentedJournal<UuidEntry>(SegmentedByteBufJournal.builder()
+            .withStorageLevel(storage)
+            .withDirectory(directory)
+            .withName("uuids")
+            .withMaxEntrySize(maxEntrySize)
+            .withMaxSegmentSize(maxSegmentSize)
+            .build(), uuidsSerdes.toReadMapper(), uuidsSerdes.toWriteMapper());
+
+        final var journalV1 = new DataJournalV1(persistenceId, messageSize, entries, uuids);
+        if (oldVersion) {
+            journalV1.upgradeFromV0();
+        }
+
+        return journalV1;
+    }
+
+    private static boolean isOldVersion(File directory) {
+        final var dataCount = directory.list((dir, name) -> dir.equals(directory) && name.startsWith("data"));
+        final var uuidsCount = directory.list((dir, name) -> dir.equals(directory) && name.startsWith("uuids"));
+        return dataCount != null && dataCount.length > 0 && uuidsCount != null && uuidsCount.length == 0;
     }
 
     final void recordMessageSize(final int size) {
