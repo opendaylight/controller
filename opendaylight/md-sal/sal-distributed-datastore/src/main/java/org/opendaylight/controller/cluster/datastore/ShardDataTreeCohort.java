@@ -14,15 +14,15 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 @VisibleForTesting
-public abstract class ShardDataTreeCohort implements Identifiable<TransactionIdentifier> {
+public abstract class ShardDataTreeCohort {
     public enum State {
         READY,
         CAN_COMMIT_PENDING,
@@ -39,6 +39,8 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
     ShardDataTreeCohort() {
         // Prevent foreign instantiation
     }
+
+    abstract @NonNull TransactionIdentifier transactionId();
 
     // FIXME: This leaks internal state generated in preCommit,
     // should be result of canCommit
@@ -71,6 +73,6 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
     }
 
     ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return toStringHelper.add("id", getIdentifier()).add("state", getState());
+        return toStringHelper.add("id", transactionId()).add("state", getState());
     }
 }

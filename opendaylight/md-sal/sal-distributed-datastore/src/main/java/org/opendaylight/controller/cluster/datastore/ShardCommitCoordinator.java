@@ -20,7 +20,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -400,19 +399,18 @@ final class ShardCommitCoordinator {
     }
 
     void abortPendingTransactions(final String reason, final Shard shard) {
-        final Failure failure = new Failure(new RuntimeException(reason));
-        Collection<ShardDataTreeCohort> pending = dataTree.getAndClearPendingTransactions();
+        final var failure = new Failure(new RuntimeException(reason));
+        final var pending = dataTree.getAndClearPendingTransactions();
 
         log.debug("{}: Aborting {} pending queued transactions", name, pending.size());
 
-        for (ShardDataTreeCohort cohort : pending) {
-            CohortEntry cohortEntry = cohortCache.remove(cohort.getIdentifier());
-            if (cohortEntry == null) {
-                continue;
-            }
-
-            if (cohortEntry.getReplySender() != null) {
-                cohortEntry.getReplySender().tell(failure, shard.self());
+        for (var cohort : pending) {
+            final var cohortEntry = cohortCache.remove(cohort.transactionId());
+            if (cohortEntry != null) {
+                final var replySender = cohortEntry.getReplySender();
+                if (replySender != null) {
+                    replySender.tell(failure, shard.self());
+                }
             }
         }
 
@@ -420,32 +418,31 @@ final class ShardCommitCoordinator {
     }
 
     Collection<?> convertPendingTransactionsToMessages(final int maxModificationsPerBatch) {
-        final Collection<VersionedExternalizableMessage> messages = new ArrayList<>();
-        for (ShardDataTreeCohort cohort : dataTree.getAndClearPendingTransactions()) {
-            CohortEntry cohortEntry = cohortCache.remove(cohort.getIdentifier());
+        final var messages = new ArrayList<VersionedExternalizableMessage>();
+        for (var cohort : dataTree.getAndClearPendingTransactions()) {
+            final var cohortEntry = cohortCache.remove(cohort.transactionId());
             if (cohortEntry == null) {
                 continue;
             }
 
-            final Deque<BatchedModifications> newMessages = new ArrayDeque<>();
+            final var newMessages = new ArrayDeque<BatchedModifications>();
             cohortEntry.getDataTreeModification().applyToCursor(new AbstractBatchedModificationsCursor() {
                 @Override
                 protected BatchedModifications getModifications() {
-                    final BatchedModifications lastBatch = newMessages.peekLast();
-
+                    final var lastBatch = newMessages.peekLast();
                     if (lastBatch != null && lastBatch.getModifications().size() >= maxModificationsPerBatch) {
                         return lastBatch;
                     }
 
                     // Allocate a new message
-                    final BatchedModifications ret = new BatchedModifications(cohortEntry.getTransactionId(),
+                    final var ret = new BatchedModifications(cohortEntry.getTransactionId(),
                         cohortEntry.getClientVersion());
                     newMessages.add(ret);
                     return ret;
                 }
             });
 
-            final BatchedModifications last = newMessages.peekLast();
+            final var last = newMessages.peekLast();
             if (last != null) {
                 final boolean immediate = cohortEntry.isDoImmediateCommit();
                 last.setDoCommitOnReady(immediate);

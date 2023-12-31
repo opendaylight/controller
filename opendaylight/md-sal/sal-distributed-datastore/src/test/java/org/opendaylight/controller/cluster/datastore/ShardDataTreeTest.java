@@ -264,29 +264,29 @@ public class ShardDataTreeTest extends AbstractTest {
         verify(preCommitCallback4).onSuccess(cohort4.getCandidate());
 
         final FutureCallback<UnsignedLong> commitCallback2 = coordinatedCommit(cohort2);
-        verify(mockShard, never()).persistPayload(eq(cohort1.getIdentifier()), any(CommitTransactionPayload.class),
+        verify(mockShard, never()).persistPayload(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 anyBoolean());
         verifyNoMoreInteractions(commitCallback2);
 
         final FutureCallback<UnsignedLong> commitCallback4 = coordinatedCommit(cohort4);
-        verify(mockShard, never()).persistPayload(eq(cohort4.getIdentifier()), any(CommitTransactionPayload.class),
+        verify(mockShard, never()).persistPayload(eq(cohort4.transactionId()), any(CommitTransactionPayload.class),
                 anyBoolean());
         verifyNoMoreInteractions(commitCallback4);
 
         final FutureCallback<UnsignedLong> commitCallback1 = coordinatedCommit(cohort1);
         InOrder inOrder = inOrder(mockShard);
-        inOrder.verify(mockShard).persistPayload(eq(cohort1.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
-        inOrder.verify(mockShard).persistPayload(eq(cohort2.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort2.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
         verifyNoMoreInteractions(commitCallback1);
         verifyNoMoreInteractions(commitCallback2);
 
         final FutureCallback<UnsignedLong> commitCallback3 = coordinatedCommit(cohort3);
         inOrder = inOrder(mockShard);
-        inOrder.verify(mockShard).persistPayload(eq(cohort3.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort3.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
-        inOrder.verify(mockShard).persistPayload(eq(cohort4.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort4.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
         verifyNoMoreInteractions(commitCallback3);
         verifyNoMoreInteractions(commitCallback4);
@@ -298,10 +298,10 @@ public class ShardDataTreeTest extends AbstractTest {
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
         CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
                 cohort1.getCandidate());
-        shardDataTree.applyReplicatedPayload(cohort1.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort2.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort3.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort4.getIdentifier(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort1.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort2.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort3.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort4.transactionId(), mockPayload);
 
         inOrder = inOrder(commitCallback1, commitCallback2, commitCallback3, commitCallback4);
         inOrder.verify(commitCallback1).onSuccess(any(UnsignedLong.class));
@@ -334,19 +334,19 @@ public class ShardDataTreeTest extends AbstractTest {
         final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
 
         InOrder inOrder = inOrder(mockShard);
-        inOrder.verify(mockShard).persistPayload(eq(cohort1.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
-        inOrder.verify(mockShard).persistPayload(eq(cohort2.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort2.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
-        inOrder.verify(mockShard).persistPayload(eq(cohort3.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort3.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
 
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
         CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
                 cohort1.getCandidate());
-        shardDataTree.applyReplicatedPayload(cohort1.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort2.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort3.getIdentifier(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort1.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort2.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort3.transactionId(), mockPayload);
 
         inOrder = inOrder(commitCallback1, commitCallback2, commitCallback3);
         inOrder.verify(commitCallback1).onSuccess(any(UnsignedLong.class));
@@ -422,19 +422,19 @@ public class ShardDataTreeTest extends AbstractTest {
         coordinatedCommit(cohort4);
 
         InOrder inOrder = inOrder(mockShard);
-        inOrder.verify(mockShard).persistPayload(eq(cohort1.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
-        inOrder.verify(mockShard).persistPayload(eq(cohort3.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort3.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
-        inOrder.verify(mockShard).persistPayload(eq(cohort4.getIdentifier()), any(CommitTransactionPayload.class),
+        inOrder.verify(mockShard).persistPayload(eq(cohort4.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
 
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
         CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
                 cohort1.getCandidate());
-        shardDataTree.applyReplicatedPayload(cohort1.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort3.getIdentifier(), mockPayload);
-        shardDataTree.applyReplicatedPayload(cohort4.getIdentifier(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort1.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort3.transactionId(), mockPayload);
+        shardDataTree.applyReplicatedPayload(cohort4.transactionId(), mockPayload);
 
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();

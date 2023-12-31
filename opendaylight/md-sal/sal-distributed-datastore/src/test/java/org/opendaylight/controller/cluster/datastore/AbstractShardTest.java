@@ -470,8 +470,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @Override
-        public TransactionIdentifier getIdentifier() {
-            return delegate.getIdentifier();
+        TransactionIdentifier transactionId() {
+            return delegate.transactionId();
         }
 
         @Override

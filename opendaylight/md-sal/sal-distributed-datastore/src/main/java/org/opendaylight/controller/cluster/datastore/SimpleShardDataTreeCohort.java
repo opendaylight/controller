@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.concurrent.CompletionStage;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.common.Empty;
@@ -31,7 +32,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
-    private final TransactionIdentifier transactionId;
+    private final @NonNull TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
     private final @Nullable SortedSet<String> participatingShardNames;
 
@@ -61,7 +62,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public TransactionIdentifier getIdentifier() {
+    TransactionIdentifier transactionId() {
         return transactionId;
     }
 
@@ -82,7 +83,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     private void checkState(final State expected) {
         Preconditions.checkState(state == expected, "State %s does not match expected state %s for %s",
-                state, expected, getIdentifier());
+                state, expected, transactionId());
     }
 
     @Override

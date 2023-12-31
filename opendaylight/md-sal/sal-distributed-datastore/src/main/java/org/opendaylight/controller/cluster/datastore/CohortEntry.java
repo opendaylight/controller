@@ -46,7 +46,7 @@ final class CohortEntry {
 
     private CohortEntry(final ShardDataTreeCohort cohort, final short clientVersion) {
         this.cohort = requireNonNull(cohort);
-        transactionId = cohort.getIdentifier();
+        transactionId = cohort.transactionId();
         transaction = null;
         this.clientVersion = clientVersion;
     }

@@ -53,8 +53,8 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public TransactionIdentifier getIdentifier() {
-        return delegate.getIdentifier();
+    TransactionIdentifier transactionId() {
+        return delegate.transactionId();
     }
 
     @Override
