@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2023 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.akka.segjournal;
+
+import io.atomix.storage.journal.JournalSerdes.EntryInput;
+import io.atomix.storage.journal.JournalSerdes.EntryOutput;
+import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
+import java.io.IOException;
+
+/**
+ * Serialization support for {@link UuidEntry}.
+ */
+enum UuidEntrySerdes implements EntrySerdes<UuidEntry> {
+    UUID_ENTRY_SERDES {
+        @Override
+        public UuidEntry read(final EntryInput input) throws IOException {
+            return new UuidEntry(input.readString(), input.readLong());
+        }
+
+        @Override
+        public void write(final EntryOutput output, final UuidEntry entry) throws IOException {
+            output.writeString(entry.writerUuid());
+            output.writeLong(entry.sequenceNr());
+        }
+    }
+}

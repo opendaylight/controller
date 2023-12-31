@@ -21,14 +21,26 @@ abstract sealed class DataJournalEntry {
      * A single data journal entry on its way to the backing file.
      */
     static final class ToPersistence extends DataJournalEntry {
-        private final PersistentRepr repr;
+        private final String manifest;
+        private final String writerUuid;
+        private final Object payload;
 
-        ToPersistence(final PersistentRepr repr) {
-            this.repr = requireNonNull(repr);
+        ToPersistence(final String manifest, final String writerUuid, final Object payload) {
+            this.manifest = manifest;
+            this.writerUuid = writerUuid;
+            this.payload = requireNonNull(payload);
         }
 
-        PersistentRepr repr() {
-            return repr;
+        String manifest() {
+            return manifest;
+        }
+
+        String writerUuid() {
+            return writerUuid;
+        }
+
+        Object payload() {
+            return payload;
         }
     }
 
@@ -42,12 +54,21 @@ abstract sealed class DataJournalEntry {
 
         FromPersistence(final String manifest, final String writerUuid, final Object payload) {
             this.manifest = manifest;
-            this.writerUuid = requireNonNull(writerUuid);
+            this.writerUuid = writerUuid;
             this.payload = requireNonNull(payload);
         }
 
+        String writerUuid() {
+            return writerUuid;
+        }
+
         PersistentRepr toRepr(final String persistenceId, final long sequenceNr) {
-            return PersistentRepr.apply(payload, sequenceNr, persistenceId, manifest, false, null, writerUuid);
+            requireNonNull(writerUuid);
+            return toRepr(persistenceId, sequenceNr, writerUuid);
+        }
+
+        PersistentRepr toRepr(final String persistenceId, final long sequenceNr, final String reprWriterUuid) {
+            return PersistentRepr.apply(payload, sequenceNr, persistenceId, manifest, false, null, reprWriterUuid);
         }
     }
 }
