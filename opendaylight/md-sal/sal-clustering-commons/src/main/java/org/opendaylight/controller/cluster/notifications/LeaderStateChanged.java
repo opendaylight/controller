@@ -18,11 +18,12 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Thomas Pantelis
  */
 public class LeaderStateChanged {
-    private final String memberId;
-    private final String leaderId;
+    private final @NonNull String memberId;
+    private final @Nullable String leaderId;
     private final short leaderPayloadVersion;
 
-    public LeaderStateChanged(@NonNull String memberId, @Nullable String leaderId, short leaderPayloadVersion) {
+    public LeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
+            final short leaderPayloadVersion) {
         this.memberId = requireNonNull(memberId);
         this.leaderId = leaderId;
         this.leaderPayloadVersion = leaderPayloadVersion;
