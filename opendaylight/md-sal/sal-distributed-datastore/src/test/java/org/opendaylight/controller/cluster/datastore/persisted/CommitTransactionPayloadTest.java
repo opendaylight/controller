@@ -18,7 +18,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
-import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.CandidateTransaction;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -66,8 +66,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         }
     }
 
-    private static void assertCandidateEquals(final DataTreeCandidate expected,
-            final DataTreeCandidateWithVersion actual) {
+    private static void assertCandidateEquals(final DataTreeCandidate expected, final CandidateTransaction actual) {
         final var candidate = actual.candidate();
         assertEquals("root path", expected.getRootPath(), candidate.getRootPath());
         assertCandidateNodeEquals(expected.getRootNode(), candidate.getRootNode());
@@ -114,13 +113,13 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     @Test
     public void testCandidateSerDes() throws IOException {
         final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testPayloadSerDes() throws IOException {
         final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate().getValue());
+        assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate());
     }
 
     @Test
@@ -134,7 +133,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
             .withValue("one")
             .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
@@ -149,7 +148,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
                 .build())
             .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
@@ -164,7 +163,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
                 .build())
             .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
@@ -175,7 +174,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         candidate = DataTreeCandidates.fromNormalizedNode(leafPath,
             ImmutableNodes.leafNode(TestModel.DESC_QNAME, "test"));
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
@@ -188,6 +187,6 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         candidate = dataTree.prepare(modification);
 
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 }
