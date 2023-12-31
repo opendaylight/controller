@@ -75,7 +75,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
-import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
@@ -1858,8 +1858,8 @@ public class ShardTest extends AbstractShardTest {
 
         MessageCollectorActor.expectFirstMatching(listener, RegisterRoleChangeListenerReply.class);
 
-        ShardLeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
-            ShardLeaderStateChanged.class);
+        ShardLeaderChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
+            ShardLeaderChanged.class);
         final var dataTree = leaderStateChanged.localShardDataTree();
         assertNotNull("getLocalShardDataTree present", dataTree);
         assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(), dataTree);
@@ -1870,7 +1870,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new RequestVote(10000, "member2", 50, 50), testKit.getRef());
 
-        leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener, ShardLeaderStateChanged.class);
+        leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener, ShardLeaderChanged.class);
         assertNull("getLocalShardDataTree present", leaderStateChanged.localShardDataTree());
     }
 

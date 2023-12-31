@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
@@ -34,7 +35,7 @@ public interface RaftActorBehavior extends AutoCloseable {
      *
      * @return the RaftState
      */
-    RaftState state();
+    @NonNull RaftState state();
 
     /**
      * Returns the id of the leader.

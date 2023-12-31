@@ -146,7 +146,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final Collection<ShardDataTreeMetadata<?>> metadata;
-    private final DataTree dataTree;
+    private final @NonNull DataTree dataTree;
     private final String logContext;
     private final Shard shard;
     private Runnable runOnPendingTransactionsComplete;

@@ -19,12 +19,11 @@ import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.LeaderChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
@@ -203,13 +202,12 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
     private static void verifyLeaderStateChangedMessages(final ActorRef notifierActor,
             final String... expLeaderIds) {
-        List<LeaderStateChanged> leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class,
-                expLeaderIds.length);
+        final var leaderStateChanges = expectMatching(notifierActor, LeaderChanged.class, expLeaderIds.length);
 
         Collections.reverse(leaderStateChanges);
-        Iterator<LeaderStateChanged> actual = leaderStateChanges.iterator();
+        var actual = leaderStateChanges.iterator();
         for (int i = expLeaderIds.length - 1; i >= 0; i--) {
-            assertEquals("getLeaderId", expLeaderIds[i], actual.next().getLeaderId());
+            assertEquals("getLeaderId", expLeaderIds[i], actual.next().leaderId());
         }
     }
 
