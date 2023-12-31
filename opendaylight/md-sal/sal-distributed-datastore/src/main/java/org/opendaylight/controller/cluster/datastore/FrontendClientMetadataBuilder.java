@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is NOT thread-safe.
  */
-// FIXME: sealed when we have JDK17+
-abstract class FrontendClientMetadataBuilder implements Identifiable<ClientIdentifier> {
+abstract sealed class FrontendClientMetadataBuilder implements Identifiable<ClientIdentifier> {
     static final class Disabled extends FrontendClientMetadataBuilder {
         Disabled(final String shardName, final ClientIdentifier identifier) {
             super(shardName, identifier);
