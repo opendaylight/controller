@@ -64,8 +64,6 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This class is not safe to access from multiple application threads, as is usual for transactions. Its internal state
  * transitions based on backend responses are thread-safe.
- *
- * @author Robert Varga
  */
 final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteProxyTransaction.class);
