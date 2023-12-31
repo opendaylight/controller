@@ -90,7 +90,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedEx
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
@@ -102,7 +101,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
-import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
@@ -111,9 +110,9 @@ import org.opendaylight.controller.cluster.datastore.utils.ForwardingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
-import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.Recovered;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -423,11 +422,11 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         DataTree mockDataTree = mock(DataTree.class);
-        shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
-            DataStoreVersions.CURRENT_VERSION), kit.getRef());
+        shardManager.tell(new ShardLeaderChanged(kit.getRef(), memberId, memberId, mockDataTree,
+            DataStoreVersions.CURRENT_VERSION), ActorRef.noSender());
 
         MessageCollectorActor.expectFirstMatching(mockShardActor, RegisterRoleChangeListener.class);
         shardManager.tell(
@@ -436,8 +435,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
 
-        LocalPrimaryShardFound primaryFound = kit.expectMsgClass(Duration.ofSeconds(5),
-            LocalPrimaryShardFound.class);
+        final var primaryFound = kit.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
         assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
             primaryFound.getPrimaryPath().contains("member-1-shard-default"));
         assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
@@ -452,7 +450,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
@@ -476,7 +474,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         MockClusterWrapper.sendMemberUp(shardManager, "member-2", kit.getRef().path().toString());
@@ -486,7 +484,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             new RoleChangeNotification(memberId1, RaftState.Candidate.name(), RaftState.Follower.name()),
             mockShardActor);
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
-        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2, leaderVersion), mockShardActor);
+        shardManager.tell(new ShardLeaderChanged(memberId1, memberId2, leaderVersion), mockShardActor);
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
 
@@ -514,7 +512,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
 
@@ -528,7 +526,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.tell(
@@ -540,7 +538,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         kit.expectMsgClass(Duration.ofSeconds(5), NoShardLeaderException.class);
 
         DataTree mockDataTree = mock(DataTree.class);
-        shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
+        shardManager.tell(new ShardLeaderChanged(memberId, memberId, mockDataTree,
             DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
@@ -571,7 +569,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         kit.expectNoMessage(Duration.ofMillis(150));
 
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         kit.expectNoMessage(Duration.ofMillis(150));
 
@@ -583,7 +581,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         kit.expectNoMessage(Duration.ofMillis(150));
 
         DataTree mockDataTree = mock(DataTree.class);
-        shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
+        shardManager.tell(new ShardLeaderChanged(memberId, memberId, mockDataTree,
             DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
         LocalPrimaryShardFound primaryFound = kit.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
@@ -608,7 +606,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         kit.expectMsgClass(Duration.ofSeconds(2), NotInitializedException.class);
 
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         kit.expectNoMessage(Duration.ofMillis(200));
 
@@ -622,7 +620,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
         shardManager.tell(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix, null,
             RaftState.Candidate.name()), mockShardActor);
 
@@ -640,7 +638,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
         shardManager.tell(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix, null,
             RaftState.IsolatedLeader.name()), mockShardActor);
 
@@ -658,7 +656,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), kit.getRef());
 
@@ -703,12 +701,12 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        shardManager2.tell(new ActorInitialized(mockShardActor2), ActorRef.noSender());
+        shardManager2.tell(new Recovered(mockShardActor2), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
-        shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId2, mock(DataTree.class), leaderVersion),
-            mockShardActor2);
+        shardManager2.tell(new ShardLeaderChanged(mockShardActor2, memberId2, memberId2, mock(DataTree.class),
+            leaderVersion), ActorRef.noSender());
         shardManager2.tell(new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Leader.name()),
             mockShardActor2);
 
@@ -771,17 +769,17 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestKit kit = new TestKit(system1);
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager1.tell(new ActorInitialized(mockShardActor1), ActorRef.noSender());
-        shardManager2.tell(new ActorInitialized(mockShardActor1), ActorRef.noSender());
+        shardManager1.tell(new Recovered(mockShardActor1), ActorRef.noSender());
+        shardManager2.tell(new Recovered(mockShardActor1), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager1.tell(new ShardLeaderStateChanged(memberId1, memberId2, mock(DataTree.class),
+        shardManager1.tell(new ShardLeaderChanged(memberId1, memberId2, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor1);
         shardManager1.tell(
             new RoleChangeNotification(memberId1, RaftState.Candidate.name(), RaftState.Follower.name()),
             mockShardActor1);
-        shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId2, mock(DataTree.class),
+        shardManager2.tell(new ShardLeaderChanged(memberId2, memberId2, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor2);
         shardManager2.tell(
             new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -877,17 +875,17 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestKit kit = new TestKit(system1);
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager1.tell(new ActorInitialized(mockShardActor1), ActorRef.noSender());
-        shardManager2.tell(new ActorInitialized(mockShardActor2), ActorRef.noSender());
+        shardManager1.tell(new Recovered(mockShardActor1), ActorRef.noSender());
+        shardManager2.tell(new Recovered(mockShardActor2), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager1.tell(new ShardLeaderStateChanged(memberId1, memberId2, mock(DataTree.class),
+        shardManager1.tell(new ShardLeaderChanged(memberId1, memberId2, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor1);
         shardManager1.tell(
             new RoleChangeNotification(memberId1, RaftState.Candidate.name(), RaftState.Follower.name()),
             mockShardActor1);
-        shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId2, mock(DataTree.class),
+        shardManager2.tell(new ShardLeaderChanged(memberId2, memberId2, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor2);
         shardManager2.tell(
             new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -915,7 +913,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         assertNull("Expected primaryShardInfoCache entry removed",
             primaryShardInfoCache.getIfPresent("default"));
 
-        shardManager1.tell(new ShardLeaderStateChanged(memberId1, memberId1, mock(DataTree.class),
+        shardManager1.tell(new ShardLeaderChanged(memberId1, memberId1, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor1);
         shardManager1.tell(
             new RoleChangeNotification(memberId1, RaftState.Follower.name(), RaftState.Leader.name()),
@@ -973,17 +971,17 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestKit kit256 = new TestKit(system256);
         shardManager256.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit256.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit256.getRef());
-        shardManager256.tell(new ActorInitialized(mockShardActor256), ActorRef.noSender());
-        shardManager2.tell(new ActorInitialized(mockShardActor2), ActorRef.noSender());
+        shardManager256.tell(new Recovered(mockShardActor256), ActorRef.noSender());
+        shardManager2.tell(new Recovered(mockShardActor2), ActorRef.noSender());
 
         String memberId256 = "member-256-shard-default-" + shardMrgIDSuffix;
         String memberId2   = "member-2-shard-default-"   + shardMrgIDSuffix;
-        shardManager256.tell(new ShardLeaderStateChanged(memberId256, memberId256, mock(DataTree.class),
+        shardManager256.tell(new ShardLeaderChanged(memberId256, memberId256, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor256);
         shardManager256.tell(
             new RoleChangeNotification(memberId256, RaftState.Candidate.name(), RaftState.Leader.name()),
             mockShardActor256);
-        shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId256, mock(DataTree.class),
+        shardManager2.tell(new ShardLeaderChanged(memberId2, memberId256, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), mockShardActor2);
         shardManager2.tell(
             new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Follower.name()),
@@ -1048,7 +1046,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), kit.getRef());
 
@@ -1082,7 +1080,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         Future<Object> future = Patterns.ask(shardManager, new FindLocalShard(Shard.DEFAULT_NAME, true),
             new Timeout(5, TimeUnit.SECONDS));
 
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         Object resp = Await.result(future, kit.duration("5 seconds"));
         assertTrue("Expected: LocalShardFound, Actual: " + resp, resp instanceof LocalShardFound);
@@ -1099,7 +1097,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 memberId, RaftState.Candidate.name(), RaftState.Leader.name()));
         assertFalse(ready.isDone());
 
-        shardManager.handleCommand(new ShardLeaderStateChanged(memberId, memberId,
+        shardManager.handleCommand(new ShardLeaderChanged(memberId, memberId,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
         assertTrue(ready.isDone());
     }
@@ -1116,7 +1114,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
 
         shardManager.handleCommand(
-            new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
+            new ShardLeaderChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
         assertTrue(ready.isDone());
     }
@@ -1131,7 +1129,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         assertFalse(ready.isDone());
 
         shardManager.handleCommand(
-            new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
+            new ShardLeaderChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
 
         shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
@@ -1254,7 +1252,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new SwitchShardBehavior(mockShardName, RaftState.Leader, 1000), kit.getRef());
 
@@ -1530,11 +1528,11 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         newReplicaShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         leaderShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        leaderShardManager.tell(new ActorInitialized(mockShardLeaderActor), ActorRef.noSender());
+        leaderShardManager.tell(new Recovered(mockShardLeaderActor), ActorRef.noSender());
 
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
         leaderShardManager.tell(
-            new ShardLeaderStateChanged(memberId2, memberId2, mock(DataTree.class), leaderVersion),
+            new ShardLeaderChanged(memberId2, memberId2, mock(DataTree.class), leaderVersion),
             mockShardLeaderActor);
         leaderShardManager.tell(
             new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -1581,7 +1579,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 .createTestActor(newPropsShardMgrWithMockShardActor(), shardMgrID);
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         String leaderId = "leader-member-shard-default-" + shardMrgIDSuffix;
         AddServerReply addServerReply = new AddServerReply(ServerChangeStatus.ALREADY_EXISTS, null);
@@ -1595,7 +1593,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             new RoleChangeNotification(newReplicaId, RaftState.Candidate.name(), RaftState.Follower.name()),
             mockShardActor);
         shardManager.tell(
-            new ShardLeaderStateChanged(newReplicaId, leaderId, DataStoreVersions.CURRENT_VERSION),
+            new ShardLeaderChanged(newReplicaId, leaderId, DataStoreVersions.CURRENT_VERSION),
             mockShardActor);
 
         shardManager.tell(new AddShardReplica(Shard.DEFAULT_NAME), kit.getRef());
@@ -1639,8 +1637,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
-        shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mock(DataTree.class),
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new ShardLeaderChanged(memberId, memberId, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), kit.getRef());
         shardManager.tell(
             new RoleChangeNotification(memberId, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -1754,8 +1752,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(respondActor), ActorRef.noSender());
-        shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mock(DataTree.class),
+        shardManager.tell(new Recovered(respondActor), ActorRef.noSender());
+        shardManager.tell(new ShardLeaderChanged(memberId, memberId, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), kit.getRef());
         shardManager.tell(
             new RoleChangeNotification(memberId, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -1826,12 +1824,12 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         newReplicaShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         leaderShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        leaderShardManager.tell(new ActorInitialized(mockShardLeaderActor), ActorRef.noSender());
-        newReplicaShardManager.tell(new ActorInitialized(mockShardLeaderActor), ActorRef.noSender());
+        leaderShardManager.tell(new Recovered(mockShardLeaderActor), ActorRef.noSender());
+        newReplicaShardManager.tell(new Recovered(mockShardLeaderActor), ActorRef.noSender());
 
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
         leaderShardManager.tell(
-            new ShardLeaderStateChanged(memberId2, memberId2, mock(DataTree.class), leaderVersion),
+            new ShardLeaderChanged(memberId2, memberId2, mock(DataTree.class), leaderVersion),
             mockShardLeaderActor);
         leaderShardManager.tell(
             new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -1839,7 +1837,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
         newReplicaShardManager.tell(
-            new ShardLeaderStateChanged(memberId1, memberId2, mock(DataTree.class), leaderVersion),
+            new ShardLeaderChanged(memberId1, memberId2, mock(DataTree.class), leaderVersion),
             mockShardActor);
         newReplicaShardManager.tell(
             new RoleChangeNotification(memberId1, RaftState.Candidate.name(), RaftState.Follower.name()),
@@ -1948,7 +1946,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.underlyingActor().waitForRecoveryComplete();
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(shard), ActorRef.noSender());
+        shardManager.tell(new Recovered(shard), ActorRef.noSender());
 
         waitForShardInitialized(shardManager, "people", kit);
         waitForShardInitialized(shardManager, "default", kit);
@@ -2017,8 +2015,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             .addShardActor("shard1", shard1).addShardActor("shard2", shard2).props());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(shard1), ActorRef.noSender());
-        shardManager.tell(new ActorInitialized(shard2), ActorRef.noSender());
+        shardManager.tell(new Recovered(shard1), ActorRef.noSender());
+        shardManager.tell(new Recovered(shard2), ActorRef.noSender());
 
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
         Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE);
@@ -2054,8 +2052,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(respondActor), ActorRef.noSender());
-        shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mock(DataTree.class),
+        shardManager.tell(new Recovered(respondActor), ActorRef.noSender());
+        shardManager.tell(new ShardLeaderChanged(memberId, memberId, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), kit.getRef());
         shardManager.tell(
             new RoleChangeNotification(memberId, RaftState.Candidate.name(), RaftState.Leader.name()),
@@ -2086,7 +2084,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(respondActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(respondActor), ActorRef.noSender());
         shardManager.tell(new RoleChangeNotification(memberId, null, RaftState.Follower.name()), respondActor);
 
         shardManager.tell(
@@ -2109,7 +2107,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
+        shardManager.tell(new Recovered(mockShardActor), ActorRef.noSender());
 
         final Consumer<String> mockCallback = mock(Consumer.class);
         shardManager.tell(new RegisterForShardAvailabilityChanges(mockCallback), kit.getRef());
@@ -2118,34 +2116,34 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final Registration reg = (Registration) reply.status();
 
         final DataTree mockDataTree = mock(DataTree.class);
-        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId1, mockDataTree,
+        shardManager.tell(new ShardLeaderChanged(memberId1, memberId1, mockDataTree,
             DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
         verify(mockCallback, timeout(5000)).accept("default");
 
         reset(mockCallback);
-        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId1, mockDataTree,
+        shardManager.tell(new ShardLeaderChanged(memberId1, memberId1, mockDataTree,
                 DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verifyNoMoreInteractions(mockCallback);
 
-        shardManager.tell(new ShardLeaderStateChanged(memberId1, null, mockDataTree,
-                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+        shardManager.tell(new ShardLeaderChanged(mockShardActor, memberId1, null, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), ActorRef.noSender());
 
         verify(mockCallback, timeout(5000)).accept("default");
 
         reset(mockCallback);
-        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2, mockDataTree,
-                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+        shardManager.tell(new ShardLeaderChanged(mockShardActor, memberId1, memberId2, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), ActorRef.noSender());
 
         verify(mockCallback, timeout(5000)).accept("default");
 
         reset(mockCallback);
         reg.close();
 
-        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId1, mockDataTree,
-                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+        shardManager.tell(new ShardLeaderChanged(mockShardActor, memberId1, memberId1, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), ActorRef.noSender());
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verifyNoMoreInteractions(mockCallback);
