@@ -120,15 +120,27 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public boolean append(final ReplicatedLogEntry replicatedLogEntry) {
-        if (replicatedLogEntry.getIndex() > lastIndex()) {
-            journal.add(replicatedLogEntry);
-            dataSize += replicatedLogEntry.size();
-            return true;
-        } else {
-            LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}",
-                    logContext, replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
-            return false;
+        final var ret = canAppend(replicatedLogEntry.getIndex());
+        if (ret) {
+            doAppend(replicatedLogEntry);
         }
+        return ret;
+    }
+
+    final void doAppend(final ReplicatedLogEntry logEntry) {
+        journal.add(logEntry);
+        dataSize += logEntry.size();
+    }
+
+    final boolean canAppend(final long newIndex) {
+        final var lastIndex = lastIndex();
+        if (newIndex > lastIndex) {
+            return true;
+        }
+
+        LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}", logContext,
+            newIndex, lastIndex, new Throwable("stack trace"));
+        return false;
     }
 
     @Override

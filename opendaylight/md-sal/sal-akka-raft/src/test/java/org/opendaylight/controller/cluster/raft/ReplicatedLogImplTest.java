@@ -84,7 +84,7 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry1, null, true);
+        log.appendAndPersist(logEntry1, null);
 
         verifyPersist(logEntry1);
 
@@ -94,7 +94,7 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         Consumer<ReplicatedLogEntry> mockCallback = mock(Consumer.class);
-        log.appendAndPersist(logEntry2, mockCallback, true);
+        log.appendAndPersist(logEntry2, mockCallback);
 
         verifyPersist(logEntry2);
 
@@ -111,7 +111,7 @@ public class ReplicatedLogImplTest {
         Consumer<ReplicatedLogEntry> mockCallback = mock(Consumer.class);
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry, mockCallback, true);
+        log.appendAndPersist(logEntry, mockCallback);
 
         verifyPersist(logEntry);
 
@@ -119,7 +119,7 @@ public class ReplicatedLogImplTest {
 
         reset(mockPersistence, mockCallback);
 
-        log.appendAndPersist(logEntry, mockCallback, true);
+        log.appendAndPersist(logEntry, mockCallback);
 
         verifyNoMoreInteractions(mockPersistence, mockCallback);
 
@@ -135,12 +135,12 @@ public class ReplicatedLogImplTest {
         final ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         final ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
 
-        log.appendAndPersist(logEntry1, null, true);
+        log.appendAndPersist(logEntry1, null);
         verifyPersist(logEntry1);
 
         reset(mockPersistence);
 
-        log.appendAndPersist(logEntry2, null, true);
+        log.appendAndPersist(logEntry2, null);
         verifyPersist(logEntry2);
 
 
@@ -156,14 +156,14 @@ public class ReplicatedLogImplTest {
         int dataSize = 600;
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
 
-        log.appendAndPersist(logEntry, null, true);
+        log.appendAndPersist(logEntry, null);
         verifyPersist(logEntry);
 
         reset(mockPersistence);
 
         logEntry = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3", 5));
 
-        log.appendAndPersist(logEntry, null, true);
+        log.appendAndPersist(logEntry, null);
         verifyPersist(logEntry);
 
         assertEquals("size", 2, log.size());

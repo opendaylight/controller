@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
@@ -19,7 +20,7 @@ public interface ReplicatedLogEntry {
      *
      * @return the payload/data
      */
-    Payload getData();
+    @NonNull Payload getData();
 
     /**
      * Returns the term of the entry.

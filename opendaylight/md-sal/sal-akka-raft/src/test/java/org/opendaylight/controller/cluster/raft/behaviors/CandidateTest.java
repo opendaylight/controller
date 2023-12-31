@@ -16,8 +16,6 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContextImpl;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -41,7 +38,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,7 +201,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                List.of(), 0, -1, (short) 0));
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], AppendEntriesReply.class);
@@ -220,7 +216,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(5, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                List.of(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Follower);
     }
@@ -233,7 +229,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                List.of(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().getCurrentTerm(),
                 newBehavior instanceof Follower);
@@ -315,13 +311,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         context.getTermInformation().update(2, "test");
 
         // Prepare the receivers log
-        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
+        final var payload = new MockRaftActorContext.MockPayload("zero");
         setLastLogEntry(context, 2, 0, payload);
 
-        List<ReplicatedLogEntry> entries = new ArrayList<>();
-        entries.add(new SimpleReplicatedLogEntry(0, 2, payload));
-
-        final AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
+        final var appendEntries = new AppendEntries(2, "leader-1", -1, -1,
+            List.of(new AppendEntries.Entry(0, 2, payload)), 2, -1, (short)0);
 
         behavior = createBehavior(context);
 

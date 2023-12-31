@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
@@ -692,7 +693,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             long followerNextIndex = followerLogInformation.getNextIndex();
             boolean isFollowerActive = followerLogInformation.isFollowerActive();
             boolean sendAppendEntries = false;
-            List<ReplicatedLogEntry> entries = Collections.emptyList();
+            var entries = List.<AppendEntries.Entry>of();
 
             LeaderInstallSnapshotState installSnapshotState = followerLogInformation.getInstallSnapshotState();
             if (installSnapshotState != null) {
@@ -771,29 +772,37 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    private List<ReplicatedLogEntry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
+    private List<AppendEntries.Entry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
             final ActorSelection followerActor) {
         // Try to get all the entries in the journal but not exceeding the max data size for a single AppendEntries
         // message.
-        int maxEntries = (int) context.getReplicatedLog().size();
+        final var maxEntries = (int) context.getReplicatedLog().size();
         final int maxDataSize = context.getConfigParams().getSnapshotChunkSize();
         final long followerNextIndex = followerLogInfo.getNextIndex();
-        List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex,
-                maxEntries, maxDataSize);
+        final var logEntries = context.getReplicatedLog().getFrom(followerNextIndex, maxEntries, maxDataSize);
+        if (logEntries.isEmpty()) {
+            return List.of();
+        }
+
+        // Convert entries
+        final var entries = logEntries.stream()
+            .map(logEntry -> new AppendEntries.Entry(logEntry.getIndex(), logEntry.getTerm(), logEntry.getData()))
+            .collect(Collectors.toList());
 
         // If the first entry's size exceeds the max data size threshold, it will be returned from the call above. If
         // that is the case, then we need to slice it into smaller chunks.
-        if (entries.size() != 1 || entries.get(0).getData().serializedSize() <= maxDataSize) {
+        final var firstLogEntry = logEntries.get(0);
+        if (logEntries.size() > 1 || firstLogEntry.getData().serializedSize() <= maxDataSize) {
             // Don't need to slice.
             return entries;
         }
 
-        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(), entries.get(0).getData().size(),
+        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(), logEntries.get(0).getData().size(),
                 maxDataSize);
 
         // If an AppendEntries has already been serialized for the log index then reuse the
         // SharedFileBackedOutputStream.
-        final Long logIndex = entries.get(0).getIndex();
+        final Long logIndex = firstLogEntry.getIndex();
         SharedFileBackedOutputStream fileBackedStream = sharedSerializedAppendEntriesStreams.get(logIndex);
         if (fileBackedStream == null) {
             fileBackedStream = context.getFileBackedOutputStreamFactory().newSharedInstance();
@@ -805,7 +814,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             log.debug("{}: Serializing {} for slicing for follower {}", logName(), appendEntries,
                     followerLogInfo.getId());
 
-            try (ObjectOutputStream out = new ObjectOutputStream(fileBackedStream)) {
+            try (var out = new ObjectOutputStream(fileBackedStream)) {
                 out.writeObject(appendEntries);
             } catch (IOException e) {
                 log.error("{}: Error serializing {}", logName(), appendEntries, e);
@@ -841,8 +850,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return Collections.emptyList();
     }
 
-    private void sendAppendEntriesToFollower(final ActorSelection followerActor, final List<ReplicatedLogEntry> entries,
-            final FollowerLogInformation followerLogInformation) {
+    private void sendAppendEntriesToFollower(final ActorSelection followerActor,
+            final List<AppendEntries.Entry> entries, final FollowerLogInformation followerLogInformation) {
         // In certain cases outlined below we don't want to send the actual commit index to prevent the follower from
         // possibly committing and applying conflicting entries (those with same index, different term) from a prior
         // term that weren't replicated to a majority, which would be a violation of raft.

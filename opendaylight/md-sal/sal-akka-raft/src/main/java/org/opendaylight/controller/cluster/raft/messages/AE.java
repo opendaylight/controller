@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -51,9 +49,9 @@ final class AE implements Externalizable {
 
         final var entries = appendEntries.getEntries();
         out.writeInt(entries.size());
-        for (var e : entries) {
-            WritableObjects.writeLongs(out, e.getIndex(), e.getTerm());
-            out.writeObject(e.getData());
+        for (var entry : entries) {
+            WritableObjects.writeLongs(out, entry.index(), entry.term());
+            out.writeObject(entry.data());
         }
 
         out.writeObject(appendEntries.leaderAddress());
@@ -75,11 +73,13 @@ final class AE implements Externalizable {
         short payloadVersion = in.readShort();
 
         int size = in.readInt();
-        var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
+        var entries = ImmutableList.<AppendEntries.Entry>builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
             hdr = WritableObjects.readLongHeader(in);
-            entries.add(new SimpleReplicatedLogEntry(WritableObjects.readFirstLong(in, hdr),
-                WritableObjects.readSecondLong(in, hdr), (Payload) in.readObject()));
+            entries.add(new AppendEntries.Entry(
+                WritableObjects.readFirstLong(in, hdr),
+                WritableObjects.readSecondLong(in, hdr),
+                (Payload) in.readObject()));
         }
 
         String leaderAddress = (String)in.readObject();

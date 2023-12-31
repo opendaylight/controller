@@ -216,7 +216,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.getReplicatedLog().append(newReplicatedLogEntry(1,100, "bar"));
         context.getReplicatedLog().setSnapshotIndex(99);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         assertEquals(1, context.getReplicatedLog().size());
 
@@ -240,7 +240,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 101, 100, (short) 0);
@@ -265,7 +265,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.getReplicatedLog().append(newReplicatedLogEntry(1, 100, "bar"));
         context.getReplicatedLog().setSnapshotIndex(99);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 101, 100, (short) 0);
@@ -289,7 +289,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.getReplicatedLog().clear(0,2);
         context.getReplicatedLog().setSnapshotIndex(100);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 101, 100, (short) 0);
@@ -314,7 +314,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.getReplicatedLog().clear(0,2);
         context.getReplicatedLog().setSnapshotIndex(100);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 105, "foo"));
+        final var entries = List.of(newAppendEntry(2, 105, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 105, 100, (short) 0);
@@ -336,7 +336,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100, (short)0);
@@ -356,7 +356,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setCommitIndex(101);
         setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
 
-        entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         appendEntries = new AppendEntries(2, "leader-1", 101, 1, entries, 102, 101, (short)0);
@@ -383,7 +383,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100, (short)0);
@@ -403,7 +403,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         setLastLogEntry(context, 1, 100,
                 new MockRaftActorContext.MockPayload(""));
 
-        entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // leader-2 is becoming the leader now and it says the commitIndex is 45
         appendEntries = new AppendEntries(2, "leader-2", 45, 1, entries, 46, 100, (short)0);
@@ -421,7 +421,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+       var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100, (short)0);
@@ -442,7 +442,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         setLastLogEntry(context, 1, 101,
                 new MockRaftActorContext.MockPayload(""));
 
-        entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         appendEntries = new AppendEntries(2, "leader-1", 101, 1, entries, 102, 101, (short)0);
@@ -459,7 +459,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         setLastLogEntry(context, 1, 100,
                 new MockRaftActorContext.MockPayload(""));
 
-        entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // leader-2 is becoming the leader now and it says the commitIndex is 45
         appendEntries = new AppendEntries(2, "leader-2", 45, 1, entries, 46, 100, (short)0);
@@ -488,7 +488,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 new MockRaftActorContext.MockPayload(""));
         context.getReplicatedLog().setSnapshotIndex(99);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100, (short)0);
@@ -570,8 +570,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
-        List<ReplicatedLogEntry> entries = List.of(
-            newReplicatedLogEntry(1, 3, "three"), newReplicatedLogEntry(1, 4, "four"));
+        final var entries = List.of(newAppendEntry(1, 3, "three"), newAppendEntry(1, 4, "four"));
 
         // Send appendEntries with the same term as was set on the receiver
         // before the new behavior was created (1 in this case)
@@ -621,8 +620,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
-        List<ReplicatedLogEntry> entries = List.of(
-            newReplicatedLogEntry(2, 2, "two-1"), newReplicatedLogEntry(2, 3, "three"));
+        final var entries = List.of(newAppendEntry(2, 2, "two-1"), newAppendEntry(2, 3, "three"));
 
         // Send appendEntries with the same term as was set on the receiver
         // before the new behavior was created (1 in this case)
@@ -671,8 +669,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
-        List<ReplicatedLogEntry> entries = List.of(
-            newReplicatedLogEntry(2, 2, "two-1"), newReplicatedLogEntry(2, 3, "three"));
+        final var entries = List.of(newAppendEntry(2, 2, "two-1"), newAppendEntry(2, 3, "three"));
 
         // Send appendEntries with the same term as was set on the receiver
         // before the new behavior was created (1 in this case)
@@ -705,7 +702,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(1, 4, "four"));
+        final var entries = List.of(newAppendEntry(1, 4, "four"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", 3, 1, entries, 4, -1, (short)0);
 
@@ -734,7 +731,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setReplicatedLog(log);
 
         // Send the last entry again.
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(1, 1, "one"));
+        var entries = List.of(newAppendEntry(1, 1, "one"));
 
         follower = createBehavior(context);
 
@@ -747,7 +744,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         // Send the last entry again and also a new one.
 
-        entries = List.of(newReplicatedLogEntry(1, 1, "one"), newReplicatedLogEntry(1, 2, "two"));
+        entries = List.of(newAppendEntry(1, 1, "one"), newAppendEntry(1, 2, "two"));
 
         MessageCollectorActor.clearMessages(leaderActor);
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 2, -1, (short)0));
@@ -775,7 +772,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         context.setReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(1, 4, "four"));
+        final var entries = List.of(newAppendEntry(1, 4, "four"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", 3, 1, entries, 4, 3, (short)0);
 
@@ -884,8 +881,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertNotNull(follower.getSnapshotTracker());
 
         // Send an append entry
-        AppendEntries appendEntries = new AppendEntries(1, "leader", 1, 1,
-                List.of(newReplicatedLogEntry(2, 1, "3")), 2, -1, (short)1);
+        AppendEntries appendEntries = new AppendEntries(1, "leader", 1, 1, List.of(newAppendEntry(2, 1, "3")), 2, -1,
+            (short)1);
 
         follower.handleMessage(leaderActor, appendEntries);
 
@@ -928,7 +925,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         // Send appendEntries with a new term and leader.
         AppendEntries appendEntries = new AppendEntries(2, "new-leader", 1, 1,
-                List.of(newReplicatedLogEntry(2, 2, "3")), 2, -1, (short)1);
+                List.of(newAppendEntry(2, 2, "3")), 2, -1, (short)1);
 
         follower.handleMessage(leaderActor, appendEntries);
 
@@ -982,7 +979,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         setLastLogEntry(context, 1, 101,
                 new MockRaftActorContext.MockPayload(""));
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newAppendEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader", 101, 1, entries, 102, 101, (short)0);
@@ -1119,8 +1116,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
-        List<ReplicatedLogEntry> entries = List.of(
-                newReplicatedLogEntry(1, 0, "one"), newReplicatedLogEntry(1, 1, "two"));
+        final var entries = List.of(newAppendEntry(1, 0, "one"), newAppendEntry(1, 1, "two"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 1, -1, (short)0);
 
@@ -1136,7 +1132,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // We expect the ApplyJournalEntries for index 1 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 1 has already been applied.
-        List<Object> journalEntries = InMemoryJournal.get(id, Object.class);
+        final var journalEntries = InMemoryJournal.get(id, Object.class);
         assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 1, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
@@ -1146,7 +1142,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastAppliedIndex", 1, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 1, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData(), entries.get(1).getData()),
+        assertEquals("Snapshot state", List.of(entries.get(0).data(), entries.get(1).data()),
                 MockRaftActor.fromState(snapshot.getState()));
     }
 
@@ -1174,9 +1170,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
-        List<ReplicatedLogEntry> entries = List.of(
-                newReplicatedLogEntry(1, 0, "one"), newReplicatedLogEntry(1, 1, "two"),
-                newReplicatedLogEntry(1, 2, "three"));
+        final var entries = List.of(
+            newAppendEntry(1, 0, "one"), newAppendEntry(1, 1, "two"), newAppendEntry(1, 2, "three"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 2, -1, (short)0);
 
@@ -1192,7 +1187,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // We expect the ApplyJournalEntries for index 2 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 2 has already been applied.
-        List<Object> journalEntries = InMemoryJournal.get(id, Object.class);
+        final var journalEntries = InMemoryJournal.get(id, Object.class);
         assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 2, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
@@ -1202,8 +1197,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastAppliedIndex", 2, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData(), entries.get(1).getData(),
-                entries.get(2).getData()), MockRaftActor.fromState(snapshot.getState()));
+        assertEquals("Snapshot state", List.of(entries.get(0).data(), entries.get(1).data(), entries.get(2).data()),
+            MockRaftActor.fromState(snapshot.getState()));
 
         assertEquals("Journal size", 0, followerRaftActor.get().getReplicatedLog().size());
         assertEquals("Snapshot index", 2, followerRaftActor.get().getReplicatedLog().getSnapshotIndex());
@@ -1221,8 +1216,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Last index", 2, followerRaftActor.get().getReplicatedLog().lastIndex());
         assertEquals("Last applied index", 2, followerRaftActor.get().getRaftActorContext().getLastApplied());
         assertEquals("Commit index", 2, followerRaftActor.get().getRaftActorContext().getCommitIndex());
-        assertEquals("State", List.of(entries.get(0).getData(), entries.get(1).getData(),
-                entries.get(2).getData()), followerRaftActor.get().getState());
+        assertEquals("State", List.of(entries.get(0).data(), entries.get(1).data(), entries.get(2).data()),
+            followerRaftActor.get().getState());
     }
 
     @Test
@@ -1249,9 +1244,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
-        List<ReplicatedLogEntry> entries = List.of(
-                newReplicatedLogEntry(1, 0, "one"), newReplicatedLogEntry(1, 1, "two"),
-                newReplicatedLogEntry(1, 2, "three"));
+        final var entries = List.of(
+            newAppendEntry(1, 0, "one"), newAppendEntry(1, 1, "two"), newAppendEntry(1, 2, "three"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 0, -1, (short)0);
 
@@ -1267,7 +1261,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // We expect the ApplyJournalEntries for index 0 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 0 has already been applied.
-        List<Object> journalEntries = InMemoryJournal.get(id, Object.class);
+        final var journalEntries = InMemoryJournal.get(id, Object.class);
         assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 0, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
@@ -1279,8 +1273,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastAppliedIndex", 0, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData()),
-                MockRaftActor.fromState(snapshot.getState()));
+        assertEquals("Snapshot state", List.of(entries.get(0).data()), MockRaftActor.fromState(snapshot.getState()));
     }
 
     @Test
@@ -1378,6 +1371,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("isNeedsLeaderAddress", false, reply.isNeedsLeaderAddress());
     }
 
+    private static AppendEntries.Entry newAppendEntry(final long term, final long index, final String data) {
+        return new AppendEntries.Entry(index, term, new MockRaftActorContext.MockPayload(data));
+    }
 
     private static ReplicatedLogEntry newReplicatedLogEntry(final long term, final long index, final String data) {
         return new SimpleReplicatedLogEntry(index, term,

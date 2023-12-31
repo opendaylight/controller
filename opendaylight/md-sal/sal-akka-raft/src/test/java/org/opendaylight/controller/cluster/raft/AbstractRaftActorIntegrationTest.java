@@ -42,6 +42,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -370,6 +371,13 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         assertEquals("ApplyState getIdentifier", id, applyState.getIdentifier());
         ReplicatedLogEntry replicatedLogEntry = applyState.getReplicatedLogEntry();
         verifyReplicatedLogEntry(replicatedLogEntry, expTerm, expIndex, payload);
+    }
+
+    protected void verifyEntry(final AppendEntries.Entry entry, final long expTerm, final long expIndex,
+            final Payload payload) {
+        assertEquals("Entry getTerm", expTerm, entry.term());
+        assertEquals("Entry getIndex", expIndex, entry.index());
+        assertEquals("Entry getData", payload, entry.data());
     }
 
     protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,
