@@ -207,8 +207,8 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         private long unflushedBytes = 0;
 
         Delayed(final String persistenceId, final File directory, final StorageLevel storage,
-                final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes) {
-            super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize);
+                final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes, final int autoUpgrade) {
+            super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize, autoUpgrade);
             this.maxUnflushedBytes = maxUnflushedBytes;
         }
 
@@ -265,8 +265,8 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
 
     private static final class Immediate extends SegmentedJournalActor {
         Immediate(final String persistenceId, final File directory, final StorageLevel storage,
-                final int maxEntrySize, final int maxSegmentSize) {
-            super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize);
+                final int maxEntrySize, final int maxSegmentSize, final int autoUpgrade) {
+            super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize, autoUpgrade);
         }
 
         @Override
@@ -291,6 +291,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     private final StorageLevel storage;
     private final int maxSegmentSize;
     private final int maxEntrySize;
+    private final int autoUpgrade;
     private final File directory;
 
     // Tracks the time it took us to write a batch of messages
@@ -311,19 +312,21 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     private long lastDelete;
 
     private SegmentedJournalActor(final String persistenceId, final File directory, final StorageLevel storage,
-            final int maxEntrySize, final int maxSegmentSize) {
+            final int maxEntrySize, final int maxSegmentSize, final int autoUpgrade) {
         this.persistenceId = requireNonNull(persistenceId);
         this.directory = requireNonNull(directory);
         this.storage = requireNonNull(storage);
         this.maxEntrySize = maxEntrySize;
         this.maxSegmentSize = maxSegmentSize;
+        this.autoUpgrade = autoUpgrade;
     }
 
     static Props props(final String persistenceId, final File directory, final StorageLevel storage,
-            final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes) {
+            final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes, final int autoUpgrade) {
         final var pid = requireNonNull(persistenceId);
         return maxUnflushedBytes > 0
-            ? Props.create(Delayed.class, pid, directory, storage, maxEntrySize, maxSegmentSize, maxUnflushedBytes)
+            ? Props.create(Delayed.class, pid, directory, storage, maxEntrySize, maxSegmentSize, maxUnflushedBytes,
+                autoUpgrade)
             : Props.create(Immediate.class, pid, directory, storage, maxEntrySize, maxSegmentSize);
     }
 
@@ -500,8 +503,8 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
             .tryNext((index, value, length) -> value);
         lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered.longValue();
 
-        dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
-            maxEntrySize, maxSegmentSize);
+        dataJournal = DataJournal.create(persistenceId, messageSize, context().system(), storage, directory,
+            maxEntrySize, maxSegmentSize, autoUpgrade);
         dataJournal.deleteTo(lastDelete);
         LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
             dataJournal.lastWrittenSequenceNr(), lastDelete);
