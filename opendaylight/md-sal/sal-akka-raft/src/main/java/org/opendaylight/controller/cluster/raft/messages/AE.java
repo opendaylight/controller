@@ -56,7 +56,7 @@ final class AE implements Externalizable {
             out.writeObject(e.getData());
         }
 
-        out.writeObject(appendEntries.getLeaderAddress().orElse(null));
+        out.writeObject(appendEntries.leaderAddress());
     }
 
     @Override

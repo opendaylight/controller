@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
-import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
@@ -117,8 +116,8 @@ public final class AppendEntries extends AbstractRaftRPC {
         return payloadVersion;
     }
 
-    public Optional<String> getLeaderAddress() {
-        return Optional.ofNullable(leaderAddress);
+    public @Nullable String leaderAddress() {
+        return leaderAddress;
     }
 
     public short getLeaderRaftVersion() {
