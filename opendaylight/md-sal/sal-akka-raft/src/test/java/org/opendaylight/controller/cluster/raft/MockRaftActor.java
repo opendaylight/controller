@@ -209,8 +209,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected Optional<ActorRef> getRoleChangeNotifier() {
-        return Optional.ofNullable(roleChangeNotifier);
+    protected ActorRef roleChangeNotifier() {
+        return roleChangeNotifier;
     }
 
     @Override public String persistenceId() {
