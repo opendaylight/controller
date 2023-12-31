@@ -20,7 +20,6 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
-import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -52,7 +50,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -450,15 +447,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * @return the ClientRequestTracker or null if none available
      */
     private ClientRequestTracker removeClientRequestTracker(final long logIndex) {
-        final Iterator<ClientRequestTracker> it = trackers.iterator();
+        final var it = trackers.iterator();
         while (it.hasNext()) {
-            final ClientRequestTracker t = it.next();
-            if (t.getIndex() == logIndex) {
+            final var tracker = it.next();
+            if (tracker.logIndex() == logIndex) {
                 it.remove();
-                return t;
+                return tracker;
             }
         }
-
         return null;
     }
 
@@ -468,16 +464,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // If it does that means the leader wasn't dropped before the transaction applied.
         // That means that this transaction can be safely applied as a local transaction since we
         // have the ClientRequestTracker.
-        final ClientRequestTracker tracker = removeClientRequestTracker(entry.getIndex());
+        final var tracker = removeClientRequestTracker(entry.getIndex());
         if (tracker != null) {
-            return new ApplyState(tracker.getClientActor(), tracker.getIdentifier(), entry);
+            return new ApplyState(tracker.clientActor(), tracker.identifier(), entry);
         }
 
         // Tracker is missing, this means that we switched behaviours between replicate and applystate
         // and became the leader again,. We still want to apply this as a local modification because
         // we have resumed leadership with that log entry having been committed.
-        final Payload payload = entry.getData();
-        if (payload instanceof IdentifiablePayload<?> identifiable) {
+        if (entry.getData() instanceof IdentifiablePayload<?> identifiable) {
             return new ApplyState(null, identifiable.getIdentifier(), entry);
         }
 
@@ -656,7 +651,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // client actor
         final var clientActor = replicate.clientActor();
         if (clientActor != null) {
-            trackers.add(new ClientRequestTrackerImpl(clientActor, replicate.identifier(), logIndex));
+            trackers.add(new ClientRequestTracker(logIndex, clientActor, replicate.identifier()));
         }
 
         boolean applyModificationToState = !context.anyVotingPeers()
