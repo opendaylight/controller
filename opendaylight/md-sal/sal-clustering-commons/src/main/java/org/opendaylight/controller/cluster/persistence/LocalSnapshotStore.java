@@ -21,7 +21,6 @@ import akka.serialization.JavaSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,7 +59,7 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
-public class LocalSnapshotStore extends SnapshotStore {
+public final class LocalSnapshotStore extends SnapshotStore {
     private static final Logger LOG = LoggerFactory.getLogger(LocalSnapshotStore.class);
     private static final int PERSISTENCE_ID_START_INDEX = "snapshot-".length();
 
@@ -69,7 +68,6 @@ public class LocalSnapshotStore extends SnapshotStore {
     private final int maxLoadAttempts;
     private final File snapshotDir;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     public LocalSnapshotStore(final Config config) {
         executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
         snapshotDir = new File(config.getString("dir"));
