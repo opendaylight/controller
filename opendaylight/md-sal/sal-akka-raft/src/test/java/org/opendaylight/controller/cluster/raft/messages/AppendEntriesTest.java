@@ -71,7 +71,7 @@ public class AppendEntriesTest {
             verifyReplicatedLogEntry(iter.next(), e);
         }
 
-        assertEquals("getLeaderAddress", expected.getLeaderAddress(), actual.getLeaderAddress());
+        assertEquals("getLeaderAddress", expected.leaderAddress(), actual.leaderAddress());
         assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
     }
 
