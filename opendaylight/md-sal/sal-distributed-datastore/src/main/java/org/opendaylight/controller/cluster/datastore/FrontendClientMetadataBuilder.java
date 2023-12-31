@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
@@ -21,25 +21,23 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
-import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
-import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class is NOT thread-safe.
  */
-abstract sealed class FrontendClientMetadataBuilder implements Identifiable<ClientIdentifier> {
+abstract sealed class FrontendClientMetadataBuilder {
     static final class Disabled extends FrontendClientMetadataBuilder {
-        Disabled(final String shardName, final ClientIdentifier identifier) {
-            super(shardName, identifier);
+        Disabled(final String shardName, final ClientIdentifier clientId) {
+            super(shardName, clientId);
         }
 
         @Override
         FrontendClientMetadata build() {
-            return new FrontendClientMetadata(getIdentifier(), ImmutableUnsignedLongSet.of(), ImmutableList.of());
+            return new FrontendClientMetadata(clientId(), ImmutableUnsignedLongSet.of(), ImmutableList.of());
         }
 
         @Override
@@ -79,7 +77,7 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
 
         @Override
         LeaderFrontendState toLeaderState(final Shard shard) {
-            return new LeaderFrontendState.Disabled(shard.persistenceId(), getIdentifier(), shard.getDataStore());
+            return new LeaderFrontendState.Disabled(shard.persistenceId(), clientId(), shard.getDataStore());
         }
     }
 
@@ -88,8 +86,8 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
         private final MutableUnsignedLongSet purgedHistories;
         private final LocalHistoryIdentifier standaloneId;
 
-        Enabled(final String shardName, final ClientIdentifier identifier) {
-            super(shardName, identifier);
+        Enabled(final String shardName, final ClientIdentifier clientId) {
+            super(shardName, clientId);
 
             purgedHistories = MutableUnsignedLongSet.of();
 
@@ -102,30 +100,30 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
             super(shardName, meta.getIdentifier());
 
             purgedHistories = meta.getPurgedHistories().mutableCopy();
-            for (FrontendHistoryMetadata h : meta.getCurrentHistories()) {
-                final FrontendHistoryMetadataBuilder b = new FrontendHistoryMetadataBuilder(getIdentifier(), h);
-                currentHistories.put(b.getIdentifier(), b);
+            for (var historyMeta : meta.getCurrentHistories()) {
+                final var builder = new FrontendHistoryMetadataBuilder(clientId(), historyMeta);
+                currentHistories.put(builder.getIdentifier(), builder);
             }
 
             // Sanity check and recovery
             standaloneId = standaloneHistoryId();
             if (!currentHistories.containsKey(standaloneId)) {
                 LOG.warn("{}: Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
-                    shardName, getIdentifier(), currentHistories);
+                    shardName, clientId(), currentHistories);
                 currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
             }
         }
 
         @Override
         FrontendClientMetadata build() {
-            return new FrontendClientMetadata(getIdentifier(), purgedHistories.immutableCopy(),
+            return new FrontendClientMetadata(clientId(), purgedHistories.immutableCopy(),
                 Collections2.transform(currentHistories.values(), FrontendHistoryMetadataBuilder::build));
         }
 
         @Override
         void onHistoryCreated(final LocalHistoryIdentifier historyId) {
-            final FrontendHistoryMetadataBuilder newMeta = new FrontendHistoryMetadataBuilder(historyId);
-            final FrontendHistoryMetadataBuilder oldMeta = currentHistories.putIfAbsent(historyId, newMeta);
+            final var newMeta = new FrontendHistoryMetadataBuilder(historyId);
+            final var oldMeta = currentHistories.putIfAbsent(historyId, newMeta);
             if (oldMeta != null) {
                 // This should not be happening, warn about it
                 LOG.warn("{}: Reused local history {}", shardName(), historyId);
@@ -136,7 +134,7 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
 
         @Override
         void onHistoryClosed(final LocalHistoryIdentifier historyId) {
-            final FrontendHistoryMetadataBuilder builder = currentHistories.get(historyId);
+            final var builder = currentHistories.get(historyId);
             if (builder != null) {
                 builder.onHistoryClosed();
                 LOG.debug("{}: Closed history {}", shardName(), historyId);
@@ -147,7 +145,7 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
 
         @Override
         void onHistoryPurged(final LocalHistoryIdentifier historyId) {
-            final FrontendHistoryMetadataBuilder history = currentHistories.remove(historyId);
+            final var history = currentHistories.remove(historyId);
             final long historyBits = historyId.getHistoryId();
             if (history == null) {
                 if (!purgedHistories.contains(historyBits)) {
@@ -164,7 +162,7 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
 
         @Override
         void onTransactionAborted(final TransactionIdentifier txId) {
-            final FrontendHistoryMetadataBuilder history = getHistory(txId);
+            final var history = getHistory(txId);
             if (history != null) {
                 history.onTransactionAborted(txId);
                 LOG.debug("{}: Aborted transaction {}", shardName(), txId);
@@ -175,7 +173,7 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
 
         @Override
         void onTransactionCommitted(final TransactionIdentifier txId) {
-            final FrontendHistoryMetadataBuilder history = getHistory(txId);
+            final var history = getHistory(txId);
             if (history != null) {
                 history.onTransactionCommitted(txId);
                 LOG.debug("{}: Committed transaction {}", shardName(), txId);
@@ -186,7 +184,7 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
 
         @Override
         void onTransactionPurged(final TransactionIdentifier txId) {
-            final FrontendHistoryMetadataBuilder history = getHistory(txId);
+            final var history = getHistory(txId);
             if (history != null) {
                 history.onTransactionPurged(txId);
                 LOG.debug("{}: Purged transaction {}", shardName(), txId);
@@ -210,26 +208,29 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
         LeaderFrontendState toLeaderState(final Shard shard) {
             // Note: we have to make sure to *copy* all current state and not leak any views, otherwise leader/follower
             //       interactions would get intertwined leading to inconsistencies.
-            final Map<LocalHistoryIdentifier, LocalFrontendHistory> histories = new HashMap<>();
-            for (FrontendHistoryMetadataBuilder e : currentHistories.values()) {
-                if (e.getIdentifier().getHistoryId() != 0) {
-                    final AbstractFrontendHistory state = e.toLeaderState(shard);
-                    verify(state instanceof LocalFrontendHistory, "Unexpected state %s", state);
-                    histories.put(e.getIdentifier(), (LocalFrontendHistory) state);
+            final var histories = new HashMap<LocalHistoryIdentifier, LocalFrontendHistory>();
+            for (var historyMetaBuilder : currentHistories.values()) {
+                final var historyId = historyMetaBuilder.getIdentifier();
+                if (historyId.getHistoryId() != 0) {
+                    final var state = historyMetaBuilder.toLeaderState(shard);
+                    if (state instanceof LocalFrontendHistory localState) {
+                        histories.put(historyId, localState);
+                    } else {
+                        throw new VerifyException("Unexpected state " + state);
+                    }
                 }
             }
 
             final AbstractFrontendHistory singleHistory;
-            final FrontendHistoryMetadataBuilder singleHistoryMeta = currentHistories.get(
-                new LocalHistoryIdentifier(getIdentifier(), 0));
+            final var singleHistoryMeta = currentHistories.get(new LocalHistoryIdentifier(clientId(), 0));
             if (singleHistoryMeta == null) {
-                final ShardDataTree tree = shard.getDataStore();
-                singleHistory = StandaloneFrontendHistory.create(shard.persistenceId(), getIdentifier(), tree);
+                final var tree = shard.getDataStore();
+                singleHistory = StandaloneFrontendHistory.create(shard.persistenceId(), clientId(), tree);
             } else {
                 singleHistory = singleHistoryMeta.toLeaderState(shard);
             }
 
-            return new LeaderFrontendState.Enabled(shard.persistenceId(), getIdentifier(), shard.getDataStore(),
+            return new LeaderFrontendState.Enabled(shard.persistenceId(), clientId(), shard.getDataStore(),
                 purgedHistories.mutableCopy(), singleHistory, histories);
         }
 
@@ -257,18 +258,18 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
         }
 
         private LocalHistoryIdentifier standaloneHistoryId() {
-            return new LocalHistoryIdentifier(getIdentifier(), 0);
+            return new LocalHistoryIdentifier(clientId(), 0);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(FrontendClientMetadataBuilder.class);
 
-    private final @NonNull ClientIdentifier identifier;
+    private final @NonNull ClientIdentifier clientId;
     private final @NonNull String shardName;
 
-    FrontendClientMetadataBuilder(final String shardName, final ClientIdentifier identifier) {
+    FrontendClientMetadataBuilder(final String shardName, final ClientIdentifier clientId) {
         this.shardName = requireNonNull(shardName);
-        this.identifier = requireNonNull(identifier);
+        this.clientId = requireNonNull(clientId);
     }
 
     static FrontendClientMetadataBuilder of(final String shardName, final FrontendClientMetadata meta) {
@@ -278,9 +279,8 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
             ? new Disabled(shardName, meta.getIdentifier()) : new Enabled(shardName, meta);
     }
 
-    @Override
-    public final ClientIdentifier getIdentifier() {
-        return identifier;
+    final ClientIdentifier clientId() {
+        return clientId;
     }
 
     final String shardName() {
@@ -317,6 +317,6 @@ abstract sealed class FrontendClientMetadataBuilder implements Identifiable<Clie
     }
 
     ToStringHelper addToStringAttributes(final ToStringHelper helper) {
-        return helper.add("identifier", identifier);
+        return helper.add("clientId", clientId);
     }
 }
