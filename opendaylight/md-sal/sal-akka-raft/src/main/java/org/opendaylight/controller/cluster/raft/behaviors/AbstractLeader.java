@@ -655,9 +655,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // Create a tracker entry we will use this later to notify the
         // client actor
-        if (replicate.getClientActor() != null) {
-            trackers.add(new ClientRequestTrackerImpl(replicate.getClientActor(), replicate.getIdentifier(),
-                    logIndex));
+        final var clientActor = replicate.getClientActor();
+        if (clientActor != null) {
+            trackers.add(new ClientRequestTrackerImpl(clientActor, replicate.getIdentifier(), logIndex));
         }
 
         boolean applyModificationToState = !context.anyVotingPeers()
