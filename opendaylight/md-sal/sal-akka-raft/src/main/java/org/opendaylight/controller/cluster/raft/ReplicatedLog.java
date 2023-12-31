@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 
 /**
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
@@ -96,7 +97,20 @@ public interface ReplicatedLog {
      * @return true if the entry was successfully appended, false otherwise.
      */
     boolean appendAndPersist(@NonNull ReplicatedLogEntry replicatedLogEntry,
-            @Nullable Consumer<ReplicatedLogEntry> callback, boolean doAsync);
+            @Nullable Consumer<ReplicatedLogEntry> callback);
+
+    /**
+     * Appends an entry to the in-memory log and persists it as well.
+     *
+     * @param entry the entry to append
+     * @param callback the callback to be notified when persistence is complete (optional).
+     * @param doAsync if true, the persistent actor can receive subsequent messages to process in between the persist
+     *        call and the execution of the associated callback. If false, subsequent messages are stashed and get
+     *        delivered after persistence is complete and the associated callback is executed. In either case the
+     *        callback is guaranteed to execute in the context of the actor associated with this log.
+     * @return true if the entry was successfully appended, false otherwise.
+     */
+    boolean appendAndPersist(AppendEntries.@NonNull Entry entry, @Nullable Consumer<ReplicatedLogEntry> callback);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.

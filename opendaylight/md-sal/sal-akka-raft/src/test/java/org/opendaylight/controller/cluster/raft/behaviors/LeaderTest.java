@@ -151,8 +151,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", lastIndex - 1, appendEntries.getPrevLogIndex());
         assertEquals("getPrevLogTerm", term, appendEntries.getPrevLogTerm());
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Entry getIndex", lastIndex, appendEntries.getEntries().get(0).getIndex());
-        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).getTerm());
+        assertEquals("Entry getIndex", lastIndex, appendEntries.getEntries().get(0).index());
+        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).term());
         assertEquals("getPayloadVersion", payloadVersion, appendEntries.getPayloadVersion());
     }
 
@@ -203,9 +203,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", lastIndex, appendEntries.getPrevLogIndex());
         assertEquals("getPrevLogTerm", term, appendEntries.getPrevLogTerm());
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).getIndex());
-        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).getTerm());
-        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
+        assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).index());
+        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).term());
+        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).data().toString());
         assertEquals("Commit Index", lastIndex, actorContext.getCommitIndex());
     }
 
@@ -251,9 +251,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", lastIndex, appendEntries.getPrevLogIndex());
         assertEquals("getPrevLogTerm", prevTerm, appendEntries.getPrevLogTerm());
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Entry getIndex", newIndex, appendEntries.getEntries().get(0).getIndex());
-        assertEquals("Entry getTerm", newTerm, appendEntries.getEntries().get(0).getTerm());
-        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
+        assertEquals("Entry getIndex", newIndex, appendEntries.getEntries().get(0).index());
+        assertEquals("Entry getTerm", newTerm, appendEntries.getEntries().get(0).term());
+        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).data().toString());
 
         // The follower replies with success. The leader should now update the commit index to the new index
         // as per §5.4.1 "once an entry from the current term is committed by counting replicas, then all
@@ -296,9 +296,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", lastIndex, appendEntries.getPrevLogIndex());
         assertEquals("getPrevLogTerm", term, appendEntries.getPrevLogTerm());
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).getIndex());
-        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).getTerm());
-        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
+        assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).index());
+        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).term());
+        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).data().toString());
         assertEquals("Commit Index", lastIndex + 1, actorContext.getCommitIndex());
     }
 
@@ -405,12 +405,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     private static void assertRequestEntry(final long lastIndex, final List<AppendEntries> allMessages,
             final int messageNr) {
-        final AppendEntries req = allMessages.get(2 * messageNr);
+        final var req = allMessages.get(2 * messageNr);
         assertEquals(lastIndex + messageNr, req.getLeaderCommit());
 
-        final List<ReplicatedLogEntry> entries = req.getEntries();
+        final var entries = req.getEntries();
         assertEquals(1, entries.size());
-        assertEquals(messageNr + 2, entries.get(0).getIndex());
+        assertEquals(messageNr + 2, entries.get(0).index());
     }
 
     @Test
@@ -448,14 +448,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
-        List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
+        final var allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
         assertEquals("The number of append entries collected should be 2", 2, allMessages.size());
 
         assertEquals(1, allMessages.get(0).getEntries().size());
-        assertEquals(lastIndex + 1, allMessages.get(0).getEntries().get(0).getIndex());
+        assertEquals(lastIndex + 1, allMessages.get(0).getEntries().get(0).index());
         assertEquals(1, allMessages.get(1).getEntries().size());
-        assertEquals(lastIndex + 1, allMessages.get(0).getEntries().get(0).getIndex());
-
+        assertEquals(lastIndex + 1, allMessages.get(0).getEntries().get(0).index());
     }
 
     @Test
@@ -1456,12 +1455,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
-        assertEquals("First entry index", 1, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry index", 1, appendEntries.getEntries().get(0).index());
         assertEquals("First entry data", leadersSecondLogEntry.getData(),
-                appendEntries.getEntries().get(0).getData());
-        assertEquals("Second entry index", 2, appendEntries.getEntries().get(1).getIndex());
+                appendEntries.getEntries().get(0).data());
+        assertEquals("Second entry index", 2, appendEntries.getEntries().get(1).index());
         assertEquals("Second entry data", leadersThirdLogEntry.getData(),
-                appendEntries.getEntries().get(1).getData());
+                appendEntries.getEntries().get(1).data());
 
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
         assertEquals("getNextIndex", 3, followerInfo.getNextIndex());
@@ -1537,17 +1536,17 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
-        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).index());
         assertEquals("First entry data", leadersFirstLogEntry.getData(),
-                appendEntries.getEntries().get(0).getData());
-        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).getIndex());
+                appendEntries.getEntries().get(0).data());
+        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).index());
         assertEquals("Second entry data", leadersSecondLogEntry.getData(),
-                appendEntries.getEntries().get(1).getData());
+                appendEntries.getEntries().get(1).data());
 
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
         assertEquals("getNextIndex", 2, followerInfo.getNextIndex());
 
-        List<ApplyState> applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
+        final var applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
 
         ApplyState applyState = applyStateList.get(0);
         assertEquals("Follower's first ApplyState index", 0, applyState.getReplicatedLogEntry().getIndex());
@@ -1619,14 +1618,14 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
-        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).getIndex());
-        assertEquals("First entry term", 2, appendEntries.getEntries().get(0).getTerm());
+        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).index());
+        assertEquals("First entry term", 2, appendEntries.getEntries().get(0).term());
         assertEquals("First entry data", leadersFirstLogEntry.getData(),
-                appendEntries.getEntries().get(0).getData());
-        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).getIndex());
-        assertEquals("Second entry term", 2, appendEntries.getEntries().get(1).getTerm());
+                appendEntries.getEntries().get(0).data());
+        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).index());
+        assertEquals("Second entry term", 2, appendEntries.getEntries().get(1).term());
         assertEquals("Second entry data", leadersSecondLogEntry.getData(),
-                appendEntries.getEntries().get(1).getData());
+                appendEntries.getEntries().get(1).data());
 
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
         assertEquals("getNextIndex", 2, followerInfo.getNextIndex());
@@ -1823,24 +1822,24 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
-        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).index());
         assertEquals("First entry data", leadersFirstLogEntry.getData(),
-                appendEntries.getEntries().get(0).getData());
-        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).getIndex());
+                appendEntries.getEntries().get(0).data());
+        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).index());
         assertEquals("Second entry data", leadersSecondLogEntry.getData(),
-                appendEntries.getEntries().get(1).getData());
+                appendEntries.getEntries().get(1).data());
 
         appendEntries = appendEntriesList.get(1);
         assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
         assertEquals("getPrevLogIndex", 1, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
-        assertEquals("First entry index", 2, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry index", 2, appendEntries.getEntries().get(0).index());
         assertEquals("First entry data", leadersThirdLogEntry.getData(),
-                appendEntries.getEntries().get(0).getData());
-        assertEquals("Second entry index", 3, appendEntries.getEntries().get(1).getIndex());
+                appendEntries.getEntries().get(0).data());
+        assertEquals("Second entry index", 3, appendEntries.getEntries().get(1).index());
         assertEquals("Second entry data", leadersFourthLogEntry.getData(),
-                appendEntries.getEntries().get(1).getData());
+                appendEntries.getEntries().get(1).data());
 
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
         assertEquals("getNextIndex", 4, followerInfo.getNextIndex());
@@ -2075,7 +2074,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(nonVotingFollowerActor,
                 AppendEntries.class);
         assertEquals("Log entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Log entry index", 1, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("Log entry index", 1, appendEntries.getEntries().get(0).index());
 
         // Send reply only from the non-voting follower and verify no consensus via no ApplyState.
         leader.handleMessage(leaderActor, new AppendEntriesReply(nonVotingFollowerId, 1, true, 1, 1, (short)0));
@@ -2247,8 +2246,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testReplicationWithPayloadSizeThatExceedsThreshold");
 
         final int serializedSize = SerializationUtils.serialize(new AppendEntries(1, LEADER_ID, -1, -1,
-                List.of(new SimpleReplicatedLogEntry(0, 1,
-                        new MockRaftActorContext.MockPayload("large"))), 0, -1, (short)0)).length;
+            List.of(new AppendEntries.Entry(0, 1, new MockRaftActorContext.MockPayload("large"))), 0, -1, (short)0))
+            .length;
         final MockRaftActorContext.MockPayload largePayload =
                 new MockRaftActorContext.MockPayload("large", serializedSize);
 
@@ -2274,7 +2273,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Entry getIndex", 0, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("Entry getIndex", 0, appendEntries.getEntries().get(0).index());
 
         leader.handleMessage(followerActor, new AppendEntriesReply(FOLLOWER_ID, term, true, 0, term, (short)0));
         assertEquals("getCommitIndex", 0, leaderActorContext.getCommitIndex());
@@ -2327,7 +2326,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
-        assertEquals("Entry getIndex", 2, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("Entry getIndex", 2, appendEntries.getEntries().get(0).index());
         assertEquals("getLeaderCommit", 1, appendEntries.getLeaderCommit());
     }
 

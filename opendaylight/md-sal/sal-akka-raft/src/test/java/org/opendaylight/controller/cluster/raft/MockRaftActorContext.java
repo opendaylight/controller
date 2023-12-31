@@ -192,13 +192,12 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
         public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-                final Consumer<ReplicatedLogEntry> callback, final boolean doAsync) {
+                final Consumer<ReplicatedLogEntry> callback) {
             append(replicatedLogEntry);
 
             if (callback != null) {
                 callback.accept(replicatedLogEntry);
             }
-
             return true;
         }
     }
@@ -260,7 +259,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         private final String value;
         private final int size;
 
-        MockPayloadProxy(String value, int size) {
+        MockPayloadProxy(final String value, final int size) {
             this.value = value;
             this.size = size;
         }

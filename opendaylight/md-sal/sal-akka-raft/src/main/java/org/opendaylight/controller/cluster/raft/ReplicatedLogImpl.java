@@ -12,7 +12,9 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -96,21 +98,27 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-            final Consumer<ReplicatedLogEntry> callback, final boolean doAsync)  {
-
+            final Consumer<ReplicatedLogEntry> callback)  {
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
-
         if (!append(replicatedLogEntry)) {
             return false;
         }
 
-        if (doAsync) {
-            context.getPersistenceProvider().persistAsync(replicatedLogEntry,
-                entry -> persistCallback(entry, callback));
-        } else {
-            context.getPersistenceProvider().persist(replicatedLogEntry, entry -> syncPersistCallback(entry, callback));
+        context.getPersistenceProvider().persistAsync(replicatedLogEntry, recv -> persistCallback(recv, callback));
+        return true;
+    }
+
+    @Override
+    public boolean appendAndPersist(final AppendEntries.Entry entry, final Consumer<ReplicatedLogEntry> callback)  {
+        context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), entry);
+        final var index = entry.index();
+        if (!canAppend(index)) {
+            return false;
         }
 
+        final var logEntry = new SimpleReplicatedLogEntry(index, entry.term(), entry.data());
+        doAppend(logEntry);
+        context.getPersistenceProvider().persist(logEntry, recv -> syncPersistCallback(recv, callback));
         return true;
     }
 

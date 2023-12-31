@@ -17,7 +17,6 @@ import akka.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -128,13 +127,11 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.getTermInformation().update(2, "test");
 
         // Prepare the receivers log
-        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
+        final var payload = new MockRaftActorContext.MockPayload("zero");
         setLastLogEntry(context, 2, 0, payload);
 
-        List<ReplicatedLogEntry> entries = new ArrayList<>();
-        entries.add(new SimpleReplicatedLogEntry(0, 2, payload));
-
-        final AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
+        final var appendEntries = new AppendEntries(2, "leader-1", -1, -1,
+            List.of(new AppendEntries.Entry(0, 2, payload)), 2, -1, (short)0);
 
         behavior = createBehavior(context);
 

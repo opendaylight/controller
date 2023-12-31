@@ -76,7 +76,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("getTerm", currentTerm, appendEntries.getTerm());
         assertEquals("getLeaderId", leaderId, appendEntries.getLeaderId());
         assertEquals("getEntries().size()", 1, appendEntries.getEntries().size());
-        verifyReplicatedLogEntry(appendEntries.getEntries().get(0), currentTerm, 2, isolatedLeaderPayload2);
+        verifyEntry(appendEntries.getEntries().get(0), currentTerm, 2, isolatedLeaderPayload2);
 
         // The leader should transition to IsolatedLeader.
 
@@ -158,12 +158,12 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // message is forwarded to the followers.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
+                        && ae.getEntries().get(0).data().equals(payload1));
 
         expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
+                        && ae.getEntries().get(0).data().equals(payload1));
 
         verifyApplyJournalEntries(leaderCollectorActor, 1);
 
@@ -182,7 +182,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("getTerm", currentTerm, appendEntries.getTerm());
         assertEquals("getLeaderId", leaderId, appendEntries.getLeaderId());
         assertEquals("getEntries().size()", 1, appendEntries.getEntries().size());
-        verifyReplicatedLogEntry(appendEntries.getEntries().get(0), currentTerm, 2, isolatedLeaderPayload2);
+        verifyEntry(appendEntries.getEntries().get(0), currentTerm, 2, isolatedLeaderPayload2);
 
         // The leader should transition to IsolatedLeader.
 
@@ -279,12 +279,12 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // message is forwarded to the followers.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
+                        && ae.getEntries().get(0).data().equals(payload1));
 
         expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
+                        && ae.getEntries().get(0).data().equals(payload1));
 
         verifyApplyJournalEntries(leaderCollectorActor, 1);
 
@@ -302,8 +302,8 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // are collected but not forwarded to the follower RaftActor.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae -> {
-            for (ReplicatedLogEntry e: ae.getEntries()) {
-                if (e.getIndex() == 4) {
+            for (var e : ae.getEntries()) {
+                if (e.index() == 4) {
                     return true;
                 }
             }

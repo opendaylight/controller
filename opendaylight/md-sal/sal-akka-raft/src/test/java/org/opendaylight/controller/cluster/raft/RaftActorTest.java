@@ -669,16 +669,14 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(6, followerActor.getReplicatedLog().size());
 
         //fake snapshot on index 6
-        List<ReplicatedLogEntry> entries = List.of(
-                new SimpleReplicatedLogEntry(6, 1, new MockRaftActorContext.MockPayload("foo-6")));
+        var entries = List.of(new AppendEntries.Entry(6, 1, new MockRaftActorContext.MockPayload("foo-6")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5, (short)0));
         assertEquals(7, followerActor.getReplicatedLog().size());
 
         //fake snapshot on index 7
         assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
 
-        entries = List.of(new SimpleReplicatedLogEntry(7, 1,
-                new MockRaftActorContext.MockPayload("foo-7")));
+        entries = List.of(new AppendEntries.Entry(7, 1, new MockRaftActorContext.MockPayload("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerActor.getReplicatedLog().size());
 
@@ -702,7 +700,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
         assertEquals(7, followerActor.getReplicatedLog().lastIndex());
 
-        entries = List.of(new SimpleReplicatedLogEntry(8, 1, new MockRaftActorContext.MockPayload("foo-7")));
+        entries = List.of(new AppendEntries.Entry(8, 1, new MockRaftActorContext.MockPayload("foo-7")));
         // send an additional entry 8 with leaderCommit = 7
         followerActor.handleCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
 
