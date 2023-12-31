@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -38,33 +37,11 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedExcepti
  * Utility methods for dealing with datastore root {@link ContainerNode} with respect to module shards.
  */
 public final class RootScatterGather {
-    // FIXME: Record when we have JDK17+
     @NonNullByDefault
-    public static final class ShardContainer<T> {
-        private final ContainerNode container;
-        private final T shard;
-
-        ShardContainer(final T shard, final ContainerNode container) {
-            this.shard = requireNonNull(shard);
-            this.container = requireNonNull(container);
-        }
-
-        public T shard() {
-            return shard;
-        }
-
-        public ContainerNode container() {
-            return container;
-        }
-
-        @Override
-        public int hashCode() {
-            return shard.hashCode();
-        }
-
-        @Override
-        public boolean equals(final @Nullable Object obj) {
-            return obj == this || obj instanceof ShardContainer && shard.equals(((ShardContainer<?>) obj).shard);
+    public record ShardContainer<T>(T shard, ContainerNode container) {
+        public ShardContainer {
+            requireNonNull(shard);
+            requireNonNull(container);
         }
 
         @Override
