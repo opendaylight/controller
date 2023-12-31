@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -23,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  * @author Thomas Pantelis
  */
 public class ShardLeaderStateChanged extends LeaderStateChanged {
-    private final ReadOnlyDataTree localShardDataTree;
+    private final @Nullable ReadOnlyDataTree localShardDataTree;
 
     public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
             final @NonNull ReadOnlyDataTree localShardDataTree, final short leaderPayloadVersion) {
@@ -37,7 +36,7 @@ public class ShardLeaderStateChanged extends LeaderStateChanged {
         localShardDataTree = null;
     }
 
-    public @NonNull Optional<ReadOnlyDataTree> getLocalShardDataTree() {
-        return Optional.ofNullable(localShardDataTree);
+    public @Nullable ReadOnlyDataTree localShardDataTree() {
+        return localShardDataTree;
     }
 }
