@@ -69,7 +69,6 @@ import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
@@ -86,7 +85,7 @@ import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
@@ -94,9 +93,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.DisableTrackingPa
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
-import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
-import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
-import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.LeadershipTransferFailedException;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
@@ -187,8 +183,6 @@ public class Shard extends RaftActor {
 
     private Cancellable txCommitTimeoutCheckSchedule;
 
-    private final ActorRef roleChangeNotifier;
-
     private final MessageTracker appendEntriesReplyTracker;
 
     private final ShardTransactionActorFactory transactionActorFactory;
@@ -259,9 +253,6 @@ public class Shard extends RaftActor {
         commitCoordinator = new ShardCommitCoordinator(store, LOG, name);
 
         setTransactionCommitTimeout();
-
-        // create a notifier actor for each cluster member
-        roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(name), name + "-notifier");
 
         appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
@@ -389,8 +380,6 @@ public class Shard extends RaftActor {
                 commitTimeoutCheck();
             } else if (message instanceof DatastoreContext request) {
                 onDatastoreContext(request);
-            } else if (message instanceof RegisterRoleChangeListener) {
-                roleChangeNotifier.forward(message, context());
             } else if (message instanceof FollowerInitialSyncUpStatus request) {
                 shardMBean.setFollowerInitialSyncStatus(request.isInitialSyncDone());
                 context().parent().tell(message, self());
@@ -658,20 +647,16 @@ public class Shard extends RaftActor {
         return commitCoordinator.getCohortCacheSize();
     }
 
-    @Override
-    protected final ActorRef roleChangeNotifier() {
-        return roleChangeNotifier;
-    }
-
     final String getShardName() {
         return shardName;
     }
 
     @Override
-    protected final LeaderStateChanged newLeaderStateChanged(final String memberId, final String leaderId,
+    protected final ShardLeaderChanged newLeaderChanged(final String memberId, final String leaderId,
             final short leaderPayloadVersion) {
-        return isLeader() ? new ShardLeaderStateChanged(memberId, leaderId, store.getDataTree(), leaderPayloadVersion)
-                : new ShardLeaderStateChanged(memberId, leaderId, leaderPayloadVersion);
+        return isLeader()
+            ? new ShardLeaderChanged(self(), memberId, leaderId, store.getDataTree(), leaderPayloadVersion)
+                : new ShardLeaderChanged(self(), memberId, leaderId, leaderPayloadVersion);
     }
 
     private void onDatastoreContext(final DatastoreContext context) {
@@ -963,9 +948,7 @@ public class Shard extends RaftActor {
     // non-final for testing
     protected void onRecoveryComplete() {
         restoreFromSnapshot = null;
-
-        //notify shard manager
-        getContext().parent().tell(new ActorInitialized(getSelf()), ActorRef.noSender());
+        super.onRecoveryComplete();
 
         // Being paranoid here - this method should only be called once but just in case...
         if (txCommitTimeoutCheckSchedule == null) {

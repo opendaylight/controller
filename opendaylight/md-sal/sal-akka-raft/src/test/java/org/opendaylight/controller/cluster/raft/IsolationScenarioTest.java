@@ -21,8 +21,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -80,8 +80,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The leader should transition to IsolatedLeader.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.IsolatedLeader.name()));
+        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.IsolatedLeader);
 
         forceElectionOnFollower1();
 
@@ -107,8 +106,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Previous leader should switch to follower b/c it will receive either an AppendEntries or AppendEntriesReply
         // with a higher term.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Follower.name()));
+        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.Follower);
 
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's index 1 entry.
@@ -186,8 +184,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The leader should transition to IsolatedLeader.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.IsolatedLeader.name()));
+        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.IsolatedLeader);
 
         forceElectionOnFollower1();
 
@@ -214,8 +211,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Previous leader should switch to follower b/c it will receive either an AppendEntries or AppendEntriesReply
         // with a higher term.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Follower.name()));
+        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.Follower);
 
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's entry.
@@ -312,8 +308,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The leader should transition to IsolatedLeader.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.IsolatedLeader.name()));
+        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.IsolatedLeader);
 
         forceElectionOnFollower1();
 
@@ -342,8 +337,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Previous leader should switch to follower b/c it will receive either an AppendEntries or AppendEntriesReply
         // with a higher term.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Follower.name()));
+        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.Follower);
 
         // The previous leader has conflicting log entries starting at index 2 with different terms which should get
         // replaced by the new leader's entries.
@@ -394,8 +388,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         follower1Actor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
-        expectFirstMatching(follower1NotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Leader.name()));
+        expectFirstMatching(follower1NotifierActor, RoleChanged.class, rc -> rc.newRole() == RaftState.Leader);
 
         currentTerm = follower1Context.getTermInformation().getCurrentTerm();
     }

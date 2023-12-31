@@ -9,9 +9,10 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
+import akka.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.LeaderChanged;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
@@ -21,18 +22,19 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  *
  * @author Thomas Pantelis
  */
-public final class ShardLeaderStateChanged extends LeaderStateChanged {
+public final class ShardLeaderChanged extends LeaderChanged {
     private final @Nullable ReadOnlyDataTree localShardDataTree;
 
-    public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
-            final @NonNull ReadOnlyDataTree localShardDataTree, final short leaderPayloadVersion) {
-        super(memberId, leaderId, leaderPayloadVersion);
+    public ShardLeaderChanged(final @NonNull ActorRef raftActor, final @NonNull String memberId,
+            final @Nullable String leaderId, final @NonNull ReadOnlyDataTree localShardDataTree,
+            final short leaderPayloadVersion) {
+        super(raftActor, memberId, leaderId, leaderPayloadVersion);
         this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
-            final short leaderPayloadVersion) {
-        super(memberId, leaderId, leaderPayloadVersion);
+    public ShardLeaderChanged(final @NonNull ActorRef raftActor, final @NonNull String memberId,
+            final @Nullable String leaderId, final short leaderPayloadVersion) {
+        super(raftActor, memberId, leaderId, leaderPayloadVersion);
         localShardDataTree = null;
     }
 
