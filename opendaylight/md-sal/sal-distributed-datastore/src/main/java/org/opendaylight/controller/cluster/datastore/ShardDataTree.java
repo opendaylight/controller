@@ -35,7 +35,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Queue;
@@ -57,7 +56,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifia
 import org.opendaylight.controller.cluster.datastore.persisted.CloseLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CreateLocalHistoryPayload;
-import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput.DataTreeCandidateWithVersion;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
 import org.opendaylight.controller.cluster.datastore.persisted.PurgeLocalHistoryPayload;
@@ -333,35 +331,35 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
-        final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.acquireCandidate();
-        final DataTreeModification unwrapped = newModification();
-        final PruningDataTreeModification mod = createPruningModification(unwrapped,
-            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.getValue().version()) > 0);
+        final var entry = payload.acquireCandidate();
+        final var unwrapped = newModification();
+        final var pruningMod = createPruningModification(unwrapped,
+            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.streamVersion()) > 0);
 
-        DataTreeCandidates.applyToModification(mod, entry.getValue().candidate());
-        mod.ready();
+        DataTreeCandidates.applyToModification(pruningMod, entry.candidate());
+        pruningMod.ready();
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
         try {
             dataTree.validate(unwrapped);
             dataTree.commit(dataTree.prepare(unwrapped));
         } catch (Exception e) {
-            File file = new File(System.getProperty("karaf.data", "."),
+            final var file = new File(System.getProperty("karaf.data", "."),
                     "failed-recovery-payload-" + logContext + ".out");
             DataTreeModificationOutput.toFile(file, unwrapped);
-            throw new IllegalStateException(String.format(
-                    "%s: Failed to apply recovery payload. Modification data was written to file %s",
-                    logContext, file), e);
+            throw new IllegalStateException(
+                "%s: Failed to apply recovery payload. Modification data was written to file %s".formatted(
+                    logContext, file),
+                e);
         }
 
-        allMetadataCommittedTransaction(entry.getKey());
+        allMetadataCommittedTransaction(entry.transactionId());
     }
 
     private PruningDataTreeModification createPruningModification(final DataTreeModification unwrapped,
             final boolean uintAdapting) {
         // TODO: we should be able to reuse the pruner, provided we are not reentrant
-        final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(
-            dataSchemaContext);
+        final var pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
         return uintAdapting ? new PruningDataTreeModification.Proactive(unwrapped, dataTree, pruner.withUintAdaption())
                 : new PruningDataTreeModification.Reactive(unwrapped, dataTree, pruner);
     }
@@ -396,21 +394,21 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private void applyReplicatedCandidate(final CommitTransactionPayload payload)
             throws DataValidationFailedException, IOException {
-        final Entry<TransactionIdentifier, DataTreeCandidateWithVersion> entry = payload.acquireCandidate();
-        final TransactionIdentifier identifier = entry.getKey();
-        LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
+        final var payloadCandidate = payload.acquireCandidate();
+        final var transactionId = payloadCandidate.transactionId();
+        LOG.debug("{}: Applying foreign transaction {}", logContext, transactionId);
 
-        final DataTreeModification mod = newModification();
+        final var mod = newModification();
         // TODO: check version here, which will enable us to perform forward-compatibility transformations
-        DataTreeCandidates.applyToModification(mod, entry.getValue().candidate());
+        DataTreeCandidates.applyToModification(mod, payloadCandidate.candidate());
         mod.ready();
 
         LOG.trace("{}: Applying foreign modification {}", logContext, mod);
         dataTree.validate(mod);
-        final DataTreeCandidate candidate = dataTree.prepare(mod);
+        final var candidate = dataTree.prepare(mod);
         dataTree.commit(candidate);
 
-        allMetadataCommittedTransaction(identifier);
+        allMetadataCommittedTransaction(transactionId);
         notifyListeners(candidate);
     }
 
@@ -450,7 +448,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             }
 
             // make sure acquireCandidate() is the last call touching the payload data as we want it to be GC-ed.
-            checkRootOverwrite(((CommitTransactionPayload) payload).acquireCandidate().getValue().candidate());
+            checkRootOverwrite(commit.acquireCandidate().candidate());
         } else if (payload instanceof AbortTransactionPayload abort) {
             if (identifier != null) {
                 payloadReplicationComplete(abort);
