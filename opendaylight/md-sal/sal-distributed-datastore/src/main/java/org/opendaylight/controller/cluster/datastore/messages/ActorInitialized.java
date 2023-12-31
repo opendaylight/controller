@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import java.io.Serializable;
+import static java.util.Objects.requireNonNull;
 
-public class ActorInitialized implements Serializable {
-    private static final long serialVersionUID = 1L;
+import akka.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-    public ActorInitialized() {
+@NonNullByDefault
+public record ActorInitialized(ActorRef actorRef) {
+    public ActorInitialized {
+        requireNonNull(actorRef);
     }
 }

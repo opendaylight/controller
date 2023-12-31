@@ -708,12 +708,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onActorInitialized(final ActorInitialized message) {
-        final ActorRef sender = getSender();
-
-        if (sender == null) {
-            // why is a non-actor sending this message? Just ignore.
-            return;
-        }
+        final var sender = message.actorRef();
 
         String actorName = sender.path().name();
         //find shard name from actor name; actor name is stringified shardId
@@ -744,8 +739,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     protected void handleRecover(final Object message) throws Exception {
         if (message instanceof RecoveryCompleted) {
             onRecoveryCompleted();
-        } else if (message instanceof SnapshotOffer) {
-            applyShardManagerSnapshot((ShardManagerSnapshot)((SnapshotOffer) message).snapshot());
+        } else if (message instanceof SnapshotOffer msg) {
+            applyShardManagerSnapshot((ShardManagerSnapshot) msg.snapshot());
         }
     }
 
