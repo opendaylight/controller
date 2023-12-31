@@ -621,8 +621,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
-            getCurrentBehavior().handleMessage(getSelf(), new Replicate(clientActor, identifier, replicatedLogEntry,
-                    !batchHint));
+            getCurrentBehavior().handleMessage(getSelf(),
+                new Replicate(replicatedLogEntry.getIndex(), !batchHint, clientActor, identifier));
         }
     }
 
