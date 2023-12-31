@@ -7,19 +7,19 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import akka.actor.ActorSystem;
+import static java.util.Objects.requireNonNull;
+
 import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import com.google.common.base.VerifyException;
+import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.JournalReader;
-import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.JournalWriter;
 import io.atomix.storage.journal.SegmentedJournal;
-import io.atomix.storage.journal.StorageLevel;
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
@@ -32,25 +32,23 @@ import scala.jdk.javaapi.CollectionConverters;
 /**
  * Version 0 data journal, where every journal entry maps to exactly one segmented file entry.
  */
-final class DataJournalV0 extends DataJournal {
+sealed class DataJournalV0 extends DataJournal permits DataJournalV1 {
     private static final Logger LOG = LoggerFactory.getLogger(DataJournalV0.class);
 
     private final SegmentedJournal<DataJournalEntry> entries;
 
-    DataJournalV0(final String persistenceId, final Histogram messageSize, final ActorSystem system,
-            final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize) {
+    DataJournalV0(final String persistenceId, final Histogram messageSize,
+            final SegmentedJournal<DataJournalEntry> entries) {
         super(persistenceId, messageSize);
-        entries = SegmentedJournal.<DataJournalEntry>builder()
-                .withStorageLevel(storage).withDirectory(directory).withName("data")
-                .withNamespace(JournalSerdes.builder()
-                    .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
-                    .build())
-                .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
-                .build();
+        this.entries = requireNonNull(entries);
+    }
+
+    JournalReader<DataJournalEntry> entriesReader(final long index) {
+        return entries.openReader(index);
     }
 
     @Override
-    long lastWrittenSequenceNr() {
+    final long lastWrittenSequenceNr() {
         return entries.writer().getLastIndex();
     }
 
@@ -77,7 +75,7 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     @SuppressWarnings("checkstyle:illegalCatch")
-    void handleReplayMessages(final ReplayMessages message, final long fromSequenceNr) {
+    final void handleReplayMessages(final ReplayMessages message, final long fromSequenceNr) {
         try (var reader = entries.openReader(fromSequenceNr)) {
             handleReplayMessages(reader, message);
         } catch (Exception e) {
@@ -95,7 +93,7 @@ final class DataJournalV0 extends DataJournal {
                 LOG.trace("{}: replay index={} entry={}", persistenceId, index, entry);
                 updateLargestSize(size);
                 if (entry instanceof FromPersistence fromPersistence) {
-                    return fromPersistence.toRepr(persistenceId, index);
+                    return toRepr(fromPersistence, index);
                 }
                 throw new VerifyException("Unexpected entry " + entry);
             });
@@ -111,9 +109,13 @@ final class DataJournalV0 extends DataJournal {
         LOG.debug("{}: successfully replayed {} entries", persistenceId, count);
     }
 
+    PersistentRepr toRepr(final FromPersistence entry, final long sequenceNr) {
+        return entry.toRepr(persistenceId, sequenceNr);
+    }
+
     @Override
     @SuppressWarnings("checkstyle:illegalCatch")
-    WrittenMessages handleWriteMessages(final WriteMessages message) {
+    final WrittenMessages handleWriteMessages(final WriteMessages message) {
         final int count = message.size();
         final var responses = new ArrayList<>();
         final var writer = entries.writer();
@@ -149,12 +151,17 @@ final class DataJournalV0 extends DataJournal {
             }
 
             LOG.trace("{}: starting append of {}", persistenceId, payload);
-            final var entry = writer.append(new ToPersistence(repr));
+            final var entry = writerRepr(writer, repr);
             final int size = entry.size();
             LOG.trace("{}: finished append of {} with {} bytes at {}", persistenceId, payload, size, entry.index());
             recordMessageSize(size);
             bytes += size;
         }
         return bytes;
+    }
+
+    Indexed<@NonNull ToPersistence> writerRepr(final JournalWriter<DataJournalEntry> writer,
+            final PersistentRepr repr) {
+        return writer.append(new ToPersistence(repr.manifest(), repr.writerUuid(), repr.payload()));
     }
 }

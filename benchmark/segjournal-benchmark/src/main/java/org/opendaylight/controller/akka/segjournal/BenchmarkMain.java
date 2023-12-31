@@ -82,7 +82,7 @@ public final class BenchmarkMain {
         // get actor
         actor = system.actorOf(
             SegmentedJournalActor.props("perf", config.workingDir(), config.storage(),
-                config.maxEntrySize(), config.maxSegmentSize(), config.maxUnflushedBytes()));
+                config.maxEntrySize(), config.maxSegmentSize(), config.maxUnflushedBytes(), Integer.MAX_VALUE));
 
         // randomize payloads
         final var random = ThreadLocalRandom.current();
