@@ -8,9 +8,17 @@
 package org.opendaylight.controller.akka.segjournal;
 
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.akka.segjournal.UuidEntrySerdes.UUID_ENTRY_SERDES;
 
+import akka.actor.ActorSystem;
 import com.codahale.metrics.Histogram;
+import io.atomix.storage.journal.JournalSerdes;
+import io.atomix.storage.journal.SegmentedJournal;
+import io.atomix.storage.journal.StorageLevel;
+import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
+import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 
@@ -18,7 +26,7 @@ import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMe
  * Abstraction of a data journal. This provides a unified interface towards {@link SegmentedJournalActor}, allowing
  * specialization for various formats.
  */
-abstract class DataJournal {
+abstract sealed class DataJournal permits DataJournalV0 {
     // Mirrors fields from associated actor
     final @NonNull String persistenceId;
     private final Histogram messageSize;
@@ -29,6 +37,49 @@ abstract class DataJournal {
     DataJournal(final String persistenceId, final Histogram messageSize) {
         this.persistenceId = requireNonNull(persistenceId);
         this.messageSize = requireNonNull(messageSize);
+    }
+
+    static DataJournal create(final String persistenceId, final Histogram messageSize, final ActorSystem system,
+            final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize,
+            final int autoUpgrade) {
+        // FIXME: consider what version the directory is (i.e. does it have uuids?) and if not, and autoUpgrade >= 1,
+        //        only then upgrade to DataJournalV1. When migrating, the uuids needs to be recovered from the contents
+        //        of data.
+
+        final boolean oldVersion = isOldVersion(directory);
+
+        var entries = SegmentedJournal.<DataJournalEntry>builder()
+            .withStorageLevel(storage).withDirectory(directory).withName("data")
+            .withNamespace(JournalSerdes.builder()
+                .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
+                .build())
+            .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
+            .build();
+
+        if (oldVersion && autoUpgrade < 1) {
+            return new DataJournalV0(persistenceId, messageSize, entries);
+        }
+
+        final var uuids = SegmentedJournal.<UuidEntry>builder()
+            .withStorageLevel(storage).withDirectory(directory).withName("uuids")
+            .withNamespace(JournalSerdes.builder()
+                .register(UUID_ENTRY_SERDES, UuidEntry.class, UuidEntry.class)
+                .build())
+            .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
+            .build();
+
+        final var journalV1 = new DataJournalV1(persistenceId, messageSize, entries, uuids);
+        if (oldVersion) {
+            journalV1.upgradeFromV0();
+        }
+
+        return journalV1;
+    }
+
+    private static boolean isOldVersion(File directory) {
+        final var dataCount = directory.list((dir, name) -> dir.equals(directory) && name.startsWith("data"));
+        final var uuidsCount = directory.list((dir, name) -> dir.equals(directory) && name.startsWith("uuids"));
+        return dataCount != null && dataCount.length > 0 && uuidsCount != null && uuidsCount.length == 0;
     }
 
     final void recordMessageSize(final int size) {

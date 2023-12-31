@@ -45,6 +45,8 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     public static final String STORAGE_MAX_SEGMENT_SIZE = "max-segment-size";
     public static final int STORAGE_MAX_SEGMENT_SIZE_DEFAULT = STORAGE_MAX_ENTRY_SIZE_DEFAULT * 8;
     public static final String STORAGE_MEMORY_MAPPED = "memory-mapped";
+    public static final int STORAGE_AUTO_UPGRADE_DEFAULT = Integer.MAX_VALUE;
+    public static final String STORAGE_AUTO_UPGRADE = "auto-upgrade";
 
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedFileJournal.class);
 
@@ -53,6 +55,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     private final StorageLevel storage;
     private final int maxEntrySize;
     private final int maxSegmentSize;
+    private final int autoUpgrade;
 
     public SegmentedFileJournal(final Config config) {
         rootDir = new File(config.getString(STORAGE_ROOT_DIRECTORY));
@@ -69,6 +72,11 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
             storage = config.getBoolean(STORAGE_MEMORY_MAPPED) ? StorageLevel.MAPPED : StorageLevel.DISK;
         } else {
             storage = StorageLevel.DISK;
+        }
+        if (config.hasPath(STORAGE_AUTO_UPGRADE)) {
+            autoUpgrade = config.getInt(STORAGE_AUTO_UPGRADE);
+        } else {
+            autoUpgrade = Integer.MAX_VALUE;
         }
 
         LOG.info("Initialized with root directory {} with storage {}", rootDir, storage);
@@ -117,7 +125,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         LOG.debug("Creating handler for {} in directory {}", persistenceId, directory);
 
         final var handler = context().actorOf(SegmentedJournalActor.props(persistenceId, directory, storage,
-            maxEntrySize, maxSegmentSize));
+            maxEntrySize, maxSegmentSize, autoUpgrade));
         LOG.debug("Directory {} handled by {}", directory, handler);
         return handler;
     }

@@ -153,6 +153,7 @@ final class SegmentedJournalActor extends AbstractActor {
     private final StorageLevel storage;
     private final int maxSegmentSize;
     private final int maxEntrySize;
+    private final int autoUpgrade;
     private final File directory;
 
     // Tracks the time it took us to write a batch of messages
@@ -167,18 +168,19 @@ final class SegmentedJournalActor extends AbstractActor {
     private long lastDelete;
 
     SegmentedJournalActor(final String persistenceId, final File directory, final StorageLevel storage,
-            final int maxEntrySize, final int maxSegmentSize) {
+            final int maxEntrySize, final int maxSegmentSize, final int autoUpgrade) {
         this.persistenceId = requireNonNull(persistenceId);
         this.directory = requireNonNull(directory);
         this.storage = requireNonNull(storage);
         this.maxEntrySize = maxEntrySize;
         this.maxSegmentSize = maxSegmentSize;
+        this.autoUpgrade = autoUpgrade;
     }
 
     static Props props(final String persistenceId, final File directory, final StorageLevel storage,
-            final int maxEntrySize, final int maxSegmentSize) {
+            final int maxEntrySize, final int maxSegmentSize, final int autoUpgrade) {
         return Props.create(SegmentedJournalActor.class, requireNonNull(persistenceId), directory, storage,
-            maxEntrySize, maxSegmentSize);
+            maxEntrySize, maxSegmentSize, autoUpgrade);
     }
 
     @Override
@@ -317,8 +319,8 @@ final class SegmentedJournalActor extends AbstractActor {
         final var lastEntry = deleteJournal.writer().getLastEntry();
         lastDelete = lastEntry == null ? 0 : lastEntry.entry();
 
-        dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
-            maxEntrySize, maxSegmentSize);
+        dataJournal = DataJournal.create(persistenceId, messageSize, context().system(), storage, directory,
+            maxEntrySize, maxSegmentSize, autoUpgrade);
         dataJournal.deleteTo(lastDelete);
         LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
             dataJournal.lastWrittenSequenceNr(), lastDelete);

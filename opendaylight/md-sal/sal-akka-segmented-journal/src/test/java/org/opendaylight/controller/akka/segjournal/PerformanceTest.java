@@ -103,8 +103,8 @@ class PerformanceTest {
         LOG.info("Test {} entrySize={} segmentSize={} payload={} count={}", storage, maxEntrySize, maxSegmentSize,
             payloadSize, requestCount);
 
-        actor = kit.childActorOf(SegmentedJournalActor.props("perf", DIRECTORY, storage, maxEntrySize, maxSegmentSize)
-            .withDispatcher(CallingThreadDispatcher.Id()));
+        actor = kit.childActorOf(SegmentedJournalActor.props("perf", DIRECTORY, storage, maxEntrySize, maxSegmentSize,
+            Integer.MAX_VALUE).withDispatcher(CallingThreadDispatcher.Id()));
 
         final var random = ThreadLocalRandom.current();
         final var sw = Stopwatch.createStarted();
