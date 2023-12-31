@@ -2401,7 +2401,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // Initial heartbeat shouldn't have the leader address
 
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
-        assertFalse(appendEntries.getLeaderAddress().isPresent());
+        assertNull(appendEntries.leaderAddress());
         MessageCollectorActor.clearMessages(followerActor);
 
         // Send AppendEntriesReply indicating the follower needs the leader address
@@ -2416,8 +2416,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
-        assertTrue(appendEntries.getLeaderAddress().isPresent());
-        assertEquals(leaderActor.path().toString(), appendEntries.getLeaderAddress().orElseThrow());
+        assertEquals(leaderActor.path().toString(), appendEntries.leaderAddress());
         MessageCollectorActor.clearMessages(followerActor);
 
         // Send AppendEntriesReply indicating the follower does not need the leader address
@@ -2431,7 +2430,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
-        assertFalse(appendEntries.getLeaderAddress().isPresent());
+        assertNull(appendEntries.leaderAddress());
     }
 
     @Override
