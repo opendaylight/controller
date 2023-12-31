@@ -12,14 +12,16 @@ import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 
-final class LongSerdes implements EntrySerdes<Long> {
-    @Override
-    public Long read(final EntryInput input) throws IOException {
-        return input.readLong();
-    }
+enum LongEntrySerdes implements EntrySerdes<Long> {
+    LONG_ENTRY_SERDES {
+        @Override
+        public Long read(final EntryInput input) throws IOException {
+            return input.readLong();
+        }
 
-    @Override
-    public void write(final EntryOutput output, final Long entry) throws IOException {
-        output.writeLong(entry);
+        @Override
+        public void write(final EntryOutput output, final Long entry) throws IOException {
+            output.writeLong(entry);
+        }
     }
 }
