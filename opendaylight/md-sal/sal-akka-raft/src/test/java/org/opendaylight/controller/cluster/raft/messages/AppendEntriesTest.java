@@ -9,14 +9,11 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
 /**
  * Unit tests for AppendEntries.
@@ -26,9 +23,9 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 public class AppendEntriesTest {
     @Test
     public void testSerialization() {
-        ReplicatedLogEntry entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
+        final var entry1 = new AppendEntries.Entry(1, 2, new MockPayload("payload1"));
 
-        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
+        final var entry2 = new AppendEntries.Entry(3, 4, new MockPayload("payload2"));
 
         short payloadVersion = 5;
 
@@ -66,18 +63,18 @@ public class AppendEntriesTest {
         assertEquals("getPayloadVersion", expected.getPayloadVersion(), actual.getPayloadVersion());
 
         assertEquals("getEntries size", expected.getEntries().size(), actual.getEntries().size());
-        Iterator<ReplicatedLogEntry> iter = expected.getEntries().iterator();
-        for (ReplicatedLogEntry e: actual.getEntries()) {
-            verifyReplicatedLogEntry(iter.next(), e);
+        final var iter = expected.getEntries().iterator();
+        for (var entry : actual.getEntries()) {
+            verifyReplicatedLogEntry(iter.next(), entry);
         }
 
         assertEquals("getLeaderAddress", expected.leaderAddress(), actual.leaderAddress());
         assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
     }
 
-    private static void verifyReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
-        assertEquals("getIndex", expected.getIndex(), actual.getIndex());
-        assertEquals("getTerm", expected.getTerm(), actual.getTerm());
-        assertEquals("getData", expected.getData().toString(), actual.getData().toString());
+    private static void verifyReplicatedLogEntry(final AppendEntries.Entry expected, final AppendEntries.Entry actual) {
+        assertEquals("index", expected.index(), actual.index());
+        assertEquals("term", expected.term(), actual.term());
+        assertEquals("data", expected.data().toString(), actual.data().toString());
     }
 }

@@ -17,15 +17,28 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
 /**
  * Invoked by leader to replicate log entries (§5.3); also used as heartbeat (§5.2).
  */
 public final class AppendEntries extends AbstractRaftRPC {
+    /**
+     * A single entry that needs to be appended.
+     *
+     * @param index entry index
+     * @param term entry term
+     * @param data entry payload
+     */
+    @NonNullByDefault
+    public record Entry(long index, long term, Payload data) {
+        public Entry {
+            requireNonNull(data);
+        }
+    }
+
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -39,7 +52,7 @@ public final class AppendEntries extends AbstractRaftRPC {
     private final long prevLogTerm;
 
     // log entries to store (empty for heart beat - may send more than one for efficiency)
-    private final @NonNull List<ReplicatedLogEntry> entries;
+    private final @NonNull List<Entry> entries;
 
     // leader's commitIndex
     private final long leaderCommit;
@@ -56,7 +69,7 @@ public final class AppendEntries extends AbstractRaftRPC {
     private final String leaderAddress;
 
     AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
-            final long prevLogTerm, @NonNull final List<ReplicatedLogEntry> entries, final long leaderCommit,
+            final long prevLogTerm, @NonNull final List<Entry> entries, final long leaderCommit,
             final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
             final short leaderRaftVersion, @Nullable final String leaderAddress) {
         super(term);
@@ -73,7 +86,7 @@ public final class AppendEntries extends AbstractRaftRPC {
     }
 
     public AppendEntries(final long term, final @NonNull String leaderId, final long prevLogIndex,
-            final long prevLogTerm, final @NonNull List<ReplicatedLogEntry> entries, final long leaderCommit,
+            final long prevLogTerm, final @NonNull List<Entry> entries, final long leaderCommit,
             final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
             final @Nullable String leaderAddress) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
@@ -82,7 +95,7 @@ public final class AppendEntries extends AbstractRaftRPC {
 
     @VisibleForTesting
     public AppendEntries(final long term, final @NonNull String leaderId, final long prevLogIndex,
-            final long prevLogTerm, final @NonNull List<ReplicatedLogEntry> entries, final long leaderCommit,
+            final long prevLogTerm, final @NonNull List<Entry> entries, final long leaderCommit,
             final long replicatedToAllIndex, final short payloadVersion) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
                 RaftVersions.CURRENT_VERSION, null);
@@ -100,7 +113,7 @@ public final class AppendEntries extends AbstractRaftRPC {
         return prevLogTerm;
     }
 
-    public @NonNull List<ReplicatedLogEntry> getEntries() {
+    public @NonNull List<Entry> getEntries() {
         return entries;
     }
 
@@ -174,10 +187,10 @@ public final class AppendEntries extends AbstractRaftRPC {
             out.writeShort(appendEntries.payloadVersion);
 
             out.writeInt(appendEntries.entries.size());
-            for (ReplicatedLogEntry e: appendEntries.entries) {
-                out.writeLong(e.getIndex());
-                out.writeLong(e.getTerm());
-                out.writeObject(e.getData());
+            for (var entry: appendEntries.entries) {
+                out.writeLong(entry.index());
+                out.writeLong(entry.term());
+                out.writeObject(entry.data());
             }
 
             out.writeObject(appendEntries.leaderAddress);
@@ -195,9 +208,9 @@ public final class AppendEntries extends AbstractRaftRPC {
             short payloadVersion = in.readShort();
 
             int size = in.readInt();
-            var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
+            var entries = ImmutableList.<Entry>builderWithExpectedSize(size);
             for (int i = 0; i < size; i++) {
-                entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
+                entries.add(new Entry(in.readLong(), in.readLong(), (Payload) in.readObject()));
             }
 
             String leaderAddress = (String)in.readObject();

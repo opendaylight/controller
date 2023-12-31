@@ -52,7 +52,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
         AppendEntries appendEntries = expectFirstMatching(follower1CollectorActor, AppendEntries.class);
         assertEquals("AppendEntries - # entries", 1, appendEntries.getEntries().size());
-        verifyReplicatedLogEntry(appendEntries.getEntries().get(0), currentTerm, 0, payload0);
+        verifyEntry(appendEntries.getEntries().get(0), currentTerm, 0, payload0);
 
         // Kill the leader actor.
         killActor(leaderActor);
