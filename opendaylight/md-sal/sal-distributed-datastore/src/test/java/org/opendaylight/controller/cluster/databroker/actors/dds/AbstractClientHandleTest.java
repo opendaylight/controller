@@ -147,8 +147,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
 
     @Test
     public void testEnsureProxy() {
-        final AbstractProxyTransaction expected = mock(AbstractProxyTransaction.class);
-        final AbstractProxyTransaction proxy = handle.ensureProxy(PATH);
+        final var proxy = handle.ensureProxy(PATH);
         assertEquals(0, proxy.getIdentifier().getTransactionId());
     }
 
