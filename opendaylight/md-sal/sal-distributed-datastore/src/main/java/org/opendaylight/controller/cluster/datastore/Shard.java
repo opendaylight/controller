@@ -965,13 +965,13 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = null;
 
         //notify shard manager
-        getContext().parent().tell(new ActorInitialized(), getSelf());
+        getContext().parent().tell(new ActorInitialized(getSelf()), ActorRef.noSender());
 
         // Being paranoid here - this method should only be called once but just in case...
         if (txCommitTimeoutCheckSchedule == null) {
             // Schedule a message to be periodically sent to check if the current in-progress
             // transaction should be expired and aborted.
-            FiniteDuration period = FiniteDuration.create(transactionCommitTimeout / 3, TimeUnit.MILLISECONDS);
+            final var period = FiniteDuration.create(transactionCommitTimeout / 3, TimeUnit.MILLISECONDS);
             txCommitTimeoutCheckSchedule = getContext().system().scheduler().schedule(
                     period, period, getSelf(),
                     TX_COMMIT_TIMEOUT_CHECK_MESSAGE, getContext().dispatcher(), ActorRef.noSender());
