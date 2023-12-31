@@ -61,7 +61,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
@@ -76,7 +75,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import org.opendaylight.controller.cluster.datastore.messages.RemoteFindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
-import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
@@ -85,6 +84,8 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.Recovered;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -209,8 +210,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             findLocalShard(msg);
         } else if (message instanceof UpdateSchemaContext msg) {
             updateSchemaContext(msg);
-        } else if (message instanceof ActorInitialized msg) {
-            onActorInitialized(msg);
+        } else if (message instanceof RaftActorEvent msg) {
+            onRaftActorEvent(msg);
         } else if (message instanceof ClusterEvent.MemberUp msg) {
             memberUp(msg);
         } else if (message instanceof ClusterEvent.MemberWeaklyUp msg) {
@@ -231,7 +232,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onFollowerInitialSyncStatus(msg);
         } else if (message instanceof ShardNotInitializedTimeout msg) {
             onShardNotInitializedTimeout(msg);
-        } else if (message instanceof ShardLeaderStateChanged msg) {
+        } else if (message instanceof ShardLeaderChanged msg) {
             onLeaderStateChanged(msg);
         } else if (message instanceof SwitchShardBehavior msg) {
             onSwitchShardBehavior(msg);
@@ -610,14 +611,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void onLeaderStateChanged(final ShardLeaderStateChanged leaderStateChanged) {
+    private void onLeaderStateChanged(final ShardLeaderChanged leaderStateChanged) {
         LOG.info("{}: Received LeaderStateChanged message: {}", persistenceId(), leaderStateChanged);
 
-        ShardInformation shardInformation = findShardInformation(leaderStateChanged.getMemberId());
+        ShardInformation shardInformation = findShardInformation(leaderStateChanged.memberId());
         if (shardInformation != null) {
             shardInformation.setLocalDataTree(leaderStateChanged.localShardDataTree());
-            shardInformation.setLeaderVersion(leaderStateChanged.getLeaderPayloadVersion());
-            if (shardInformation.setLeaderId(leaderStateChanged.getLeaderId())) {
+            shardInformation.setLeaderVersion(leaderStateChanged.leaderPayloadVersion());
+            if (shardInformation.setLeaderId(leaderStateChanged.leaderId())) {
                 primaryShardInfoCache.remove(shardInformation.getShardName());
 
                 notifyShardAvailabilityCallbacks(shardInformation);
@@ -625,7 +626,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             checkReady();
         } else {
-            LOG.debug("No shard found with member Id {}", leaderStateChanged.getMemberId());
+            LOG.debug("No shard found with member Id {}", leaderStateChanged.memberId());
         }
     }
 
@@ -707,8 +708,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return true;
     }
 
-    private void onActorInitialized(final ActorInitialized message) {
-        final var sender = message.actorRef();
+    private void onRaftActorEvent(final RaftActorEvent event) {
+        if (event instanceof RaftActorEvent.Recovered recoveryCompleted) {
+            onRaftActorRecovered(recoveryCompleted);
+        }
+    }
+
+    private void onRaftActorRecovered(final Recovered message) {
+        final var sender = message.raftActor();
 
         String actorName = sender.path().name();
         //find shard name from actor name; actor name is stringified shardId

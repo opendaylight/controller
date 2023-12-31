@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import akka.actor.ActorRef;
 import java.util.List;
@@ -16,8 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor.Builder;
+import org.opendaylight.controller.cluster.raft.RaftActorEvent.LeaderChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
@@ -371,16 +372,14 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         follower1Actor.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
         followerInstance.startDropMessages(AppendEntries.class);
 
-        LeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,
-                LeaderStateChanged.class);
-        assertEquals("getLeaderId", null, leaderStateChanged.getLeaderId());
+        var leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier, LeaderChanged.class);
+        assertNull("getLeaderId", leaderStateChanged.leaderId());
 
         MessageCollectorActor.clearMessages(roleChangeNotifier);
         followerInstance.stopDropMessages(AppendEntries.class);
 
-        leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,
-                LeaderStateChanged.class);
-        assertEquals("getLeaderId", leaderId, leaderStateChanged.getLeaderId());
+        leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier, LeaderChanged.class);
+        assertEquals("getLeaderId", leaderId, leaderStateChanged.leaderId());
     }
 
     private void createNewLeaderActor() {

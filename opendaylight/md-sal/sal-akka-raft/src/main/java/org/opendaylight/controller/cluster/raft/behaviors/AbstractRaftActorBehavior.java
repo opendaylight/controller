@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -55,7 +56,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      * The RaftState corresponding to his behavior.
      */
-    private final RaftState state;
+    private final @NonNull RaftState state;
 
     /**
      * Used to cancel a scheduled election.
