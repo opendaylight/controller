@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
@@ -82,19 +81,19 @@ public class RaftActorLeadershipTransferCohort {
     }
 
     void init() {
-        RaftActorContext context = raftActor.getRaftActorContext();
-        RaftActorBehavior currentBehavior = raftActor.getCurrentBehavior();
+        final var context = raftActor.getRaftActorContext();
+        final var currentBehavior = raftActor.getCurrentBehavior();
 
         transferTimer.start();
 
-        Optional<ActorRef> roleChangeNotifier = raftActor.getRoleChangeNotifier();
-        if (roleChangeNotifier.isPresent()) {
-            roleChangeNotifier.orElseThrow().tell(raftActor.newLeaderStateChanged(context.getId(), null,
-                    currentBehavior.getLeaderPayloadVersion()), raftActor.self());
+        final var roleChangeNotifier = raftActor.roleChangeNotifier();
+        if (roleChangeNotifier != null) {
+            roleChangeNotifier.tell(raftActor.newLeaderStateChanged(context.getId(), null,
+                currentBehavior.getLeaderPayloadVersion()), raftActor.self());
         }
 
-        for (String peerId: context.getPeerIds()) {
-            ActorSelection followerActor = context.getPeerActorSelection(peerId);
+        for (var peerId : context.getPeerIds()) {
+            final var followerActor = context.getPeerActorSelection(peerId);
             if (followerActor != null) {
                 followerActor.tell(new LeaderTransitioning(context.getId()), context.getActor());
             }
