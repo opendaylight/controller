@@ -20,7 +20,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
 import org.slf4j.Logger;
@@ -59,13 +58,13 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
         LOG.debug("{}: applying snapshot {} over clients {}", shardName, snapshot, clients);
         clients.clear();
 
-        for (FrontendClientMetadata m : snapshot.getClients()) {
-            LOG.debug("{}: applying metadata {}", shardName, m);
-            final FrontendClientMetadataBuilder b = FrontendClientMetadataBuilder.of(shardName, m);
-            final FrontendIdentifier client = m.getIdentifier().getFrontendId();
+        for (var clientMeta : snapshot.getClients()) {
+            LOG.debug("{}: applying metadata {}", shardName, clientMeta);
+            final var builder = FrontendClientMetadataBuilder.of(shardName, clientMeta);
+            final var frontendId = clientMeta.clientId().getFrontendId();
 
-            LOG.debug("{}: client {} updated to {}", shardName, client, b);
-            clients.put(client, b);
+            LOG.debug("{}: client {} updated to {}", shardName, frontendId, builder);
+            clients.put(frontendId, builder);
         }
     }
 
@@ -76,13 +75,13 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     }
 
     private FrontendClientMetadataBuilder ensureClient(final ClientIdentifier id) {
-        final FrontendClientMetadataBuilder existing = clients.get(id.getFrontendId());
-        if (existing != null && id.equals(existing.getIdentifier())) {
+        final var existing = clients.get(id.getFrontendId());
+        if (existing != null && id.equals(existing.clientId())) {
             return existing;
         }
 
-        final FrontendClientMetadataBuilder client = new FrontendClientMetadataBuilder.Enabled(shardName, id);
-        final FrontendClientMetadataBuilder previous = clients.put(id.getFrontendId(), client);
+        final var client = new FrontendClientMetadataBuilder.Enabled(shardName, id);
+        final var previous = clients.put(id.getFrontendId(), client);
         if (previous != null) {
             LOG.debug("{}: Replaced client {} with {}", shardName, previous, client);
         } else {
@@ -136,8 +135,8 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     }
 
     void disableTracking(final ClientIdentifier clientId) {
-        final FrontendIdentifier frontendId = clientId.getFrontendId();
-        final FrontendClientMetadataBuilder client = clients.get(frontendId);
+        final var frontendId = clientId.getFrontendId();
+        final var client = clients.get(frontendId);
         if (client == null) {
             // When we have not seen the client before, we still need to disable tracking for him since this only gets
             // triggered once.
@@ -145,7 +144,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
             clients.put(frontendId, new FrontendClientMetadataBuilder.Disabled(shardName, clientId));
             return;
         }
-        if (!clientId.equals(client.getIdentifier())) {
+        if (!clientId.equals(client.clientId())) {
             LOG.debug("{}: disableTracking {} does not match client {}, ignoring", shardName, clientId, client);
             return;
         }
@@ -159,7 +158,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
 
     ImmutableSet<ClientIdentifier> getClients() {
         return clients.values().stream()
-                .map(FrontendClientMetadataBuilder::getIdentifier)
-                .collect(ImmutableSet.toImmutableSet());
+            .map(FrontendClientMetadataBuilder::clientId)
+            .collect(ImmutableSet.toImmutableSet());
     }
 }

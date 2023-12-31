@@ -70,15 +70,15 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
 
         final Map<ClientIdentifier, FrontendClientMetadata> origIdent = new HashMap<>();
         final Map<ClientIdentifier, FrontendClientMetadata> copyIdent = new HashMap<>();
-        origClientList.forEach(client -> origIdent.put(client.getIdentifier(), client));
-        origClientList.forEach(client -> copyIdent.put(client.getIdentifier(), client));
+        origClientList.forEach(client -> origIdent.put(client.clientId(), client));
+        origClientList.forEach(client -> copyIdent.put(client.clientId(), client));
 
         assertTrue(origIdent.keySet().containsAll(copyIdent.keySet()));
         assertTrue(copyIdent.keySet().containsAll(origIdent.keySet()));
 
         origIdent.values().forEach(client -> {
-            final FrontendClientMetadata copyClient = copyIdent.get(client.getIdentifier());
-            testObject(client.getIdentifier(), copyClient.getIdentifier());
+            final var copyClient = copyIdent.get(client.clientId());
+            testObject(client.clientId(), copyClient.clientId());
             assertEquals(client.getPurgedHistories(), copyClient.getPurgedHistories());
             assertEquals(client.getCurrentHistories(), copyClient.getCurrentHistories());
         });
