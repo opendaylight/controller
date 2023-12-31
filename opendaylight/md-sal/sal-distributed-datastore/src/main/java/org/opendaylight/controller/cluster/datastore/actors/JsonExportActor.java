@@ -145,7 +145,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
             for (var entry : entries) {
                 final var data = entry.getData();
                 if (data instanceof CommitTransactionPayload payload) {
-                    final var candidate = payload.getCandidate().getValue().candidate();
+                    final var candidate = payload.getCandidate().candidate();
                     writeNode(jsonWriter, candidate);
                 } else {
                     jsonWriter.beginObject().name("Payload").value(data.toString()).endObject();
