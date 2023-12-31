@@ -318,16 +318,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 log.info("{}: follower {} appears to be behind the leader from the last snapshot - "
                     + "updated: matchIndex: {}, nextIndex: {}", logName(), followerId,
                     followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
-            } else {
-                // The follower's log conflicts with leader's log so decrement follower's next index
-                // in an attempt to find where the logs match.
-                if (followerLogInformation.decrNextIndex(appendEntriesReply.getLogLastIndex())) {
-                    updated = true;
+            } else // The follower's log conflicts with leader's log so decrement follower's next index
+            // in an attempt to find where the logs match.
+            if (followerLogInformation.decrNextIndex(appendEntriesReply.getLogLastIndex())) {
+                updated = true;
 
-                    log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
-                            logName(), followerId, appendEntriesReply.getLogLastTerm(),
-                            followersLastLogTermInLeadersLogOrSnapshot, followerLogInformation.getNextIndex());
-                }
+                log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
+                        logName(), followerId, appendEntriesReply.getLogLastTerm(),
+                        followersLastLogTermInLeadersLogOrSnapshot, followerLogInformation.getNextIndex());
             }
         }
 
@@ -647,17 +645,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     private void replicate(final Replicate replicate) {
-        long logIndex = replicate.getReplicatedLogEntry().getIndex();
+        final long logIndex = replicate.logIndex();
 
-        log.debug("{}: Replicate message: identifier: {}, logIndex: {}, payload: {}, isSendImmediate: {}", logName(),
-                replicate.getIdentifier(), logIndex, replicate.getReplicatedLogEntry().getData().getClass(),
-                replicate.isSendImmediate());
+        log.debug("{}: Replicate message: identifier: {}, logIndex: {}, isSendImmediate: {}", logName(),
+                replicate.identifier(), logIndex, replicate.sendImmediate());
 
         // Create a tracker entry we will use this later to notify the
         // client actor
-        final var clientActor = replicate.getClientActor();
+        final var clientActor = replicate.clientActor();
         if (clientActor != null) {
-            trackers.add(new ClientRequestTrackerImpl(clientActor, replicate.getIdentifier(), logIndex));
+            trackers.add(new ClientRequestTrackerImpl(clientActor, replicate.identifier(), logIndex));
         }
 
         boolean applyModificationToState = !context.anyVotingPeers()
@@ -668,7 +665,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(logIndex);
         }
 
-        if (replicate.isSendImmediate() && !followerToLog.isEmpty()) {
+        if (replicate.sendImmediate() && !followerToLog.isEmpty()) {
             sendAppendEntries(0, false);
         }
     }
