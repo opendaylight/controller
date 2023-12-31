@@ -32,10 +32,10 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
  * around a {@link PersistentRepr}, while {@link #read(EntryInput)} produces an {@link FromPersistence}, which
  * needs further processing to reconstruct a {@link PersistentRepr}.
  */
-final class DataJournalEntrySerializer implements EntrySerdes<DataJournalEntry> {
+final class DataJournalEntrySerdes implements EntrySerdes<DataJournalEntry> {
     private final ExtendedActorSystem actorSystem;
 
-    DataJournalEntrySerializer(final ActorSystem actorSystem) {
+    DataJournalEntrySerdes(final ActorSystem actorSystem) {
         this.actorSystem = requireNonNull((ExtendedActorSystem) actorSystem);
     }
 
