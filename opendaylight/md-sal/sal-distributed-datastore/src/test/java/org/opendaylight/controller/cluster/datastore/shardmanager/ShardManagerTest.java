@@ -423,7 +423,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         DataTree mockDataTree = mock(DataTree.class);
         shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
@@ -452,7 +452,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
@@ -476,7 +476,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         MockClusterWrapper.sendMemberUp(shardManager, "member-2", kit.getRef().path().toString());
@@ -514,7 +514,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
 
@@ -528,7 +528,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.tell(
@@ -571,7 +571,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         kit.expectNoMessage(Duration.ofMillis(150));
 
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         kit.expectNoMessage(Duration.ofMillis(150));
 
@@ -608,7 +608,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         kit.expectMsgClass(Duration.ofSeconds(2), NotInitializedException.class);
 
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         kit.expectNoMessage(Duration.ofMillis(200));
 
@@ -622,7 +622,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
         shardManager.tell(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix, null,
             RaftState.Candidate.name()), mockShardActor);
 
@@ -640,7 +640,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
         shardManager.tell(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix, null,
             RaftState.IsolatedLeader.name()), mockShardActor);
 
@@ -658,7 +658,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), kit.getRef());
 
@@ -703,7 +703,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        shardManager2.tell(new ActorInitialized(), mockShardActor2);
+        shardManager2.tell(new ActorInitialized(mockShardActor2), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
@@ -771,8 +771,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestKit kit = new TestKit(system1);
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager1.tell(new ActorInitialized(), mockShardActor1);
-        shardManager2.tell(new ActorInitialized(), mockShardActor2);
+        shardManager1.tell(new ActorInitialized(mockShardActor1), ActorRef.noSender());
+        shardManager2.tell(new ActorInitialized(mockShardActor1), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
@@ -877,8 +877,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestKit kit = new TestKit(system1);
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager1.tell(new ActorInitialized(), mockShardActor1);
-        shardManager2.tell(new ActorInitialized(), mockShardActor2);
+        shardManager1.tell(new ActorInitialized(mockShardActor1), ActorRef.noSender());
+        shardManager2.tell(new ActorInitialized(mockShardActor2), ActorRef.noSender());
 
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
@@ -973,8 +973,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestKit kit256 = new TestKit(system256);
         shardManager256.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit256.getRef());
         shardManager2.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit256.getRef());
-        shardManager256.tell(new ActorInitialized(), mockShardActor256);
-        shardManager2.tell(new ActorInitialized(), mockShardActor2);
+        shardManager256.tell(new ActorInitialized(mockShardActor256), ActorRef.noSender());
+        shardManager2.tell(new ActorInitialized(mockShardActor2), ActorRef.noSender());
 
         String memberId256 = "member-256-shard-default-" + shardMrgIDSuffix;
         String memberId2   = "member-2-shard-default-"   + shardMrgIDSuffix;
@@ -1048,7 +1048,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), kit.getRef());
 
@@ -1082,7 +1082,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         Future<Object> future = Patterns.ask(shardManager, new FindLocalShard(Shard.DEFAULT_NAME, true),
             new Timeout(5, TimeUnit.SECONDS));
 
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         Object resp = Await.result(future, kit.duration("5 seconds"));
         assertTrue("Expected: LocalShardFound, Actual: " + resp, resp instanceof LocalShardFound);
@@ -1254,7 +1254,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         shardManager.tell(new SwitchShardBehavior(mockShardName, RaftState.Leader, 1000), kit.getRef());
 
@@ -1530,7 +1530,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         newReplicaShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         leaderShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        leaderShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
+        leaderShardManager.tell(new ActorInitialized(mockShardLeaderActor), ActorRef.noSender());
 
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
         leaderShardManager.tell(
@@ -1581,7 +1581,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 .createTestActor(newPropsShardMgrWithMockShardActor(), shardMgrID);
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         String leaderId = "leader-member-shard-default-" + shardMrgIDSuffix;
         AddServerReply addServerReply = new AddServerReply(ServerChangeStatus.ALREADY_EXISTS, null);
@@ -1639,7 +1639,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
         shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), kit.getRef());
         shardManager.tell(
@@ -1754,7 +1754,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), respondActor);
+        shardManager.tell(new ActorInitialized(respondActor), ActorRef.noSender());
         shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), kit.getRef());
         shardManager.tell(
@@ -1826,8 +1826,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         newReplicaShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         leaderShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        leaderShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
-        newReplicaShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
+        leaderShardManager.tell(new ActorInitialized(mockShardLeaderActor), ActorRef.noSender());
+        newReplicaShardManager.tell(new ActorInitialized(mockShardLeaderActor), ActorRef.noSender());
 
         short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
         leaderShardManager.tell(
@@ -1948,7 +1948,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.underlyingActor().waitForRecoveryComplete();
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), shard);
+        shardManager.tell(new ActorInitialized(shard), ActorRef.noSender());
 
         waitForShardInitialized(shardManager, "people", kit);
         waitForShardInitialized(shardManager, "default", kit);
@@ -2017,8 +2017,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             .addShardActor("shard1", shard1).addShardActor("shard2", shard2).props());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), shard1);
-        shardManager.tell(new ActorInitialized(), shard2);
+        shardManager.tell(new ActorInitialized(shard1), ActorRef.noSender());
+        shardManager.tell(new ActorInitialized(shard2), ActorRef.noSender());
 
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
         Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE);
@@ -2054,7 +2054,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), respondActor);
+        shardManager.tell(new ActorInitialized(respondActor), ActorRef.noSender());
         shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mock(DataTree.class),
             DataStoreVersions.CURRENT_VERSION), kit.getRef());
         shardManager.tell(
@@ -2086,7 +2086,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), respondActor);
+        shardManager.tell(new ActorInitialized(respondActor), ActorRef.noSender());
         shardManager.tell(new RoleChangeNotification(memberId, null, RaftState.Follower.name()), respondActor);
 
         shardManager.tell(
@@ -2109,7 +2109,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
-        shardManager.tell(new ActorInitialized(), mockShardActor);
+        shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
         final Consumer<String> mockCallback = mock(Consumer.class);
         shardManager.tell(new RegisterForShardAvailabilityChanges(mockCallback), kit.getRef());
