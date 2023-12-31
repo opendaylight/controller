@@ -317,7 +317,7 @@ final class SegmentedJournalActor extends AbstractActor {
         final var lastEntry = deleteJournal.writer().getLastEntry();
         lastDelete = lastEntry == null ? 0 : lastEntry.entry();
 
-        dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
+        dataJournal = DataJournal.create(persistenceId, messageSize, context().system(), storage, directory,
             maxEntrySize, maxSegmentSize);
         dataJournal.deleteTo(lastDelete);
         LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
