@@ -131,12 +131,12 @@ public class SegmentedFileJournalTest {
         actor.tell(write, ActorRef.noSender());
         requests.forEach(future -> assertFalse(getFuture(future).isPresent()));
 
-        assertFileCount(2, 1);
+        assertFileCount(2, 1, 1);
 
         // Delete all but the last entry
         deleteEntries(requests.size());
 
-        assertFileCount(1, 1);
+        assertFileCount(1, 1, 1);
     }
 
     @Test
@@ -145,19 +145,117 @@ public class SegmentedFileJournalTest {
             writeBigPaylod();
         }
 
-        assertFileCount(10, 1);
+        assertFileCount(10, 1, 1);
 
         // delete including index 3, so get rid of the first segment
         deleteEntries(3);
-        assertFileCount(9, 1);
+        assertFileCount(9, 1, 1);
 
         // get rid of segments 2(index 4-6) and 3(index 7-9)
         deleteEntries(9);
-        assertFileCount(7, 1);
+        assertFileCount(7, 1, 1);
 
         // get rid of all segments except the last one
         deleteEntries(27);
-        assertFileCount(1, 1);
+        assertFileCount(1, 1, 1);
+
+        restartActor();
+
+        // Check if state is retained
+        assertHighestSequenceNr(30);
+        // 28,29,30 replayed
+        assertReplayCount(3);
+
+
+        deleteEntries(28);
+        restartActor();
+
+        assertHighestSequenceNr(30);
+        // 29,30 replayed
+        assertReplayCount(2);
+
+        deleteEntries(29);
+        restartActor();
+
+        // 30 replayed
+        assertReplayCount(1);
+
+        deleteEntries(30);
+        restartActor();
+
+        // nothing replayed
+        assertReplayCount(0);
+    }
+
+    @Test
+    public void testComplexDeletesAndPartialReplays1() throws Exception {
+        for (int i = 0; i <= 1; i++) {
+            writeBigPaylodWithUuid("uuide" + i);
+            writeBigPaylod();
+        }
+        writeBigPaylodWithUuid("uuide-last");
+
+        assertFileCount(10, 1, 1);
+
+        // delete including index 3, so get rid of the first segment
+        deleteEntries(3);
+        assertFileCount(9, 1, 1);
+
+        // get rid of segments 2(index 4-6) and 3(index 7-9)
+        deleteEntries(9);
+        assertFileCount(7, 1, 1);
+
+        // get rid of all segments except the last one
+        deleteEntries(27);
+        assertFileCount(1, 1, 1);
+
+        restartActor();
+
+        // Check if state is retained
+        assertHighestSequenceNr(30);
+        // 28,29,30 replayed
+        assertReplayCount(3);
+
+
+        deleteEntries(28);
+        restartActor();
+
+        assertHighestSequenceNr(30);
+        // 29,30 replayed
+        assertReplayCount(2);
+
+        deleteEntries(29);
+        restartActor();
+
+        // 30 replayed
+        assertReplayCount(1);
+
+        deleteEntries(30);
+        restartActor();
+
+        // nothing replayed
+        assertReplayCount(0);
+    }
+
+    @Test
+    public void testComplexDeletesAndPartialReplays2() throws Exception {
+        for (int i = 0; i <= 4; i++) {
+            writeBigPaylodBigUuid();
+        }
+
+        assertFileCount(10, 10, 1);
+
+        // delete including index 3, so get rid of the first segment
+        deleteEntries(3);
+        assertFileCount(9, 9, 1);
+
+        // get rid of segments 2(index 4-6) and 3(index 7-9)
+        deleteEntries(9);
+        assertFileCount(7, 7, 1);
+
+        // get rid of all segments except the last one
+        deleteEntries(27);
+        assertFileCount(1, 1, 1);
 
         restartActor();
 
@@ -190,6 +288,45 @@ public class SegmentedFileJournalTest {
     private void restartActor() {
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         actor = actor();
+    }
+
+    private void writeBigPaylodWithUuid(final String uuid) {
+        final LargePayload payload = new LargePayload();
+
+        final WriteMessages write = new WriteMessages();
+        final List<Future<Optional<Exception>>> requests = new ArrayList<>();
+
+        // Each payload is half of segment size, plus some overhead, should result in two segments being present
+        for (int i = 1; i <= SEGMENT_SIZE * 3 / MESSAGE_SIZE; ++i) {
+            requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
+                    uuid + i))));
+        }
+
+        actor.tell(write, ActorRef.noSender());
+        requests.forEach(future -> assertFalse(getFuture(future).isPresent()));
+    }
+
+    private void writeBigPaylodBigUuid() {
+        final LargePayload payload = new LargePayload();
+
+        final char[] bytes = new char[MESSAGE_SIZE / 2];
+
+        for (int i = 0; i < MESSAGE_SIZE / 16; i++) {
+            bytes[i] = 'b';
+        }
+
+        final WriteMessages write = new WriteMessages();
+        final List<Future<Optional<Exception>>> requests = new ArrayList<>();
+
+        // Each payload is half of segment size, plus some overhead, should result in two segments being present
+        for (int i = 1; i <= SEGMENT_SIZE * 3 / MESSAGE_SIZE; ++i) {
+            bytes[i] = 'a';
+            requests.add(write.add(AtomicWrite.apply(PersistentRepr.apply(payload, i, "foo", null, false, kit.getRef(),
+                    new String(bytes)))));
+        }
+
+        actor.tell(write, ActorRef.noSender());
+        requests.forEach(future -> assertFalse(getFuture(future).isPresent()));
     }
 
     private void writeBigPaylod() {
@@ -236,9 +373,11 @@ public class SegmentedFileJournalTest {
         verify(firstCallback, times(expected)).accept(any(PersistentRepr.class));
     }
 
-    private static void assertFileCount(final long dataFiles, final long deleteFiles) throws IOException {
+    private static void assertFileCount(final long dataFiles, final long uuideFiles,
+            final long deleteFiles) throws IOException {
         List<File> contents = Files.list(DIRECTORY.toPath()).map(Path::toFile).collect(Collectors.toList());
         assertEquals(dataFiles, contents.stream().filter(file -> file.getName().startsWith("data-")).count());
+        assertEquals(uuideFiles, contents.stream().filter(file -> file.getName().startsWith("uuides-")).count());
         assertEquals(deleteFiles, contents.stream().filter(file -> file.getName().startsWith("delete-")).count());
     }
 
