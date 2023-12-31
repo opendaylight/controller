@@ -165,12 +165,11 @@ public class Follower extends AbstractRaftActorBehavior {
         leaderId = appendEntries.getLeaderId();
         leaderPayloadVersion = appendEntries.getPayloadVersion();
 
-        if (appendEntries.getLeaderAddress().isPresent()) {
-            final String address = appendEntries.getLeaderAddress().orElseThrow();
-            log.debug("New leader address: {}", address);
-
-            context.setPeerAddress(leaderId, address);
-            context.getConfigParams().getPeerAddressResolver().setResolved(leaderId, address);
+        final var leaderAddress = appendEntries.leaderAddress();
+        if (leaderAddress != null) {
+            log.debug("New leader address: {}", leaderAddress);
+            context.setPeerAddress(leaderId, leaderAddress);
+            context.getConfigParams().getPeerAddressResolver().setResolved(leaderId, leaderAddress);
         }
 
         // First check if the logs are in sync or not
