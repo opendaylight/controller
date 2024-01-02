@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b7639242_df5a3bdc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2024-01-02T18:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf5754fd_8b223201",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dbc1f81d_1cff2f80",
@@ -31,6 +49,24 @@
       "writtenOn": "2024-01-02T13:08:18Z",
       "side": 1,
       "message": "No more RESTCONF 02. But RESTCONF RFC 8040.",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "241f5ad9_9a1c557b",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2024-01-02T18:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dbc1f81d_1cff2f80",
       "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -52,6 +88,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3580076a_222f6d6b",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2024-01-02T18:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53ede301_65a28da3",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d6747ac5_b9c31240",
@@ -65,6 +119,24 @@
       "writtenOn": "2024-01-02T13:08:18Z",
       "side": 1,
       "message": "No idea how accurate is the image now, but write comment here that URI on image is different or edit the image.",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ab9f990_6cf133cf",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2024-01-02T18:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6747ac5_b9c31240",
       "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
