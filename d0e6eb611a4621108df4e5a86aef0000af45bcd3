@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cf5754fd_8b223201",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-01-02T13:08:18Z",
+      "side": 1,
+      "message": "Should be the last line.",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dbc1f81d_1cff2f80",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-01-02T13:08:18Z",
+      "side": 1,
+      "message": "No more RESTCONF 02. But RESTCONF RFC 8040.",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "53ede301_65a28da3",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-01-02T13:08:18Z",
+      "side": 1,
+      "message": "non-configuration",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6747ac5_b9c31240",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 7
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-01-02T13:08:18Z",
+      "side": 1,
+      "message": "No idea how accurate is the image now, but write comment here that URI on image is different or edit the image.",
+      "revId": "d0e6eb611a4621108df4e5a86aef0000af45bcd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
