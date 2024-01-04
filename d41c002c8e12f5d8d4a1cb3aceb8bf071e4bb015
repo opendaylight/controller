@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "187880d8_240711bd",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/NewLocalSnapshotStore.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-01-04T16:18:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5e1855d0_5a1c370c",
+      "revId": "d41c002c8e12f5d8d4a1cb3aceb8bf071e4bb015",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "55970ac7_253fed8c",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-12-18T09:56:00Z",
       "side": 1,
       "message": "var",
+      "revId": "d41c002c8e12f5d8d4a1cb3aceb8bf071e4bb015",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0b5df565_80f9cea3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-01-04T16:18:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55970ac7_253fed8c",
       "revId": "d41c002c8e12f5d8d4a1cb3aceb8bf071e4bb015",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
