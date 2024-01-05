@@ -53,10 +53,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This class is not thread-safe, as it is expected to be guarded by {@link AbstractClientConnection}.
- *
- * @author Robert Varga
  */
-abstract class TransmitQueue {
+abstract sealed class TransmitQueue {
     static final class Halted extends TransmitQueue {
         // For ConnectingClientConnection.
         Halted(final int targetDepth) {
