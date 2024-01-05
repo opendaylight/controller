@@ -16,6 +16,24 @@
       "message": "The format for keys have changed.",
       "revId": "83b4348476bf243d7aadbd174d89bf47b0b92303",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "938c97eb_99cca404",
+        "filename": "docs/dev-guide.rst",
+        "patchSetId": 8
+      },
+      "lineNbr": 904,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2024-01-05T16:03:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69a410de_d389e589",
+      "revId": "83b4348476bf243d7aadbd174d89bf47b0b92303",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
