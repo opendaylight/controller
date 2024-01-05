@@ -102,12 +102,12 @@ public final class SkipTransactionsRequest extends TransactionRequest<SkipTransa
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new STR(this);
     }
 
     @Override
-    protected SkipTransactionsRequest cloneAsVersion(final ABIVersion version) {
+    public SkipTransactionsRequest cloneAsVersion(final ABIVersion version) {
         return new SkipTransactionsRequest(this, version);
     }
 

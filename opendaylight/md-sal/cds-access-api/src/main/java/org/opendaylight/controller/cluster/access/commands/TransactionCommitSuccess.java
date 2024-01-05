@@ -13,8 +13,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Successful reply to a coordinated commit request. It contains a reference to the actor which is handling the commit
  * process.
- *
- * @author Robert Varga
  */
 public final class TransactionCommitSuccess extends TransactionSuccess<TransactionCommitSuccess> {
     @java.io.Serial
@@ -29,12 +27,12 @@ public final class TransactionCommitSuccess extends TransactionSuccess<Transacti
     }
 
     @Override
-    protected TCS externalizableProxy(final ABIVersion version) {
+    public TCS externalizableProxy(final ABIVersion version) {
         return new TCS(this);
     }
 
     @Override
-    protected TransactionCommitSuccess cloneAsVersion(final ABIVersion version) {
+    public TransactionCommitSuccess cloneAsVersion(final ABIVersion version) {
         return new TransactionCommitSuccess(this, version);
     }
 }

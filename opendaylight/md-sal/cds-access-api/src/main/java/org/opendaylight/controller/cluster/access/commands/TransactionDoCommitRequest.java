@@ -36,12 +36,12 @@ public final class TransactionDoCommitRequest extends TransactionRequest<Transac
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new TDCR(this);
     }
 
     @Override
-    protected TransactionDoCommitRequest cloneAsVersion(final ABIVersion version) {
+    public TransactionDoCommitRequest cloneAsVersion(final ABIVersion version) {
         return new TransactionDoCommitRequest(this, version);
     }
 }

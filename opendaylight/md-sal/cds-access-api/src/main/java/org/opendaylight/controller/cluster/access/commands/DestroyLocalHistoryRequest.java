@@ -37,12 +37,12 @@ public final class DestroyLocalHistoryRequest extends LocalHistoryRequest<Destro
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new DHR(this);
     }
 
     @Override
-    protected DestroyLocalHistoryRequest cloneAsVersion(final ABIVersion version) {
+    public DestroyLocalHistoryRequest cloneAsVersion(final ABIVersion version) {
         return new DestroyLocalHistoryRequest(this, version);
     }
 }

@@ -11,10 +11,10 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.IOException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * Abstract base class for {@link Request}s involving specific local history. This class is visible outside of this
@@ -44,9 +44,9 @@ public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> exte
 
     @Override
     public final LocalHistoryFailure toRequestFailure(final RequestException cause) {
-        return new LocalHistoryFailure(getTarget(), getSequence(), cause);
+        return new LocalHistoryFailure(target(), sequence(), cause);
     }
 
     @Override
-    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
+    public abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

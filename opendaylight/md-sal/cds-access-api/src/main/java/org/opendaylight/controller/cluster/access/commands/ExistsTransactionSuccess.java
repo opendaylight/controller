@@ -36,12 +36,12 @@ public final class ExistsTransactionSuccess extends TransactionSuccess<ExistsTra
     }
 
     @Override
-    protected ETS externalizableProxy(final ABIVersion version) {
+    public ETS externalizableProxy(final ABIVersion version) {
         return new ETS(this);
     }
 
     @Override
-    protected ExistsTransactionSuccess cloneAsVersion(final ABIVersion version) {
+    public ExistsTransactionSuccess cloneAsVersion(final ABIVersion version) {
         return new ExistsTransactionSuccess(this, version);
     }
 

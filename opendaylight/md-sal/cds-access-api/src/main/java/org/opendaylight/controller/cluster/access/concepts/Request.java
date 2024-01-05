@@ -10,13 +10,8 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
-import com.google.common.base.MoreObjects.ToStringHelper;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -27,47 +22,37 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-public abstract class Request<T extends WritableIdentifier, C extends Request<T, C>> extends Message<T, C> {
-    protected interface SerialForm<T extends WritableIdentifier, C extends Request<T, C>>
-            extends Message.SerialForm<T, C> {
-        @Override
-        default C readExternal(final ObjectInput in, final T target, final long sequence)
-                throws ClassNotFoundException, IOException {
-            return readExternal(in, target, sequence,
-                JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject()));
-        }
-
-        @NonNull C readExternal(@NonNull ObjectInput in, @NonNull T target, long sequence, @NonNull ActorRef replyTo)
-            throws IOException;
-
-        @Override
-        default void writeExternal(final ObjectOutput out, final C msg) throws IOException {
-            out.writeObject(Serialization.serializedActorPath(msg.getReplyTo()));
-        }
-    }
-
+public abstract class Request<T extends WritableIdentifier, C extends Request<T, C>>
+        extends org.opendaylight.controller.akka.queue.Request<T, C> implements VersionedMessage<T, C> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final @NonNull ActorRef replyTo;
+    private final @NonNull ABIVersion version;
 
     protected Request(final @NonNull T target, final long sequence, final @NonNull ActorRef replyTo) {
-        super(target, sequence);
-        this.replyTo = requireNonNull(replyTo);
+        super(target, sequence, replyTo);
+        version = ABIVersion.current();
     }
 
     protected Request(final @NonNull C request, final @NonNull ABIVersion version) {
-        super(request, version);
-        this.replyTo = requireNonNull(request.getReplyTo());
+        super(request);
+        this.version = requireNonNull(version);
+    }
+
+    @Override
+    public final ABIVersion version() {
+        return version;
     }
 
     /**
      * Return the return address where responses to this request should be directed to.
      *
      * @return Original requestor
+     * @deprecated Use {@link #replyTo()} instead.
      */
+    @Deprecated(since = "9.0.0", forRemoval = true)
     public final @NonNull ActorRef getReplyTo() {
-        return replyTo;
+        return replyTo();
     }
 
     /**
@@ -76,13 +61,15 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
      * @param cause Failure cause
      * @return {@link RequestFailure} corresponding to this request
      */
+    @Override
     public abstract @NonNull RequestFailure<T, ?> toRequestFailure(@NonNull RequestException cause);
 
+
     @Override
-    protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("replyTo", replyTo);
+    public final SerialForm<T, C> toSerialForm() {
+        return externalizableProxy(version);
     }
 
     @Override
-    protected abstract SerialForm<T, C> externalizableProxy(ABIVersion version);
+    public abstract SerialForm<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
 }

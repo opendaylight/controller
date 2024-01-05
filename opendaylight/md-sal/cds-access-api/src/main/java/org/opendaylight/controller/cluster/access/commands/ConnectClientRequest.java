@@ -15,10 +15,10 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * Request to connect a frontend instance to the backend. It carries basic information about the frontend:
@@ -85,16 +85,16 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     @Override
     public ConnectClientFailure toRequestFailure(final RequestException cause) {
-        return new ConnectClientFailure(getTarget(), getSequence(), cause);
+        return new ConnectClientFailure(target(), sequence(), cause);
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new CCR(this);
     }
 
     @Override
-    protected ConnectClientRequest cloneAsVersion(final ABIVersion version) {
+    public ConnectClientRequest cloneAsVersion(final ABIVersion version) {
         return new ConnectClientRequest(this, version);
     }
 

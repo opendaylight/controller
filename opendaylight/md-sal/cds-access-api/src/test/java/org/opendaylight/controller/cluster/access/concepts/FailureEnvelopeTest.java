@@ -14,6 +14,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.DataInput;
 import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
+import org.opendaylight.controller.akka.queue.FailureEnvelope;
+import org.opendaylight.controller.akka.queue.RequestException;
+import org.opendaylight.controller.akka.queue.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -28,9 +31,9 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
 
     @Override
     protected void doAdditionalAssertions(final FailureEnvelope envelope, final FailureEnvelope resolvedObject) {
-        assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
-        final var expectedCause = envelope.getMessage().getCause();
-        final var actualCause = resolvedObject.getMessage().getCause();
+        assertEquals(envelope.executionTimeNanos(), resolvedObject.executionTimeNanos());
+        final var expectedCause = envelope.message().cause();
+        final var actualCause = resolvedObject.message().cause();
         assertEquals(expectedCause.getMessage(), actualCause.getMessage());
         assertEquals(expectedCause.isRetriable(), actualCause.isRetriable());
     }
@@ -86,13 +89,13 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         }
 
         @Override
-        protected RequestFailure.SerialForm<WritableIdentifier, MockFailure> externalizableProxy(
+        public RequestFailure.SerialForm<WritableIdentifier, MockFailure> externalizableProxy(
                 final ABIVersion version) {
             return new MockRequestFailureProxy(this);
         }
 
         @Override
-        protected MockFailure cloneAsVersion(final ABIVersion version) {
+        public MockFailure cloneAsVersion(final ABIVersion version) {
             return this;
         }
     }

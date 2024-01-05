@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import org.junit.Test;
+import org.opendaylight.controller.akka.queue.RequestException;
 
 public abstract class RequestExceptionTest<T extends RequestException> {
 
@@ -24,5 +25,4 @@ public abstract class RequestExceptionTest<T extends RequestException> {
     public void testExceptionMessage() {
         checkMessage();
     }
-
 }

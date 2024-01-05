@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
 public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>> {
     @java.io.Serial
@@ -17,7 +17,7 @@ public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>
     }
 
     @Override
-    SE createProxy() {
+    SE toSerialForm() {
         return new SE(this);
     }
 }

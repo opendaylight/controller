@@ -22,7 +22,7 @@ public class SkipTransactionsResponseTest extends AbstractTransactionSuccessTest
     @Test
     public void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
-        assertEquals(OBJECT.getSequence(), clone.getSequence());
-        assertEquals(OBJECT.getTarget(), clone.getTarget());
+        assertEquals(OBJECT.sequence(), clone.sequence());
+        assertEquals(OBJECT.target(), clone.target());
     }
 }

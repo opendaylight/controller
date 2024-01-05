@@ -12,6 +12,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.opendaylight.controller.akka.queue.RequestException;
+import org.opendaylight.controller.akka.queue.RuntimeRequestException;
 
 public class RuntimeRequestExceptionTest extends RequestExceptionTest<RuntimeRequestException> {
 

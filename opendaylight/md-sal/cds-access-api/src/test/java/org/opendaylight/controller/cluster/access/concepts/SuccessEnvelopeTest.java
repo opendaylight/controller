@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static org.junit.Assert.assertEquals;
 
+import org.opendaylight.controller.akka.queue.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 
 public class SuccessEnvelopeTest extends AbstractEnvelopeTest<SuccessEnvelope> {
@@ -19,6 +20,6 @@ public class SuccessEnvelopeTest extends AbstractEnvelopeTest<SuccessEnvelope> {
 
     @Override
     protected void doAdditionalAssertions(final SuccessEnvelope envelope, final SuccessEnvelope resolvedObject) {
-        assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
+        assertEquals(envelope.executionTimeNanos(), resolvedObject.executionTimeNanos());
     }
 }

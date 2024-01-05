@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.akka.queue.RequestException;
 
 /**
  * A {@link RequestException} indicating that the backend has received a RequestEnvelope whose sequence does not match
@@ -16,7 +16,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  */
 public final class OutOfSequenceEnvelopeException extends RequestException {
     @java.io.Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public OutOfSequenceEnvelopeException(final long expectedEnvelope) {
         super("Expecting envelope " + Long.toUnsignedString(expectedEnvelope));

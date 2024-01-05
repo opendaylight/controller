@@ -23,13 +23,13 @@ public class TransactionPreCommitRequestTest extends AbstractTransactionRequestT
     @Test
     public void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
-        assertEquals(OBJECT.getSequence(), clone.getSequence());
-        assertEquals(OBJECT.getTarget(), clone.getTarget());
-        assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());
+        assertEquals(OBJECT.sequence(), clone.sequence());
+        assertEquals(OBJECT.target(), clone.target());
+        assertEquals(OBJECT.replyTo(), clone.replyTo());
     }
 
     @Override
     protected void doAdditionalAssertions(final TransactionPreCommitRequest deserialize) {
-        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.replyTo(), deserialize.replyTo());
     }
 }

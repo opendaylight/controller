@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.akka.queue.RequestException;
 
 /**
  * A {@link RequestException} indicating that the backend has received a request referencing an unknown history. This
@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  */
 public final class UnknownHistoryException extends RequestException {
     @java.io.Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public UnknownHistoryException(final Long lastSeenHistory) {
         super("Last known history is " + historyToString(lastSeenHistory));

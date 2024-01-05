@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -19,9 +18,10 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-public abstract class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C> {
-    protected interface SerialForm<T extends WritableIdentifier, C extends Response<T, C>>
-            extends Message.SerialForm<T, C> {
+public abstract sealed class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C>
+        permits RequestFailure, RequestSuccess {
+    protected sealed interface SerialForm<T extends WritableIdentifier, C extends Response<T, C>>
+            extends Message.SerialForm<T, C> permits RequestFailure.SerialForm, RequestSuccess.SerialForm {
 
     }
 
@@ -32,7 +32,10 @@ public abstract class Response<T extends WritableIdentifier, C extends Response<
         super(target, sequence);
     }
 
-    Response(final @NonNull C response, final @NonNull ABIVersion version) {
-        super(response, version);
+    Response(final @NonNull C response) {
+        super(response);
     }
+
+    @Override
+    protected abstract SerialForm<T, C> toSerialForm();
 }

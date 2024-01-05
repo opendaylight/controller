@@ -27,12 +27,12 @@ public final class TransactionPurgeResponse extends TransactionSuccess<Transacti
     }
 
     @Override
-    protected TPS externalizableProxy(final ABIVersion version) {
+    public TPS externalizableProxy(final ABIVersion version) {
         return new TPS(this);
     }
 
     @Override
-    protected TransactionPurgeResponse cloneAsVersion(final ABIVersion version) {
+    public TransactionPurgeResponse cloneAsVersion(final ABIVersion version) {
         return new TransactionPurgeResponse(this, version);
     }
 }

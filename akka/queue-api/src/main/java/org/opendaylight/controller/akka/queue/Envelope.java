@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
 import static java.util.Objects.requireNonNull;
 
@@ -19,8 +19,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
-public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Serializable {
-    interface SerialForm<T extends Message<?, ?>, E extends Envelope<T>> extends Externalizable {
+public abstract sealed class Envelope<T extends Message<?, ?>> implements Immutable, Serializable
+        permits RequestEnvelope, ResponseEnvelope {
+    public interface SerialForm<T extends Message<?, ?>, E extends Envelope<T>> extends Externalizable {
 
         @NonNull E envelope();
 
@@ -47,8 +48,8 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
         }
 
         default void writeExternal(final ObjectOutput out, final @NonNull E envelope) throws IOException {
-            WritableObjects.writeLongs(out, envelope.getSessionId(), envelope.getTxSequence());
-            out.writeObject(envelope.getMessage());
+            WritableObjects.writeLongs(out, envelope.sessionId(), envelope.txSequence());
+            out.writeObject(envelope.message());
         }
     }
 
@@ -70,7 +71,7 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
      *
      * @return enclose message
      */
-    public @NonNull T getMessage() {
+    public @NonNull T message() {
         return message;
     }
 
@@ -79,7 +80,7 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
      *
      * @return Message sequence
      */
-    public long getTxSequence() {
+    public long txSequence() {
         return txSequence;
     }
 
@@ -88,20 +89,23 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
      *
      * @return Session identifier
      */
-    public long getSessionId() {
+    public long sessionId() {
         return sessionId;
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(Envelope.class).add("sessionId", Long.toHexString(sessionId))
-                .add("txSequence", Long.toHexString(txSequence)).add("message", message).toString();
+    public final String toString() {
+        return MoreObjects.toStringHelper(Envelope.class)
+            .add("sessionId", Long.toHexString(sessionId))
+            .add("txSequence", Long.toHexString(txSequence))
+            .add("message", message)
+            .toString();
     }
 
     @java.io.Serial
     final Object writeReplace() {
-        return createProxy();
+        return toSerialForm();
     }
 
-    abstract @NonNull SerialForm<T, ?> createProxy();
+    abstract @NonNull SerialForm<T, ?> toSerialForm();
 }

@@ -32,7 +32,7 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     protected AbstractRequestTest(final T object, final int baseSize) {
         this.object = requireNonNull(object);
-        this.expectedSize = baseSize + ACTOR_REF_SIZE;
+        expectedSize = baseSize + ACTOR_REF_SIZE;
     }
 
     protected final T object() {
@@ -46,7 +46,7 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     @Test
     public void getReplyToTest() {
-        assertEquals(ACTOR_REF, object.getReplyTo());
+        assertEquals(ACTOR_REF, object.replyTo());
     }
 
     @Test
@@ -62,9 +62,9 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
         @SuppressWarnings("unchecked")
         final T deserialize = (T) SerializationUtils.deserialize(bytes);
 
-        assertEquals(object.getTarget(), deserialize.getTarget());
-        assertEquals(object.getVersion(), deserialize.getVersion());
-        assertEquals(object.getSequence(), deserialize.getSequence());
+        assertEquals(object.target(), deserialize.target());
+        assertEquals(object.version(), deserialize.version());
+        assertEquals(object.sequence(), deserialize.sequence());
         doAdditionalAssertions(deserialize);
     }
 

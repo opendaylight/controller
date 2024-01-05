@@ -10,11 +10,10 @@ package org.opendaylight.controller.cluster.access.commands;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
 public class UnknownHistoryExceptionTest extends RequestExceptionTest<UnknownHistoryException> {
-
     private static final RequestException OBJECT = new UnknownHistoryException(100L);
     private static final RequestException OBJECT_NULL_PARAM = new UnknownHistoryException(null);
 

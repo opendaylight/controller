@@ -46,15 +46,15 @@ public class ModifyTransactionRequestEmptyTest extends AbstractTransactionReques
     @Test
     public void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
-        assertEquals(OBJECT.getSequence(), clone.getSequence());
-        assertEquals(OBJECT.getTarget(), clone.getTarget());
-        assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());
+        assertEquals(OBJECT.sequence(), clone.sequence());
+        assertEquals(OBJECT.target(), clone.target());
+        assertEquals(OBJECT.replyTo(), clone.replyTo());
         assertEquals(OBJECT.getPersistenceProtocol(), clone.getPersistenceProtocol());
     }
 
     @Override
     protected void doAdditionalAssertions(final ModifyTransactionRequest deserialize) {
-        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.replyTo(), deserialize.replyTo());
         assertEquals(OBJECT.getModifications(), deserialize.getModifications());
         assertEquals(OBJECT.getPersistenceProtocol(), deserialize.getPersistenceProtocol());
     }

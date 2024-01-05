@@ -128,12 +128,12 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new CCS(this);
     }
 
     @Override
-    protected ConnectClientSuccess cloneAsVersion(final ABIVersion version) {
+    public ConnectClientSuccess cloneAsVersion(final ABIVersion version) {
         return new ConnectClientSuccess(this, version);
     }
 

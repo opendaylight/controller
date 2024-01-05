@@ -69,12 +69,12 @@ public final class IncrementTransactionSequenceRequest extends
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new ITSR(this);
     }
 
     @Override
-    protected IncrementTransactionSequenceRequest cloneAsVersion(final ABIVersion targetVersion) {
+    public IncrementTransactionSequenceRequest cloneAsVersion(final ABIVersion targetVersion) {
         return new IncrementTransactionSequenceRequest(this, targetVersion);
     }
 }

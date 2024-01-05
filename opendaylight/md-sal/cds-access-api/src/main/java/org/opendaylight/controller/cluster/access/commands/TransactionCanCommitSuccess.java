@@ -13,8 +13,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Successful reply to a coordinated commit request initiated by a {@link ModifyTransactionRequest}
  * or {@link CommitLocalTransactionRequest}.
- *
- * @author Robert Varga
  */
 public final class TransactionCanCommitSuccess extends TransactionSuccess<TransactionCanCommitSuccess> {
     @java.io.Serial
@@ -29,12 +27,12 @@ public final class TransactionCanCommitSuccess extends TransactionSuccess<Transa
     }
 
     @Override
-    protected TCCS externalizableProxy(final ABIVersion version) {
+    public TCCS externalizableProxy(final ABIVersion version) {
         return new TCCS(this);
     }
 
     @Override
-    protected TransactionCanCommitSuccess cloneAsVersion(final ABIVersion version) {
+    public TransactionCanCommitSuccess cloneAsVersion(final ABIVersion version) {
         return new TransactionCanCommitSuccess(this, version);
     }
 }

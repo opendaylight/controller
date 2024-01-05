@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
 /**
  * General error raised when the recipient of a {@link Request} determines that it does not know how to handle

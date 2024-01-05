@@ -41,12 +41,12 @@ public final class ExistsTransactionRequest extends AbstractReadPathTransactionR
     }
 
     @Override
-    protected ExistsTransactionRequest cloneAsVersion(final ABIVersion version) {
+    public ExistsTransactionRequest cloneAsVersion(final ABIVersion version) {
         return new ExistsTransactionRequest(this, version);
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new ETR(this);
     }
 }

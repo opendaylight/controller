@@ -58,7 +58,7 @@ public class CommitLocalTransactionRequestTest
 
     @Override
     protected void doAdditionalAssertions(final CommitLocalTransactionRequest deserialize) {
-        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.replyTo(), deserialize.replyTo());
         assertEquals(OBJECT.getModification(), deserialize.getModification());
     }
 }

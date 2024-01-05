@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import java.io.DataInput;
 import java.io.IOException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -43,12 +43,12 @@ public final class TransactionFailure extends RequestFailure<TransactionIdentifi
     }
 
     @Override
-    protected TransactionFailure cloneAsVersion(final ABIVersion version) {
+    public TransactionFailure cloneAsVersion(final ABIVersion version) {
         return new TransactionFailure(this, version);
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new TF(this);
     }
 }

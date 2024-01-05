@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
 import akka.actor.ActorRef;
 
@@ -18,7 +18,7 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
     }
 
     @Override
-    RE createProxy() {
+    RE toSerialForm() {
         return new RE(this);
     }
 
@@ -27,10 +27,10 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      *
      * @param cause Cause of this {@link RequestFailure}
      * @param executionTimeNanos Time to execute the request, in nanoseconds
-     * @throws NullPointerException if cause is null
+     * @throws NullPointerException if {@code cause} is {@code null}
      */
     public void sendFailure(final RequestException cause, final long executionTimeNanos) {
-        sendResponse(new FailureEnvelope(getMessage().toRequestFailure(cause), getSessionId(), getTxSequence(),
+        sendResponse(new FailureEnvelope(message().toRequestFailure(cause), sessionId(), txSequence(),
             executionTimeNanos));
     }
 
@@ -38,7 +38,7 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * Respond to this envelope with a {@link RequestSuccess}.
      *
      * @param success Successful response
-     * @throws NullPointerException if success is null
+     * @throws NullPointerException if {@code success} is {@code null}
      */
     public void sendSuccess(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
         sendResponse(newSuccessEnvelope(success, executionTimeNanos));
@@ -52,10 +52,10 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * @return a {@link ResponseEnvelope} instance
      */
     public ResponseEnvelope<?> newSuccessEnvelope(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
-        return new SuccessEnvelope(success, getSessionId(), getTxSequence(), executionTimeNanos);
+        return new SuccessEnvelope(success, sessionId(), txSequence(), executionTimeNanos);
     }
 
     private void sendResponse(final ResponseEnvelope<?> envelope) {
-        getMessage().getReplyTo().tell(envelope, ActorRef.noSender());
+        message().replyTo().tell(envelope, ActorRef.noSender());
     }
 }

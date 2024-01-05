@@ -38,12 +38,12 @@ public final class TransactionPurgeRequest extends TransactionRequest<Transactio
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new TPR(this);
     }
 
     @Override
-    protected TransactionPurgeRequest cloneAsVersion(final ABIVersion version) {
+    public TransactionPurgeRequest cloneAsVersion(final ABIVersion version) {
         return new TransactionPurgeRequest(this, version);
     }
 }

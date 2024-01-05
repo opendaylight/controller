@@ -16,8 +16,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Abstract base class for {@link Request}s involving specific transactions local to a member node. These transactions
  * take advantage of isolation provided by the DataTree, performing transaction modifications on the frontend.
  *
- * @author Robert Varga
- *
  * @param <T> Message type
  */
 public abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTransactionRequest<T>>
@@ -31,13 +29,13 @@ public abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTra
     }
 
     @Override
-    protected final SerialForm<T> externalizableProxy(final ABIVersion version) {
+    public final SerialForm<T> externalizableProxy(final ABIVersion version) {
         throw new UnsupportedOperationException("Local transaction request " + this + " should never be serialized");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected final T cloneAsVersion(final ABIVersion version) {
+    public final T cloneAsVersion(final ABIVersion version) {
         // These messages cannot be serialized, hence we this method is a no-op
         return (T)this;
     }

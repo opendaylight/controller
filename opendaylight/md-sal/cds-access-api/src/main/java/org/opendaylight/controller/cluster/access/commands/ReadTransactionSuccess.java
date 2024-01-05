@@ -46,12 +46,12 @@ public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransac
     }
 
     @Override
-    protected RTS externalizableProxy(final ABIVersion version) {
+    public RTS externalizableProxy(final ABIVersion version) {
         return new RTS(this);
     }
 
     @Override
-    protected ReadTransactionSuccess cloneAsVersion(final ABIVersion version) {
+    public ReadTransactionSuccess cloneAsVersion(final ABIVersion version) {
         return new ReadTransactionSuccess(this, version);
     }
 

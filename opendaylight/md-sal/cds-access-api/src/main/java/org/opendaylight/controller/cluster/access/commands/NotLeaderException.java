@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.akka.queue.RequestException;
 
 /**
  * General error raised when the recipient of a Request is not the correct backend to talk to. This typically
@@ -16,7 +16,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  */
 public final class NotLeaderException extends RequestException {
     @java.io.Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public NotLeaderException(final ActorRef me) {
         super("Actor " + me + " is not the current leader");

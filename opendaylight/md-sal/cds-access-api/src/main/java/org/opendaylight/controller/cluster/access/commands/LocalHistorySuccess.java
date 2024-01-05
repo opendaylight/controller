@@ -43,12 +43,12 @@ public final class LocalHistorySuccess extends RequestSuccess<LocalHistoryIdenti
     }
 
     @Override
-    protected LocalHistorySuccess cloneAsVersion(final ABIVersion version) {
+    public LocalHistorySuccess cloneAsVersion(final ABIVersion version) {
         return new LocalHistorySuccess(this, version);
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new HS(this);
     }
 }

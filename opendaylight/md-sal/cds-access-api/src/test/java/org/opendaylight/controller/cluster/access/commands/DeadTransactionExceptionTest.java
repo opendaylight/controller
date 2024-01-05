@@ -12,11 +12,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import com.google.common.collect.ImmutableRangeSet;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
 public class DeadTransactionExceptionTest extends RequestExceptionTest<DeadTransactionException> {
-
     private static final RequestException OBJECT = new DeadTransactionException(ImmutableRangeSet.of());
 
     @Override

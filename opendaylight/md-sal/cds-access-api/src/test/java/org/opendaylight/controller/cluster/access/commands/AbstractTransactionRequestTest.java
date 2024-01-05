@@ -10,13 +10,13 @@ package org.opendaylight.controller.cluster.access.commands;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
+import org.opendaylight.controller.akka.queue.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public abstract class AbstractTransactionRequestTest<T extends TransactionRequest<T>>

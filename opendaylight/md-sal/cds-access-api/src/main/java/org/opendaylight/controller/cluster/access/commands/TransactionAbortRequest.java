@@ -36,12 +36,12 @@ public final class TransactionAbortRequest extends TransactionRequest<Transactio
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new TAR(this);
     }
 
     @Override
-    protected TransactionAbortRequest cloneAsVersion(final ABIVersion version) {
+    public TransactionAbortRequest cloneAsVersion(final ABIVersion version) {
         return new TransactionAbortRequest(this, version);
     }
 }

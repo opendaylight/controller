@@ -57,7 +57,7 @@ public abstract class AbstractReadTransactionRequest<T extends AbstractReadTrans
 
     AbstractReadTransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
-        this.snapshotOnly = request.isSnapshotOnly();
+        snapshotOnly = request.isSnapshotOnly();
     }
 
     public final boolean isSnapshotOnly() {
@@ -70,5 +70,5 @@ public abstract class AbstractReadTransactionRequest<T extends AbstractReadTrans
     }
 
     @Override
-    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
+    public abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

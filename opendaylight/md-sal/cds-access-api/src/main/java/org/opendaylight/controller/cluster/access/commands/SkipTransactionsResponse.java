@@ -27,12 +27,12 @@ public final class SkipTransactionsResponse extends TransactionSuccess<SkipTrans
     }
 
     @Override
-    protected STS externalizableProxy(final ABIVersion version) {
+    public STS externalizableProxy(final ABIVersion version) {
         return new STS(this);
     }
 
     @Override
-    protected SkipTransactionsResponse cloneAsVersion(final ABIVersion version) {
+    public SkipTransactionsResponse cloneAsVersion(final ABIVersion version) {
         return new SkipTransactionsResponse(this, version);
     }
 }

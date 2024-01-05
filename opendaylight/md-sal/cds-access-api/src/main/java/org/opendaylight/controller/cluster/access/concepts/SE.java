@@ -11,10 +11,16 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.ObjectInput;
+import org.opendaylight.controller.akka.queue.RequestSuccess;
+import org.opendaylight.controller.akka.queue.ResponseEnvelope;
+import org.opendaylight.controller.akka.queue.SuccessEnvelope;
 
 /**
  * Serialization proxy for {@link SuccessEnvelope}.
+ *
+ * @deprecated Superseded serial form.
  */
+@Deprecated(since = "9.0.0", forRemoval = true)
 final class SE implements ResponseEnvelope.SerialForm<RequestSuccess<?, ?>, SuccessEnvelope> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -24,10 +30,6 @@ final class SE implements ResponseEnvelope.SerialForm<RequestSuccess<?, ?>, Succ
     @SuppressWarnings("checkstyle:RedundantModifier")
     public SE() {
         // for Externalizable
-    }
-
-    SE(final SuccessEnvelope envelope) {
-        this.envelope = requireNonNull(envelope);
     }
 
     @Override

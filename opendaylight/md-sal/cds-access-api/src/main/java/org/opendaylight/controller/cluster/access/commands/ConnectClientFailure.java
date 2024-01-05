@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import java.io.DataInput;
 import java.io.IOException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 
 /**
@@ -43,12 +43,12 @@ public final class ConnectClientFailure extends RequestFailure<ClientIdentifier,
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new CCF(this);
     }
 
     @Override
-    protected ConnectClientFailure cloneAsVersion(final ABIVersion version) {
+    public ConnectClientFailure cloneAsVersion(final ABIVersion version) {
         return new ConnectClientFailure(this, version);
     }
 }

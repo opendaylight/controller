@@ -5,9 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
-
-import static com.google.common.base.Preconditions.checkArgument;
+package org.opendaylight.controller.akka.queue;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -15,12 +13,15 @@ import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
-public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T> {
-    interface SerialForm<T extends Response<?, ?>, E extends ResponseEnvelope<T>> extends Envelope.SerialForm<T, E> {
+public abstract sealed class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T>
+        permits FailureEnvelope, SuccessEnvelope {
+    // FIXME: hide this interface once we drop org.opendaylight.controller.cluster.access.concepts.FE
+    public interface SerialForm<T extends Response<?, ?>, E extends ResponseEnvelope<T>>
+            extends Envelope.SerialForm<T, E> {
         @Override
         default void writeExternal(final ObjectOutput out, final @NonNull E envelope) throws IOException {
             Envelope.SerialForm.super.writeExternal(out, envelope);
-            WritableObjects.writeLong(out, envelope.getExecutionTimeNanos());
+            WritableObjects.writeLong(out, envelope.executionTimeNanos());
         }
 
         @Override
@@ -39,7 +40,9 @@ public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelop
 
     ResponseEnvelope(final T message, final long sessionId, final long txSequence, final long executionTimeNanos) {
         super(message, sessionId, txSequence);
-        checkArgument(executionTimeNanos >= 0, "Negative executionTime");
+        if (executionTimeNanos < 0) {
+            throw new IllegalArgumentException("Negative executionTime" + executionTimeNanos);
+        }
         this.executionTimeNanos = executionTimeNanos;
     }
 
@@ -49,7 +52,10 @@ public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelop
      *
      * @return Time the request took to execute in nanoseconds
      */
-    public final long getExecutionTimeNanos() {
+    public final long executionTimeNanos() {
         return executionTimeNanos;
     }
+
+    @Override
+    abstract @NonNull SerialForm<T, ?> toSerialForm();
 }

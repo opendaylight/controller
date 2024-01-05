@@ -28,12 +28,12 @@ public final class TransactionPreCommitSuccess extends TransactionSuccess<Transa
     }
 
     @Override
-    protected TPCS externalizableProxy(final ABIVersion version) {
+    public TPCS externalizableProxy(final ABIVersion version) {
         return new TPCS(this);
     }
 
     @Override
-    protected TransactionPreCommitSuccess cloneAsVersion(final ABIVersion version) {
+    public TransactionPreCommitSuccess cloneAsVersion(final ABIVersion version) {
         return new TransactionPreCommitSuccess(this, version);
     }
 }

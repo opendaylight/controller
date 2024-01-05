@@ -64,7 +64,7 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
             final var modifications = msg.getModifications();
             out.writeInt(modifications.size());
             if (!modifications.isEmpty()) {
-                try (var nnout = msg.getVersion().getStreamVersion().newDataOutput(out)) {
+                try (var nnout = msg.version().getStreamVersion().newDataOutput(out)) {
                     for (var op : modifications) {
                         op.writeTo(nnout);
                     }
@@ -107,12 +107,12 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new MTR(this);
     }
 
     @Override
-    protected ModifyTransactionRequest cloneAsVersion(final ABIVersion version) {
+    public ModifyTransactionRequest cloneAsVersion(final ABIVersion version) {
         return new ModifyTransactionRequest(this, version);
     }
 

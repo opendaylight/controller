@@ -74,8 +74,8 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     @Test
     public void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
-        assertEquals(OBJECT.getSequence(), clone.getSequence());
-        assertEquals(OBJECT.getTarget(), clone.getTarget());
+        assertEquals(OBJECT.sequence(), clone.sequence());
+        assertEquals(OBJECT.target(), clone.target());
         assertEquals(OBJECT.getAlternates(), clone.getAlternates());
         assertEquals(OBJECT.getBackend(), clone.getBackend());
         assertEquals(OBJECT.getDataTree(), clone.getDataTree());

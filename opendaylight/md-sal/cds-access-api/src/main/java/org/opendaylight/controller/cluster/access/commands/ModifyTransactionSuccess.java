@@ -26,12 +26,12 @@ public final class ModifyTransactionSuccess extends TransactionSuccess<ModifyTra
     }
 
     @Override
-    protected MTS externalizableProxy(final ABIVersion version) {
+    public MTS externalizableProxy(final ABIVersion version) {
         return new MTS(this);
     }
 
     @Override
-    protected ModifyTransactionSuccess cloneAsVersion(final ABIVersion version) {
+    public ModifyTransactionSuccess cloneAsVersion(final ABIVersion version) {
         return new ModifyTransactionSuccess(this, version);
     }
 }

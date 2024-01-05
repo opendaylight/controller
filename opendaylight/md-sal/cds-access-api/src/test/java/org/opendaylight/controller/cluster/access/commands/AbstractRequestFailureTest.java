@@ -13,14 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.akka.queue.RequestException;
+import org.opendaylight.controller.akka.queue.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
-import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>> {
@@ -39,12 +39,12 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
 
     protected AbstractRequestFailureTest(final T object, final int baseSize) {
         this.object = requireNonNull(object);
-        this.expectedSize = baseSize + CAUSE_SIZE;
+        expectedSize = baseSize + CAUSE_SIZE;
     }
 
     @Test
     public void getCauseTest() {
-        assertEquals(CAUSE, object.getCause());
+        assertEquals(CAUSE, object.cause());
     }
 
     @Test
@@ -60,8 +60,8 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
         @SuppressWarnings("unchecked")
         final var deserialize = (T) SerializationUtils.deserialize(bytes);
 
-        assertEquals(object.getTarget(), deserialize.getTarget());
-        assertEquals(object.getVersion(), deserialize.getVersion());
-        assertEquals(object.getSequence(), deserialize.getSequence());
+        assertEquals(object.target(), deserialize.target());
+        assertEquals(object.version(), deserialize.version());
+        assertEquals(object.sequence(), deserialize.sequence());
     }
 }

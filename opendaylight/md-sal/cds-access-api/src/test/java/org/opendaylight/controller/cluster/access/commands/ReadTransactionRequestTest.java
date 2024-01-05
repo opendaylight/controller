@@ -24,14 +24,14 @@ public class ReadTransactionRequestTest extends AbstractReadTransactionRequestTe
     public void cloneAsVersionTest() {
         final var cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
         final var clone = OBJECT.cloneAsVersion(cloneVersion);
-        assertEquals(cloneVersion, clone.getVersion());
+        assertEquals(cloneVersion, clone.version());
         assertEquals(OBJECT.getPath(), clone.getPath());
         assertEquals(OBJECT.isSnapshotOnly(), clone.isSnapshotOnly());
     }
 
     @Override
     protected void doAdditionalAssertions(final ReadTransactionRequest deserialize) {
-        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.replyTo(), deserialize.replyTo());
         assertEquals(OBJECT.getPath(), deserialize.getPath());
     }
 }

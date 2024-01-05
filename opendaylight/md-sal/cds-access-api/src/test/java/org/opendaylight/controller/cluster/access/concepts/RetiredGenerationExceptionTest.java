@@ -11,8 +11,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class RetiredGenerationExceptionTest extends RequestExceptionTest<RetiredGenerationException> {
+import org.opendaylight.controller.akka.queue.RequestException;
 
+public class RetiredGenerationExceptionTest extends RequestExceptionTest<RetiredGenerationException> {
     private static final RequestException OBJECT = new RetiredGenerationException(99, 100);
 
     @Override

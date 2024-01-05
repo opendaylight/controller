@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.akka.queue.Envelope;
 
 public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
     protected record EnvelopeDetails<E extends Envelope<?>>(E envelope, int expectedSize) {
@@ -45,13 +46,13 @@ public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
     }
 
     private void checkDeserialized(final E deserializedEnvelope) {
-        assertEquals(envelope.getSessionId(), deserializedEnvelope.getSessionId());
-        assertEquals(envelope.getTxSequence(), deserializedEnvelope.getTxSequence());
-        final var expectedMessage = envelope.getMessage();
-        final var actualMessage = deserializedEnvelope.getMessage();
-        assertEquals(expectedMessage.getSequence(), actualMessage.getSequence());
-        assertEquals(expectedMessage.getTarget(), actualMessage.getTarget());
-        assertEquals(expectedMessage.getVersion(), actualMessage.getVersion());
+        assertEquals(envelope.sessionId(), deserializedEnvelope.sessionId());
+        assertEquals(envelope.txSequence(), deserializedEnvelope.txSequence());
+        final var expectedMessage = envelope.message();
+        final var actualMessage = deserializedEnvelope.message();
+        assertEquals(expectedMessage.sequence(), actualMessage.sequence());
+        assertEquals(expectedMessage.target(), actualMessage.target());
+        assertEquals(expectedMessage.version(), actualMessage.version());
         assertEquals(expectedMessage.getClass(), actualMessage.getClass());
         doAdditionalAssertions(envelope, deserializedEnvelope);
     }

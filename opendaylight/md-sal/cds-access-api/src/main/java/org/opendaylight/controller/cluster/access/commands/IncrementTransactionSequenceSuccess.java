@@ -27,12 +27,12 @@ public final class IncrementTransactionSequenceSuccess extends TransactionSucces
     }
 
     @Override
-    protected ITSS externalizableProxy(final ABIVersion version) {
+    public ITSS externalizableProxy(final ABIVersion version) {
         return new ITSS(this);
     }
 
     @Override
-    protected IncrementTransactionSequenceSuccess cloneAsVersion(final ABIVersion version) {
+    public IncrementTransactionSequenceSuccess cloneAsVersion(final ABIVersion version) {
         return new IncrementTransactionSequenceSuccess(this, version);
     }
 }

@@ -58,7 +58,7 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     public void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertNotNull(clone);
-        assertEquals(ABIVersion.TEST_FUTURE_VERSION, clone.getVersion());
+        assertEquals(ABIVersion.TEST_FUTURE_VERSION, clone.version());
     }
 
     @Test
@@ -72,6 +72,6 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     protected void doAdditionalAssertions(final ConnectClientRequest deserialize) {
         assertEquals(OBJECT.getMaxVersion(), deserialize.getMaxVersion());
         assertEquals(OBJECT.getMinVersion(), deserialize.getMinVersion());
-        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.replyTo(), deserialize.replyTo());
     }
 }

@@ -66,7 +66,7 @@ final class RTS implements TransactionSuccess.SerialForm<ReadTransactionSuccess>
         final var data = msg.getData();
         if (data.isPresent()) {
             out.writeBoolean(true);
-            try (var nnout = msg.getVersion().getStreamVersion().newDataOutput(out)) {
+            try (var nnout = msg.version().getStreamVersion().newDataOutput(out)) {
                 nnout.writeNormalizedNode(data.orElseThrow());
             }
         } else {

@@ -40,12 +40,12 @@ public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateL
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new CHR(this);
     }
 
     @Override
-    protected CreateLocalHistoryRequest cloneAsVersion(final ABIVersion version) {
+    public CreateLocalHistoryRequest cloneAsVersion(final ABIVersion version) {
         return new CreateLocalHistoryRequest(this, version);
     }
 }

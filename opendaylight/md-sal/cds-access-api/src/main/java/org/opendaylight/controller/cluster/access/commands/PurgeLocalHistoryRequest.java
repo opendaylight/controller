@@ -37,12 +37,12 @@ public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLoc
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new PHR(this);
     }
 
     @Override
-    protected PurgeLocalHistoryRequest cloneAsVersion(final ABIVersion version) {
+    public PurgeLocalHistoryRequest cloneAsVersion(final ABIVersion version) {
         return new PurgeLocalHistoryRequest(this, version);
     }
 }

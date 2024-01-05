@@ -48,7 +48,7 @@ public abstract class AbstractReadPathTransactionRequest<T extends AbstractReadP
         @Override
         default void writeExternal(final ObjectOutput out, final T msg) throws IOException {
             AbstractReadTransactionRequest.SerialForm.super.writeExternal(out, msg);
-            try (var nnout = msg.getVersion().getStreamVersion().newDataOutput(out)) {
+            try (var nnout = msg.version().getStreamVersion().newDataOutput(out)) {
                 nnout.writeYangInstanceIdentifier(msg.getPath());
             }
         }
@@ -67,7 +67,7 @@ public abstract class AbstractReadPathTransactionRequest<T extends AbstractReadP
 
     AbstractReadPathTransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
-        this.path = request.getPath();
+        path = request.getPath();
     }
 
     public final @NonNull YangInstanceIdentifier getPath() {
@@ -80,5 +80,5 @@ public abstract class AbstractReadPathTransactionRequest<T extends AbstractReadP
     }
 
     @Override
-    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
+    public abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

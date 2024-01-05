@@ -37,12 +37,12 @@ public final class TransactionPreCommitRequest extends TransactionRequest<Transa
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new TPCR(this);
     }
 
     @Override
-    protected TransactionPreCommitRequest cloneAsVersion(final ABIVersion version) {
+    public TransactionPreCommitRequest cloneAsVersion(final ABIVersion version) {
         return new TransactionPreCommitRequest(this, version);
     }
 }

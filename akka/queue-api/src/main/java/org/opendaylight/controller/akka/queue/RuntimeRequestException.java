@@ -5,12 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.Strings;
 
 /**
  * General error raised when the recipient of a {@link Request} fails to process a request.
@@ -21,7 +18,9 @@ public final class RuntimeRequestException extends RequestException {
 
     public RuntimeRequestException(final String message, final Throwable cause) {
         super(message, requireNonNull(cause));
-        checkArgument(!Strings.isNullOrEmpty(message), "Exception message is mandatory");
+        if (message.isEmpty()) {
+            throw new IllegalArgumentException("Message must not be empty");
+        }
     }
 
     @Override
@@ -30,7 +29,7 @@ public final class RuntimeRequestException extends RequestException {
     }
 
     @Override
-    public Throwable unwrap() {
+    Throwable unwrapImpl() {
         return getCause();
     }
 }

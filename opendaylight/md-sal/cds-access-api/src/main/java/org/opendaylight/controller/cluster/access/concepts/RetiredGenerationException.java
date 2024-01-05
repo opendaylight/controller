@@ -7,13 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import org.opendaylight.controller.akka.queue.RequestException;
+
 /**
  * General error raised when the recipient of a {@link Request} determines that the request contains
  * a {@link ClientIdentifier} which corresponds to an outdated generation.
  */
 public final class RetiredGenerationException extends RequestException {
     @java.io.Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public RetiredGenerationException(final long originatingGeneration, final long newGeneration) {
         super("Originating generation " + Long.toUnsignedString(originatingGeneration) + " was superseded by "

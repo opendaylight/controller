@@ -41,12 +41,12 @@ public final class ReadTransactionRequest extends AbstractReadPathTransactionReq
     }
 
     @Override
-    protected ReadTransactionRequest cloneAsVersion(final ABIVersion version) {
+    public ReadTransactionRequest cloneAsVersion(final ABIVersion version) {
         return new ReadTransactionRequest(this, version);
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new RTR(this);
     }
 }

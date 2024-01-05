@@ -40,5 +40,5 @@ public abstract class TransactionSuccess<T extends TransactionSuccess<T>>
     }
 
     @Override
-    protected abstract SerialForm<T> externalizableProxy(ABIVersion version);
+    public abstract SerialForm<T> externalizableProxy(ABIVersion version);
 }

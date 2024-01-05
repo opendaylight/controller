@@ -18,6 +18,10 @@ import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import org.junit.After;
 import org.junit.Before;
+import org.opendaylight.controller.akka.queue.FailureEnvelope;
+import org.opendaylight.controller.akka.queue.RequestEnvelope;
+import org.opendaylight.controller.akka.queue.RuntimeRequestException;
+import org.opendaylight.controller.akka.queue.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 
@@ -46,18 +50,18 @@ public class RequestEnvelopeTest extends AbstractEnvelopeTest<RequestEnvelope> {
 
     @Override
     protected void doAdditionalAssertions(final RequestEnvelope envelope, final RequestEnvelope resolvedObject) {
-        final Request<?, ?> actual = resolvedObject.getMessage();
+        final Request<?, ?> actual = resolvedObject.message();
         assertThat(actual, instanceOf(TransactionPurgeRequest.class));
         final var purgeRequest = (TransactionPurgeRequest) actual;
-        assertEquals(replyTo, purgeRequest.getReplyTo());
+        assertEquals(replyTo, purgeRequest.replyTo());
         final var response = new TransactionPurgeResponse(OBJECT, 2L);
         resolvedObject.sendSuccess(response, 11L);
         final var successEnvelope = replyToProbe.expectMsgClass(SuccessEnvelope.class);
-        assertEquals(response, successEnvelope.getMessage());
+        assertEquals(response, successEnvelope.message());
         final var failResponse = new RuntimeRequestException("fail", new RuntimeException());
         resolvedObject.sendFailure(failResponse, 11L);
         final var failureEnvelope = replyToProbe.expectMsgClass(FailureEnvelope.class);
-        assertEquals(failResponse, failureEnvelope.getMessage().getCause());
+        assertEquals(failResponse, failureEnvelope.message().cause());
     }
 
     @After

@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.concepts;
+package org.opendaylight.controller.akka.queue;
 
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.DataInput;
@@ -24,7 +23,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
@@ -38,36 +36,22 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * per-target basis, hence two targets can observe the same sequence number.
  *
  * <p>
- * This class includes explicit versioning for forward- and backward- compatibility of serialization format. This is
- * achieved by using the serialization proxy pattern. Subclasses are in complete control of what proxy is used to
- * serialize a particular object on the wire. This class can serve as an explicit version marker, hence no further
- * action is necessary in the deserialization path.
- *
- * <p>
- * For the serialization path an explicit call from the user is required to select the appropriate serialization
- * version. This is done via {@link #toVersion(ABIVersion)} method, which should return a copy of this object with
- * the requested ABI version recorded and should return the appropriate serialization proxy.
- *
- * <p>
- * This workflow allows least disturbance across ABI versions, as all messages not affected by a ABI version bump
- * will remain working with the same serialization format for the new ABI version.
- *
- * <p>
  * Note that this class specifies the {@link Immutable} contract, which means that all subclasses must follow this API
- * contract.
+ * contract and be effectively immutable.
  *
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>>
-        implements Immutable, Serializable {
+public abstract sealed class Message<T extends WritableIdentifier, C extends Message<T, C>>
+        implements Immutable, Serializable permits Request, Response {
     /**
      * Externalizable proxy for use with {@link Message} subclasses.
      *
      * @param <T> Target identifier type
      * @param <C> Message class
      */
-    protected interface SerialForm<T extends WritableIdentifier, C extends Message<T, C>> extends Externalizable {
+    public sealed interface SerialForm<T extends WritableIdentifier, C extends Message<T, C>> extends Externalizable
+            permits Request.SerialForm, Response.SerialForm {
 
         @NonNull C message();
 
@@ -76,8 +60,8 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         @Override
         default void writeExternal(final ObjectOutput out) throws IOException {
             final var message = message();
-            message.getTarget().writeTo(out);
-            WritableObjects.writeLong(out, message.getSequence());
+            message.target().writeTo(out);
+            WritableObjects.writeLong(out, message.sequence());
             writeExternal(out, message);
         }
 
@@ -101,22 +85,16 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final @NonNull ABIVersion version;
-    private final long sequence;
     private final @NonNull T target;
+    private final long sequence;
 
-    private Message(final ABIVersion version, final T target, final long sequence) {
+    protected Message(final T target, final long sequence) {
         this.target = requireNonNull(target);
-        this.version = requireNonNull(version);
         this.sequence = sequence;
     }
 
-    Message(final T target, final long sequence) {
-        this(ABIVersion.current(), target, sequence);
-    }
-
-    Message(final C msg, final ABIVersion version) {
-        this(version, msg.getTarget(), msg.getSequence());
+    protected Message(final @NonNull C msg) {
+        this(msg.target(), msg.sequence());
     }
 
     /**
@@ -124,7 +102,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      *
      * @return Target identifier
      */
-    public final @NonNull T getTarget() {
+    public final @NonNull T target() {
         return target;
     }
 
@@ -133,43 +111,9 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      *
      * @return logical sequence number
      */
-    public final long getSequence() {
+    public final long sequence() {
         return sequence;
     }
-
-    @VisibleForTesting
-    public final @NonNull ABIVersion getVersion() {
-        return version;
-    }
-
-    /**
-     * Return a message which will end up being serialized in the specified {@link ABIVersion}.
-     *
-     * @param toVersion Request {@link ABIVersion}
-     * @return A new message which will use ABIVersion as its serialization.
-     */
-    @SuppressWarnings("unchecked")
-    public final @NonNull C toVersion(final @NonNull ABIVersion toVersion) {
-        if (version == toVersion) {
-            return (C)this;
-        }
-
-        return switch (toVersion) {
-            case POTASSIUM -> verifyNotNull(cloneAsVersion(toVersion));
-            default -> throw new IllegalArgumentException("Unhandled ABI version " + toVersion);
-        };
-    }
-
-    /**
-     * Create a copy of this message which will serialize to a stream corresponding to the specified method. This
-     * method should be implemented by the concrete final message class and should invoke the equivalent of
-     * {@link #Message(Message, ABIVersion)}.
-     *
-     * @param targetVersion target ABI version
-     * @return A message with the specified serialization stream
-     * @throws IllegalArgumentException if this message does not support the target ABI
-     */
-    protected abstract @NonNull C cloneAsVersion(@NonNull ABIVersion targetVersion);
 
     @Override
     public final String toString() {
@@ -188,20 +132,17 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         return toStringHelper.add("target", target).add("sequence", Long.toUnsignedString(sequence));
     }
 
-    /**
-     * Instantiate a serialization proxy for this object for the target ABI version. Implementations should return
-     * different objects for incompatible {@link ABIVersion}s. This method should never fail, as any compatibility
-     * checks should have been done by {@link #cloneAsVersion(ABIVersion)}.
-     *
-     * @param reqVersion Requested ABI version
-     * @return Proxy for this object
-     */
-    protected abstract @NonNull SerialForm<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
-
     @java.io.Serial
     protected final Object writeReplace() {
-        return externalizableProxy(version);
+        return toSerialForm();
     }
+
+    /**
+     * Instantiate a serialization proxy for this object.
+     *
+     * @return a serialization proxy for this object
+     */
+    protected abstract @NonNull SerialForm<T, C> toSerialForm();
 
     protected final void throwNSE() throws NotSerializableException {
         throw new NotSerializableException(getClass().getName());

@@ -11,11 +11,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
 public class OutOfOrderRequestExceptionTest extends RequestExceptionTest<OutOfOrderRequestException> {
-
     private static final RequestException OBJECT = new OutOfOrderRequestException(100);
 
     @Override
@@ -29,5 +28,4 @@ public class OutOfOrderRequestExceptionTest extends RequestExceptionTest<OutOfOr
         assertTrue("Expecting request 100".equals(message));
         assertNull(OBJECT.getCause());
     }
-
 }

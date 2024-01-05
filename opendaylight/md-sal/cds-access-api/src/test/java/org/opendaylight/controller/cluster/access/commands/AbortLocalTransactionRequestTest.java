@@ -32,6 +32,6 @@ public class AbortLocalTransactionRequestTest
 
     @Override
     protected void doAdditionalAssertions(final AbortLocalTransactionRequest deserialize) {
-        assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
+        assertEquals(OBJECT.replyTo(), deserialize.replyTo());
     }
 }

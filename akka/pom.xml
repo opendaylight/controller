@@ -26,6 +26,7 @@
     </properties>
 
     <modules>
+        <module>queue-api</module>
         <module>repackaged-akka-jar</module>
         <module>repackaged-akka</module>
     </modules>

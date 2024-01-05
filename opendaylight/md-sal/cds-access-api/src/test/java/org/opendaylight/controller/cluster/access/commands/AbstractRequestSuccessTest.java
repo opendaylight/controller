@@ -42,9 +42,9 @@ public abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, T>>
         @SuppressWarnings("unchecked")
         final var deserialize = (T) SerializationUtils.deserialize(bytes);
 
-        assertEquals(object.getTarget(), deserialize.getTarget());
-        assertEquals(object.getVersion(), deserialize.getVersion());
-        assertEquals(object.getSequence(), deserialize.getSequence());
+        assertEquals(object.target(), deserialize.target());
+        assertEquals(object.version(), deserialize.version());
+        assertEquals(object.sequence(), deserialize.sequence());
         doAdditionalAssertions(deserialize);
     }
 

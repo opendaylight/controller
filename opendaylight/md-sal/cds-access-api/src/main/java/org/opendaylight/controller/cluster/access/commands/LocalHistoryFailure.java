@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import java.io.DataInput;
 import java.io.IOException;
+import org.opendaylight.controller.akka.queue.RequestException;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 
 /**
@@ -43,12 +43,12 @@ public final class LocalHistoryFailure extends RequestFailure<LocalHistoryIdenti
     }
 
     @Override
-    protected LocalHistoryFailure cloneAsVersion(final ABIVersion targetVersion) {
+    public LocalHistoryFailure cloneAsVersion(final ABIVersion targetVersion) {
         return new LocalHistoryFailure(this, targetVersion);
     }
 
     @Override
-    protected SerialForm externalizableProxy(final ABIVersion version) {
+    public SerialForm externalizableProxy(final ABIVersion version) {
         return new HF(this);
     }
 }
