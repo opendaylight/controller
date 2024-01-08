@@ -22,7 +22,7 @@ import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
 import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -36,7 +36,7 @@ public class OpsManager extends AbstractUntypedActor {
     private final DOMActionProviderService actionProvisionRegistry;
     private final DOMActionService actionService;
 
-    private ListenerRegistration<OpsListener> listenerReg;
+    private Registration listenerReg;
     private ActorRef opsInvoker;
     private ActorRef actionRegistry;
     private ActorRef rpcRegistry;
@@ -48,7 +48,7 @@ public class OpsManager extends AbstractUntypedActor {
         this.rpcProvisionRegistry = requireNonNull(rpcProvisionRegistry);
         this.rpcServices = requireNonNull(rpcServices);
         this.config = requireNonNull(config);
-        this.actionProvisionRegistry = requireNonNull(actionProviderService);
+        actionProvisionRegistry = requireNonNull(actionProviderService);
         this.actionService = requireNonNull(actionService);
     }
 

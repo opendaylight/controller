@@ -9,65 +9,48 @@ package org.opendaylight.controller.cluster.databroker;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.ImmutableClassToInstanceMap;
-import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
+import com.google.common.collect.ImmutableList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.PingPongMergingDOMDataBroker;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
         implements PingPongMergingDOMDataBroker {
-
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBroker.class);
 
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
-    private final ClassToInstanceMap<DOMDataBrokerExtension> extensions;
+    private final @NonNull List<Extension> extensions;
 
     private volatile AutoCloseable closeable;
 
     protected AbstractDOMBroker(final Map<LogicalDatastoreType, DOMStore> datastores) {
         super(datastores);
 
-        Builder<DOMDataBrokerExtension> extBuilder = ImmutableClassToInstanceMap.builder();
+        final var extBuilder = ImmutableList.<Extension>builder();
         if (isSupported(datastores, DOMStoreTreeChangePublisher.class)) {
-            extBuilder.put(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
-                @Override
-                public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
-                        final DOMDataTreeIdentifier treeId, final L listener) {
-                    DOMStore store = getDOMStore(treeId.getDatastoreType());
-                    return ((DOMStoreTreeChangePublisher) store).registerTreeChangeListener(
-                            treeId.getRootIdentifier(), listener);
-                }
+            extBuilder.add((DOMDataTreeChangeService) (treeId, listener) -> {
+               final var store = getDOMStore(treeId.datastore());
+               return ((DOMStoreTreeChangePublisher) store).registerTreeChangeListener(treeId.path(), listener);
             });
         }
 
         if (isSupported(datastores, DOMDataTreeCommitCohortRegistry.class)) {
-            extBuilder.put(DOMDataTreeCommitCohortRegistry.class, new DOMDataTreeCommitCohortRegistry() {
-                @Override
-                public <T extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<T> registerCommitCohort(
-                        final DOMDataTreeIdentifier path, final T cohort) {
-                    DOMStore store = getDOMStore(path.getDatastoreType());
-                    return ((DOMDataTreeCommitCohortRegistry) store).registerCommitCohort(path, cohort);
-                }
+            extBuilder.add((DOMDataTreeCommitCohortRegistry) (path, cohort) -> {
+               final var store = getDOMStore(path.datastore());
+               return ((DOMDataTreeCommitCohortRegistry) store).registerCommitCohort(path, cohort);
             });
         }
 
@@ -103,24 +86,23 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
     }
 
     @Override
-    public ClassToInstanceMap<DOMDataBrokerExtension> getExtensions() {
+    public List<Extension> supportedExtensions() {
         return extensions;
     }
 
     @Override
-    public DOMTransactionChain createTransactionChain(final DOMTransactionChainListener listener) {
+    public DOMTransactionChain createTransactionChain() {
         checkNotClosed();
 
-        final Map<LogicalDatastoreType, DOMStoreTransactionChain> backingChains =
-                new EnumMap<>(LogicalDatastoreType.class);
-        for (Map.Entry<LogicalDatastoreType, DOMStore> entry : getTxFactories().entrySet()) {
+        final var backingChains = new EnumMap<LogicalDatastoreType, DOMStoreTransactionChain>(
+            LogicalDatastoreType.class);
+        for (var entry : getTxFactories().entrySet()) {
             backingChains.put(entry.getKey(), entry.getValue().createTransactionChain());
         }
 
         final long chainId = chainNum.getAndIncrement();
-        LOG.debug("Transaction chain {} created with listener {}, backing store chains {}", chainId, listener,
-                backingChains);
-        return new DOMBrokerTransactionChain(chainId, backingChains, this, listener);
+        LOG.debug("Transaction chain {} created, backing store chains {}", chainId, backingChains);
+        return new DOMBrokerTransactionChain(chainId, backingChains, this);
     }
 
     private DOMStore getDOMStore(final LogicalDatastoreType type) {

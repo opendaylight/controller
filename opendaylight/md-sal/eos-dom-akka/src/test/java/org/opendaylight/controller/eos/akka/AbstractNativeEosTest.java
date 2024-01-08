@@ -50,14 +50,15 @@ import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterCandidate;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.UnregisterCandidate;
+import org.opendaylight.controller.eos.akka.registry.listener.type.command.EntityOwnerChanged;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.RegisterListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingCodecContext;
 import org.opendaylight.mdsal.binding.generator.impl.DefaultBindingRuntimeGenerator;
 import org.opendaylight.mdsal.binding.runtime.api.BindingRuntimeGenerator;
 import org.opendaylight.mdsal.binding.runtime.spi.BindingRuntimeHelpers;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -336,13 +337,13 @@ public abstract class AbstractNativeEosTest {
         await().until(() -> !listener.getChanges().isEmpty());
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-            final List<DOMEntityOwnershipChange> changes = listener.getChanges();
-            final DOMEntityOwnershipChange domEntityOwnershipChange = listener.getChanges().get(changes.size() - 1);
-            assertEquals(entity, domEntityOwnershipChange.getEntity());
+            final var changes = listener.getChanges();
+            final var domEntityOwnershipChange = listener.getChanges().get(changes.size() - 1);
+            assertEquals(entity, domEntityOwnershipChange.entity());
 
-            assertEquals(hasOwner, domEntityOwnershipChange.getState().hasOwner());
-            assertEquals(isOwner, domEntityOwnershipChange.getState().isOwner());
-            assertEquals(wasOwner, domEntityOwnershipChange.getState().wasOwner());
+            assertEquals(hasOwner, domEntityOwnershipChange.change().hasOwner());
+            assertEquals(isOwner, domEntityOwnershipChange.change().isOwner());
+            assertEquals(wasOwner, domEntityOwnershipChange.change().wasOwner());
         });
     }
 
@@ -415,11 +416,9 @@ public abstract class AbstractNativeEosTest {
     }
 
     protected static final class MockEntityOwnershipListener implements DOMEntityOwnershipListener {
-
-        private final Logger log;
-
-        private final List<DOMEntityOwnershipChange> changes = new ArrayList<>();
+        private final List<EntityOwnerChanged> changes = new ArrayList<>();
         private final String member;
+        private final Logger log;
 
         public MockEntityOwnershipListener(final String member) {
             log = LoggerFactory.getLogger("EOS-listener-" + member);
@@ -427,13 +426,15 @@ public abstract class AbstractNativeEosTest {
         }
 
         @Override
-        public void ownershipChanged(final DOMEntityOwnershipChange ownershipChange) {
-            log.info("{} Received ownershipCHanged: {}", member, ownershipChange);
+        public void ownershipChanged(final DOMEntity entity, final EntityOwnershipStateChange change,
+                final boolean inJeopardy) {
+            final var changed = new EntityOwnerChanged(entity, change, inJeopardy);
+            log.info("{} Received ownershipCHanged: {}", member, changed);
             log.info("{} changes: {}", member, changes.size());
-            changes.add(ownershipChange);
+            changes.add(changed);
         }
 
-        public List<DOMEntityOwnershipChange> getChanges() {
+        public List<EntityOwnerChanged> getChanges() {
             return changes;
         }
 
