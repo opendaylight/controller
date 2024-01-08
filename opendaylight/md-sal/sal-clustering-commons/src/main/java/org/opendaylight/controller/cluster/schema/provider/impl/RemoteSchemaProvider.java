@@ -12,19 +12,18 @@ import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
-import scala.concurrent.Future;
 
 /**
  * Provides schema sources from {@link RemoteYangTextSourceProvider}.
  */
 @Beta
-public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchemaSource> {
+public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSource> {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteSchemaProvider.class);
 
     private final RemoteYangTextSourceProvider remoteRepo;
@@ -37,21 +36,18 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchema
     }
 
     @Override
-    public ListenableFuture<YangTextSchemaSource> getSource(final SourceIdentifier sourceIdentifier) {
+    public ListenableFuture<YangTextSource> getSource(final SourceIdentifier sourceIdentifier) {
         LOG.trace("Getting yang schema source for {}", sourceIdentifier.name().getLocalName());
 
-        Future<YangTextSchemaSourceSerializationProxy> result = remoteRepo.getYangTextSchemaSource(sourceIdentifier);
-
-        final SettableFuture<YangTextSchemaSource> res = SettableFuture.create();
-        result.onComplete(new OnComplete<YangTextSchemaSourceSerializationProxy>() {
+        final var res = SettableFuture.<YangTextSource>create();
+        remoteRepo.getYangTextSchemaSource(sourceIdentifier).onComplete(new OnComplete<>() {
             @Override
-            public void onComplete(final Throwable throwable,
-                    final YangTextSchemaSourceSerializationProxy yangTextSchemaSourceSerializationProxy) {
-                if (yangTextSchemaSourceSerializationProxy != null) {
-                    res.set(yangTextSchemaSourceSerializationProxy.getRepresentation());
+            public void onComplete(final Throwable failure, final YangTextSchemaSourceSerializationProxy success) {
+                if (success != null) {
+                    res.set(success.getRepresentation());
                 }
-                if (throwable != null) {
-                    res.setException(throwable);
+                if (failure != null) {
+                    res.setException(failure);
                 }
             }
         }, executionContext);

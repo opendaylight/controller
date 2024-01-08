@@ -11,7 +11,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShards;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -21,11 +21,11 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
         description = "Run a flip-member-voting-states-for-all-shards test")
 public class FlipMemberVotingStatesForAllShardsCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcConsumerRegistry;
+    private RpcService rpcService;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcConsumerRegistry.getRpc(FlipMemberVotingStatesForAllShards.class)
+        return rpcService.getRpc(FlipMemberVotingStatesForAllShards.class)
                 .invoke(new FlipMemberVotingStatesForAllShardsInputBuilder().build());
     }
 }

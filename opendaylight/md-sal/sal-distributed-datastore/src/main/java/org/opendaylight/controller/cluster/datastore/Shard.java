@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -114,7 +115,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextProvider;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -955,7 +955,7 @@ public class Shard extends RaftActor {
     }
 
     private void updateSchemaContext(final UpdateSchemaContext message) {
-        updateSchemaContext(message.getEffectiveModelContext());
+        updateSchemaContext(message.modelContext());
     }
 
     @VisibleForTesting
@@ -1168,7 +1168,7 @@ public class Shard extends RaftActor {
         private ShardIdentifier id;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
-        private EffectiveModelContextProvider schemaContextProvider;
+        private Supplier<@NonNull EffectiveModelContext> schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private DataTree dataTree;
 
@@ -1205,7 +1205,7 @@ public class Shard extends RaftActor {
             return self();
         }
 
-        public T schemaContextProvider(final EffectiveModelContextProvider newSchemaContextProvider) {
+        public T schemaContextProvider(final Supplier<@NonNull EffectiveModelContext> newSchemaContextProvider) {
             checkSealed();
             schemaContextProvider = requireNonNull(newSchemaContextProvider);
             return self();
@@ -1236,7 +1236,7 @@ public class Shard extends RaftActor {
         }
 
         public EffectiveModelContext getSchemaContext() {
-            return verifyNotNull(schemaContextProvider.getEffectiveModelContext());
+            return verifyNotNull(schemaContextProvider.get());
         }
 
         public DatastoreSnapshot.ShardSnapshot getRestoreFromSnapshot() {

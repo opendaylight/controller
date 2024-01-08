@@ -26,8 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
@@ -97,7 +96,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     @Before
     public void setUp() {
         setUpStatic();
-        candidate = DataTreeCandidates.fromNormalizedNode(TestModel.TEST_PATH, Builders.containerBuilder()
+        candidate = DataTreeCandidates.fromNormalizedNode(TestModel.TEST_PATH, ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build());
@@ -128,10 +127,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
         YangInstanceIdentifier leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
                 .node(entryPathArg).build();
 
-        candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, Builders.leafSetEntryBuilder()
-            .withNodeIdentifier(entryPathArg)
-            .withValue("one")
-            .build());
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, ImmutableNodes.leafSetEntry(entryPathArg));
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
@@ -140,12 +136,9 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     public void testLeafSetNodeCandidate() throws Exception {
         YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
-        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, Builders.leafSetBuilder()
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, ImmutableNodes.newSystemLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LEAF_SET))
-            .withChild(Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(new NodeWithValue<>(LEAF_SET, "one"))
-                .withValue("one")
-                .build())
+            .withChild(ImmutableNodes.leafSetEntry(LEAF_SET, "one"))
             .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
@@ -155,12 +148,9 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     public void testOrderedLeafSetNodeCandidate() throws Exception {
         YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
-        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, Builders.orderedLeafSetBuilder()
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, ImmutableNodes.newUserLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LEAF_SET))
-            .withChild(Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(new NodeWithValue<>(LEAF_SET, "one"))
-                .withValue("one")
-                .build())
+            .withChild(ImmutableNodes.leafSetEntry(LEAF_SET, "one"))
             .build());
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());

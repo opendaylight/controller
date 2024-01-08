@@ -30,13 +30,12 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeCh
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
-        extends AbstractListenerRegistration<L> {
+final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener> extends AbstractObjectRegistration<L> {
     private abstract static class State {
 
     }
@@ -75,7 +74,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
             final Set<String> shardNames) {
         super(listener);
         this.actorUtils = requireNonNull(actorUtils);
-        this.state = new ResolveShards(shardNames.size());
+        state = new ResolveShards(shardNames.size());
 
         for (String shardName : shardNames) {
             actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<ActorRef>() {
@@ -94,8 +93,8 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         } else if (state instanceof ResolveShards) {
             // Simple case: just mark the fact we were closed, terminating when resolution finishes
             state = new Terminated();
-        } else if (state instanceof Subscribed) {
-            terminate((Subscribed) state);
+        } else if (state instanceof Subscribed subscribed) {
+            terminate(subscribed);
         } else {
             throw new IllegalStateException("Unhandled close in state " + state);
         }
@@ -103,8 +102,8 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
 
     private synchronized void onFindLocalShardComplete(final String shardName, final Throwable failure,
             final ActorRef shard) {
-        if (state instanceof ResolveShards) {
-            localShardsResolved((ResolveShards) state, shardName, failure, shard);
+        if (state instanceof ResolveShards resolveShards) {
+            localShardsResolved(resolveShards, shardName, failure, shard);
         } else {
             LOG.debug("{}: lookup for shard {} turned into a noop on state {}", logContext(), shardName, state);
         }
@@ -170,8 +169,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
     }
 
     private synchronized void onShardSubscribed(final String shardName, final Throwable failure, final Object result) {
-        if (state instanceof Subscribed) {
-            final Subscribed current = (Subscribed) state;
+        if (state instanceof Subscribed current) {
             if (failure != null) {
                 LOG.error("{}: Shard {} failed to subscribe, terminating listener {}", logContext(),
                     shardName,getInstance(), failure);

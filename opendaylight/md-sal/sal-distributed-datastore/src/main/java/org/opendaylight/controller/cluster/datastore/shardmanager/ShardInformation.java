@@ -78,7 +78,7 @@ public final class ShardInformation {
 
     Props newProps() {
         Props props = requireNonNull(builder).id(shardId).peerAddresses(initialPeerAddresses)
-                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider).props();
+                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider::modelContext).props();
         builder = null;
         return props;
     }
@@ -256,7 +256,7 @@ public final class ShardInformation {
     }
 
     EffectiveModelContext getSchemaContext() {
-        return schemaContextProvider.getEffectiveModelContext();
+        return schemaContextProvider.modelContext();
     }
 
     void setSchemaContext(final EffectiveModelContext schemaContext) {
