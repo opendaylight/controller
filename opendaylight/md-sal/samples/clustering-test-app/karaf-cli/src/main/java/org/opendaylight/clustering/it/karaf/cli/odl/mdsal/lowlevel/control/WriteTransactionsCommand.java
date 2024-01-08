@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactions;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.common.Uint32;
 @Command(scope = "test-app", name = "write-transactions", description = "Run a write-transactions test")
 public class WriteTransactionsCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcService;
+    private RpcService rpcService;
     @Argument(index = 0, name = "id", required = true)
     private String id;
     @Argument(index = 1, name = "seconds", required = true)

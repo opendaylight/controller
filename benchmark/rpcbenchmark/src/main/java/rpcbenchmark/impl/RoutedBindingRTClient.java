@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchInputBuilder;
@@ -37,9 +37,9 @@ public class RoutedBindingRTClient implements RTCClient {
     private final List<RoutedRpcBenchInput> inVal = new ArrayList<>();
     private final int inSize;
 
-    public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize,
+    public RoutedBindingRTClient(final RpcService rpcService, final int inSize,
             final List<InstanceIdentifier<?>> routeIid) {
-        this.routedRpcBench = registry.getRpc(RoutedRpcBench.class);
+        routedRpcBench = rpcService.getRpc(RoutedRpcBench.class);
         this.inSize = inSize;
 
         Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
