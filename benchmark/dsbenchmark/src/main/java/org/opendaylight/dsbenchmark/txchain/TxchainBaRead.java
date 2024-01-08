@@ -13,9 +13,6 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
-import org.opendaylight.mdsal.binding.api.Transaction;
-import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
@@ -27,7 +24,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainBaRead extends DatastoreAbstractWriter implements TransactionChainListener {
+public class TxchainBaRead extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaRead.class);
     private final DataBroker bindingDataBroker;
 
@@ -91,16 +88,5 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
                 }
             }
         }
-    }
-
-    @Override
-    public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
-            final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}", chain, transaction.getIdentifier(), cause);
-    }
-
-    @Override
-    public void onTransactionChainSuccessful(final TransactionChain chain) {
-        LOG.debug("TxchainBaDelete closed successfully, chain {}", chain);
     }
 }

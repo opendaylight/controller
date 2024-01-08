@@ -59,9 +59,7 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCod
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntities;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInput;
@@ -170,7 +168,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     }
 
     @Override
-    public DOMEntityOwnershipCandidateRegistration registerCandidate(final DOMEntity entity)
+    public Registration registerCandidate(final DOMEntity entity)
             throws CandidateAlreadyRegisteredException {
         if (!registeredEntities.add(entity)) {
             throw new CandidateAlreadyRegisteredException(entity);
@@ -184,8 +182,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     }
 
     @Override
-    public DOMEntityOwnershipListenerRegistration registerListener(final String entityType,
-                                                                   final DOMEntityOwnershipListener listener) {
+    public Registration registerListener(final String entityType, final DOMEntityOwnershipListener listener) {
         LOG.debug("Registering listener {} for type {}", listener, entityType);
         listenerRegistry.tell(new RegisterListener(entityType, listener));
 
