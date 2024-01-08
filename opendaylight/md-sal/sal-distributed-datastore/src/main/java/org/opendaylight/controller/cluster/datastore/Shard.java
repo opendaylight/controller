@@ -369,22 +369,6 @@ public class Shard extends RaftActor {
                 handleRequestAssemblerMessage(message);
             } else if (message instanceof ConnectClientRequest request) {
                 handleConnectClient(request);
-            } else if (CreateTransaction.isSerializedType(message)) {
-                handleCreateTransaction(message);
-            } else if (message instanceof BatchedModifications request) {
-                handleBatchedModifications(request);
-            } else if (message instanceof ForwardedReadyTransaction request) {
-                handleForwardedReadyTransaction(request);
-            } else if (message instanceof ReadyLocalTransaction request) {
-                handleReadyLocalTransaction(request);
-            } else if (CanCommitTransaction.isSerializedType(message)) {
-                handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-            } else if (CommitTransaction.isSerializedType(message)) {
-                handleCommitTransaction(CommitTransaction.fromSerializable(message));
-            } else if (AbortTransaction.isSerializedType(message)) {
-                handleAbortTransaction(AbortTransaction.fromSerializable(message));
-            } else if (CloseTransactionChain.isSerializedType(message)) {
-                closeTransactionChain(CloseTransactionChain.fromSerializable(message));
             } else if (message instanceof DataTreeChangedReply) {
                 // Ignore reply
             } else if (message instanceof RegisterDataTreeChangeListener request) {
@@ -408,8 +392,6 @@ public class Shard extends RaftActor {
                 sender().tell(store.getDataTree(), self());
             } else if (message instanceof ServerRemoved) {
                 context().parent().forward(message, context());
-            } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
-                messageRetrySupport.onTimerMessage(message);
             } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
                 store.processCohortRegistryCommand(getSender(), request);
             } else if (message instanceof MakeLeaderLocal) {
@@ -419,7 +401,28 @@ public class Shard extends RaftActor {
             } else if (GetKnownClients.INSTANCE.equals(message)) {
                 handleGetKnownClients();
             } else if (!responseMessageSlicer.handleMessage(message)) {
-                super.handleNonRaftCommand(message);
+                // Ask-based protocol messages
+                if (CreateTransaction.isSerializedType(message)) {
+                    handleCreateTransaction(message);
+                } else if (message instanceof BatchedModifications request) {
+                    handleBatchedModifications(request);
+                } else if (message instanceof ForwardedReadyTransaction request) {
+                    handleForwardedReadyTransaction(request);
+                } else if (message instanceof ReadyLocalTransaction request) {
+                    handleReadyLocalTransaction(request);
+                } else if (CanCommitTransaction.isSerializedType(message)) {
+                    handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
+                } else if (CommitTransaction.isSerializedType(message)) {
+                    handleCommitTransaction(CommitTransaction.fromSerializable(message));
+                } else if (AbortTransaction.isSerializedType(message)) {
+                    handleAbortTransaction(AbortTransaction.fromSerializable(message));
+                } else if (CloseTransactionChain.isSerializedType(message)) {
+                    closeTransactionChain(CloseTransactionChain.fromSerializable(message));
+                } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
+                    messageRetrySupport.onTimerMessage(message);
+                } else {
+                    super.handleNonRaftCommand(message);
+                }
             }
         }
     }
