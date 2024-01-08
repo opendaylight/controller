@@ -13,8 +13,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.common.UnresolvedQName.Unqualified;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
+import org.opendaylight.yangtools.yang.model.spi.source.DelegatedYangTextSource;
 
 /**
  * {@link org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource} serialization proxy.
@@ -27,15 +28,15 @@ public class YangTextSchemaSourceSerializationProxy implements Serializable {
     private final Revision revision;
     private final String name;
 
-    public YangTextSchemaSourceSerializationProxy(final YangTextSchemaSource source) throws IOException {
-        final var id = source.getIdentifier();
-        revision = id.revision();
-        name = id.name().getLocalName();
+    public YangTextSchemaSourceSerializationProxy(final YangTextSource source) throws IOException {
+        final var sourceId = source.sourceId();
+        revision = sourceId.revision();
+        name = sourceId.name().getLocalName();
         schemaSource = source.read();
     }
 
-    public YangTextSchemaSource getRepresentation() {
-        return YangTextSchemaSource.delegateForCharSource(new SourceIdentifier(Unqualified.of(name), revision),
+    public YangTextSource getRepresentation() {
+        return new DelegatedYangTextSource(new SourceIdentifier(Unqualified.of(name), revision),
             CharSource.wrap(schemaSource));
     }
 }
