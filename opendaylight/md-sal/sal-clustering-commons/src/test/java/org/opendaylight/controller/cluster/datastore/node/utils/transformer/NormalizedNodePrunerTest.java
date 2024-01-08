@@ -28,7 +28,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.DOMSourceAnyxmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -229,15 +228,14 @@ public class NormalizedNodePrunerTest {
 
     @Test
     public void testAnyXMLNodeNotPrunedWhenHasParent() throws IOException {
-        AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH);
-        DOMSourceAnyxmlNode child = Builders.anyXmlBuilder().withNodeIdentifier(
+        final var pruner = prunerFullSchema(TestModel.TEST_PATH);
+        final var child =  Builders.anyXmlBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.ANY_XML_QNAME)).withValue(mock(DOMSource.class)).build();
-        NormalizedNode input = Builders.containerBuilder().withNodeIdentifier(
+        final var input = Builders.containerBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.TEST_QNAME)).withChild(child).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode actual = pruner.getResult().orElseThrow();
-        assertEquals("normalizedNode", input, actual);
+        assertEquals("normalizedNode", input, pruner.getResult().orElseThrow());
     }
 
     @Test

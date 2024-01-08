@@ -26,8 +26,6 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.AbstractRegistrationTree;
-import org.opendaylight.mdsal.dom.spi.RegistrationTreeNode;
-import org.opendaylight.mdsal.dom.spi.RegistrationTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
@@ -40,13 +38,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Registry of user commit cohorts, which is responsible for handling registration and calculation
  * of affected cohorts based on {@link DataTreeCandidate}. This class is NOT thread-safe.
- *
  */
 class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActorRegistry.class);
 
-    private final Map<ActorRef, RegistrationTreeNode<ActorRef>> cohortToNode = new HashMap<>();
+    private final Map<ActorRef, Node<ActorRef>> cohortToNode = new HashMap<>();
 
     Collection<ActorRef> getCohortActors() {
         return new ArrayList<>(cohortToNode.keySet());
@@ -57,8 +54,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         takeLock();
         try {
             final ActorRef cohortRef = cohort.getCohort();
-            final RegistrationTreeNode<ActorRef> node =
-                    findNodeFor(cohort.getPath().getRootIdentifier().getPathArguments());
+            final Node<ActorRef> node = findNodeFor(cohort.getPath().path().getPathArguments());
             addRegistration(node, cohort.getCohort());
             cohortToNode.put(cohortRef, node);
         } catch (final Exception e) {
@@ -72,7 +68,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     void removeCommitCohort(final ActorRef sender, final RemoveCohort message) {
         final ActorRef cohort = message.getCohort();
-        final RegistrationTreeNode<ActorRef> node = cohortToNode.get(cohort);
+        final Node<ActorRef> node = cohortToNode.get(cohort);
         if (node != null) {
             removeRegistration(node, cohort);
             cohortToNode.remove(cohort);
@@ -83,7 +79,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     List<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
             final DataTreeCandidate candidate, final EffectiveModelContext schema) {
-        try (RegistrationTreeSnapshot<ActorRef> cohorts = takeSnapshot()) {
+        try (var cohorts = takeSnapshot()) {
             return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
         }
     }
@@ -141,24 +137,24 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         }
 
         private void lookupAndCreateCanCommits(final List<PathArgument> args, final int offset,
-                final RegistrationTreeNode<ActorRef> node) {
+                final Node<ActorRef> node) {
 
             if (args.size() != offset) {
                 final PathArgument arg = args.get(offset);
-                final RegistrationTreeNode<ActorRef> exactChild = node.getExactChild(arg);
+                final var exactChild = node.getExactChild(arg);
                 if (exactChild != null) {
                     lookupAndCreateCanCommits(args, offset + 1, exactChild);
                 }
-                for (final RegistrationTreeNode<ActorRef> c : node.getInexactChildren(arg)) {
-                    lookupAndCreateCanCommits(args, offset + 1, c);
+                for (var inexact : node.getInexactChildren(arg)) {
+                    lookupAndCreateCanCommits(args, offset + 1, inexact);
                 }
             } else {
                 lookupAndCreateCanCommits(candidate.getRootPath(), node, candidate.getRootNode());
             }
         }
 
-        private void lookupAndCreateCanCommits(final YangInstanceIdentifier path,
-                final RegistrationTreeNode<ActorRef> regNode, final DataTreeCandidateNode candNode) {
+        private void lookupAndCreateCanCommits(final YangInstanceIdentifier path, final Node<ActorRef> regNode,
+                final DataTreeCandidateNode candNode) {
             if (candNode.modificationType() == ModificationType.UNMODIFIED) {
                 LOG.debug("Skipping unmodified candidate {}", path);
                 return;
@@ -170,7 +166,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
             for (var candChild : candNode.childNodes()) {
                 if (candChild.modificationType() != ModificationType.UNMODIFIED) {
-                    final RegistrationTreeNode<ActorRef> regChild = regNode.getExactChild(candChild.name());
+                    final var regChild = regNode.getExactChild(candChild.name());
                     if (regChild != null) {
                         lookupAndCreateCanCommits(path.node(candChild.name()), regChild, candChild);
                     }
@@ -191,11 +187,11 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         }
 
         private static DOMDataTreeIdentifier treeIdentifier(final YangInstanceIdentifier path) {
-            return new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, path);
+            return DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, path);
         }
 
-        List<DataTreeCohortActor.CanCommit> perform(final RegistrationTreeNode<ActorRef> rootNode) {
-            final List<PathArgument> toLookup = candidate.getRootPath().getPathArguments();
+        List<DataTreeCohortActor.CanCommit> perform(final Node<ActorRef> rootNode) {
+            final var toLookup = candidate.getRootPath().getPathArguments();
             lookupAndCreateCanCommits(toLookup, 0, rootNode);
 
             final Map<ActorRef, Collection<DOMDataTreeCandidate>> mapView = actorToCandidates.asMap();

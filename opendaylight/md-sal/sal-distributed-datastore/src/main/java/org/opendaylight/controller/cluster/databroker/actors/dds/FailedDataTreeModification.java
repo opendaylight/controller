@@ -17,7 +17,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModifica
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.spi.AbstractEffectiveModelContextProvider;
 
 /**
  * A {@link CursorAwareDataTreeModification} which does not really do anything and throws an
@@ -25,17 +24,13 @@ import org.opendaylight.yangtools.yang.model.spi.AbstractEffectiveModelContextPr
  * {@link DataTreeSnapshot#newModification()} fails, see {@link LocalReadWriteProxyTransaction} for details. Surrounding
  * code should guard against invocation of most of these methods.
  */
-final class FailedDataTreeModification extends AbstractEffectiveModelContextProvider
-        implements CursorAwareDataTreeModification {
-    private final @NonNull Exception cause;
+record FailedDataTreeModification(
+        @NonNull EffectiveModelContext modelContext,
+        @NonNull Exception cause) implements CursorAwareDataTreeModification {
 
-    FailedDataTreeModification(final EffectiveModelContext context, final Exception cause) {
-        super(context);
-        this.cause = requireNonNull(cause);
-    }
-
-    @NonNull Exception cause() {
-        return cause;
+    FailedDataTreeModification {
+        requireNonNull(modelContext);
+        requireNonNull(cause);
     }
 
     @Override
