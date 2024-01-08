@@ -127,8 +127,8 @@ public abstract class PruningDataTreeModification extends ForwardingObject imple
     }
 
     @Override
-    public final EffectiveModelContext getEffectiveModelContext() {
-        return delegate.getEffectiveModelContext();
+    public final EffectiveModelContext modelContext() {
+        return delegate.modelContext();
     }
 
     @Override
