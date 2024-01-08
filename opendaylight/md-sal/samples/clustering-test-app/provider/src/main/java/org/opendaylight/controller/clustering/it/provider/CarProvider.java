@@ -32,7 +32,6 @@ import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
@@ -76,7 +75,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Rpc;
@@ -113,21 +112,17 @@ public final class CarProvider {
     private final AtomicLong succcessCounter = new AtomicLong();
     private final AtomicLong failureCounter = new AtomicLong();
 
-    private final EntityOwnershipListener ownershipListener =
-        ownershipChange -> LOG.info("ownershipChanged: {}", ownershipChange);
+    private final EntityOwnershipListener ownershipListener = (entity, change, inJeopardy) ->
+        LOG.info("ownershipChanged: entity={} change={} inJeopardy={}", entity, change, inJeopardy);
 
     private final AtomicBoolean registeredListener = new AtomicBoolean();
-
-    private final Set<ListenerRegistration<?>> carsDclRegistrations = ConcurrentHashMap.newKeySet();
-
+    private final AtomicReference<Registration> commitCohortReg = new AtomicReference<>();
+    private final Set<ObjectRegistration<?>> carsDclRegistrations = ConcurrentHashMap.newKeySet();
     private final Set<Registration> regs = new HashSet<>();
-    private final Set<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
-            ConcurrentHashMap.newKeySet();
+    private final Set<Registration> carsDtclRegistrations = ConcurrentHashMap.newKeySet();
 
     private volatile Thread testThread;
     private volatile boolean stopThread;
-    private final AtomicReference<DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort>> commitCohortReg =
-            new AtomicReference<>();
 
     @Inject
     @Activate
@@ -297,10 +292,8 @@ public final class CarProvider {
     private ListenableFuture<RpcResult<RegisterLoggingDtclOutput>> registerLoggingDtcl(
             final RegisterLoggingDtclInput input) {
         LOG.info("Registering a new CarDataTreeChangeListener");
-        final ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration =
-                dataProvider.registerDataTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
-
-        carsDtclRegistrations.add(carsDtclRegistration);
+        final var reg = dataProvider.registerDataTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
+        carsDtclRegistrations.add(reg);
         return RpcResultBuilder.success(new RegisterLoggingDtclOutputBuilder().build()).buildFuture();
     }
 
@@ -309,7 +302,7 @@ public final class CarProvider {
         LOG.info("Unregistering the CarDataTreeChangeListener(s)");
         synchronized (carsDtclRegistrations) {
             int numListeners = 0;
-            for (ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration : carsDtclRegistrations) {
+            for (var carsDtclRegistration : carsDtclRegistrations) {
                 carsDtclRegistration.close();
                 numListeners++;
             }
@@ -328,7 +321,7 @@ public final class CarProvider {
     }
 
     private void closeCommitCohortRegistration() {
-        final DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort> reg = commitCohortReg.getAndSet(null);
+        final var reg = commitCohortReg.getAndSet(null);
         if (reg != null) {
             reg.close();
             LOG.info("Unregistered commit cohort");
@@ -341,9 +334,7 @@ public final class CarProvider {
             return RpcResultBuilder.success(new RegisterCommitCohortOutputBuilder().build()).buildFuture();
         }
 
-        final DOMDataTreeCommitCohortRegistry commitCohortRegistry = domDataBroker.getExtensions().getInstance(
-            DOMDataTreeCommitCohortRegistry.class);
-
+        final var commitCohortRegistry = domDataBroker.extension(DOMDataTreeCommitCohortRegistry.class);
         if (commitCohortRegistry == null) {
             // Shouldn't happen
             return RpcResultBuilder.<RegisterCommitCohortOutput>failed().withError(ErrorType.APPLICATION,
@@ -358,7 +349,7 @@ public final class CarProvider {
         // to address all list entries, the second path argument is wild-carded by specifying just the CarEntry.QNAME.
         final YangInstanceIdentifier carEntryPath = YangInstanceIdentifier.builder(
                 YangInstanceIdentifier.of(Cars.QNAME)).node(CarEntry.QNAME).node(CarEntry.QNAME).build();
-        commitCohortReg.set(commitCohortRegistry.registerCommitCohort(new DOMDataTreeIdentifier(
+        commitCohortReg.set(commitCohortRegistry.registerCommitCohort(DOMDataTreeIdentifier.of(
             LogicalDatastoreType.CONFIGURATION, carEntryPath), new CarEntryDataTreeCommitCohort()));
 
         LOG.info("Registered commit cohort");

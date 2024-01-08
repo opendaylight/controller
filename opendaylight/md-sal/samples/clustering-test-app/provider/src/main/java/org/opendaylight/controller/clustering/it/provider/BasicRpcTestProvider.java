@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = { })
 public final class BasicRpcTestProvider implements ClusterSingletonService {
     private static final Logger LOG = LoggerFactory.getLogger(BasicRpcTestProvider.class);
-    private static final ServiceGroupIdentifier IDENTIFIER = ServiceGroupIdentifier.create("Basic-rpc-test");
+    private static final ServiceGroupIdentifier IDENTIFIER = new ServiceGroupIdentifier("Basic-rpc-test");
 
     private final RpcProviderService rpcProviderRegistry;
     private final Registration singletonRegistration;
