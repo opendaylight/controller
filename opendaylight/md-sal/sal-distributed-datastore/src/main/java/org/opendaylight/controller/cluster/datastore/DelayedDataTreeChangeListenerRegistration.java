@@ -8,12 +8,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
-import java.util.EventListener;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 
-class DelayedDataTreeChangeListenerRegistration<L extends EventListener> implements ListenerRegistration<L> {
+class DelayedDataTreeChangeListenerRegistration implements Registration {
     private final RegisterDataTreeChangeListener registrationMessage;
     private final ActorRef registrationActor;
 
@@ -30,17 +29,6 @@ class DelayedDataTreeChangeListenerRegistration<L extends EventListener> impleme
         if (!closed) {
             support.doRegistration(registrationMessage, registrationActor);
         }
-    }
-
-    @Override
-    public L getInstance() {
-        // ObjectRegistration annotates this method as @Nonnull but we could return null if the delegate is not set yet.
-        // In reality, we do not and should not ever call this method on DelayedDataTreeChangeListenerRegistration
-        // instances anyway but, since we have to provide an implementation to satisfy the interface, we throw
-        // UnsupportedOperationException to honor the API contract of not returning null and to avoid a FindBugs error
-        // for possibly returning null.
-        throw new UnsupportedOperationException(
-                "getInstance should not be called on this instance since it could be null");
     }
 
     @Override
