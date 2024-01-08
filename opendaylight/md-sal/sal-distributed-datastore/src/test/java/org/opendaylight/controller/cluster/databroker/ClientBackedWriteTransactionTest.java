@@ -19,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTest<ClientBackedWriteTransaction> {
@@ -28,7 +28,7 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
     @Mock
     private ClientTransaction delegate;
     @Mock
-    private NormalizedNode data;
+    private ContainerNode data;
     @Mock
     private DOMStoreThreePhaseCommitCohort readyCohort;
 
