@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTestInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.common.Uint32;
 @Command(scope = "test-app" , name = "stress-test", description = "Run a stress-test")
 public class StressTestCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcService;
+    private RpcService rpcService;
     @Argument(index = 0, name = "rate", required = true)
     private int rate;
     @Argument(index = 1, name = "count", required = true)

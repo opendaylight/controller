@@ -12,7 +12,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplica;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 @Command(scope = "cluster-admin", name = "remove-shard-replica", description = "Run a remove-shard-replica")
 public class RemoveShardReplicaCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcConsumerRegistry;
+    private RpcService rpcService;
     @Argument(index = 0, name = "shard-name", required = true)
     private String shardName;
     @Argument(index = 1, name = "data-store-type", required = true, description = "config / operational")
@@ -32,7 +32,7 @@ public class RemoveShardReplicaCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcConsumerRegistry.getRpc(RemoveShardReplica.class)
+        return rpcService.getRpc(RemoveShardReplica.class)
                 .invoke(new RemoveShardReplicaInputBuilder()
                         .setShardName(shardName)
                         .setDataStoreType(DataStoreType.forName(dataStoreType))

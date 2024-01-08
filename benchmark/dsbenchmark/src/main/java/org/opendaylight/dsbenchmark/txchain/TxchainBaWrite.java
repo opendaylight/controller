@@ -16,9 +16,6 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.Transaction;
-import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
@@ -26,10 +23,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainBaWrite extends DatastoreAbstractWriter implements TransactionChainListener {
+public class TxchainBaWrite extends DatastoreAbstractWriter implements FutureCallback<Empty> {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaWrite.class);
 
     private final DataBroker dataBroker;
@@ -49,7 +47,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void executeList() {
-        final var chain = dataBroker.createMergingTransactionChain(this);
+        final var chain = dataBroker.createMergingTransactionChain();
+        chain.addCallback(this);
         final var dsType = getDataStoreType();
 
         var tx = chain.newWriteOnlyTransaction();
@@ -106,14 +105,12 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
-            final Throwable cause) {
-        LOG.error("Broken chain {} in DatastoreBaAbstractWrite, transaction {}", chain, transaction.getIdentifier(),
-            cause);
+    public void onFailure(final Throwable cause) {
+        LOG.error("Broken chain in DatastoreBaAbstractWrite", cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain chain) {
-        LOG.debug("DatastoreBaAbstractWrite closed successfully, chain {}", chain);
+    public void onSuccess(final Empty result) {
+        LOG.debug("DatastoreBaAbstractWrite closed successfully");
     }
 }
