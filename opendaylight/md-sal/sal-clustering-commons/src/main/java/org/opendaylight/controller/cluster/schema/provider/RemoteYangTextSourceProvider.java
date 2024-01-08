@@ -11,7 +11,7 @@ import com.google.common.annotations.Beta;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.schema.provider.impl.YangTextSchemaSourceSerializationProxy;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
 import scala.concurrent.Future;
 
 /**

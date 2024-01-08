@@ -43,7 +43,7 @@ public final class DistributedDataStoreFactory {
 
         updater.setListener(dataStore);
 
-        schemaService.registerSchemaContextListener(dataStore);
+        schemaService.registerSchemaContextListener(dataStore::onModelContextUpdated);
 
         dataStore.setCloseable(updater);
         dataStore.waitTillReady();

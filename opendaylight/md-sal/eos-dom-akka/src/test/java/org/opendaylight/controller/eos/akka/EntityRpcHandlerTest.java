@@ -26,7 +26,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntitiesInputBuilder;
@@ -37,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -101,7 +101,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
         final DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
-        final DOMEntityOwnershipCandidateRegistration reg = service1.registerCandidate(entity);
+        final Registration reg = service1.registerCandidate(entity);
 
         await().untilAsserted(() -> {
             final var getEntityResult = service1.getEntity(new GetEntityInputBuilder()
@@ -117,16 +117,16 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         // immediately, so that the rpc actor retries with distributed-data asap
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
             final var getEntitiesResult = service2.getEntities(new GetEntitiesInputBuilder().build()).get().getResult();
-
-            assertEquals(getEntitiesResult.getEntities().size(), 1);
-            assertTrue(getEntitiesResult.getEntities().get(new EntitiesKey(
-                            new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
-                            new EntityType(ENTITY_TYPE)))
-                    .getCandidateNodes().contains(new NodeName("member-1")));
-            assertTrue(getEntitiesResult.getEntities().get(new EntitiesKey(
-                            new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
-                            new EntityType(ENTITY_TYPE)))
-                    .getOwnerNode().getValue().equals("member-1"));
+            final var entities = getEntitiesResult.nonnullEntities();
+            assertEquals(1, entities.size());
+            assertTrue(entities.get(new EntitiesKey(
+                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
+                new EntityType(ENTITY_TYPE)))
+                .getCandidateNodes().contains(new NodeName("member-1")));
+            assertTrue(entities.get(new EntitiesKey(
+                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
+                new EntityType(ENTITY_TYPE)))
+                .getOwnerNode().getValue().equals("member-1"));
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {

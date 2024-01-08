@@ -21,14 +21,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest<ClientBackedReadTransaction> {
     private ClientBackedReadTransaction object;
 
     @Mock
-    private NormalizedNode data;
+    private ContainerNode data;
     @Mock
     private ClientActorContext clientContext;
     @Mock

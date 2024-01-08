@@ -22,10 +22,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.spi.source.DelegatedYangTextSource;
 import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -46,24 +47,24 @@ public class RemoteYangTextSourceProviderImplTest {
 
     @Test
     public void testGetExistingYangTextSchemaSource() throws Exception {
-        var schemaSource = YangTextSchemaSource.delegateForCharSource(ID, CharSource.wrap("Test source."));
+        var schemaSource = new DelegatedYangTextSource(ID, CharSource.wrap("Test source."));
 
         doReturn(Futures.immediateFuture(schemaSource)).when(mockedLocalRepository)
-            .getSchemaSource(ID, YangTextSchemaSource.class);
+            .getSchemaSource(ID, YangTextSource.class);
 
         var retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID);
         assertTrue(retrievedSourceFuture.isCompleted());
         var resultSchemaSource = Await.result(retrievedSourceFuture, FiniteDuration.Zero()).getRepresentation();
-        assertEquals(resultSchemaSource.getIdentifier(), schemaSource.getIdentifier());
+        assertEquals(resultSchemaSource.sourceId(), schemaSource.sourceId());
         assertEquals(resultSchemaSource.read(), schemaSource.read());
     }
 
     @Test
     public void testGetNonExistentYangTextSchemaSource() throws Exception {
-        final var exception = new SchemaSourceException("Source is not provided");
+        final var exception = new SchemaSourceException(ID, "Source is not provided");
 
         doReturn(Futures.immediateFailedFuture(exception)).when(mockedLocalRepository)
-            .getSchemaSource(ID, YangTextSchemaSource.class);
+            .getSchemaSource(ID, YangTextSource.class);
 
         var retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID);
         assertTrue(retrievedSourceFuture.isCompleted());

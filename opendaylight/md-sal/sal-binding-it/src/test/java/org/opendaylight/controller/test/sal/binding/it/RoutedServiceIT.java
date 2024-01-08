@@ -20,8 +20,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRoute;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInputBuilder;
@@ -52,7 +52,7 @@ public class RoutedServiceIT extends AbstractIT {
 
     @Inject
     @Filter(timeout = 120 * 1000)
-    RpcConsumerRegistry rpcConsumerRegistry;
+    RpcService rpcService;
 
     /**
      * Prepare mocks.
@@ -86,7 +86,7 @@ public class RoutedServiceIT extends AbstractIT {
         assertNotNull("Registration should not be null", firstReg);
         assertNotSame(secondReg, firstReg);
 
-        RoutedSimpleRoute consumerService = rpcConsumerRegistry.getRpc(RoutedSimpleRoute.class);
+        RoutedSimpleRoute consumerService = rpcService.getRpc(RoutedSimpleRoute.class);
         assertNotNull("MD-SAL instance of test Service should be returned", consumerService);
         assertNotSame("Provider instance and consumer instance should not be same.", routedSimpleRouteRpc1,
                 consumerService);
