@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstant;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -23,16 +23,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
          description = "Run a register-singleton-constant text")
 public class RegisterSingletonConstantCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcService;
+    private RpcService rpcService;
     @Argument(index = 0, name = "constant", required = true)
     private String constant;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
         return rpcService.getRpc(RegisterSingletonConstant.class)
-                .invoke(new RegisterSingletonConstantInputBuilder()
-                        .setConstant(constant)
-                        .build());
-
+                .invoke(new RegisterSingletonConstantInputBuilder().setConstant(constant).build());
     }
 }

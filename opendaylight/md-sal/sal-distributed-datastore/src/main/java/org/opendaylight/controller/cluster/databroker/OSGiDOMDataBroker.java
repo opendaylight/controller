@@ -8,19 +8,17 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
@@ -75,18 +73,18 @@ public final class OSGiDOMDataBroker implements DOMDataBroker {
     }
 
     @Override
-    public ClassToInstanceMap<DOMDataBrokerExtension> getExtensions() {
-        return delegate.getExtensions();
+    public Collection<Extension> supportedExtensions() {
+        return delegate.supportedExtensions();
     }
 
     @Override
-    public DOMTransactionChain createTransactionChain(final DOMTransactionChainListener listener) {
-        return delegate.createTransactionChain(listener);
+    public DOMTransactionChain createTransactionChain() {
+        return delegate.createTransactionChain();
     }
 
     @Override
-    public DOMTransactionChain createMergingTransactionChain(final DOMTransactionChainListener listener) {
-        return delegate.createMergingTransactionChain(listener);
+    public DOMTransactionChain createMergingTransactionChain() {
+        return delegate.createMergingTransactionChain();
     }
 
     @Activate
