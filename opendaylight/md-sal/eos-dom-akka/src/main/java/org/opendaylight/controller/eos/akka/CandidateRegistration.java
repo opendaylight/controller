@@ -10,11 +10,9 @@ package org.opendaylight.controller.eos.akka;
 import static java.util.Objects.requireNonNull;
 
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
-final class CandidateRegistration extends AbstractObjectRegistration<DOMEntity>
-        implements DOMEntityOwnershipCandidateRegistration {
+final class CandidateRegistration extends AbstractObjectRegistration<DOMEntity> {
     private final AkkaEntityOwnershipService service;
 
     CandidateRegistration(final DOMEntity instance, final AkkaEntityOwnershipService service) {
