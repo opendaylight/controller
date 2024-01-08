@@ -15,7 +15,7 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,8 @@ public class DsbenchmarkListenerProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkListenerProvider.class);
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
             InstanceIdentifier.builder(TestExec.class).build();
-    private final List<ListenerRegistration<DsbenchmarkListener>> listeners = new ArrayList<>();
+    private final List<DsbenchmarkListener> listeners = new ArrayList<>();
+    private final List<Registration> registrations = new ArrayList<>();
     private final DataBroker dataBroker;
 
     public DsbenchmarkListenerProvider(final DataBroker dataBroker) {
@@ -34,11 +35,12 @@ public class DsbenchmarkListenerProvider {
 
     public void createAndRegisterListeners(final int numListeners) {
         for (int i = 0; i < numListeners; i++) {
-            DsbenchmarkListener listener = new DsbenchmarkListener();
-            listeners.add(dataBroker.registerDataTreeChangeListener(
-                    DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
-            listeners.add(dataBroker.registerDataTreeChangeListener(
-                    DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
+            var listener = new DsbenchmarkListener();
+            listeners.add(listener);
+            registrations.add(dataBroker.registerDataTreeChangeListener(
+                    DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
+            registrations.add(dataBroker.registerDataTreeChangeListener(
+                    DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
 
         }
         LOG.debug("DsbenchmarkListenerProvider created {} listeneres", numListeners);
@@ -47,8 +49,8 @@ public class DsbenchmarkListenerProvider {
     public long getDataChangeCount() {
         long dataChanges = 0;
 
-        for (ListenerRegistration<DsbenchmarkListener> listenerRegistration : listeners) {
-            dataChanges += listenerRegistration.getInstance().getNumDataChanges();
+        for (var listener : listeners) {
+            dataChanges += listener.getNumDataChanges();
         }
         LOG.debug("DsbenchmarkListenerProvider , total data changes {}", dataChanges);
         return dataChanges;
@@ -57,11 +59,14 @@ public class DsbenchmarkListenerProvider {
     public long getEventCountAndDestroyListeners() {
         long totalEvents = 0;
 
-        for (ListenerRegistration<DsbenchmarkListener> listenerRegistration : listeners) {
-            totalEvents += listenerRegistration.getInstance().getNumEvents();
-            listenerRegistration.close();
+        registrations.forEach(Registration::close);
+        registrations.clear();
+
+        for (var listener : listeners) {
+            totalEvents += listener.getNumEvents();
         }
         listeners.clear();
+
         LOG.debug("DsbenchmarkListenerProvider destroyed listeneres, total events {}", totalEvents);
         return totalEvents;
     }

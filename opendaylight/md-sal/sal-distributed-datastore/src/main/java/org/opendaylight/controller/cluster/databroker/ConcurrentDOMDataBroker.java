@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.databroker;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER;
-import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER;
-import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
+import static org.opendaylight.mdsal.dom.spi.TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER;
+import static org.opendaylight.mdsal.dom.spi.TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER;
+import static org.opendaylight.mdsal.dom.spi.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
 
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AbstractFuture;
@@ -28,7 +28,8 @@ import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
-import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
+import org.opendaylight.mdsal.dom.spi.AbstractDOMDataBroker;
+import org.opendaylight.mdsal.dom.spi.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 @Beta
-public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
+public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrentDOMDataBroker.class);
     private static final String CAN_COMMIT = "CAN_COMMIT";
     private static final String PRE_COMMIT = "PRE_COMMIT";

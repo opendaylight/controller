@@ -12,11 +12,9 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
-final class ListenerRegistration extends AbstractObjectRegistration<DOMEntityOwnershipListener>
-        implements DOMEntityOwnershipListenerRegistration {
+final class ListenerRegistration extends AbstractObjectRegistration<DOMEntityOwnershipListener> {
     private final AkkaEntityOwnershipService service;
     private final @NonNull String entityType;
 
@@ -27,8 +25,7 @@ final class ListenerRegistration extends AbstractObjectRegistration<DOMEntityOwn
         this.service = requireNonNull(service);
     }
 
-    @Override
-    public  String getEntityType() {
+    public String entityType() {
         return entityType;
     }
 

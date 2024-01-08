@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.spi.AbstractEffectiveModelContextProvider;
+import static java.util.Objects.requireNonNull;
 
-public class UpdateSchemaContext extends AbstractEffectiveModelContextProvider {
-    public UpdateSchemaContext(final EffectiveModelContext modelContext) {
-        super(modelContext);
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+
+@NonNullByDefault
+public record UpdateSchemaContext(EffectiveModelContext modelContext) {
+    public UpdateSchemaContext {
+        requireNonNull(modelContext);
     }
 }

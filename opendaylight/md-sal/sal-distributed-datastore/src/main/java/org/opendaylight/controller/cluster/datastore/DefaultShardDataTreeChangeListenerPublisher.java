@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTreeChangePublisher;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
@@ -46,21 +45,21 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     }
 
     @Override
-    protected void notifyListener(final AbstractDOMDataTreeChangeListenerRegistration<?> registration,
-            final List<DataTreeCandidate> changes) {
-        LOG.debug("{}: notifyListener: listener: {}", logContext, registration.getInstance());
-        registration.getInstance().onDataTreeChanged(changes);
+    protected void notifyListener(final Reg registration, final List<DataTreeCandidate> changes) {
+        final var listener = registration.listener();
+        LOG.debug("{}: notifyListener: listener: {}", logContext, listener);
+        listener.onDataTreeChanged(changes);
     }
 
     @Override
-    protected void registrationRemoved(final AbstractDOMDataTreeChangeListenerRegistration<?> registration) {
+    protected void registrationRemoved(final Reg registration) {
         LOG.debug("Registration {} removed", registration);
     }
 
     @Override
     public void registerTreeChangeListener(final YangInstanceIdentifier treeId,
             final DOMDataTreeChangeListener listener, final Optional<DataTreeCandidate> initialState,
-            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+            final Consumer<Registration> onRegistration) {
         registerTreeChangeListener(treeId, listener, onRegistration);
 
         if (initialState.isPresent()) {
@@ -71,13 +70,9 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     }
 
     void registerTreeChangeListener(final YangInstanceIdentifier treeId, final DOMDataTreeChangeListener listener,
-            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+            final Consumer<Registration> onRegistration) {
         LOG.debug("{}: registerTreeChangeListener: path: {}, listener: {}", logContext, treeId, listener);
-
-        AbstractDOMDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> registration =
-                super.registerTreeChangeListener(treeId, listener);
-
-        onRegistration.accept(registration);
+        onRegistration.accept(super.registerTreeChangeListener(treeId, listener));
     }
 
     static void notifySingleListener(final YangInstanceIdentifier treeId, final DOMDataTreeChangeListener listener,
