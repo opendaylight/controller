@@ -17,9 +17,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -38,6 +38,7 @@ import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -47,6 +48,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -102,7 +104,6 @@ import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -381,8 +382,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             });
 
         try (var tx = txChain.newReadOnlyTransaction()) {
-            final var body = tx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS).orElseThrow().body();
-            assertThat(body, instanceOf(Collection.class));
+            final var body = assertInstanceOf(Collection.class,
+                tx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS).orElseThrow().body());
             assertEquals(numCars, ((Collection<?>) body).size());
         }
     }
@@ -612,8 +613,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                         LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore).build(),
                         MoreExecutors.directExecutor());
 
-        final DOMTransactionChainListener listener = mock(DOMTransactionChainListener.class);
-        final DOMTransactionChain txChain = broker.createTransactionChain(listener);
+        final var listener = mock(FutureCallback.class);
+        final DOMTransactionChain txChain = broker.createTransactionChain();
+        txChain.addCallback(listener);
 
         final DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
@@ -622,11 +624,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
             .build());
 
-        final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
-            .getCause();
-        assertThat(ex, instanceOf(TransactionCommitFailedException.class));
+        final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
+        assertInstanceOf(TransactionCommitFailedException.class, ex.getCause());
 
-        verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx), any(Throwable.class));
+        verify(listener, timeout(5000)).onFailure(any());
 
         txChain.close();
         broker.close();
@@ -636,33 +637,32 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testChainedTransactionFailureWithMultipleShards() throws Exception {
         initDatastoresWithCarsAndPeople("testChainedTransactionFailureWithMultipleShards");
 
-        final ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
-                ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
-                        LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore).build(),
-                        MoreExecutors.directExecutor());
+        try (var broker = new ConcurrentDOMDataBroker(
+            Map.of(LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore), MoreExecutors.directExecutor())) {
 
-        final DOMTransactionChainListener listener = mock(DOMTransactionChainListener.class);
-        final DOMTransactionChain txChain = broker.createTransactionChain(listener);
+            final var listener = mock(FutureCallback.class);
+            final DOMTransactionChain txChain = broker.createTransactionChain();
+            txChain.addCallback(listener);
 
-        final DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            final DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+            writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-        // Note that merge will validate the data and fail but put succeeds b/c deep validation is not
-        // done for put for performance reasons.
-        writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, Builders.containerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
-            .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
-            .build());
+            // Note that merge will validate the data and fail but put succeeds b/c deep validation is not
+            // done for put for performance reasons.
+            writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
+                .build());
 
-        final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
-            .getCause();
-        assertThat(ex, instanceOf(TransactionCommitFailedException.class));
+            final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
+                .getCause();
+            assertThat(ex, instanceOf(TransactionCommitFailedException.class));
 
-        verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx), any(Throwable.class));
+            verify(listener, timeout(5000)).onFailure(any());
 
-        txChain.close();
-        broker.close();
+            txChain.close();
+        }
     }
 
     @Test

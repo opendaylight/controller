@@ -14,7 +14,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShard;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
         description = "Run a change-member-voting-states-for-shard test")
 public class ChangeMemberVotingStatesForShardCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcConsumerRegistry;
+    private RpcService rpcService;
     @Argument(index = 0, name = "shard-name", required = true)
     private String shardName;
     @Argument(index = 1, name = "data-store-type", required = true, description = "config / operational")
@@ -44,7 +44,7 @@ public class ChangeMemberVotingStatesForShardCommand extends AbstractRpcAction {
                 .setVoting(voting)
                 .build();
 
-        return rpcConsumerRegistry.getRpc(ChangeMemberVotingStatesForShard.class)
+        return rpcService.getRpc(ChangeMemberVotingStatesForShard.class)
                 .invoke(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName(shardName)
                         .setDataStoreType(DataStoreType.forName(dataStoreType))

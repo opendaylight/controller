@@ -107,7 +107,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             } catch (Exception e) {
                 LOG.debug("Failed to instantiate modification for {}", identifier, e);
                 recordedFailure = e;
-                mod = new FailedDataTreeModification(snapshot.getEffectiveModelContext(), e);
+                mod = new FailedDataTreeModification(snapshot.modelContext(), e);
             }
             modification = mod;
         }

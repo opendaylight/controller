@@ -27,9 +27,9 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class JsonExportTest extends AbstractShardTest {
     private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in "
@@ -47,7 +47,7 @@ public class JsonExportTest extends AbstractShardTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        final File exportTmpFolder = temporaryFolder.newFolder("persistence-export");
+        final var exportTmpFolder = temporaryFolder.newFolder("persistence-export");
         actualJournalFilePath = exportTmpFolder.getAbsolutePath() + "/journals/"
             + "member-1-shard-inventory-config" + nextShardNum + "-journal.json";
         actualSnapshotFilePath = exportTmpFolder.getAbsolutePath() + "/snapshots/"
@@ -66,10 +66,12 @@ public class JsonExportTest extends AbstractShardTest {
     @Test
     public void testJsonExport() throws Exception {
         // Set up the InMemorySnapshotStore.
-        final DataTree source = setupInMemorySnapshotStore();
+        final var source = setupInMemorySnapshotStore();
 
-        final DataTreeModification writeMod = source.takeSnapshot().newModification();
-        writeMod.write(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+        final var writeMod = source.takeSnapshot().newModification();
+        writeMod.write(TestModel.OUTER_LIST_PATH, ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
+            .build());
         writeMod.ready();
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
@@ -82,13 +84,18 @@ public class JsonExportTest extends AbstractShardTest {
 
         // Add some ModificationPayload entries
         for (int i = 1; i <= nListEntries; i++) {
-            listEntryKeys.add(i);
+            final Integer value = i;
+            listEntryKeys.add(value);
 
-            final YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                    .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
+            final var path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+                    .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, value).build();
 
-            final DataTreeModification mod = source.takeSnapshot().newModification();
-            mod.merge(path, ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
+            final var mod = source.takeSnapshot().newModification();
+            mod.merge(path, ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(
+                    NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, value))
+                .withChild(ImmutableNodes.leafNode(TestModel.ID_QNAME, value))
+                .build());
             mod.ready();
 
             InMemoryJournal.addEntry(shardID.toString(), i + 1, new SimpleReplicatedLogEntry(i, 1,
@@ -117,13 +124,13 @@ public class JsonExportTest extends AbstractShardTest {
     }
 
     private static String readExpectedFile(final String filePath) throws IOException {
-        final File exportFile = new File(JsonExportTest.class.getClassLoader().getResource(filePath).getFile());
+        final var exportFile = new File(JsonExportTest.class.getResource(filePath).getFile());
         return new String(Files.readAllBytes(Path.of(exportFile.getPath())));
     }
 
     private static String readActualFile(final String filePath) throws IOException {
-        final File exportFile = new File(filePath);
+        final var exportFile = new File(filePath);
         await().atMost(10, TimeUnit.SECONDS).until(exportFile::exists);
-        return new String(Files.readAllBytes(Path.of(filePath)));
+        return Files.readString(Path.of(filePath));
     }
 }

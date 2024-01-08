@@ -28,11 +28,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.eos.akka.AbstractNativeEosTest;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
-import org.opendaylight.mdsal.singleton.dom.impl.DOMClusterSingletonServiceProviderImpl;
+import org.opendaylight.mdsal.singleton.dom.impl.EOSClusterSingletonServiceProvider;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +43,9 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
     private MockNativeEntityOwnershipService node2;
     private MockNativeEntityOwnershipService node3;
 
-    private MockSingletonService singletonNode1;
-    private MockSingletonService singletonNode2;
-    private MockSingletonService singletonNode3;
+    private EOSClusterSingletonServiceProvider singletonNode1;
+    private EOSClusterSingletonServiceProvider singletonNode2;
+    private EOSClusterSingletonServiceProvider singletonNode3;
 
 
     @Before
@@ -55,14 +54,9 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
         node2 = startupNativeService(2551, List.of("member-2"), THREE_NODE_SEED_NODES);
         node3 = startupNativeService(2552, List.of("member-3"), THREE_NODE_SEED_NODES);
 
-        singletonNode1 = new MockSingletonService(node1);
-        singletonNode1.initializeProvider();
-
-        singletonNode2 = new MockSingletonService(node2);
-        singletonNode2.initializeProvider();
-
-        singletonNode3 = new MockSingletonService(node3);
-        singletonNode3.initializeProvider();
+        singletonNode1 = new EOSClusterSingletonServiceProvider(node1);
+        singletonNode2 = new EOSClusterSingletonServiceProvider(node2);
+        singletonNode3 = new EOSClusterSingletonServiceProvider(node3);
 
         waitUntillNodeReady(node3);
     }
@@ -90,8 +84,7 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
     @Test
     public void testSingletonOwnershipHandoff() {
         final MockClusterSingletonService service = new MockClusterSingletonService("member-1", "service-1");
-        final ClusterSingletonServiceRegistration registration =
-                singletonNode1.registerClusterSingletonService(service);
+        final Registration registration = singletonNode1.registerClusterSingletonService(service);
 
         verifyServiceActive(service);
 
@@ -108,14 +101,12 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
     @Test
     public void testSingletonOwnershipHandoffOnNodeShutdown() throws Exception {
         MockClusterSingletonService service2 = new MockClusterSingletonService("member-2", "service-1");
-        ClusterSingletonServiceRegistration registration2 =
-                singletonNode2.registerClusterSingletonService(service2);
+        Registration registration2 = singletonNode2.registerClusterSingletonService(service2);
 
         verifyServiceActive(service2);
 
         final MockClusterSingletonService service3 = new MockClusterSingletonService("member-3", "service-1");
-        final ClusterSingletonServiceRegistration registration3 =
-                singletonNode3.registerClusterSingletonService(service3);
+        final Registration registration3 = singletonNode3.registerClusterSingletonService(service3);
 
         verifyServiceInactive(service3, 2);
 
@@ -124,8 +115,7 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
         verifyServiceActive(service3);
 
         node2 = startupNativeService(2551, List.of("member-1"), THREE_NODE_SEED_NODES);
-        singletonNode2 = new MockSingletonService(node2);
-        singletonNode2.initializeProvider();
+        singletonNode2 = new EOSClusterSingletonServiceProvider(node2);
 
         waitUntillNodeReady(node2);
         service2 = new MockClusterSingletonService("member-2", "service-1");
@@ -135,7 +125,7 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
         verifyServiceInactive(service2, 5);
     }
 
-    private void waitUntillNodeReady(MockNativeEntityOwnershipService node) {
+    private static void waitUntillNodeReady(final MockNativeEntityOwnershipService node) {
         // need to wait until all nodes are ready
         final Cluster cluster = Cluster.get(Adapter.toTyped(node.getActorSystem()));
         Awaitility.await().atMost(Duration.ofSeconds(20)).until(() -> {
@@ -155,19 +145,19 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
         });
     }
 
-    private static void verifyServiceActive(MockClusterSingletonService service) {
+    private static void verifyServiceActive(final MockClusterSingletonService service) {
         await().untilAsserted(() -> assertTrue(service.isActivated()));
     }
 
-    private static void verifyServiceActive(MockClusterSingletonService service, long delay) {
+    private static void verifyServiceActive(final MockClusterSingletonService service, final long delay) {
         await().pollDelay(delay, TimeUnit.SECONDS).untilAsserted(() -> assertTrue(service.isActivated()));
     }
 
-    private static void verifyServiceInactive(MockClusterSingletonService service) {
+    private static void verifyServiceInactive(final MockClusterSingletonService service) {
         await().untilAsserted(() -> assertFalse(service.isActivated()));
     }
 
-    private static void verifyServiceInactive(MockClusterSingletonService service, long delay) {
+    private static void verifyServiceInactive(final MockClusterSingletonService service, final long delay) {
         await().pollDelay(delay, TimeUnit.SECONDS).untilAsserted(() -> assertFalse(service.isActivated()));
     }
 
@@ -177,9 +167,9 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
         private final ServiceGroupIdentifier identifier;
         private boolean activated = false;
 
-        MockClusterSingletonService(String member, String identifier) {
+        MockClusterSingletonService(final String member, final String identifier) {
             this.member = member;
-            this.identifier = ServiceGroupIdentifier.create(identifier);
+            this.identifier = new ServiceGroupIdentifier(identifier);
         }
 
         @Override
@@ -202,12 +192,6 @@ public class ClusterSingletonIntegrationTest extends AbstractNativeEosTest {
 
         public boolean isActivated() {
             return activated;
-        }
-    }
-
-    private static class MockSingletonService extends DOMClusterSingletonServiceProviderImpl {
-        MockSingletonService(DOMEntityOwnershipService entityOwnershipService) {
-            super(entityOwnershipService);
         }
     }
 }

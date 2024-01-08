@@ -24,9 +24,8 @@ import org.opendaylight.controller.eos.akka.registry.listener.owner.command.List
 import org.opendaylight.controller.eos.akka.registry.listener.owner.command.OwnerChanged;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.EntityOwnerChanged;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerCommand;
-import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,9 +98,7 @@ public class SingleEntityListenerActor extends AbstractBehavior<ListenerCommand>
 
     private void triggerNoOwnerNotification() {
         LOG.debug("Triggering initial notification without an owner for: {}", entity);
-
-        toNotify.tell(new EntityOwnerChanged(new DOMEntityOwnershipChange(
-                entity, EntityOwnershipChangeState.REMOTE_OWNERSHIP_LOST_NO_OWNER)));
+        toNotify.tell(new EntityOwnerChanged(entity, EntityOwnershipStateChange.REMOTE_OWNERSHIP_LOST_NO_OWNER, false));
     }
 
     private Behavior<ListenerCommand> onOwnerChanged(final OwnerChanged ownerChanged) {
@@ -133,8 +130,8 @@ public class SingleEntityListenerActor extends AbstractBehavior<ListenerCommand>
 
         currentOwner = newOwner;
 
-        toNotify.tell(new EntityOwnerChanged(new DOMEntityOwnershipChange(
-                entity, EntityOwnershipChangeState.from(wasOwner, isOwner, hasOwner))));
+        toNotify.tell(new EntityOwnerChanged(entity, EntityOwnershipStateChange.from(wasOwner, isOwner, hasOwner),
+            false));
     }
 
     private void handleOwnerLost(final Replicator.Deleted<LWWRegister<String>> changed) {
@@ -143,7 +140,6 @@ public class SingleEntityListenerActor extends AbstractBehavior<ListenerCommand>
         LOG.debug("Owner lost for entity:{}, currentOwner: {}, wasOwner: {}", entity, currentOwner, wasOwner);
 
         currentOwner = "";
-        toNotify.tell(new EntityOwnerChanged(new DOMEntityOwnershipChange(
-                entity, EntityOwnershipChangeState.from(wasOwner, false, false))));
+        toNotify.tell(new EntityOwnerChanged(entity, EntityOwnershipStateChange.from(wasOwner, false, false), false));
     }
 }

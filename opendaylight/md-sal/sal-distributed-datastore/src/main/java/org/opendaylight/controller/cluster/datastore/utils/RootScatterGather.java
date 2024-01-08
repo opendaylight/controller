@@ -29,8 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 
 /**
@@ -91,7 +90,7 @@ public final class RootScatterGather {
     public static <T> @NonNull Stream<ShardContainer<T>> scatterAll(final ContainerNode rootNode,
             final Function<PathArgument, T> childToShard, final Stream<T> allShards) {
         final var builders = allShards
-            .collect(Collectors.toUnmodifiableMap(Function.identity(), unused -> Builders.containerBuilder()));
+            .collect(Collectors.toUnmodifiableMap(Function.identity(), unused -> ImmutableNodes.newContainerBuilder()));
         for (var child : rootNode.body()) {
             final var shard = childToShard.apply(child.name());
             verifyNotNull(builders.get(shard), "Failed to find builder for %s", shard).addChild(child);
@@ -109,16 +108,16 @@ public final class RootScatterGather {
      */
     public static <T> @NonNull Stream<ShardContainer<T>> scatterTouched(final ContainerNode rootNode,
             final Function<PathArgument, T> childToShard) {
-        final var builders = new HashMap<T, DataContainerNodeBuilder<NodeIdentifier, ContainerNode>>();
+        final var builders = new HashMap<T, ContainerNode.Builder>();
         for (var child : rootNode.body()) {
-            builders.computeIfAbsent(childToShard.apply(child.name()), unused -> Builders.containerBuilder())
+            builders.computeIfAbsent(childToShard.apply(child.name()), unused -> ImmutableNodes.newContainerBuilder())
                 .addChild(child);
         }
         return streamContainers(rootNode.name(), builders);
     }
 
     private static <T> @NonNull Stream<ShardContainer<T>> streamContainers(final NodeIdentifier rootId,
-            final Map<T, DataContainerNodeBuilder<NodeIdentifier, ContainerNode>> builders) {
+            final Map<T, ContainerNode.Builder> builders) {
         return builders.entrySet().stream()
             .map(entry -> new ShardContainer<>(entry.getKey(), entry.getValue().withNodeIdentifier(rootId).build()));
     }

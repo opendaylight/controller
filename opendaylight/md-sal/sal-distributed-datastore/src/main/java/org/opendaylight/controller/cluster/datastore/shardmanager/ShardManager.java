@@ -149,7 +149,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @VisibleForTesting
     final ShardPeerAddressResolver peerAddressResolver;
 
-    private EffectiveModelContext schemaContext;
+    private EffectiveModelContext modelContext;
 
     private DatastoreSnapshot restoreFromSnapshot;
 
@@ -588,8 +588,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
 
-        if (schemaContext != null) {
-            info.setSchemaContext(schemaContext);
+        if (modelContext != null) {
+            info.setSchemaContext(modelContext);
             info.setActor(newShardActor(info));
         }
     }
@@ -964,12 +964,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * @param message the message to send
      */
     private void updateSchemaContext(final UpdateSchemaContext message) {
-        schemaContext = message.getEffectiveModelContext();
+        modelContext = message.modelContext();
 
-        LOG.debug("Got updated SchemaContext: # of modules {}", schemaContext.getModules().size());
+        LOG.debug("Got updated SchemaContext: # of modules {}", modelContext.getModules().size());
 
         for (ShardInformation info : localShards.values()) {
-            info.setSchemaContext(schemaContext);
+            info.setSchemaContext(modelContext);
 
             if (info.getActor() == null) {
                 LOG.debug("Creating Shard {}", info.getShardId());
@@ -1191,7 +1191,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         // Create the localShard
-        if (schemaContext == null) {
+        if (modelContext == null) {
             LOG.debug("{}: No SchemaContext is available in order to create a local shard instance for {}",
                 persistenceId(), shardName);
             getSender().tell(new Status.Failure(new IllegalStateException(
@@ -1244,7 +1244,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
                     Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
-            shardInfo.setSchemaContext(schemaContext);
+            shardInfo.setSchemaContext(modelContext);
             localShards.put(shardName, shardInfo);
             shardInfo.setActor(newShardActor(shardInfo));
         } else {
