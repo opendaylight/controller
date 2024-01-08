@@ -40,16 +40,14 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
@@ -57,10 +55,9 @@ import scala.concurrent.duration.Duration;
 /**
  * Base implementation of a distributed DOMStore.
  */
-public abstract class AbstractDataStore implements DistributedDataStoreInterface, EffectiveModelContextListener,
-        DatastoreContextPropertiesUpdater.Listener, DOMStoreTreeChangePublisher,
-        DOMDataTreeCommitCohortRegistry, AutoCloseable {
-
+public abstract class AbstractDataStore implements DistributedDataStoreInterface,
+        DatastoreContextPropertiesUpdater.Listener, DOMStoreTreeChangePublisher, DOMDataTreeCommitCohortRegistry,
+        AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStore.class);
 
     private final SettableFuture<Empty> readinessFuture = SettableFuture.create();
@@ -153,8 +150,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
-            final YangInstanceIdentifier treeId, final L listener) {
+    public Registration registerTreeChangeListener(final YangInstanceIdentifier treeId,
+            final DOMDataTreeChangeListener listener) {
         requireNonNull(treeId, "treeId should not be null");
         requireNonNull(listener, "listener should not be null");
 
@@ -176,30 +173,27 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
-        final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorUtils, listener, treeId);
+        final var listenerRegistrationProxy = new DataTreeChangeListenerProxy<>(actorUtils, listener, treeId);
         listenerRegistrationProxy.init(shardName);
 
         return listenerRegistrationProxy;
     }
 
     @Override
-    public <C extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<C> registerCommitCohort(
-            final DOMDataTreeIdentifier subtree, final C cohort) {
-        YangInstanceIdentifier treeId = requireNonNull(subtree, "subtree should not be null").getRootIdentifier();
+    public Registration registerCommitCohort(final DOMDataTreeIdentifier subtree,
+            final DOMDataTreeCommitCohort cohort) {
+        YangInstanceIdentifier treeId = requireNonNull(subtree, "subtree should not be null").path();
         requireNonNull(cohort, "listener should not be null");
 
 
         final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, treeId, shardName);
 
-        DataTreeCohortRegistrationProxy<C> cohortProxy =
-                new DataTreeCohortRegistrationProxy<>(actorUtils, subtree, cohort);
+        final var cohortProxy = new DataTreeCohortRegistrationProxy<>(actorUtils, subtree, cohort);
         cohortProxy.init(shardName);
         return cohortProxy;
     }
 
-    @Override
     public void onModelContextUpdated(final EffectiveModelContext newModelContext) {
         actorUtils.setSchemaContext(newModelContext);
     }
@@ -333,36 +327,32 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
-            final YangInstanceIdentifier shardLookup, final YangInstanceIdentifier insideShard,
-            final DOMDataTreeChangeListener delegate) {
-
+    public Registration registerProxyListener(final YangInstanceIdentifier shardLookup,
+            final YangInstanceIdentifier insideShard, final DOMDataTreeChangeListener delegate) {
         requireNonNull(shardLookup, "shardLookup should not be null");
         requireNonNull(insideShard, "insideShard should not be null");
         requireNonNull(delegate, "delegate should not be null");
 
         final String shardName = actorUtils.getShardStrategyFactory().getStrategy(shardLookup).findShard(shardLookup);
-        LOG.debug("Registering tree listener: {} for tree: {} shard: {}, path inside shard: {}",
-                delegate,shardLookup, shardName, insideShard);
+        LOG.debug("Registering tree listener: {} for tree: {} shard: {}, path inside shard: {}", delegate, shardLookup,
+            shardName, insideShard);
 
         // wrap this in the ClusteredDOMDataTreeChangeLister interface
         // since we always want clustered registration
-        final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorUtils, new ClusteredDOMDataTreeChangeListener() {
-                    @Override
-                    public void onDataTreeChanged(final List<DataTreeCandidate> changes) {
-                        delegate.onDataTreeChanged(changes);
-                    }
+        final var proxy = new DataTreeChangeListenerProxy<>(actorUtils, new ClusteredDOMDataTreeChangeListener() {
+            @Override
+            public void onDataTreeChanged(final List<DataTreeCandidate> changes) {
+                delegate.onDataTreeChanged(changes);
+            }
 
-                    @Override
-                    public void onInitialData() {
-                        delegate.onInitialData();
-                    }
-                }, insideShard);
-        listenerRegistrationProxy.init(shardName);
+            @Override
+            public void onInitialData() {
+                delegate.onInitialData();
+            }
+        }, insideShard);
+        proxy.init(shardName);
 
-        return (ListenerRegistration<L>) listenerRegistrationProxy;
+        return proxy;
     }
 
     private Duration initialSettleTime() {

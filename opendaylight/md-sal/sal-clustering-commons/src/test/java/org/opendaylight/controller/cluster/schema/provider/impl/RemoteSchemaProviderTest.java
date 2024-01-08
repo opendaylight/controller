@@ -17,16 +17,15 @@ import static org.mockito.Mockito.mock;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
 import com.google.common.io.CharSource;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.spi.source.DelegatedYangTextSource;
 
 public class RemoteSchemaProviderTest {
     private static final SourceIdentifier ID = new SourceIdentifier("Test", "2015-10-30");
@@ -43,21 +42,21 @@ public class RemoteSchemaProviderTest {
 
     @Test
     public void getExistingYangTextSchemaSource() throws IOException, InterruptedException, ExecutionException {
-        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForCharSource(ID, CharSource.wrap("Test"));
+        final var schemaSource = new DelegatedYangTextSource(ID, CharSource.wrap("Test"));
         doReturn(Futures.successful(new YangTextSchemaSourceSerializationProxy(schemaSource)))
             .when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
 
-        YangTextSchemaSource providedSource = remoteSchemaProvider.getSource(ID).get();
-        assertEquals(ID, providedSource.getIdentifier());
+        final var providedSource = remoteSchemaProvider.getSource(ID).get();
+        assertEquals(ID, providedSource.sourceId());
         assertEquals(schemaSource.read(), providedSource.read());
     }
 
     @Test
     public void getNonExistingSchemaSource() throws InterruptedException {
-        final var exception = new SchemaSourceException("Source not provided");
+        final var exception = new SchemaSourceException(ID, "Source not provided");
         doReturn(Futures.failed(exception)).when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
 
-        ListenableFuture<YangTextSchemaSource> sourceFuture = remoteSchemaProvider.getSource(ID);
+        final var sourceFuture = remoteSchemaProvider.getSource(ID);
         assertTrue(sourceFuture.isDone());
 
         final var cause = assertThrows(ExecutionException.class, sourceFuture::get).getCause();

@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import scala.concurrent.Future;
  *
  * @param <T> listener type
  */
-final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
+final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractObjectRegistration<T> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
     private final ActorRef dataChangeListenerActor;
     private final ActorUtils actorUtils;
@@ -48,7 +48,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         super(listener);
         this.actorUtils = requireNonNull(actorUtils);
         this.registeredPath = requireNonNull(registeredPath);
-        this.dataChangeListenerActor = actorUtils.getActorSystem().actorOf(
+        dataChangeListenerActor = actorUtils.getActorSystem().actorOf(
                 DataTreeChangeListenerActor.props(getInstance(), registeredPath)
                     .withDispatcher(actorUtils.getNotificationDispatcherPath()));
 
@@ -94,7 +94,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
 
         synchronized (this) {
             if (!isClosed()) {
-                this.listenerRegistrationActor = actor;
+                listenerRegistrationActor = actor;
                 return;
             }
         }

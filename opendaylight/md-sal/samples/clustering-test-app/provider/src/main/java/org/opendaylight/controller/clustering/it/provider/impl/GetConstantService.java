@@ -11,10 +11,10 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
-import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
@@ -22,8 +22,7 @@ import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +43,7 @@ public final class GetConstantService implements DOMRpcImplementation {
         this.constant = constant;
     }
 
-    public static DOMRpcImplementationRegistration<GetConstantService> registerNew(
-            final DOMRpcProviderService rpcProviderService, final String constant) {
+    public static Registration registerNew(final DOMRpcProviderService rpcProviderService, final String constant) {
         LOG.debug("Registering get-constant service, constant value: {}", constant);
         return rpcProviderService.registerRpcImplementation(new GetConstantService(constant),
             DOMRpcIdentifier.create(GET_CONSTANT));
@@ -55,7 +53,7 @@ public final class GetConstantService implements DOMRpcImplementation {
     public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final ContainerNode input) {
         LOG.debug("get-constant invoked, current value: {}", constant);
 
-        return Futures.immediateFuture(new DefaultDOMRpcResult(Builders.containerBuilder()
+        return Futures.immediateFuture(new DefaultDOMRpcResult(ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(OUTPUT))
             .withChild(ImmutableNodes.leafNode(CONSTANT, constant))
             .build()));
