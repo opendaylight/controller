@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5b0af93d_84564152",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 9255
+      },
+      "writtenOn": "2024-01-08T05:51:00Z",
+      "side": 1,
+      "message": "8 spaces",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13947ff8_e591693a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/NewPersistentDataProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 9255
+      },
+      "writtenOn": "2024-01-08T05:51:00Z",
+      "side": 1,
+      "message": "8 spaces",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5654b55_5802735d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/NewLocalSnapshotStore.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 9255
+      },
+      "writtenOn": "2024-01-08T05:51:00Z",
+      "side": 1,
+      "message": "Separate static variables pls.",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c699d5a_4bfb6274",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 9255
+      },
+      "writtenOn": "2024-01-08T05:51:00Z",
+      "side": 1,
+      "message": "spacing",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
