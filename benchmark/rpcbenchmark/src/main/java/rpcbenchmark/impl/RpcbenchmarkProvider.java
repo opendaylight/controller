@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchRpcRoutes;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.rpcbench.rpc.routes.RpcRoute;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.rpcbench.rpc.routes.RpcRouteKey;
@@ -59,14 +59,14 @@ public final class RpcbenchmarkProvider implements AutoCloseable {
 
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private final RpcProviderService providerRegistry;
-    private final RpcConsumerRegistry consumerRegistry;
+    private final RpcService consumerRegistry;
     private final GlobalBindingRTCServer globalServer;
     private final Registration reg;
 
     @Inject
     @Activate
     public RpcbenchmarkProvider(@Reference final RpcProviderService providerRegistry,
-            @Reference final RpcConsumerRegistry consumerRegistry) {
+            @Reference final RpcService consumerRegistry) {
         this.providerRegistry = requireNonNull(providerRegistry);
         this.consumerRegistry = requireNonNull(consumerRegistry);
         globalServer = new GlobalBindingRTCServer(providerRegistry);
