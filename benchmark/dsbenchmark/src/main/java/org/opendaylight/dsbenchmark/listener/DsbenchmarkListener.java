@@ -15,7 +15,6 @@ import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
         for (DataTreeModification<TestExec> change : changes) {
             final DataObjectModification<TestExec> rootNode = change.getRootNode();
             final ModificationType modType = rootNode.getModificationType();
-            final PathArgument changeId = rootNode.getIdentifier();
+            final var changeId = rootNode.getIdentifier();
             final Collection<? extends DataObjectModification<? extends DataObject>> modifications =
                     rootNode.getModifiedChildren();
 

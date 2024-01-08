@@ -38,9 +38,9 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
@@ -51,9 +51,9 @@ public class OpsRegistrarTest {
     @Mock
     private DOMActionProviderService actionService;
     @Mock
-    private DOMRpcImplementationRegistration<RemoteRpcImplementation> oldReg;
+    private Registration oldReg;
     @Mock
-    private DOMRpcImplementationRegistration<RemoteRpcImplementation> newReg;
+    private Registration newReg;
     @Mock
     private ObjectRegistration<RemoteActionImplementation> oldActionReg;
     @Mock

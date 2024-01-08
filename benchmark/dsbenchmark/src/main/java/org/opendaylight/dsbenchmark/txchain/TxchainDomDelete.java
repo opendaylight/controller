@@ -14,21 +14,20 @@ import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTransactionChainListener {
+public class TxchainDomDelete extends DatastoreAbstractWriter implements FutureCallback<Empty> {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomDelete.class);
     private final DOMDataBroker domDataBroker;
 
@@ -57,7 +56,8 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTran
         final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
         final YangInstanceIdentifier pid =
                 YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
-        final DOMTransactionChain chain = domDataBroker.createMergingTransactionChain(this);
+        final DOMTransactionChain chain = domDataBroker.createMergingTransactionChain();
+        chain.addCallback(this);
 
         DOMDataTreeWriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
@@ -108,13 +108,12 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements DOMTran
     }
 
     @Override
-    public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
-            final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}", chain, transaction.getIdentifier(), cause);
+    public void onFailure(final Throwable cause) {
+        LOG.error("Broken chain in TxchainDomDelete", cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
-        LOG.debug("TxchainDomDelete closed successfully, chain {}", chain);
+    public void onSuccess(final Empty result) {
+        LOG.debug("TxchainDomDelete closed successfully");
     }
 }

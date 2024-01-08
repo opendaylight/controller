@@ -17,44 +17,43 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
+import org.opendaylight.yangtools.yang.model.spi.source.DelegatedYangTextSource;
 
 public class YangTextSourceSerializationProxyTest {
-    private YangTextSchemaSource schemaSource;
+    private YangTextSource schemaSource;
 
     @Before
     public void setUp() {
-        schemaSource = YangTextSchemaSource.delegateForCharSource(new SourceIdentifier("test", "2015-10-30"),
+        schemaSource = new DelegatedYangTextSource(new SourceIdentifier("test", "2015-10-30"),
             CharSource.wrap("Test source."));
     }
 
     @Test
     public void serializeAndDeserializeProxy() throws ClassNotFoundException, IOException {
-        YangTextSchemaSourceSerializationProxy proxy = new YangTextSchemaSourceSerializationProxy(schemaSource);
+        final var proxy = new YangTextSchemaSourceSerializationProxy(schemaSource);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
 
         oos.writeObject(proxy);
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(333, bytes.length);
+        assertEquals(323, bytes.length);
 
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
 
-        YangTextSchemaSourceSerializationProxy deserializedProxy =
-                (YangTextSchemaSourceSerializationProxy) ois.readObject();
+        final var deserializedProxy = (YangTextSchemaSourceSerializationProxy) ois.readObject();
 
-        assertEquals(deserializedProxy.getRepresentation().getIdentifier(), proxy.getRepresentation().getIdentifier());
+        assertEquals(deserializedProxy.getRepresentation().sourceId(), proxy.getRepresentation().sourceId());
         assertEquals(deserializedProxy.getRepresentation().read(), proxy.getRepresentation().read());
     }
 
     @Test
     public void testProxyEqualsBackingYangTextSource() throws IOException {
-        YangTextSchemaSourceSerializationProxy serializationProxy =
-                new YangTextSchemaSourceSerializationProxy(schemaSource);
+        final var serializationProxy = new YangTextSchemaSourceSerializationProxy(schemaSource);
 
-        assertEquals(serializationProxy.getRepresentation().getIdentifier(), schemaSource.getIdentifier());
+        assertEquals(serializationProxy.getRepresentation().sourceId(), schemaSource.sourceId());
         assertEquals(serializationProxy.getRepresentation().read(), schemaSource.read());
     }
 }
