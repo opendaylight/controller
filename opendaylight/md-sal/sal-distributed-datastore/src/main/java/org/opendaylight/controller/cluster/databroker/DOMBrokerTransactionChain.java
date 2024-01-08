@@ -12,18 +12,21 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +44,10 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
     private static final AtomicReferenceFieldUpdater<DOMBrokerTransactionChain, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(DOMBrokerTransactionChain.class, State.class, "state");
     private static final Logger LOG = LoggerFactory.getLogger(DOMBrokerTransactionChain.class);
+
+    private final @NonNull SettableFuture<Empty> future = SettableFuture.create();
     private final AtomicLong txNum = new AtomicLong();
     private final AbstractDOMBroker broker;
-    private final DOMTransactionChainListener listener;
     private final long chainId;
 
     private volatile State state = State.RUNNING;
@@ -62,11 +66,15 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
      *             If any of arguments is null.
      */
     DOMBrokerTransactionChain(final long chainId, final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-            final AbstractDOMBroker broker, final DOMTransactionChainListener listener) {
+            final AbstractDOMBroker broker) {
         super(chains);
         this.chainId = chainId;
         this.broker = requireNonNull(broker);
-        this.listener = requireNonNull(listener);
+    }
+
+    @Override
+    public ListenableFuture<Empty> future() {
+        return future;
     }
 
     private void checkNotFailed() {
@@ -84,7 +92,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
         checkNotFailed();
         checkNotClosed();
 
-        final FluentFuture<? extends CommitInfo> ret = broker.commit(transaction, cohort);
+        final var ret = broker.commit(transaction, cohort);
 
         COUNTER_UPDATER.incrementAndGet(this);
         ret.addCallback(new FutureCallback<CommitInfo>() {
@@ -111,7 +119,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
         }
 
         super.close();
-        for (DOMStoreTransactionChain subChain : getTxFactories().values()) {
+        for (var subChain : getTxFactories().values()) {
             subChain.close();
         }
 
@@ -122,7 +130,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
 
     private void finishClose() {
         state = State.CLOSED;
-        listener.onTransactionChainSuccessful(this);
+        future.set(Empty.value());
     }
 
     private void transactionCompleted() {
@@ -134,6 +142,6 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
     private void transactionFailed(final DOMDataTreeWriteTransaction tx, final Throwable cause) {
         state = State.FAILED;
         LOG.debug("Transaction chain {} failed.", this, cause);
-        listener.onTransactionChainFailed(this, tx, cause);
+        future.setException(cause);
     }
 }

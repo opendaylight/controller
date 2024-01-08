@@ -24,7 +24,6 @@ import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediate
 import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateTrueFluentFuture;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -51,7 +50,6 @@ import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
-import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
@@ -60,7 +58,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -376,7 +373,7 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
                 futureExecutor)) {
 
-            dataBroker.createTransactionChain(mock(DOMTransactionChainListener.class));
+            dataBroker.createTransactionChain();
 
             verify(domStore, times(2)).createTransactionChain();
         }
@@ -396,8 +393,7 @@ public class ConcurrentDOMDataBrokerTest {
             doReturn(mockChain).when(domStore).createTransactionChain();
             doReturn(operationalTransaction).when(mockChain).newWriteOnlyTransaction();
 
-            DOMTransactionChain transactionChain = dataBroker.createTransactionChain(
-                    mock(DOMTransactionChainListener.class));
+            DOMTransactionChain transactionChain = dataBroker.createTransactionChain();
 
             DOMDataTreeWriteTransaction domDataWriteTransaction = transactionChain.newWriteOnlyTransaction();
 
@@ -433,21 +429,16 @@ public class ConcurrentDOMDataBrokerTest {
     public void testExtensions() {
         final var mockConfigStore = mock(AbstractDataStore.class);
         final var mockOperStore = mock(AbstractDataStore.class);
-        try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
+        try (var dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, mockOperStore,
                 LogicalDatastoreType.CONFIGURATION, mockConfigStore), futureExecutor)) {
+            assertNotNull(dataBroker.extension(DOMDataTreeChangeService.class));
 
-            ClassToInstanceMap<DOMDataBrokerExtension> supportedExtensions = dataBroker.getExtensions();
-            assertNotNull(supportedExtensions.getInstance(DOMDataTreeChangeService.class));
-
-            DOMDataTreeCommitCohortRegistry cohortRegistry = supportedExtensions.getInstance(
-                    DOMDataTreeCommitCohortRegistry.class);
+            final var cohortRegistry = dataBroker.extension(DOMDataTreeCommitCohortRegistry.class);
             assertNotNull(cohortRegistry);
 
-            DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
-            DOMDataTreeIdentifier path = new DOMDataTreeIdentifier(
-                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
-                    YangInstanceIdentifier.of());
+            final var cohort = mock(DOMDataTreeCommitCohort.class);
+            final var path = DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.of());
             cohortRegistry.registerCommitCohort(path, cohort);
 
             verify(mockConfigStore).registerCommitCohort(path, cohort);

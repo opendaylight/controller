@@ -13,7 +13,7 @@ import akka.actor.Props;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
@@ -34,7 +34,7 @@ class ShardDataTreeChangeListenerPublisherActorProxy extends AbstractShardDataTr
     @Override
     public void registerTreeChangeListener(final YangInstanceIdentifier treeId,
             final DOMDataTreeChangeListener listener, final Optional<DataTreeCandidate> currentState,
-            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+            final Consumer<Registration> onRegistration) {
         final ShardDataTreeChangePublisherActor.RegisterListener regMessage =
                 new ShardDataTreeChangePublisherActor.RegisterListener(treeId, listener, currentState, onRegistration);
         log.debug("{}: Sending {} to publisher actor {}", logContext(), regMessage, publisherActor());
