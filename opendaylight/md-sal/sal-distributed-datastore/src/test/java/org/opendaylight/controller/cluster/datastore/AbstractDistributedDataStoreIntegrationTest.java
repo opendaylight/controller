@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -24,6 +24,7 @@ import akka.actor.ActorSystem;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -40,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameter;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
@@ -62,14 +62,12 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChainClosedException;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -544,8 +542,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final DOMTransactionChainListener listener = Mockito.mock(DOMTransactionChainListener.class);
-            DOMTransactionChain txChain = broker.createTransactionChain(listener);
+            DOMTransactionChain txChain = broker.createTransactionChain();
 
             final List<ListenableFuture<?>> futures = new ArrayList<>();
 
@@ -689,8 +686,9 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final var listener = Mockito.mock(DOMTransactionChainListener.class);
-            final var txChain = broker.createTransactionChain(listener);
+            final var listener = mock(FutureCallback.class);
+            final var txChain = broker.createTransactionChain();
+            txChain.addCallback(listener);
 
             final var writeTx = txChain.newReadWriteTransaction();
 
@@ -706,8 +704,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
 
-            verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx),
-                any(Throwable.class));
+            verify(listener, timeout(5000)).onFailure(any());
 
             txChain.close();
             broker.close();
@@ -725,8 +722,9 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final DOMTransactionChainListener listener = Mockito.mock(DOMTransactionChainListener.class);
-            final DOMTransactionChain txChain = broker.createTransactionChain(listener);
+            final var listener = mock(FutureCallback.class);
+            final DOMTransactionChain txChain = broker.createTransactionChain();
+            txChain.addCallback(listener);
 
             final DOMDataTreeWriteTransaction writeTx = txChain.newReadWriteTransaction();
 
@@ -745,8 +743,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // done for put for performance reasons.
             assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
 
-            verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx),
-                any(Throwable.class));
+            verify(listener, timeout(5000)).onFailure(any());
 
             txChain.close();
             broker.close();
@@ -764,8 +761,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
 
-            ListenerRegistration<MockDataTreeChangeListener> listenerReg = dataStore
-                    .registerTreeChangeListener(TestModel.TEST_PATH, listener);
+            final var listenerReg = dataStore.registerTreeChangeListener(TestModel.TEST_PATH, listener);
 
             assertNotNull("registerTreeChangeListener returned null", listenerReg);
 

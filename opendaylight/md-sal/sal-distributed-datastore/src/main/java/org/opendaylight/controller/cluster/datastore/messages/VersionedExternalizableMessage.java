@@ -43,8 +43,6 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
             return NormalizedNodeStreamVersion.POTASSIUM;
         } else if (version >= DataStoreVersions.PHOSPHORUS_VERSION) {
             return NormalizedNodeStreamVersion.MAGNESIUM;
-        } else if (version == DataStoreVersions.SODIUM_SR1_VERSION) {
-            return NormalizedNodeStreamVersion.SODIUM_SR1;
         } else {
             throw new IllegalStateException("Unsupported version " + version);
         }
