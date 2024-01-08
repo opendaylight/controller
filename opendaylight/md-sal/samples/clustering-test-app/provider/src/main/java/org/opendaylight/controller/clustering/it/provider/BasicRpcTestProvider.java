@@ -13,9 +13,9 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
-import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonService;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonServiceProvider;
+import org.opendaylight.mdsal.singleton.api.ServiceGroupIdentifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutputBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = { })
 public final class BasicRpcTestProvider implements ClusterSingletonService {
     private static final Logger LOG = LoggerFactory.getLogger(BasicRpcTestProvider.class);
-    private static final ServiceGroupIdentifier IDENTIFIER = ServiceGroupIdentifier.create("Basic-rpc-test");
+    private static final ServiceGroupIdentifier IDENTIFIER = new ServiceGroupIdentifier("Basic-rpc-test");
 
     private final RpcProviderService rpcProviderRegistry;
     private final Registration singletonRegistration;

@@ -12,7 +12,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInputBuilder;
@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 @Command(scope = "cluster-admin", name = "make-leader-local", description = "Run a make-leader-local test")
 public class MakeLeaderLocalCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcConsumerRegistry;
+    private RpcService rpcService;
     @Argument(index = 0, name = "shard-name", required = true)
     private String shardName;
     @Argument(index = 1, name = "data-store-type", required = true, description = "config / operational")
@@ -30,7 +30,7 @@ public class MakeLeaderLocalCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcConsumerRegistry.getRpc(MakeLeaderLocal.class)
+        return rpcService.getRpc(MakeLeaderLocal.class)
                 .invoke(new MakeLeaderLocalInputBuilder()
                         .setShardName(shardName)
                         .setDataStoreType(DataStoreType.forName(dataStoreType))

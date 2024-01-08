@@ -12,6 +12,12 @@
   <packaging>bundle</packaging>
 
   <dependencies>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+    </dependency>
+
     <!-- Java -->
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -7,32 +7,33 @@
  */
 package org.opendaylight.controller.clustering.it.provider.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
-import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonService;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonServiceProvider;
+import org.opendaylight.mdsal.singleton.api.ServiceGroupIdentifier;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class FlappingSingletonService implements ClusterSingletonService {
     private static final Logger LOG = LoggerFactory.getLogger(FlappingSingletonService.class);
     private static final ServiceGroupIdentifier SERVICE_GROUP_IDENTIFIER =
-            ServiceGroupIdentifier.create("flapping-singleton-service");
+            new ServiceGroupIdentifier("flapping-singleton-service");
 
     private final ClusterSingletonServiceProvider singletonServiceProvider;
     private final AtomicBoolean active = new AtomicBoolean(true);
-
     private final AtomicLong flapCount = new AtomicLong();
-    private volatile ClusterSingletonServiceRegistration registration;
+
+    private volatile Registration registration;
 
     public FlappingSingletonService(final ClusterSingletonServiceProvider singletonServiceProvider) {
         LOG.debug("Registering flapping-singleton-service.");
-
-        this.singletonServiceProvider = singletonServiceProvider;
+        this.singletonServiceProvider = requireNonNull(singletonServiceProvider);
         registration = singletonServiceProvider.registerClusterSingletonService(this);
     }
 

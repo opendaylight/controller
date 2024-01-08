@@ -13,7 +13,7 @@ import akka.actor.Props;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
@@ -54,11 +54,10 @@ public final class ShardDataTreeChangePublisherActor
         private final YangInstanceIdentifier path;
         private final DOMDataTreeChangeListener listener;
         private final Optional<DataTreeCandidate> initialState;
-        private final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration;
+        private final Consumer<Registration> onRegistration;
 
         RegisterListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
-                final Optional<DataTreeCandidate> initialState,
-                final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+                final Optional<DataTreeCandidate> initialState, final Consumer<Registration> onRegistration) {
             this.path = requireNonNull(path);
             this.listener = requireNonNull(listener);
             this.initialState = requireNonNull(initialState);

@@ -41,15 +41,12 @@ import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker.DataTreeChangeExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
-import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonServiceProvider;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplica;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaOutput;
@@ -135,7 +132,6 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -166,19 +162,17 @@ public final class MdsalLowLevelTestProvider {
     private final NotificationService notificationService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
-    private final DOMDataTreeChangeService domDataTreeChangeService;
+    private final DataTreeChangeExtension dataTreeChangeExtension;
 
-    private final Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>>
-            routedRegistrations = new HashMap<>();
-
+    private final Map<InstanceIdentifier<?>, Registration> routedRegistrations = new HashMap<>();
     private final Map<String, ObjectRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
-
-    private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
-    private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
-    private FlappingSingletonService flappingSingletonService;
-    private ListenerRegistration<DOMDataTreeChangeListener> dtclReg;
-    private IdIntsListener idIntsListener;
     private final Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
+
+    private Registration globalGetConstantRegistration = null;
+    private Registration getSingletonConstantRegistration;
+    private FlappingSingletonService flappingSingletonService;
+    private Registration dtclReg;
+    private IdIntsListener idIntsListener;
 
     @Inject
     @Activate
@@ -200,7 +194,7 @@ public final class MdsalLowLevelTestProvider {
         this.domDataBroker = domDataBroker;
         this.configDataStore = configDataStore;
 
-        domDataTreeChangeService = domDataBroker.getExtensions().getInstance(DOMDataTreeChangeService.class);
+        dataTreeChangeExtension = domDataBroker.extension(DataTreeChangeExtension.class);
 
         registration = rpcRegistry.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
             .put(UnregisterSingletonConstant.class, this::unregisterSingletonConstant)
@@ -284,7 +278,7 @@ public final class MdsalLowLevelTestProvider {
 
         idIntsListener = new IdIntsListener();
 
-        dtclReg = domDataTreeChangeService.registerDataTreeChangeListener(
+        dtclReg = dataTreeChangeExtension.registerDataTreeChangeListener(
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, WriteTransactionsHandler.ID_INT_YID),
             idIntsListener);
 
@@ -332,9 +326,7 @@ public final class MdsalLowLevelTestProvider {
             final UnregisterBoundConstantInput input) {
         LOG.info("In unregisterBoundConstant - {}", input);
 
-        final DOMRpcImplementationRegistration<RoutedGetConstantService> rpcRegistration =
-                routedRegistrations.remove(input.getContext());
-
+        final var rpcRegistration = routedRegistrations.remove(input.getContext());
         if (rpcRegistration == null) {
             return RpcResultBuilder.<UnregisterBoundConstantOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.DATA_MISSING,
@@ -428,9 +420,8 @@ public final class MdsalLowLevelTestProvider {
                 .buildFuture();
         }
 
-        final DOMRpcImplementationRegistration<RoutedGetConstantService> rpcRegistration =
-                RoutedGetConstantService.registerNew(bindingNormalizedNodeSerializer, domRpcService,
-                        input.getConstant(), input.getContext());
+        final var rpcRegistration = RoutedGetConstantService.registerNew(bindingNormalizedNodeSerializer, domRpcService,
+            input.getConstant(), input.getContext());
 
         routedRegistrations.put(input.getContext(), rpcRegistration);
         return RpcResultBuilder.success(new RegisterBoundConstantOutputBuilder().build()).buildFuture();

@@ -12,9 +12,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -24,10 +22,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainBaDelete extends DatastoreAbstractWriter implements TransactionChainListener {
+public class TxchainBaDelete extends DatastoreAbstractWriter implements FutureCallback<Empty> {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaDelete.class);
     private final DataBroker bindingDataBroker;
 
@@ -53,7 +52,8 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     @Override
     public void executeList() {
         final LogicalDatastoreType dsType = getDataStoreType();
-        final TransactionChain chain = bindingDataBroker.createMergingTransactionChain(this);
+        final TransactionChain chain = bindingDataBroker.createMergingTransactionChain();
+        chain.addCallback(this);
 
         WriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
@@ -104,13 +104,12 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
-            final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}", chain, transaction.getIdentifier(), cause);
+    public void onFailure(final Throwable cause) {
+        LOG.error("Broken chain in TxchainBaDelete", cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain chain) {
-        LOG.debug("TxchainBaDelete closed successfully, chain {}", chain);
+    public void onSuccess(final Empty chain) {
+        LOG.debug("TxchainBaDelete closed successfully");
     }
 }

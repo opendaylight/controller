@@ -11,14 +11,13 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
-import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
-import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
-import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonService;
+import org.opendaylight.mdsal.singleton.api.ClusterSingletonServiceProvider;
+import org.opendaylight.mdsal.singleton.api.ServiceGroupIdentifier;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
@@ -43,21 +42,20 @@ public final class SingletonGetConstantService implements DOMRpcImplementation, 
     private static final QName GET_SINGLETON_CONSTANT = QName.create(MODULE, "get-singleton-constant").intern();
 
     private static final ServiceGroupIdentifier SERVICE_GROUP_IDENTIFIER =
-            ServiceGroupIdentifier.create("get-singleton-constant-service");
+        new ServiceGroupIdentifier("get-singleton-constant-service");
 
     private final DOMRpcProviderService rpcProviderService;
     private final String constant;
 
-    private DOMRpcImplementationRegistration<SingletonGetConstantService> rpcRegistration = null;
+    private Registration rpcRegistration = null;
 
     private SingletonGetConstantService(final DOMRpcProviderService rpcProviderService, final String constant) {
         this.rpcProviderService = rpcProviderService;
         this.constant = constant;
     }
 
-    public static ClusterSingletonServiceRegistration registerNew(
-            final ClusterSingletonServiceProvider singletonService, final DOMRpcProviderService rpcProviderService,
-            final String constant) {
+    public static Registration registerNew(final ClusterSingletonServiceProvider singletonService,
+            final DOMRpcProviderService rpcProviderService, final String constant) {
         LOG.debug("Registering get-singleton-constant into ClusterSingletonService, value {}", constant);
 
         return singletonService.registerClusterSingletonService(
