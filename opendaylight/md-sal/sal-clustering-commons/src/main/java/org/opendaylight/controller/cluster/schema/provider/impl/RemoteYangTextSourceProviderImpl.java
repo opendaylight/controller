@@ -17,9 +17,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
 import java.util.Set;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
+import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -51,16 +51,16 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
         LOG.trace("Sending yang schema source for {}", identifier);
 
         final Promise<YangTextSchemaSourceSerializationProxy> promise = akka.dispatch.Futures.promise();
-        ListenableFuture<YangTextSchemaSource> future =
-                repository.getSchemaSource(identifier, YangTextSchemaSource.class);
+        ListenableFuture<YangTextSource> future =
+                repository.getSchemaSource(identifier, YangTextSource.class);
 
-        Futures.addCallback(future, new FutureCallback<YangTextSchemaSource>() {
+        Futures.addCallback(future, new FutureCallback<YangTextSource>() {
             @Override
-            public void onSuccess(final YangTextSchemaSource result) {
+            public void onSuccess(final YangTextSource result) {
                 try {
                     promise.success(new YangTextSchemaSourceSerializationProxy(result));
                 } catch (IOException e) {
-                    LOG.warn("Unable to read schema source for {}", result.getIdentifier(), e);
+                    LOG.warn("Unable to read schema source for {}", result.sourceId(), e);
                     promise.failure(e);
                 }
             }
