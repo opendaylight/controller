@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInputBuilder;
@@ -44,8 +44,8 @@ public class GlobalBindingRTCClient implements RTCClient {
         return rpcError.get();
     }
 
-    public GlobalBindingRTCClient(final RpcConsumerRegistry registry, final int inSize) {
-        this.globalRpcBench = registry.getRpc(GlobalRpcBench.class);
+    public GlobalBindingRTCClient(final RpcService rpcService, final int inSize) {
+        globalRpcBench = rpcService.getRpc(GlobalRpcBench.class);
 
         this.inSize = inSize;
         Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
