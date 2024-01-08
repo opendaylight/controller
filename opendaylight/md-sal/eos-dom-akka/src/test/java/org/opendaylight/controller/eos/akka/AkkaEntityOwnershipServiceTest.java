@@ -40,8 +40,6 @@ import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
-import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
@@ -53,6 +51,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -88,9 +87,9 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         final YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         final DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
-        final DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+        final Registration reg = service.registerCandidate(entity);
+        assertNotNull(reg);
 
-        verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyEntityCandidateRegistered(ENTITY_TYPE, entityId, "member-1");
 
         try {
@@ -102,9 +101,9 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         }
 
         final DOMEntity entity2 = new DOMEntity(ENTITY_TYPE2, entityId);
-        final DOMEntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2);
+        final Registration reg2 = service.registerCandidate(entity2);
 
-        verifyEntityOwnershipCandidateRegistration(entity2, reg2);
+        assertNotNull(reg2);
         verifyEntityCandidateRegistered(ENTITY_TYPE2, entityId, "member-1");
     }
 
@@ -113,9 +112,9 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         final YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         final DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
-        final DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+        final Registration reg = service.registerCandidate(entity);
+        assertNotNull(reg);
 
-        verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyEntityCandidateRegistered(ENTITY_TYPE, entityId, "member-1");
 
         reg.close();
@@ -132,13 +131,11 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         final DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
         final MockEntityOwnershipListener listener = new MockEntityOwnershipListener("member-1");
 
-        final DOMEntityOwnershipListenerRegistration reg = service.registerListener(entity.getType(), listener);
+        final Registration reg = service.registerListener(entity.getType(), listener);
 
         assertNotNull("EntityOwnershipListenerRegistration null", reg);
-        assertEquals("getEntityType", entity.getType(), reg.getEntityType());
-        assertEquals("getInstance", listener, reg.getInstance());
 
-        final DOMEntityOwnershipCandidateRegistration candidate = service.registerCandidate(entity);
+        final Registration candidate = service.registerCandidate(entity);
 
         verifyListenerState(listener, entity, true, true, false);
         final int changes = listener.getChanges().size();
@@ -157,7 +154,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
     public void testGetOwnershipState() throws Exception {
         final DOMEntity entity = new DOMEntity(ENTITY_TYPE, "one");
 
-        final DOMEntityOwnershipCandidateRegistration registration = service.registerCandidate(entity);
+        final Registration registration = service.registerCandidate(entity);
         verifyGetOwnershipState(service, entity, EntityOwnershipState.IS_OWNER);
 
         final RunningContext runningContext = service.getRunningContext();
@@ -197,9 +194,9 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
 
         final DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
-        final DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+        final Registration reg = service.registerCandidate(entity);
 
-        verifyEntityOwnershipCandidateRegistration(entity, reg);
+        assertNotNull(reg);
         verifyEntityCandidateRegistered(ENTITY_TYPE, entityId, "member-1");
 
         var getEntityResult = service.getEntity(new GetEntityInputBuilder()
@@ -301,11 +298,5 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
                 (Replicator.GetSuccess<ORMap<DOMEntity, ORSet<String>>>) response;
 
         return success.get(CandidateRegistry.KEY).getEntries();
-    }
-
-    private static void verifyEntityOwnershipCandidateRegistration(final DOMEntity entity,
-                                                                   final DOMEntityOwnershipCandidateRegistration reg) {
-        assertNotNull("EntityOwnershipCandidateRegistration null", reg);
-        assertEquals("getInstance", entity, reg.getInstance());
     }
 }
