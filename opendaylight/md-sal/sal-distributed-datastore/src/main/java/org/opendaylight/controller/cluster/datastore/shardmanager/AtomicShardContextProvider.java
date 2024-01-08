@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
-import com.google.common.base.Verify;
-import java.util.concurrent.atomic.AtomicReference;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextProvider;
+import static com.google.common.base.Verify.verifyNotNull;
 
-final class AtomicShardContextProvider extends AtomicReference<EffectiveModelContext>
-        implements EffectiveModelContextProvider {
+import java.util.concurrent.atomic.AtomicReference;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+
+final class AtomicShardContextProvider extends AtomicReference<EffectiveModelContext> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public EffectiveModelContext getEffectiveModelContext() {
-        return Verify.verifyNotNull(get());
+    @NonNull EffectiveModelContext modelContext() {
+        return verifyNotNull(get());
     }
 }

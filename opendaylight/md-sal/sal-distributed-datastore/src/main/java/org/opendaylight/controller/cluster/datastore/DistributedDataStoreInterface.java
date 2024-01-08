@@ -11,7 +11,7 @@ import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -24,7 +24,6 @@ public interface DistributedDataStoreInterface extends DOMStore {
     ActorUtils getActorUtils();
 
     @Beta
-    <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
-            YangInstanceIdentifier shardLookup, YangInstanceIdentifier insideShard,
+    Registration registerProxyListener(YangInstanceIdentifier shardLookup, YangInstanceIdentifier insideShard,
             DOMDataTreeChangeListener delegate);
 }

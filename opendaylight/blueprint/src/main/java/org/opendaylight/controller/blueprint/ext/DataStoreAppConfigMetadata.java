@@ -32,7 +32,7 @@ import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -70,7 +70,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private final AtomicBoolean readingInitialAppConfig = new AtomicBoolean(true);
 
     private volatile BindingContext bindingContext;
-    private volatile ListenerRegistration<?> appConfigChangeListenerReg;
+    private volatile Registration appConfigChangeListenerReg;
     private volatile DataObject currentAppConfig;
 
     // Note: the BindingNormalizedNodeSerializer interface is annotated as deprecated because there's an
@@ -148,7 +148,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         // the data isn't present, we won't get an initial DTCN update so the read will indicate the data
         // isn't present.
 
-        DataTreeIdentifier<DataObject> dataTreeId = DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION,
+        DataTreeIdentifier<DataObject> dataTreeId = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
                 bindingContext.appConfigPath);
         appConfigChangeListenerReg = dataBroker.registerDataTreeChangeListener(dataTreeId,
                 (ClusteredDataTreeChangeListener<DataObject>) this::onAppConfigChanged);

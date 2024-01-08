@@ -10,6 +10,7 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.LinkedHashSet;
@@ -25,13 +26,12 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutputBuilder;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -46,14 +46,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class WriteTransactionsHandler extends AbstractTransactionHandler {
-    private static final class Chained extends WriteTransactionsHandler implements DOMTransactionChainListener {
+    private static final class Chained extends WriteTransactionsHandler implements FutureCallback<Empty> {
         private final SplittableRandom random = new SplittableRandom();
         private final DOMTransactionChain transactionChain;
 
         Chained(final DOMDataBroker dataBroker, final YangInstanceIdentifier idListItem,
             final WriteTransactionsInput input) {
             super(idListItem, input);
-            transactionChain = dataBroker.createTransactionChain(this);
+            transactionChain = dataBroker.createTransactionChain();
+            transactionChain.addCallback(this);
         }
 
         @Override
@@ -67,15 +68,14 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         }
 
         @Override
-        public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
-                final Throwable cause) {
+        public void onFailure(final Throwable cause) {
             // This is expected to happen frequently in isolation testing.
             LOG.debug("Transaction chain failed.", cause);
             // Do not return RPC here, rely on transaction failure to call runFailed.
         }
 
         @Override
-        public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
+        public void onSuccess(final Empty result) {
             LOG.debug("Transaction chain closed successfully.");
         }
     }

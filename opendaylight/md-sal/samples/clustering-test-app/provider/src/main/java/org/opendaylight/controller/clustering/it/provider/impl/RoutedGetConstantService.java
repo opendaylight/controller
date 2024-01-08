@@ -12,17 +12,16 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
-import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.common.YangConstants;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
@@ -46,14 +45,14 @@ public final class RoutedGetConstantService implements DOMRpcImplementation {
         this.constant = constant;
     }
 
-    public static DOMRpcImplementationRegistration<RoutedGetConstantService> registerNew(
-            final BindingNormalizedNodeSerializer codec, final DOMRpcProviderService rpcProviderService,
-            final String constant, final InstanceIdentifier<?> context) {
+    public static Registration registerNew(final BindingNormalizedNodeSerializer codec,
+            final DOMRpcProviderService rpcProviderService, final String constant,
+            final InstanceIdentifier<?> context) {
 
         LOG.debug("Registering get-contexted-constant on context: {}, with value: {}", context, constant);
 
-        final YangInstanceIdentifier yid = codec.toYangInstanceIdentifier(context);
-        final DOMRpcIdentifier id = DOMRpcIdentifier.create(GET_CONTEXTED_CONSTANT, yid);
+        final var yid = codec.toYangInstanceIdentifier(context);
+        final var id = DOMRpcIdentifier.create(GET_CONTEXTED_CONSTANT, yid);
 
         return rpcProviderService.registerRpcImplementation(new RoutedGetConstantService(constant), id);
     }

@@ -24,7 +24,6 @@ import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediate
 import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateTrueFluentFuture;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -51,17 +50,15 @@ import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
-import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker.CommitCohortExtension;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker.DataTreeChangeExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
-import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
+import org.opendaylight.mdsal.dom.spi.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -70,7 +67,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
 /**
  * Unit tests for DOMConcurrentDataCommitCoordinator.
@@ -278,8 +275,8 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor)) {
             DOMDataTreeReadWriteTransaction dataTxn = dataBroker.newReadWriteTransaction();
 
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(NormalizedNode.class));
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(ContainerNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(ContainerNode.class));
             dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of());
 
             verify(configDomStore, never()).newReadWriteTransaction();
@@ -302,8 +299,8 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor)) {
             DOMDataTreeWriteTransaction dataTxn = dataBroker.newWriteOnlyTransaction();
 
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(NormalizedNode.class));
-            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(NormalizedNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(ContainerNode.class));
+            dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(), mock(ContainerNode.class));
 
             verify(configDomStore, never()).newWriteOnlyTransaction();
             verify(operationalDomStore, times(1)).newWriteOnlyTransaction();
@@ -376,7 +373,7 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
                 futureExecutor)) {
 
-            dataBroker.createTransactionChain(mock(DOMTransactionChainListener.class));
+            dataBroker.createTransactionChain();
 
             verify(domStore, times(2)).createTransactionChain();
         }
@@ -396,15 +393,14 @@ public class ConcurrentDOMDataBrokerTest {
             doReturn(mockChain).when(domStore).createTransactionChain();
             doReturn(operationalTransaction).when(mockChain).newWriteOnlyTransaction();
 
-            DOMTransactionChain transactionChain = dataBroker.createTransactionChain(
-                    mock(DOMTransactionChainListener.class));
+            DOMTransactionChain transactionChain = dataBroker.createTransactionChain();
 
             DOMDataTreeWriteTransaction domDataWriteTransaction = transactionChain.newWriteOnlyTransaction();
 
             verify(mockChain, never()).newWriteOnlyTransaction();
 
             domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(),
-                    mock(NormalizedNode.class));
+                    mock(ContainerNode.class));
         }
     }
 
@@ -433,21 +429,16 @@ public class ConcurrentDOMDataBrokerTest {
     public void testExtensions() {
         final var mockConfigStore = mock(AbstractDataStore.class);
         final var mockOperStore = mock(AbstractDataStore.class);
-        try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
+        try (var dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, mockOperStore,
                 LogicalDatastoreType.CONFIGURATION, mockConfigStore), futureExecutor)) {
+            assertNotNull(dataBroker.extension(DataTreeChangeExtension.class));
 
-            ClassToInstanceMap<DOMDataBrokerExtension> supportedExtensions = dataBroker.getExtensions();
-            assertNotNull(supportedExtensions.getInstance(DOMDataTreeChangeService.class));
-
-            DOMDataTreeCommitCohortRegistry cohortRegistry = supportedExtensions.getInstance(
-                    DOMDataTreeCommitCohortRegistry.class);
+            final var cohortRegistry = dataBroker.extension(CommitCohortExtension.class);
             assertNotNull(cohortRegistry);
 
-            DOMDataTreeCommitCohort cohort = mock(DOMDataTreeCommitCohort.class);
-            DOMDataTreeIdentifier path = new DOMDataTreeIdentifier(
-                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
-                    YangInstanceIdentifier.of());
+            final var cohort = mock(DOMDataTreeCommitCohort.class);
+            final var path = DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.of());
             cohortRegistry.registerCommitCohort(path, cohort);
 
             verify(mockConfigStore).registerCommitCohort(path, cohort);

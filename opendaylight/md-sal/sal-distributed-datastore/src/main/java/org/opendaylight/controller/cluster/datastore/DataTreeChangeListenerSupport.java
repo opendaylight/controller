@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<RegisterDataTreeChangeListener> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerSupport.class);
 
-    private final Collection<DelayedDataTreeChangeListenerRegistration<DOMDataTreeChangeListener>>
+    private final Collection<DelayedDataTreeChangeListenerRegistration>
             delayedDataTreeChangeListenerRegistrations = ConcurrentHashMap.newKeySet();
-    private final Collection<DelayedDataTreeChangeListenerRegistration<DOMDataTreeChangeListener>>
+    private final Collection<DelayedDataTreeChangeListenerRegistration>
             delayedListenerOnAllRegistrations = ConcurrentHashMap.newKeySet();
     private final Collection<ActorSelection> leaderOnlyListenerActors = ConcurrentHashMap.newKeySet();
     private final Collection<ActorSelection> allListenerActors = ConcurrentHashMap.newKeySet();
@@ -62,8 +62,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         }
 
         if (hasLeader) {
-            for (DelayedDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> reg :
-                    delayedListenerOnAllRegistrations) {
+            for (var reg : delayedListenerOnAllRegistrations) {
                 reg.doRegistration(this);
             }
 
@@ -71,8 +70,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         }
 
         if (isLeader) {
-            for (DelayedDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> reg :
-                    delayedDataTreeChangeListenerRegistrations) {
+            for (var reg : delayedDataTreeChangeListenerRegistrations) {
                 reg.doRegistration(this);
             }
 
@@ -91,9 +89,8 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         } else {
             LOG.debug("{}: Shard does not have a leader - delaying registration", persistenceId());
 
-            final DelayedDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> delayedReg =
-                    new DelayedDataTreeChangeListenerRegistration<>(message, registrationActor);
-            final Collection<DelayedDataTreeChangeListenerRegistration<DOMDataTreeChangeListener>> delayedRegList;
+            final var delayedReg = new DelayedDataTreeChangeListenerRegistration(message, registrationActor);
+            final Collection<DelayedDataTreeChangeListenerRegistration> delayedRegList;
             if (message.isRegisterOnAllInstances()) {
                 delayedRegList = delayedListenerOnAllRegistrations;
             } else {

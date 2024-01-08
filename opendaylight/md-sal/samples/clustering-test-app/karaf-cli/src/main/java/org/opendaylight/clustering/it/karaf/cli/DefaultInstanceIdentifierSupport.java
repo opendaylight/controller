@@ -38,7 +38,7 @@ public final class DefaultInstanceIdentifierSupport implements InstanceIdentifie
     public DefaultInstanceIdentifierSupport(@Reference final BindingCodecTree bindingCodecTree,
             @Reference final BindingRuntimeContext runtimeContext) {
         bindingCodec = bindingCodecTree.getInstanceIdentifierCodec();
-        jsonCodec = JSONCodecFactorySupplier.RFC7951.createLazy(runtimeContext.getEffectiveModelContext())
+        jsonCodec = JSONCodecFactorySupplier.RFC7951.createLazy(runtimeContext.modelContext())
             .codecFor(new FakeLeafDefinition(), null);
     }
 

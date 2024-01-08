@@ -12,7 +12,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicas;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -22,13 +22,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
         description = "Run a remove-all-shard-replicas test")
 public class RemoveAllShardReplicasCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcConsumerRegistry;
+    private RpcService rpcService;
     @Argument(index = 0, name = "member-name",required = true)
     private String memberName;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        return rpcConsumerRegistry.getRpc(RemoveAllShardReplicas.class)
+        return rpcService.getRpc(RemoveAllShardReplicas.class)
                 .invoke(new RemoveAllShardReplicasInputBuilder()
                         .setMemberName(memberName)
                         .build());

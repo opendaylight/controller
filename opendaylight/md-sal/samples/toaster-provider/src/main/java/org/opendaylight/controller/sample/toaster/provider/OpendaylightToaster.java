@@ -8,8 +8,6 @@
 package org.opendaylight.controller.sample.toaster.provider;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.DELETE;
-import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.WRITE;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
 import static org.opendaylight.yangtools.yang.common.ErrorType.APPLICATION;
@@ -21,7 +19,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -37,7 +35,6 @@ import javax.inject.Singleton;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -67,7 +64,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBreadBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Rpc;
@@ -76,7 +72,6 @@ import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.common.Uint32;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -115,7 +110,7 @@ public final class OpendaylightToaster extends AbstractMXBean
 
     private final DataBroker dataBroker;
     private final NotificationPublishService notificationProvider;
-    private final ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
+    private final Registration dataTreeChangeListenerRegistration;
     private final Registration reg;
 
     private final ExecutorService executor;
@@ -153,7 +148,7 @@ public final class OpendaylightToaster extends AbstractMXBean
         LOG.info("Initializing...");
 
         dataTreeChangeListenerRegistration = requireNonNull(dataBroker, "dataBroker must be set")
-            .registerDataTreeChangeListener(DataTreeIdentifier.create(CONFIGURATION, TOASTER_IID), this);
+            .registerTreeChangeListener(DataTreeIdentifier.of(CONFIGURATION, TOASTER_IID), this);
         try {
             setToasterStatusUp(null).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -231,23 +226,26 @@ public final class OpendaylightToaster extends AbstractMXBean
      * Implemented from the DataTreeChangeListener interface.
      */
     @Override
-    public void onDataTreeChanged(final Collection<DataTreeModification<Toaster>> changes) {
-        for (DataTreeModification<Toaster> change: changes) {
-            DataObjectModification<Toaster> rootNode = change.getRootNode();
-            if (rootNode.getModificationType() == WRITE) {
-                Toaster oldToaster = rootNode.getDataBefore();
-                Toaster newToaster = rootNode.getDataAfter();
-                LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: "
-                        + "old Toaster: {}, new Toaster: {}", change.getRootPath().getRootIdentifier(),
-                        oldToaster, newToaster);
+    public void onDataTreeChanged(final List<DataTreeModification<Toaster>> changes) {
+        for (var change: changes) {
+            final var rootNode = change.getRootNode();
+            switch (rootNode.modificationType()) {
+                case WRITE -> {
+                    final var oldToaster = rootNode.dataBefore();
+                    final var newToaster = rootNode.dataAfter();
+                    LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: old Toaster: {}, "
+                        + "new Toaster: {}", change.getRootPath().path(), oldToaster, newToaster);
 
-                Uint32 darkness = newToaster.getDarknessFactor();
-                if (darkness != null) {
-                    darknessFactor.set(darkness.toJava());
+                    final var darkness = newToaster.getDarknessFactor();
+                    if (darkness != null) {
+                        darknessFactor.set(darkness.toJava());
+                    }
                 }
-            } else if (rootNode.getModificationType() == DELETE) {
-                LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
-                        change.getRootPath().getRootIdentifier(), rootNode.getDataBefore());
+                case DELETE -> LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
+                        change.getRootPath().path(), rootNode.dataBefore());
+                default -> {
+                    // No-op
+                }
             }
         }
     }
@@ -256,7 +254,7 @@ public final class OpendaylightToaster extends AbstractMXBean
      * RPC call implemented from the ToasterService interface that cancels the current toast, if any.
      */
     private ListenableFuture<RpcResult<CancelToastOutput>> cancelToast(final CancelToastInput input) {
-        Future<?> current = currentMakeToastTask.getAndSet(null);
+        final var current = currentMakeToastTask.getAndSet(null);
         if (current != null) {
             current.cancel(true);
         }
