@@ -8,19 +8,14 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
+import org.opendaylight.mdsal.dom.spi.ForwardingDOMDataBroker;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
@@ -35,10 +30,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Beta
-@Component(immediate = true, configurationPid = "org.opendaylight.controller.cluster.datastore.broker",
+@Component(
+    service = DOMDataBroker.class,
+    immediate = true,
+    configurationPid = "org.opendaylight.controller.cluster.datastore.broker",
     property = "type=default")
 @Designate(ocd = OSGiDOMDataBroker.Config.class)
-public final class OSGiDOMDataBroker implements DOMDataBroker {
+public final class OSGiDOMDataBroker extends ForwardingDOMDataBroker {
     @ObjectClassDefinition
     public @interface Config {
         @AttributeDefinition(name = "max-data-broker-future-callback-queue-size")
@@ -49,48 +47,16 @@ public final class OSGiDOMDataBroker implements DOMDataBroker {
 
     private static final Logger LOG = LoggerFactory.getLogger(OSGiDOMDataBroker.class);
 
-    @Reference(target = "(type=distributed-config)")
-    DOMStore configDatastore = null;
-    @Reference(target = "(type=distributed-operational)")
-    DOMStore operDatastore = null;
-
-    private ExecutorService executorService;
-    private ConcurrentDOMDataBroker delegate;
-    private CommitStatsMXBeanImpl commitStats;
-    private ThreadExecutorStatsMXBeanImpl threadStats;
-
-    @Override
-    public DOMDataTreeReadTransaction newReadOnlyTransaction() {
-        return delegate.newReadOnlyTransaction();
-    }
-
-    @Override
-    public DOMDataTreeWriteTransaction newWriteOnlyTransaction() {
-        return delegate.newWriteOnlyTransaction();
-    }
-
-    @Override
-    public DOMDataTreeReadWriteTransaction newReadWriteTransaction() {
-        return delegate.newReadWriteTransaction();
-    }
-
-    @Override
-    public ClassToInstanceMap<DOMDataBrokerExtension> getExtensions() {
-        return delegate.getExtensions();
-    }
-
-    @Override
-    public DOMTransactionChain createTransactionChain(final DOMTransactionChainListener listener) {
-        return delegate.createTransactionChain(listener);
-    }
-
-    @Override
-    public DOMTransactionChain createMergingTransactionChain(final DOMTransactionChainListener listener) {
-        return delegate.createMergingTransactionChain(listener);
-    }
+    private final @NonNull ExecutorService executorService;
+    private final @NonNull ConcurrentDOMDataBroker delegate;
+    private final CommitStatsMXBeanImpl commitStats;
+    private final ThreadExecutorStatsMXBeanImpl threadStats;
 
     @Activate
-    void activate(final Config config) {
+    public OSGiDOMDataBroker(
+            @Reference(target = "(type=distributed-config)") final DOMStore configDatastore,
+            @Reference(target = "(type=distributed-operational)") final DOMStore operDatastore,
+            final Config config) {
         LOG.info("DOM Data Broker starting");
         final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
 
@@ -124,5 +90,10 @@ public final class OSGiDOMDataBroker implements DOMDataBroker {
             LOG.warn("Future executor failed to finish in time, giving up", e);
         }
         LOG.info("DOM Data Broker stopped");
+    }
+
+    @Override
+    protected DOMDataBroker delegate() {
+        return delegate;
     }
 }

@@ -10,14 +10,15 @@ package org.opendaylight.controller.cluster.databroker;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateFailedFluentFuture;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
@@ -37,10 +38,6 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, AbstractDOMTransactionFactory>
             IMPL_UPDATER = AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class,
                     AbstractDOMTransactionFactory.class, "commitImpl");
-    @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, Future> FUTURE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class, Future.class,
-                    "commitFuture");
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBrokerWriteTransaction.class);
     private static final Future<?> CANCELLED_FUTURE = Futures.immediateCancelledFuture();
 
@@ -61,13 +58,19 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
      * fast path gets the benefit of a store-store barrier instead of the
      * usual store-load barrier.
      */
-    private volatile Future<?> commitFuture;
+    private final SettableFuture<CommitInfo> future = SettableFuture.create();
+    private final @NonNull FluentFuture<CommitInfo> publicFuture = FluentFuture.from(future);
 
     protected AbstractDOMBrokerWriteTransaction(final Object identifier,
             final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories,
             final AbstractDOMTransactionFactory<?> commitImpl) {
         super(identifier, storeTxFactories);
         this.commitImpl = requireNonNull(commitImpl, "commitImpl must not be null.");
+    }
+
+    @Override
+    public final FluentFuture<?> completionFuture() {
+        return publicFuture;
     }
 
     @Override
@@ -127,20 +130,22 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         final AbstractDOMTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
 
-        FluentFuture<? extends CommitInfo> ret;
         final var tx = getSubtransaction();
         if (tx == null) {
-            ret = CommitInfo.emptyFluentFuture();
-        } else {
-            try {
-                ret = impl.commit(this, tx.ready());
-            } catch (RuntimeException e) {
-                ret = immediateFailedFluentFuture(TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e));
-            }
+            future.set(CommitInfo.empty());
+            return publicFuture;
         }
 
-        FUTURE_UPDATER.lazySet(this, ret);
-        return ret;
+        final FluentFuture<? extends CommitInfo> implFuture;
+        try {
+            implFuture = impl.commit(this, tx.ready());
+        } catch (RuntimeException e) {
+            future.setException(TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e));
+            return publicFuture;
+        }
+
+        future.setFuture(implFuture);
+        return publicFuture;
     }
 
     private void checkRunning(final AbstractDOMTransactionFactory<?> impl) {
