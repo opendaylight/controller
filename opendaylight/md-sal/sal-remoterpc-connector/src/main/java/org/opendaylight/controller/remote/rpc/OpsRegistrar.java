@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.Address;
 import akka.actor.Props;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,19 +21,17 @@ import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.U
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
-import org.opendaylight.mdsal.dom.api.DOMActionImplementation;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
-import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 
 /**
  * Actor handling registration of RPCs and Actions available on remote nodes with the local
  * {@link DOMRpcProviderService} and {@link DOMActionProviderService}.
  */
 final class OpsRegistrar extends AbstractUntypedActor {
-    private final Map<Address, ObjectRegistration<DOMRpcImplementation>> rpcRegs = new HashMap<>();
-    private final Map<Address, ObjectRegistration<DOMActionImplementation>> actionRegs = new HashMap<>();
+    private final Map<Address, Registration> rpcRegs = new HashMap<>();
+    private final Map<Address, Registration> actionRegs = new HashMap<>();
     private final DOMRpcProviderService rpcProviderService;
     private final RemoteOpsProviderConfig config;
     private final DOMActionProviderService actionProviderService;
@@ -55,9 +52,9 @@ final class OpsRegistrar extends AbstractUntypedActor {
 
     @Override
     public void postStop() throws Exception {
-        rpcRegs.values().forEach(ObjectRegistration::close);
+        rpcRegs.values().forEach(Registration::close);
         rpcRegs.clear();
-        actionRegs.values().forEach(ObjectRegistration::close);
+        actionRegs.values().forEach(Registration::close);
         actionRegs.clear();
 
         super.postStop();
@@ -85,12 +82,12 @@ final class OpsRegistrar extends AbstractUntypedActor {
          * Note that when an RPC moves from one remote node to another, we also do not want to expose the gap,
          * hence we register all new implementations before closing all registrations.
          */
-        final Collection<ObjectRegistration<?>> prevRegs = new ArrayList<>(rpcEndpoints.size());
+        final var prevRegs = new ArrayList<Registration>(rpcEndpoints.size());
 
         for (Entry<Address, Optional<RemoteRpcEndpoint>> e : rpcEndpoints.entrySet()) {
             LOG.debug("Updating RPC registrations for {}", e.getKey());
 
-            final ObjectRegistration<DOMRpcImplementation> prevReg;
+            final Registration prevReg;
             final Optional<RemoteRpcEndpoint> maybeEndpoint = e.getValue();
             if (maybeEndpoint.isPresent()) {
                 final RemoteRpcEndpoint endpoint = maybeEndpoint.orElseThrow();
@@ -106,7 +103,7 @@ final class OpsRegistrar extends AbstractUntypedActor {
             }
         }
 
-        prevRegs.forEach(ObjectRegistration::close);
+        prevRegs.forEach(Registration::close);
     }
 
     /**
@@ -121,12 +118,12 @@ final class OpsRegistrar extends AbstractUntypedActor {
          * Note that when an Action moves from one remote node to another, we also do not want to expose the gap,
          * hence we register all new implementations before closing all registrations.
          */
-        final Collection<ObjectRegistration<?>> prevRegs = new ArrayList<>(actionEndpoints.size());
+        final var prevRegs = new ArrayList<Registration>(actionEndpoints.size());
 
         for (Entry<Address, Optional<RemoteActionEndpoint>> e : actionEndpoints.entrySet()) {
             LOG.debug("Updating action registrations for {}", e.getKey());
 
-            final ObjectRegistration<DOMActionImplementation> prevReg;
+            final Registration prevReg;
             final Optional<RemoteActionEndpoint> maybeEndpoint = e.getValue();
             if (maybeEndpoint.isPresent()) {
                 final RemoteActionEndpoint endpoint = maybeEndpoint.orElseThrow();
@@ -142,6 +139,6 @@ final class OpsRegistrar extends AbstractUntypedActor {
             }
         }
 
-        prevRegs.forEach(ObjectRegistration::close);
+        prevRegs.forEach(Registration::close);
     }
 }

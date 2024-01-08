@@ -67,7 +67,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBreadBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Rpc;
@@ -115,7 +114,7 @@ public final class OpendaylightToaster extends AbstractMXBean
 
     private final DataBroker dataBroker;
     private final NotificationPublishService notificationProvider;
-    private final ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
+    private final Registration dataTreeChangeListenerRegistration;
     private final Registration reg;
 
     private final ExecutorService executor;
@@ -153,7 +152,7 @@ public final class OpendaylightToaster extends AbstractMXBean
         LOG.info("Initializing...");
 
         dataTreeChangeListenerRegistration = requireNonNull(dataBroker, "dataBroker must be set")
-            .registerDataTreeChangeListener(DataTreeIdentifier.create(CONFIGURATION, TOASTER_IID), this);
+            .registerDataTreeChangeListener(DataTreeIdentifier.of(CONFIGURATION, TOASTER_IID), this);
         try {
             setToasterStatusUp(null).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -238,7 +237,7 @@ public final class OpendaylightToaster extends AbstractMXBean
                 Toaster oldToaster = rootNode.getDataBefore();
                 Toaster newToaster = rootNode.getDataAfter();
                 LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: "
-                        + "old Toaster: {}, new Toaster: {}", change.getRootPath().getRootIdentifier(),
+                        + "old Toaster: {}, new Toaster: {}", change.getRootPath().path(),
                         oldToaster, newToaster);
 
                 Uint32 darkness = newToaster.getDarknessFactor();
@@ -247,7 +246,7 @@ public final class OpendaylightToaster extends AbstractMXBean
                 }
             } else if (rootNode.getModificationType() == DELETE) {
                 LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
-                        change.getRootPath().getRootIdentifier(), rootNode.getDataBefore());
+                        change.getRootPath().path(), rootNode.getDataBefore());
             }
         }
     }

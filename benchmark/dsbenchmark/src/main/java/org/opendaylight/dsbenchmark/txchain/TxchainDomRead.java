@@ -14,9 +14,6 @@ import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -28,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainDomRead extends DatastoreAbstractWriter implements DOMTransactionChainListener {
+public class TxchainDomRead extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomRead.class);
     private final DOMDataBroker domDataBroker;
 
@@ -54,7 +51,7 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements DOMTransa
     @Override
     public void executeList() {
         final LogicalDatastoreType dsType = getDataStoreType();
-        final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
+        final QName olId = QName.create(OuterList.QNAME, "id");
         final YangInstanceIdentifier pid =
                 YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
 
@@ -74,16 +71,5 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements DOMTransa
                 }
             }
         }
-    }
-
-    @Override
-    public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
-            final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}", chain, transaction.getIdentifier(), cause);
-    }
-
-    @Override
-    public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
-        LOG.debug("TxchainDomDelete closed successfully, chain {}", chain);
     }
 }

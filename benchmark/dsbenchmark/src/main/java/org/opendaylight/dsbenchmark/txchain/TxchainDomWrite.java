@@ -15,20 +15,18 @@ import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainDomWrite extends DatastoreAbstractWriter implements DOMTransactionChainListener {
+public class TxchainDomWrite extends DatastoreAbstractWriter implements FutureCallback<Empty> {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomWrite.class);
 
     private final DOMDataBroker dataBroker;
@@ -50,7 +48,8 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements DOMTrans
     public void executeList() {
         final var dsType = getDataStoreType();
         final var pid = YangInstanceIdentifier.of(TestExec.QNAME, OuterList.QNAME);
-        final var chain = dataBroker.createMergingTransactionChain(this);
+        final var chain = dataBroker.createMergingTransactionChain();
+        chain.addCallback(this);
 
         var tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
@@ -109,13 +108,12 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements DOMTrans
     }
 
     @Override
-    public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
-            final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomWrite, transaction {}", chain, transaction.getIdentifier(), cause);
+    public void onFailure(final Throwable cause) {
+        LOG.error("Broken chain in TxchainDomWrite", cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
-        LOG.debug("Chain {} closed successfully", chain);
+    public void onSuccess(final Empty result) {
+        LOG.debug("Chain closed successfully");
     }
 }

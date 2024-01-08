@@ -13,7 +13,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.clustering.it.karaf.cli.AbstractRpcAction;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotifications;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -23,15 +23,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
          description = "Run a check-publish-notifications test")
 public class CheckPublishNotificationsCommand extends AbstractRpcAction {
     @Reference
-    private RpcConsumerRegistry rpcService;
+    private RpcService rpcService;
     @Argument(index = 0, name = "id", required = true)
     private String id;
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
         return rpcService.getRpc(CheckPublishNotifications.class)
-                .invoke(new CheckPublishNotificationsInputBuilder()
-                        .setId(id)
-                        .build());
+                .invoke(new CheckPublishNotificationsInputBuilder().setId(id).build());
     }
 }
