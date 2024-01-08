@@ -18,7 +18,6 @@ import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.slf4j.Logger;
@@ -26,11 +25,10 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> extends AbstractObjectRegistration<C>
-        implements DOMDataTreeCommitCohortRegistration<C> {
-
+public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> extends AbstractObjectRegistration<C> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistrationProxy.class);
     private static final Timeout TIMEOUT = new Timeout(new FiniteDuration(5, TimeUnit.SECONDS));
+
     private final DOMDataTreeIdentifier subtree;
     private final ActorRef actor;
     private final ActorUtils actorUtils;
@@ -42,8 +40,8 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
         super(cohort);
         this.subtree = requireNonNull(subtree);
         this.actorUtils = requireNonNull(actorUtils);
-        this.actor = actorUtils.getActorSystem().actorOf(DataTreeCohortActor.props(getInstance(),
-                subtree.getRootIdentifier()).withDispatcher(actorUtils.getNotificationDispatcherPath()));
+        actor = actorUtils.getActorSystem().actorOf(DataTreeCohortActor.props(getInstance(),
+                subtree.path()).withDispatcher(actorUtils.getNotificationDispatcherPath()));
     }
 
     public void init(final String shardName) {

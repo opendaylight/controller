@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
-import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,32 +24,28 @@ public final class CarDataTreeChangeListener implements DataTreeChangeListener<C
     private static final Logger LOG = LoggerFactory.getLogger(CarDataTreeChangeListener.class);
 
     @Override
-    public void onDataTreeChanged(final java.util.Collection<DataTreeModification<Cars>> changes) {
+    public void onDataTreeChanged(final List<DataTreeModification<Cars>> changes) {
         if (LOG.isTraceEnabled()) {
-            for (DataTreeModification<Cars> change : changes) {
+            for (var change : changes) {
                 outputChanges(change);
             }
         }
     }
 
     private static void outputChanges(final DataTreeModification<Cars> change) {
-        final DataObjectModification<Cars> rootNode = change.getRootNode();
-        final ModificationType modificationType = rootNode.getModificationType();
-        final InstanceIdentifier<Cars> rootIdentifier = change.getRootPath().getRootIdentifier();
+        final var rootNode = change.getRootNode();
+        final var modificationType = rootNode.modificationType();
+        final var rootIdentifier = change.getRootPath().path();
         switch (modificationType) {
-            case WRITE:
-            case SUBTREE_MODIFIED: {
+            case WRITE, SUBTREE_MODIFIED -> {
                 LOG.trace("onDataTreeChanged - Cars config with path {} was added or changed from {} to {}",
-                        rootIdentifier, rootNode.getDataBefore(), rootNode.getDataAfter());
-                break;
+                    rootIdentifier, rootNode.dataBefore(), rootNode.dataAfter());
             }
-            case DELETE: {
+            case DELETE -> {
                 LOG.trace("onDataTreeChanged - Cars config with path {} was deleted", rootIdentifier);
-                break;
             }
-            default: {
+            default -> {
                 LOG.trace("onDataTreeChanged called with unknown modificationType: {}", modificationType);
-                break;
             }
         }
     }

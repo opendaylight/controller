@@ -41,7 +41,7 @@ public class SerializationUtilsTest {
     public void testSerializeDeserializeNodes() throws Exception {
         final var normalizedNode = createNormalizedNode();
         final var bytes = serialize(normalizedNode);
-        assertEquals(10556, bytes.length);
+        assertEquals(10567, bytes.length);
         assertEquals(normalizedNode, deserialize(bytes));
     }
 
@@ -94,7 +94,7 @@ public class SerializationUtilsTest {
         }
 
         final byte[] bytes = bos.toByteArray();
-        assertEquals(10558, bytes.length);
+        assertEquals(10569, bytes.length);
 
         final var applierCalled = new AtomicBoolean(false);
         try (var in = new DataInputStream(new ByteArrayInputStream(bytes))) {
@@ -139,7 +139,7 @@ public class SerializationUtilsTest {
                 .withChild(stringLeaf)
                 .withChild(createLeaf("longStringLeaf", "0123456789".repeat(1000)))
                 .withChild(createLeaf("stringLeaf", QName.create("base", "qName")))
-                .withChild(createLeaf("stringLeaf", YangInstanceIdentifier.of()))
+                .withChild(createLeaf("stringLeaf", YangInstanceIdentifier.of(QName.create("test", "test"))))
                 .withChild(Builders.mapBuilder()
                     .withNodeIdentifier(id("mapNode"))
                     .withChild(entry1)

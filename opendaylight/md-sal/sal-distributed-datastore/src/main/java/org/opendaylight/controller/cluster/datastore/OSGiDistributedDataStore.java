@@ -150,7 +150,7 @@ public final class OSGiDistributedDataStore {
         final var introspector = introspectorFactory.newInstance(datastoreType, properties);
         final var datastore = DistributedDataStoreFactory.createInstance(actorSystemProvider,
             introspector.getContext(), introspector, snapshotRestore, config);
-        datastore.setCloseable(schemaService.registerSchemaContextListener(datastore));
+        datastore.setCloseable(schemaService.registerSchemaContextListener(datastore::onModelContextUpdated));
         final var state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
 
         Futures.addCallback(datastore.initialSettleFuture(), state,

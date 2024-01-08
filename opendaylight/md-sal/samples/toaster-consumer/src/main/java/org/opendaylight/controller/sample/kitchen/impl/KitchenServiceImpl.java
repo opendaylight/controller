@@ -26,7 +26,7 @@ import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.api.KitchenServiceRuntimeMXBean;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.NotificationService.CompositeListener;
-import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToast;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
@@ -63,10 +63,10 @@ public final class KitchenServiceImpl extends AbstractMXBean implements KitchenS
 
     @Inject
     @Activate
-    public KitchenServiceImpl(@Reference final RpcConsumerRegistry rpcRegistry,
+    public KitchenServiceImpl(@Reference final RpcService rpcService,
             @Reference final NotificationService notifService) {
         super("KitchenService", "toaster-consumer", null);
-        makeToast = rpcRegistry.getRpc(MakeToast.class);
+        makeToast = rpcService.getRpc(MakeToast.class);
         reg = notifService.registerCompositeListener(new CompositeListener(Set.of(
             new CompositeListener.Component<>(ToasterOutOfBread.class, notification -> {
                 LOG.info("ToasterOutOfBread notification");
