@@ -15,7 +15,6 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
@@ -24,7 +23,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -56,21 +55,19 @@ public final class OSGiDOMStore
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
-            final YangInstanceIdentifier shardLookup, final YangInstanceIdentifier insideShard,
-            final DOMDataTreeChangeListener delegate) {
+    public Registration registerProxyListener(final YangInstanceIdentifier shardLookup,
+            final YangInstanceIdentifier insideShard, final DOMDataTreeChangeListener delegate) {
         return datastore.registerProxyListener(shardLookup, insideShard, delegate);
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
-            final YangInstanceIdentifier treeId, final L listener) {
+    public Registration registerTreeChangeListener(final YangInstanceIdentifier treeId,
+            final DOMDataTreeChangeListener listener) {
         return datastore.registerTreeChangeListener(treeId, listener);
     }
 
     @Override
-    public <T extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<T> registerCommitCohort(
-            final DOMDataTreeIdentifier path, final T cohort) {
+    public Registration registerCommitCohort(final DOMDataTreeIdentifier path, final DOMDataTreeCommitCohort cohort) {
         return datastore.registerCommitCohort(path, cohort);
     }
 

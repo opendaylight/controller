@@ -24,13 +24,16 @@ import org.opendaylight.yangtools.yang.binding.Key;
 import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.opendaylight.yangtools.yang.binding.contract.Naming;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.codec.xml.XmlParserStream;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizationResultHolder;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -109,8 +112,8 @@ public abstract class BindingContext {
         }
 
         @Override
-        public NormalizedNode newDefaultNode(final SchemaTreeInference dataSchema) {
-            return ImmutableNodes.containerNode(bindingQName);
+        public ContainerNode newDefaultNode(final SchemaTreeInference dataSchema) {
+            return ImmutableNodes.newContainerBuilder().withNodeIdentifier(new NodeIdentifier(bindingQName)).build();
         }
     }
 
@@ -149,7 +152,10 @@ public abstract class BindingContext {
 
             checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);
             QName listKeyQName = keys.iterator().next();
-            return ImmutableNodes.mapEntryBuilder(bindingQName, listKeyQName, appConfigListKeyValue).build();
+            return ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(bindingQName, listKeyQName, appConfigListKeyValue))
+                .withChild(ImmutableNodes.leafNode(listKeyQName, appConfigListKeyValue))
+                .build();
         }
     }
 }
