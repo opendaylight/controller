@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "58160085_57d0459e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-01-11T11:30:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b0af93d_84564152",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "13947ff8_e591693a",
@@ -31,6 +49,24 @@
       "writtenOn": "2024-01-08T05:51:00Z",
       "side": 1,
       "message": "8 spaces",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8bd83f01_e5ee369f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/NewPersistentDataProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-01-11T11:30:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "13947ff8_e591693a",
       "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -52,6 +88,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6150f74a_39a58196",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/NewLocalSnapshotStore.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-01-11T11:30:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d5654b55_5802735d",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5c699d5a_4bfb6274",
@@ -65,6 +119,24 @@
       "writtenOn": "2024-01-08T05:51:00Z",
       "side": 1,
       "message": "spacing",
+      "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "01d64133_8189274f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persistance/PersistenceProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-01-11T11:30:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c699d5a_4bfb6274",
       "revId": "f1f4a3658376d2e484f774bb2ccc45dfbe2f0e2c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
