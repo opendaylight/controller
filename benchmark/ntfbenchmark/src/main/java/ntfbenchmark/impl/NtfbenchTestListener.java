@@ -9,11 +9,10 @@ package ntfbenchmark.impl;
 
 import com.google.common.util.concurrent.Futures;
 import java.util.concurrent.Future;
+import org.opendaylight.mdsal.binding.api.NotificationService.Listener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.Ntfbench;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.NtfbenchPayloadListener;
 
-public class NtfbenchTestListener implements NtfbenchPayloadListener {
-
+public class NtfbenchTestListener implements Listener<Ntfbench> {
     private final int expectedSize;
     private int received = 0;
 
@@ -22,7 +21,7 @@ public class NtfbenchTestListener implements NtfbenchPayloadListener {
     }
 
     @Override
-    public void onNtfbench(final Ntfbench notification) {
+    public void onNotification(final Ntfbench notification) {
         if (expectedSize == notification.getPayload().size()) {
             received++;
         }

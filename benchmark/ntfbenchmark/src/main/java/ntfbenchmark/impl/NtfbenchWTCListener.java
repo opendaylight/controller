@@ -20,9 +20,8 @@ public class NtfbenchWTCListener extends NtfbenchTestListener {
     }
 
     @Override
-    public void onNtfbench(final Ntfbench notification) {
-        // TODO Auto-generated method stub
-        super.onNtfbench(notification);
+    public void onNotification(final Ntfbench notification) {
+        super.onNotification(notification);
         if (expectedCount == getReceived()) {
             allDone.set(null);
         }

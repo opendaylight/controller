@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +23,7 @@ import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.Ntfbench;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput.ProducerType;
@@ -32,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusOutput;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -85,13 +84,14 @@ public final class NtfbenchmarkProvider implements AutoCloseable {
         final int iterations = input.getIterations().intValue();
         final int payloadSize = input.getIterations().intValue();
 
-        final List<AbstractNtfbenchProducer> producers = new ArrayList<>(producerCount);
-        final List<ListenerRegistration<NtfbenchTestListener>> listeners = new ArrayList<>(listenerCount);
+        final var producers = new ArrayList<AbstractNtfbenchProducer>(producerCount);
         for (int i = 0; i < producerCount; i++) {
             producers.add(new NtfbenchBlockingProducer(publishService, iterations, payloadSize));
         }
         int expectedCntPerListener = producerCount * iterations;
 
+        final var listeners = new ArrayList<NtfbenchTestListener>(listenerCount);
+        final var registrations = new ArrayList<Registration>(listenerCount);
         for (int i = 0; i < listenerCount; i++) {
             final NtfbenchTestListener listener;
             if (input.getProducerType() == ProducerType.BLOCKING) {
@@ -99,7 +99,8 @@ public final class NtfbenchmarkProvider implements AutoCloseable {
             } else {
                 listener = new NtfbenchTestListener(payloadSize);
             }
-            listeners.add(listenService.registerNotificationListener(listener));
+            listeners.add(listener);
+            registrations.add(listenService.registerListener(Ntfbench.class, listener));
         }
 
         try {
@@ -115,8 +116,8 @@ public final class NtfbenchmarkProvider implements AutoCloseable {
             executor.shutdown();
             try {
                 executor.awaitTermination(TEST_TIMEOUT, TimeUnit.MINUTES);
-                for (ListenerRegistration<NtfbenchTestListener> listenerRegistration : listeners) {
-                    listenerRegistration.getInstance().getAllDone().get();
+                for (var listener : listeners) {
+                    listener.getAllDone().get();
                 }
             } catch (final InterruptedException | ExecutionException e) {
                 LOG.error("Out of time: test did not finish within the {} min deadline ", TEST_TIMEOUT, e);
@@ -129,8 +130,8 @@ public final class NtfbenchmarkProvider implements AutoCloseable {
             long allProducersOk = 0;
             long allProducersError = 0;
 
-            for (final ListenerRegistration<NtfbenchTestListener> listenerRegistration : listeners) {
-                allListeners += listenerRegistration.getInstance().getReceived();
+            for (var listener : listeners) {
+                allListeners += listener.getReceived();
             }
 
             final long listenerElapsedTime = producerEndTime - startTime;
@@ -154,9 +155,7 @@ public final class NtfbenchmarkProvider implements AutoCloseable {
                 .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {
-            for (final ListenerRegistration<NtfbenchTestListener> listenerRegistration : listeners) {
-                listenerRegistration.close();
-            }
+            registrations.forEach(Registration::close);
         }
     }
 
