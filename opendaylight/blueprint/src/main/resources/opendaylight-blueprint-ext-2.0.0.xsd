@@ -1,0 +1,37 @@
+<xsd:schema xmlns="http://opendaylight.org/xmlns/blueprint/v2.0.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    targetNamespace="http://opendaylight.org/xmlns/blueprint/v2.0.0" elementFormDefault="qualified"
+    attributeFormDefault="unqualified" version="2.0.0">
+
+  <!--
+   Copyright © 2016, 2018 Brocade Communications Systems, Inc. and others.
+
+   This program and the accompanying materials are made available under the
+   terms of the Eclipse Public License v1.0 which accompanies this distribution,
+   and is available at http://www.eclipse.org/legal/epl-v10.html
+   -->
+
+  <xsd:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/>
+
+  <xsd:attribute name="restart-dependents-on-updates" type="xsd:boolean"/>
+  <xsd:attribute name="use-default-for-reference-types" type="xsd:boolean"/>
+  <xsd:attribute name="type" type="xsd:string"/>
+
+  <xsd:complexType name="TclusteredAppConfig">
+    <xsd:sequence>
+      <xsd:element name="default-config" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+    <xsd:attribute name="binding-class" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="list-key-value" type="xsd:string" use="optional"/>
+    <xsd:attribute name="default-config-file-name" type="xsd:string" use="optional"/>
+    <xsd:attribute name="id" type="xsd:ID" use="required"/>
+    <xsd:attribute name="update-strategy" type="TupdateStrategy" use="optional" default="reload"/>
+  </xsd:complexType>
+  <xsd:element name="clustered-app-config" type="TclusteredAppConfig"/>
+  <xsd:simpleType name="TupdateStrategy">
+    <xsd:restriction base="xsd:NMTOKEN">
+      <xsd:enumeration value="none"/>
+      <xsd:enumeration value="reload"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+</xsd:schema>
