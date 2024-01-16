@@ -13,7 +13,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import java.util.Set;
 import javax.inject.Inject;
@@ -75,14 +74,13 @@ public class RoutedServiceIT extends AbstractIT {
         final InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
         final InstanceIdentifier<UnorderedList> nodeTwo = createNodeRef("foo:node:2");
 
-        Registration firstReg = rpcProviderService.registerRpcImplementations(
-            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc1),  Set.of(nodeOnePath));
+        Registration firstReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc1,
+            Set.of(nodeOnePath));
         assertNotNull("Registration should not be null", firstReg);
 
         LOG.info("Register provider 2 with second implementation of routeSimpleService - rpc2 of node 2");
 
-        Registration secondReg = rpcProviderService.registerRpcImplementations(
-            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc2), Set.of(nodeTwo));
+        Registration secondReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc2, Set.of(nodeTwo));
         assertNotNull("Registration should not be null", firstReg);
         assertNotSame(secondReg, firstReg);
 
@@ -125,8 +123,7 @@ public class RoutedServiceIT extends AbstractIT {
 
         LOG.info("Provider 2 registers path of node 1");
         secondReg.close();
-        secondReg = rpcProviderService.registerRpcImplementations(
-            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc2), Set.of(nodeOnePath));
+        secondReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc2, Set.of(nodeOnePath));
 
         /**
          * A consumer sends third message to node 1.
