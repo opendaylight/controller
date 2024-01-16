@@ -23,8 +23,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 /**
  * Unit tests for ShardDataTreeSnapshot.
@@ -32,10 +31,9 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  * @author Thomas Pantelis
  */
 public class ShardDataTreeSnapshotTest {
-
     @Test
     public void testShardDataTreeSnapshotWithNoMetadata() throws Exception {
-        ContainerNode expectedNode = Builders.containerBuilder()
+        ContainerNode expectedNode = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
@@ -60,7 +58,7 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testShardDataTreeSnapshotWithMetadata() throws Exception {
-        ContainerNode expectedNode = Builders.containerBuilder()
+        ContainerNode expectedNode = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
