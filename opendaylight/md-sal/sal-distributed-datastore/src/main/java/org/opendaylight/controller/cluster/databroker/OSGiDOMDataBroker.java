@@ -8,17 +8,14 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.ImmutableMap;
-import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
-import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.spi.ForwardingDOMDataBroker;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
@@ -33,10 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Beta
-@Component(immediate = true, configurationPid = "org.opendaylight.controller.cluster.datastore.broker",
+@Component(service = DOMDataBroker.class, configurationPid = "org.opendaylight.controller.cluster.datastore.broker",
     property = "type=default")
 @Designate(ocd = OSGiDOMDataBroker.Config.class)
-public final class OSGiDOMDataBroker implements DOMDataBroker {
+public final class OSGiDOMDataBroker extends ForwardingDOMDataBroker {
     @ObjectClassDefinition
     public @interface Config {
         @AttributeDefinition(name = "max-data-broker-future-callback-queue-size")
@@ -47,74 +44,42 @@ public final class OSGiDOMDataBroker implements DOMDataBroker {
 
     private static final Logger LOG = LoggerFactory.getLogger(OSGiDOMDataBroker.class);
 
-    @Reference(target = "(type=distributed-config)")
-    DOMStore configDatastore = null;
-    @Reference(target = "(type=distributed-operational)")
-    DOMStore operDatastore = null;
-
-    private ExecutorService executorService;
-    private ConcurrentDOMDataBroker delegate;
-    private CommitStatsMXBeanImpl commitStats;
-    private ThreadExecutorStatsMXBeanImpl threadStats;
-
-    @Override
-    public DOMDataTreeReadTransaction newReadOnlyTransaction() {
-        return delegate.newReadOnlyTransaction();
-    }
-
-    @Override
-    public DOMDataTreeWriteTransaction newWriteOnlyTransaction() {
-        return delegate.newWriteOnlyTransaction();
-    }
-
-    @Override
-    public DOMDataTreeReadWriteTransaction newReadWriteTransaction() {
-        return delegate.newReadWriteTransaction();
-    }
-
-    @Override
-    public Collection<Extension> supportedExtensions() {
-        return delegate.supportedExtensions();
-    }
-
-    @Override
-    public DOMTransactionChain createTransactionChain() {
-        return delegate.createTransactionChain();
-    }
-
-    @Override
-    public DOMTransactionChain createMergingTransactionChain() {
-        return delegate.createMergingTransactionChain();
-    }
+    private final @NonNull ConcurrentDOMDataBroker delegate;
+    private final ThreadExecutorStatsMXBeanImpl threadStats;
+    private final CommitStatsMXBeanImpl commitStats;
+    private final ExecutorService executorService;
 
     @Activate
-    void activate(final Config config) {
+    public OSGiDOMDataBroker(
+            @Reference(target = "(type=distributed-config)") final DOMStore configDatastore,
+            @Reference(target = "(type=distributed-operational)") final DOMStore operDatastore, final Config config) {
         LOG.info("DOM Data Broker starting");
-        final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
+        final var commitStatsTracker = DurationStatisticsTracker.createConcurrent();
 
         executorService = SpecialExecutors.newBlockingBoundedCachedThreadPool(config.callbackPoolSize(),
             config.callbackQueueSize(), "CommitFutures", ConcurrentDOMDataBroker.class);
-        delegate = new ConcurrentDOMDataBroker(ImmutableMap.of(
-            LogicalDatastoreType.CONFIGURATION, configDatastore, LogicalDatastoreType.OPERATIONAL, operDatastore),
-            executorService, commitStatsTracker);
-
-        commitStats = new CommitStatsMXBeanImpl(commitStatsTracker, "DOMDataBroker");
-        commitStats.register();
         threadStats = ThreadExecutorStatsMXBeanImpl.create(executorService, "CommitFutureExecutorStats",
             "DOMDataBroker");
+        commitStats = new CommitStatsMXBeanImpl(commitStatsTracker, "DOMDataBroker");
+        commitStats.register();
 
+        delegate = new ConcurrentDOMDataBroker(Map.of(
+            LogicalDatastoreType.CONFIGURATION, configDatastore, LogicalDatastoreType.OPERATIONAL, operDatastore),
+            executorService, commitStatsTracker);
         LOG.info("DOM Data Broker started");
+    }
+
+    @Override
+    protected DOMDataBroker delegate() {
+        return delegate;
     }
 
     @Deactivate
     void deactivate() {
         LOG.info("DOM Data Broker stopping");
-        commitStats.unregister();
-        if (threadStats != null) {
-            threadStats.unregister();
-        }
-
         delegate.close();
+        commitStats.unregister();
+        threadStats.unregister();
         executorService.shutdown();
         try {
             executorService.awaitTermination(1, TimeUnit.MINUTES);
