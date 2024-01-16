@@ -159,7 +159,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     private void registerNamespaceHandler(final BundleContext context) {
         namespaceReg = context.registerService(NamespaceHandler.class, new OpendaylightNamespaceHandler(),
             FrameworkUtil.asDictionary(Map.of(
-                "osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0)));
+                "osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_2_0_0)));
     }
 
     private void registerBlueprintEventHandler(final BundleContext context) {
