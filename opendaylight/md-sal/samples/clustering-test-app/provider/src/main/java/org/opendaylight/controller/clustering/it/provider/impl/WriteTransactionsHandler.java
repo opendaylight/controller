@@ -134,7 +134,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INT, ID, id)
                 .withChild(ImmutableNodes.mapNodeBuilder(ITEM).build())
                 .build();
-        final YangInstanceIdentifier idListItem = ID_INT_YID.node(entry.getIdentifier());
+        final YangInstanceIdentifier idListItem = ID_INT_YID.node(entry.name());
 
         final ContainerNode containerNode = Builders.containerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(ID_INTS))

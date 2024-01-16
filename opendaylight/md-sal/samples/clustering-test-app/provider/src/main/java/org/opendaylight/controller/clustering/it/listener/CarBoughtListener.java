@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.NotificationService;
-import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.binding.api.NotificationService.Listener;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.CarPeople;
@@ -24,7 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarBought;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseListener;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
@@ -36,18 +35,18 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 @Component(service = { })
-public final class PeopleCarListener implements CarPurchaseListener {
-    private static final Logger LOG = LoggerFactory.getLogger(PeopleCarListener.class);
+public final class CarBoughtListener implements Listener<CarBought> {
+    private static final Logger LOG = LoggerFactory.getLogger(CarBoughtListener.class);
 
     private final DataBroker dataProvider;
     private final Registration reg;
 
     @Inject
     @Activate
-    public PeopleCarListener(@Reference final DataBroker dataProvider,
+    public CarBoughtListener(@Reference final DataBroker dataProvider,
             @Reference final NotificationService notifService) {
         this.dataProvider = requireNonNull(dataProvider);
-        reg = notifService.registerNotificationListener(this);
+        reg = notifService.registerListener(CarBought.class, this);
     }
 
     @PreDestroy
@@ -57,19 +56,17 @@ public final class PeopleCarListener implements CarPurchaseListener {
     }
 
     @Override
-    public void onCarBought(final CarBought notification) {
-
-        final CarPerson carPerson = new CarPersonBuilder()
+    public void onNotification(final CarBought notification) {
+        final var carPerson = new CarPersonBuilder()
             .withKey(new CarPersonKey(notification.getCarId(), notification.getPersonId()))
             .build();
 
         LOG.info("Car bought, adding car-person entry: [{}]", carPerson);
 
-        InstanceIdentifier<CarPerson> carPersonIId = InstanceIdentifier.builder(CarPeople.class)
+        final var carPersonIId = InstanceIdentifier.builder(CarPeople.class)
                 .child(CarPerson.class, carPerson.key()).build();
 
-
-        WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
+        final var tx = dataProvider.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson);
 
         tx.commit().addCallback(new FutureCallback<CommitInfo>() {

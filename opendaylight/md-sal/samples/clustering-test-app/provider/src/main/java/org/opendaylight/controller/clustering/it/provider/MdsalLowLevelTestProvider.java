@@ -133,7 +133,10 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactions;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Rpc;
@@ -168,7 +171,7 @@ public final class MdsalLowLevelTestProvider {
     private final Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>>
             routedRegistrations = new HashMap<>();
 
-    private final Map<String, ListenerRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
+    private final Map<String, ObjectRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
@@ -311,8 +314,15 @@ public final class MdsalLowLevelTestProvider {
                 .buildFuture();
         }
 
-        ynlRegistrations.put(input.getId(),
-                notificationService.registerNotificationListener(new YnlListener(input.getId())));
+        final var id = input.getId();
+        final var listener = new YnlListener(id);
+        final var reg = notificationService.registerListener(IdSequence.class, listener);
+        ynlRegistrations.put(id, new AbstractObjectRegistration<>(listener) {
+            @Override
+            protected void removeRegistration() {
+                reg.close();
+            }
+        });
 
         return RpcResultBuilder.success(new SubscribeYnlOutputBuilder().build()).buildFuture();
     }
@@ -505,12 +515,11 @@ public final class MdsalLowLevelTestProvider {
                 .buildFuture();
         }
 
-        final ListenerRegistration<YnlListener> reg = ynlRegistrations.remove(input.getId());
-        final UnsubscribeYnlOutput output = reg.getInstance().getOutput();
-
-        reg.close();
-
-        return RpcResultBuilder.<UnsubscribeYnlOutput>success().withResult(output).buildFuture();
+        try (var reg = ynlRegistrations.remove(input.getId())) {
+            return RpcResultBuilder.<UnsubscribeYnlOutput>success()
+                .withResult(reg.getInstance().getOutput())
+                .buildFuture();
+        }
     }
 
     private ListenableFuture<RpcResult<CheckPublishNotificationsOutput>> checkPublishNotifications(
