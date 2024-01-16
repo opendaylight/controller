@@ -9,17 +9,17 @@ package org.opendaylight.controller.test.sal.binding.it;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import java.util.Set;
 import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRoute;
@@ -41,9 +41,7 @@ import org.slf4j.LoggerFactory;
  * Covers routed rpc creation, registration, invocation, unregistration.
  */
 public class RoutedServiceIT extends AbstractIT {
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(RoutedServiceIT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RoutedServiceIT.class);
 
     protected RoutedSimpleRoute routedSimpleRouteRpc1;
     protected RoutedSimpleRoute routedSimpleRouteRpc2;
@@ -62,11 +60,14 @@ public class RoutedServiceIT extends AbstractIT {
     @Before
     public void setUp() {
         routedSimpleRouteRpc1 = mock(RoutedSimpleRoute.class, "First Flow Rpc");
+        doReturn(RoutedSimpleRoute.class).when(routedSimpleRouteRpc1).implementedInterface();
+        doReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null)).when(routedSimpleRouteRpc1)
+            .invoke(any());
+
         routedSimpleRouteRpc2 = mock(RoutedSimpleRoute.class, "Second Flow Rpc");
-        Mockito.when(routedSimpleRouteRpc1.invoke(Mockito.<RoutedSimpleRouteInput>any()))
-            .thenReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null));
-        Mockito.when(routedSimpleRouteRpc2.invoke(Mockito.<RoutedSimpleRouteInput>any()))
-            .thenReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null));
+        doReturn(RoutedSimpleRoute.class).when(routedSimpleRouteRpc2).implementedInterface();
+        doReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null)).when(routedSimpleRouteRpc2)
+            .invoke(any());
     }
 
     @Test
@@ -75,14 +76,13 @@ public class RoutedServiceIT extends AbstractIT {
         final InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
         final InstanceIdentifier<UnorderedList> nodeTwo = createNodeRef("foo:node:2");
 
-        Registration firstReg = rpcProviderService.registerRpcImplementations(
-            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc1),  Set.of(nodeOnePath));
+        Registration firstReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc1,
+            Set.of(nodeOnePath));
         assertNotNull("Registration should not be null", firstReg);
 
         LOG.info("Register provider 2 with second implementation of routeSimpleService - rpc2 of node 2");
 
-        Registration secondReg = rpcProviderService.registerRpcImplementations(
-            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc2), Set.of(nodeTwo));
+        Registration secondReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc2, Set.of(nodeTwo));
         assertNotNull("Registration should not be null", firstReg);
         assertNotSame(secondReg, firstReg);
 
@@ -125,8 +125,7 @@ public class RoutedServiceIT extends AbstractIT {
 
         LOG.info("Provider 2 registers path of node 1");
         secondReg.close();
-        secondReg = rpcProviderService.registerRpcImplementations(
-            ImmutableClassToInstanceMap.of(RoutedSimpleRoute.class, routedSimpleRouteRpc2), Set.of(nodeOnePath));
+        secondReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc2, Set.of(nodeOnePath));
 
         /**
          * A consumer sends third message to node 1.
