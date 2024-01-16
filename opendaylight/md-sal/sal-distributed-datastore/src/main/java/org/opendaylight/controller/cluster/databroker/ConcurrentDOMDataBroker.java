@@ -27,6 +27,7 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataBroker;
 import org.opendaylight.mdsal.dom.spi.TransactionCommitFailedExceptionMapper;
@@ -34,6 +35,10 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.yang.common.Empty;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 @Beta
+@Component(service = DOMDataBroker.class, property = "type=default")
 public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrentDOMDataBroker.class);
     private static final String CAN_COMMIT = "CAN_COMMIT";
@@ -70,8 +76,22 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         this.commitStatsTracker = requireNonNull(commitStatsTracker);
     }
 
-    public DurationStatisticsTracker getCommitStatsTracker() {
-        return commitStatsTracker;
+    @Activate
+    public ConcurrentDOMDataBroker(@Reference final DataBrokerCommitExecutor commitExecutor,
+            @Reference(target = "(type=distributed-config)") final DOMStore configDatastore,
+            @Reference(target = "(type=distributed-operational)") final DOMStore operDatastore) {
+        this(Map.of(
+            LogicalDatastoreType.CONFIGURATION, configDatastore, LogicalDatastoreType.OPERATIONAL, operDatastore),
+            commitExecutor.executor(), commitExecutor.commitStatsTracker());
+        LOG.info("DOM Data Broker started");
+    }
+
+    @Override
+    @Deactivate
+    public void close() {
+        LOG.info("DOM Data Broker stopping");
+        super.close();
+        LOG.info("DOM Data Broker stopped");
     }
 
     @Override
@@ -82,9 +102,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         checkArgument(cohort != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
-        final AsyncNotifyingSettableFuture clientSubmitFuture =
-                new AsyncNotifyingSettableFuture(clientFutureCallbackExecutor);
-
+        final var clientSubmitFuture = new AsyncNotifyingSettableFuture(clientFutureCallbackExecutor);
         doCanCommit(clientSubmitFuture, transaction, cohort);
         return FluentFuture.from(clientSubmitFuture);
     }
@@ -157,8 +175,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         final Exception e;
         if (throwable instanceof NoShardLeaderException || throwable instanceof ShardLeaderNotRespondingException) {
             e = new DataStoreUnavailableException(throwable.getMessage(), throwable);
-        } else if (throwable instanceof Exception) {
-            e = (Exception) throwable;
+        } else if (throwable instanceof Exception ex) {
+            e = ex;
         } else {
             e = new RuntimeException("Unexpected error occurred", throwable);
         }
