@@ -98,24 +98,35 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         LOG.debug("In parse for {}", element);
 
         if (nodeNameEquals(element, RpcImplementationBean.RPC_IMPLEMENTATION)) {
+            warnDeprecatedElement(RpcImplementationBean.RPC_IMPLEMENTATION);
             return parseRpcImplementation(element, context);
         } else if (nodeNameEquals(element, RPC_SERVICE)) {
+            warnDeprecatedElement(RPC_SERVICE);
             return parseRpcService(element, context);
         } else if (nodeNameEquals(element, NotificationListenerBean.NOTIFICATION_LISTENER)) {
+            warnDeprecatedElement(NotificationListenerBean.NOTIFICATION_LISTENER);
             return parseNotificationListener(element, context);
         } else if (nodeNameEquals(element, CLUSTERED_APP_CONFIG)) {
             return parseClusteredAppConfig(element, context);
         } else if (nodeNameEquals(element, SPECIFIC_SERVICE_REF_LIST)) {
+            warnDeprecatedElement(SPECIFIC_SERVICE_REF_LIST);
             return parseSpecificReferenceList(element, context);
         } else if (nodeNameEquals(element, STATIC_REFERENCE)) {
+            warnDeprecatedElement(SPECIFIC_SERVICE_REF_LIST);
             return parseStaticReference(element, context);
         } else if (nodeNameEquals(element, ACTION_SERVICE)) {
+            warnDeprecatedElement(ACTION_SERVICE);
             return parseActionService(element, context);
         } else if (nodeNameEquals(element, ActionProviderBean.ACTION_PROVIDER)) {
+            warnDeprecatedElement(ActionProviderBean.ACTION_PROVIDER);
             return parseActionProvider(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
+    }
+
+    private static void warnDeprecatedElement(final String element) {
+        LOG.warn("Encountered element {}, support for this element will be removed in the next major release", element);
     }
 
     @Override
@@ -144,11 +155,9 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private static ComponentMetadata decorateServiceType(final Attr attr, final ComponentMetadata component,
             final ParserContext context) {
-        if (!(component instanceof MutableServiceMetadata)) {
+        if (!(component instanceof MutableServiceMetadata service)) {
             throw new ComponentDefinitionException("Expected an instanceof MutableServiceMetadata");
         }
-
-        MutableServiceMetadata service = (MutableServiceMetadata)component;
 
         LOG.debug("decorateServiceType for {} - adding type property {}", service.getId(), attr.getValue());
 
