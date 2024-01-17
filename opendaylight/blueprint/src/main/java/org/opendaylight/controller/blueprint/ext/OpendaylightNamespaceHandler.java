@@ -48,7 +48,7 @@ import org.xml.sax.SAXException;
  * @author Thomas Pantelis
  */
 public final class OpendaylightNamespaceHandler implements NamespaceHandler {
-    public static final String NAMESPACE_2_0_0 = "http://opendaylight.org/xmlns/blueprint/v2.0.0";
+    public static final String NAMESPACE_1_0_0 = "http://opendaylight.org/xmlns/blueprint/v1.0.0";
     static final String ROUTED_RPC_REG_CONVERTER_NAME = "org.opendaylight.blueprint.RoutedRpcRegConverter";
     static final String DOM_RPC_PROVIDER_SERVICE_NAME = "org.opendaylight.blueprint.DOMRpcProviderService";
     static final String RPC_REGISTRY_NAME = "org.opendaylight.blueprint.RpcRegistry";
@@ -63,6 +63,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static final String RESTART_DEPENDENTS_ON_UPDATES = "restart-dependents-on-updates";
     private static final String USE_DEFAULT_FOR_REFERENCE_TYPES = "use-default-for-reference-types";
     private static final String CLUSTERED_APP_CONFIG = "clustered-app-config";
+    private static final String INTERFACE = "interface";
     private static final String ID_ATTR = "id";
 
     @SuppressWarnings("rawtypes")
@@ -73,8 +74,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     @Override
     public URL getSchemaLocation(final String namespace) {
-        if (NAMESPACE_2_0_0.equals(namespace)) {
-            URL url = getClass().getResource("/opendaylight-blueprint-ext-2.0.0.xsd");
+        if (NAMESPACE_1_0_0.equals(namespace)) {
+            URL url = getClass().getResource("/opendaylight-blueprint-ext-1.0.0.xsd");
             LOG.debug("getSchemaLocation for {} returning URL {}", namespace, url);
             return url;
         }
