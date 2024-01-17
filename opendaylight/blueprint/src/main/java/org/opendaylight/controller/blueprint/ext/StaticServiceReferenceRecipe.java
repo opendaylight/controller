@@ -29,10 +29,6 @@ import org.slf4j.LoggerFactory;
 class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     private static final Logger LOG = LoggerFactory.getLogger(StaticServiceReferenceRecipe.class);
 
-    private static final SatisfactionListener NOOP_LISTENER = satisfiable -> {
-        // Intentional NOOP
-    };
-
     private volatile ServiceReference<?> trackedServiceReference;
     private volatile Object trackedService;
     private Consumer<Object> serviceSatisfiedCallback;
@@ -44,8 +40,10 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     }
 
     void startTracking(final Consumer<Object> newServiceSatisfiedCallback) {
-        this.serviceSatisfiedCallback = newServiceSatisfiedCallback;
-        super.start(NOOP_LISTENER);
+        serviceSatisfiedCallback = newServiceSatisfiedCallback;
+        super.start(satisfiable -> {
+            // Intentional NOOP
+        });
     }
 
     @SuppressWarnings("rawtypes")
