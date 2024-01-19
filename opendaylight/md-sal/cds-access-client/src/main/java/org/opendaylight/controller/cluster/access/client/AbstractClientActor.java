@@ -17,13 +17,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Frontend actor which takes care of persisting generations and creates an appropriate ClientIdentifier.
  */
+// FIXME: do not use persistence, e.g. derive from akka.actor.AbstractActor
+// FIXME: convert to akka.actor.typed(.javadsl.Behaviours)
 public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
     private AbstractClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
         currentBehavior = new RecoveringClientActorBehavior(
-                new InitialClientActorContext(this, frontendId.toPersistentId()), frontendId);
+                new InitialClientActorContext(this, frontendId), frontendId);
     }
 
     @Override

@@ -11,7 +11,9 @@ import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSystem;
 import akka.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 
 /**
  * The initial context for an actor.
@@ -20,14 +22,26 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  */
 final class InitialClientActorContext extends AbstractClientActorContext {
     private final AbstractClientActor actor;
+    private final ClientIdentifier clientId;
 
-    InitialClientActorContext(final AbstractClientActor actor, final String persistenceId) {
-        super(actor.self(), persistenceId);
+    InitialClientActorContext(final AbstractClientActor actor, final FrontendIdentifier frontendId) {
+        super(actor.self(), frontendId.toPersistentId());
         this.actor = requireNonNull(actor);
+        clientId = ClientStateUtils.loadClientIdentifier(frontendId);
     }
 
-    void saveSnapshot(final ClientIdentifier snapshot) {
-        actor.saveSnapshot(snapshot);
+    @Nullable ClientIdentifier resolveTombstone(final PersistenceTombstone tombstone) {
+        final var recovered = tombstone.clientId();
+        return clientId.getFrontendId().equals(recovered.getFrontendId())
+            && clientId.getGeneration() > recovered.getGeneration() ? clientId : null;
+    }
+
+    void saveSnapshot(final ClientIdentifier newClientId) {
+        // migrate clientId storage if necessary
+        if (newClientId.getGeneration() > clientId.getGeneration()) {
+            actor.saveSnapshot(new PersistenceTombstone(clientId));
+            ClientStateUtils.saveClientIdentifier(clientId);
+        }
     }
 
     void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
