@@ -37,9 +37,9 @@ public class DsbenchmarkListenerProvider {
         for (int i = 0; i < numListeners; i++) {
             var listener = new DsbenchmarkListener();
             listeners.add(listener);
-            registrations.add(dataBroker.registerDataTreeChangeListener(
+            registrations.add(dataBroker.registerTreeChangeListener(
                     DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
-            registrations.add(dataBroker.registerDataTreeChangeListener(
+            registrations.add(dataBroker.registerTreeChangeListener(
                     DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
 
         }
