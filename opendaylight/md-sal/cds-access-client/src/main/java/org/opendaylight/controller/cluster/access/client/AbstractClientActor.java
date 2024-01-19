@@ -23,7 +23,7 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
         currentBehavior = new RecoveringClientActorBehavior(
-                new InitialClientActorContext(this, frontendId.toPersistentId()), frontendId);
+                new InitialClientActorContext(this, frontendId), frontendId);
     }
 
     @Override
