@@ -50,12 +50,11 @@
             <artifactId>checker-qual</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-testkit_2.13</artifactId>
@@ -85,6 +84,7 @@
             <type>test-jar</type>
         </dependency>
     </dependencies>
+
 
     <build>
         <pluginManagement>
@@ -125,6 +125,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.opendaylight.controller.cluster.access.client.state.dir>
+                            target/state
+                        </org.opendaylight.controller.cluster.access.client.state.dir>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

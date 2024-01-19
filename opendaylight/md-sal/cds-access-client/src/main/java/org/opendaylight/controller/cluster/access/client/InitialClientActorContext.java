@@ -9,9 +9,19 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.persistence.Persistence;
+import akka.persistence.SnapshotMetadata;
+import akka.persistence.SnapshotProtocol;
+import akka.persistence.SnapshotProtocol.LoadSnapshot;
+import akka.persistence.SnapshotProtocol.SaveSnapshot;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.typesafe.config.ConfigFactory;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The initial context for an actor.
@@ -19,26 +29,48 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  * @author Robert Varga
  */
 final class InitialClientActorContext extends AbstractClientActorContext {
+    private static final Logger LOG = LoggerFactory.getLogger(InitialClientActorContext.class);
     private final AbstractClientActor actor;
+    private final ActorRef snapshotStore;
+    private final FrontendIdentifier frontendId;
+    private ClientIdentifier currentClientId;
 
-    InitialClientActorContext(final AbstractClientActor actor, final String persistenceId) {
-        super(actor.self(), persistenceId);
+    InitialClientActorContext(final AbstractClientActor actor, final FrontendIdentifier frontendId) {
+        super(actor.self(), frontendId.toPersistentId());
         this.actor = requireNonNull(actor);
+        this.frontendId = requireNonNull(frontendId);
+        snapshotStore = snapshotStoreFor(actor);
+        currentClientId = ClientStateUtils.currentClientIdentifier(frontendId);
     }
 
-    void saveSnapshot(final ClientIdentifier snapshot) {
-        actor.saveSnapshot(snapshot);
+    void startSnapshotMigration() {
+        snapshotStore.tell(new LoadSnapshot(persistenceId(),
+            SnapshotSelectionCriteria.latest(), scala.Long.MaxValue()), self());
+    }
+
+    void updateFromSnapshot(final ClientIdentifier recoveredClientId) {
+        LOG.info("updateFromSnapshot: current -> {} , recovered -> {}", currentClientId, recoveredClientId);
+        if (frontendId.equals(recoveredClientId.getFrontendId())
+                && recoveredClientId.getGeneration() > currentClientId.getGeneration()) {
+            currentClientId = recoveredClientId;
+            LOG.info("updated {}", currentClientId);
+            ClientStateUtils.saveClientIdentifier(currentClientId);
+        }
+    }
+
+    void saveTombstone(final long seqNumber, final ClientIdentifier recoveredClientId) {
+        final var metadata = SnapshotMetadata.apply(persistenceId(), seqNumber);
+        snapshotStore.tell(new SaveSnapshot(metadata, new PersistenceTombstone(recoveredClientId)), self());
     }
 
     void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        actor.deleteSnapshots(criteria);
+        snapshotStore.tell(new SnapshotProtocol.DeleteSnapshots(persistenceId(), criteria), self());
     }
 
-    ClientActorBehavior<?> createBehavior(final ClientIdentifier clientId) {
+    ClientActorBehavior<?> finishRecovery() {
         final ActorSystem system = actor.getContext().system();
         final ClientActorContext context = new ClientActorContext(self(), persistenceId(), system,
-            clientId, actor.getClientActorConfig());
-
+            currentClientId, actor.getClientActorConfig());
         return actor.initialBehavior(context);
     }
 
@@ -48,5 +80,11 @@ final class InitialClientActorContext extends AbstractClientActorContext {
 
     void unstash() {
         actor.unstashAll();
+    }
+
+    private static ActorRef snapshotStoreFor(final AbstractClientActor actor) {
+        final var system = actor.getContext().getSystem();
+        final var snapshotPluginId = system.settings().config().getString("akka.persistence.snapshot-store.plugin");
+        return system.extension(Persistence.lookup()).snapshotStoreFor(snapshotPluginId, ConfigFactory.empty());
     }
 }
