@@ -12,6 +12,9 @@ import static java.util.Objects.requireNonNull;
 import akka.actor.ActorSystem;
 import akka.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The initial context for an actor.
@@ -19,26 +22,39 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  * @author Robert Varga
  */
 final class InitialClientActorContext extends AbstractClientActorContext {
+    private static final Logger LOG = LoggerFactory.getLogger(InitialClientActorContext.class);
     private final AbstractClientActor actor;
+    private final FrontendIdentifier frontendId;
+    private ClientIdentifier currentClientId;
 
-    InitialClientActorContext(final AbstractClientActor actor, final String persistenceId) {
-        super(actor.self(), persistenceId);
+    InitialClientActorContext(final AbstractClientActor actor, final FrontendIdentifier frontendId) {
+        super(actor.self(), frontendId.toPersistentId());
         this.actor = requireNonNull(actor);
+        this.frontendId = requireNonNull(frontendId);
+        currentClientId = ClientStateUtils.currentClientIdentifier(frontendId);
     }
 
-    void saveSnapshot(final ClientIdentifier snapshot) {
-        actor.saveSnapshot(snapshot);
+    void updateFromSnapshot(final ClientIdentifier recoveredClientId) {
+        if (frontendId.equals(recoveredClientId.getFrontendId())
+            && recoveredClientId.getGeneration() > currentClientId.getGeneration()) {
+            currentClientId = recoveredClientId;
+            LOG.info("updated {}", currentClientId);
+            ClientStateUtils.saveClientIdentifier(currentClientId);
+        }
+    }
+
+    void saveTombstone(final ClientIdentifier recoveredClientId) {
+        actor.saveSnapshot(new PersistenceTombstone(recoveredClientId));
     }
 
     void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
         actor.deleteSnapshots(criteria);
     }
 
-    ClientActorBehavior<?> createBehavior(final ClientIdentifier clientId) {
+    ClientActorBehavior<?> finishRecovery() {
         final ActorSystem system = actor.getContext().system();
         final ClientActorContext context = new ClientActorContext(self(), persistenceId(), system,
-            clientId, actor.getClientActorConfig());
-
+            currentClientId, actor.getClientActorConfig());
         return actor.initialBehavior(context);
     }
 
@@ -49,4 +65,5 @@ final class InitialClientActorContext extends AbstractClientActorContext {
     void unstash() {
         actor.unstashAll();
     }
+
 }
