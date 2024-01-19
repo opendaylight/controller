@@ -7,97 +7,90 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import static java.util.Objects.requireNonNull;
-
+import akka.persistence.DeleteSnapshotsFailure;
+import akka.persistence.DeleteSnapshotsSuccess;
 import akka.persistence.RecoveryCompleted;
+import akka.persistence.SaveSnapshotFailure;
+import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotOffer;
+import akka.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Transient behavior handling messages during initial actor recovery.
- *
- * @author Robert Varga
+ * Transient behavior handling snapshot recovery and migration.
  */
 final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<InitialClientActorContext> {
     private static final Logger LOG = LoggerFactory.getLogger(RecoveringClientActorBehavior.class);
 
-    /*
-     * Base for the property name which overrides the initial generation when we fail to find anything from persistence.
-     * The actual property name has the frontend type name appended.
-     */
-    private static final String GENERATION_OVERRIDE_PROP_BASE =
-            "org.opendaylight.controller.cluster.access.client.initial.generation.";
+    private final FrontendIdentifier frontendId;
 
-    private final FrontendIdentifier currentFrontend;
-    private ClientIdentifier lastId = null;
+    private Object snapshot;
 
     RecoveringClientActorBehavior(final AbstractClientActor actor, final FrontendIdentifier frontendId) {
-        super(new InitialClientActorContext(actor, frontendId.toPersistentId()));
-        currentFrontend = requireNonNull(frontendId);
+        super(new InitialClientActorContext(actor, frontendId));
+        this.frontendId = frontendId;
     }
 
     @Override
     AbstractClientActorBehavior<?> onReceiveCommand(final Object command) {
-        throw new IllegalStateException("Frontend is recovering");
+        if (command instanceof SaveSnapshotSuccess saved) {
+            context().deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
+                saved.metadata().timestamp() - 1, 0L, 0L));
+            return this;
+        } else if (command instanceof SaveSnapshotFailure saveFailure) {
+            LOG.warn("{}: error saving tombstone", persistenceId(), saveFailure.cause());
+        } else if (command instanceof DeleteSnapshotsSuccess) {
+            LOG.debug("{}: snapshot migrated successfully", persistenceId());
+        } else if (command instanceof DeleteSnapshotsFailure deleteFailure) {
+            LOG.warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
+        } else {
+            LOG.debug("{}: stashing command {}", persistenceId(), command);
+            context().stash();
+            return this;
+        }
+        context().unstash();
+        return context().finishRecovery();
     }
 
     @Override
-    AbstractClientActorBehavior<?> onReceiveRecover(final Object recover) {
-        if (recover instanceof RecoveryCompleted msg) {
-            return onRecoveryCompleted(msg);
-        } else if (recover instanceof SnapshotOffer snapshotOffer) {
-            onSnapshotOffer(snapshotOffer);
-        } else {
-            LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
-        }
-        return this;
-    }
+    AbstractClientActorBehavior<?> onReceiveRecover(final @NonNull Object recover) {
+        if (recover instanceof SnapshotOffer snapshotOffer) {
+            snapshot = snapshotOffer.snapshot();
+            return this;
 
-    private void onSnapshotOffer(final SnapshotOffer snapshotOffer) {
-        lastId = (ClientIdentifier) snapshotOffer.snapshot();
-        LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
-    }
+        } else if (recover instanceof RecoveryCompleted) {
+            if (snapshot instanceof ClientIdentifier clientId) {
+                if (!frontendId.equals(clientId.getFrontendId())) {
+                    // terminate if frontend id mismatches
+                    LOG.error("{}: FrontendId mismatch for snapshot -> expected: {}, actual: {}",
+                        persistenceId(), frontendId, clientId.getFrontendId());
+                    return null;
+                }
+                // update generation and migrate to file storage
+                final var newClientId = nextGenerationOf(clientId);
+                context().updateFromSnapshot(newClientId);
+                context().saveTombstone(newClientId);
+                return this;
 
-    private SavingClientActorBehavior onRecoveryCompleted(final RecoveryCompleted msg) {
-        final ClientIdentifier nextId;
-        if (lastId != null) {
-            if (!currentFrontend.equals(lastId.getFrontendId())) {
-                LOG.error("{}: Mismatched frontend identifier, shutting down. Current: {} Saved: {}",
-                    persistenceId(), currentFrontend, lastId.getFrontendId());
-                return null;
+            } else if (snapshot instanceof PersistenceTombstone tombstone) {
+                if (!frontendId.equals(tombstone.clientId().getFrontendId())) {
+                    // terminate if frontend id mismatches
+                    LOG.error("{}: FrontendId mismatch for snapshot -> expected: {}, actual: {}",
+                        persistenceId(), frontendId, tombstone.clientId().getFrontendId());
+                    return null;
+                }
+                // recover from tombstone if state file was deleted
+                context().updateFromSnapshot(nextGenerationOf(tombstone.clientId()));
             }
-
-            nextId = ClientIdentifier.create(currentFrontend, lastId.getGeneration() + 1);
-        } else {
-            nextId = ClientIdentifier.create(currentFrontend, initialGeneration());
         }
-
-        LOG.debug("{}: persisting new identifier {}", persistenceId(), nextId);
-        context().saveSnapshot(nextId);
-        return new SavingClientActorBehavior(context(), nextId);
+        return context().finishRecovery();
     }
 
-    private long initialGeneration() {
-        final String propName = GENERATION_OVERRIDE_PROP_BASE + currentFrontend.getClientType().getName();
-        final String propValue = System.getProperty(propName);
-        if (propValue == null) {
-            LOG.debug("{}: no initial generation override, starting from 0", persistenceId());
-            return 0;
-        }
-
-        final long ret;
-        try {
-            ret = Long.parseUnsignedLong(propValue);
-        } catch (NumberFormatException e) {
-            LOG.warn("{}: failed to parse initial generation override '{}', starting from 0", persistenceId(),
-                propValue, e);
-            return 0;
-        }
-
-        LOG.info("{}: initial generation set to {}", persistenceId(), ret);
-        return ret;
+    private static ClientIdentifier nextGenerationOf(final ClientIdentifier clientId) {
+        return ClientIdentifier.create(clientId.getFrontendId(), clientId.getGeneration() + 1);
     }
 }
