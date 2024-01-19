@@ -13,12 +13,11 @@ import java.util.List;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.outer.list.InnerList;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public final class DomListBuilder {
     // Inner List Qname identifiers for yang model's 'name' and 'value'
@@ -33,9 +32,9 @@ public final class DomListBuilder {
     }
 
     public static List<MapEntryNode> buildOuterList(final int outerElements, final int innerElements) {
-        List<MapEntryNode> outerList = new ArrayList<>(outerElements);
+        final var outerList = new ArrayList<MapEntryNode>(outerElements);
         for (int j = 0; j < outerElements; j++) {
-            outerList.add(ImmutableNodes.mapEntryBuilder()
+            outerList.add(ImmutableNodes.newMapEntryBuilder()
                 .withNodeIdentifier(NodeIdentifierWithPredicates.of(OuterList.QNAME, OL_ID, j))
                 .withChild(ImmutableNodes.leafNode(OL_ID, j))
                 .withChild(buildInnerList(j, innerElements))
@@ -45,11 +44,12 @@ public final class DomListBuilder {
     }
 
     private static MapNode buildInnerList(final int index, final int elements) {
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
+        final var innerList = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(InnerList.QNAME));
 
         final String itemStr = "Item-" + index + "-";
         for (int i = 0; i < elements; i++) {
-            innerList.addChild(ImmutableNodes.mapEntryBuilder()
+            innerList.addChild(ImmutableNodes.newMapEntryBuilder()
                 .withNodeIdentifier(NodeIdentifierWithPredicates.of(InnerList.QNAME, IL_NAME, i))
                 .withChild(ImmutableNodes.leafNode(IL_NAME, i))
                 .withChild(ImmutableNodes.leafNode(IL_VALUE, itemStr + String.valueOf(i)))
