@@ -64,7 +64,14 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
             context().saveSnapshot(nextId);
             return new SavingClientActorBehavior(context(), nextId);
         } else if (recover instanceof SnapshotOffer snapshotOffer) {
-            lastId = (ClientIdentifier) snapshotOffer.snapshot();
+            final var snapshot = snapshotOffer.snapshot();
+            if (snapshot instanceof ClientIdentifier clientId) {
+                lastId = clientId;
+            } else if (snapshot instanceof PersistenceTombstone tombstone) {
+                lastId = tombstone.clientId();
+            } else {
+                LOG.warn("{}: ignoring snapshot {}", persistenceId(), snapshot);
+            }
             LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
         } else {
             LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
