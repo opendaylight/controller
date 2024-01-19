@@ -22,7 +22,6 @@ import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader.ConfigURLProvider;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
@@ -143,15 +142,12 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
         setDependencyDesc("Initial app config " + bindingContext.appConfigBindingClass.getSimpleName());
 
-        // We register a DTCL to get updates and also read the app config data from the data store. If
-        // the app config data is present then both the read and initial DTCN update will return it. If the
-        // the data isn't present, we won't get an initial DTCN update so the read will indicate the data
-        // isn't present.
-
-        DataTreeIdentifier<DataObject> dataTreeId = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
-                bindingContext.appConfigPath);
-        appConfigChangeListenerReg = dataBroker.registerDataTreeChangeListener(dataTreeId,
-                (ClusteredDataTreeChangeListener<DataObject>) this::onAppConfigChanged);
+        // We register a DTCL to get updates and also read the app config data from the data store. If the app config
+        // data is present then both the read and initial DTCN update will return it. If the the data isn't present, we
+        // will not get an initial DTCN update so the read will indicate the data is not present.
+        appConfigChangeListenerReg = dataBroker.registerTreeChangeListener(
+            DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath),
+            this::onAppConfigChanged);
 
         readInitialAppConfig(dataBroker);
     }
@@ -187,12 +183,12 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private void onAppConfigChanged(final Collection<DataTreeModification<DataObject>> changes) {
         for (DataTreeModification<DataObject> change: changes) {
             DataObjectModification<DataObject> changeRoot = change.getRootNode();
-            ModificationType type = changeRoot.getModificationType();
+            ModificationType type = changeRoot.modificationType();
 
             LOG.debug("{}: onAppConfigChanged: {}, {}", logName(), type, change.getRootPath());
 
             if (type == ModificationType.SUBTREE_MODIFIED || type == ModificationType.WRITE) {
-                DataObject newAppConfig = changeRoot.getDataAfter();
+                DataObject newAppConfig = changeRoot.dataAfter();
 
                 LOG.debug("New app config instance: {}, previous: {}", newAppConfig, currentAppConfig);
 
