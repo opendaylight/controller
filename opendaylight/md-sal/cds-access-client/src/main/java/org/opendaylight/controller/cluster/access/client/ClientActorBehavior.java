@@ -46,7 +46,7 @@ import scala.concurrent.duration.FiniteDuration;
  * A behavior, which handles messages sent to a {@link AbstractClientActor}.
  */
 public abstract class ClientActorBehavior<T extends BackendInfo> extends
-        RecoveredClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
+        AbstractClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
     /**
      * Connection reconnect cohort, driven by this class.
      */
@@ -88,16 +88,18 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         super(context);
         this.resolver = requireNonNull(resolver);
 
-        final ClientActorConfig config = context.config();
-        responseMessageAssembler = MessageAssembler.builder().logContext(persistenceId())
-                .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
-                        config.getTempFileDirectory()))
-                .assembledMessageCallback((message, sender) -> context.self().tell(message, sender)).build();
+        final var config = context.config();
+        responseMessageAssembler = MessageAssembler.builder()
+            .logContext(persistenceId())
+            .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
+                config.getTempFileDirectory()))
+            .assembledMessageCallback((message, sender) -> context.self().tell(message, sender))
+            .build();
 
         staleBackendInfoReg = resolver.notifyWhenBackendInfoIsStale(shard -> {
             context().executeInActor(behavior -> {
                 LOG.debug("BackendInfo for shard {} is now stale", shard);
-                final AbstractClientConnection<T> conn = connections.get(shard);
+                final var conn = connections.get(shard);
                 if (conn instanceof ConnectedClientConnection) {
                     conn.reconnect(this, new BackendStaleException(shard));
                 }
@@ -115,7 +117,9 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     public void close() {
         super.close();
         responseMessageAssembler.close();
-        staleBackendInfoReg.close();
+        if (staleBackendInfoReg != null) {
+            staleBackendInfoReg.close();
+        }
     }
 
     /**
@@ -139,6 +143,11 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     private AbstractClientConnection<T> getConnection(final ResponseEnvelope<?> response) {
         // Always called from actor context: no locking required
         return connections.get(extractCookie(response.getMessage().getTarget()));
+    }
+
+    @Override
+    final AbstractClientActorBehavior<?> onReceiveRecover(final Object recover) {
+        throw new IllegalStateException("Frontend has been recovered");
     }
 
     @SuppressWarnings("unchecked")
