@@ -50,12 +50,11 @@
             <artifactId>checker-qual</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-testkit_2.13</artifactId>
@@ -85,6 +84,7 @@
             <type>test-jar</type>
         </dependency>
     </dependencies>
+
 
     <build>
         <pluginManagement>

@@ -46,7 +46,7 @@ import scala.concurrent.duration.FiniteDuration;
  * A behavior, which handles messages sent to a {@link AbstractClientActor}.
  */
 public abstract class ClientActorBehavior<T extends BackendInfo> extends
-        RecoveredClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
+        AbstractClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
     /**
      * Connection reconnect cohort, driven by this class.
      */

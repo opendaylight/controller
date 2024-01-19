@@ -25,6 +25,7 @@ import com.typesafe.config.ConfigFactory;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +56,11 @@ class ActorBehaviorTest {
     private FrontendIdentifier id;
     private ActorRef mockedActor;
 
+    @BeforeAll
+    static void beforeAll() {
+        System.setProperty("org.opendaylight.controller.cluster.access.client.states.dir.override", "target/states");
+    }
+
     @BeforeEach
     void beforeEach() throws Exception {
         //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
@@ -76,6 +82,7 @@ class ActorBehaviorTest {
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         //handle initial actor recovery
         saveRequest = handleRecovery(null);
+
     }
 
     @AfterEach
@@ -109,7 +116,7 @@ class ActorBehaviorTest {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         final MockedSnapshotStore.SaveRequest newSaveRequest =
-                handleRecovery(new SelectedSnapshot(saveRequest.getMetadata(), saveRequest.getSnapshot()));
+            handleRecovery(new SelectedSnapshot(saveRequest.getMetadata(), saveRequest.getSnapshot()));
         assertEquals(MEMBER_1_FRONTEND_TYPE_1, newSaveRequest.getMetadata().persistenceId());
     }
 
@@ -122,7 +129,7 @@ class ActorBehaviorTest {
         //offer snapshot with incorrect client id
         final SnapshotMetadata metadata = saveRequest.getMetadata();
         final FrontendIdentifier anotherFrontend = FrontendIdentifier.create(MemberName.forName("another"),
-                FrontendType.forName("type-2"));
+            FrontendType.forName("type-2"));
         final ClientIdentifier incorrectClientId = ClientIdentifier.create(anotherFrontend, 0);
         probe.watch(mockedActor);
         probe.reply(Optional.of(new SelectedSnapshot(metadata, incorrectClientId)));
@@ -163,7 +170,7 @@ class ActorBehaviorTest {
         //offer snapshot
         probe.reply(Optional.ofNullable(savedState));
         final MockedSnapshotStore.SaveRequest nextSaveRequest =
-                probe.expectMsgClass(MockedSnapshotStore.SaveRequest.class);
+            probe.expectMsgClass(MockedSnapshotStore.SaveRequest.class);
         probe.reply(Void.TYPE);
         //check old snapshots deleted
         probe.expectMsgClass(MockedSnapshotStore.DeleteByCriteriaRequest.class);
