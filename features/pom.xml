@@ -34,7 +34,7 @@
 
     <!-- Experimental features -->
     <module>features-controller-experimental</module>
-    <module>odl-controller-exp-netty-config</module>
+    <module>odl-toaster</module>
 
     <!-- CSIT features -->
     <module>features-controller-testing</module>
@@ -47,13 +47,12 @@
 
     <!-- Single features, to be cleaned up -->
     <module>odl-controller-blueprint</module>
+    <module>odl-controller-broker-local</module>
     <module>odl-controller-mdsal-common</module>
     <module>odl-jolokia</module>
-    <module>odl-controller-broker-local</module>
     <module>odl-mdsal-broker</module>
     <module>odl-mdsal-clustering-commons</module>
     <module>odl-mdsal-distributed-datastore</module>
     <module>odl-mdsal-remoterpc-connector</module>
-    <module>odl-toaster</module>
   </modules>
 </project>

@@ -36,28 +36,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Config Subsystem remnants -->
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netty-event-executor-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netty-threadgroup-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netty-timer-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>threadpool-config-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>threadpool-config-impl</artifactId>
-        </dependency>
-
         <!-- Clustered implementation -->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

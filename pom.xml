@@ -32,12 +32,8 @@
     <module>benchmark</module>
     <module>jolokia</module>
 
-    <!-- md-sal -->
-    <module>opendaylight/md-sal</module>
-    <!-- config -->
-    <module>opendaylight/config</module>
-
     <module>opendaylight/blueprint</module>
+    <module>opendaylight/md-sal</module>
   </modules>
 
   <profiles>
