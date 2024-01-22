@@ -103,7 +103,7 @@ public final class CarProvider {
 
     private static final String ENTITY_TYPE = "cars";
     private static final InstanceIdentifier<Cars> CARS_IID = InstanceIdentifier.builder(Cars.class).build();
-    private static final DataTreeIdentifier<Cars> CARS_DTID = DataTreeIdentifier.create(
+    private static final DataTreeIdentifier<Cars> CARS_DTID = DataTreeIdentifier.of(
             LogicalDatastoreType.CONFIGURATION, CARS_IID);
 
     private final DataBroker dataProvider;
@@ -292,7 +292,7 @@ public final class CarProvider {
     private ListenableFuture<RpcResult<RegisterLoggingDtclOutput>> registerLoggingDtcl(
             final RegisterLoggingDtclInput input) {
         LOG.info("Registering a new CarDataTreeChangeListener");
-        final var reg = dataProvider.registerDataTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
+        final var reg = dataProvider.registerTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
         carsDtclRegistrations.add(reg);
         return RpcResultBuilder.success(new RegisterLoggingDtclOutputBuilder().build()).buildFuture();
     }
