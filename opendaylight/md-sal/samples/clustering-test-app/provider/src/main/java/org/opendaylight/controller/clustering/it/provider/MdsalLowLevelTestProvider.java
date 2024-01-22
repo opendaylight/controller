@@ -278,8 +278,8 @@ public final class MdsalLowLevelTestProvider {
 
         idIntsListener = new IdIntsListener();
 
-        dtclReg = dataTreeChangeExtension.registerDataTreeChangeListener(
-            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, WriteTransactionsHandler.ID_INT_YID),
+        dtclReg = dataTreeChangeExtension.registerTreeChangeListener(
+            DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, WriteTransactionsHandler.ID_INT_YID),
             idIntsListener);
 
         return RpcResultBuilder.success(new SubscribeDtclOutputBuilder().build()).buildFuture();

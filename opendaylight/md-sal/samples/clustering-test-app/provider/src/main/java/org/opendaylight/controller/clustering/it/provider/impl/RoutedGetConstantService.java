@@ -24,8 +24,7 @@ import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +60,7 @@ public final class RoutedGetConstantService implements DOMRpcImplementation {
     public ListenableFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc, final ContainerNode input) {
         LOG.debug("get-contexted-constant invoked, current value: {}", constant);
 
-        return Futures.immediateFuture(new DefaultDOMRpcResult(Builders.containerBuilder()
+        return Futures.immediateFuture(new DefaultDOMRpcResult(ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(OUTPUT))
             .withChild(ImmutableNodes.leafNode(CONSTANT, constant))
             .build()));
