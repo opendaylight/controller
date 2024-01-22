@@ -15,11 +15,11 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
-    private static final ContainerNode NODE = Builders.containerBuilder()
-        .withNodeIdentifier(NodeIdentifier.create(QName.create("namespace", "localName")))
+    private static final ContainerNode NODE = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(new NodeIdentifier(QName.create("namespace", "localName")))
         .build();
 
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(TRANSACTION_IDENTIFIER, 0,

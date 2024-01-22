@@ -24,11 +24,11 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class ModifyTransactionRequestBuilderTest {
-
     private final MemberName memberName = MemberName.forName("member-1");
     private final FrontendType frontendType = FrontendType.forName("test");
     private final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, frontendType);
@@ -36,8 +36,9 @@ public class ModifyTransactionRequestBuilderTest {
     private final TransactionIdentifier transactionIdentifier =
             new TransactionIdentifier(new LocalHistoryIdentifier(clientId, 0L), 0L);
     private final ActorRef actorRef = ActorSystem.create("test").actorOf(Props.create(TestActors.EchoActor.class));
-    private final NormalizedNode node = Builders.containerBuilder().withNodeIdentifier(
-            YangInstanceIdentifier.NodeIdentifier.create(QName.create("namespace", "localName"))).build();
+    private final NormalizedNode node = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(new NodeIdentifier(QName.create("namespace", "localName")))
+        .build();
     private final TransactionModification transactionModification =
             new TransactionWrite(YangInstanceIdentifier.of(), node);
     private final ModifyTransactionRequestBuilder modifyTransactionRequestBuilder =
@@ -52,14 +53,14 @@ public class ModifyTransactionRequestBuilderTest {
 
     @Test
     public void testGetIdentifier() {
-        final TransactionIdentifier identifier = modifyTransactionRequestBuilder.getIdentifier();
+        final var identifier = modifyTransactionRequestBuilder.getIdentifier();
         assertEquals(transactionIdentifier, identifier);
     }
 
     @Test
     public void testBuildReady() {
         modifyTransactionRequestBuilder.setReady();
-        final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
+        final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
         assertEquals(transactionModification, modifyTransactionRequest.getModifications().get(0));
     }
@@ -67,7 +68,7 @@ public class ModifyTransactionRequestBuilderTest {
     @Test
     public void testBuildAbort() {
         modifyTransactionRequestBuilder.setAbort();
-        final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
+        final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
         assertTrue(modifyTransactionRequest.getModifications().isEmpty());
     }
@@ -75,15 +76,14 @@ public class ModifyTransactionRequestBuilderTest {
     @Test
     public void testBuildCommitTrue() {
         modifyTransactionRequestBuilder.setCommit(true);
-        final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
+        final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
     }
 
     @Test
     public void testBuildCommitFalse() {
         modifyTransactionRequestBuilder.setCommit(false);
-        final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
+        final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
     }
-
 }

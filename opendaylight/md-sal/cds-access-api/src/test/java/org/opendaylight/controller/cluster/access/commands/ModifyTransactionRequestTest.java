@@ -22,11 +22,12 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<ModifyTransactionRequest> {
-    private static final ContainerNode NODE = Builders.containerBuilder().withNodeIdentifier(
-            NodeIdentifier.create(QName.create("namespace", "localName"))).build();
+    private static final ContainerNode NODE = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(new NodeIdentifier(QName.create("namespace", "localName")))
+        .build();
 
     private static final List<TransactionModification> MODIFICATIONS = List.of(
             new TransactionWrite(YangInstanceIdentifier.of(), NODE));
