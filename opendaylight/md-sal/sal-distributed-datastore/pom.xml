@@ -231,9 +231,6 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
 
-            <!-- Karaf cannot handle Factory Component requirements, see https://issues.apache.org/jira/browse/KARAF-6625 -->
-            <_dsannotations-options>norequirements</_dsannotations-options>
-
             <Export-Package>
                 org.opendaylight.controller.cluster.datastore;
                 org.opendaylight.controller.cluster.datastore.config;
