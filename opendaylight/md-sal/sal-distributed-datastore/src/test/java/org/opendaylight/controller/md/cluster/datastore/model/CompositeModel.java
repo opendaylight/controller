@@ -7,18 +7,17 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.leafNode;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+import static org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes.leafNode;
 
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
@@ -102,31 +101,19 @@ public final class CompositeModel {
     }
 
     public static ContainerNode createTestContainer() {
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(leafNode(DESC_QNAME, DESC))
             .withChild(leafNode(AUG_QNAME, "First Test"))
-            .withChild(Builders.leafSetBuilder()
+            .withChild(ImmutableNodes.<String>newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "shoe")))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "nike"))
-                    .withValue("nike")
-                    .build())
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "shoe"), "puma"))
-                    .withValue("puma")
-                    .build())
+                .withChildValue("nike")
+                .withChildValue("puma")
                 .build())
-            .withChild(Builders.leafSetBuilder()
+            .withChild(ImmutableNodes.<Integer>newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "number")))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 5))
-                    .withValue(5)
-                    .build())
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 15))
-                    .withValue(15)
-                    .build())
+                .withChildValue(5)
+                .withChildValue(15)
                 .build())
             .withChild(mapNodeBuilder(OUTER_LIST_QNAME)
                 .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
@@ -142,7 +129,7 @@ public final class CompositeModel {
                 .withChild(leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME))
                 .build();
 
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(FAMILY_QNAME))
             .withChild(mapNodeBuilder(CHILDREN_QNAME)
                 .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID)
