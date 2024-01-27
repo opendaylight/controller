@@ -19,11 +19,9 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 
 public class RemoteActionRegistryMXBeanImpl extends AbstractRegistryMXBean<ActionRoutingTable, DOMActionInstance>
         implements RemoteActionRegistryMXBean {
-
     public RemoteActionRegistryMXBeanImpl(final BucketStoreAccess actionRegistryAccess, final Timeout timeout) {
         super("RemoteActionRegistry", "RemoteActionBroker", actionRegistryAccess, timeout);
     }
@@ -33,8 +31,7 @@ public class RemoteActionRegistryMXBeanImpl extends AbstractRegistryMXBean<Actio
         ActionRoutingTable table = localData();
         Set<String> routedAction = new HashSet<>(table.getItems().size());
         for (DOMActionInstance route : table.getItems()) {
-            final YangInstanceIdentifier actionPath = YangInstanceIdentifier.create(new NodeIdentifier(
-                route.getType().lastNodeIdentifier()));
+            final YangInstanceIdentifier actionPath = YangInstanceIdentifier.of(route.getType().lastNodeIdentifier());
             if (!actionPath.isEmpty()) {
                 routedAction.add(ROUTE_CONSTANT + actionPath + NAME_CONSTANT + route.getType());
             }
@@ -84,8 +81,7 @@ public class RemoteActionRegistryMXBeanImpl extends AbstractRegistryMXBean<Actio
         Collection<DOMActionInstance> routes = table.getItems();
         Map<String, String> actionMap = new HashMap<>(routes.size());
         for (DOMActionInstance route : routes) {
-            final YangInstanceIdentifier actionPath = YangInstanceIdentifier.create(new NodeIdentifier(
-                route.getType().lastNodeIdentifier()));
+            final YangInstanceIdentifier actionPath = YangInstanceIdentifier.of(route.getType().lastNodeIdentifier());
             if (!actionPath.isEmpty()) {
                 String routeString = actionPath.toString();
                 if (routeString.contains(routeName)) {
@@ -104,8 +100,7 @@ public class RemoteActionRegistryMXBeanImpl extends AbstractRegistryMXBean<Actio
         Collection<DOMActionInstance> routes = table.getItems();
         Map<String, String> actionMap = new HashMap<>(routes.size());
         for (DOMActionInstance route : routes) {
-            final YangInstanceIdentifier actionPath = YangInstanceIdentifier.create(new NodeIdentifier(
-                route.getType().lastNodeIdentifier()));
+            final YangInstanceIdentifier actionPath = YangInstanceIdentifier.of(route.getType().lastNodeIdentifier());
             if (!actionPath.isEmpty()) {
                 String type = route.getType().toString();
                 if (type.contains(name)) {

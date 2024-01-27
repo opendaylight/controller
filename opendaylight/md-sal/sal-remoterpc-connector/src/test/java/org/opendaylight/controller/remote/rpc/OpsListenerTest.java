@@ -28,8 +28,7 @@ public class OpsListenerTest {
 
     private static final QName TEST_QNAME = QName.create("test", "2015-06-12", "test");
     private static final Absolute RPC_TYPE = Absolute.of(TEST_QNAME);
-    private static final YangInstanceIdentifier TEST_PATH =
-            YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME));
+    private static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
     private static final DOMRpcIdentifier RPC_ID = DOMRpcIdentifier.create(TEST_QNAME, TEST_PATH);
     private static final DOMActionInstance ACTION_INSTANCE = DOMActionInstance.of(RPC_TYPE,
             LogicalDatastoreType.OPERATIONAL, TEST_PATH);

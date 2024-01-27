@@ -119,14 +119,19 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         if (autoStartGossipTicks) {
-            gossipTask = getContext().system().scheduler().schedule(
-                    new FiniteDuration(1, TimeUnit.SECONDS),        //initial delay
-                    config.getGossipTickInterval(),                 //interval
-                    getSelf(),                                      //target
-                    GOSSIP_TICK,                                    //message
-                    getContext().dispatcher(),                      //execution context
-                    getSelf()                                       //sender
-            );
+            gossipTask = getContext().system().scheduler().scheduleAtFixedRate(
+                // initial delay
+                new FiniteDuration(1, TimeUnit.SECONDS),
+                // interval
+                config.getGossipTickInterval(),
+                // target
+                getSelf(),
+                // message
+                GOSSIP_TICK,
+                // execution context
+                getContext().dispatcher(),
+                // sender
+                getSelf());
         }
     }
 

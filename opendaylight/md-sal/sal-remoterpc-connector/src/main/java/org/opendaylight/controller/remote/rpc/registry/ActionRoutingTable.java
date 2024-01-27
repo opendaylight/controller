@@ -23,7 +23,6 @@ import java.util.Set;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
@@ -63,8 +62,7 @@ public final class ActionRoutingTable extends AbstractRoutingTable<ActionRouting
             for (DOMActionInstance id : actions) {
                 final Absolute type = id.getType();
                 nnout.writeSchemaNodeIdentifier(type);
-                nnout.writeYangInstanceIdentifier(YangInstanceIdentifier.create(new NodeIdentifier(
-                    type.lastNodeIdentifier())));
+                nnout.writeYangInstanceIdentifier(YangInstanceIdentifier.of(type.lastNodeIdentifier()));
             }
         }
 
