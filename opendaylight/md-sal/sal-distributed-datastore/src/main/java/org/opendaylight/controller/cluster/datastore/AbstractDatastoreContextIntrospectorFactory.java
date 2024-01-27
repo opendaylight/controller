@@ -14,7 +14,9 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStorePropertiesContainer;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
+//import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 abstract class AbstractDatastoreContextIntrospectorFactory implements DatastoreContextIntrospectorFactory {
     @Override
@@ -35,11 +37,12 @@ abstract class AbstractDatastoreContextIntrospectorFactory implements DatastoreC
 
     @VisibleForTesting
     final @NonNull DatastoreContextIntrospector newInstance(final DatastoreContext context) {
-        final DataStorePropertiesContainer defaultPropsContainer = (DataStorePropertiesContainer)
-                serializer().fromNormalizedNode(YangInstanceIdentifier.of(DataStorePropertiesContainer.QNAME),
-                    ImmutableNodes.containerNode(DataStorePropertiesContainer.QNAME)).getValue();
-
-        return new DatastoreContextIntrospector(context, defaultPropsContainer);
+        return new DatastoreContextIntrospector(context, (DataStorePropertiesContainer) serializer()
+            .fromNormalizedNode(YangInstanceIdentifier.of(DataStorePropertiesContainer.QNAME),
+                ImmutableNodes.newContainerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(DataStorePropertiesContainer.QNAME))
+                .build())
+            .getValue());
     }
 
     abstract BindingNormalizedNodeSerializer serializer();
