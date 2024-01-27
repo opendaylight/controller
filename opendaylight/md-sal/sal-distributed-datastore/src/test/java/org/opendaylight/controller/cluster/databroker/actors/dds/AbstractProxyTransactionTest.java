@@ -66,8 +66,9 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
@@ -86,11 +87,11 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     protected static final YangInstanceIdentifier PATH_3 = YangInstanceIdentifier.builder()
             .node(QName.create("ns-1", "node-3"))
             .build();
-    protected static final ContainerNode DATA_1 = Builders.containerBuilder()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(PATH_1.getLastPathArgument().getNodeType()))
+    protected static final ContainerNode DATA_1 = ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(PATH_1.getLastPathArgument().getNodeType()))
             .build();
-    protected static final ContainerNode DATA_2 = Builders.containerBuilder()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(PATH_2.getLastPathArgument().getNodeType()))
+    protected static final ContainerNode DATA_2 = ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(PATH_2.getLastPathArgument().getNodeType()))
             .build();
     protected static final String PERSISTENCE_ID = "per-1";
 
