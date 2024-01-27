@@ -84,12 +84,10 @@ public class OpsRegistrarTest {
         final QName firstActionQName = QName.create("first:actionIdentifier", "fooAction");
 
         final DOMActionInstance firstActionInstance = DOMActionInstance.of(Absolute.of(firstActionQName),
-                LogicalDatastoreType.OPERATIONAL,
-                YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(firstActionQName)));
+                LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(firstActionQName));
 
         final DOMActionInstance secondActionInstance = DOMActionInstance.of(Absolute.of(firstActionQName),
-                LogicalDatastoreType.OPERATIONAL,
-                YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(firstActionQName)));
+                LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(firstActionQName));
 
         final TestKit senderKit = new TestKit(system);
         firstEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), Collections.singletonList(firstEndpointId));

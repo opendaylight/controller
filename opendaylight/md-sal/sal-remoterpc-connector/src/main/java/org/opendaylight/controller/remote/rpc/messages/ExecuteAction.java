@@ -22,7 +22,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
@@ -75,10 +74,10 @@ public final class ExecuteAction extends AbstractExecute<Absolute, @NonNull Cont
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            try (NormalizedNodeDataOutput stream = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
+            try (var stream = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
                 stream.writeSchemaNodeIdentifier(executeAction.getType());
-                executeAction.getPath().getDatastoreType().writeTo(out);
-                stream.writeYangInstanceIdentifier(executeAction.getPath().getRootIdentifier());
+                executeAction.getPath().datastore().writeTo(out);
+                stream.writeYangInstanceIdentifier(executeAction.getPath().path());
                 stream.writeOptionalNormalizedNode(executeAction.getInput());
             }
         }
@@ -95,7 +94,7 @@ public final class ExecuteAction extends AbstractExecute<Absolute, @NonNull Cont
             final YangInstanceIdentifier path = stream.readYangInstanceIdentifier();
             final ContainerNode input = (ContainerNode) stream.readOptionalNormalizedNode().orElse(null);
 
-            executeAction = new ExecuteAction(absolute, new DOMDataTreeIdentifier(type, path), input);
+            executeAction = new ExecuteAction(absolute, DOMDataTreeIdentifier.of(type, path), input);
         }
 
         private Object readResolve() {
