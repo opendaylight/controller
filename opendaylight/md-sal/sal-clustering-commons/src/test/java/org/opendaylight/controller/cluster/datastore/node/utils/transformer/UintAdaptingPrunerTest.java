@@ -22,11 +22,9 @@ import org.opendaylight.yangtools.yang.common.Uint8;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
@@ -55,9 +53,9 @@ public class UintAdaptingPrunerTest {
 
     @Test
     public void testListTranslation() throws IOException {
-        assertEquals(Builders.mapBuilder()
+        assertEquals(ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(LST))
-            .withChild(Builders.mapEntryBuilder()
+            .withChild(ImmutableNodes.newMapEntryBuilder()
                 .withNodeIdentifier(NodeIdentifierWithPredicates.of(LST, ImmutableMap.<QName, Object>builder()
                     .put(A, (byte) 1)
                     .put(B, (short) 1)
@@ -78,9 +76,9 @@ public class UintAdaptingPrunerTest {
                 .withChild(ImmutableNodes.leafNode(H, Uint64.ONE))
                 .build())
             .build(),
-            prune(Builders.mapBuilder()
+            prune(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(LST))
-                .withChild(Builders.mapEntryBuilder()
+                .withChild(ImmutableNodes.newMapEntryBuilder()
                     .withNodeIdentifier(NodeIdentifierWithPredicates.of(LST,  ImmutableMap.<QName, Object>builder()
                         .put(A, (byte) 1)
                         .put(B, (short) 1)
@@ -105,7 +103,7 @@ public class UintAdaptingPrunerTest {
 
     @Test
     public void testContainerTranslation() throws IOException {
-        assertEquals(Builders.containerBuilder()
+        assertEquals(ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(CONT))
             .withChild(ImmutableNodes.leafNode(A, (byte) 1))
             .withChild(ImmutableNodes.leafNode(B, (short) 1))
@@ -116,7 +114,7 @@ public class UintAdaptingPrunerTest {
             .withChild(ImmutableNodes.leafNode(G, Uint32.ONE))
             .withChild(ImmutableNodes.leafNode(H, Uint64.ONE))
             .build(),
-            prune(Builders.containerBuilder()
+            prune(ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CONT))
                 .withChild(ImmutableNodes.leafNode(A, (byte) 1))
                 .withChild(ImmutableNodes.leafNode(B, (short) 1))
@@ -131,73 +129,49 @@ public class UintAdaptingPrunerTest {
 
     @Test
     public void testLeafList8() throws IOException {
-        assertEquals(Builders.leafSetBuilder()
+        assertEquals(ImmutableNodes.newSystemLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LFLST8))
-            .withChild(Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(new NodeWithValue<>(LFLST8, Uint8.ONE))
-                .withValue(Uint8.ONE)
-                .build())
+            .withChildValue(Uint8.ONE)
             .build(),
-            prune(Builders.leafSetBuilder()
+            prune(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(LFLST8))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(LFLST8, (short) 1))
-                    .withValue((short) 1)
-                    .build())
+                .withChildValue((short) 1)
                 .build()));
     }
 
     @Test
     public void testLeafList16() throws IOException {
-        assertEquals(Builders.leafSetBuilder()
+        assertEquals(ImmutableNodes.newSystemLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LFLST16))
-            .withChild(Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(new NodeWithValue<>(LFLST16, Uint16.ONE))
-                .withValue(Uint16.ONE)
-                .build())
+            .withChildValue(Uint16.ONE)
             .build(),
-            prune(Builders.leafSetBuilder()
+            prune(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(LFLST16))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(LFLST16,  1))
-                    .withValue(1)
-                    .build())
+                .withChildValue(1)
                 .build()));
     }
 
     @Test
     public void testLeafList32() throws IOException {
-        assertEquals(Builders.leafSetBuilder()
+        assertEquals(ImmutableNodes.newSystemLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LFLST32))
-            .withChild(Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(new NodeWithValue<>(LFLST32, Uint32.ONE))
-                .withValue(Uint32.ONE)
-                .build())
+            .withChildValue(Uint32.ONE)
             .build(),
-            prune(Builders.leafSetBuilder()
+            prune(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(LFLST32))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(LFLST32, 1L))
-                    .withValue(1L)
-                    .build())
+                .withChildValue(1L)
                 .build()));
     }
 
     @Test
     public void testLeafList64() throws IOException {
-        assertEquals(Builders.leafSetBuilder()
+        assertEquals(ImmutableNodes.newSystemLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LFLST64))
-            .withChild(Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(new NodeWithValue<>(LFLST64, Uint64.ONE))
-                .withValue(Uint64.ONE)
-                .build())
+            .withChildValue(Uint64.ONE)
             .build(),
-            prune(Builders.leafSetBuilder()
+            prune(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(LFLST64))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(LFLST64, BigInteger.ONE))
-                    .withValue(BigInteger.ONE)
-                    .build())
+                .withChildValue(BigInteger.ONE)
                 .build()));
     }
 

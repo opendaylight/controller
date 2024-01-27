@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.util;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.leafNode;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+import static org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes.leafNode;
 
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithV
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
@@ -176,7 +176,7 @@ public final class TestModel {
             new NodeWithValue<>(QName.create(TEST_QNAME, "leaf-list-entry"), "foo"));
 
         // Create the document
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             // Create a bits leaf
             .withChild(leafNode(QName.create(TEST_QNAME, "my-bits"), ImmutableSet.of("foo", "bar")))
@@ -188,54 +188,39 @@ public final class TestModel {
             .withChild(leafNode(TestModel.BIGDECIMAL_LEAF_QNAME, Decimal64.valueOf("1.2").scaleTo(2)))
             .withChild(leafNode(SOME_REF_QNAME, instanceID))
             .withChild(leafNode(MYIDENTITY_QNAME, DESC_QNAME))
-            .withChild(Builders.unkeyedListBuilder()
+            .withChild(ImmutableNodes.newUnkeyedListBuilder()
                 .withNodeIdentifier(new NodeIdentifier(UNKEYED_LIST_QNAME))
                 // Create unkeyed list entry
-                .withChild(Builders.unkeyedListEntryBuilder()
+                .withChild(ImmutableNodes.newUnkeyedListEntryBuilder()
                     .withNodeIdentifier(new NodeIdentifier(UNKEYED_LIST_QNAME))
                     .withChild(leafNode(NAME_QNAME, "unkeyed-entry-name"))
                     .build())
                 .build())
-            .withChild(Builders.choiceBuilder()
+            .withChild(ImmutableNodes.newChoiceBuilder()
                 .withNodeIdentifier(new NodeIdentifier(TWO_THREE_QNAME))
                 .withChild(leafNode(TWO_QNAME, "two")).build())
-            .withChild(Builders.orderedMapBuilder()
+            .withChild(ImmutableNodes.newUserMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(ORDERED_LIST_QNAME))
                 .withValue(List.of(
                     mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "1").build(),
                     mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "2").build()))
                 .build())
-            .withChild(Builders.leafSetBuilder()
+            .withChild(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(SHOE_QNAME))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(SHOE_QNAME, "nike"))
-                    .withValue("nike")
-                    .build())
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(SHOE_QNAME, "puma"))
-                    .withValue("puma")
-                    .build())
+                .withChildValue("nike")
+                .withChildValue("puma")
                 .build())
-            .withChild(Builders.leafSetBuilder()
+            .withChild(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "number")))
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 5))
-                    .withValue(5)
-                    .build())
-                .withChild(Builders.leafSetEntryBuilder()
-                    .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "number"), 15))
-                    .withValue(15)
-                    .build())
+                .withChildValue(5)
+                .withChildValue(15)
                 .build())
-            .withChild(Builders.containerBuilder()
+            .withChild(ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(SWITCH_FEATURES_QNAME))
                 // Test a leaf-list where each entry contains an identity
-                .withChild(Builders.leafSetBuilder()
+                .withChild(ImmutableNodes.newSystemLeafSetBuilder()
                     .withNodeIdentifier(new NodeIdentifier(QName.create(TEST_QNAME, "capability")))
-                    .withChild(Builders.leafSetEntryBuilder()
-                        .withNodeIdentifier(new NodeWithValue<>(QName.create(TEST_QNAME, "capability"), DESC_QNAME))
-                        .withValue(DESC_QNAME)
-                        .build())
+                    .withChildValue(DESC_QNAME)
                     .build())
                 .build())
             .withChild(mapNodeBuilder(AUGMENTED_LIST_QNAME)
@@ -253,10 +238,10 @@ public final class TestModel {
     }
 
     public static MapEntryNode createAugmentedListEntry(final int id, final String name) {
-        return Builders.mapEntryBuilder()
+        return ImmutableNodes.newMapEntryBuilder()
             .withNodeIdentifier(NodeIdentifierWithPredicates.of(AUGMENTED_LIST_QNAME, ID_QNAME, id))
             .withChild(leafNode(ID_QNAME, id))
-            .withChild(Builders.containerBuilder()
+            .withChild(ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(AUG_CONT_QNAME))
                 .withChild(leafNode(AUG_NAME_QNAME, name))
                 .build())
@@ -269,9 +254,9 @@ public final class TestModel {
             .withChild(leafNode(GRAND_CHILD_NUMBER_QNAME,FIRST_GRAND_CHILD_ID))
             .withChild(leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME));
 
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(FAMILY_QNAME))
-            .withChild(mapNodeBuilder()
+            .withChild(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CHILDREN_QNAME))
                 .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID)
                     .withChild(leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))

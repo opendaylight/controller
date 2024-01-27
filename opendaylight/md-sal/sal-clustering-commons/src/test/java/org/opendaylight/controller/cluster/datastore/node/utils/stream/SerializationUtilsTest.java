@@ -30,8 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.xmlunit.builder.DiffBuilder;
 
 public class SerializationUtilsTest {
@@ -49,7 +48,7 @@ public class SerializationUtilsTest {
     public void testSerializeDeserializeAnyXmlNode() throws Exception {
         final var parse = UntrustedXML.newDocumentBuilder().parse(
             new ByteArrayInputStream("<xml><data/></xml>".getBytes(StandardCharsets.UTF_8)));
-        final var anyXmlNode = Builders.anyXmlBuilder()
+        final var anyXmlNode = ImmutableNodes.newAnyxmlBuilder(DOMSource.class)
             .withNodeIdentifier(id("anyXmlNode"))
             .withValue(new DOMSource(parse))
             .build();
@@ -120,16 +119,16 @@ public class SerializationUtilsTest {
 
     private static ContainerNode createNormalizedNode() {
         final var stringLeaf = createLeaf("stringLeaf", "stringValue");
-        final var entry1 = Builders.mapEntryBuilder()
+        final var entry1 = ImmutableNodes.newMapEntryBuilder()
             .withNodeIdentifier(listId("mapNode", "key", "key1"))
             .withChild(stringLeaf)
             .build();
-        final var entry2 = Builders.mapEntryBuilder()
+        final var entry2 = ImmutableNodes.newMapEntryBuilder()
             .withNodeIdentifier(listId("mapNode", "key", "key2"))
             .withChild(stringLeaf)
             .build();
 
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CONTAINER1))
                 .withChild(createLeaf("booleanLeaf", true))
                 .withChild(createLeaf("byteLeaf", (byte) 0))
@@ -140,40 +139,40 @@ public class SerializationUtilsTest {
                 .withChild(createLeaf("longStringLeaf", "0123456789".repeat(1000)))
                 .withChild(createLeaf("stringLeaf", QName.create("base", "qName")))
                 .withChild(createLeaf("stringLeaf", YangInstanceIdentifier.of(QName.create("test", "test"))))
-                .withChild(Builders.mapBuilder()
+                .withChild(ImmutableNodes.newSystemMapBuilder()
                     .withNodeIdentifier(id("mapNode"))
                     .withChild(entry1)
                     .withChild(entry2)
                     .build())
-                .withChild(Builders.orderedMapBuilder()
+                .withChild(ImmutableNodes.newUserMapBuilder()
                     .withNodeIdentifier(id("orderedMapNode"))
                     .withChild(entry2)
                     .withChild(entry1)
                     .build())
-                .withChild(Builders.unkeyedListBuilder()
+                .withChild(ImmutableNodes.newUnkeyedListBuilder()
                     .withNodeIdentifier(id("unkeyedList"))
-                    .withChild(Builders.unkeyedListEntryBuilder()
+                    .withChild(ImmutableNodes.newUnkeyedListEntryBuilder()
                         .withNodeIdentifier(id("unkeyedList"))
                         .withChild(stringLeaf)
                         .build())
-                    .withChild(Builders.unkeyedListEntryBuilder()
+                    .withChild(ImmutableNodes.newUnkeyedListEntryBuilder()
                         .withNodeIdentifier(id("unkeyedList"))
                         .withChild(stringLeaf)
                         .build())
                     .build())
-                .withChild(Builders.leafSetBuilder()
+                .withChild(ImmutableNodes.newSystemLeafSetBuilder()
                     .withNodeIdentifier(id("leafSetNode"))
                     .withChild(createLeafSetEntry("leafSetNode", "leafSetValue1"))
                     .withChild(createLeafSetEntry("leafSetNode", "leafSetValue2"))
                     .build())
-                .withChild(Builders.orderedLeafSetBuilder()
+                .withChild(ImmutableNodes.newUserLeafSetBuilder()
                     .withNodeIdentifier(id("orderedLeafSetNode"))
                     .withChild(createLeafSetEntry("orderedLeafSetNode", "value1"))
                     .withChild(createLeafSetEntry("orderedLeafSetNode", "value2"))
                     .build())
                 .withChild(createLeaf("aug1", "aug1Value"))
                 .withChild(createLeaf("aug2", "aug2Value"))
-                .withChild(Builders.choiceBuilder()
+                .withChild(ImmutableNodes.newChoiceBuilder()
                     .withNodeIdentifier(id("choiceNode"))
                     .withChild(createLeaf("choiceLeaf", 12))
                     .build())
@@ -185,10 +184,7 @@ public class SerializationUtilsTest {
     }
 
     private static LeafSetEntryNode<Object> createLeafSetEntry(final String leafSet, final String value) {
-        return Builders.leafSetEntryBuilder()
-                .withNodeIdentifier(leafSetId(leafSet, value))
-                .withValue(value)
-                .build();
+        return ImmutableNodes.leafSetEntry(leafSetId(leafSet, value));
     }
 
     private static NodeIdentifier id(final String name) {
