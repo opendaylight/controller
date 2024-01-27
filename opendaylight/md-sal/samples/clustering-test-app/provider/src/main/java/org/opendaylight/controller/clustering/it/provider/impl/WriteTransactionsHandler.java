@@ -8,6 +8,7 @@
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -40,8 +41,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,14 +131,18 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         LOG.info("Starting write transactions with input {}", input);
 
         final String id = input.getId();
-        final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INT, ID, id)
-                .withChild(ImmutableNodes.mapNodeBuilder(ITEM).build())
+        final MapEntryNode entry = mapEntryBuilder(ID_INT, ID, id)
+                .withChild(ImmutableNodes.newSystemMapBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(ITEM))
+                    .build())
                 .build();
         final YangInstanceIdentifier idListItem = ID_INT_YID.node(entry.name());
 
-        final ContainerNode containerNode = Builders.containerBuilder()
+        final ContainerNode containerNode = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(ID_INTS))
-                .withChild(ImmutableNodes.mapNodeBuilder(ID_INT).build())
+                .withChild(ImmutableNodes.newSystemMapBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(ID_INT))
+                    .build())
                 .build();
 
         DOMDataTreeWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
@@ -181,7 +185,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
         final YangInstanceIdentifier itemListId = idListItem.node(ITEM);
         tx = domDataBroker.newWriteOnlyTransaction();
-        final MapNode itemListNode = ImmutableNodes.mapNodeBuilder(ITEM).build();
+        final MapNode itemListNode = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(ITEM))
+            .build();
         tx.put(LogicalDatastoreType.CONFIGURATION, itemListId, itemListNode);
 
         try {
@@ -224,8 +230,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         } else {
             LOG.debug("Inserting item: {}", i);
             insertTx.incrementAndGet();
-            final MapEntryNode entry = ImmutableNodes.mapEntry(ITEM, NUMBER, i);
-            tx.put(LogicalDatastoreType.CONFIGURATION, entryId, entry);
+            tx.put(LogicalDatastoreType.CONFIGURATION, entryId, mapEntryBuilder(ITEM, NUMBER, i).build());
             usedValues.add(i);
         }
 
