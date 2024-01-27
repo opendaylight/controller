@@ -377,7 +377,7 @@ public class ActionRegistryTest {
         for (int i = 0; i < nRoutes; i++) {
             QName type = QName.create("/mockaction", "mockaction" + routeIdCounter++);
             final DOMActionInstance routeId = DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
-                    YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(type)));
+                    YangInstanceIdentifier.of(type));
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -412,9 +412,9 @@ public class ActionRegistryTest {
 
     private List<DOMActionInstance> createRouteIds() {
         QName type = QName.create("/mockaction", "mockaction" + routeIdCounter++);
-        List<DOMActionInstance> routeIds = new ArrayList<>(1);
+        var routeIds = new ArrayList<DOMActionInstance>(1);
         routeIds.add(DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
-            YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(type))));
+            YangInstanceIdentifier.of(type)));
         return routeIds;
     }
 }

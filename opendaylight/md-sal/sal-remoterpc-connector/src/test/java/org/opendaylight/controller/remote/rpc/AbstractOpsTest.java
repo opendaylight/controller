@@ -16,7 +16,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 import java.net.URI;
-import java.util.Collection;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,8 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
@@ -58,11 +56,10 @@ public class AbstractOpsTest {
 
 
     static final Absolute TEST_RPC_TYPE = Absolute.of(TEST_RPC);
-    static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.create(
-            new YangInstanceIdentifier.NodeIdentifier(TEST_RPC));
+    static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_RPC);
     public static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC, TEST_PATH);
-    public static final DOMDataTreeIdentifier TEST_DATA_TREE_ID = new DOMDataTreeIdentifier(
-            LogicalDatastoreType.OPERATIONAL, TEST_PATH);
+    public static final DOMDataTreeIdentifier TEST_DATA_TREE_ID =
+        DOMDataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, TEST_PATH);
 
     static ActorSystem node1;
     static ActorSystem node2;
@@ -142,21 +139,25 @@ public class AbstractOpsTest {
     }
 
     public static ContainerNode makeRPCInput(final String data) {
-        return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(TEST_RPC_INPUT))
-                .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data)).build();
+        return ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_RPC_INPUT))
+            .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data))
+            .build();
 
     }
 
     public static ContainerNode makeRPCOutput(final String data) {
-        return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(TEST_RPC_OUTPUT))
-                .withChild(ImmutableNodes.leafNode(TEST_RPC_OUTPUT, data)).build();
+        return ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_RPC_OUTPUT))
+            .withChild(ImmutableNodes.leafNode(TEST_RPC_OUTPUT, data))
+            .build();
     }
 
     static void assertFailedRpcResult(final DOMRpcResult rpcResult, final ErrorSeverity severity,
                                       final ErrorType errorType, final String tag, final String message,
                                       final String applicationTag, final String info, final String causeMsg) {
         assertNotNull("RpcResult was null", rpcResult);
-        final Collection<? extends RpcError> rpcErrors = rpcResult.errors();
+        final var rpcErrors = rpcResult.errors();
         assertEquals("RpcErrors count", 1, rpcErrors.size());
         assertRpcErrorEquals(rpcErrors.iterator().next(), severity, errorType, tag, message,
                 applicationTag, info, causeMsg);
