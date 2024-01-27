@@ -30,17 +30,14 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 
 public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransaction> {
-
-    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.builder()
-            .node(QName.create("ns-1", "node-1"))
-            .build();
-    private static final ContainerNode DATA = Builders.containerBuilder()
-            .withNodeIdentifier(NodeIdentifier.create(PATH.getLastPathArgument().getNodeType()))
-            .build();
+    private static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of(QName.create("ns-1", "node-1"));
+    private static final ContainerNode DATA = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(NodeIdentifier.create(PATH.getLastPathArgument().getNodeType()))
+        .build();
 
     @Mock
     private CursorAwareDataTreeModification modification;

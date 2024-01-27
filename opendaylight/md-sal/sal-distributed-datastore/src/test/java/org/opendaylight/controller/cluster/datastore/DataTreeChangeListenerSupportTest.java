@@ -40,7 +40,8 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
@@ -77,7 +78,9 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     @Test
     public void testInitialChangeListenerEventWithContainerPath() throws DataValidationFailedException {
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
+        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .build());
 
         Entry<MockDataTreeChangeListener, ActorSelection> entry = registerChangeListener(TEST_PATH, 1);
         MockDataTreeChangeListener listener = entry.getKey();
@@ -87,7 +90,9 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
         listener.reset(1);
 
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
+        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .build());
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(TEST_PATH);
 
@@ -96,7 +101,9 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
+        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+            .build());
         listener.verifyNoNotifiedData(TEST_PATH);
     }
 
