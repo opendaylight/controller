@@ -27,7 +27,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.messaging.MessageSlice;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class ConnectedClientConnectionTest
         extends AbstractClientConnectionTest<ConnectedClientConnection<BackendInfo>, BackendInfo> {
@@ -70,9 +71,10 @@ public class ConnectedClientConnectionTest
                 new TransactionIdentifier(new LocalHistoryIdentifier(CLIENT_ID, 0L), 0L);
         ModifyTransactionRequestBuilder reqBuilder =
                 new ModifyTransactionRequestBuilder(identifier, replyToProbe.ref());
-        reqBuilder.addModification(new TransactionWrite(YangInstanceIdentifier.of(), Builders.containerBuilder()
-                .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(
-                        QName.create("namespace", "localName"))).build()));
+        reqBuilder.addModification(new TransactionWrite(YangInstanceIdentifier.of(),
+            ImmutableNodes.newContainerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(QName.create("namespace", "localName")))
+                .build()));
         reqBuilder.setSequence(0L);
         final Request<?, ?> request = reqBuilder.build();
         connection.sendRequest(request, callback);
