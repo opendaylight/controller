@@ -22,6 +22,30 @@
       },
       "revId": "39004bbc6eb83c2c0e9547225a78f761ab10f086",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d372c0c0_ee0d0fc2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 817,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-02-15T11:44:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7129a4bd_80cc83da",
+      "range": {
+        "startLine": 817,
+        "startChar": 8,
+        "endLine": 817,
+        "endChar": 24
+      },
+      "revId": "39004bbc6eb83c2c0e9547225a78f761ab10f086",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
