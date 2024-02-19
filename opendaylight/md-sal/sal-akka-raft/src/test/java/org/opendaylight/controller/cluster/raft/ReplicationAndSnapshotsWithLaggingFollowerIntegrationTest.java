@@ -844,7 +844,6 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
     }
 
     private void sendInitialPayloadsReplicatedToAllFollowers(final String... data) {
-
         // Send the payloads.
         for (String d: data) {
             expSnapshotState.add(sendPayloadData(leaderActor, d));
@@ -853,25 +852,27 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         int numEntries = data.length;
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor,
-                ApplyState.class, numEntries);
+        final var leaderStates = MessageCollectorActor.expectMatching(leaderCollectorActor,
+            ApplyState.class, numEntries);
         for (int i = 0; i < expSnapshotState.size(); i++) {
-            MockPayload payload = expSnapshotState.get(i);
-            verifyApplyState(applyStates.get(i), leaderCollectorActor, payload.toString(), currentTerm, i, payload);
+            final MockPayload payload = expSnapshotState.get(i);
+            verifyApplyState(leaderStates.get(i), leaderCollectorActor, payload.toString(), currentTerm, i, payload);
         }
 
         // Verify follower 1 applies each log entry.
-        applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, numEntries);
+        final var follower1States = MessageCollectorActor.expectMatching(follower1CollectorActor,
+            ApplyState.class, numEntries);
         for (int i = 0; i < expSnapshotState.size(); i++) {
-            MockPayload payload = expSnapshotState.get(i);
-            verifyApplyState(applyStates.get(i), null, null, currentTerm, i, payload);
+            final MockPayload payload = expSnapshotState.get(i);
+            verifyApplyState(follower1States.get(i), null, null, currentTerm, i, payload);
         }
 
         // Verify follower 2 applies each log entry.
-        applyStates = MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyState.class, numEntries);
+        final var follower2States = MessageCollectorActor.expectMatching(follower2CollectorActor,
+            ApplyState.class, numEntries);
         for (int i = 0; i < expSnapshotState.size(); i++) {
-            MockPayload payload = expSnapshotState.get(i);
-            verifyApplyState(applyStates.get(i), null, null, currentTerm, i, payload);
+            final MockPayload payload = expSnapshotState.get(i);
+            verifyApplyState(follower2States.get(i), null, null, currentTerm, i, payload);
         }
 
         // Ensure there's at least 1 more heartbeat.
