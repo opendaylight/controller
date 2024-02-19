@@ -106,6 +106,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cff70e11_d7bee86d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 879,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-02-19T16:22:13Z",
+      "side": 1,
+      "message": "IMO: We can use it if we want - for verification that it has been applied.",
+      "parentUuid": "0d6449f0_0d216c39",
+      "revId": "8836630379946195d5ffec27e086fa0a530d8381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4a06b294_5a08aea8",
