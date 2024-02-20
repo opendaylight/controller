@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -84,7 +85,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2 = follower2Actor.underlyingActor().getCurrentBehavior();
 
         currentTerm = leaderContext.getTermInformation().getCurrentTerm();
-        assertEquals("Current term > " + initialTerm, true, currentTerm > initialTerm);
+        assertTrue("Current term > " + initialTerm, currentTerm > initialTerm);
 
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
@@ -631,7 +632,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // This is OK - the next snapshot should delete it. In production, even if the system restarted
         // before another snapshot, they would both get applied which wouldn't hurt anything.
         List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        assertTrue("Expected at least 1 persisted snapshots", persistedSnapshots.size() > 0);
+        assertFalse("Expected at least 1 persisted snapshots", persistedSnapshots.isEmpty());
         Snapshot persistedSnapshot = persistedSnapshots.get(persistedSnapshots.size() - 1);
         verifySnapshot("Persisted", persistedSnapshot, currentTerm, lastAppliedIndex, currentTerm, lastAppliedIndex);
         List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshot.getUnAppliedEntries();
@@ -658,7 +659,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
             assertEquals("InstallSnapshotReply getTerm", currentTerm, installSnapshotReply.getTerm());
             assertEquals("InstallSnapshotReply getChunkIndex", index++, installSnapshotReply.getChunkIndex());
             assertEquals("InstallSnapshotReply getFollowerId", follower2Id, installSnapshotReply.getFollowerId());
-            assertEquals("InstallSnapshotReply isSuccess", true, installSnapshotReply.isSuccess());
+            assertTrue("InstallSnapshotReply isSuccess", installSnapshotReply.isSuccess());
         }
 
         // Verify follower 2 applies the snapshot.
