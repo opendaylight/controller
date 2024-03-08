@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,20 +35,20 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import scala.concurrent.Future;
 
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class SegmentedFileJournalTest {
+@ExtendWith(MockitoExtension.class)
+class SegmentedFileJournalTest {
     private static final File DIRECTORY = new File("target/sfj-test");
     private static final int SEGMENT_SIZE = 1024 * 1024;
     private static final int MESSAGE_SIZE = 512 * 1024;
@@ -62,31 +61,31 @@ public class SegmentedFileJournalTest {
     private TestKit kit;
     private ActorRef actor;
 
-    @BeforeClass
-    public static void beforeClass() {
+    @BeforeAll
+    static void beforeClass() {
         SYSTEM = ActorSystem.create("test");
     }
 
-    @AfterClass
-    public static void afterClass() {
+    @AfterAll
+    static void afterClass() {
         TestKit.shutdownActorSystem(SYSTEM);
         SYSTEM = null;
     }
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         kit = new TestKit(SYSTEM);
         FileUtils.deleteQuietly(DIRECTORY);
         actor = actor();
     }
 
-    @After
-    public void after() {
+    @AfterEach
+    void after() {
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @Test
-    public void testDeleteAfterStop() {
+    void testDeleteAfterStop() {
         // Preliminary setup
         final WriteMessages write = new WriteMessages();
         final Future<Optional<Exception>> first = write.add(AtomicWrite.apply(PersistentRepr.apply("first", 1, "foo",
@@ -115,7 +114,7 @@ public class SegmentedFileJournalTest {
     }
 
     @Test
-    public void testSegmentation() throws IOException {
+    void testSegmentation() throws IOException {
         // We want to have roughly three segments
         final LargePayload payload = new LargePayload();
 
@@ -140,7 +139,7 @@ public class SegmentedFileJournalTest {
     }
 
     @Test
-    public void testComplexDeletesAndPartialReplays() throws Exception {
+    void testComplexDeletesAndPartialReplays() throws Exception {
         for (int i = 0; i <= 4; i++) {
             writeBigPaylod();
         }
@@ -228,7 +227,6 @@ public class SegmentedFileJournalTest {
     private void assertReplayCount(final int expected) {
         // Cast fixes an Eclipse warning 'generic array created'
         reset((Object) firstCallback);
-        doNothing().when(firstCallback).accept(any(PersistentRepr.class));
         AsyncMessage<Void> replay = SegmentedJournalActor.replayMessages(0, Long.MAX_VALUE, Long.MAX_VALUE,
             firstCallback);
         actor.tell(replay, ActorRef.noSender());
@@ -252,9 +250,9 @@ public class SegmentedFileJournalTest {
     }
 
     static final class LargePayload implements Serializable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         final byte[] bytes = new byte[MESSAGE_SIZE / 2];
-
     }
 }
