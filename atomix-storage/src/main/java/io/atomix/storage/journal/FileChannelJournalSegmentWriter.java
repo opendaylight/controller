@@ -42,6 +42,8 @@ import java.util.zip.Checksum;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
+  private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[Integer.BYTES + Integer.BYTES]);
+
   private final FileChannel channel;
   private final JournalSegment<E> segment;
   private final int maxEntrySize;
@@ -256,15 +258,8 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
         reset(index);
       }
 
-      // Zero entries at the current position.
-      // FIXME: This is quite inefficient, we essentially want to zero-out part of the file, but it is not quite clear
-      //        how much: this overwrites at least two entries. I believe we should be able to get by with wiping the
-      //        header of the current entry.
-      memory.clear();
-      for (int i = 0; i < memory.limit(); i++) {
-        memory.put(i, (byte) 0);
-      }
-      channel.write(memory, channel.position());
+      // Zero the entry header at current channel position.
+      channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), channel.position());
     } catch (IOException e) {
       throw new StorageException(e);
     }
