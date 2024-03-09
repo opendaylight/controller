@@ -99,18 +99,18 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
         final CRC32 crc32 = new CRC32();
         crc32.update(memory.array(), memory.position(), length);
 
-        // If the stored checksum equals the computed checksum, return the entry.
-        if (checksum == crc32.getValue()) {
-          int limit = memory.limit();
-          memory.limit(memory.position() + length);
-          final E entry = namespace.deserialize(memory);
-          memory.limit(limit);
-          lastEntry = new Indexed<>(nextIndex, entry, length);
-          this.index.index(nextIndex, (int) position);
-          nextIndex++;
-        } else {
+        // If the stored checksum does not equal the computed checksum, do not proceed further
+        if (checksum != crc32.getValue()) {
           break;
         }
+
+        int limit = memory.limit();
+        memory.limit(memory.position() + length);
+        final E entry = namespace.deserialize(memory);
+        memory.limit(limit);
+        lastEntry = new Indexed<>(nextIndex, entry, length);
+        this.index.index(nextIndex, (int) position);
+        nextIndex++;
 
         // Update the current position for indexing.
         position = channel.position() + memory.position();

@@ -103,16 +103,16 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
         slice.limit(length);
         crc32.update(slice);
 
-        // If the stored checksum equals the computed checksum, return the entry.
-        if (checksum == crc32.getValue()) {
-          slice.rewind();
-          final E entry = namespace.deserialize(slice);
-          lastEntry = new Indexed<>(nextIndex, entry, length);
-          this.index.index(nextIndex, position);
-          nextIndex++;
-        } else {
+        // If the stored checksum does not equal the computed checksum, do not proceed further
+        if (checksum != crc32.getValue()) {
           break;
         }
+
+        slice.rewind();
+        final E entry = namespace.deserialize(slice);
+        lastEntry = new Indexed<>(nextIndex, entry, length);
+        this.index.index(nextIndex, position);
+        nextIndex++;
 
         // Update the current position for indexing.
         position = buffer.position() + length;
