@@ -77,18 +77,14 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
     // Clear the buffer indexes.
     try {
       channel.position(JournalSegmentDescriptor.BYTES);
-      memory.clear().flip();
 
       // Record the current buffer position.
       long position = channel.position();
 
-      // Read more bytes from the segment if necessary.
-      if (memory.remaining() < maxEntrySize) {
-        memory.clear();
-        channel.read(memory);
-        channel.position(position);
-        memory.flip();
-      }
+      // Clear memory buffer and read fist chunk
+      memory.clear();
+      channel.read(memory, position);
+      memory.flip();
 
       // Read the entry length.
       memory.mark();
