@@ -149,15 +149,6 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
   }
 
   /**
-   * Returns the size of the underlying buffer.
-   *
-   * @return The size of the underlying buffer.
-   */
-  public long size() {
-    return buffer.position() + JournalSegmentDescriptor.BYTES;
-  }
-
-  /**
    * Returns a boolean indicating whether the segment is empty.
    *
    * @return Indicates whether the segment is empty.

@@ -164,35 +164,12 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
   }
 
   /**
-   * Returns the size of the underlying buffer.
-   *
-   * @return The size of the underlying buffer.
-   */
-  public long size() {
-    try {
-      return channel.position();
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
-  }
-
-  /**
    * Returns a boolean indicating whether the segment is empty.
    *
    * @return Indicates whether the segment is empty.
    */
   public boolean isEmpty() {
     return lastEntry == null;
-  }
-
-  /**
-   * Returns a boolean indicating whether the segment is full.
-   *
-   * @return Indicates whether the segment is full.
-   */
-  public boolean isFull() {
-    return size() >= segment.descriptor().maxSegmentSize()
-        || getNextIndex() - firstIndex >= segment.descriptor().maxEntries();
   }
 
   /**
