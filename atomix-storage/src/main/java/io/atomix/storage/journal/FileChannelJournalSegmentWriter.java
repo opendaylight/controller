@@ -51,6 +51,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
   private final ByteBuffer memory;
   private final long firstIndex;
   private Indexed<E> lastEntry;
+  private long currentPosition;
 
   FileChannelJournalSegmentWriter(
       FileChannel channel,
@@ -74,15 +75,12 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
     long nextIndex = firstIndex;
 
     // Clear the buffer indexes.
+    currentPosition = JournalSegmentDescriptor.BYTES;
+
     try {
-      channel.position(JournalSegmentDescriptor.BYTES);
-
-      // Record the current buffer position.
-      long position = channel.position();
-
       // Clear memory buffer and read fist chunk
       memory.clear();
-      channel.read(memory, position);
+      channel.read(memory, JournalSegmentDescriptor.BYTES);
       memory.flip();
 
       // Read the entry length.
@@ -110,18 +108,17 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
         entryBytes.rewind();
         final E entry = namespace.deserialize(entryBytes);
         lastEntry = new Indexed<>(nextIndex, entry, length);
-        this.index.index(nextIndex, (int) position);
+        this.index.index(nextIndex, (int) currentPosition);
         nextIndex++;
 
         // Update the current position for indexing.
-        position = position + length;
-        channel.position(position);
+        currentPosition = currentPosition + length;
         memory.position(memory.position() + length);
 
         // Read more bytes from the segment if necessary.
         if (memory.remaining() < maxEntrySize) {
           memory.clear();
-          channel.read(memory, position);
+          channel.read(memory, currentPosition);
           memory.flip();
         }
 
@@ -175,48 +172,48 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
     // Store the entry index.
     final long index = getNextIndex();
 
+    // Serialize the entry.
+    memory.clear();
+    memory.position(Integer.BYTES + Integer.BYTES);
     try {
-      // Serialize the entry.
-      memory.clear();
-      memory.position(Integer.BYTES + Integer.BYTES);
-      try {
-        namespace.serialize(entry, memory);
-      } catch (KryoException e) {
-        throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
-      }
-      memory.flip();
+      namespace.serialize(entry, memory);
+    } catch (KryoException e) {
+      throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
+    }
+    memory.flip();
 
-      final int length = memory.limit() - (Integer.BYTES + Integer.BYTES);
+    final int length = memory.limit() - (Integer.BYTES + Integer.BYTES);
 
-      // Ensure there's enough space left in the buffer to store the entry.
-      long position = channel.position();
-      if (segment.descriptor().maxSegmentSize() - position < length + Integer.BYTES + Integer.BYTES) {
-        throw new BufferOverflowException();
-      }
+    // Ensure there's enough space left in the buffer to store the entry.
+    if (segment.descriptor().maxSegmentSize() - currentPosition < length + Integer.BYTES + Integer.BYTES) {
+      throw new BufferOverflowException();
+    }
 
-      // If the entry length exceeds the maximum entry size then throw an exception.
-      if (length > maxEntrySize) {
-        throw new StorageException.TooLarge("Entry size " + length + " exceeds maximum allowed bytes (" + maxEntrySize + ")");
-      }
+    // If the entry length exceeds the maximum entry size then throw an exception.
+    if (length > maxEntrySize) {
+      throw new StorageException.TooLarge("Entry size " + length + " exceeds maximum allowed bytes (" + maxEntrySize + ")");
+    }
 
-      // Compute the checksum for the entry.
-      final CRC32 crc32 = new CRC32();
-      crc32.update(memory.array(), Integer.BYTES + Integer.BYTES, memory.limit() - (Integer.BYTES + Integer.BYTES));
-      final long checksum = crc32.getValue();
+    // Compute the checksum for the entry.
+    final CRC32 crc32 = new CRC32();
+    crc32.update(memory.array(), Integer.BYTES + Integer.BYTES, memory.limit() - (Integer.BYTES + Integer.BYTES));
+    final long checksum = crc32.getValue();
 
-      // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-      memory.putInt(0, length);
-      memory.putInt(Integer.BYTES, (int) checksum);
-      channel.write(memory);
-
-      // Update the last entry with the correct index/term/length.
-      Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
-      this.lastEntry = indexedEntry;
-      this.index.index(index, (int) position);
-      return (Indexed<T>) indexedEntry;
+    // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
+    memory.putInt(0, length);
+    memory.putInt(Integer.BYTES, (int) checksum);
+    try {
+      channel.write(memory, currentPosition);
     } catch (IOException e) {
       throw new StorageException(e);
     }
+    currentPosition = currentPosition + Integer.BYTES + Integer.BYTES + length;
+
+    // Update the last entry with the correct index/term/length.
+    Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
+    this.lastEntry = indexedEntry;
+    this.index.index(index, (int) currentPosition);
+    return (Indexed<T>) indexedEntry;
   }
 
   @Override
@@ -240,14 +237,14 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
     try {
       if (index < segment.index()) {
         // Reset the writer to the first entry.
-        channel.position(JournalSegmentDescriptor.BYTES);
+        currentPosition = JournalSegmentDescriptor.BYTES;
       } else {
         // Reset the writer to the given index.
         reset(index);
       }
 
       // Zero the entry header at current channel position.
-      channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), channel.position());
+      channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), currentPosition);
     } catch (IOException e) {
       throw new StorageException(e);
     }
