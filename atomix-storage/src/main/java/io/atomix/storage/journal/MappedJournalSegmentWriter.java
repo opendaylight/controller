@@ -233,20 +233,18 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
     this.index.truncate(index);
 
     if (index < segment.index()) {
-      buffer.position(JournalSegmentDescriptor.BYTES);
-      buffer.putInt(0);
-      buffer.putInt(0);
+      // Reset the writer to the first entry.
       buffer.position(JournalSegmentDescriptor.BYTES);
     } else {
       // Reset the writer to the given index.
       reset(index);
-
-      // Zero entries after the given index.
-      int position = buffer.position();
-      buffer.putInt(0);
-      buffer.putInt(0);
-      buffer.position(position);
     }
+
+    // Zero the entry header at current buffer position.
+    int position = buffer.position();
+    // Note: we issue a single putLong() instead of two putInt()s.
+    buffer.putLong(0);
+    buffer.position(position);
   }
 
   @Override
