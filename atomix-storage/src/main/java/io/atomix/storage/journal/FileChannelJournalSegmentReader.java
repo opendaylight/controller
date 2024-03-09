@@ -39,6 +39,7 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
   private final long firstIndex;
   private Indexed<E> currentEntry;
   private Indexed<E> nextEntry;
+  private long currentPosition;
 
   FileChannelJournalSegmentReader(
       FileChannel channel,
@@ -81,12 +82,8 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
     Position position = this.index.lookup(index - 1);
     if (position != null) {
       currentEntry = new Indexed<>(position.index() - 1, null, 0);
-      try {
-        channel.position(position.position());
-        memory.clear().flip();
-      } catch (IOException e) {
-        throw new StorageException(e);
-      }
+      currentPosition = position.position();
+      memory.clear().flip();
       readNext();
     }
     while (getNextIndex() < index && hasNext()) {
@@ -96,11 +93,7 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
 
   @Override
   public void reset() {
-    try {
-      channel.position(JournalSegmentDescriptor.BYTES);
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
+    currentPosition = JournalSegmentDescriptor.BYTES;
     memory.clear().limit(0);
     currentEntry = null;
     nextEntry = null;
@@ -145,11 +138,10 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
     try {
       // Read more bytes from the segment if necessary.
       if (memory.remaining() < maxEntrySize) {
-        long position = channel.position() + memory.position();
-        channel.position(position);
+        long position = currentPosition + memory.position();
         memory.clear();
-        channel.read(memory);
-        channel.position(position);
+        channel.read(memory, position);
+        currentPosition = position;
         memory.flip();
       }
 
