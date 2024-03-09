@@ -24,7 +24,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 
 /**
  * Segment writer.
@@ -97,7 +96,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
         final long checksum = memory.getInt() & 0xFFFFFFFFL;
 
         // Compute the checksum for the entry bytes.
-        final Checksum crc32 = new CRC32();
+        final CRC32 crc32 = new CRC32();
         crc32.update(memory.array(), memory.position(), length);
 
         // If the stored checksum equals the computed checksum, return the entry.
@@ -207,7 +206,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
       }
 
       // Compute the checksum for the entry.
-      final Checksum crc32 = new CRC32();
+      final CRC32 crc32 = new CRC32();
       crc32.update(memory.array(), Integer.BYTES + Integer.BYTES, memory.limit() - (Integer.BYTES + Integer.BYTES));
       final long checksum = crc32.getValue();
 
