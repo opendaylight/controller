@@ -86,7 +86,6 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
       memory.flip();
 
       // Read the entry length.
-      memory.mark();
       int length = memory.getInt();
 
       // If the length is non-zero, read the entry.
@@ -108,37 +107,28 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
           break;
         }
 
-        int limit = memory.limit();
-        memory.limit(memory.position() + length);
-        final E entry = namespace.deserialize(memory);
-        memory.limit(limit);
+        entryBytes.rewind();
+        final E entry = namespace.deserialize(entryBytes);
         lastEntry = new Indexed<>(nextIndex, entry, length);
         this.index.index(nextIndex, (int) position);
         nextIndex++;
 
         // Update the current position for indexing.
-        position = channel.position() + memory.position();
+        position = position + length;
+        channel.position(position);
+        memory.position(memory.position() + length);
 
         // Read more bytes from the segment if necessary.
         if (memory.remaining() < maxEntrySize) {
           memory.clear();
-          channel.position(position);
           channel.read(memory, position);
           memory.flip();
         }
 
-        memory.mark();
         length = memory.getInt();
       }
-
-      // Reset the buffer to the previous mark.
-      channel.position(channel.position() + memory.reset().position());
     } catch (BufferUnderflowException e) {
-      try {
-        channel.position(channel.position() + memory.reset().position());
-      } catch (IOException e2) {
-        throw new StorageException(e2);
-      }
+      // No-op, position is only updated on success
     } catch (IOException e) {
       throw new StorageException(e);
     }
