@@ -97,19 +97,21 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
         // Read the checksum of the entry.
         final long checksum = buffer.getInt() & 0xFFFFFFFFL;
 
+        // Slice off the entry's bytes
+        final ByteBuffer entryBytes = buffer.slice();
+        entryBytes.limit(length);
+
         // Compute the checksum for the entry bytes.
         final CRC32 crc32 = new CRC32();
-        ByteBuffer slice = buffer.slice();
-        slice.limit(length);
-        crc32.update(slice);
+        crc32.update(entryBytes);
 
         // If the stored checksum does not equal the computed checksum, do not proceed further
         if (checksum != crc32.getValue()) {
           break;
         }
 
-        slice.rewind();
-        final E entry = namespace.deserialize(slice);
+        entryBytes.rewind();
+        final E entry = namespace.deserialize(entryBytes);
         lastEntry = new Indexed<>(nextIndex, entry, length);
         this.index.index(nextIndex, position);
         nextIndex++;
