@@ -95,9 +95,13 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
         // Read the checksum of the entry.
         final long checksum = memory.getInt() & 0xFFFFFFFFL;
 
+        // Slice off the entry's bytes
+        final ByteBuffer entryBytes = memory.slice();
+        entryBytes.limit(length);
+
         // Compute the checksum for the entry bytes.
         final CRC32 crc32 = new CRC32();
-        crc32.update(memory.array(), memory.position(), length);
+        crc32.update(entryBytes);
 
         // If the stored checksum does not equal the computed checksum, do not proceed further
         if (checksum != crc32.getValue()) {
