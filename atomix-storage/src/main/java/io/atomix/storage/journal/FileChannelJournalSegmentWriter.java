@@ -244,37 +244,30 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
     // Reset the last entry.
     lastEntry = null;
 
-    try {
-      // Truncate the index.
-      this.index.truncate(index);
+    // Truncate the index.
+    this.index.truncate(index);
 
+    try {
       if (index < segment.index()) {
-        channel.position(JournalSegmentDescriptor.BYTES);
-        channel.write(zero());
+        // Reset the writer to the first entry.
         channel.position(JournalSegmentDescriptor.BYTES);
       } else {
         // Reset the writer to the given index.
         reset(index);
-
-        // Zero entries after the given index.
-        long position = channel.position();
-        channel.write(zero());
-        channel.position(position);
       }
+
+      // Zero entries at the current position.
+      // FIXME: This is quite inefficient, we essentially want to zero-out part of the file, but it is not quite clear
+      //        how much: this overwrites at least two entries. I believe we should be able to get by with wiping the
+      //        header of the current entry.
+      memory.clear();
+      for (int i = 0; i < memory.limit(); i++) {
+        memory.put(i, (byte) 0);
+      }
+      channel.write(memory, channel.position());
     } catch (IOException e) {
       throw new StorageException(e);
     }
-  }
-
-  /**
-   * Returns a zeroed out byte buffer.
-   */
-  private ByteBuffer zero() {
-    memory.clear();
-    for (int i = 0; i < memory.limit(); i++) {
-      memory.put(i, (byte) 0);
-    }
-    return memory;
   }
 
   @Override
