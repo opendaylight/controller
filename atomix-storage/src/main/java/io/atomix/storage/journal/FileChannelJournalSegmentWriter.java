@@ -118,10 +118,9 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
 
         // Read more bytes from the segment if necessary.
         if (memory.remaining() < maxEntrySize) {
-          channel.position(position);
           memory.clear();
-          channel.read(memory);
           channel.position(position);
+          channel.read(memory, position);
           memory.flip();
         }
 
