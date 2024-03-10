@@ -55,14 +55,14 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       JournalIndex index,
       JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
-    mappedBuffer = mapBuffer(channel, segment.descriptor().maxSegmentSize());
+    mappedBuffer = mapBuffer(channel, maxSegmentSize);
     buffer = mappedBuffer.slice();
     reset(0);
   }
 
   MappedJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
     super(previous);
-    mappedBuffer = mapBuffer(channel, segment.descriptor().maxSegmentSize());
+    mappedBuffer = mapBuffer(channel, maxSegmentSize);
     buffer = mappedBuffer.slice();
     lastEntry = previous.getLastEntry();
     buffer.position(position);
@@ -151,7 +151,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   public long getLastIndex() {
-    return lastEntry != null ? lastEntry.index() : segment.index() - 1;
+    return lastEntry != null ? lastEntry.index() : firstIndex - 1;
   }
 
   @Override
@@ -248,7 +248,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     // Truncate the index.
     this.index.truncate(index);
 
-    if (index < segment.index()) {
+    if (index < firstIndex) {
       // Reset the writer to the first entry.
       buffer.position(JournalSegmentDescriptor.BYTES);
     } else {
