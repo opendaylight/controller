@@ -23,7 +23,6 @@ import java.nio.channels.FileChannel;
  * Mappable log segment writer.
  */
 final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
-  private final JournalSegment<E> segment;
   private JournalSegmentWriter<E> writer;
 
   MappableJournalSegmentWriter(
@@ -32,7 +31,6 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    this.segment = segment;
     this.writer = new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
   }
 
@@ -56,15 +54,6 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
 
   MappedByteBuffer buffer() {
     return writer.buffer();
-  }
-
-  /**
-   * Returns the writer's first index.
-   *
-   * @return the writer's first index
-   */
-  public long firstIndex() {
-    return segment.index();
   }
 
   @Override
