@@ -16,10 +16,8 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.storage.journal.index.Position;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.NoSuchElementException;
 import java.util.zip.CRC32;
 
 /**
@@ -29,8 +27,6 @@ import java.util.zip.CRC32;
  */
 final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
   private final ByteBuffer buffer;
-  private Indexed<E> currentEntry;
-  private Indexed<E> nextEntry;
 
   MappedJournalSegmentReader(
       ByteBuffer buffer,
@@ -44,74 +40,12 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
   }
 
   @Override
-  public long getCurrentIndex() {
-    return currentEntry != null ? currentEntry.index() : 0;
+  void setPosition(int position) {
+    buffer.position(position);
   }
 
   @Override
-  public Indexed<E> getCurrentEntry() {
-    return currentEntry;
-  }
-
-  @Override
-  public long getNextIndex() {
-    return currentEntry != null ? currentEntry.index() + 1 : firstIndex;
-  }
-
-  @Override
-  public void reset(long index) {
-    reset();
-    Position position = this.index.lookup(index - 1);
-    if (position != null) {
-      currentEntry = new Indexed<>(position.index() - 1, null, 0);
-      buffer.position(position.position());
-      readNext();
-    }
-    while (getNextIndex() < index && hasNext()) {
-      next();
-    }
-  }
-
-  @Override
-  public void reset() {
-    buffer.position(JournalSegmentDescriptor.BYTES);
-    currentEntry = null;
-    nextEntry = null;
-    readNext();
-  }
-
-  @Override
-  public boolean hasNext() {
-    // If the next entry is null, check whether a next entry exists.
-    if (nextEntry == null) {
-      readNext();
-    }
-    return nextEntry != null;
-  }
-
-  @Override
-  public Indexed<E> next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
-    }
-
-    // Set the current entry to the next entry.
-    currentEntry = nextEntry;
-
-    // Reset the next entry to null.
-    nextEntry = null;
-
-    // Read the next entry in the segment.
-    readNext();
-
-    // Return the current entry.
-    return currentEntry;
-  }
-
-  /**
-   * Reads the next entry in the segment.
-   */
-  private void readNext() {
+  Indexed<E> readNext() {
     // Compute the index of the next entry in the segment.
     final long index = getNextIndex();
 
@@ -125,8 +59,7 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
       // If the buffer length is zero then return.
       if (length <= 0 || length > maxEntrySize) {
         buffer.reset();
-        nextEntry = null;
-        return;
+        return null;
       }
 
       // Read the checksum of the entry.
@@ -142,15 +75,15 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
       if (checksum == crc32.getValue()) {
         slice.rewind();
         E entry = namespace.deserialize(slice);
-        nextEntry = new Indexed<>(index, entry, length);
         buffer.position(buffer.position() + length);
+        return new Indexed<>(index, entry, length);
       } else {
         buffer.reset();
-        nextEntry = null;
+        return null;
       }
     } catch (BufferUnderflowException e) {
       buffer.reset();
-      nextEntry = null;
+      return null;
     }
   }
 }
