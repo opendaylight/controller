@@ -18,28 +18,28 @@ import org.eclipse.jdt.annotation.Nullable;
 abstract sealed class JournalSegmentWriter<E> implements JournalWriter<E>
         permits FileChannelJournalSegmentWriter, MappedJournalSegmentWriter {
     final @NonNull FileChannel channel;
-    final @NonNull JournalSegment<E> segment;
-    final int maxEntrySize;
     final @NonNull JournalIndex index;
     final @NonNull JournalSerdes namespace;
+    final int maxSegmentSize;
+    final int maxEntrySize;
     final long firstIndex;
 
     JournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
             final JournalIndex index, final JournalSerdes namespace) {
         this.channel = requireNonNull(channel);
-        this.segment = requireNonNull(segment);
-        this.maxEntrySize = maxEntrySize;
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
+        this.maxSegmentSize = segment.descriptor().maxSegmentSize();
+        this.maxEntrySize = maxEntrySize;
         this.firstIndex = segment.index();
     }
 
     JournalSegmentWriter(JournalSegmentWriter<E> previous) {
         this.channel = previous.channel;
-        this.segment = previous.segment;
-        this.maxEntrySize = previous.maxEntrySize;
         this.index = previous.index;
         this.namespace = previous.namespace;
+        this.maxSegmentSize = previous.maxSegmentSize;
+        this.maxEntrySize = previous.maxEntrySize;
         this.firstIndex = previous.firstIndex;
     }
 
