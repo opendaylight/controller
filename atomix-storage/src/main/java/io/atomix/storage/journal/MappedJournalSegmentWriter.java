@@ -40,14 +40,10 @@ import java.util.zip.CRC32;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
+final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private final MappedByteBuffer mappedBuffer;
   private final ByteBuffer buffer;
-  private final JournalSegment<E> segment;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
-  private final long firstIndex;
+
   private Indexed<E> lastEntry;
 
   MappedJournalSegmentWriter(
@@ -56,21 +52,13 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
+    super(segment, maxEntrySize, index, namespace);
     this.mappedBuffer = buffer;
     this.buffer = buffer.slice();
-    this.segment = segment;
-    this.maxEntrySize = maxEntrySize;
-    this.index = index;
-    this.namespace = namespace;
-    this.firstIndex = segment.index();
     reset(0);
   }
 
-  /**
-   * Returns the mapped buffer underlying the segment writer.
-   *
-   * @return the mapped buffer underlying the segment writer
-   */
+  @Override
   MappedByteBuffer buffer() {
     return mappedBuffer;
   }
@@ -216,10 +204,6 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
     return (Indexed<T>) indexedEntry;
   }
 
-  @Override
-  public void commit(long index) {
-
-  }
 
   @Override
   public void truncate(long index) {
