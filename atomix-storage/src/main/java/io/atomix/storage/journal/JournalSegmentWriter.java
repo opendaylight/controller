@@ -11,19 +11,22 @@ import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentWriter<E> implements JournalWriter<E>
         permits FileChannelJournalSegmentWriter, MappedJournalSegmentWriter {
+    final @NonNull FileChannel channel;
     final @NonNull JournalSegment<E> segment;
     final int maxEntrySize;
     final @NonNull JournalIndex index;
     final @NonNull JournalSerdes namespace;
     final long firstIndex;
 
-    JournalSegmentWriter(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
-            final JournalSerdes namespace) {
+    JournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
+            final JournalIndex index, final JournalSerdes namespace) {
+        this.channel = requireNonNull(channel);
         this.segment = requireNonNull(segment);
         this.maxEntrySize = maxEntrySize;
         this.index = requireNonNull(index);
@@ -43,4 +46,8 @@ abstract sealed class JournalSegmentWriter<E> implements JournalWriter<E>
      * @return the mapped buffer underlying the segment writer, or {@code null}.
      */
     abstract @Nullable MappedByteBuffer buffer();
+
+    abstract @NonNull MappedJournalSegmentWriter<E> toMapped();
+
+    abstract @NonNull FileChannelJournalSegmentWriter<E> toFileChannel();
 }

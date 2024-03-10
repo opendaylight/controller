@@ -44,7 +44,6 @@ import java.util.zip.CRC32;
 final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[Integer.BYTES + Integer.BYTES]);
 
-  private final FileChannel channel;
   private final ByteBuffer memory;
   private Indexed<E> lastEntry;
   private long currentPosition;
@@ -55,8 +54,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
-    this.channel = channel;
+    super(channel, segment, maxEntrySize, index, namespace);
     this.memory = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
     memory.limit(0);
     reset(0);
@@ -65,6 +63,16 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   @Override
   MappedByteBuffer buffer() {
     return null;
+  }
+
+  @Override
+  MappedJournalSegmentWriter<E> toMapped() {
+    return new MappedJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
+  }
+
+  @Override
+  FileChannelJournalSegmentWriter<E> toFileChannel() {
+    return this;
   }
 
   @Override

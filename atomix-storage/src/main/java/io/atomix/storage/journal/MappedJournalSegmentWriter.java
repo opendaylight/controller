@@ -15,8 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import static java.util.Objects.requireNonNull;
-
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
 
@@ -25,6 +23,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -50,20 +49,35 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private Indexed<E> lastEntry;
 
   MappedJournalSegmentWriter(
-      MappedByteBuffer buffer,
+      FileChannel channel,
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
-    this.mappedBuffer = requireNonNull(buffer);
-    this.buffer = buffer.slice();
+    super(channel, segment, maxEntrySize, index, namespace);
+    try {
+      mappedBuffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, segment.descriptor().maxSegmentSize());
+    } catch (IOException e) {
+      throw new StorageException(e);
+    }
+    this.buffer = mappedBuffer.slice();
     reset(0);
   }
 
   @Override
   @NonNull MappedByteBuffer buffer() {
     return mappedBuffer;
+  }
+
+  @Override
+  MappedJournalSegmentWriter<E> toMapped() {
+    return this;
+  }
+
+  @Override
+  FileChannelJournalSegmentWriter<E> toFileChannel() {
+    close();
+    return new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
   }
 
   @Override
