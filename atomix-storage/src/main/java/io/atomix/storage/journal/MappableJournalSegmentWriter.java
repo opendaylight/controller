@@ -26,9 +26,6 @@ import java.nio.channels.FileChannel;
 final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
   private final FileChannel channel;
   private final JournalSegment<E> segment;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
   private JournalSegmentWriter<E> writer;
 
   MappableJournalSegmentWriter(
@@ -39,9 +36,6 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
       JournalSerdes namespace) {
     this.channel = channel;
     this.segment = segment;
-    this.maxEntrySize = maxEntrySize;
-    this.index = index;
-    this.namespace = namespace;
     this.writer = new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
   }
 
@@ -51,30 +45,16 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
    * @return the buffer that was mapped into memory
    */
   MappedByteBuffer map() {
-    if (writer instanceof MappedJournalSegmentWriter) {
-      return ((MappedJournalSegmentWriter<E>) writer).buffer();
-    }
-
-    try {
-      JournalSegmentWriter<E> writer = this.writer;
-      MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, segment.descriptor().maxSegmentSize());
-      this.writer = new MappedJournalSegmentWriter<>(buffer, segment, maxEntrySize, index, namespace);
-      writer.close();
-      return buffer;
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
+    final var mapped = writer.toMapped();
+    writer = mapped;
+    return mapped.buffer();
   }
 
   /**
    * Unmaps the mapped buffer.
    */
   void unmap() {
-    if (writer instanceof MappedJournalSegmentWriter) {
-      JournalSegmentWriter<E> writer = this.writer;
-      this.writer = new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
-      writer.close();
-    }
+    writer = writer.toFileChannel();
   }
 
   MappedByteBuffer buffer() {
