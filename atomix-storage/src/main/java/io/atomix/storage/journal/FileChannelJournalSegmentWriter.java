@@ -55,9 +55,21 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       JournalIndex index,
       JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
-    this.memory = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
-    memory.limit(0);
+    memory = allocMemory(maxEntrySize);
     reset(0);
+  }
+
+  FileChannelJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+    super(previous);
+    memory = allocMemory(maxEntrySize);
+    lastEntry = previous.getLastEntry();
+    currentPosition = position;
+  }
+
+  private static ByteBuffer allocMemory(int maxEntrySize) {
+    final var buf = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
+    buf.limit(0);
+    return buf;
   }
 
   @Override
@@ -67,7 +79,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   MappedJournalSegmentWriter<E> toMapped() {
-    return new MappedJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
+    return new MappedJournalSegmentWriter<>(this, (int) currentPosition);
   }
 
   @Override
