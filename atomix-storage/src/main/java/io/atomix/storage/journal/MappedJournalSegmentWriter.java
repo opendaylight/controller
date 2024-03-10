@@ -15,6 +15,8 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
 
@@ -24,6 +26,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.util.zip.CRC32;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Segment writer.
@@ -40,14 +43,10 @@ import java.util.zip.CRC32;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
-  private final MappedByteBuffer mappedBuffer;
+final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
+  private final @NonNull MappedByteBuffer mappedBuffer;
   private final ByteBuffer buffer;
-  private final JournalSegment<E> segment;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
-  private final long firstIndex;
+
   private Indexed<E> lastEntry;
 
   MappedJournalSegmentWriter(
@@ -56,22 +55,14 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    this.mappedBuffer = buffer;
+    super(segment, maxEntrySize, index, namespace);
+    this.mappedBuffer = requireNonNull(buffer);
     this.buffer = buffer.slice();
-    this.segment = segment;
-    this.maxEntrySize = maxEntrySize;
-    this.index = index;
-    this.namespace = namespace;
-    this.firstIndex = segment.index();
     reset(0);
   }
 
-  /**
-   * Returns the mapped buffer underlying the segment writer.
-   *
-   * @return the mapped buffer underlying the segment writer
-   */
-  MappedByteBuffer buffer() {
+  @Override
+  @NonNull MappedByteBuffer buffer() {
     return mappedBuffer;
   }
 
@@ -216,10 +207,6 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
     return (Indexed<T>) indexedEntry;
   }
 
-  @Override
-  public void commit(long index) {
-
-  }
 
   @Override
   public void truncate(long index) {

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
 
@@ -40,16 +41,11 @@ import java.util.zip.CRC32;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
+final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[Integer.BYTES + Integer.BYTES]);
 
   private final FileChannel channel;
-  private final JournalSegment<E> segment;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
   private final ByteBuffer memory;
-  private final long firstIndex;
   private Indexed<E> lastEntry;
   private long currentPosition;
 
@@ -59,15 +55,16 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
+    super(segment, maxEntrySize, index, namespace);
     this.channel = channel;
-    this.segment = segment;
-    this.maxEntrySize = maxEntrySize;
-    this.index = index;
     this.memory = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
     memory.limit(0);
-    this.namespace = namespace;
-    this.firstIndex = segment.index();
     reset(0);
+  }
+
+  @Override
+  MappedByteBuffer buffer() {
+    return null;
   }
 
   @Override
@@ -215,11 +212,6 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
 
     currentPosition = currentPosition + Integer.BYTES + Integer.BYTES + length;
     return (Indexed<T>) indexedEntry;
-  }
-
-  @Override
-  public void commit(long index) {
-
   }
 
   @Override
