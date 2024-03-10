@@ -27,12 +27,8 @@ import java.util.zip.CRC32;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class MappedJournalSegmentReader<E> implements JournalReader<E> {
+final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
   private final ByteBuffer buffer;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
-  private final long firstIndex;
   private Indexed<E> currentEntry;
   private Indexed<E> nextEntry;
 
@@ -42,17 +38,9 @@ final class MappedJournalSegmentReader<E> implements JournalReader<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
+    super(segment, maxEntrySize, index, namespace);
     this.buffer = buffer.slice();
-    this.maxEntrySize = maxEntrySize;
-    this.index = index;
-    this.namespace = namespace;
-    this.firstIndex = segment.index();
     reset();
-  }
-
-  @Override
-  public long getFirstIndex() {
-    return firstIndex;
   }
 
   @Override
@@ -164,10 +152,5 @@ final class MappedJournalSegmentReader<E> implements JournalReader<E> {
       buffer.reset();
       nextEntry = null;
     }
-  }
-
-  @Override
-  public void close() {
-    // Do nothing. The writer is responsible for cleaning the mapped buffer.
   }
 }

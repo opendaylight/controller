@@ -23,13 +23,13 @@ import java.nio.channels.FileChannel;
 /**
  * Mappable log segment reader.
  */
-class MappableJournalSegmentReader<E> implements JournalReader<E> {
+final class MappableJournalSegmentReader<E> implements JournalReader<E> {
   private final JournalSegment<E> segment;
   private final FileChannel channel;
   private final int maxEntrySize;
   private final JournalIndex index;
   private final JournalSerdes namespace;
-  private JournalReader<E> reader;
+  private JournalSegmentReader<E> reader;
 
   MappableJournalSegmentReader(
       FileChannel channel,
