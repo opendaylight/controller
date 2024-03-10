@@ -21,7 +21,6 @@ import java.util.NoSuchElementException;
  * Raft log reader.
  */
 public class SegmentedJournalReader<E> implements JournalReader<E> {
-
   private final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
   private Indexed<E> previousEntry;
@@ -31,13 +30,6 @@ public class SegmentedJournalReader<E> implements JournalReader<E> {
   public SegmentedJournalReader(SegmentedJournal<E> journal, long index, Mode mode) {
     this.journal = journal;
     this.mode = mode;
-    initialize(index);
-  }
-
-  /**
-   * Initializes the reader to the given index.
-   */
-  private void initialize(long index) {
     currentSegment = journal.getSegment(index);
     currentSegment.acquire();
     currentReader = currentSegment.createReader();
