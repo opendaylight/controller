@@ -16,7 +16,6 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
-import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -24,7 +23,6 @@ import java.nio.channels.FileChannel;
  * Mappable log segment writer.
  */
 final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
-  private final FileChannel channel;
   private final JournalSegment<E> segment;
   private JournalSegmentWriter<E> writer;
 
@@ -34,7 +32,6 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    this.channel = channel;
     this.segment = segment;
     this.writer = new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
   }
@@ -68,19 +65,6 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
    */
   public long firstIndex() {
     return segment.index();
-  }
-
-  /**
-   * Returns the size of the segment.
-   *
-   * @return the size of the segment
-   */
-  public int size() {
-    try {
-      return (int) channel.size();
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
   }
 
   @Override
@@ -131,10 +115,5 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
   @Override
   public void close() {
     writer.close();
-    try {
-      channel.close();
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
   }
 }
