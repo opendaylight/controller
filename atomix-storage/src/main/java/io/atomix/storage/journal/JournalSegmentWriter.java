@@ -34,6 +34,15 @@ abstract sealed class JournalSegmentWriter<E> implements JournalWriter<E>
         this.firstIndex = segment.index();
     }
 
+    JournalSegmentWriter(JournalSegmentWriter<E> previous) {
+        this.channel = previous.channel;
+        this.segment = previous.segment;
+        this.maxEntrySize = previous.maxEntrySize;
+        this.index = previous.index;
+        this.namespace = previous.namespace;
+        this.firstIndex = previous.firstIndex;
+    }
+
     @Override
     public final void commit(final long index) {
         // FIXME: CONTROLLER-2098: eliminate the need for this method

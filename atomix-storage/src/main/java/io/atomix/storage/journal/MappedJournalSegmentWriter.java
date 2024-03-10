@@ -55,13 +55,25 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       JournalIndex index,
       JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
+    mappedBuffer = mapBuffer(channel, segment.descriptor().maxSegmentSize());
+    buffer = mappedBuffer.slice();
+    reset(0);
+  }
+
+  MappedJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+    super(previous);
+    mappedBuffer = mapBuffer(channel, segment.descriptor().maxSegmentSize());
+    buffer = mappedBuffer.slice();
+    lastEntry = previous.getLastEntry();
+    buffer.position(position);
+  }
+
+  private static @NonNull MappedByteBuffer mapBuffer(FileChannel channel, int maxSegmentSize) {
     try {
-      mappedBuffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, segment.descriptor().maxSegmentSize());
+      return channel.map(FileChannel.MapMode.READ_WRITE, 0, maxSegmentSize);
     } catch (IOException e) {
       throw new StorageException(e);
     }
-    this.buffer = mappedBuffer.slice();
-    reset(0);
   }
 
   @Override
@@ -76,8 +88,9 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   FileChannelJournalSegmentWriter<E> toFileChannel() {
+    final int position = buffer.position();
     close();
-    return new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
+    return new FileChannelJournalSegmentWriter<>(this, position);
   }
 
   @Override
