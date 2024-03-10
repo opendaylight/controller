@@ -16,7 +16,6 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.index.JournalIndex;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -114,12 +113,6 @@ final class MappableJournalSegmentReader<E> implements JournalReader<E> {
   @Override
   public void close() {
     reader.close();
-    try {
-      channel.close();
-    } catch (IOException e) {
-      throw new StorageException(e);
-    } finally {
-      segment.closeReader(this);
-    }
+    segment.closeReader(this);
   }
 }
