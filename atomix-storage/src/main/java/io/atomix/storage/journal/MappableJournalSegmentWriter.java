@@ -27,11 +27,13 @@ final class MappableJournalSegmentWriter<E> implements JournalWriter<E> {
 
   MappableJournalSegmentWriter(
       FileChannel channel,
-      JournalSegment<E> segment,
+      long firstIndex,
+      int maxSegmentSize,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    this.writer = new FileChannelJournalSegmentWriter<>(channel, segment, maxEntrySize, index, namespace);
+    this.writer = new FileChannelJournalSegmentWriter<>(channel, firstIndex, maxSegmentSize, maxEntrySize, index,
+        namespace);
   }
 
   /**

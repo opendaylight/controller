@@ -30,11 +30,11 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
 
   MappedJournalSegmentReader(
       ByteBuffer buffer,
-      JournalSegment<E> segment,
+      long firstIndex,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
+    super(firstIndex, maxEntrySize, index, namespace);
     this.buffer = buffer.slice();
     reset();
   }

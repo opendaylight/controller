@@ -34,11 +34,11 @@ final class FileChannelJournalSegmentReader<E> extends JournalSegmentReader<E> {
 
   FileChannelJournalSegmentReader(
       FileChannel channel,
-      JournalSegment<E> segment,
+      long firstIndex,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
+    super(firstIndex, maxEntrySize, index, namespace);
     this.channel = channel;
     this.memory = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
     reset();

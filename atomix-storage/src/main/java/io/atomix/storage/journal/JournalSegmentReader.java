@@ -24,12 +24,12 @@ abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
     private Indexed<E> currentEntry;
     private Indexed<E> nextEntry;
 
-    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
+    JournalSegmentReader(final long firstIndex, final int maxEntrySize, final JournalIndex index,
             final JournalSerdes namespace) {
+        this.firstIndex = firstIndex;
         this.maxEntrySize = maxEntrySize;
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
-        firstIndex = segment.index();
     }
 
     @Override

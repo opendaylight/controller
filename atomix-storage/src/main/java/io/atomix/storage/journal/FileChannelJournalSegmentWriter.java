@@ -50,11 +50,12 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   FileChannelJournalSegmentWriter(
       FileChannel channel,
-      JournalSegment<E> segment,
+      long firstIndex,
+      int maxSegmentSize,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(channel, segment, maxEntrySize, index, namespace);
+    super(channel, firstIndex, maxSegmentSize, maxEntrySize, index, namespace);
     memory = allocMemory(maxEntrySize);
     reset(0);
   }
@@ -150,7 +151,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   public long getLastIndex() {
-    return lastEntry != null ? lastEntry.index() : segment.index() - 1;
+    return lastEntry != null ? lastEntry.index() : firstIndex - 1;
   }
 
   @Override
@@ -202,7 +203,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     final int length = memory.limit() - (Integer.BYTES + Integer.BYTES);
 
     // Ensure there's enough space left in the buffer to store the entry.
-    if (segment.descriptor().maxSegmentSize() - currentPosition < length + Integer.BYTES + Integer.BYTES) {
+    if (maxSegmentSize - currentPosition < length + Integer.BYTES + Integer.BYTES) {
       throw new BufferOverflowException();
     }
 
@@ -248,7 +249,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     this.index.truncate(index);
 
     try {
-      if (index < segment.index()) {
+      if (index < firstIndex) {
         // Reset the writer to the first entry.
         currentPosition = JournalSegmentDescriptor.BYTES;
       } else {

@@ -66,7 +66,8 @@ public class JournalSegment<E> implements AutoCloseable {
     } catch (IOException e) {
       throw new StorageException(e);
     }
-    writer = new MappableJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
+    writer = new MappableJournalSegmentWriter<>(channel, descriptor.index(), descriptor.maxSegmentSize(), maxEntrySize,
+        index, namespace);
   }
 
   /**
