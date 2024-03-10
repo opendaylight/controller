@@ -30,13 +30,9 @@ import java.util.zip.Checksum;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
+final class FileChannelJournalSegmentReader<E> extends JournalSegmentReader<E> {
   private final FileChannel channel;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
   private final ByteBuffer memory;
-  private final long firstIndex;
   private Indexed<E> currentEntry;
   private Indexed<E> nextEntry;
   private long currentPosition;
@@ -47,18 +43,10 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
+    super(segment, maxEntrySize, index, namespace);
     this.channel = channel;
-    this.maxEntrySize = maxEntrySize;
-    this.index = index;
-    this.namespace = namespace;
     this.memory = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
-    this.firstIndex = segment.index();
     reset();
-  }
-
-  @Override
-  public long getFirstIndex() {
-    return firstIndex;
   }
 
   @Override
@@ -184,10 +172,5 @@ final class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
     } catch (IOException e) {
       throw new StorageException(e);
     }
-  }
-
-  @Override
-  public void close() {
-    // Do nothing. The parent reader manages the channel.
   }
 }
