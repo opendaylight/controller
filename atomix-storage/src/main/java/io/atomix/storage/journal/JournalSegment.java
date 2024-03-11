@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public class JournalSegment<E> implements AutoCloseable {
+final class JournalSegment<E> implements AutoCloseable {
   private final JournalSegmentFile file;
   private final JournalSegmentDescriptor descriptor;
   private final StorageLevel storageLevel;
@@ -47,7 +47,7 @@ public class JournalSegment<E> implements AutoCloseable {
   private final FileChannel channel;
   private boolean open = true;
 
-  public JournalSegment(
+  JournalSegment(
       JournalSegmentFile file,
       JournalSegmentDescriptor descriptor,
       StorageLevel storageLevel,
