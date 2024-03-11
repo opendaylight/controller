@@ -20,7 +20,7 @@ import java.nio.BufferOverflowException;
 /**
  * Raft log writer.
  */
-public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
+final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   private final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
   private JournalSegmentWriter<E> currentWriter;
