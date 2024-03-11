@@ -156,7 +156,7 @@ final class JournalSegment<E> implements AutoCloseable {
   /**
    * Acquires a reference to the log segment.
    */
-  void acquire() {
+  private void acquire() {
     if (references.getAndIncrement() == 0 && storageLevel == StorageLevel.MAPPED) {
       writer.map();
     }
@@ -165,7 +165,7 @@ final class JournalSegment<E> implements AutoCloseable {
   /**
    * Releases a reference to the log segment.
    */
-  void release() {
+  private void release() {
     if (references.decrementAndGet() == 0) {
       if (storageLevel == StorageLevel.MAPPED) {
         writer.unmap();
@@ -177,13 +177,22 @@ final class JournalSegment<E> implements AutoCloseable {
   }
 
   /**
-   * Returns the segment writer.
+   * Acquires a reference to the segment writer.
    *
    * @return The segment writer.
    */
-  public MappableJournalSegmentWriter<E> writer() {
+  MappableJournalSegmentWriter<E> acquireWriter() {
     checkOpen();
+    acquire();
+
     return writer;
+  }
+
+  /**
+   * Releases the reference to the segment writer.
+   */
+  void releaseWriter() {
+      release();
   }
 
   /**
