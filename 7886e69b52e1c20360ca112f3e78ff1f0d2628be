@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8930ed1f_5c704617",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2024-03-11T12:32:04Z",
+      "side": 1,
+      "message": "Missing @NonNull in child implementation.",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a4277184_27df0a25",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2024-03-11T12:32:04Z",
+      "side": 1,
+      "message": "Missing @NonNull in child implementation.",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dcbb9bb5_26e271df",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/MappableJournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2024-03-11T12:32:04Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the `writer` be closed here as it was before?",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "030a90ae_d63487e5",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/MappableJournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2024-03-11T12:32:04Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the `writer` be closed here as it was before?",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
