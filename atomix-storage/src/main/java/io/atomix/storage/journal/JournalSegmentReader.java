@@ -14,8 +14,7 @@ import io.atomix.storage.journal.index.Position;
 import java.util.NoSuchElementException;
 import org.eclipse.jdt.annotation.Nullable;
 
-abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
-        permits FileChannelJournalSegmentReader, MappedJournalSegmentReader {
+abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentReader, MappedJournalSegmentReader {
     final int maxEntrySize;
     private final JournalIndex index;
     final JournalSerdes namespace;
@@ -34,33 +33,49 @@ abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
         firstIndex = segment.index();
     }
 
-    @Override
-    public final long getFirstIndex() {
-        return firstIndex;
-    }
-
-    @Override
-    public final long getCurrentIndex() {
+    /**
+     * Returns the current reader index.
+     *
+     * @return The current reader index.
+     */
+    final long getCurrentIndex() {
         return currentEntry != null ? currentEntry.index() : 0;
     }
 
-    @Override
-    public final Indexed<E> getCurrentEntry() {
+    /**
+     * Returns the last read entry.
+     *
+     * @return The last read entry.
+     */
+    final Indexed<E> getCurrentEntry() {
         return currentEntry;
     }
 
-    @Override
-    public final long getNextIndex() {
+    /**
+     * Returns the next reader index.
+     *
+     * @return The next reader index.
+     */
+    final long getNextIndex() {
         return currentEntry != null ? currentEntry.index() + 1 : firstIndex;
     }
 
-    @Override
-    public final boolean hasNext() {
+    /**
+     * Returns whether the reader has a next entry to read.
+     *
+     * @return Whether the reader has a next entry to read.
+     */
+    final boolean hasNext() {
         return nextEntry != null || (nextEntry = readNext()) != null;
     }
 
-    @Override
-    public final Indexed<E> next() {
+    /**
+     * Returns the next entry in the reader.
+     *
+     * @return The next entry in the reader.
+     * @throws UnsupportedOperationException if there is no such entry
+     */
+    final Indexed<E> next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
@@ -78,16 +93,22 @@ abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
         return currentEntry;
     }
 
-    @Override
-    public final void reset() {
+    /**
+     * Resets the reader to the start of the segment.
+     */
+    final void reset() {
         currentEntry = null;
         nextEntry = null;
         setPosition(JournalSegmentDescriptor.BYTES);
         nextEntry = readNext();
     }
 
-    @Override
-    public final void reset(final long index) {
+    /**
+     * Resets the reader to the given index.
+     *
+     * @param index The index to which to reset the reader.
+     */
+    final void reset(final long index) {
         reset();
         Position position = this.index.lookup(index - 1);
         if (position != null) {
@@ -100,8 +121,10 @@ abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
         }
     }
 
-    @Override
-    public final void close() {
+    /**
+     * Close this reader.
+     */
+    final void close() {
         segment.closeReader(this);
     }
 
