@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e53db246_edf86271",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-03-11T12:57:18Z",
+      "side": 1,
+      "message": "@NonNull is a TYPE_USE annotation, hence there is no need to repeat it in implementations.",
+      "parentUuid": "8930ed1f_5c704617",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a4277184_27df0a25",
@@ -31,6 +49,24 @@
       "writtenOn": "2024-03-11T12:32:04Z",
       "side": 1,
       "message": "Missing @NonNull in child implementation.",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6fc56f1_d47ab4d1",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-03-11T12:57:18Z",
+      "side": 1,
+      "message": "See above",
+      "parentUuid": "a4277184_27df0a25",
       "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
@@ -52,6 +88,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2c62938_72edb780",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/MappableJournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-03-11T12:57:18Z",
+      "side": 1,
+      "message": "No, if it is already mapped, it will return \u0027this\u0027.\n\nIf it does not, it know it is being converted, so can clean up its resources as appropriate.",
+      "parentUuid": "dcbb9bb5_26e271df",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "030a90ae_d63487e5",
@@ -65,6 +119,24 @@
       "writtenOn": "2024-03-11T12:32:04Z",
       "side": 1,
       "message": "Shouldn\u0027t the `writer` be closed here as it was before?",
+      "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0c7b4a4d_8c5b99b7",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/MappableJournalSegmentWriter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-03-11T12:57:18Z",
+      "side": 1,
+      "message": "See above",
+      "parentUuid": "030a90ae_d63487e5",
       "revId": "7886e69b52e1c20360ca112f3e78ff1f0d2628be",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
