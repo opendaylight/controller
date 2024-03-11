@@ -23,7 +23,7 @@ import java.nio.BufferOverflowException;
 public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   private final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
-  private MappableJournalSegmentWriter<E> currentWriter;
+  private JournalSegmentWriter<E> currentWriter;
 
   SegmentedJournalWriter(SegmentedJournal<E> journal) {
     this.journal = journal;
