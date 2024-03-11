@@ -20,19 +20,20 @@ import java.util.NoSuchElementException;
 /**
  * Raft log reader.
  */
-public class SegmentedJournalReader<E> implements JournalReader<E> {
+public final class SegmentedJournalReader<E> implements JournalReader<E> {
   private final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
   private Indexed<E> previousEntry;
   private MappableJournalSegmentReader<E> currentReader;
   private final Mode mode;
 
-  public SegmentedJournalReader(SegmentedJournal<E> journal, long index, Mode mode) {
+  SegmentedJournalReader(SegmentedJournal<E> journal, long index, Mode mode) {
     this.journal = journal;
     this.mode = mode;
     currentSegment = journal.getSegment(index);
     currentSegment.acquire();
     currentReader = currentSegment.createReader();
+
     long nextIndex = getNextIndex();
     while (index > nextIndex && hasNext()) {
       next();
@@ -73,12 +74,13 @@ public class SegmentedJournalReader<E> implements JournalReader<E> {
 
   @Override
   public void reset() {
+    previousEntry = null;
     currentReader.close();
     currentSegment.release();
+
     currentSegment = journal.getFirstSegment();
     currentSegment.acquire();
     currentReader = currentSegment.createReader();
-    previousEntry = null;
   }
 
   @Override
@@ -106,6 +108,7 @@ public class SegmentedJournalReader<E> implements JournalReader<E> {
       if (segment != null) {
         currentReader.close();
         currentSegment.release();
+
         currentSegment = segment;
         currentSegment.acquire();
         currentReader = currentSegment.createReader();
@@ -137,44 +140,43 @@ public class SegmentedJournalReader<E> implements JournalReader<E> {
   }
 
   private boolean hasNextEntry() {
-    if (!currentReader.hasNext()) {
-      JournalSegment<E> nextSegment = journal.getNextSegment(currentSegment.index());
-      if (nextSegment != null && nextSegment.index() == getNextIndex()) {
-        previousEntry = currentReader.getCurrentEntry();
-        currentSegment.release();
-        currentSegment = nextSegment;
-        currentSegment.acquire();
-        currentReader = currentSegment.createReader();
-        return currentReader.hasNext();
-      }
-      return false;
+    if (currentReader.hasNext()) {
+      return true;
     }
-    return true;
+    return moveToNextSegment() ? currentReader.hasNext() : false;
   }
 
   @Override
   public Indexed<E> next() {
-    if (!currentReader.hasNext()) {
-      JournalSegment<E> nextSegment = journal.getNextSegment(currentSegment.index());
-      if (nextSegment != null && nextSegment.index() == getNextIndex()) {
-        previousEntry = currentReader.getCurrentEntry();
-        currentSegment.release();
-        currentSegment = nextSegment;
-        currentSegment.acquire();
-        currentReader = currentSegment.createReader();
-        return currentReader.next();
-      } else {
-        throw new NoSuchElementException();
-      }
-    } else {
+    if (currentReader.hasNext()) {
       previousEntry = currentReader.getCurrentEntry();
       return currentReader.next();
     }
+    if (moveToNextSegment()) {
+      return currentReader.next();
+    }
+    throw new NoSuchElementException();
   }
 
   @Override
   public void close() {
     currentReader.close();
     journal.closeReader(this);
+  }
+
+  private boolean moveToNextSegment() {
+    final var nextSegment = journal.getNextSegment(currentSegment.index());
+    if (nextSegment == null || nextSegment.index() != getNextIndex()) {
+      return false;
+    }
+
+    previousEntry = currentReader.getCurrentEntry();
+    currentReader.close();
+    currentSegment.release();
+
+    currentSegment = nextSegment;
+    currentSegment.acquire();
+    currentReader = currentSegment.createReader();
+    return true;
   }
 }
