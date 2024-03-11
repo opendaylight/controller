@@ -40,10 +40,11 @@ final class JournalSegment<E> implements AutoCloseable {
   private final int maxEntrySize;
   private final JournalIndex index;
   private final JournalSerdes namespace;
-  private final MappableJournalSegmentWriter<E> writer;
   private final Set<JournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
   private final FileChannel channel;
+
+  private JournalSegmentWriter<E> writer;
   private boolean open = true;
 
   JournalSegment(
@@ -65,7 +66,7 @@ final class JournalSegment<E> implements AutoCloseable {
     } catch (IOException e) {
       throw new StorageException(e);
     }
-    writer = new MappableJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
+    writer = new FileChannelJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
   }
 
   /**
@@ -158,7 +159,7 @@ final class JournalSegment<E> implements AutoCloseable {
    */
   private void acquire() {
     if (references.getAndIncrement() == 0 && storageLevel == StorageLevel.MAPPED) {
-      writer.map();
+      writer = writer.toMapped();
     }
   }
 
@@ -168,7 +169,7 @@ final class JournalSegment<E> implements AutoCloseable {
   private void release() {
     if (references.decrementAndGet() == 0) {
       if (storageLevel == StorageLevel.MAPPED) {
-        writer.unmap();
+        writer = writer.toFileChannel();
       }
       if (!open) {
         finishClose();
@@ -181,7 +182,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return The segment writer.
    */
-  MappableJournalSegmentWriter<E> acquireWriter() {
+  JournalSegmentWriter<E> acquireWriter() {
     checkOpen();
     acquire();
 
