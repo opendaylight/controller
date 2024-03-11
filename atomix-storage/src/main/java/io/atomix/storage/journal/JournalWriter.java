@@ -20,8 +20,7 @@ package io.atomix.storage.journal;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public interface JournalWriter<E> extends AutoCloseable {
-
+public interface JournalWriter<E> {
   /**
    * Returns the last written index.
    *
@@ -83,7 +82,4 @@ public interface JournalWriter<E> extends AutoCloseable {
    * Flushes written entries to disk.
    */
   void flush();
-
-  @Override
-  void close();
 }
