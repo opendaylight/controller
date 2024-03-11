@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.SparseJournalIndex;
 import java.io.IOException;
@@ -24,9 +25,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Log segment.
@@ -70,29 +68,11 @@ final class JournalSegment<E> implements AutoCloseable {
   }
 
   /**
-   * Returns the segment ID.
-   *
-   * @return The segment ID.
-   */
-  public long id() {
-    return descriptor.id();
-  }
-
-  /**
-   * Returns the segment version.
-   *
-   * @return The segment version.
-   */
-  public long version() {
-    return descriptor.version();
-  }
-
-  /**
    * Returns the segment's starting index.
    *
    * @return The segment's starting index.
    */
-  public long index() {
+  long index() {
     return descriptor.index();
   }
 
@@ -101,7 +81,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return The last index in the segment.
    */
-  public long lastIndex() {
+  long lastIndex() {
     return writer.getLastIndex();
   }
 
@@ -110,7 +90,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return the size of the segment
    */
-  public int size() {
+  int size() {
     try {
       return (int) channel.size();
     } catch (IOException e) {
@@ -123,7 +103,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return The segment file.
    */
-  public JournalSegmentFile file() {
+  JournalSegmentFile file() {
     return file;
   }
 
@@ -132,26 +112,8 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return The segment descriptor.
    */
-  public JournalSegmentDescriptor descriptor() {
+  JournalSegmentDescriptor descriptor() {
     return descriptor;
-  }
-
-  /**
-   * Returns a boolean value indicating whether the segment is empty.
-   *
-   * @return Indicates whether the segment is empty.
-   */
-  public boolean isEmpty() {
-    return length() == 0;
-  }
-
-  /**
-   * Returns the segment length.
-   *
-   * @return The segment length.
-   */
-  public long length() {
-    return writer.getNextIndex() - index();
   }
 
   /**
@@ -228,7 +190,9 @@ final class JournalSegment<E> implements AutoCloseable {
    * Checks whether the segment is open.
    */
   private void checkOpen() {
-    checkState(open, "Segment not open");
+    if (!open) {
+      throw new IllegalStateException("Segment not open");
+    }
   }
 
   /**
@@ -268,7 +232,7 @@ final class JournalSegment<E> implements AutoCloseable {
   /**
    * Deletes the segment.
    */
-  public void delete() {
+  void delete() {
     try {
       Files.deleteIfExists(file.file().toPath());
     } catch (IOException e) {
@@ -278,9 +242,9 @@ final class JournalSegment<E> implements AutoCloseable {
 
   @Override
   public String toString() {
-    return toStringHelper(this)
-        .add("id", id())
-        .add("version", version())
+    return MoreObjects.toStringHelper(this)
+        .add("id", descriptor.id())
+        .add("version", descriptor.version())
         .add("index", index())
         .toString();
   }
