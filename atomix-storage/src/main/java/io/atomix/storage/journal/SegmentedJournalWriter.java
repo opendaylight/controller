@@ -28,8 +28,7 @@ public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   SegmentedJournalWriter(SegmentedJournal<E> journal) {
     this.journal = journal;
     this.currentSegment = journal.getLastSegment();
-    currentSegment.acquire();
-    this.currentWriter = currentSegment.writer();
+    this.currentWriter = currentSegment.acquireWriter();
   }
 
   @Override
@@ -50,10 +49,9 @@ public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   @Override
   public void reset(long index) {
     if (index > currentSegment.index()) {
-      currentSegment.release();
+      currentSegment.releaseWriter();
       currentSegment = journal.resetSegments(index);
-      currentSegment.acquire();
-      currentWriter = currentSegment.writer();
+      currentWriter = currentSegment.acquireWriter();
     } else {
       truncate(index - 1);
     }
@@ -101,10 +99,9 @@ public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
 
   private void moveToNextSegment() {
     currentWriter.flush();
-    currentSegment.release();
+    currentSegment.releaseWriter();
     currentSegment = journal.getNextSegment();
-    currentSegment.acquire();
-    currentWriter = currentSegment.writer();
+    currentWriter = currentSegment.acquireWriter();
   }
 
   @Override
@@ -115,11 +112,10 @@ public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
 
     // Delete all segments with first indexes greater than the given index.
     while (index < currentSegment.index() && currentSegment != journal.getFirstSegment()) {
-      currentSegment.release();
+      currentSegment.releaseWriter();
       journal.removeSegment(currentSegment);
       currentSegment = journal.getLastSegment();
-      currentSegment.acquire();
-      currentWriter = currentSegment.writer();
+      currentWriter = currentSegment.acquireWriter();
     }
 
     // Truncate the current index.
