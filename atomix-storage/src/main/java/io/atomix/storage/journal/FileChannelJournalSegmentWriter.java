@@ -88,7 +88,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  public void reset(long index) {
+  void reset(long index) {
     long nextIndex = firstIndex;
 
     // Clear the buffer indexes.
@@ -149,17 +149,17 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  public long getLastIndex() {
+  long getLastIndex() {
     return lastEntry != null ? lastEntry.index() : firstIndex - 1;
   }
 
   @Override
-  public Indexed<E> getLastEntry() {
+  Indexed<E> getLastEntry() {
     return lastEntry;
   }
 
   @Override
-  public long getNextIndex() {
+  long getNextIndex() {
     if (lastEntry != null) {
       return lastEntry.index() + 1;
     } else {
@@ -168,7 +168,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  public void append(Indexed<E> entry) {
+  void append(Indexed<E> entry) {
     final long nextIndex = getNextIndex();
 
     // If the entry's index is greater than the next index in the segment, skip some entries.
@@ -185,7 +185,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T extends E> Indexed<T> append(T entry) {
+  <T extends E> Indexed<T> append(T entry) {
     // Store the entry index.
     final long index = getNextIndex();
 
@@ -235,7 +235,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  public void truncate(long index) {
+  void truncate(long index) {
     // If the index is greater than or equal to the last index, skip the truncate.
     if (index >= getLastIndex()) {
       return;
@@ -264,7 +264,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  public void flush() {
+  void flush() {
     try {
       if (channel.isOpen()) {
         channel.force(true);
@@ -275,7 +275,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  public void close() {
+  void close() {
     flush();
   }
 }
