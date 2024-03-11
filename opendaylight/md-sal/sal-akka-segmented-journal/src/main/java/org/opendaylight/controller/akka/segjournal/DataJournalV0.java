@@ -11,10 +11,10 @@ import akka.actor.ActorSystem;
 import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import com.google.common.base.VerifyException;
+import io.atomix.storage.journal.JournalReader;
 import io.atomix.storage.journal.JournalSerdes;
+import io.atomix.storage.journal.JournalWriter;
 import io.atomix.storage.journal.SegmentedJournal;
-import io.atomix.storage.journal.SegmentedJournalReader;
-import io.atomix.storage.journal.SegmentedJournalWriter;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
 import java.io.Serializable;
@@ -80,8 +80,7 @@ final class DataJournalV0 extends DataJournal {
         }
     }
 
-    private void handleReplayMessages(final SegmentedJournalReader<DataJournalEntry> reader,
-            final ReplayMessages message) {
+    private void handleReplayMessages(final JournalReader<DataJournalEntry> reader, final ReplayMessages message) {
         int count = 0;
         while (reader.hasNext() && count < message.max) {
             final var next = reader.next();
@@ -132,7 +131,7 @@ final class DataJournalV0 extends DataJournal {
         return bytes;
     }
 
-    private long writePayload(final SegmentedJournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {
+    private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {
         long bytes = 0;
         for (var repr : reprs) {
             final Object payload = repr.payload();
