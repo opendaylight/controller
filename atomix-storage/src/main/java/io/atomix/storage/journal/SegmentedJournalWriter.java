@@ -129,9 +129,4 @@ public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   public void flush() {
     currentWriter.flush();
   }
-
-  @Override
-  public void close() {
-    currentWriter.close();
-  }
 }
