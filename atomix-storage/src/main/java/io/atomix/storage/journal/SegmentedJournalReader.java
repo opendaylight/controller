@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 /**
  * Raft log reader.
  */
-public final class SegmentedJournalReader<E> implements JournalReader<E> {
+final class SegmentedJournalReader<E> implements JournalReader<E> {
   private final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
   private Indexed<E> previousEntry;

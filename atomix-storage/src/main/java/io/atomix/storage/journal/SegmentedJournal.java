@@ -40,7 +40,6 @@ import static java.util.Objects.requireNonNull;
  * Segmented journal.
  */
 public final class SegmentedJournal<E> implements Journal<E> {
-
   /**
    * Returns a new Raft log builder.
    *
@@ -91,7 +90,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     this.indexDensity = indexDensity;
     this.flushOnCommit = flushOnCommit;
     open();
-    this.writer = openWriter();
+    this.writer = new SegmentedJournalWriter<>(this);
   }
 
   /**
@@ -194,13 +193,13 @@ public final class SegmentedJournal<E> implements Journal<E> {
   }
 
   @Override
-  public SegmentedJournalWriter<E> writer() {
+  public JournalWriter<E> writer() {
     return writer;
   }
 
   @Override
-  public SegmentedJournalReader<E> openReader(long index) {
-    return openReader(index, SegmentedJournalReader.Mode.ALL);
+  public JournalReader<E> openReader(long index) {
+    return openReader(index, JournalReader.Mode.ALL);
   }
 
   /**
@@ -210,19 +209,10 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param mode The mode in which to read entries.
    * @return The Raft log reader.
    */
-  public SegmentedJournalReader<E> openReader(long index, SegmentedJournalReader.Mode mode) {
-    SegmentedJournalReader<E> reader = new SegmentedJournalReader<>(this, index, mode);
+  public JournalReader<E> openReader(long index, JournalReader.Mode mode) {
+    final var reader = new SegmentedJournalReader<>(this, index, mode);
     readers.add(reader);
     return reader;
-  }
-
-  /**
-   * Opens a new journal writer.
-   *
-   * @return A new journal writer.
-   */
-  protected SegmentedJournalWriter<E> openWriter() {
-    return new SegmentedJournalWriter<>(this);
   }
 
   /**
