@@ -20,12 +20,14 @@ abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
     private final JournalIndex index;
     final JournalSerdes namespace;
     private final long firstIndex;
+    private final JournalSegment<E> segment;
 
     private Indexed<E> currentEntry;
     private Indexed<E> nextEntry;
 
     JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
             final JournalSerdes namespace) {
+        this.segment = requireNonNull(segment);
         this.maxEntrySize = maxEntrySize;
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
@@ -100,7 +102,7 @@ abstract sealed class JournalSegmentReader<E> implements JournalReader<E>
 
     @Override
     public final void close() {
-        // FIXME: CONTROLLER-2098: remove this method
+        segment.closeReader(this);
     }
 
     /**
