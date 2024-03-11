@@ -20,12 +20,12 @@ import java.nio.BufferOverflowException;
 /**
  * Raft log writer.
  */
-public class SegmentedJournalWriter<E> implements JournalWriter<E> {
+public final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   private final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
   private MappableJournalSegmentWriter<E> currentWriter;
 
-  public SegmentedJournalWriter(SegmentedJournal<E> journal) {
+  SegmentedJournalWriter(SegmentedJournal<E> journal) {
     this.journal = journal;
     this.currentSegment = journal.getLastSegment();
     currentSegment.acquire();
@@ -78,30 +78,33 @@ public class SegmentedJournalWriter<E> implements JournalWriter<E> {
       if (currentSegment.index() == currentWriter.getNextIndex()) {
         throw e;
       }
-      currentWriter.flush();
-      currentSegment.release();
-      currentSegment = journal.getNextSegment();
-      currentSegment.acquire();
-      currentWriter = currentSegment.writer();
-      return currentWriter.append(entry);
     }
+
+    moveToNextSegment();
+    return currentWriter.append(entry);
   }
 
   @Override
   public void append(Indexed<E> entry) {
     try {
       currentWriter.append(entry);
+      return;
     } catch (BufferOverflowException e) {
       if (currentSegment.index() == currentWriter.getNextIndex()) {
         throw e;
       }
-      currentWriter.flush();
-      currentSegment.release();
-      currentSegment = journal.getNextSegment();
-      currentSegment.acquire();
-      currentWriter = currentSegment.writer();
-      currentWriter.append(entry);
     }
+
+    moveToNextSegment();
+    currentWriter.append(entry);
+  }
+
+  private void moveToNextSegment() {
+    currentWriter.flush();
+    currentSegment.release();
+    currentSegment = journal.getNextSegment();
+    currentSegment.acquire();
+    currentWriter = currentSegment.writer();
   }
 
   @Override
