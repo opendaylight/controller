@@ -112,6 +112,7 @@ abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentR
         reset();
         Position position = this.index.lookup(index - 1);
         if (position != null) {
+            // FIXME: why do we need a 'null'-based entry here?
             currentEntry = new Indexed<>(position.index() - 1, null, 0);
             setPosition(position.position());
             nextEntry = readNext();
