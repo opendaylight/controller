@@ -53,11 +53,10 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
   @Override
   public final Indexed<E> getCurrentEntry() {
-    Indexed<E> currentEntry = currentReader.getCurrentEntry();
-    if (currentEntry != null) {
-      return currentEntry;
-    }
-    return previousEntry;
+    // If previousEntry was the last in the previous segment, we may have moved currentReader to the next segment.
+    // That segment may be empty, though, in which case we need to report the previousEntry.
+    final Indexed<E> currentEntry;
+    return (currentEntry = currentReader.getCurrentEntry()) != null ? currentEntry : previousEntry;
   }
 
   @Override
