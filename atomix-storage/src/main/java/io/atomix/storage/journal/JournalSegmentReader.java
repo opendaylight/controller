@@ -136,9 +136,15 @@ abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentR
     abstract void setPosition(int position);
 
     /**
-     * Reads the next entry in the segment.
+     * Reads the entry at specified index.
      *
-     * @return Next entry, or {@code null}
+     * @param index entry index
+     * @return The entry, or {@code null}
      */
-    abstract @Nullable Indexed<E> readNext();
+    abstract @Nullable Indexed<E> readEntry(long index);
+
+    private @Nullable Indexed<E> readNext() {
+        // Compute the index of the next entry in the segment.
+        return readEntry(getNextIndex());
+    }
 }

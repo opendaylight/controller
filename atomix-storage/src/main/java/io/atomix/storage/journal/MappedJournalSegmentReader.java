@@ -45,10 +45,7 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
   }
 
   @Override
-  Indexed<E> readNext() {
-    // Compute the index of the next entry in the segment.
-    final long index = getNextIndex();
-
+  Indexed<E> readEntry(final long index) {
     // Mark the buffer so it can be reset if necessary.
     buffer.mark();
 
