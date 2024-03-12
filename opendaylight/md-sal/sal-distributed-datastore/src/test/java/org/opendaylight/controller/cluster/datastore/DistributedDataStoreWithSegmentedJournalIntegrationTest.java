@@ -96,8 +96,8 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         CollectionNodeBuilder<MapEntryNode, SystemMapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
 
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-                testParameter, "testManyWritesDeletes", "module-shards-cars-member-1.conf", true, "cars")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testManyWritesDeletes",
+            "module-shards-cars-member-1.conf", true, "cars")) {
 
             DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
@@ -155,8 +155,8 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         }
 
         // test restoration from journal and verify data matches
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-                testParameter, "testManyWritesDeletes", "module-shards-cars-member-1.conf", true, "cars")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testManyWritesDeletes",
+            "module-shards-cars-member-1.conf", true, "cars")) {
 
             DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
             MapNode cars = carMapBuilder.build();
