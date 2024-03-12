@@ -73,8 +73,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.AbstractClusterRefActorTest;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -203,12 +203,12 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     private TestShardManager.Builder newTestShardMgrBuilder() {
-        return TestShardManager.builder(datastoreContextBuilder).distributedDataStore(mock(AbstractDataStore.class));
+        return TestShardManager.builder(datastoreContextBuilder)
+            .distributedDataStore(mock(ClientBackedDataStore.class));
     }
 
     private TestShardManager.Builder newTestShardMgrBuilder(final Configuration config) {
-        return TestShardManager.builder(datastoreContextBuilder).configuration(config)
-                .distributedDataStore(mock(AbstractDataStore.class));
+        return newTestShardMgrBuilder().configuration(config);
     }
 
     private Props newShardMgrProps() {
@@ -244,8 +244,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(final ActorRef shardActor) {
-        return TestShardManager.builder(datastoreContextBuilder).shardActor(shardActor)
-                .distributedDataStore(mock(AbstractDataStore.class));
+        return TestShardManager.builder(datastoreContextBuilder)
+            .shardActor(shardActor)
+            .distributedDataStore(mock(ClientBackedDataStore.class));
     }
 
 
