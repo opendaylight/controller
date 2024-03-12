@@ -15,38 +15,32 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.NoSuchElementException;
 
 /**
- * Raft log reader.
+ * A {@link JournalReader} traversing all entries.
  */
-final class SegmentedJournalReader<E> implements JournalReader<E> {
-  private final SegmentedJournal<E> journal;
+sealed class SegmentedJournalReader<E> implements JournalReader<E> permits CommitedSegmentJournalReader {
+  final SegmentedJournal<E> journal;
   private JournalSegment<E> currentSegment;
   private Indexed<E> previousEntry;
   private JournalSegmentReader<E> currentReader;
-  private final Mode mode;
 
-  SegmentedJournalReader(SegmentedJournal<E> journal, long index, Mode mode) {
-    this.journal = journal;
-    this.mode = mode;
-    currentSegment = journal.getSegment(index);
-    currentReader = currentSegment.createReader();
-
-    long nextIndex = getNextIndex();
-    while (index > nextIndex && hasNext()) {
-      next();
-      nextIndex = getNextIndex();
-    }
+  SegmentedJournalReader(SegmentedJournal<E> journal, JournalSegment<E> segment) {
+    this.journal = requireNonNull(journal);
+    currentSegment = requireNonNull(segment);
+    currentReader = segment.createReader();
   }
 
   @Override
-  public long getFirstIndex() {
+  public final long getFirstIndex() {
     return journal.getFirstSegment().index();
   }
 
   @Override
-  public long getCurrentIndex() {
+  public final long getCurrentIndex() {
     long currentIndex = currentReader.getCurrentIndex();
     if (currentIndex != 0) {
       return currentIndex;
@@ -58,7 +52,7 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
   }
 
   @Override
-  public Indexed<E> getCurrentEntry() {
+  public final Indexed<E> getCurrentEntry() {
     Indexed<E> currentEntry = currentReader.getCurrentEntry();
     if (currentEntry != null) {
       return currentEntry;
@@ -67,12 +61,12 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
   }
 
   @Override
-  public long getNextIndex() {
+  public final long getNextIndex() {
     return currentReader.getNextIndex();
   }
 
   @Override
-  public void reset() {
+  public final void reset() {
     previousEntry = null;
     currentReader.close();
 
@@ -81,7 +75,7 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
   }
 
   @Override
-  public void reset(long index) {
+  public final void reset(long index) {
     // If the current segment is not open, it has been replaced. Reset the segments.
     if (!currentSegment.isOpen()) {
       reset();
@@ -125,24 +119,11 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
 
   @Override
   public boolean hasNext() {
-    if (mode == Mode.ALL) {
-      return hasNextEntry();
-    }
-
-    long nextIndex = getNextIndex();
-    long commitIndex = journal.getCommitIndex();
-    return nextIndex <= commitIndex && hasNextEntry();
-  }
-
-  private boolean hasNextEntry() {
-    if (currentReader.hasNext()) {
-      return true;
-    }
-    return moveToNextSegment() ? currentReader.hasNext() : false;
+    return currentReader.hasNext() || moveToNextSegment() && currentReader.hasNext();
   }
 
   @Override
-  public Indexed<E> next() {
+  public final Indexed<E> next() {
     if (currentReader.hasNext()) {
       previousEntry = currentReader.getCurrentEntry();
       return currentReader.next();
@@ -154,7 +135,7 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
   }
 
   @Override
-  public void close() {
+  public final void close() {
     currentReader.close();
     journal.closeReader(this);
   }

@@ -210,7 +210,17 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @return The Raft log reader.
    */
   public JournalReader<E> openReader(long index, JournalReader.Mode mode) {
-    final var reader = new SegmentedJournalReader<>(this, index, mode);
+    final var segment = getSegment(index);
+    final var reader = switch (mode) {
+      case ALL -> new SegmentedJournalReader<>(this, segment);
+      case COMMITS -> new CommitedSegmentJournalReader<>(this, segment);
+    };
+
+    // Forward reader to specified index
+    for (long next = reader.getNextIndex(); index > next && reader.hasNext(); next = reader.getNextIndex()) {
+      reader.next();
+    }
+
     readers.add(reader);
     return reader;
   }
