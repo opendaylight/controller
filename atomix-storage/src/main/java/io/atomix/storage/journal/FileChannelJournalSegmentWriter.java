@@ -168,22 +168,6 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  void append(Indexed<E> entry) {
-    final long nextIndex = getNextIndex();
-
-    // If the entry's index is greater than the next index in the segment, skip some entries.
-    if (entry.index() > nextIndex) {
-      throw new IndexOutOfBoundsException("Entry index is not sequential");
-    }
-
-    // If the entry's index is less than the next index, truncate the segment.
-    if (entry.index() < nextIndex) {
-      truncate(entry.index() - 1);
-    }
-    append(entry.entry());
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
   <T extends E> Indexed<T> append(T entry) {
     // Store the entry index.

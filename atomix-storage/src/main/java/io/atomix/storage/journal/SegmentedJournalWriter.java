@@ -78,30 +78,11 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
       }
     }
 
-    moveToNextSegment();
-    return currentWriter.append(entry);
-  }
-
-  @Override
-  public void append(Indexed<E> entry) {
-    try {
-      currentWriter.append(entry);
-      return;
-    } catch (BufferOverflowException e) {
-      if (currentSegment.index() == currentWriter.getNextIndex()) {
-        throw e;
-      }
-    }
-
-    moveToNextSegment();
-    currentWriter.append(entry);
-  }
-
-  private void moveToNextSegment() {
     currentWriter.flush();
     currentSegment.releaseWriter();
     currentSegment = journal.getNextSegment();
     currentWriter = currentSegment.acquireWriter();
+    return currentWriter.append(entry);
   }
 
   @Override

@@ -72,13 +72,6 @@ abstract sealed class JournalSegmentWriter<E> permits FileChannelJournalSegmentW
     abstract <T extends E> Indexed<T> append(T entry);
 
     /**
-     * Appends an indexed entry to the log.
-     *
-     * @param entry The indexed entry to append.
-     */
-    abstract void append(Indexed<E> entry);
-
-    /**
      * Resets the head of the segment to the given index.
      *
      * @param index the index to which to reset the head of the segment
