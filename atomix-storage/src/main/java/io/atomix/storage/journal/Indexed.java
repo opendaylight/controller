@@ -15,63 +15,22 @@
  */
 package io.atomix.storage.journal;
 
-import static com.google.common.base.MoreObjects.toStringHelper;
+import com.google.common.base.MoreObjects;
 
 /**
  * Indexed journal entry.
+ *
+ * @param <E> entry type
+ * @param index the entry index
+ * @param entry the indexed entry
+ * @param size the serialized entry size
  */
-public class Indexed<E> {
-  private final long index;
-  private final E entry;
-  private final int size;
-
-  public Indexed(long index, E entry, int size) {
-    this.index = index;
-    this.entry = entry;
-    this.size = size;
-  }
-
-  /**
-   * Returns the entry index.
-   *
-   * @return The entry index.
-   */
-  public long index() {
-    return index;
-  }
-
-  /**
-   * Returns the indexed entry.
-   *
-   * @return The indexed entry.
-   */
-  public E entry() {
-    return entry;
-  }
-
-  /**
-   * Returns the serialized entry size.
-   *
-   * @return The serialized entry size.
-   */
-  public int size() {
-    return size;
-  }
-
-  /**
-   * Returns the entry type class.
-   *
-   * @return The entry class.
-   */
-  public Class<?> type() {
-    return entry.getClass();
-  }
-
-  @Override
-  public String toString() {
-    return toStringHelper(this)
-        .add("index", index)
-        .add("entry", entry)
-        .toString();
-  }
+// FIXME: add @NonNullByDefault and enforce non-null entry once we can say that entries cannot be null
+// FIXME: it seems 'index' has to be non-zero, we should enforce that if that really is the case
+// FIXME: it seems 'size' has not be non-zero, we should enforce that if that really is the case
+public record Indexed<E>(long index, E entry, int size) {
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("index", index).add("entry", entry).toString();
+    }
 }
