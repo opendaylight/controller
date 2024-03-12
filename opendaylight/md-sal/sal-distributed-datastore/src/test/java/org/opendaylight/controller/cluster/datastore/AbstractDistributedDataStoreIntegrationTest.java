@@ -42,6 +42,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameter;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
@@ -83,9 +84,8 @@ import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class AbstractDistributedDataStoreIntegrationTest {
-
     @Parameter
-    public Class<? extends AbstractDataStore> testParameter;
+    public Class<? extends ClientBackedDataStore> testParameter;
 
     protected ActorSystem system;
 
@@ -99,8 +99,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "transactionIntegrationTest", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "transactionIntegrationTest", "test-1")) {
 
             testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH,
                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -115,8 +114,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testWriteTransactionWithMultipleShards() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testWriteTransactionWithMultipleShards", "cars-1", "people-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testWriteTransactionWithMultipleShards",
+            "cars-1", "people-1")) {
 
             DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
@@ -156,8 +155,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testReadWriteTransactionWithSingleShard() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testReadWriteTransactionWithSingleShard", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testReadWriteTransactionWithSingleShard",
+            "test-1")) {
 
             // 1. Create a read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
@@ -190,8 +189,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testReadWriteTransactionWithMultipleShards() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testReadWriteTransactionWithMultipleShards", "cars-1", "people-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testReadWriteTransactionWithMultipleShards",
+            "cars-1", "people-1")) {
 
             DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
@@ -236,8 +235,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testSingleTransactionsWritesInQuickSuccession() throws Exception {
         final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (var dataStore = testKit.setupAbstractDataStore(testParameter,
-                "testSingleTransactionsWritesInQuickSuccession", "cars-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testSingleTransactionsWritesInQuickSuccession",
+            "cars-1")) {
 
             final var txChain = dataStore.createTransactionChain();
 
@@ -301,8 +300,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1)
         .shardInitializationTimeout(200, TimeUnit.MILLISECONDS).frontendRequestTimeoutInSeconds(2);
 
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(testParameter, testName, false, shardName)) {
-
+        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
             final Object result = dataStore.getActorUtils().executeOperation(
                 dataStore.getActorUtils().getShardManager(), new FindLocalShard(shardName, true));
             assertTrue("Expected LocalShardFound. Actual: " + result, result instanceof LocalShardFound);
@@ -378,8 +376,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testTransactionAbort() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "transactionAbortIntegrationTest", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "transactionAbortIntegrationTest", "test-1")) {
 
             final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
@@ -401,8 +398,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionChainWithSingleShard() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testTransactionChainWithSingleShard", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testTransactionChainWithSingleShard", "test-1")) {
 
             // 1. Create a Tx chain and write-only Tx
             final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
@@ -478,8 +474,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testTransactionChainWithMultipleShards() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testTransactionChainWithMultipleShards", "cars-1", "people-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testTransactionChainWithMultipleShards",
+            "cars-1", "people-1")) {
 
             final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
@@ -534,8 +530,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testCreateChainedTransactionsInQuickSuccession() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testCreateChainedTransactionsInQuickSuccession", "cars-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionsInQuickSuccession",
+            "cars-1")) {
 
             final ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                 ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
@@ -579,8 +575,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testCreateChainedTransactionAfterEmptyTxReadied() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testCreateChainedTransactionAfterEmptyTxReadied", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionAfterEmptyTxReadied",
+            "test-1")) {
 
             final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
@@ -600,8 +596,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testCreateChainedTransactionWhenPreviousNotReady() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testCreateChainedTransactionWhenPreviousNotReady", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionWhenPreviousNotReady",
+            "test-1")) {
 
             final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
@@ -620,8 +616,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testCreateChainedTransactionAfterClose() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testCreateChainedTransactionAfterClose", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionAfterClose",
+            "test-1")) {
 
             final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
             txChain.close();
@@ -635,8 +631,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testChainWithReadOnlyTxAfterPreviousReady() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testChainWithReadOnlyTxAfterPreviousReady", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testChainWithReadOnlyTxAfterPreviousReady",
+            "test-1")) {
 
             final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
@@ -678,8 +674,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception {
         final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (var dataStore = testKit.setupAbstractDataStore(testParameter,
-                "testChainedTransactionFailureWithSingleShard", "cars-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testChainedTransactionFailureWithSingleShard",
+            "cars-1")) {
 
             final var broker = new ConcurrentDOMDataBroker(
                 ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
@@ -714,8 +710,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testChainedTransactionFailureWithMultipleShards() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testChainedTransactionFailureWithMultipleShards", "cars-1", "people-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testChainedTransactionFailureWithMultipleShards",
+            "cars-1", "people-1")) {
 
             final ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                 ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
@@ -753,8 +749,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     public void testDataTreeChangeListenerRegistration() throws Exception {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, "testDataTreeChangeListenerRegistration", "test-1")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testDataTreeChangeListenerRegistration",
+            "test-1")) {
 
             testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH,
                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -835,8 +831,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             new DatastoreSnapshot.ShardSnapshot("cars", carsSnapshot),
             new DatastoreSnapshot.ShardSnapshot("people", peopleSnapshot)));
 
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, name, "module-shards-member1.conf", true, "cars", "people")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, name, "module-shards-member1.conf", true,
+            "cars", "people")) {
 
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
@@ -851,9 +847,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     // FIXME: re-enable this test
     public void testSnapshotOnRootOverwrite() throws Exception {
         final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder.snapshotOnRootOverwrite(true));
-        try (var dataStore = testKit.setupAbstractDataStore(
-                testParameter, "testRootOverwrite", "module-shards-default-cars-member1.conf",
-                true, "cars", "default")) {
+        try (var dataStore = testKit.setupDataStore(testParameter, "testRootOverwrite",
+            "module-shards-default-cars-member1.conf", true, "cars", "default")) {
 
             final var rootNode = Builders.containerBuilder()
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME))

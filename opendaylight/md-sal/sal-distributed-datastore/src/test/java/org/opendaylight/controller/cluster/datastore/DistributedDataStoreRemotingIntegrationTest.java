@@ -66,6 +66,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -145,7 +146,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     @Parameter(0)
-    public Class<? extends AbstractDataStore> testParameter;
+    public Class<? extends ClientBackedDataStore> testParameter;
     @Parameter(1)
     public int commitTimeout;
 
@@ -175,8 +176,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private final TransactionIdentifier tx1 = nextTransactionId();
     private final TransactionIdentifier tx2 = nextTransactionId();
 
-    private AbstractDataStore followerDistributedDataStore;
-    private AbstractDataStore leaderDistributedDataStore;
+    private ClientBackedDataStore followerDistributedDataStore;
+    private ClientBackedDataStore leaderDistributedDataStore;
     private IntegrationTestKit followerTestKit;
     private IntegrationTestKit leaderTestKit;
 
@@ -231,11 +232,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderBuilder, commitTimeout);
 
-        leaderDistributedDataStore = leaderTestKit.setupAbstractDataStore(
-                testParameter, type, moduleShardsConfig, false, shards);
+        leaderDistributedDataStore = leaderTestKit.setupDataStore(testParameter, type, moduleShardsConfig, false,
+            shards);
 
         followerTestKit = new IntegrationTestKit(followerSystem, followerBuilder, commitTimeout);
-        followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
+        followerDistributedDataStore = followerTestKit.setupDataStore(
                 testParameter, type, moduleShardsConfig, false, shards);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(), shards);
@@ -340,9 +341,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final ActorSystem newSystem = newActorSystem("reinstated-member2", "Member2");
 
-        try (AbstractDataStore member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder,
-                commitTimeout)
-                .setupAbstractDataStore(testParameter, testName, "module-shards-member2", true, CARS)) {
+        try (var member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder, commitTimeout)
+                .setupDataStore(testParameter, testName, "module-shards-member2", true, CARS)) {
             verifyCars(member2Datastore.newReadOnlyTransaction(), car2);
         }
     }
@@ -702,9 +702,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
         IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder, commitTimeout);
 
-        try (AbstractDataStore ds =
-                newMember1TestKit.setupAbstractDataStore(
-                        testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
+        try (var ds = newMember1TestKit.setupDataStore(testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false,
+            CARS)) {
 
             followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), CARS);
 
@@ -979,7 +978,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifyNode(readTx, PeopleModel.PERSON_LIST_PATH, people);
     }
 
-    private static void verifyCarsReadWriteTransactions(final AbstractDataStore datastore, final int expected)
+    private static void verifyCarsReadWriteTransactions(final ClientBackedDataStore datastore, final int expected)
             throws Exception {
         IntegrationTestKit.verifyShardStats(datastore, "cars",
             stats -> assertEquals("getReadWriteTransactionCount", expected, stats.getReadWriteTransactionCount()));
@@ -995,8 +994,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System,
                 DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).operationTimeoutInMillis(500),
                 commitTimeout);
-        try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
-                testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
+        try (var follower2DistributedDataStore = follower2TestKit.setupDataStore(testParameter, testName,
+            MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
 
             followerTestKit.waitForMembersUp("member-3");
             follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1095,8 +1094,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DOMStoreThreePhaseCommitCohort successTxCohort = successWriteTx.ready();
 
-        followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
-                testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
+        followerDistributedDataStore = followerTestKit.setupDataStore(testParameter, testName,
+            MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
 
         leaderTestKit.doCommit(preIsolatedLeaderTxCohort);
         leaderTestKit.doCommit(successTxCohort);
@@ -1181,9 +1180,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
                 follower2System, follower2DatastoreContextBuilder, commitTimeout);
 
-        try (AbstractDataStore ds =
-                follower2TestKit.setupAbstractDataStore(
-                        testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS)) {
+        try (var ds = follower2TestKit.setupDataStore(testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS)) {
 
             followerTestKit.waitForMembersUp("member-1", "member-3");
             follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1220,9 +1217,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
                 follower2System, follower2DatastoreContextBuilder, commitTimeout);
 
-        final AbstractDataStore ds2 =
-                     follower2TestKit.setupAbstractDataStore(
-                             testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS);
+        final var ds2 = follower2TestKit.setupDataStore(testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS);
 
         followerTestKit.waitForMembersUp("member-1", "member-3");
         follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1340,8 +1335,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initialWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         leaderTestKit.doCommit(initialWriteTx.ready());
 
-        try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
-                testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false)) {
+        try (var follower2DistributedDataStore = follower2TestKit.setupDataStore(testParameter, testName,
+            MODULE_SHARDS_CARS_1_2_3, false)) {
 
             final ActorRef member3Cars = ((LocalShardStore) follower2DistributedDataStore).getLocalShards()
                     .getLocalShards().get("cars").getActor();
@@ -1463,7 +1458,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().orElseThrow());
     }
 
-    private static void sendDatastoreContextUpdate(final AbstractDataStore dataStore, final Builder builder) {
+    private static void sendDatastoreContextUpdate(final ClientBackedDataStore dataStore, final Builder builder) {
         final Builder newBuilder = DatastoreContext.newBuilderFrom(builder.build());
         final DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
         final Answer<DatastoreContext> answer = invocation -> newBuilder.build();

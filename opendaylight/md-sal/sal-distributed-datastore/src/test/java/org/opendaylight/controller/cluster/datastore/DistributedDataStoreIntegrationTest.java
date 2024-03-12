@@ -87,9 +87,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, testName, false, shardName)) {
-
+        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
             // Create the write Tx
             final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction()
                     : dataStore.newReadWriteTransaction();
@@ -183,9 +181,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(
-            testParameter, testName, false, shardName)) {
-
+        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
             // Create the read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
@@ -251,7 +247,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-        final AbstractDataStore dataStore = testKit.setupAbstractDataStore(testParameter, testName, false, shardName);
+        final var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName);
 
         // Create the write Tx
         final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
@@ -317,8 +313,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-        try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(testParameter, testName, false, shardName)) {
-
+        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
             // Create the read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);

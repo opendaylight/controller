@@ -46,7 +46,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
@@ -427,8 +426,8 @@ public class ConcurrentDOMDataBrokerTest {
 
     @Test
     public void testExtensions() {
-        final var mockConfigStore = mock(AbstractDataStore.class);
-        final var mockOperStore = mock(AbstractDataStore.class);
+        final var mockConfigStore = mock(ClientBackedDataStore.class);
+        final var mockOperStore = mock(ClientBackedDataStore.class);
         try (var dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, mockOperStore,
                 LogicalDatastoreType.CONFIGURATION, mockConfigStore), futureExecutor)) {
