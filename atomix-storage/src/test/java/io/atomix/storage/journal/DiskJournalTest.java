@@ -18,13 +18,8 @@ package io.atomix.storage.journal;
 /**
  * Disk journal test.
  */
-public class DiskJournalTest extends PersistentJournalTest {
-  public DiskJournalTest(int maxSegmentSize) {
-    super(maxSegmentSize);
-  }
-
-  @Override
-  protected StorageLevel storageLevel() {
-    return StorageLevel.DISK;
-  }
+public class DiskJournalTest extends AbstractJournalTest {
+    public DiskJournalTest(final int maxSegmentSize) {
+        super(StorageLevel.DISK, maxSegmentSize);
+    }
 }
