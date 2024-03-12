@@ -131,6 +131,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         this.identifier = requireNonNull(identifier);
     }
 
+    @VisibleForTesting
     protected AbstractShardManagerCreator<?> getShardManagerCreator() {
         return new ShardManagerCreator();
     }
@@ -139,16 +140,12 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         return client;
     }
 
-    final ClientIdentifier getIdentifier() {
-        return identifier;
-    }
-
     public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
     }
 
     @Override
-    public Registration registerTreeChangeListener(final YangInstanceIdentifier treeId,
+    public final Registration registerTreeChangeListener(final YangInstanceIdentifier treeId,
             final DOMDataTreeChangeListener listener) {
         return registerTreeChangeListener(treeId, listener, true);
     }
@@ -183,12 +180,13 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @Override
     @Deprecated(since = "9.0.0", forRemoval = true)
-    public Registration registerLegacyTreeChangeListener(final YangInstanceIdentifier treeId,
+    public final Registration registerLegacyTreeChangeListener(final YangInstanceIdentifier treeId,
             final DOMDataTreeChangeListener listener) {
         return registerTreeChangeListener(treeId, listener, false);
     }
 
     @Override
+    // Non-final for testing
     public Registration registerCommitCohort(final DOMDataTreeIdentifier subtree,
             final DOMDataTreeCommitCohort cohort) {
         YangInstanceIdentifier treeId = requireNonNull(subtree, "subtree should not be null").path();
@@ -208,7 +206,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @Override
-    public void onDatastoreContextUpdated(final DatastoreContextFactory contextFactory) {
+    public final void onDatastoreContextUpdated(final DatastoreContextFactory contextFactory) {
         LOG.info("DatastoreContext updated for data store {}", actorUtils.getDataStoreName());
 
         actorUtils.setDatastoreContext(contextFactory);
@@ -217,7 +215,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void close() {
+    public final void close() {
         LOG.info("Closing data store {}", identifier);
 
         if (datastoreConfigMXBean != null) {
@@ -249,7 +247,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     // TODO: consider removing this in favor of awaitReadiness()
     @Deprecated
-    public void waitTillReady() {
+    public final void waitTillReady() {
         LOG.info("Beginning to wait for data store to become ready : {}", identifier);
 
         final Duration toWait = initialSettleTime();
@@ -268,13 +266,13 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @Beta
     @Deprecated
-    public boolean awaitReadiness() throws InterruptedException {
+    public final boolean awaitReadiness() throws InterruptedException {
         return awaitReadiness(initialSettleTime());
     }
 
     @Beta
     @Deprecated
-    public boolean awaitReadiness(final Duration toWait) throws InterruptedException {
+    public final boolean awaitReadiness(final Duration toWait) throws InterruptedException {
         try {
             if (toWait.isFinite()) {
                 try {
@@ -295,7 +293,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @Beta
     @Deprecated
-    public void awaitReadiness(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException {
+    public final void awaitReadiness(final long timeout, final TimeUnit unit)
+            throws InterruptedException, TimeoutException {
         if (!awaitReadiness(Duration.create(timeout, unit))) {
             throw new TimeoutException("Shard leaders failed to settle");
         }
@@ -336,7 +335,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @Override
-    public Registration registerProxyListener(final YangInstanceIdentifier shardLookup,
+    public final Registration registerProxyListener(final YangInstanceIdentifier shardLookup,
             final YangInstanceIdentifier insideShard, final DOMDataTreeChangeListener delegate) {
         requireNonNull(shardLookup, "shardLookup should not be null");
         requireNonNull(insideShard, "insideShard should not be null");
