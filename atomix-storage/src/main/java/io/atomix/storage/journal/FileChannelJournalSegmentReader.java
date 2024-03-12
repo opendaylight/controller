@@ -51,10 +51,7 @@ final class FileChannelJournalSegmentReader<E> extends JournalSegmentReader<E> {
   }
 
   @Override
-  Indexed<E> readNext() {
-    // Compute the index of the next entry in the segment.
-    final long index = getNextIndex();
-
+  Indexed<E> readEntry(final long index) {
     try {
       // Read more bytes from the segment if necessary.
       if (memory.remaining() < maxEntrySize) {
