@@ -98,8 +98,9 @@ public class DataTreeCohortIntegrationTest {
         ArgumentCaptor<Collection> candidateCapt = ArgumentCaptor.forClass(Collection.class);
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
-        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class,
-                "testSuccessfulCanCommitWithNoopPostStep", "test-1")) {
+        try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testSuccessfulCanCommitWithNoopPostStep",
+            "test-1")) {
+
             final var cohortReg = dataStore.registerCommitCohort(TEST_ID, cohort);
             assertNotNull(cohortReg);
 
@@ -140,7 +141,7 @@ public class DataTreeCohortIntegrationTest {
                 any(EffectiveModelContext.class), anyCollection());
 
         final var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class, "testFailedCanCommit", "test-1")) {
+        try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testFailedCanCommit", "test-1")) {
             dataStore.registerCommitCohort(TEST_ID, failedCohort);
 
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
@@ -166,8 +167,9 @@ public class DataTreeCohortIntegrationTest {
                 any(EffectiveModelContext.class), anyCollection());
         final var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
-        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class,
-                "testCanCommitWithMultipleListEntries", "cars-1")) {
+        try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testCanCommitWithMultipleListEntries",
+            "cars-1")) {
+
             final var cohortReg = dataStore.registerCommitCohort(
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH
                             .node(CarsModel.CAR_QNAME)), cohort);
@@ -282,7 +284,7 @@ public class DataTreeCohortIntegrationTest {
                 any(EffectiveModelContext.class), anyCollection());
 
         var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (var dataStore = kit.setupAbstractDataStore(ClientBackedDataStore.class, "testAbortAfterCanCommit",
+        try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testAbortAfterCanCommit",
                 "test-1", "cars-1")) {
             dataStore.registerCommitCohort(TEST_ID, cohortToAbort);
 

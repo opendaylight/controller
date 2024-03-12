@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.admin;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,18 +27,14 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.nio.file.Files;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +43,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
@@ -82,7 +80,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -93,6 +90,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public class ClusterAdminRpcServiceTest {
+    record ExpState(String name, boolean voting) {
+        ExpState {
+            requireNonNull(name);
+        }
+    }
+
     private static final MemberName MEMBER_1 = MemberName.forName("member-1");
     private static final MemberName MEMBER_2 = MemberName.forName("member-2");
     private static final MemberName MEMBER_3 = MemberName.forName("member-3");
@@ -132,8 +135,9 @@ public class ClusterAdminRpcServiceTest {
             List<DatastoreSnapshot> snapshots = SerializationUtils.deserialize(fis);
             assertEquals("DatastoreSnapshot size", 2, snapshots.size());
 
-            ImmutableMap<String, DatastoreSnapshot> map = ImmutableMap.of(snapshots.get(0).getType(), snapshots.get(0),
-                    snapshots.get(1).getType(), snapshots.get(1));
+            final var map = Map.of(
+                snapshots.get(0).getType(), snapshots.get(0),
+                snapshots.get(1).getType(), snapshots.get(1));
             verifyDatastoreSnapshot(node.configDataStore().getActorUtils().getDataStoreName(),
                     map.get(node.configDataStore().getActorUtils().getDataStoreName()), "cars", "people");
         } finally {
@@ -159,9 +163,9 @@ public class ClusterAdminRpcServiceTest {
     private static void verifyDatastoreSnapshot(final String type, final DatastoreSnapshot datastoreSnapshot,
             final String... expShardNames) {
         assertNotNull("Missing DatastoreSnapshot for type " + type, datastoreSnapshot);
-        Set<String> shardNames = new HashSet<>();
-        for (DatastoreSnapshot.ShardSnapshot s: datastoreSnapshot.getShardSnapshots()) {
-            shardNames.add(s.getName());
+        var shardNames = new HashSet<String>();
+        for (var snapshot : datastoreSnapshot.getShardSnapshots()) {
+            shardNames.add(snapshot.getName());
         }
 
         assertEquals("DatastoreSnapshot shard names", Set.of(expShardNames), shardNames);
@@ -371,8 +375,9 @@ public class ClusterAdminRpcServiceTest {
 
     private static <T> T verifySuccessfulRpcResult(final RpcResult<T> rpcResult) {
         if (!rpcResult.isSuccessful()) {
-            if (rpcResult.getErrors().size() > 0) {
-                RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
+            final var errors = rpcResult.getErrors();
+            if (errors.size() > 0) {
+                final var error = errors.get(0);
                 throw new AssertionError("Rpc failed with error: " + error, error.getCause());
             }
 
@@ -384,8 +389,9 @@ public class ClusterAdminRpcServiceTest {
 
     private static void verifyFailedRpcResult(final RpcResult<?> rpcResult) {
         assertFalse("RpcResult", rpcResult.isSuccessful());
-        assertEquals("RpcResult errors size", 1, rpcResult.getErrors().size());
-        RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
+        final var errors = rpcResult.getErrors();
+        assertEquals("RpcResult errors size", 1, errors.size());
+        final var error = errors.get(0);
         assertNotNull("RpcResult error message null", error.getMessage());
     }
 
@@ -644,12 +650,12 @@ public class ClusterAdminRpcServiceTest {
             .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
-        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
-                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
-        verifyVotingStates(replicaNode2.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
-                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
-        verifyVotingStates(replicaNode3.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
-                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
+        verifyVotingStates(leaderNode1.configDataStore(), "cars",
+            new ExpState("member-1", true), new ExpState("member-2", false), new ExpState("member-3", false));
+        verifyVotingStates(replicaNode2.configDataStore(), "cars",
+            new ExpState("member-1", true), new ExpState("member-2", false), new ExpState("member-3", false));
+        verifyVotingStates(replicaNode3.configDataStore(), "cars",
+            new ExpState("member-1", true), new ExpState("member-2", false), new ExpState("member-3", false));
     }
 
     @Test
@@ -678,7 +684,7 @@ public class ClusterAdminRpcServiceTest {
             .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
-        verifyVotingStates(leaderNode.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE));
+        verifyVotingStates(leaderNode.configDataStore(), "cars", new ExpState("member-1", true));
     }
 
     @Test
@@ -726,11 +732,12 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
-                replicaNode2.configDataStore(), replicaNode2.operDataStore(),
-                replicaNode3.configDataStore(), replicaNode3.operDataStore()},
-                new String[]{"cars", "people"}, new SimpleEntry<>("member-1", TRUE),
-                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
+        verifyVotingStates(new ClientBackedDataStore[] {
+            leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            replicaNode2.configDataStore(), replicaNode2.operDataStore(),
+            replicaNode3.configDataStore(), replicaNode3.operDataStore()
+        }, new String[] { "cars", "people" },
+            new ExpState("member-1", true), new ExpState("member-2", false), new ExpState("member-3", false));
     }
 
     @Test
@@ -738,8 +745,7 @@ public class ClusterAdminRpcServiceTest {
         String name = "testFlipMemberVotingStates";
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo("member-1", true), new ServerInfo("member-2", true),
-                new ServerInfo("member-3", false)));
+            new ServerInfo("member-1", true), new ServerInfo("member-2", true), new ServerInfo("member-3", false)));
 
         setupPersistedServerConfigPayload(persistedServerConfig, "member-1", name, "cars", "people");
         setupPersistedServerConfigPayload(persistedServerConfig, "member-2", name, "cars", "people");
@@ -761,8 +767,8 @@ public class ClusterAdminRpcServiceTest {
         leaderNode1.operDataStore().waitTillReady();
         replicaNode3.configDataStore().waitTillReady();
         replicaNode3.operDataStore().waitTillReady();
-        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
-                new SimpleEntry<>("member-2", TRUE), new SimpleEntry<>("member-3", FALSE));
+        verifyVotingStates(leaderNode1.configDataStore(), "cars",
+            new ExpState("member-1", true), new ExpState("member-2", true), new ExpState("member-3", false));
 
         final var service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(), replicaNode3.operDataStore(),
             null);
@@ -776,12 +782,12 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
-                replicaNode2.configDataStore(), replicaNode2.operDataStore(),
-                replicaNode3.configDataStore(), replicaNode3.operDataStore()},
-                new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", FALSE), new SimpleEntry<>("member-2", FALSE),
-                new SimpleEntry<>("member-3", TRUE));
+        verifyVotingStates(new ClientBackedDataStore[] {
+            leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            replicaNode2.configDataStore(), replicaNode2.operDataStore(),
+            replicaNode3.configDataStore(), replicaNode3.operDataStore()
+        }, new String[] { "cars", "people" },
+            new ExpState("member-1", false), new ExpState("member-2", false), new ExpState("member-3", true));
 
         // Leadership should have transferred to member 3 since it is the only remaining voting member.
         verifyRaftState(leaderNode1.configDataStore(), "cars", raftState -> {
@@ -807,12 +813,12 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
-                replicaNode2.configDataStore(), replicaNode2.operDataStore(),
-                replicaNode3.configDataStore(), replicaNode3.operDataStore()},
-                new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", TRUE), new SimpleEntry<>("member-2", TRUE),
-                new SimpleEntry<>("member-3", FALSE));
+        verifyVotingStates(new ClientBackedDataStore[] {
+            leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            replicaNode2.configDataStore(), replicaNode2.operDataStore(),
+            replicaNode3.configDataStore(), replicaNode3.operDataStore()
+        }, new String[] { "cars", "people" },
+            new ExpState("member-1", true), new ExpState("member-2", true), new ExpState("member-3", true));
 
         // Leadership should have transferred to member 1 or 2.
         verifyRaftState(leaderNode1.configDataStore(), "cars", raftState -> {
@@ -853,10 +859,9 @@ public class ClusterAdminRpcServiceTest {
 
         replicaNode1.waitForMembersUp("member-2", "member-3");
 
-        verifyVotingStates(replicaNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", FALSE),
-                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE),
-                new SimpleEntry<>("member-4", TRUE), new SimpleEntry<>("member-5", TRUE),
-                new SimpleEntry<>("member-6", TRUE));
+        verifyVotingStates(replicaNode1.configDataStore(), "cars",
+            new ExpState("member-1", false), new ExpState("member-2", false), new ExpState("member-3", false),
+            new ExpState("member-4", true), new ExpState("member-5", true), new ExpState("member-6", true));
 
         verifyRaftState(replicaNode1.configDataStore(), "cars", raftState ->
             assertEquals("Expected raft state", RaftState.Follower.toString(), raftState.getRaftState()));
@@ -873,13 +878,13 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new AbstractDataStore[]{replicaNode1.configDataStore(), replicaNode1.operDataStore(),
-                replicaNode2.configDataStore(), replicaNode2.operDataStore(),
-                replicaNode3.configDataStore(), replicaNode3.operDataStore()},
-                new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", TRUE), new SimpleEntry<>("member-2", TRUE),
-                new SimpleEntry<>("member-3", TRUE), new SimpleEntry<>("member-4", FALSE),
-                new SimpleEntry<>("member-5", FALSE), new SimpleEntry<>("member-6", FALSE));
+        verifyVotingStates(new ClientBackedDataStore[] {
+            replicaNode1.configDataStore(), replicaNode1.operDataStore(),
+            replicaNode2.configDataStore(), replicaNode2.operDataStore(),
+            replicaNode3.configDataStore(), replicaNode3.operDataStore()
+        }, new String[] { "cars", "people" },
+            new ExpState("member-1", true), new ExpState("member-2", true), new ExpState("member-3", true),
+            new ExpState("member-4", false), new ExpState("member-5", false), new ExpState("member-6", false));
 
         // Since member 1 was changed to voting and there was no leader, it should've started and election
         // and become leader
@@ -924,10 +929,9 @@ public class ClusterAdminRpcServiceTest {
 
         leaderNode1.configDataStore().waitTillReady();
         leaderNode1.operDataStore().waitTillReady();
-        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
-                new SimpleEntry<>("member-2", TRUE), new SimpleEntry<>("member-3", TRUE),
-                new SimpleEntry<>("member-4", FALSE), new SimpleEntry<>("member-5", FALSE),
-                new SimpleEntry<>("member-6", FALSE));
+        verifyVotingStates(leaderNode1.configDataStore(), "cars",
+            new ExpState("member-1", true), new ExpState("member-2", true), new ExpState("member-3", true),
+            new ExpState("member-4", false), new ExpState("member-5", false), new ExpState("member-6", false));
 
         final var service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(), leaderNode1.operDataStore(),
             null);
@@ -942,13 +946,13 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("people", DataStoreType.Operational));
 
         // Members 2 and 3 are now non-voting but should get replicated with the new new server config.
-        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
-                replicaNode2.configDataStore(), replicaNode2.operDataStore(),
-                replicaNode3.configDataStore(), replicaNode3.operDataStore()},
-                new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", FALSE), new SimpleEntry<>("member-2", FALSE),
-                new SimpleEntry<>("member-3", FALSE), new SimpleEntry<>("member-4", TRUE),
-                new SimpleEntry<>("member-5", TRUE), new SimpleEntry<>("member-6", TRUE));
+        verifyVotingStates(new ClientBackedDataStore[] {
+            leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+            replicaNode2.configDataStore(), replicaNode2.operDataStore(),
+            replicaNode3.configDataStore(), replicaNode3.operDataStore()
+        }, new String[] { "cars", "people" },
+            new ExpState("member-1", false), new ExpState("member-2", false), new ExpState("member-3", false),
+            new ExpState("member-4", true), new ExpState("member-5", true), new ExpState("member-6", true));
 
         // The leader (member 1) was changed to non-voting but it shouldn't be able to step down as leader yet
         // b/c it can't get a majority consensus with all voting members down. So verify it remains the leader.
@@ -978,45 +982,43 @@ public class ClusterAdminRpcServiceTest {
         }
     }
 
-    @SafeVarargs
-    private static void verifyVotingStates(final AbstractDataStore[] datastores, final String[] shards,
-            final SimpleEntry<String, Boolean>... expStates) throws Exception {
-        for (AbstractDataStore datastore: datastores) {
-            for (String shard: shards) {
+    private static void verifyVotingStates(final ClientBackedDataStore[] datastores, final String[] shards,
+            final ExpState... expStates) throws Exception {
+        for (var datastore : datastores) {
+            for (String shard : shards) {
                 verifyVotingStates(datastore, shard, expStates);
             }
         }
     }
 
-    @SafeVarargs
-    private static void verifyVotingStates(final AbstractDataStore datastore, final String shardName,
-            final SimpleEntry<String, Boolean>... expStates) throws Exception {
+    private static void verifyVotingStates(final ClientBackedDataStore datastore, final String shardName,
+            final ExpState... expStates) throws Exception {
         String localMemberName = datastore.getActorUtils().getCurrentMemberName().getName();
-        Map<String, Boolean> expStateMap = new HashMap<>();
-        for (Entry<String, Boolean> e: expStates) {
-            expStateMap.put(ShardIdentifier.create(shardName, MemberName.forName(e.getKey()),
-                    datastore.getActorUtils().getDataStoreName()).toString(), e.getValue());
+        var expStateMap = new HashMap<String, Boolean>();
+        for (var expState : expStates) {
+            expStateMap.put(ShardIdentifier.create(shardName, MemberName.forName(expState.name),
+                datastore.getActorUtils().getDataStoreName()).toString(), expState.voting);
         }
 
         verifyRaftState(datastore, shardName, raftState -> {
             String localPeerId = ShardIdentifier.create(shardName, MemberName.forName(localMemberName),
                     datastore.getActorUtils().getDataStoreName()).toString();
             assertEquals("Voting state for " + localPeerId, expStateMap.get(localPeerId), raftState.isVoting());
-            for (Entry<String, Boolean> e: raftState.getPeerVotingStates().entrySet()) {
-                assertEquals("Voting state for " + e.getKey(), expStateMap.get(e.getKey()), e.getValue());
+            for (var entry : raftState.getPeerVotingStates().entrySet()) {
+                assertEquals("Voting state for " + entry.getKey(), expStateMap.get(entry.getKey()), entry.getValue());
             }
         });
     }
 
     private static void verifyShardResults(final Map<ShardResultKey, ShardResult> shardResults,
             final ShardResult... expShardResults) {
-        Map<String, ShardResult> expResultsMap = new HashMap<>();
-        for (ShardResult r: expShardResults) {
+        var expResultsMap = new HashMap<String, ShardResult>();
+        for (var r : expShardResults) {
             expResultsMap.put(r.getShardName() + "-" + r.getDataStoreType(), r);
         }
 
-        for (ShardResult result: shardResults.values()) {
-            ShardResult exp = expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType());
+        for (var result : shardResults.values()) {
+            var exp = expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType());
             assertNotNull(String.format("Unexpected result for shard %s, type %s", result.getShardName(),
                     result.getDataStoreType()), exp);
             assertEquals("isSucceeded", exp.getSucceeded(), result.getSucceeded());

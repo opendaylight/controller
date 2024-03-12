@@ -52,8 +52,8 @@ public class MemberNode {
     private static final String MEMBER_1_ADDRESS = "akka://cluster-test@127.0.0.1:2558";
 
     private IntegrationTestKit kit;
-    private AbstractDataStore configDataStore;
-    private AbstractDataStore operDataStore;
+    private ClientBackedDataStore configDataStore;
+    private ClientBackedDataStore operDataStore;
     private DatastoreContext.Builder datastoreContextBuilder;
     private boolean cleanedUp;
 
@@ -73,12 +73,12 @@ public class MemberNode {
     }
 
 
-    public AbstractDataStore configDataStore() {
+    public ClientBackedDataStore configDataStore() {
         return configDataStore;
     }
 
 
-    public AbstractDataStore operDataStore() {
+    public ClientBackedDataStore operDataStore() {
         return operDataStore;
     }
 
@@ -132,7 +132,7 @@ public class MemberNode {
         }
     }
 
-    public static void verifyRaftState(final AbstractDataStore datastore, final String shardName,
+    public static void verifyRaftState(final ClientBackedDataStore datastore, final String shardName,
             final RaftStateVerifier verifier) throws Exception {
         ActorUtils actorUtils = datastore.getActorUtils();
 
@@ -157,7 +157,7 @@ public class MemberNode {
         throw lastError;
     }
 
-    public static void verifyRaftPeersPresent(final AbstractDataStore datastore, final String shardName,
+    public static void verifyRaftPeersPresent(final ClientBackedDataStore datastore, final String shardName,
             final String... peerMemberNames) throws Exception {
         final Set<String> peerIds = new HashSet<>();
         for (String p: peerMemberNames) {
@@ -169,7 +169,7 @@ public class MemberNode {
             raftState.getPeerAddresses().keySet()));
     }
 
-    public static void verifyNoShardPresent(final AbstractDataStore datastore, final String shardName) {
+    public static void verifyNoShardPresent(final ClientBackedDataStore datastore, final String shardName) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             Optional<ActorRef> shardReply = datastore.getActorUtils().findLocalShard(shardName);
@@ -308,12 +308,12 @@ public class MemberNode {
 
             String memberName = new ClusterWrapperImpl(system).getCurrentMemberName().getName();
             node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-config-" + memberName);
-            node.configDataStore = node.kit.setupAbstractDataStore(ClientBackedDataStore.class,
-                    "config_" + testName, moduleShardsConfig, true, schemaContext, waitForshardLeader);
+            node.configDataStore = node.kit.setupDataStore(ClientBackedDataStore.class, "config_" + testName,
+                moduleShardsConfig, true, schemaContext, waitForshardLeader);
 
             if (createOperDatastore) {
                 node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-oper-" + memberName);
-                node.operDataStore = node.kit.setupAbstractDataStore(ClientBackedDataStore.class,
+                node.operDataStore = node.kit.setupDataStore(ClientBackedDataStore.class,
                         "oper_" + testName, moduleShardsConfig, true, schemaContext, waitForshardLeader);
             }
 
