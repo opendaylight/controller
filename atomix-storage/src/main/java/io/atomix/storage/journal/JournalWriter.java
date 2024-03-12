@@ -51,13 +51,6 @@ public interface JournalWriter<E> {
   <T extends E> Indexed<T> append(T entry);
 
   /**
-   * Appends an indexed entry to the log.
-   *
-   * @param entry The indexed entry to append.
-   */
-  void append(Indexed<E> entry);
-
-  /**
    * Commits entries up to the given index.
    *
    * @param index The index up to which to commit entries.
