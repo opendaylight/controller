@@ -15,6 +15,8 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
 
@@ -43,54 +45,26 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
-  private final @NonNull MappedByteBuffer mappedBuffer;
   private final ByteBuffer buffer;
 
   private Indexed<E> lastEntry;
 
   MappedJournalSegmentWriter(
-      FileChannel channel,
+      ByteBuffer buffer,
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(channel, segment, maxEntrySize, index, namespace);
-    mappedBuffer = mapBuffer(channel, maxSegmentSize);
-    buffer = mappedBuffer.slice();
+    super(segment, maxEntrySize, index, namespace);
+    this.buffer = requireNonNull(buffer);
     reset(0);
   }
 
-  MappedJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+  MappedJournalSegmentWriter(JournalSegmentWriter<E> previous, ByteBuffer buffer, int position) {
     super(previous);
-    mappedBuffer = mapBuffer(channel, maxSegmentSize);
-    buffer = mappedBuffer.slice();
+    this.buffer = requireNonNull(buffer);
     lastEntry = previous.getLastEntry();
     buffer.position(position);
-  }
-
-  private static @NonNull MappedByteBuffer mapBuffer(FileChannel channel, int maxSegmentSize) {
-    try {
-      return channel.map(FileChannel.MapMode.READ_WRITE, 0, maxSegmentSize);
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
-  }
-
-  @Override
-  @NonNull MappedByteBuffer buffer() {
-    return mappedBuffer;
-  }
-
-  @Override
-  MappedJournalSegmentWriter<E> toMapped() {
-    return this;
-  }
-
-  @Override
-  FileChannelJournalSegmentWriter<E> toFileChannel() {
-    final int position = buffer.position();
-    close();
-    return new FileChannelJournalSegmentWriter<>(this, position);
   }
 
   @Override
