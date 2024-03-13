@@ -41,14 +41,14 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
   @Override
   public final long getCurrentIndex() {
-    long currentIndex = currentReader.getCurrentIndex();
-    if (currentIndex != 0) {
-      return currentIndex;
+    final var currentEntry = currentReader.getCurrentEntry();
+    if (currentEntry != null) {
+      final long currentIndex = currentEntry.index();
+      if (currentIndex != 0) {
+        return currentIndex;
+      }
     }
-    if (previousEntry != null) {
-      return previousEntry.index();
-    }
-    return 0;
+    return previousEntry != null ? previousEntry.index() : 0;
   }
 
   @Override

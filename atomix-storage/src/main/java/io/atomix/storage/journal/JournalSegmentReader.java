@@ -42,15 +42,6 @@ abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentR
     }
 
     /**
-     * Returns the current reader index.
-     *
-     * @return The current reader index.
-     */
-    final long getCurrentIndex() {
-        return currentEntry != null ? currentEntry.index() : 0;
-    }
-
-    /**
      * Returns the last read entry.
      *
      * @return The last read entry.
