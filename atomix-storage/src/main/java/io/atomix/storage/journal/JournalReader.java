@@ -16,6 +16,7 @@
 package io.atomix.storage.journal;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Log reader.
@@ -80,6 +81,7 @@ public interface JournalReader<E> extends Iterator<Indexed<E>>, AutoCloseable {
    * Returns the next entry in the reader.
    *
    * @return The next entry in the reader.
+   * @throws NoSuchElementException there is no next entry
    */
   @Override
   Indexed<E> next();
