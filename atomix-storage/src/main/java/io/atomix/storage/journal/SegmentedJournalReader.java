@@ -80,9 +80,10 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
       reset();
     }
 
-    if (index < currentReader.getNextIndex()) {
+    final var nextIndex = currentReader.getNextIndex();
+    if (index < nextIndex) {
       rewind(index);
-    } else if (index > currentReader.getNextIndex()) {
+    } else if (index > nextIndex) {
       forward(index);
     } else {
       currentReader.reset(index);
