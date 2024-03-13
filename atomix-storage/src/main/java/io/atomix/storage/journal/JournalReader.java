@@ -15,89 +15,75 @@
  */
 package io.atomix.storage.journal;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Log reader.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public interface JournalReader<E> extends Iterator<Indexed<E>>, AutoCloseable {
-
-  /**
-   * Raft log reader mode.
-   */
-  enum Mode {
+public interface JournalReader<E> extends AutoCloseable {
+    /**
+     * Raft log reader mode.
+     */
+    enum Mode {
+        /**
+         * Reads all entries from the log.
+         */
+        ALL,
+        /**
+         * Reads committed entries from the log.
+         */
+        COMMITS,
+    }
 
     /**
-     * Reads all entries from the log.
+     * Returns the first index in the journal.
+     *
+     * @return the first index in the journal
      */
-    ALL,
+    long getFirstIndex();
 
     /**
-     * Reads committed entries from the log.
+     * Returns the current reader index.
+     *
+     * @return The current reader index.
      */
-    COMMITS,
-  }
+    long getCurrentIndex();
 
-  /**
-   * Returns the first index in the journal.
-   *
-   * @return the first index in the journal
-   */
-  long getFirstIndex();
+    /**
+     * Returns the last read entry.
+     *
+     * @return The last read entry.
+     */
+    Indexed<E> getCurrentEntry();
 
-  /**
-   * Returns the current reader index.
-   *
-   * @return The current reader index.
-   */
-  long getCurrentIndex();
+    /**
+     * Returns the next reader index.
+     *
+     * @return The next reader index.
+     */
+    long getNextIndex();
 
-  /**
-   * Returns the last read entry.
-   *
-   * @return The last read entry.
-   */
-  Indexed<E> getCurrentEntry();
+    /**
+     * Try to move to the next entry.
+     *
+     * @return The next entry in the reader, or {@code null} if there is no next entry.
+     */
+    @Nullable Indexed<E> tryNext();
 
-  /**
-   * Returns the next reader index.
-   *
-   * @return The next reader index.
-   */
-  long getNextIndex();
+    /**
+     * Resets the reader to the start.
+     */
+    void reset();
 
-  /**
-   * Returns whether the reader has a next entry to read.
-   *
-   * @return Whether the reader has a next entry to read.
-   */
-  @Override
-  boolean hasNext();
+    /**
+     * Resets the reader to the given index.
+     *
+     * @param index The index to which to reset the reader.
+     */
+    void reset(long index);
 
-  /**
-   * Returns the next entry in the reader.
-   *
-   * @return The next entry in the reader.
-   * @throws NoSuchElementException there is no next entry
-   */
-  @Override
-  Indexed<E> next();
-
-  /**
-   * Resets the reader to the start.
-   */
-  void reset();
-
-  /**
-   * Resets the reader to the given index.
-   *
-   * @param index The index to which to reset the reader.
-   */
-  void reset(long index);
-
-  @Override
-  void close();
+    @Override
+    void close();
 }
