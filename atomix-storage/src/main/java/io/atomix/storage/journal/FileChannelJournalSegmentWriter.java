@@ -15,6 +15,8 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
 
@@ -22,9 +24,9 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Segment writer.
@@ -44,6 +46,7 @@ import java.util.zip.CRC32;
 final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[Integer.BYTES + Integer.BYTES]);
 
+  private final @NonNull FileChannel channel;
   private final ByteBuffer memory;
   private Indexed<E> lastEntry;
   private long currentPosition;
@@ -54,13 +57,15 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(channel, segment, maxEntrySize, index, namespace);
+    super(segment, maxEntrySize, index, namespace);
+    this.channel = requireNonNull(channel);
     memory = allocMemory(maxEntrySize);
     reset(0);
   }
 
-  FileChannelJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+  FileChannelJournalSegmentWriter(JournalSegmentWriter<E> previous, FileChannel channel, int position) {
     super(previous);
+    this.channel = requireNonNull(channel);
     memory = allocMemory(maxEntrySize);
     lastEntry = previous.getLastEntry();
     currentPosition = position;
@@ -70,21 +75,6 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     final var buf = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
     buf.limit(0);
     return buf;
-  }
-
-  @Override
-  MappedByteBuffer buffer() {
-    return null;
-  }
-
-  @Override
-  MappedJournalSegmentWriter<E> toMapped() {
-    return new MappedJournalSegmentWriter<>(this, (int) currentPosition);
-  }
-
-  @Override
-  FileChannelJournalSegmentWriter<E> toFileChannel() {
-    return this;
   }
 
   @Override

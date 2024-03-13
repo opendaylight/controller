@@ -15,6 +15,8 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import io.atomix.storage.journal.index.JournalIndex;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -30,12 +32,13 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
 
   MappedJournalSegmentReader(
       ByteBuffer buffer,
+      MappedFileAccess access,
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
-    this.buffer = buffer.slice();
+    super(access, segment, maxEntrySize, index, namespace);
+    this.buffer = requireNonNull(buffer);
     reset();
   }
 

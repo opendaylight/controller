@@ -15,6 +15,8 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.SparseJournalIndex;
@@ -24,228 +26,237 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Log segment.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class JournalSegment<E> implements AutoCloseable {
-  private final JournalSegmentFile file;
-  private final JournalSegmentDescriptor descriptor;
-  private final StorageLevel storageLevel;
-  private final int maxEntrySize;
-  private final JournalIndex index;
-  private final JournalSerdes namespace;
-  private final Set<JournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
-  private final AtomicInteger references = new AtomicInteger();
-  private final FileChannel channel;
+final class JournalSegment<E> {
+    private final Set<JournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
+    private final JournalSegmentFile file;
+    private final JournalSegmentDescriptor descriptor;
+    private final StorageLevel storageLevel;
+    private final int maxEntrySize;
+    private final JournalIndex index;
+    private final JournalSerdes namespace;
+    private final FileChannel channel;
 
-  private JournalSegmentWriter<E> writer;
-  private boolean open = true;
+    private volatile FileAccess fileAccess;
+    private JournalSegmentWriter<E> writer;
+    private boolean open;
 
-  JournalSegment(
-      JournalSegmentFile file,
-      JournalSegmentDescriptor descriptor,
-      StorageLevel storageLevel,
-      int maxEntrySize,
-      double indexDensity,
-      JournalSerdes namespace) {
-    this.file = file;
-    this.descriptor = descriptor;
-    this.storageLevel = storageLevel;
-    this.maxEntrySize = maxEntrySize;
-    this.namespace = namespace;
-    index = new SparseJournalIndex(indexDensity);
-    try {
-      channel = FileChannel.open(file.file().toPath(),
-        StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
-    writer = new FileChannelJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
-  }
+    JournalSegment(final JournalSegmentFile file, final JournalSegmentDescriptor descriptor,
+            final StorageLevel storageLevel, final int maxEntrySize, final double indexDensity,
+            final JournalSerdes namespace) {
+        this.file = requireNonNull(file);
+        this.descriptor = requireNonNull(descriptor);
+        this.storageLevel = requireNonNull(storageLevel);
+        this.maxEntrySize = maxEntrySize;
+        this.namespace = requireNonNull(namespace);
+        index = new SparseJournalIndex(indexDensity);
+        try {
+            channel = FileChannel.open(file.file().toPath(),
+                StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
 
-  /**
-   * Returns the segment's starting index.
-   *
-   * @return The segment's starting index.
-   */
-  long index() {
-    return descriptor.index();
-  }
-
-  /**
-   * Returns the last index in the segment.
-   *
-   * @return The last index in the segment.
-   */
-  long lastIndex() {
-    return writer.getLastIndex();
-  }
-
-  /**
-   * Returns the size of the segment.
-   *
-   * @return the size of the segment
-   */
-  int size() {
-    try {
-      return (int) channel.size();
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
-  }
-
-  /**
-   * Returns the segment file.
-   *
-   * @return The segment file.
-   */
-  JournalSegmentFile file() {
-    return file;
-  }
-
-  /**
-   * Returns the segment descriptor.
-   *
-   * @return The segment descriptor.
-   */
-  JournalSegmentDescriptor descriptor() {
-    return descriptor;
-  }
-
-  /**
-   * Acquires a reference to the log segment.
-   */
-  private void acquire() {
-    if (references.getAndIncrement() == 0 && storageLevel == StorageLevel.MAPPED) {
-      writer = writer.toMapped();
-    }
-  }
-
-  /**
-   * Releases a reference to the log segment.
-   */
-  private void release() {
-    if (references.decrementAndGet() == 0) {
-      if (storageLevel == StorageLevel.MAPPED) {
-        writer = writer.toFileChannel();
-      }
-      if (!open) {
-        finishClose();
-      }
-    }
-  }
-
-  /**
-   * Acquires a reference to the segment writer.
-   *
-   * @return The segment writer.
-   */
-  JournalSegmentWriter<E> acquireWriter() {
-    checkOpen();
-    acquire();
-
-    return writer;
-  }
-
-  /**
-   * Releases the reference to the segment writer.
-   */
-  void releaseWriter() {
-      release();
-  }
-
-  /**
-   * Creates a new segment reader.
-   *
-   * @return A new segment reader.
-   */
-  JournalSegmentReader<E> createReader() {
-    checkOpen();
-    acquire();
-
-    final var buffer = writer.buffer();
-    final var reader = buffer == null
-      ? new FileChannelJournalSegmentReader<>(channel, this, maxEntrySize, index, namespace)
-        : new MappedJournalSegmentReader<>(buffer, this, maxEntrySize, index, namespace);
-    readers.add(reader);
-    return reader;
-  }
-
-  /**
-   * Closes a segment reader.
-   *
-   * @param reader the closed segment reader
-   */
-  void closeReader(JournalSegmentReader<E> reader) {
-    if (readers.remove(reader)) {
-      release();
-    }
-  }
-
-  /**
-   * Checks whether the segment is open.
-   */
-  private void checkOpen() {
-    if (!open) {
-      throw new IllegalStateException("Segment not open");
-    }
-  }
-
-  /**
-   * Returns a boolean indicating whether the segment is open.
-   *
-   * @return indicates whether the segment is open
-   */
-  public boolean isOpen() {
-    return open;
-  }
-
-  /**
-   * Closes the segment.
-   */
-  @Override
-  public void close() {
-    if (!open) {
-      return;
+        // Create a FileAccess and index
+        fileAccess = createAccess();
+        writer = fileAccess.createInitialWriter(this, maxEntrySize, index, namespace);
+        open = true;
+        releaseWriter();
     }
 
-    open = false;
-    readers.forEach(JournalSegmentReader::close);
-    if (references.get() == 0) {
-      finishClose();
+    /**
+     * Returns the segment's starting index.
+     *
+     * @return The segment's starting index.
+     */
+    long index() {
+        return descriptor.index();
     }
-  }
 
-  private void finishClose() {
-    writer.close();
-    try {
-      channel.close();
-    } catch (IOException e) {
-      throw new StorageException(e);
+    /**
+     * Returns the last index in the segment.
+     *
+     * @return The last index in the segment.
+     */
+    long lastIndex() {
+        return writer.getLastIndex();
     }
-  }
 
-  /**
-   * Deletes the segment.
-   */
-  void delete() {
-    try {
-      Files.deleteIfExists(file.file().toPath());
-    } catch (IOException e) {
-      throw new StorageException(e);
+    /**
+     * Returns the size of the segment.
+     *
+     * @return the size of the segment
+     */
+    int size() {
+        try {
+            return (int) channel.size();
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
     }
-  }
 
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("id", descriptor.id())
-        .add("version", descriptor.version())
-        .add("index", index())
-        .toString();
-  }
+    /**
+     * Returns the segment file.
+     *
+     * @return The segment file.
+     */
+    JournalSegmentFile file() {
+        return file;
+    }
+
+    /**
+     * Returns the segment descriptor.
+     *
+     * @return The segment descriptor.
+     */
+    JournalSegmentDescriptor descriptor() {
+        return descriptor;
+    }
+
+    /**
+     * Acquires a reference to the segment writer.
+     *
+     * @return The segment writer.
+     */
+    JournalSegmentWriter<E> acquireWriter() {
+        checkOpen();
+        acquireAccess();
+
+        return writer;
+    }
+
+    /**
+     * Releases the reference to the segment writer.
+     */
+    void releaseWriter() {
+        // FIXME: acquire offset and last entry
+        writer.close();
+        writer = null;
+        fileAccess.release();
+    }
+
+    /**
+     * Creates a new segment reader.
+     *
+     * @return A new segment reader.
+     */
+    JournalSegmentReader<E> createReader() {
+        checkOpen();
+        final var reader = acquireAccess().createReader(this, maxEntrySize, index, namespace);
+        readers.add(reader);
+        return reader;
+    }
+
+    /**
+     * Closes a segment reader.
+     *
+     * @param reader the closed segment reader
+     * @param access
+     */
+    void removeReader(final JournalSegmentReader<E> reader, final FileAccess access) {
+        if (readers.remove(reader)) {
+            if (access.release()) {
+                // FIXME: check if it is the same access we have now and we are closed
+            }
+        }
+    }
+
+    /**
+     * Checks whether the segment is open.
+     */
+    private void checkOpen() {
+        if (!open) {
+            throw new IllegalStateException("Segment not open");
+        }
+    }
+
+    /**
+     * Returns a boolean indicating whether the segment is open.
+     *
+     * @return indicates whether the segment is open
+     */
+    boolean isOpen() {
+        return open;
+    }
+
+    /**
+     * Closes the segment.
+     */
+    void close() {
+        if (!open) {
+            return;
+        }
+
+        open = false;
+        readers.forEach(JournalSegmentReader::close);
+        if (references.get() == 0) {
+            finishClose();
+        }
+    }
+
+    private void finishClose() {
+        writer.close();
+        try {
+            channel.close();
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    /**
+     * Deletes the segment.
+     */
+    void delete() {
+        try {
+            Files.deleteIfExists(file.file().toPath());
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("id", descriptor.id())
+            .add("version", descriptor.version())
+            .add("index", index())
+            .toString();
+    }
+
+    /**
+     * Acquires a reference to the log segment and perhaps allocates resources needed to access it.
+     */
+    private FileAccess acquireAccess() {
+        final var local = fileAccess;
+        return local.acquire() ? local : lockedAcquireAccess();
+    }
+
+    private synchronized FileAccess lockedAcquireAccess() {
+        // Retry, as fileAccess may have been updated
+        final var existing = fileAccess;
+        if (existing.acquire()) {
+            return existing;
+        }
+
+        final var created = createAccess();
+        fileAccess = created;
+        return created;
+    }
+
+    private @NonNull FileAccess createAccess() {
+        try {
+            return switch (storageLevel) {
+                case DISK -> new DiskFileAccess(channel, descriptor.maxSegmentSize());
+                case MAPPED -> new MappedFileAccess(channel, descriptor.maxSegmentSize());
+            };
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
+    }
 }

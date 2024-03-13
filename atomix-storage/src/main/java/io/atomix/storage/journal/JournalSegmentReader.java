@@ -23,17 +23,19 @@ import java.util.NoSuchElementException;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentReader, MappedJournalSegmentReader {
-    final int maxEntrySize;
+    private final JournalSegment<E> segment;
     private final JournalIndex index;
     final JournalSerdes namespace;
+    final int maxEntrySize;
     private final long firstIndex;
-    private final JournalSegment<E> segment;
 
+    private FileAccess access;
     private Indexed<E> currentEntry;
     private Indexed<E> nextEntry;
 
-    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
-            final JournalSerdes namespace) {
+    JournalSegmentReader(final FileAccess access, final JournalSegment<E> segment, final int maxEntrySize,
+            final JournalIndex index, final JournalSerdes namespace) {
+        this.access = requireNonNull(access);
         this.segment = requireNonNull(segment);
         this.maxEntrySize = maxEntrySize;
         this.index = requireNonNull(index);
@@ -125,7 +127,9 @@ abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentR
      * Close this reader.
      */
     final void close() {
-        segment.closeReader(this);
+        final var toRelease = access;
+        access = null;
+        segment.removeReader(this, toRelease);
     }
 
     /**
