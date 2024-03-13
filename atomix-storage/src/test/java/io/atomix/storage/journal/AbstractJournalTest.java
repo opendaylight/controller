@@ -68,7 +68,7 @@ public abstract class AbstractJournalTest {
         var runs = new ArrayList<Object[]>();
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
-                runs.add(new Object[]{64 + i * (NAMESPACE.serialize(ENTRY).length + 8) + j});
+                runs.add(new Object[] { 64 + i * (NAMESPACE.serialize(ENTRY).length + 8) + j });
             }
         }
         return runs;
@@ -370,36 +370,34 @@ public abstract class AbstractJournalTest {
      */
     @Test
     public void testCompactAndRecover() throws Exception {
-        SegmentedJournal<TestEntry> journal = createJournal();
+        try (var journal = createJournal()) {
+            // Write three segments to the journal.
+            final var writer = journal.writer();
+            for (int i = 0; i < entriesPerSegment * 3; i++) {
+                writer.append(ENTRY);
+            }
 
-        // Write three segments to the journal.
-        JournalWriter<TestEntry> writer = journal.writer();
-        for (int i = 0; i < entriesPerSegment * 3; i++) {
-            writer.append(ENTRY);
+            // Commit the entries and compact the first segment.
+            writer.commit(entriesPerSegment * 3);
+            journal.compact(entriesPerSegment + 1);
         }
 
-        // Commit the entries and compact the first segment.
-        writer.commit(entriesPerSegment * 3);
-        journal.compact(entriesPerSegment + 1);
-
-        // Close the journal.
-        journal.close();
-
         // Reopen the journal and create a reader.
-        journal = createJournal();
-        writer = journal.writer();
-        JournalReader<TestEntry> reader = journal.openReader(1, JournalReader.Mode.COMMITS);
-        writer.append(ENTRY);
-        writer.append(ENTRY);
-        writer.commit(entriesPerSegment * 3);
+        try (var journal = createJournal()) {
+            final var writer = journal.writer();
+            final var reader = journal.openReader(1, JournalReader.Mode.COMMITS);
+            writer.append(ENTRY);
+            writer.append(ENTRY);
+            writer.commit(entriesPerSegment * 3);
 
-        // Ensure the reader starts at the first physical index in the journal.
-        assertEquals(entriesPerSegment + 1, reader.getNextIndex());
-        assertEquals(reader.getFirstIndex(), reader.getNextIndex());
-        assertTrue(reader.hasNext());
-        assertEquals(entriesPerSegment + 1, reader.getNextIndex());
-        assertEquals(reader.getFirstIndex(), reader.getNextIndex());
-        assertEquals(entriesPerSegment + 1, reader.next().index());
+            // Ensure the reader starts at the first physical index in the journal.
+            assertEquals(entriesPerSegment + 1, reader.getNextIndex());
+            assertEquals(reader.getFirstIndex(), reader.getNextIndex());
+            assertTrue(reader.hasNext());
+            assertEquals(entriesPerSegment + 1, reader.getNextIndex());
+            assertEquals(reader.getFirstIndex(), reader.getNextIndex());
+            assertEquals(entriesPerSegment + 1, reader.next().index());
+        }
     }
 
     @Before
