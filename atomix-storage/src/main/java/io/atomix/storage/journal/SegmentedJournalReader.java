@@ -123,7 +123,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
   }
 
   @Override
-  public final Indexed<E> next() {
+  public Indexed<E> next() {
     if (currentReader.hasNext()) {
       previousEntry = currentReader.getCurrentEntry();
       return currentReader.next();
