@@ -17,8 +17,6 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.NoSuchElementException;
-
 /**
  * A {@link JournalReader} traversing all entries.
  */
@@ -112,38 +110,21 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
    * Fast forwards the journal to the given index.
    */
   private void forward(long index) {
-    while (getNextIndex() < index && hasNext()) {
-      next();
+    while (getNextIndex() < index && tryNext() != null) {
+      // Nothing else
     }
   }
 
   @Override
-  public boolean hasNext() {
-    return currentReader.hasNext() || moveToNextSegment() && currentReader.hasNext();
-  }
-
-  @Override
-  public Indexed<E> next() {
+  public Indexed<E> tryNext() {
     if (currentReader.hasNext()) {
       previousEntry = currentReader.getCurrentEntry();
       return currentReader.next();
     }
-    if (moveToNextSegment()) {
-      return currentReader.next();
-    }
-    throw new NoSuchElementException();
-  }
 
-  @Override
-  public final void close() {
-    currentReader.close();
-    journal.closeReader(this);
-  }
-
-  private boolean moveToNextSegment() {
     final var nextSegment = journal.getNextSegment(currentSegment.index());
     if (nextSegment == null || nextSegment.index() != getNextIndex()) {
-      return false;
+      return null;
     }
 
     previousEntry = currentReader.getCurrentEntry();
@@ -151,6 +132,12 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
     currentSegment = nextSegment;
     currentReader = currentSegment.createReader();
-    return true;
+    return currentReader.hasNext() ? currentReader.next() : null;
+  }
+
+  @Override
+  public final void close() {
+    currentReader.close();
+    journal.closeReader(this);
   }
 }
