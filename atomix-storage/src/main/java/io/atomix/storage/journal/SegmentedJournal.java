@@ -456,7 +456,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param descriptor The segment descriptor.
    * @return The segment instance.
    */
-  protected JournalSegment<E> newSegment(JournalSegmentFile segmentFile, JournalSegmentDescriptor descriptor) {
+  private JournalSegment<E> newSegment(JournalSegmentFile segmentFile, JournalSegmentDescriptor descriptor) {
     return new JournalSegment<>(segmentFile, descriptor, storageLevel, maxEntrySize, indexDensity, namespace);
   }
 
