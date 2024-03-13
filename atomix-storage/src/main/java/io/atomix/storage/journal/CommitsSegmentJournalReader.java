@@ -15,8 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import java.util.NoSuchElementException;
-
 /**
  * A {@link JournalReader} traversing only committed entries.
  */
@@ -26,19 +24,7 @@ final class CommitsSegmentJournalReader<E> extends SegmentedJournalReader<E> {
     }
 
     @Override
-    public boolean hasNext() {
-        return isNextCommited() && super.hasNext();
-    }
-
-    @Override
-    public Indexed<E> next() {
-        if (isNextCommited()) {
-            return super.next();
-        }
-        throw new NoSuchElementException();
-    }
-
-    private boolean isNextCommited() {
-        return getNextIndex() <= journal.getCommitIndex();
+    public Indexed<E> tryNext() {
+        return getNextIndex() <= journal.getCommitIndex() ? super.tryNext() : null;
     }
 }

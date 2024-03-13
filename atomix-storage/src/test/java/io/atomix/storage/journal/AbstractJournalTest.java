@@ -17,11 +17,8 @@
 package io.atomix.storage.journal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -32,7 +29,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,79 +102,78 @@ public abstract class AbstractJournalTest {
             JournalReader<TestEntry> reader = journal.openReader(1);
 
             // Append a couple entries.
-            Indexed<TestEntry> indexed;
             assertEquals(1, writer.getNextIndex());
-            indexed = writer.append(ENTRY);
+            Indexed<TestEntry> indexed = writer.append(ENTRY);
             assertEquals(1, indexed.index());
 
             assertEquals(2, writer.getNextIndex());
             writer.append(ENTRY);
             reader.reset(2);
-            indexed = reader.next();
+            indexed = reader.tryNext();
+            assertNotNull(indexed);
             assertEquals(2, indexed.index());
-            assertFalse(reader.hasNext());
+            assertNull(reader.tryNext());
 
             // Test reading an entry
             Indexed<TestEntry> entry1;
             reader.reset();
-            entry1 = reader.next();
+            entry1 = reader.tryNext();
+            assertNotNull(entry1);
             assertEquals(1, entry1.index());
             assertEquals(entry1, reader.getCurrentEntry());
             assertEquals(1, reader.getCurrentIndex());
 
             // Test reading a second entry
-            Indexed<TestEntry> entry2;
-            assertTrue(reader.hasNext());
+            Indexed<TestEntry> entry2 = reader.tryNext();
+            assertNotNull(entry2);
             assertEquals(2, reader.getNextIndex());
-            entry2 = reader.next();
             assertEquals(2, entry2.index());
             assertEquals(entry2, reader.getCurrentEntry());
             assertEquals(2, reader.getCurrentIndex());
-            assertFalse(reader.hasNext());
+            assertNull(reader.tryNext());
 
             // Test opening a new reader and reading from the journal.
             reader = journal.openReader(1);
-            assertTrue(reader.hasNext());
-            entry1 = reader.next();
+            entry1 = reader.tryNext();
+            assertNotNull(entry1);
             assertEquals(1, entry1.index());
             assertEquals(entry1, reader.getCurrentEntry());
             assertEquals(1, reader.getCurrentIndex());
-            assertTrue(reader.hasNext());
 
-            assertTrue(reader.hasNext());
             assertEquals(2, reader.getNextIndex());
-            entry2 = reader.next();
+            entry2 = reader.tryNext();
+            assertNotNull(entry2);
             assertEquals(2, entry2.index());
             assertEquals(entry2, reader.getCurrentEntry());
             assertEquals(2, reader.getCurrentIndex());
-            assertFalse(reader.hasNext());
+            assertNull(reader.tryNext());
 
             // Reset the reader.
             reader.reset();
 
             // Test opening a new reader and reading from the journal.
             reader = journal.openReader(1);
-            assertTrue(reader.hasNext());
-            entry1 = reader.next();
+            entry1 = reader.tryNext();
+            assertNotNull(entry1);
             assertEquals(1, entry1.index());
             assertEquals(entry1, reader.getCurrentEntry());
             assertEquals(1, reader.getCurrentIndex());
-            assertTrue(reader.hasNext());
 
-            assertTrue(reader.hasNext());
             assertEquals(2, reader.getNextIndex());
-            entry2 = reader.next();
+            entry2 = reader.tryNext();
+            assertNotNull(entry2);
             assertEquals(2, entry2.index());
             assertEquals(entry2, reader.getCurrentEntry());
             assertEquals(2, reader.getCurrentIndex());
-            assertFalse(reader.hasNext());
+            assertNull(reader.tryNext());
 
             // Truncate the journal and write a different entry.
             writer.truncate(1);
             assertEquals(2, writer.getNextIndex());
             writer.append(ENTRY);
             reader.reset(2);
-            indexed = reader.next();
+            indexed = reader.tryNext();
+            assertNotNull(indexed);
             assertEquals(2, indexed.index());
 
             // Reset the reader to a specific index and read the last entry again.
@@ -187,13 +182,13 @@ public abstract class AbstractJournalTest {
             assertNotNull(reader.getCurrentEntry());
             assertEquals(1, reader.getCurrentIndex());
             assertEquals(1, reader.getCurrentEntry().index());
-            assertTrue(reader.hasNext());
             assertEquals(2, reader.getNextIndex());
-            entry2 = reader.next();
+            entry2 = reader.tryNext();
+            assertNotNull(entry2);
             assertEquals(2, entry2.index());
             assertEquals(entry2, reader.getCurrentEntry());
             assertEquals(2, reader.getCurrentIndex());
-            assertFalse(reader.hasNext());
+            assertNull(reader.tryNext());
         }
     }
 
@@ -209,15 +204,19 @@ public abstract class AbstractJournalTest {
             writer.reset(1);
             assertEquals(0, writer.getLastIndex());
             writer.append(ENTRY);
-            assertEquals(1, reader.next().index());
+
+            var indexed = reader.tryNext();
+            assertNotNull(indexed);
+            assertEquals(1, indexed.index());
             writer.reset(1);
             assertEquals(0, writer.getLastIndex());
             writer.append(ENTRY);
             assertEquals(1, writer.getLastIndex());
             assertEquals(1, writer.getLastEntry().index());
 
-            assertTrue(reader.hasNext());
-            assertEquals(1, reader.next().index());
+            indexed = reader.tryNext();
+            assertNotNull(indexed);
+            assertEquals(1, indexed.index());
 
             writer.truncate(0);
             assertEquals(0, writer.getLastIndex());
@@ -226,8 +225,9 @@ public abstract class AbstractJournalTest {
             assertEquals(1, writer.getLastIndex());
             assertEquals(1, writer.getLastEntry().index());
 
-            assertTrue(reader.hasNext());
-            assertEquals(1, reader.next().index());
+            indexed = reader.tryNext();
+            assertNotNull(indexed);
+            assertEquals(1, indexed.index());
         }
     }
 
@@ -243,21 +243,22 @@ public abstract class AbstractJournalTest {
             }
 
             for (int j = 1; j <= i - 2; j++) {
-                assertTrue(reader.hasNext());
-                assertEquals(j, reader.next().index());
+                final var indexed = reader.tryNext();
+                assertNotNull(indexed);
+                assertEquals(j, indexed.index());
             }
 
             writer.truncate(i - 2);
 
-            assertFalse(reader.hasNext());
+            assertNull(reader.tryNext());
             assertEquals(i - 1, writer.append(new TestEntry(32)).index());
             assertEquals(i, writer.append(new TestEntry(32)).index());
 
-            assertTrue(reader.hasNext());
-            Indexed<TestEntry> entry = reader.next();
+            Indexed<TestEntry> entry = reader.tryNext();
+            assertNotNull(entry);
             assertEquals(i - 1, entry.index());
-            assertTrue(reader.hasNext());
-            entry = reader.next();
+            entry = reader.tryNext();
+            assertNotNull(entry);
             assertEquals(i, entry.index());
         }
     }
@@ -270,13 +271,13 @@ public abstract class AbstractJournalTest {
 
             for (int i = 1; i <= entriesPerSegment * 5; i++) {
                 writer.append(ENTRY);
-                assertTrue(reader.hasNext());
-                Indexed<TestEntry> entry;
-                entry = reader.next();
+                var entry = reader.tryNext();
+                assertNotNull(entry);
                 assertEquals(i, entry.index());
                 assertEquals(32, entry.entry().bytes().length);
                 reader.reset(i);
-                entry = reader.next();
+                entry = reader.tryNext();
+                assertNotNull(entry);
                 assertEquals(i, entry.index());
                 assertEquals(32, entry.entry().bytes().length);
 
@@ -292,10 +293,10 @@ public abstract class AbstractJournalTest {
                 writer.truncate(i - 1);
                 writer.append(ENTRY);
 
-                assertTrue(reader.hasNext());
+                assertNotNull(reader.tryNext());
                 reader.reset(i);
-                assertTrue(reader.hasNext());
-                entry = reader.next();
+                entry = reader.tryNext();
+                assertNotNull(entry);
                 assertEquals(i, entry.index());
                 assertEquals(32, entry.entry().bytes().length);
             }
@@ -310,37 +311,15 @@ public abstract class AbstractJournalTest {
 
             for (int i = 1; i <= entriesPerSegment * 5; i++) {
                 writer.append(ENTRY);
-                assertFalse(reader.hasNext());
+                assertNull(reader.tryNext());
                 writer.commit(i);
-                assertTrue(reader.hasNext());
-                Indexed<TestEntry> entry;
-                entry = reader.next();
+                var entry = reader.tryNext();
+                assertNotNull(entry);
                 assertEquals(i, entry.index());
                 assertEquals(32, entry.entry().bytes().length);
                 reader.reset(i);
-                entry = reader.next();
-                assertEquals(i, entry.index());
-                assertEquals(32, entry.entry().bytes().length);
-            }
-        }
-    }
-
-    // Same as testWriteReadCommittedEntries(), but does not use hasNext() but checks whether an exception is thrown
-    @Test
-    public void testWriteReadCommittedEntriesException() throws Exception {
-        try (Journal<TestEntry> journal = createJournal()) {
-            JournalWriter<TestEntry> writer = journal.writer();
-            JournalReader<TestEntry> reader = journal.openReader(1, JournalReader.Mode.COMMITS);
-
-            for (int i = 1; i <= entriesPerSegment * 5; i++) {
-                writer.append(ENTRY);
-                assertThrows(NoSuchElementException.class, reader::next);
-                writer.commit(i);
-                Indexed<TestEntry> entry = reader.next();
-                assertEquals(i, entry.index());
-                assertEquals(32, entry.entry().bytes().length);
-                reader.reset(i);
-                entry = reader.next();
+                entry = reader.tryNext();
+                assertNotNull(entry);
                 assertEquals(i, entry.index());
                 assertEquals(32, entry.entry().bytes().length);
             }
@@ -359,33 +338,46 @@ public abstract class AbstractJournalTest {
             }
 
             assertEquals(1, uncommittedReader.getNextIndex());
-            assertTrue(uncommittedReader.hasNext());
             assertEquals(1, committedReader.getNextIndex());
-            assertFalse(committedReader.hasNext());
+
+            // This creates asymmetry, as uncommitted reader will move one step ahead...
+            assertNotNull(uncommittedReader.tryNext());
+            assertEquals(2, uncommittedReader.getNextIndex());
+            assertNull(committedReader.tryNext());
+            assertEquals(1, committedReader.getNextIndex());
 
             writer.commit(entriesPerSegment * 9);
 
-            assertTrue(uncommittedReader.hasNext());
-            assertTrue(committedReader.hasNext());
+            // ... so here we catch up ...
+            assertNotNull(committedReader.tryNext());
+            assertEquals(2, committedReader.getNextIndex());
 
-            for (int i = 1; i <= entriesPerSegment * 2.5; i++) {
-                assertEquals(i, uncommittedReader.next().index());
-                assertEquals(i, committedReader.next().index());
+            // ... and continue from the third entry
+            for (int i = 3; i <= entriesPerSegment * 2.5; i++) {
+                var entry = uncommittedReader.tryNext();
+                assertNotNull(entry);
+                assertEquals(i, entry.index());
+
+                entry = committedReader.tryNext();
+                assertNotNull(entry);
+                assertEquals(i, entry.index());
             }
 
             journal.compact(entriesPerSegment * 5 + 1);
 
             assertNull(uncommittedReader.getCurrentEntry());
             assertEquals(0, uncommittedReader.getCurrentIndex());
-            assertTrue(uncommittedReader.hasNext());
             assertEquals(entriesPerSegment * 5 + 1, uncommittedReader.getNextIndex());
-            assertEquals(entriesPerSegment * 5 + 1, uncommittedReader.next().index());
+            var entry = uncommittedReader.tryNext();
+            assertNotNull(entry);
+            assertEquals(entriesPerSegment * 5 + 1, entry.index());
 
             assertNull(committedReader.getCurrentEntry());
             assertEquals(0, committedReader.getCurrentIndex());
-            assertTrue(committedReader.hasNext());
             assertEquals(entriesPerSegment * 5 + 1, committedReader.getNextIndex());
-            assertEquals(entriesPerSegment * 5 + 1, committedReader.next().index());
+            entry = committedReader.tryNext();
+            assertNotNull(entry);
+            assertEquals(entriesPerSegment * 5 + 1, entry.index());
         }
     }
 
@@ -417,10 +409,11 @@ public abstract class AbstractJournalTest {
             // Ensure the reader starts at the first physical index in the journal.
             assertEquals(entriesPerSegment + 1, reader.getNextIndex());
             assertEquals(reader.getFirstIndex(), reader.getNextIndex());
-            assertTrue(reader.hasNext());
-            assertEquals(entriesPerSegment + 1, reader.getNextIndex());
-            assertEquals(reader.getFirstIndex(), reader.getNextIndex());
-            assertEquals(entriesPerSegment + 1, reader.next().index());
+            final var indexed = reader.tryNext();
+            assertNotNull(indexed);
+            assertEquals(entriesPerSegment + 2, reader.getNextIndex());
+            assertEquals(reader.getFirstIndex() + 1, reader.getNextIndex());
+            assertEquals(entriesPerSegment + 2, indexed.index());
         }
     }
 
