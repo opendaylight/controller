@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -313,6 +315,28 @@ public abstract class AbstractJournalTest {
                 assertTrue(reader.hasNext());
                 Indexed<TestEntry> entry;
                 entry = reader.next();
+                assertEquals(i, entry.index());
+                assertEquals(32, entry.entry().bytes().length);
+                reader.reset(i);
+                entry = reader.next();
+                assertEquals(i, entry.index());
+                assertEquals(32, entry.entry().bytes().length);
+            }
+        }
+    }
+
+    // Same as testWriteReadCommittedEntries(), but does not use hasNext() but checks whether an exception is thrown
+    @Test
+    public void testWriteReadCommittedEntriesException() throws Exception {
+        try (Journal<TestEntry> journal = createJournal()) {
+            JournalWriter<TestEntry> writer = journal.writer();
+            JournalReader<TestEntry> reader = journal.openReader(1, JournalReader.Mode.COMMITS);
+
+            for (int i = 1; i <= entriesPerSegment * 5; i++) {
+                writer.append(ENTRY);
+                assertThrows(NoSuchElementException.class, reader::next);
+                writer.commit(i);
+                Indexed<TestEntry> entry = reader.next();
                 assertEquals(i, entry.index());
                 assertEquals(32, entry.entry().bytes().length);
                 reader.reset(i);
