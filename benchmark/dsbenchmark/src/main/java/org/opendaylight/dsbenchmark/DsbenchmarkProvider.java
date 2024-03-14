@@ -9,7 +9,6 @@ package org.opendaylight.dsbenchmark;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
@@ -51,7 +50,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatusBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -98,10 +96,7 @@ public final class DsbenchmarkProvider implements AutoCloseable {
             LOG.warn("Working around Bugs 8829 and 6793 by ignoring exception from setTestOperData", e);
         }
 
-        rpcReg = rpcService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(StartTest.class, this::startTest)
-            .put(CleanupStore.class, this::cleanupStore)
-            .build());
+        rpcReg = rpcService.registerRpcImplementations((StartTest) this::startTest, (CleanupStore) this::cleanupStore);
         LOG.info("DsbenchmarkProvider initiated");
     }
 

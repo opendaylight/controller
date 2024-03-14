@@ -10,7 +10,6 @@ package rpcbenchmark.impl;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutputBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -70,10 +68,7 @@ public final class RpcbenchmarkProvider implements AutoCloseable {
         this.providerRegistry = requireNonNull(providerRegistry);
         this.consumerRegistry = requireNonNull(consumerRegistry);
         globalServer = new GlobalBindingRTCServer(providerRegistry);
-        reg = providerRegistry.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(TestStatus.class, this::testStatus)
-            .put(StartTest.class, this::startTest)
-            .build());
+        reg = providerRegistry.registerRpcImplementations((TestStatus) this::testStatus, (StartTest) this::startTest);
         LOG.info("RpcbenchmarkProvider initiated");
     }
 

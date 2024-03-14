@@ -20,8 +20,6 @@ import org.opendaylight.mdsal.singleton.api.ServiceGroupIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
-import org.opendaylight.yangtools.yang.common.Revision;
-import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -32,9 +30,8 @@ import org.slf4j.LoggerFactory;
 public final class SingletonGetConstantService implements DOMRpcImplementation, ClusterSingletonService {
     private static final Logger LOG = LoggerFactory.getLogger(SingletonGetConstantService.class);
 
-    private static final QNameModule MODULE = QNameModule.create(
-        XMLNamespace.of("tag:opendaylight.org,2017:controller:yang:lowlevel:target"), Revision.of("2017-02-15"))
-        .intern();
+    private static final QNameModule MODULE =
+        QNameModule.ofRevision("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15").intern();
     private static final QName OUTPUT = YangConstants.operationOutputQName(MODULE).intern();
     private static final QName CONSTANT = QName.create(MODULE, "constant").intern();
     private static final QName CONTEXT = QName.create(MODULE, "context").intern();

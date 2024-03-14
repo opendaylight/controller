@@ -12,7 +12,6 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.HashMap;
@@ -135,7 +134,6 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -196,31 +194,30 @@ public final class MdsalLowLevelTestProvider {
 
         dataTreeChangeExtension = domDataBroker.extension(DataTreeChangeExtension.class);
 
-        registration = rpcRegistry.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(UnregisterSingletonConstant.class, this::unregisterSingletonConstant)
-            .put(StartPublishNotifications.class, this::startPublishNotifications)
-            .put(SubscribeDdtl.class, this::subscribeDdtl)
-            .put(WriteTransactions.class, this::writeTransactions)
-            .put(IsClientAborted.class, this::isClientAborted)
-            .put(RemoveShardReplica.class, this::removeShardReplica)
-            .put(SubscribeYnl.class, this::subscribeYnl)
-            .put(UnregisterBoundConstant.class, this::unregisterBoundConstant)
-            .put(RegisterSingletonConstant.class, this::registerSingletonConstant)
-            .put(RegisterDefaultConstant.class, this::registerDefaultConstant)
-            .put(UnregisterConstant.class, this::unregisterConstant)
-            .put(UnregisterFlappingSingleton.class, this::unregisterFlappingSingleton)
-            .put(AddShardReplica.class, this::addShardReplica)
-            .put(RegisterBoundConstant.class, this::registerBoundConstant)
-            .put(RegisterFlappingSingleton.class, this::registerFlappingSingleton)
-            .put(UnsubscribeDdtl.class, this::unsubscribeDdtl)
-            .put(UnsubscribeYnl.class, this::unsubscribeYnl)
-            .put(CheckPublishNotifications.class, this::checkPublishNotifications)
-            .put(ShutdownShardReplica.class, this::shutdownShardReplica)
-            .put(RegisterConstant.class, this::registerConstant)
-            .put(UnregisterDefaultConstant.class, this::unregisterDefaultConstant)
-            .put(SubscribeDtcl.class, this::subscribeDtcl)
-            .put(UnsubscribeDtcl.class, this::unsubscribeDtcl)
-            .build());
+        registration = rpcRegistry.registerRpcImplementations(
+            (UnregisterSingletonConstant) this::unregisterSingletonConstant,
+            (StartPublishNotifications) this::startPublishNotifications,
+            (SubscribeDdtl) this::subscribeDdtl,
+            (WriteTransactions) this::writeTransactions,
+            (IsClientAborted) this::isClientAborted,
+            (RemoveShardReplica) this::removeShardReplica,
+            (SubscribeYnl) this::subscribeYnl,
+            (UnregisterBoundConstant) this::unregisterBoundConstant,
+            (RegisterSingletonConstant) this::registerSingletonConstant,
+            (RegisterDefaultConstant) this::registerDefaultConstant,
+            (UnregisterConstant) this::unregisterConstant,
+            (UnregisterFlappingSingleton) this::unregisterFlappingSingleton,
+            (AddShardReplica) this::addShardReplica,
+            (RegisterBoundConstant) this::registerBoundConstant,
+            (RegisterFlappingSingleton) this::registerFlappingSingleton,
+            (UnsubscribeDdtl) this::unsubscribeDdtl,
+            (UnsubscribeYnl) this::unsubscribeYnl,
+            (CheckPublishNotifications) this::checkPublishNotifications,
+            (ShutdownShardReplica) this::shutdownShardReplica,
+            (RegisterConstant) this::registerConstant,
+            (UnregisterDefaultConstant) this::unregisterDefaultConstant,
+            (SubscribeDtcl) this::subscribeDtcl,
+            (UnsubscribeDtcl) this::unsubscribeDtcl);
     }
 
     @PreDestroy

@@ -16,7 +16,6 @@ import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
@@ -119,7 +118,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -163,26 +161,25 @@ public final class ClusterAdminRpcService {
     }
 
     Registration registerWith(final RpcProviderService rpcProviderService) {
-        return rpcProviderService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin
-                .rev151013.AddShardReplica.class, this::addShardReplica)
-            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin
-                .rev151013.RemoveShardReplica.class, this::removeShardReplica)
-            .put(LocateShard.class, this::locateShard)
-            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin
-                .rev151013.MakeLeaderLocal.class, this::makeLeaderLocal)
-            .put(AddReplicasForAllShards.class, this::addReplicasForAllShards)
-            .put(RemoveAllShardReplicas.class, this::removeAllShardReplicas)
-            .put(ChangeMemberVotingStatesForShard.class, this::changeMemberVotingStatesForShard)
-            .put(ChangeMemberVotingStatesForAllShards.class, this::changeMemberVotingStatesForAllShards)
-            .put(FlipMemberVotingStatesForAllShards.class, this::flipMemberVotingStatesForAllShards)
-            .put(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin
-                .rev151013.GetShardRole.class, this::getShardRole)
-            .put(BackupDatastore.class, this::backupDatastore)
-            .put(GetKnownClientsForAllShards.class, this::getKnownClientsForAllShards)
-            .put(ActivateEosDatacenter.class, this::activateEosDatacenter)
-            .put(DeactivateEosDatacenter.class, this::deactivateEosDatacenter)
-            .build());
+        return rpcProviderService.registerRpcImplementations(
+            (org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013
+                .AddShardReplica) this::addShardReplica,
+            (org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013
+                .RemoveShardReplica) this::removeShardReplica,
+            (LocateShard) this::locateShard,
+            (org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013
+                .MakeLeaderLocal) this::makeLeaderLocal,
+            (AddReplicasForAllShards) this::addReplicasForAllShards,
+            (RemoveAllShardReplicas) this::removeAllShardReplicas,
+            (ChangeMemberVotingStatesForShard) this::changeMemberVotingStatesForShard,
+            (ChangeMemberVotingStatesForAllShards) this::changeMemberVotingStatesForAllShards,
+            (FlipMemberVotingStatesForAllShards) this::flipMemberVotingStatesForAllShards,
+            (org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013
+                .GetShardRole) this::getShardRole,
+            (BackupDatastore) this::backupDatastore,
+            (GetKnownClientsForAllShards) this::getKnownClientsForAllShards,
+            (ActivateEosDatacenter) this::activateEosDatacenter,
+            (DeactivateEosDatacenter) this::deactivateEosDatacenter);
     }
 
     @VisibleForTesting

@@ -15,7 +15,6 @@ import akka.actor.typed.javadsl.AskPattern;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.cluster.typed.Cluster;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -71,7 +70,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.GetEntityOwnerOutput;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.binding.RpcOutput;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -149,11 +147,10 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
             throws ExecutionException, InterruptedException {
         this(actorProvider.getActorSystem(), codecTree);
 
-        reg = rpcProvider.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(GetEntity.class, this::getEntity)
-            .put(GetEntities.class, this::getEntities)
-            .put(GetEntityOwner.class, this::getEntityOwner)
-            .build());
+        reg = rpcProvider.registerRpcImplementations(
+            (GetEntity) this::getEntity,
+            (GetEntities) this::getEntities,
+            (GetEntityOwner) this::getEntityOwner);
     }
 
     @PreDestroy

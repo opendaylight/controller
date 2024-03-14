@@ -19,8 +19,6 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
-import org.opendaylight.yangtools.yang.common.Revision;
-import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -31,9 +29,8 @@ import org.slf4j.LoggerFactory;
 public final class RoutedGetConstantService implements DOMRpcImplementation {
     private static final Logger LOG = LoggerFactory.getLogger(RoutedGetConstantService.class);
 
-    private static final QNameModule MODULE = QNameModule.create(
-        XMLNamespace.of("tag:opendaylight.org,2017:controller:yang:lowlevel:target"), Revision.of("2017-02-15"))
-        .intern();
+    private static final QNameModule MODULE =
+        QNameModule.ofRevision("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15").intern();
     private static final QName OUTPUT = YangConstants.operationOutputQName(MODULE).intern();
     private static final QName CONSTANT = QName.create(MODULE, "constant").intern();
     private static final QName GET_CONTEXTED_CONSTANT = QName.create(MODULE, "get-contexted-constant").intern();
