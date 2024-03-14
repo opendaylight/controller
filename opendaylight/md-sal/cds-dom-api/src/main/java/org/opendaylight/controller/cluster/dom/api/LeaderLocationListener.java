@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.cluster.dom.api;
 
-import java.util.EventListener;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Listener for shard leader location changes.
  */
-public interface LeaderLocationListener extends EventListener {
+public interface LeaderLocationListener {
     /**
      * Invoked when shard leader location changes.
      *
