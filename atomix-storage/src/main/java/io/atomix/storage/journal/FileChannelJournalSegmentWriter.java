@@ -134,8 +134,8 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
         // Read more bytes from the segment if necessary.
         if (memory.remaining() < maxEntrySize) {
-          memory.clear();
-          channel.read(memory, currentPosition);
+          memory.compact();
+          channel.read(memory);
           memory.flip();
         }
 
