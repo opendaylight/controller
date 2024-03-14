@@ -12,7 +12,6 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATI
 import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
 import static org.opendaylight.yangtools.yang.common.ErrorType.APPLICATION;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -66,7 +65,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -139,11 +137,10 @@ public final class OpendaylightToaster extends AbstractMXBean
         this.maxMakeToastTries = maxMakeToastTries;
 
         executor = Executors.newFixedThreadPool(1);
-        reg = rpcProviderService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(CancelToast.class, this::cancelToast)
-            .put(MakeToast.class, this)
-            .put(RestockToaster.class, this::restockToaster)
-            .build());
+        reg = rpcProviderService.registerRpcImplementations(
+            (CancelToast) this::cancelToast,
+            this,
+            (RestockToaster) this::restockToaster);
 
         LOG.info("Initializing...");
 

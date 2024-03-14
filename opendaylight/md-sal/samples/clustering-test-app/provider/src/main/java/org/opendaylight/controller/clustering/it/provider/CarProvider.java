@@ -8,7 +8,6 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -78,7 +77,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Rpc;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -132,16 +130,15 @@ public final class CarProvider {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
         this.domDataBroker = domDataBroker;
-        regs.add(rpcProviderService.registerRpcImplementations(ImmutableClassToInstanceMap.<Rpc<?, ?>>builder()
-            .put(StressTest.class, this::stressTest)
-            .put(StopStressTest.class, this::stopStressTest)
-            .put(RegisterOwnership.class, this::registerOwnership)
-            .put(UnregisterOwnership.class, this::unregisterOwnership)
-            .put(RegisterLoggingDtcl.class, this::registerLoggingDtcl)
-            .put(UnregisterLoggingDtcls.class, this::unregisterLoggingDtcls)
-            .put(RegisterCommitCohort.class, this::registerCommitCohort)
-            .put(UnregisterCommitCohort.class, this::unregisterCommitCohort)
-            .build()));
+        regs.add(rpcProviderService.registerRpcImplementations(
+            (StressTest) this::stressTest,
+            (StopStressTest) this::stopStressTest,
+            (RegisterOwnership) this::registerOwnership,
+            (UnregisterOwnership) this::unregisterOwnership,
+            (RegisterLoggingDtcl) this::registerLoggingDtcl,
+            (UnregisterLoggingDtcls) this::unregisterLoggingDtcls,
+            (RegisterCommitCohort) this::registerCommitCohort,
+            (UnregisterCommitCohort) this::unregisterCommitCohort));
     }
 
     @PreDestroy
