@@ -55,8 +55,9 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      JournalSerdes namespace) {
-    super(channel, segment, maxEntrySize, index, namespace);
+      JournalSerdes namespace,
+      int maxSegmentSize) {
+    super(channel, segment, maxEntrySize, index, namespace, maxSegmentSize);
     mappedBuffer = mapBuffer(channel, maxSegmentSize);
     buffer = mappedBuffer.slice();
     reset(0);
