@@ -66,7 +66,7 @@ final class JournalSegment<E> implements AutoCloseable {
       throw new StorageException(e);
     }
     writer = switch (storageLevel) {
-        case DISK -> new FileChannelJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
+        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
         case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace).toFileChannel();
     };
   }
@@ -173,7 +173,7 @@ final class JournalSegment<E> implements AutoCloseable {
 
     final var buffer = writer.buffer();
     final var reader = buffer == null
-      ? new FileChannelJournalSegmentReader<>(channel, this, maxEntrySize, index, namespace)
+      ? new DiskJournalSegmentReader<>(channel, this, maxEntrySize, index, namespace)
         : new MappedJournalSegmentReader<>(buffer, this, maxEntrySize, index, namespace);
     readers.add(reader);
     return reader;

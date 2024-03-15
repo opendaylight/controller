@@ -87,10 +87,10 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  FileChannelJournalSegmentWriter<E> toFileChannel() {
+  DiskJournalSegmentWriter<E> toFileChannel() {
     final int position = buffer.position();
     close();
-    return new FileChannelJournalSegmentWriter<>(this, position);
+    return new DiskJournalSegmentWriter<>(this, position);
   }
 
   @Override

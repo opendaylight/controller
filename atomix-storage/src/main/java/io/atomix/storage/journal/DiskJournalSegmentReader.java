@@ -28,12 +28,12 @@ import java.util.zip.CRC32;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class FileChannelJournalSegmentReader<E> extends JournalSegmentReader<E> {
+final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
   private final FileChannel channel;
   private final ByteBuffer memory;
   private long currentPosition;
 
-  FileChannelJournalSegmentReader(
+  DiskJournalSegmentReader(
       FileChannel channel,
       JournalSegment<E> segment,
       int maxEntrySize,
