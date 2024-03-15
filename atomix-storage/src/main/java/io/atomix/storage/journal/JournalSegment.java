@@ -64,7 +64,10 @@ final class JournalSegment<E> implements AutoCloseable {
     } catch (IOException e) {
       throw new StorageException(e);
     }
-    writer = new FileChannelJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
+    writer = switch (storageLevel) {
+        case DISK -> new FileChannelJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
+        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace).toFileChannel();
+    };
   }
 
   /**
