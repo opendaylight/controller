@@ -248,7 +248,6 @@ final class JournalSegment<E> implements AutoCloseable {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("id", descriptor.id())
-        .add("version", descriptor.version())
         .add("index", index())
         .toString();
   }
