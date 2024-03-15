@@ -36,10 +36,10 @@ final class JournalSegmentReader<E> {
     private int position;
 
     JournalSegmentReader(final JournalSegment<E> segment, final FileReader fileReader,
-            final int maxEntrySize, final JournalSerdes namespace) {
+            final int maxEntrySize, final JournalSerdes namespace, final int maxSegmentSize) {
         this.segment = requireNonNull(segment);
         this.fileReader = requireNonNull(fileReader);
-        maxSegmentSize = segment.descriptor().maxSegmentSize();
+        this.maxSegmentSize = maxSegmentSize;
         this.maxEntrySize = maxEntrySize;
         this.namespace = requireNonNull(namespace);
     }
