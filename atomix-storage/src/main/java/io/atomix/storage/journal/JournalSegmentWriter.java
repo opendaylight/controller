@@ -72,7 +72,10 @@ abstract sealed class JournalSegmentWriter<E> permits FileChannelJournalSegmentW
      *
      * @return The next index to be written.
      */
-    abstract long getNextIndex();
+    final long getNextIndex() {
+        final Indexed<?> lastEntry;
+        return (lastEntry = getLastEntry()) != null ? lastEntry.index() + 1 : firstIndex;
+    }
 
     /**
      * Appends an entry to the journal.
