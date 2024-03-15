@@ -96,8 +96,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     try {
       // Clear memory buffer and read fist chunk
-      memory.clear();
-      channel.read(memory, JournalSegmentDescriptor.BYTES);
+      channel.read(memory.clear(), JournalSegmentDescriptor.BYTES);
       memory.flip();
 
       // Read the entry length.
@@ -134,8 +133,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
         // Read more bytes from the segment if necessary.
         if (memory.remaining() < maxEntrySize) {
-          memory.compact();
-          channel.read(memory);
+          channel.read(memory.compact());
           memory.flip();
         }
 
@@ -174,10 +172,8 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     final long index = getNextIndex();
 
     // Serialize the entry.
-    memory.clear();
-    memory.position(Integer.BYTES + Integer.BYTES);
     try {
-      namespace.serialize(entry, memory);
+      namespace.serialize(entry, memory.clear().position(Integer.BYTES + Integer.BYTES));
     } catch (KryoException e) {
       throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
     }
@@ -201,8 +197,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     final long checksum = crc32.getValue();
 
     // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-    memory.putInt(0, length);
-    memory.putInt(Integer.BYTES, (int) checksum);
+    memory.putInt(0, length).putInt(Integer.BYTES, (int) checksum);
     try {
       channel.write(memory, currentPosition);
     } catch (IOException e) {
