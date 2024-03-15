@@ -63,9 +63,8 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   MappedJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
     super(previous);
     mappedBuffer = mapBuffer(channel, maxSegmentSize);
-    buffer = mappedBuffer.slice();
+    buffer = mappedBuffer.slice().position(position);
     lastEntry = previous.getLastEntry();
-    buffer.position(position);
   }
 
   private static @NonNull MappedByteBuffer mapBuffer(FileChannel channel, int maxSegmentSize) {
@@ -138,8 +137,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
         position = buffer.position() + length;
         buffer.position(position);
 
-        buffer.mark();
-        length = buffer.getInt();
+        length = buffer.mark().getInt();
       }
 
       // Reset the buffer to the previous mark.
@@ -192,10 +190,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     final long checksum = crc32.getValue();
 
     // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-    buffer.position(position);
-    buffer.putInt(length);
-    buffer.putInt((int) checksum);
-    buffer.position(position + ENTRY_HEADER_BYTES + length);
+    buffer.position(position).putInt(length).putInt((int) checksum).position(position + ENTRY_HEADER_BYTES + length);
 
     // Update the last entry with the correct index/term/length.
     Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
@@ -228,8 +223,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     // Zero the entry header at current buffer position.
     int position = buffer.position();
     // Note: we issue a single putLong() instead of two putInt()s.
-    buffer.putLong(0);
-    buffer.position(position);
+    buffer.putLong(0).position(position);
   }
 
   @Override
