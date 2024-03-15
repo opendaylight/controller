@@ -32,11 +32,11 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     final long firstIndex;
 
     JournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
-            final JournalIndex index, final JournalSerdes namespace) {
+            final JournalIndex index, final JournalSerdes namespace, final int maxSegmentSize) {
         this.channel = requireNonNull(channel);
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
-        maxSegmentSize = segment.descriptor().maxSegmentSize();
+        this.maxSegmentSize = maxSegmentSize;
         this.maxEntrySize = maxEntrySize;
         firstIndex = segment.index();
     }
