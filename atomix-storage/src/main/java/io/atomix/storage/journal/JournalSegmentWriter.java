@@ -23,7 +23,7 @@ import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-abstract sealed class JournalSegmentWriter<E> permits FileChannelJournalSegmentWriter, MappedJournalSegmentWriter {
+abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, MappedJournalSegmentWriter {
     /**
      * The size of the header, comprising of:
      * <ul>
@@ -128,5 +128,5 @@ abstract sealed class JournalSegmentWriter<E> permits FileChannelJournalSegmentW
 
     abstract @NonNull MappedJournalSegmentWriter<E> toMapped();
 
-    abstract @NonNull FileChannelJournalSegmentWriter<E> toFileChannel();
+    abstract @NonNull DiskJournalSegmentWriter<E> toFileChannel();
 }

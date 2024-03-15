@@ -42,14 +42,14 @@ import java.util.zip.CRC32;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
+final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[ENTRY_HEADER_BYTES]);
 
   private final ByteBuffer memory;
   private Indexed<E> lastEntry;
   private long currentPosition;
 
-  FileChannelJournalSegmentWriter(
+  DiskJournalSegmentWriter(
       FileChannel channel,
       JournalSegment<E> segment,
       int maxEntrySize,
@@ -60,7 +60,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     reset(0);
   }
 
-  FileChannelJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+  DiskJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
     super(previous);
     memory = allocMemory(maxEntrySize);
     lastEntry = previous.getLastEntry();
@@ -84,7 +84,7 @@ final class FileChannelJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  FileChannelJournalSegmentWriter<E> toFileChannel() {
+  DiskJournalSegmentWriter<E> toFileChannel() {
     return this;
   }
 
