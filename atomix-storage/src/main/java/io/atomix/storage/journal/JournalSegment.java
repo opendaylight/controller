@@ -39,6 +39,7 @@ final class JournalSegment<E> implements AutoCloseable {
   private final JournalSegmentDescriptor descriptor;
   private final StorageLevel storageLevel;
   private final int maxEntrySize;
+  private final int maxSegmentSize;
   private final JournalIndex journalIndex;
   private final JournalSerdes namespace;
   private final Set<JournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
@@ -54,11 +55,13 @@ final class JournalSegment<E> implements AutoCloseable {
       StorageLevel storageLevel,
       int maxEntrySize,
       double indexDensity,
-      JournalSerdes namespace) {
+      JournalSerdes namespace,
+      int maxSegmentSize) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
     this.maxEntrySize = maxEntrySize;
+    this.maxSegmentSize = maxSegmentSize;
     this.namespace = namespace;
     journalIndex = new SparseJournalIndex(indexDensity);
     try {
@@ -68,9 +71,9 @@ final class JournalSegment<E> implements AutoCloseable {
       throw new StorageException(e);
     }
     writer = switch (storageLevel) {
-        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace);
-        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace)
-            .toFileChannel();
+        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace, maxSegmentSize);
+        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace, maxSegmentSize)
+          .toFileChannel();
     };
   }
 
@@ -187,8 +190,8 @@ final class JournalSegment<E> implements AutoCloseable {
     final var buffer = writer.buffer();
     final var path = file.file().toPath();
     final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
-        : new DiskFileReader(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
-    final var reader = new JournalSegmentReader<>(this, fileReader, maxEntrySize, namespace);
+        : new DiskFileReader(path, channel, maxSegmentSize, maxEntrySize);
+    final var reader = new JournalSegmentReader<>(this, fileReader, maxEntrySize, namespace, maxSegmentSize);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
     return reader;
@@ -263,7 +266,6 @@ final class JournalSegment<E> implements AutoCloseable {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("id", descriptor.id())
-        .add("version", descriptor.version())
         .add("index", index())
         .toString();
   }
