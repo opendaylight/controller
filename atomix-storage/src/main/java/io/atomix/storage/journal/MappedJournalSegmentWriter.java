@@ -155,15 +155,6 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  long getNextIndex() {
-    if (lastEntry != null) {
-      return lastEntry.index() + 1;
-    } else {
-      return firstIndex;
-    }
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
   <T extends E> Indexed<T> append(T entry) {
     // Store the entry index.
