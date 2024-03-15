@@ -54,8 +54,9 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       JournalSegment<E> segment,
       int maxEntrySize,
       JournalIndex index,
-      JournalSerdes namespace) {
-    super(channel, segment, maxEntrySize, index, namespace);
+      JournalSerdes namespace,
+      int maxSegmentSize) {
+    super(channel, segment, maxEntrySize, index, namespace, maxSegmentSize);
     memory = allocMemory(maxEntrySize);
     reset(0);
   }

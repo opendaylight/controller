@@ -239,15 +239,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
     if (!segments.isEmpty()) {
       currentSegment = segments.lastEntry().getValue();
     } else {
-      JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
-          .withId(1)
-          .withIndex(1)
-          .withMaxSegmentSize(maxSegmentSize)
-          .withMaxEntries(maxEntriesPerSegment)
-          .build();
+      final var descriptor = new JournalSegmentDescriptor(1, 1);
 
       currentSegment = createSegment(descriptor);
-      currentSegment.descriptor().update(System.currentTimeMillis());
 
       segments.put(1L, currentSegment);
     }
@@ -279,12 +273,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     if (lastSegment != null) {
       currentSegment = lastSegment;
     } else {
-      JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
-          .withId(1)
-          .withIndex(1)
-          .withMaxSegmentSize(maxSegmentSize)
-          .withMaxEntries(maxEntriesPerSegment)
-          .build();
+      final var descriptor = new JournalSegmentDescriptor(1, 1);
 
       currentSegment = createSegment(descriptor);
 
@@ -313,12 +302,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
     segments.clear();
 
-    JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
-        .withId(1)
-        .withIndex(index)
-        .withMaxSegmentSize(maxSegmentSize)
-        .withMaxEntries(maxEntriesPerSegment)
-        .build();
+    final var descriptor = new JournalSegmentDescriptor(1, index);
     currentSegment = createSegment(descriptor);
     segments.put(index, currentSegment);
     return currentSegment;
@@ -356,13 +340,10 @@ public final class SegmentedJournal<E> implements Journal<E> {
     assertOpen();
     assertDiskSpace();
 
-    JournalSegment<E> lastSegment = getLastSegment();
-    JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
-        .withId(lastSegment != null ? lastSegment.descriptor().id() + 1 : 1)
-        .withIndex(currentSegment.lastIndex() + 1)
-        .withMaxSegmentSize(maxSegmentSize)
-        .withMaxEntries(maxEntriesPerSegment)
-        .build();
+    final JournalSegment<E> lastSegment = getLastSegment();
+    final var descriptorId = lastSegment != null ? lastSegment.descriptor().id() + 1 : 1;
+    final var descriptorIndex = currentSegment.lastIndex() + 1;
+    final var descriptor = new JournalSegmentDescriptor(descriptorId, descriptorIndex);
 
     currentSegment = createSegment(descriptor);
 
@@ -424,14 +405,13 @@ public final class SegmentedJournal<E> implements Journal<E> {
     FileChannel channel;
     try {
       raf = new RandomAccessFile(segmentFile, "rw");
-      raf.setLength(descriptor.maxSegmentSize());
+      raf.setLength(maxSegmentSize);
       channel =  raf.getChannel();
     } catch (IOException e) {
       throw new StorageException(e);
     }
 
-    ByteBuffer buffer = ByteBuffer.allocate(JournalSegmentDescriptor.BYTES);
-    descriptor.copyTo(buffer);
+    ByteBuffer buffer = descriptor.asBuffer();
     buffer.flip();
     try {
       channel.write(buffer);
@@ -457,7 +437,8 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @return The segment instance.
    */
   protected JournalSegment<E> newSegment(JournalSegmentFile segmentFile, JournalSegmentDescriptor descriptor) {
-    return new JournalSegment<>(segmentFile, descriptor, storageLevel, maxEntrySize, indexDensity, namespace);
+    return new JournalSegment<>(segmentFile, descriptor, storageLevel, maxEntrySize, indexDensity, namespace,
+      maxSegmentSize);
   }
 
   /**
@@ -469,7 +450,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     try (FileChannel channel = openChannel(segmentFile)) {
       channel.read(buffer);
       buffer.flip();
-      JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
+      final var descriptor = JournalSegmentDescriptor.fromBuffer(buffer);
       JournalSegment<E> segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
       log.debug("Loaded disk segment: {} ({})", descriptor.id(), segmentFile.getName());
       return segment;
@@ -511,7 +492,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
           throw new StorageException(e);
         }
 
-        JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
+        final var descriptor = JournalSegmentDescriptor.fromBuffer(buffer);
 
         // Load the segment.
         JournalSegment<E> segment = loadSegment(descriptor.id());
