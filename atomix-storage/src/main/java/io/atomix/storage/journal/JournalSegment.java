@@ -52,7 +52,8 @@ final class JournalSegment<E> implements AutoCloseable {
       StorageLevel storageLevel,
       int maxEntrySize,
       double indexDensity,
-      JournalSerdes namespace) {
+      JournalSerdes namespace,
+      int maxSegmentSize) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
@@ -66,8 +67,9 @@ final class JournalSegment<E> implements AutoCloseable {
       throw new StorageException(e);
     }
     writer = switch (storageLevel) {
-        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace);
-        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace).toFileChannel();
+        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace, maxSegmentSize);
+        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, index, namespace, maxSegmentSize)
+          .toFileChannel();
     };
   }
 
@@ -248,7 +250,6 @@ final class JournalSegment<E> implements AutoCloseable {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("id", descriptor.id())
-        .add("version", descriptor.version())
         .add("index", index())
         .toString();
   }
