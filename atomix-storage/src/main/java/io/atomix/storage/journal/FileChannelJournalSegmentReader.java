@@ -56,8 +56,7 @@ final class FileChannelJournalSegmentReader<E> extends JournalSegmentReader<E> {
       // Read more bytes from the segment if necessary.
       if (memory.remaining() < maxEntrySize) {
         long position = currentPosition + memory.position();
-        memory.clear();
-        channel.read(memory, position);
+        channel.read(memory.clear(), position);
         currentPosition = position;
         memory.flip();
       }
