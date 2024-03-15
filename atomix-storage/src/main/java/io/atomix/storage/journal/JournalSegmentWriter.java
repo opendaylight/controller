@@ -39,13 +39,12 @@ final class JournalSegmentWriter {
     private int currentPosition;
     private Long lastIndex;
 
-    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final int maxEntrySize,
-            final JournalIndex index) {
+    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex index) {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);
         this.index = requireNonNull(index);
-        maxSegmentSize = segment.descriptor().maxSegmentSize();
-        this.maxEntrySize = maxEntrySize;
+        maxSegmentSize = segment.maxSegmentSize();
+        maxEntrySize = segment.maxEntrySize();
         // adjust lastEntry value
         reset(0);
     }
@@ -143,7 +142,7 @@ final class JournalSegmentWriter {
 
         // Clear the buffer indexes and acquire ownership of the buffer
         currentPosition = JournalSegmentDescriptor.BYTES;
-        final var reader = new JournalSegmentReader(segment, fileReader, maxEntrySize);
+        final var reader = new JournalSegmentReader(segment, fileReader);
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {

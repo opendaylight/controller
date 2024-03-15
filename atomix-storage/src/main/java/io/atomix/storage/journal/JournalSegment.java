@@ -38,6 +38,7 @@ final class JournalSegment implements AutoCloseable {
   private final JournalSegmentFile file;
   private final JournalSegmentDescriptor descriptor;
   private final StorageLevel storageLevel;
+  private final int maxSegmentSize;
   private final int maxEntrySize;
   private final JournalIndex journalIndex;
   private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
@@ -51,11 +52,13 @@ final class JournalSegment implements AutoCloseable {
       final JournalSegmentFile file,
       final JournalSegmentDescriptor descriptor,
       final StorageLevel storageLevel,
+      final int maxSegmentSize,
       final int maxEntrySize,
       final double indexDensity) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
+    this.maxSegmentSize = maxSegmentSize;
     this.maxEntrySize = maxEntrySize;
     journalIndex = new SparseJournalIndex(indexDensity);
     try {
@@ -66,10 +69,10 @@ final class JournalSegment implements AutoCloseable {
     }
 
     final var fileWriter = switch (storageLevel) {
-        case DISK -> new DiskFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
-        case MAPPED -> new MappedFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
+        case DISK -> new DiskFileWriter(file.file().toPath(), channel, maxSegmentSize, maxEntrySize);
+        case MAPPED -> new MappedFileWriter(file.file().toPath(), channel, maxSegmentSize, maxEntrySize);
     };
-    writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex)
+    writer = new JournalSegmentWriter(fileWriter, this, journalIndex)
         // relinquish mapped memory
         .toFileChannel();
   }
@@ -121,6 +124,24 @@ final class JournalSegment implements AutoCloseable {
    */
   JournalSegmentDescriptor descriptor() {
     return descriptor;
+  }
+
+  /**
+   * Returns max entry size.
+   *
+   * @return max entry size
+   */
+  int maxEntrySize() {
+    return maxEntrySize;
+  }
+
+  /**
+   * Returns max segment size.
+   *
+   * @return max segment size
+   */
+  int maxSegmentSize() {
+    return maxSegmentSize;
   }
 
   /**
@@ -187,8 +208,8 @@ final class JournalSegment implements AutoCloseable {
     final var buffer = writer.buffer();
     final var path = file.file().toPath();
     final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
-        : new DiskFileReader(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
-    final var reader = new JournalSegmentReader(this, fileReader, maxEntrySize);
+        : new DiskFileReader(path, channel, maxSegmentSize, maxEntrySize);
+    final var reader = new JournalSegmentReader(this, fileReader);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
     return reader;
@@ -263,7 +284,6 @@ final class JournalSegment implements AutoCloseable {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("id", descriptor.id())
-        .add("version", descriptor.version())
         .add("index", firstIndex())
         .toString();
   }
