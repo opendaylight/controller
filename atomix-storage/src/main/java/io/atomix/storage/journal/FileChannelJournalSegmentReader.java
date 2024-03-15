@@ -40,7 +40,7 @@ final class FileChannelJournalSegmentReader<E> extends JournalSegmentReader<E> {
       JournalSerdes namespace) {
     super(segment, maxEntrySize, index, namespace);
     this.channel = channel;
-    this.memory = ByteBuffer.allocate((maxEntrySize + Integer.BYTES + Integer.BYTES) * 2);
+    this.memory = ByteBuffer.allocate((maxEntrySize + JournalSegmentWriter.ENTRY_HEADER_BYTES) * 2);
     reset();
   }
 
