@@ -150,11 +150,6 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  long getLastIndex() {
-    return lastEntry != null ? lastEntry.index() : firstIndex - 1;
-  }
-
-  @Override
   Indexed<E> getLastEntry() {
     return lastEntry;
   }

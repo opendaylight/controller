@@ -55,7 +55,10 @@ abstract sealed class JournalSegmentWriter<E> permits FileChannelJournalSegmentW
      *
      * @return The last written index.
      */
-    abstract long getLastIndex();
+    final long getLastIndex() {
+        final Indexed<?> lastEntry;
+        return (lastEntry = getLastEntry()) != null ? lastEntry.index() : firstIndex - 1;
+    }
 
     /**
      * Returns the last entry written.
