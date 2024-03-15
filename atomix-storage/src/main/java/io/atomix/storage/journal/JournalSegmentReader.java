@@ -22,7 +22,7 @@ import io.atomix.storage.journal.index.Position;
 import java.util.NoSuchElementException;
 import org.eclipse.jdt.annotation.Nullable;
 
-abstract sealed class JournalSegmentReader<E> permits FileChannelJournalSegmentReader, MappedJournalSegmentReader {
+abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, MappedJournalSegmentReader {
     final int maxEntrySize;
     private final JournalIndex index;
     final JournalSerdes namespace;
