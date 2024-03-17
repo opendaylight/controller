@@ -20,7 +20,6 @@ import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -42,11 +41,12 @@ import java.util.zip.CRC32;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
-  private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[ENTRY_HEADER_BYTES]);
+  private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[SegmentEntry.HEADER_BYTES]);
 
   private final ByteBuffer memory;
   private Indexed<E> lastEntry;
-  private long currentPosition;
+
+  private final DiskSegmentEntryReader reader;
 
   DiskJournalSegmentWriter(
       final FileChannel channel,
@@ -56,6 +56,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       final JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
     memory = allocMemory(maxEntrySize);
+    reader = new DiskSegmentEntryReader(channel, maxSegmentSize, maxEntrySize);
     reset(0);
   }
 
@@ -63,11 +64,12 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     super(previous);
     memory = allocMemory(maxEntrySize);
     lastEntry = previous.getLastEntry();
-    currentPosition = position;
+    reader = new DiskSegmentEntryReader(channel, maxSegmentSize, maxEntrySize);
+    reader.reset(position);
   }
 
   private static ByteBuffer allocMemory(final int maxEntrySize) {
-    final var buf = ByteBuffer.allocate((maxEntrySize + ENTRY_HEADER_BYTES) * 2);
+    final var buf = ByteBuffer.allocate((maxEntrySize + SegmentEntry.HEADER_BYTES) * 2);
     buf.limit(0);
     return buf;
   }
@@ -90,87 +92,25 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   @Override
   void reset(final long index) {
     long nextIndex = firstIndex;
+    reader.reset();
 
-    // Clear the buffer indexes.
-    currentPosition = JournalSegmentDescriptor.BYTES;
-
-    try {
-      // Clear memory buffer and read fist chunk
-      channel.read(memory.clear(), JournalSegmentDescriptor.BYTES);
-      memory.flip();
-
-      // Read the entry length.
-      int length = memory.getInt();
-
-      // If the length is non-zero, read the entry.
-      while (0 < length && length <= maxEntrySize && (index == 0 || nextIndex <= index)) {
-
-        // Read the checksum of the entry.
-        final long checksum = memory.getInt() & 0xFFFFFFFFL;
-
-        // Slice off the entry's bytes
-        final ByteBuffer entryBytes = memory.slice();
-        entryBytes.limit(length);
-
-        // Compute the checksum for the entry bytes.
-        final CRC32 crc32 = new CRC32();
-        crc32.update(entryBytes);
-
-        // If the stored checksum does not equal the computed checksum, do not proceed further
-        if (checksum != crc32.getValue()) {
-          break;
+    while (index == 0 || nextIndex <= index) {
+        final var position = reader.currentPosition();
+        final Indexed<E> entry;
+        try {
+            entry = reader.readNextIndexed(namespace, nextIndex);
+        } catch (IOException e) {
+            throw new StorageException(e);
         }
 
-        entryBytes.rewind();
-        final E entry = namespace.deserialize(entryBytes);
-        lastEntry = new Indexed<>(nextIndex, entry, length);
-        this.index.index(nextIndex, (int) currentPosition);
+        if (entry == null) {
+            break;
+        }
+
+        this.index.index(nextIndex, (int) position);
+        lastEntry = entry;
         nextIndex++;
-
-        // Update the current position for indexing.
-        currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
-        memory.position(memory.position() + length);
-
-        length = prepareNextEntry();
-      }
-    } catch (BufferUnderflowException e) {
-      // No-op, position is only updated on success
-    } catch (IOException e) {
-      throw new StorageException(e);
     }
-  }
-
-  private int prepareNextEntry() throws IOException {
-      int remaining = memory.remaining();
-      boolean compacted;
-      if (remaining < ENTRY_HEADER_BYTES) {
-          // We do not have the header available. Move the pointer and read.
-          channel.read(memory.compact());
-          remaining = memory.flip().remaining();
-          if (remaining < ENTRY_HEADER_BYTES) {
-              // could happen with mis-padded segment
-              return 0;
-          }
-          compacted = true;
-      } else {
-          compacted = false;
-      }
-
-      final int length = memory.getInt();
-      final var need = Integer.BYTES + length;
-      if (need <= remaining) {
-          // Fast path: we have the entry properly positioned
-          return length;
-      }
-
-      if (compacted) {
-          // we have already compacted the buffer, there is just not enough data
-          return 0;
-      }
-
-      // Try to read more data and check again
-      channel.read(memory.compact());
-      return need <= memory.flip().remaining() ? length : 0;
   }
 
   @Override
@@ -186,16 +126,16 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Serialize the entry.
     try {
-      namespace.serialize(entry, memory.clear().position(ENTRY_HEADER_BYTES));
+      namespace.serialize(entry, memory.clear().position(SegmentEntry.HEADER_BYTES));
     } catch (KryoException e) {
       throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
     }
     memory.flip();
 
-    final int length = memory.limit() - ENTRY_HEADER_BYTES;
+    final int length = memory.limit() - SegmentEntry.HEADER_BYTES;
 
     // Ensure there's enough space left in the buffer to store the entry.
-    if (maxSegmentSize - currentPosition < length + ENTRY_HEADER_BYTES) {
+    if (maxSegmentSize - currentPosition < length + SegmentEntry.HEADER_BYTES) {
       throw new BufferOverflowException();
     }
 
@@ -206,7 +146,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Compute the checksum for the entry.
     final CRC32 crc32 = new CRC32();
-    crc32.update(memory.array(), ENTRY_HEADER_BYTES, memory.limit() - ENTRY_HEADER_BYTES);
+    crc32.update(memory.array(), SegmentEntry.HEADER_BYTES, memory.limit() - SegmentEntry.HEADER_BYTES);
     final long checksum = crc32.getValue();
 
     // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
@@ -222,7 +162,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     lastEntry = indexedEntry;
     this.index.index(index, (int) currentPosition);
 
-    currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
+    currentPosition = currentPosition + SegmentEntry.HEADER_BYTES + length;
     return (Indexed<T>) indexedEntry;
   }
 

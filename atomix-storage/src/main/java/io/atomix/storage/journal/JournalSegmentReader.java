@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, MappedJournalSegmentReader {
+    final int maxSegmentSize;
     final int maxEntrySize;
     private final JournalIndex index;
     final JournalSerdes namespace;
@@ -35,6 +36,7 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
     JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
             final JournalSerdes namespace) {
         this.segment = requireNonNull(segment);
+        maxSegmentSize = segment.descriptor().maxSegmentSize();
         this.maxEntrySize = maxEntrySize;
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
