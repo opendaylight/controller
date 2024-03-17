@@ -18,7 +18,6 @@ package io.atomix.storage.journal;
 
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -50,24 +49,24 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private long currentPosition;
 
   DiskJournalSegmentWriter(
-      FileChannel channel,
-      JournalSegment<E> segment,
-      int maxEntrySize,
-      JournalIndex index,
-      JournalSerdes namespace) {
+      final FileChannel channel,
+      final JournalSegment<E> segment,
+      final int maxEntrySize,
+      final JournalIndex index,
+      final JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
     memory = allocMemory(maxEntrySize);
     reset(0);
   }
 
-  DiskJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+  DiskJournalSegmentWriter(final JournalSegmentWriter<E> previous, final int position) {
     super(previous);
     memory = allocMemory(maxEntrySize);
     lastEntry = previous.getLastEntry();
     currentPosition = position;
   }
 
-  private static ByteBuffer allocMemory(int maxEntrySize) {
+  private static ByteBuffer allocMemory(final int maxEntrySize) {
     final var buf = ByteBuffer.allocate((maxEntrySize + ENTRY_HEADER_BYTES) * 2);
     buf.limit(0);
     return buf;
@@ -89,7 +88,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  void reset(long index) {
+  void reset(final long index) {
     long nextIndex = firstIndex;
 
     // Clear the buffer indexes.
@@ -132,19 +131,46 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
         currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
         memory.position(memory.position() + length);
 
-        // Read more bytes from the segment if necessary.
-        if (memory.remaining() < maxEntrySize) {
-          channel.read(memory.compact());
-          memory.flip();
-        }
-
-        length = memory.getInt();
+        length = prepareNextEntry();
       }
     } catch (BufferUnderflowException e) {
       // No-op, position is only updated on success
     } catch (IOException e) {
       throw new StorageException(e);
     }
+  }
+
+  private int prepareNextEntry() throws IOException {
+      int remaining = memory.remaining();
+      boolean compacted;
+      if (remaining < ENTRY_HEADER_BYTES) {
+          // We do not have the header available. Move the pointer and read.
+          channel.read(memory.compact());
+          remaining = memory.flip().remaining();
+          if (remaining < ENTRY_HEADER_BYTES) {
+              // could happen with mis-padded segment
+              return 0;
+          }
+          compacted = true;
+      } else {
+          compacted = false;
+      }
+
+      final int length = memory.getInt();
+      final var need = Integer.BYTES + length;
+      if (need <= remaining) {
+          // Fast path: we have the entry properly positioned
+          return length;
+      }
+
+      if (compacted) {
+          // we have already compacted the buffer, there is just not enough data
+          return 0;
+      }
+
+      // Try to read more data and check again
+      channel.read(memory.compact());
+      return need <= memory.flip().remaining() ? length : 0;
   }
 
   @Override
@@ -154,7 +180,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   @SuppressWarnings("unchecked")
-  <T extends E> Indexed<T> append(T entry) {
+  <T extends E> Indexed<T> append(final T entry) {
     // Store the entry index.
     final long index = getNextIndex();
 
@@ -193,7 +219,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Update the last entry with the correct index/term/length.
     Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
-    this.lastEntry = indexedEntry;
+    lastEntry = indexedEntry;
     this.index.index(index, (int) currentPosition);
 
     currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
@@ -201,7 +227,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  void truncate(long index) {
+  void truncate(final long index) {
     // If the index is greater than or equal to the last index, skip the truncate.
     if (index >= getLastIndex()) {
       return;
