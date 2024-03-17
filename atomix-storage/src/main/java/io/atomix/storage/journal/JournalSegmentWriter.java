@@ -24,15 +24,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, MappedJournalSegmentWriter {
-    /**
-     * The size of the header, comprising of:
-     * <ul>
-     *   <li>32-bit signed entry length</li>
-     *   <li>32-bit unsigned CRC32 checksum</li>
-     * </li>
-     */
-    static final int ENTRY_HEADER_BYTES = Integer.BYTES + Integer.BYTES;
-
     final @NonNull FileChannel channel;
     final @NonNull JournalIndex index;
     final @NonNull JournalSerdes namespace;

@@ -161,11 +161,11 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Serialize the entry.
     int position = buffer.position();
-    if (position + ENTRY_HEADER_BYTES > buffer.limit()) {
+    if (position + SegmentEntry.HEADER_BYTES > buffer.limit()) {
       throw new BufferOverflowException();
     }
 
-    buffer.position(position + ENTRY_HEADER_BYTES);
+    buffer.position(position + SegmentEntry.HEADER_BYTES);
 
     try {
       namespace.serialize(entry, buffer);
@@ -173,7 +173,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       throw new BufferOverflowException();
     }
 
-    final int length = buffer.position() - (position + ENTRY_HEADER_BYTES);
+    final int length = buffer.position() - (position + SegmentEntry.HEADER_BYTES);
 
     // If the entry length exceeds the maximum entry size then throw an exception.
     if (length > maxEntrySize) {
@@ -184,14 +184,14 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Compute the checksum for the entry.
     final CRC32 crc32 = new CRC32();
-    buffer.position(position + ENTRY_HEADER_BYTES);
+    buffer.position(position + SegmentEntry.HEADER_BYTES);
     ByteBuffer slice = buffer.slice();
     slice.limit(length);
     crc32.update(slice);
     final long checksum = crc32.getValue();
 
     // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-    buffer.position(position).putInt(length).putInt((int) checksum).position(position + ENTRY_HEADER_BYTES + length);
+    buffer.position(position).putInt(length).putInt((int) checksum).position(position + SegmentEntry.HEADER_BYTES + length);
 
     // Update the last entry with the correct index/term/length.
     Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
