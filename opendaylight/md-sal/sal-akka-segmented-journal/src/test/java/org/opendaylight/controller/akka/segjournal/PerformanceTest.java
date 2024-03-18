@@ -92,6 +92,7 @@ class PerformanceTest {
         if (actor != null) {
             actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }
+        FileUtils.deleteQuietly(DIRECTORY);
     }
 
     @Disabled("Disable due to being an extensive time hog")

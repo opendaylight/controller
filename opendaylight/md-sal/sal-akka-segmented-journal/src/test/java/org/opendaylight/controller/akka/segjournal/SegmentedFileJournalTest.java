@@ -82,6 +82,7 @@ class SegmentedFileJournalTest {
     @AfterEach
     void after() {
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        FileUtils.deleteQuietly(DIRECTORY);
     }
 
     @Test
