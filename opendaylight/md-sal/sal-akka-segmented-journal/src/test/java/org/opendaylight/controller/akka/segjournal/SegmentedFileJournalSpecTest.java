@@ -29,4 +29,10 @@ public class SegmentedFileJournalSpecTest extends JavaJournalSpec {
         FileUtils.deleteQuietly(JOURNAL_DIR);
         super.beforeAll();
     }
+
+    @Override
+    public void afterAll() {
+        super.afterAll();
+        FileUtils.deleteQuietly(JOURNAL_DIR);
+    }
 }
