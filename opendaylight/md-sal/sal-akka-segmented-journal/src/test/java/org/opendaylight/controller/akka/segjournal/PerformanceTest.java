@@ -103,7 +103,8 @@ class PerformanceTest {
         LOG.info("Test {} entrySize={} segmentSize={} payload={} count={}", storage, maxEntrySize, maxSegmentSize,
             payloadSize, requestCount);
 
-        actor = kit.childActorOf(SegmentedJournalActor.props("perf", DIRECTORY, storage, maxEntrySize, maxSegmentSize)
+        actor = kit.childActorOf(
+            SegmentedJournalActor.props("perf", DIRECTORY, storage, maxEntrySize, maxSegmentSize, 0)
             .withDispatcher(CallingThreadDispatcher.Id()));
 
         final var random = ThreadLocalRandom.current();

@@ -13,6 +13,7 @@ import com.codahale.metrics.Histogram;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
+import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WrittenMessages;
 
 /**
  * Abstraction of a data journal. This provides a unified interface towards {@link SegmentedJournalActor}, allowing
@@ -79,8 +80,10 @@ abstract class DataJournal {
     /**
      * Handle a request to store some messages.
      *
-     * @param message Request message
-     * @return number of bytes written
+     * @param message {@link WriteMessages} message
+     * @return a {@link WrittenMessages} object
      */
-    abstract long handleWriteMessages(@NonNull WriteMessages message);
+    abstract @NonNull WrittenMessages handleWriteMessages(@NonNull WriteMessages message);
+
+    abstract void flush();
 }
