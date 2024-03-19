@@ -52,6 +52,7 @@ class SegmentedFileJournalTest {
     private static final File DIRECTORY = new File("target/sfj-test");
     private static final int SEGMENT_SIZE = 1024 * 1024;
     private static final int MESSAGE_SIZE = 512 * 1024;
+    private static final int FLUSH_SIZE = 16 * 1024;
 
     private static ActorSystem SYSTEM;
 
@@ -210,7 +211,7 @@ class SegmentedFileJournalTest {
 
     private ActorRef actor() {
         return kit.childActorOf(SegmentedJournalActor.props("foo", DIRECTORY, StorageLevel.DISK, MESSAGE_SIZE,
-            SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
+            SEGMENT_SIZE, FLUSH_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
     }
 
     private void deleteEntries(final long deleteTo) {
