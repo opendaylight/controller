@@ -18,11 +18,13 @@ import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
+import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WrittenMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.jdk.javaapi.CollectionConverters;
@@ -64,7 +66,13 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     void close() {
+        flush();
         entries.close();
+    }
+
+    @Override
+    void flush() {
+        entries.writer().flush();
     }
 
     @Override
@@ -105,10 +113,11 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     @SuppressWarnings("checkstyle:illegalCatch")
-    long handleWriteMessages(final WriteMessages message) {
+    WrittenMessages handleWriteMessages(final WriteMessages message) {
         final int count = message.size();
+        final var responses = new ArrayList<>();
         final var writer = entries.writer();
-        long bytes = 0;
+        long writtenBytes = 0;
 
         for (int i = 0; i < count; ++i) {
             final long mark = writer.getLastIndex();
@@ -117,18 +126,18 @@ final class DataJournalV0 extends DataJournal {
             final var reprs = CollectionConverters.asJava(request.payload());
             LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, reprs.size(), mark);
             try {
-                bytes += writePayload(writer, reprs);
+                writtenBytes += writePayload(writer, reprs);
             } catch (Exception e) {
                 LOG.warn("{}: failed to write out request {}/{} reverting to {}", persistenceId, i, count, mark, e);
-                message.setFailure(i, e);
+                responses.add(e);
                 writer.truncate(mark);
                 continue;
             }
-
-            message.setSuccess(i);
+            responses.add(null);
         }
         writer.flush();
-        return bytes;
+
+        return new WrittenMessages(message, responses, writtenBytes);
     }
 
     private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {

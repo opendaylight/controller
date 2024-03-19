@@ -7,13 +7,16 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
+import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
+import akka.remote.artery.Flush;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -25,7 +28,9 @@ import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -57,8 +62,8 @@ import scala.concurrent.Promise;
  * Split-file approach allows us to treat sequence numbers and indices as equivalent, without maintaining any explicit
  * mapping information. The only additional information we need to maintain is the last deleted sequence number.
  */
-final class SegmentedJournalActor extends AbstractActor {
-    abstract static class AsyncMessage<T> {
+abstract sealed class SegmentedJournalActor extends AbstractActor {
+    abstract static sealed class AsyncMessage<T> {
         final Promise<T> promise = Promise.apply();
     }
 
@@ -143,6 +148,101 @@ final class SegmentedJournalActor extends AbstractActor {
         }
     }
 
+    // responses == null on success, Exception on failure
+    record WrittenMessages(WriteMessages message, List<Object> responses, long writtenBytes) {
+        WrittenMessages {
+            verify(responses.size() == message.size(), "Mismatched %s and %s", message, responses);
+            verify(writtenBytes >= 0, "Unexpected length %s", writtenBytes);
+        }
+
+        private void complete() {
+            for (int i = 0, size = responses.size(); i < size; ++i) {
+                if (responses.get(i) instanceof Exception ex) {
+                    message.setFailure(i, ex);
+                } else {
+                    message.setSuccess(i);
+                }
+            }
+        }
+    }
+
+    private static final class DelayedFlushing extends SegmentedJournalActor {
+        private static final class Flush extends AsyncMessage<Void> {
+            final long id;
+
+            Flush(long id) {
+                this.id = id;
+            }
+        }
+
+        private final Deque<WrittenMessages> unflushedWrites = new ArrayDeque<>();
+        private final long maxUnflushedBytes;
+
+        private long unflushedBytes = 0;
+        private final Stopwatch unflushedDuration = Stopwatch.createUnstarted();
+
+        DelayedFlushing(final String persistenceId, final File directory, final StorageLevel storage,
+                final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes) {
+            super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize);
+            this.maxUnflushedBytes = maxUnflushedBytes;
+        }
+
+        @Override
+        void onWrittenMessages(final WrittenMessages message) {
+            boolean first = unflushedWrites.isEmpty(); 
+            if (first) {
+                unflushedDuration.start();
+            }
+            unflushedWrites.addLast(message);
+            unflushedBytes = unflushedBytes + message.writtenBytes;
+            if (unflushedBytes >= maxUnflushedBytes) {
+                LOG.debug("{}: reached {} unflushed journal bytes", persistenceId(), unflushedBytes);
+                flushWrites();
+            } else if (first) {
+                LOG.debug("{}: deferring journal flush", persistenceId());
+                self().tell(new Flush(flushId), ActorRef.noSender());
+            }
+        }
+
+        @Override
+        void flushWrites() {
+            final var unsyncedSize = unflushedWrites.size();
+            if (unsyncedSize == 0) {
+                // Nothing to flush
+                return;
+            }
+
+            LOG.debug("{}: flushing {} journal writes after {}", persistenceId(), unsyncedSize,
+                unflushedDuration.stop());
+            flushJournal();
+
+            final var sw = Stopwatch.createStarted();
+            unflushedWrites.forEach(WrittenMessages::complete);
+            unflushedWrites.clear();
+            unflushedBytes = 0;
+            unflushedDuration.reset();
+            LOG.debug("{}: completed {} flushed journal writes in {}", persistenceId(), unsyncedSize, sw);
+        }
+    }
+
+    private static final class ImmediateFlushing extends SegmentedJournalActor {
+        ImmediateFlushing(final String persistenceId, final File directory, final StorageLevel storage,
+                final int maxEntrySize, final int maxSegmentSize) {
+            super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize);
+        }
+
+        @Override
+        void onWrittenMessages(final WrittenMessages message) {
+            flushJournal();
+            message.complete();
+        }
+
+        @Override
+        void flushWrites() {
+            // No-op
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedJournalActor.class);
     private static final JournalSerdes DELETE_NAMESPACE = JournalSerdes.builder()
         .register(LongEntrySerdes.LONG_ENTRY_SERDES, Long.class)
@@ -166,7 +266,7 @@ final class SegmentedJournalActor extends AbstractActor {
     private SegmentedJournal<Long> deleteJournal;
     private long lastDelete;
 
-    SegmentedJournalActor(final String persistenceId, final File directory, final StorageLevel storage,
+    private SegmentedJournalActor(final String persistenceId, final File directory, final StorageLevel storage,
             final int maxEntrySize, final int maxSegmentSize) {
         this.persistenceId = requireNonNull(persistenceId);
         this.directory = requireNonNull(directory);
@@ -176,9 +276,22 @@ final class SegmentedJournalActor extends AbstractActor {
     }
 
     static Props props(final String persistenceId, final File directory, final StorageLevel storage,
-            final int maxEntrySize, final int maxSegmentSize) {
-        return Props.create(SegmentedJournalActor.class, requireNonNull(persistenceId), directory, storage,
-            maxEntrySize, maxSegmentSize);
+            final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes) {
+        return maxUnflushedBytes > 0
+            ? Props.create(DelayedFlushing.class, requireNonNull(persistenceId), directory, storage, maxEntrySize,
+                maxSegmentSize, maxUnflushedBytes)
+            : Props.create(ImmediateFlushing.class, requireNonNull(persistenceId), directory, storage, maxEntrySize,
+                maxSegmentSize);
+    }
+
+    final String persistenceId() {
+        return persistenceId;
+    }
+
+    final void flushJournal() {
+        final var sw = Stopwatch.createStarted();
+        dataJournal.flush();
+        LOG.debug("{}: journal flush completed in {}", persistenceId, sw);
     }
 
     @Override
@@ -188,6 +301,7 @@ final class SegmentedJournalActor extends AbstractActor {
                 .match(ReadHighestSequenceNr.class, this::handleReadHighestSequenceNr)
                 .match(ReplayMessages.class, this::handleReplayMessages)
                 .match(WriteMessages.class, this::handleWriteMessages)
+                .match(Flush.class, this::handleFlush)
                 .matchAny(this::handleUnknown)
                 .build();
     }
@@ -239,6 +353,8 @@ final class SegmentedJournalActor extends AbstractActor {
         ensureOpen();
 
         LOG.debug("{}: delete messages {}", persistenceId, message);
+        flushWrites();
+
         final long to = Long.min(dataJournal.lastWrittenSequenceNr(), message.toSequenceNr);
         LOG.debug("{}: adjusted delete to {}", persistenceId, to);
 
@@ -267,6 +383,7 @@ final class SegmentedJournalActor extends AbstractActor {
         final Long sequence;
         if (directory.isDirectory()) {
             ensureOpen();
+            flushWrites();
             sequence = dataJournal.lastWrittenSequenceNr();
         } else {
             sequence = 0L;
@@ -279,6 +396,7 @@ final class SegmentedJournalActor extends AbstractActor {
     private void handleReplayMessages(final ReplayMessages message) {
         LOG.debug("{}: replaying messages {}", persistenceId, message);
         ensureOpen();
+        flushWrites();
 
         final long from = Long.max(lastDelete + 1, message.fromSequenceNr);
         LOG.debug("{}: adjusted fromSequenceNr to {}", persistenceId, from);
@@ -291,14 +409,21 @@ final class SegmentedJournalActor extends AbstractActor {
 
         final var sw = Stopwatch.createStarted();
         final long start = dataJournal.lastWrittenSequenceNr();
-        final long bytes = dataJournal.handleWriteMessages(message);
+        final var writtenMessages = dataJournal.handleWriteMessages(message);
         sw.stop();
 
         batchWriteTime.update(sw.elapsed(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
         messageWriteCount.mark(dataJournal.lastWrittenSequenceNr() - start);
 
         // log message after statistics are updated
-        LOG.debug("{}: write of {} bytes completed in {}", persistenceId, bytes, sw);
+        LOG.debug("{}: write of {} bytes completed in {}", persistenceId, writtenMessages.writtenBytes, sw);
+        onWrittenMessages(writtenMessages);
+    }
+
+    abstract void onWrittenMessages(WrittenMessages message);
+
+    private void handleFlush(final Flush message) {
+        flushWrites();
     }
 
     private void handleUnknown(final Object message) {
@@ -323,4 +448,7 @@ final class SegmentedJournalActor extends AbstractActor {
         LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
             dataJournal.lastWrittenSequenceNr(), lastDelete);
     }
+
+    abstract void flushWrites();
+
 }

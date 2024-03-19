@@ -44,6 +44,8 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     public static final int STORAGE_MAX_ENTRY_SIZE_DEFAULT = 16 * 1024 * 1024;
     public static final String STORAGE_MAX_SEGMENT_SIZE = "max-segment-size";
     public static final int STORAGE_MAX_SEGMENT_SIZE_DEFAULT = STORAGE_MAX_ENTRY_SIZE_DEFAULT * 8;
+    public static final String STORAGE_MAX_UNFLUSHED_BYTES = "max-unflushed-bytes";
+    public static final int STORAGE_MAX_UNFLUSHED_BYTES_DEFAULT = 0;
     public static final String STORAGE_MEMORY_MAPPED = "memory-mapped";
 
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedFileJournal.class);
@@ -53,6 +55,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     private final StorageLevel storage;
     private final int maxEntrySize;
     private final int maxSegmentSize;
+    private final int maxUnflushedBytes;
 
     public SegmentedFileJournal(final Config config) {
         rootDir = new File(config.getString(STORAGE_ROOT_DIRECTORY));
@@ -64,6 +67,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
 
         maxEntrySize = getBytes(config, STORAGE_MAX_ENTRY_SIZE, STORAGE_MAX_ENTRY_SIZE_DEFAULT);
         maxSegmentSize = getBytes(config, STORAGE_MAX_SEGMENT_SIZE, STORAGE_MAX_SEGMENT_SIZE_DEFAULT);
+        maxUnflushedBytes = getBytes(config, STORAGE_MAX_UNFLUSHED_BYTES, STORAGE_MAX_UNFLUSHED_BYTES_DEFAULT);
 
         if (config.hasPath(STORAGE_MEMORY_MAPPED)) {
             storage = config.getBoolean(STORAGE_MEMORY_MAPPED) ? StorageLevel.MAPPED : StorageLevel.DISK;
@@ -117,7 +121,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         LOG.debug("Creating handler for {} in directory {}", persistenceId, directory);
 
         final var handler = context().actorOf(SegmentedJournalActor.props(persistenceId, directory, storage,
-            maxEntrySize, maxSegmentSize));
+            maxEntrySize, maxSegmentSize, maxUnflushedBytes));
         LOG.debug("Directory {} handled by {}", directory, handler);
         return handler;
     }
@@ -141,9 +145,8 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         if (!config.hasPath(path)) {
             return defaultValue;
         }
-        final var value = config.getMemorySize(path);
-        final long result = value.toBytes();
-        checkArgument(result <= Integer.MAX_VALUE, "Size %s exceeds maximum allowed %s", Integer.MAX_VALUE);
-        return (int) result;
+        final long value = config.getBytes(path);
+        checkArgument(value <= Integer.MAX_VALUE, "Size %s exceeds maximum allowed %s", Integer.MAX_VALUE);
+        return (int) value;
     }
 }
