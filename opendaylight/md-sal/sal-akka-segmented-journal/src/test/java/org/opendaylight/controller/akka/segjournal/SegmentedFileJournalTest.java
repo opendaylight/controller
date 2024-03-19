@@ -210,7 +210,7 @@ class SegmentedFileJournalTest {
 
     private ActorRef actor() {
         return kit.childActorOf(SegmentedJournalActor.props("foo", DIRECTORY, StorageLevel.DISK, MESSAGE_SIZE,
-            SEGMENT_SIZE).withDispatcher(CallingThreadDispatcher.Id()));
+            SEGMENT_SIZE, 0).withDispatcher(CallingThreadDispatcher.Id()));
     }
 
     private void deleteEntries(final long deleteTo) {
