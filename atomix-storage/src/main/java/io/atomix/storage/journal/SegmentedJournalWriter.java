@@ -15,7 +15,7 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.BufferOverflowException;
+import static com.google.common.base.Verify.verifyNotNull;
 
 /**
  * Raft log writer.
@@ -69,20 +69,17 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T extends E> Indexed<T> append(T entry) {
-    try {
-      return currentWriter.append(entry);
-    } catch (BufferOverflowException e) {
-      if (currentSegment.index() == currentWriter.getNextIndex()) {
-        throw e;
-      }
+    var writtenEntry = currentWriter.append(entry);
+    if (writtenEntry == null) {
+        currentWriter.flush();
+        currentSegment.releaseWriter();
+        currentSegment = journal.getNextSegment();
+        currentWriter = currentSegment.acquireWriter();
+        writtenEntry = verifyNotNull(currentWriter.append(entry));
     }
-
-    currentWriter.flush();
-    currentSegment.releaseWriter();
-    currentSegment = journal.getNextSegment();
-    currentWriter = currentSegment.acquireWriter();
-    return currentWriter.append(entry);
+    return (Indexed<T>) writtenEntry;
   }
 
   @Override

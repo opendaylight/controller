@@ -153,8 +153,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  <T extends E> Indexed<T> append(T entry) {
+  Indexed<E> append(E entry) {
     // Store the entry index.
     final long index = getNextIndex();
 
@@ -170,7 +169,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Ensure there's enough space left in the buffer to store the entry.
     if (maxSegmentSize - currentPosition < length + ENTRY_HEADER_BYTES) {
-      throw new BufferOverflowException();
+      return null;
     }
 
     // If the entry length exceeds the maximum entry size then throw an exception.
@@ -197,7 +196,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     this.index.index(index, (int) currentPosition);
 
     currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
-    return (Indexed<T>) indexedEntry;
+    return indexedEntry;
   }
 
   @Override

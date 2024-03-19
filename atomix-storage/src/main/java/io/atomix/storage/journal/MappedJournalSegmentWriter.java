@@ -154,23 +154,26 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  <T extends E> Indexed<T> append(T entry) {
+  Indexed<E> append(E entry) {
     // Store the entry index.
     final long index = getNextIndex();
 
     // Serialize the entry.
-    int position = buffer.position();
-    if (position + ENTRY_HEADER_BYTES > buffer.limit()) {
-      throw new BufferOverflowException();
+    final int position = buffer.position();
+    final int remaining = buffer.remaining();
+    if (ENTRY_HEADER_BYTES > remaining) {
+      return null;
     }
 
-    buffer.position(position + ENTRY_HEADER_BYTES);
-
+    final var bufSize = Math.min(remaining - ENTRY_HEADER_BYTES, maxEntrySize);
+    final var serBuffer = buffer.slice(position + ENTRY_HEADER_BYTES, bufSize);
     try {
-      namespace.serialize(entry, buffer);
+      namespace.serialize(entry, serBuffer);
     } catch (KryoException e) {
-      throw new BufferOverflowException();
+        if (bufSize >= maxEntrySize) {
+            throw e;
+        }
+        return null;
     }
 
     final int length = buffer.position() - (position + ENTRY_HEADER_BYTES);
@@ -197,7 +200,7 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
     this.lastEntry = indexedEntry;
     this.index.index(index, position);
-    return (Indexed<T>) indexedEntry;
+    return indexedEntry;
   }
 
   @Override

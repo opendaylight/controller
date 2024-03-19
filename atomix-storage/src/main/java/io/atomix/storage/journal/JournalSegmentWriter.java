@@ -18,6 +18,7 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
+import java.nio.BufferOverflowException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
@@ -45,18 +46,18 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         this.channel = requireNonNull(channel);
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
-        this.maxSegmentSize = segment.descriptor().maxSegmentSize();
+        maxSegmentSize = segment.descriptor().maxSegmentSize();
         this.maxEntrySize = maxEntrySize;
-        this.firstIndex = segment.index();
+        firstIndex = segment.index();
     }
 
-    JournalSegmentWriter(JournalSegmentWriter<E> previous) {
-        this.channel = previous.channel;
-        this.index = previous.index;
-        this.namespace = previous.namespace;
-        this.maxSegmentSize = previous.maxSegmentSize;
-        this.maxEntrySize = previous.maxEntrySize;
-        this.firstIndex = previous.firstIndex;
+    JournalSegmentWriter(final JournalSegmentWriter<E> previous) {
+        channel = previous.channel;
+        index = previous.index;
+        namespace = previous.namespace;
+        maxSegmentSize = previous.maxSegmentSize;
+        maxEntrySize = previous.maxEntrySize;
+        firstIndex = previous.firstIndex;
     }
 
     /**
@@ -87,12 +88,13 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     }
 
     /**
-     * Appends an entry to the journal.
+     * Attempt to append an entry to the journal.
      *
      * @param entry The entry to append.
-     * @return The appended indexed entry.
+     * @return The appended indexed entry, or {@code null} if the entry does not fit
+     * @throws BufferOverflowException if entry serialized to more than {@link #maxEntrySize}
      */
-    abstract <T extends E> Indexed<T> append(T entry);
+    abstract @Nullable Indexed<E> append(E entry);
 
     /**
      * Resets the head of the segment to the given index.
