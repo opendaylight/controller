@@ -16,6 +16,8 @@
  */
 package io.atomix.storage.journal;
 
+import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
+
 import com.esotericsoftware.kryo.KryoException;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.storage.journal.index.JournalIndex;
@@ -47,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private static final Logger LOG = LoggerFactory.getLogger(DiskJournalSegmentWriter.class);
-  private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[ENTRY_HEADER_BYTES]);
+  private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[HEADER_BYTES]);
 
   private final ByteBuffer memory;
   private Indexed<E> lastEntry;
@@ -72,7 +74,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   private static ByteBuffer allocMemory(int maxEntrySize) {
-    final var buf = ByteBuffer.allocate((maxEntrySize + ENTRY_HEADER_BYTES) * 2);
+    final var buf = ByteBuffer.allocate((maxEntrySize + HEADER_BYTES) * 2);
     buf.limit(0);
     return buf;
   }
@@ -124,7 +126,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
               nextIndex++;
 
               // Update the current position for indexing.
-              currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
+              currentPosition = currentPosition + HEADER_BYTES + length;
               memory.position(memory.position() + length);
           }
       } catch (IOException e) {
@@ -137,11 +139,11 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
           final int maxEntrySize) throws IOException {
       int remaining = memory.remaining();
       boolean compacted;
-      if (remaining < ENTRY_HEADER_BYTES) {
+      if (remaining < HEADER_BYTES) {
           // We do not have the header available. Move the pointer and read.
           channel.read(memory.compact());
           remaining = memory.flip().remaining();
-          if (remaining < ENTRY_HEADER_BYTES) {
+          if (remaining < HEADER_BYTES) {
               // could happen with mis-padded segment
               return null;
           }
@@ -212,16 +214,16 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Serialize the entry.
     try {
-      namespace.serialize(entry, memory.clear().position(ENTRY_HEADER_BYTES));
+      namespace.serialize(entry, memory.clear().position(HEADER_BYTES));
     } catch (KryoException e) {
       throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
     }
     memory.flip();
 
-    final int length = memory.limit() - ENTRY_HEADER_BYTES;
+    final int length = memory.limit() - HEADER_BYTES;
 
     // Ensure there's enough space left in the buffer to store the entry.
-    if (maxSegmentSize - currentPosition < length + ENTRY_HEADER_BYTES) {
+    if (maxSegmentSize - currentPosition < length + HEADER_BYTES) {
       throw new BufferOverflowException();
     }
 
@@ -232,7 +234,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
     // Compute the checksum for the entry.
     final CRC32 crc32 = new CRC32();
-    crc32.update(memory.array(), ENTRY_HEADER_BYTES, memory.limit() - ENTRY_HEADER_BYTES);
+    crc32.update(memory.array(), HEADER_BYTES, memory.limit() - HEADER_BYTES);
     final long checksum = crc32.getValue();
 
     // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
@@ -248,7 +250,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     this.lastEntry = indexedEntry;
     this.index.index(index, (int) currentPosition);
 
-    currentPosition = currentPosition + ENTRY_HEADER_BYTES + length;
+    currentPosition = currentPosition + HEADER_BYTES + length;
     return (Indexed<T>) indexedEntry;
   }
 

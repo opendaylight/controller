@@ -11,6 +11,9 @@ import java.nio.ByteBuffer;
 
 /**
  * An {@link Indexed} entry read from {@link JournalSegment}.
+ *
+ * @param checksum The CRC32 checksum of data
+ * @param bytes Entry bytes
  */
 record SegmentEntry(int checksum, ByteBuffer bytes) {
     /**
