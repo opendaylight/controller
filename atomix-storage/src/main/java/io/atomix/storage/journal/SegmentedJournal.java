@@ -49,9 +49,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
     return new Builder<>();
   }
 
+  private static final Logger LOG = LoggerFactory.getLogger(SegmentedJournal.class);
   private static final int SEGMENT_BUFFER_FACTOR = 3;
 
-  private final Logger log = LoggerFactory.getLogger(getClass());
   private final String name;
   private final StorageLevel storageLevel;
   private final File directory;
@@ -445,7 +445,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       }
     }
     JournalSegment<E> segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
-    log.debug("Created segment: {}", segment);
+    LOG.debug("Created segment: {}", segment);
     return segment;
   }
 
@@ -471,7 +471,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       buffer.flip();
       JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
       JournalSegment<E> segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
-      log.debug("Loaded disk segment: {} ({})", descriptor.id(), segmentFile.getName());
+      LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), segmentFile.getName());
       return segment;
     } catch (IOException e) {
       throw new StorageException(e);
@@ -517,7 +517,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
         JournalSegment<E> segment = loadSegment(descriptor.id());
 
         // Add the segment to the segments list.
-        log.debug("Found segment: {} ({})", segment.descriptor().id(), segmentFile.file().getName());
+        LOG.debug("Found segment: {} ({})", segment.descriptor().id(), segmentFile.file().getName());
         segments.put(segment.index(), segment);
       }
     }
@@ -529,7 +529,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     while (iterator.hasNext()) {
       JournalSegment<E> segment = iterator.next().getValue();
       if (previousSegment != null && previousSegment.lastIndex() != segment.index() - 1) {
-        log.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(), previousSegment.file().file());
+        LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(), previousSegment.file().file());
         corrupted = true;
       }
       if (corrupted) {
@@ -612,9 +612,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
     if (segmentEntry != null) {
       SortedMap<Long, JournalSegment<E>> compactSegments = segments.headMap(segmentEntry.getValue().index());
       if (!compactSegments.isEmpty()) {
-        log.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
+        LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
         for (JournalSegment<E> segment : compactSegments.values()) {
-          log.trace("Deleting segment: {}", segment);
+          LOG.trace("Deleting segment: {}", segment);
           segment.close();
           segment.delete();
         }
@@ -627,7 +627,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   @Override
   public void close() {
     segments.values().forEach(segment -> {
-      log.debug("Closing segment: {}", segment);
+      LOG.debug("Closing segment: {}", segment);
       segment.close();
     });
     currentSegment = null;
