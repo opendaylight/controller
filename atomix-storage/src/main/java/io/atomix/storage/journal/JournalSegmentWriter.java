@@ -24,15 +24,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, MappedJournalSegmentWriter {
-    /**
-     * The size of the header, comprising of:
-     * <ul>
-     *   <li>32-bit signed entry length</li>
-     *   <li>32-bit unsigned CRC32 checksum</li>
-     * </li>
-     */
-    static final int ENTRY_HEADER_BYTES = Integer.BYTES + Integer.BYTES;
-
     final @NonNull FileChannel channel;
     final @NonNull JournalIndex index;
     final @NonNull JournalSerdes namespace;
@@ -45,18 +36,18 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         this.channel = requireNonNull(channel);
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
-        this.maxSegmentSize = segment.descriptor().maxSegmentSize();
+        maxSegmentSize = segment.descriptor().maxSegmentSize();
         this.maxEntrySize = maxEntrySize;
-        this.firstIndex = segment.index();
+        firstIndex = segment.index();
     }
 
-    JournalSegmentWriter(JournalSegmentWriter<E> previous) {
-        this.channel = previous.channel;
-        this.index = previous.index;
-        this.namespace = previous.namespace;
-        this.maxSegmentSize = previous.maxSegmentSize;
-        this.maxEntrySize = previous.maxEntrySize;
-        this.firstIndex = previous.firstIndex;
+    JournalSegmentWriter(final JournalSegmentWriter<E> previous) {
+        channel = previous.channel;
+        index = previous.index;
+        namespace = previous.namespace;
+        maxSegmentSize = previous.maxSegmentSize;
+        maxEntrySize = previous.maxEntrySize;
+        firstIndex = previous.firstIndex;
     }
 
     /**
