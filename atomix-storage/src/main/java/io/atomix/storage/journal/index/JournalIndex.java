@@ -1,5 +1,6 @@
 /*
  * Copyright 2018-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +16,33 @@
  */
 package io.atomix.storage.journal.index;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
- * Journal index.
+ * Index of a particular JournalSegment.
  */
 public interface JournalIndex {
+    /**
+     * Adds an entry for the given index at the given position.
+     *
+     * @param index the index for which to add the entry
+     * @param position the position of the given index
+     */
+    void index(long index, int position);
 
-  /**
-   * Adds an entry for the given index at the given position.
-   *
-   * @param index the index for which to add the entry
-   * @param position the position of the given index
-   */
-  void index(long index, int position);
+    /**
+     * Looks up the position of the given index.
+     *
+     * @param index the index to lookup
+     * @return the position of the given index or a lesser index, or {@code null}
+     */
+    @Nullable Position lookup(long index);
 
-  /**
-   * Looks up the position of the given index.
-   *
-   * @param index the index to lookup
-   * @return the position of the given index or a lesser index
-   */
-  Position lookup(long index);
-
-  /**
-   * Truncates the index to the given index.
-   *
-   * @param index the index to which to truncate the index
-   */
-  void truncate(long index);
-
+    /**
+     * Truncates the index to the given index and returns its position, if available.
+     *
+     * @param index the index to which to truncate the index, or {@code null}
+     * @return the position of the given index or a lesser index, or {@code null}
+     */
+    @Nullable Position truncate(long index);
 }
