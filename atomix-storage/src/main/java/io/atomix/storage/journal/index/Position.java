@@ -16,9 +16,18 @@
  */
 package io.atomix.storage.journal.index;
 
+import java.util.Map.Entry;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Journal index position.
  */
 public record Position(long index, int position) {
+    public Position(final Entry<Long, Integer> entry) {
+        this(entry.getKey(), entry.getValue());
+    }
 
+    public static @Nullable Position ofNullable(final Entry<Long, Integer> entry) {
+        return entry == null ? null : new Position(entry);
+    }
 }
