@@ -1,5 +1,6 @@
 /*
  * Copyright 2018-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +16,40 @@
  */
 package io.atomix.storage.journal.index;
 
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Sparse index.
+ * A {@link JournalIndex} maintaining target density.
  */
-public class SparseJournalIndex implements JournalIndex {
-  private static final int MIN_DENSITY = 1000;
-  private final int density;
-  private final TreeMap<Long, Integer> positions = new TreeMap<>();
+public final class SparseJournalIndex implements JournalIndex {
+    private static final int MIN_DENSITY = 1000;
 
-  public SparseJournalIndex(double density) {
-    this.density = (int) Math.ceil(MIN_DENSITY / (density * MIN_DENSITY));
-  }
+    private final int density;
+    private final TreeMap<Long, Integer> positions = new TreeMap<>();
 
-  @Override
-  public void index(long index, int position) {
-    if (index % density == 0) {
-      positions.put(index, position);
+    public SparseJournalIndex() {
+        density = MIN_DENSITY;
     }
-  }
 
-  @Override
-  public Position lookup(long index) {
-    Map.Entry<Long, Integer> entry = positions.floorEntry(index);
-    return entry != null ? new Position(entry.getKey(), entry.getValue()) : null;
-  }
+    public SparseJournalIndex(final double density) {
+        this.density = (int) Math.ceil(MIN_DENSITY / (density * MIN_DENSITY));
+    }
 
-  @Override
-  public void truncate(long index) {
-    positions.tailMap(index, false).clear();
-  }
+    @Override
+    public void index(final long index, final int position) {
+        if (index % density == 0) {
+            positions.put(index, position);
+        }
+    }
+
+    @Override
+    public Position lookup(final long index) {
+        return Position.ofNullable(positions.floorEntry(index));
+    }
+
+    @Override
+    public Position truncate(final long index) {
+        positions.tailMap(index, false).clear();
+        return Position.ofNullable(positions.lastEntry());
+    }
 }
