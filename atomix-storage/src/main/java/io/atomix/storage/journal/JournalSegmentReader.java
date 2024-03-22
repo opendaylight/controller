@@ -17,14 +17,11 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
-import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.storage.journal.index.Position;
 import java.util.NoSuchElementException;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, MappedJournalSegmentReader {
     final int maxEntrySize;
-    private final JournalIndex index;
     final JournalSerdes namespace;
     private final long firstIndex;
     private final JournalSegment<E> segment;
@@ -32,11 +29,9 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
     private Indexed<E> currentEntry;
     private Indexed<E> nextEntry;
 
-    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
-            final JournalSerdes namespace) {
+    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalSerdes namespace) {
         this.segment = requireNonNull(segment);
         this.maxEntrySize = maxEntrySize;
-        this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
         firstIndex = segment.index();
     }
@@ -93,32 +88,15 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
     }
 
     /**
-     * Resets the reader to the start of the segment.
+     * Resets the reader to the specified position.
+     *
+     * @param position new position
      */
-    final void reset() {
+    final void reset(int position) {
         currentEntry = null;
         nextEntry = null;
-        setPosition(JournalSegmentDescriptor.BYTES);
+        setPosition(position);
         nextEntry = readNext();
-    }
-
-    /**
-     * Resets the reader to the given index.
-     *
-     * @param index The index to which to reset the reader.
-     */
-    final void reset(final long index) {
-        reset();
-        Position position = this.index.lookup(index - 1);
-        if (position != null) {
-            // FIXME: why do we need a 'null'-based entry here?
-            currentEntry = new Indexed<>(position.index() - 1, null, 0);
-            setPosition(position.position());
-            nextEntry = readNext();
-        }
-        while (getNextIndex() < index && hasNext()) {
-            next();
-        }
     }
 
     /**

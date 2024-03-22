@@ -85,8 +85,22 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     } else if (index > nextIndex) {
       forward(index);
     } else {
-      currentReader.reset(index);
+      resetCurrentReader(index);
     }
+  }
+
+  /**
+   * Resets the reader to the given index.
+   *
+   * @param index The index to which to reset the reader.
+   */
+  private final void resetCurrentReader(long index) {
+      final var position = currentSegment.lookup(index - 1);
+      currentReader.reset(position != null ? position.position() : JournalSegmentDescriptor.BYTES);
+
+      while (currentReader.getNextIndex() < index && currentReader.hasNext()) {
+          currentReader.next();
+      }
   }
 
   /**
@@ -103,7 +117,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
       }
     }
 
-    currentReader.reset(index);
+    resetCurrentReader(index);
     previousEntry = currentReader.getCurrentEntry();
   }
 
