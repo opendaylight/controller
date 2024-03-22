@@ -16,7 +16,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.storage.journal.index.JournalIndex;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -37,9 +36,8 @@ final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
       FileChannel channel,
       JournalSegment<E> segment,
       int maxEntrySize,
-      JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
+    super(segment, maxEntrySize, namespace);
     this.channel = channel;
     this.memory = ByteBuffer.allocate((maxEntrySize + SegmentEntry.HEADER_BYTES) * 2);
     reset();
