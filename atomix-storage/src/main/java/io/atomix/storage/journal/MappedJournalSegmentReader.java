@@ -16,7 +16,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.storage.journal.index.JournalIndex;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
@@ -33,9 +32,8 @@ final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
       ByteBuffer buffer,
       JournalSegment<E> segment,
       int maxEntrySize,
-      JournalIndex index,
       JournalSerdes namespace) {
-    super(segment, maxEntrySize, index, namespace);
+    super(segment, maxEntrySize, namespace);
     this.buffer = buffer.slice();
     reset();
   }
