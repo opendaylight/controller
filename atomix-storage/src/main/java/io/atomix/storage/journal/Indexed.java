@@ -16,7 +16,10 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Indexed journal entry.
@@ -26,10 +29,14 @@ import com.google.common.base.MoreObjects;
  * @param entry the indexed entry
  * @param size the serialized entry size
  */
-// FIXME: add @NonNullByDefault and enforce non-null entry once we can say that entries cannot be null
 // FIXME: it seems 'index' has to be non-zero, we should enforce that if that really is the case
 // FIXME: it seems 'size' has not be non-zero, we should enforce that if that really is the case
+@NonNullByDefault
 public record Indexed<E>(long index, E entry, int size) {
+    public Indexed {
+        requireNonNull(entry);
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).add("index", index).add("entry", entry).toString();
