@@ -28,21 +28,30 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * A {@link StorageLevel#DISK} implementation of {@link FileReader}. Maintains an internal buffer.
  */
 final class DiskFileReader extends FileReader {
+    private static final int MIN_IO_SIZE = 8192;
+
     private final FileChannel channel;
     private final ByteBuffer buffer;
 
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
-    DiskFileReader(final Path path, final FileChannel channel, final int maxEntrySize) {
+    DiskFileReader(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
         super(path);
         this.channel = requireNonNull(channel);
-        buffer = ByteBuffer.allocate(chooseBufferSize(maxEntrySize)).flip();
+        buffer = ByteBuffer.allocate(chooseBufferSize(maxSegmentSize, maxEntrySize)).flip();
         bufferPosition = 0;
     }
 
-    private static int chooseBufferSize(final int maxEntrySize) {
-        return (maxEntrySize + SegmentEntry.HEADER_BYTES) * 2;
+    private static int chooseBufferSize(final int maxSegmentSize, final int maxEntrySize) {
+        if (maxSegmentSize <= MIN_IO_SIZE) {
+            // just buffer the entire segment
+            return maxSegmentSize;
+        }
+
+        // one full entry plus its header, or MIN_IO_SIZE, which benefits the read of many small entries
+        final int minBufferSize = maxEntrySize + SegmentEntry.HEADER_BYTES;
+        return minBufferSize <= MIN_IO_SIZE ? MIN_IO_SIZE : minBufferSize;
     }
 
     @Override
