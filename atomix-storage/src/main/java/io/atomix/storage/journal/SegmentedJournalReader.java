@@ -118,9 +118,11 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
   @Override
   public Indexed<E> tryNext() {
-    if (currentReader.hasNext()) {
-      previousEntry = currentReader.getCurrentEntry();
-      return currentReader.next();
+    final var current = currentReader.getCurrentEntry();
+    final var next = currentReader.tryNext();
+    if (next != null) {
+      previousEntry = current;
+      return next;
     }
 
     final var nextSegment = journal.getNextSegment(currentSegment.index());
@@ -133,7 +135,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
     currentSegment = nextSegment;
     currentReader = currentSegment.createReader();
-    return currentReader.hasNext() ? currentReader.next() : null;
+    return currentReader.tryNext();
   }
 
   @Override
