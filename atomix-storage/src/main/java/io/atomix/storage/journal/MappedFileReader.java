@@ -1,6 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
- * Copyright (c) 2024 PANTHEON.tech, s.r.o.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +16,16 @@
 package io.atomix.storage.journal;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 
 /**
- * Log segment reader.
- *
- * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
+ * A {@link StorageLevel#MAPPED} implementation of {@link FileReader}. Operates on direct mapping of the entire file.
  */
-final class MappedJournalSegmentReader<E> extends JournalSegmentReader<E> {
+final class MappedFileReader extends FileReader {
     private final ByteBuffer buffer;
 
-    MappedJournalSegmentReader(final ByteBuffer buffer, final JournalSegment<E> segment, final int maxEntrySize,
-            final JournalSerdes namespace) {
-        super(segment, maxEntrySize, namespace);
+    MappedFileReader(final Path path, final ByteBuffer buffer) {
+        super(path);
         this.buffer = buffer.slice().asReadOnlyBuffer();
     }
 
