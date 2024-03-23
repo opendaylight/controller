@@ -40,10 +40,19 @@ final class DiskFileReader extends FileReader {
     private int bufferPosition;
 
     DiskFileReader(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
+        this(path, channel, allocateBuffer(maxSegmentSize, maxEntrySize));
+    }
+
+    // Note: take ownership of the buffer
+    DiskFileReader(final Path path, final FileChannel channel, final ByteBuffer buffer) {
         super(path);
         this.channel = requireNonNull(channel);
-        buffer = ByteBuffer.allocate(chooseBufferSize(maxSegmentSize, maxEntrySize)).flip();
+        this.buffer = buffer.flip();
         bufferPosition = 0;
+    }
+
+    static ByteBuffer allocateBuffer(final int maxSegmentSize, final int maxEntrySize) {
+        return ByteBuffer.allocate(chooseBufferSize(maxSegmentSize, maxEntrySize));
     }
 
     private static int chooseBufferSize(final int maxSegmentSize, final int maxEntrySize) {
