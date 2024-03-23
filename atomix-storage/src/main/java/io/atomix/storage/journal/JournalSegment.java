@@ -49,12 +49,12 @@ final class JournalSegment<E> implements AutoCloseable {
   private boolean open = true;
 
   JournalSegment(
-      JournalSegmentFile file,
-      JournalSegmentDescriptor descriptor,
-      StorageLevel storageLevel,
-      int maxEntrySize,
-      double indexDensity,
-      JournalSerdes namespace) {
+      final JournalSegmentFile file,
+      final JournalSegmentDescriptor descriptor,
+      final StorageLevel storageLevel,
+      final int maxEntrySize,
+      final double indexDensity,
+      final JournalSerdes namespace) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
@@ -129,7 +129,7 @@ final class JournalSegment<E> implements AutoCloseable {
    * @param index the index to lookup
    * @return the position of the given index or a lesser index, or {@code null}
    */
-  @Nullable Position lookup(long index) {
+  @Nullable Position lookup(final long index) {
     return journalIndex.lookup(index);
   }
 
@@ -185,9 +185,10 @@ final class JournalSegment<E> implements AutoCloseable {
     acquire();
 
     final var buffer = writer.buffer();
-    final var reader = buffer == null
-      ? new DiskJournalSegmentReader<>(channel, this, maxEntrySize, namespace)
-        : new MappedJournalSegmentReader<>(buffer, this, maxEntrySize, namespace);
+    final var path = file.file().toPath();
+    final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
+        : new DiskFileReader(path, channel, maxEntrySize);
+    final var reader = new JournalSegmentReader<>(this, fileReader, maxEntrySize, namespace);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
     return reader;
@@ -198,7 +199,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @param reader the closed segment reader
    */
-  void closeReader(JournalSegmentReader<E> reader) {
+  void closeReader(final JournalSegmentReader<E> reader) {
     if (readers.remove(reader)) {
       release();
     }

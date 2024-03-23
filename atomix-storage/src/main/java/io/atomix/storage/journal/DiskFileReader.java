@@ -1,6 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
- * Copyright (c) 2024 PANTHEON.tech, s.r.o.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,40 +21,45 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * Log segment reader.
- *
- * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
+ * A {@link StorageLevel#DISK} implementation of {@link FileReader}. Maintains an internal buffer.
  */
-final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
+final class DiskFileReader extends FileReader {
     private final FileChannel channel;
     private final ByteBuffer buffer;
 
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
-    DiskJournalSegmentReader(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
-            final JournalSerdes namespace) {
-        super(segment, maxEntrySize, namespace);
+    DiskFileReader(final Path path, final FileChannel channel, final int maxEntrySize) {
+        super(path);
         this.channel = requireNonNull(channel);
-        buffer = ByteBuffer.allocate((maxEntrySize + SegmentEntry.HEADER_BYTES) * 2).flip();
+        buffer = ByteBuffer.allocate(chooseBufferSize(maxEntrySize)).flip();
         bufferPosition = 0;
     }
 
-    @Override void invalidateCache() {
+    private static int chooseBufferSize(final int maxEntrySize) {
+        return (maxEntrySize + SegmentEntry.HEADER_BYTES) * 2;
+    }
+
+    @Override
+    void invalidateCache() {
         buffer.clear().flip();
         bufferPosition = 0;
     }
 
-    @Override ByteBuffer read(final int position, final int size) {
+    @Override
+    ByteBuffer read(final int position, final int size) {
         // calculate logical seek distance between buffer's first byte and position and split flow between
         // forward-moving and backwards-moving code paths.
         final int seek = bufferPosition - position;
         return seek >= 0 ? forwardAndRead(seek, position, size) : rewindAndRead(-seek, position, size);
     }
 
-    private ByteBuffer forwardAndRead(final int seek, final int position, final int size) {
+    private @NonNull ByteBuffer forwardAndRead(final int seek, final int position, final int size) {
         final int missing = buffer.limit() - seek - size;
         if (missing <= 0) {
             // fast path: we have the requested region
@@ -72,7 +76,7 @@ final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
         return setAndSlice(position, size);
     }
 
-    ByteBuffer rewindAndRead(final int rewindBy, final int position, final int size) {
+    private @NonNull ByteBuffer rewindAndRead(final int rewindBy, final int position, final int size) {
         // TODO: Lazy solution. To be super crisp, we want to find out how much of the buffer we can salvage and
         //       do all the limit/position fiddling before and after read. Right now let's just flow the buffer up and
         //       read it.
@@ -81,7 +85,7 @@ final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
         return setAndSlice(position, size);
     }
 
-    void readAtLeast(final int readPosition, final int readAtLeast) {
+    private void readAtLeast(final int readPosition, final int readAtLeast) {
         final int bytesRead;
         try {
             bytesRead = channel.read(buffer, readPosition);
@@ -92,7 +96,7 @@ final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
         buffer.flip();
     }
 
-    private ByteBuffer setAndSlice(final int position, final int size) {
+    private @NonNull ByteBuffer setAndSlice(final int position, final int size) {
         bufferPosition = position;
         return buffer.slice(0, size).asReadOnlyBuffer();
     }
