@@ -17,100 +17,17 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
-import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.storage.journal.index.Position;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, MappedJournalSegmentReader {
     final int maxEntrySize;
-    private final JournalIndex index;
     final JournalSerdes namespace;
-    private final long firstIndex;
     private final JournalSegment<E> segment;
 
-    private Indexed<E> currentEntry;
-    private Indexed<E> nextEntry;
-
-    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalIndex index,
-            final JournalSerdes namespace) {
+    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalSerdes namespace) {
         this.segment = requireNonNull(segment);
         this.maxEntrySize = maxEntrySize;
-        this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
-        firstIndex = segment.index();
-    }
-
-    /**
-     * Returns the last read entry.
-     *
-     * @return The last read entry.
-     */
-    final Indexed<E> getCurrentEntry() {
-        return currentEntry;
-    }
-
-    /**
-     * Returns the next reader index.
-     *
-     * @return The next reader index.
-     */
-    final long getNextIndex() {
-        return currentEntry != null ? currentEntry.index() + 1 : firstIndex;
-    }
-
-    /**
-     * Returns the next entry in the reader.
-     *
-     * @return The next entry in the reader, or {@code null}
-     */
-    final @Nullable Indexed<E> tryNext() {
-        if (nextEntry == null) {
-            nextEntry = readNext();
-        }
-        if (nextEntry == null) {
-            return null;
-        }
-
-        // Set the current entry to the next entry.
-        currentEntry = nextEntry;
-
-        // Reset the next entry to null.
-        nextEntry = null;
-
-        // Read the next entry in the segment.
-        nextEntry = readNext();
-
-        // Return the current entry.
-        return currentEntry;
-    }
-
-    /**
-     * Resets the reader to the start of the segment.
-     */
-    final void reset() {
-        currentEntry = null;
-        nextEntry = null;
-        setPosition(JournalSegmentDescriptor.BYTES);
-        nextEntry = readNext();
-    }
-
-    /**
-     * Resets the reader to the given index.
-     *
-     * @param index The index to which to reset the reader.
-     */
-    final void reset(final long index) {
-        reset();
-        Position position = this.index.lookup(index - 1);
-        if (position != null) {
-            // FIXME: why do we need a 'null'-based entry here?
-            currentEntry = new Indexed<>(position.index() - 1, null, 0);
-            setPosition(position.position());
-            nextEntry = readNext();
-        }
-        while (getNextIndex() < index && tryNext() != null) {
-            // Nothing else
-        }
     }
 
     /**
@@ -134,9 +51,4 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
      * @return The entry, or {@code null}
      */
     abstract @Nullable Indexed<E> readEntry(long index);
-
-    private @Nullable Indexed<E> readNext() {
-        // Compute the index of the next entry in the segment.
-        return readEntry(getNextIndex());
-    }
 }
