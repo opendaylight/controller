@@ -185,9 +185,10 @@ final class JournalSegment<E> implements AutoCloseable {
     acquire();
 
     final var buffer = writer.buffer();
-    final var reader = buffer == null
-      ? new DiskJournalSegmentReader<>(channel, this, maxEntrySize, namespace)
-        : new MappedJournalSegmentReader<>(buffer, this, maxEntrySize, namespace);
+    final var path = file.file().toPath();
+    final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
+        : new DiskFileReader(path, channel, maxEntrySize);
+    final var reader = new JournalSegmentReader<>(this, fileReader, maxEntrySize, namespace);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
     return reader;

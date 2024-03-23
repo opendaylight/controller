@@ -19,24 +19,26 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.esotericsoftware.kryo.KryoException;
-import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, MappedJournalSegmentReader {
+final class JournalSegmentReader<E> {
     private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentReader.class);
 
     private final JournalSegment<E> segment;
     private final JournalSerdes namespace;
+    private final FileReader fileReader;
     private final int maxSegmentSize;
     private final int maxEntrySize;
 
     private int position;
 
-    JournalSegmentReader(final JournalSegment<E> segment, final int maxEntrySize, final JournalSerdes namespace) {
+    JournalSegmentReader(final JournalSegment<E> segment, final FileReader fileReader,
+            final int maxEntrySize, final JournalSerdes namespace) {
         this.segment = requireNonNull(segment);
+        this.fileReader = requireNonNull(fileReader);
         maxSegmentSize = segment.descriptor().maxSegmentSize();
         this.maxEntrySize = maxEntrySize;
         this.namespace = requireNonNull(namespace);
@@ -47,7 +49,7 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
      *
      * @return current position.
      */
-    final int position() {
+    int position() {
         return position;
     }
 
@@ -56,17 +58,19 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
      *
      * @param position new position
      */
-    final void setPosition(final int position) {
+    void setPosition(final int position) {
         verify(position >= JournalSegmentDescriptor.BYTES && position < maxSegmentSize,
             "Invalid position %s", position);
         this.position = position;
-        invalidateCache();
+        fileReader.invalidateCache();
     }
 
     /**
      * Invalidate any cache that is present, so that the next read is coherent with the backing file.
      */
-    abstract void invalidateCache();
+    void invalidateCache() {
+        fileReader.invalidateCache();
+    }
 
     /**
      * Reads the next entry, assigning it specified index.
@@ -74,7 +78,7 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
      * @param index entry index
      * @return The entry, or {@code null}
      */
-    final @Nullable Indexed<E> readEntry(final long index) {
+    @Nullable Indexed<E> readEntry(final long index) {
         // Check if there is enough in the buffer remaining
         final int remaining = maxSegmentSize - position - SegmentEntry.HEADER_BYTES;
         if (remaining < 0) {
@@ -84,7 +88,7 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
 
         // Calculate maximum entry length not exceeding file size nor maxEntrySize
         final var maxLength = Math.min(remaining, maxEntrySize);
-        final var buffer = read(position, maxLength + SegmentEntry.HEADER_BYTES);
+        final var buffer = fileReader.read(position, maxLength + SegmentEntry.HEADER_BYTES);
 
         // Read the entry length
         final var length = buffer.getInt(0);
@@ -128,19 +132,9 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
     }
 
     /**
-     * Read the some bytes as specified position. The sum of position and size is guaranteed not to exceed
-     * {@link #maxSegmentSize}.
-     *
-     * @param position position to the entry header
-     * @param size to read, guaranteed to not exceed {@link #maxEntrySize}
-     * @return resulting buffer
-     */
-    abstract ByteBuffer read(int position, int size);
-
-    /**
      * Close this reader.
      */
-    final void close() {
+    void close() {
         segment.closeReader(this);
     }
 }
