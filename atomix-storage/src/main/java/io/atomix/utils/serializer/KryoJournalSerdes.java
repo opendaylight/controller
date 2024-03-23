@@ -143,6 +143,7 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
 
     @Override
     public <T> T deserialize(final ByteBuffer buffer) {
+        // FIXME: CONTROLLER-2109: do not use ByteBufferInput due to readAscii() modifying buffer
         ByteBufferInput in = new ByteBufferInput(buffer);
         Kryo kryo = borrow();
         try {
