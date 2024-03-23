@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, MappedJournalSegmentWriter {
     final @NonNull FileChannel channel;
+    final @NonNull JournalSegment<E> segment;
     final @NonNull JournalIndex index;
     final @NonNull JournalSerdes namespace;
     final int maxSegmentSize;
@@ -34,6 +35,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     JournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
             final JournalIndex index, final JournalSerdes namespace) {
         this.channel = requireNonNull(channel);
+        this.segment = requireNonNull(segment);
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
         maxSegmentSize = segment.descriptor().maxSegmentSize();
@@ -43,6 +45,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
 
     JournalSegmentWriter(final JournalSegmentWriter<E> previous) {
         channel = previous.channel;
+        segment = previous.segment;
         index = previous.index;
         namespace = previous.namespace;
         maxSegmentSize = previous.maxSegmentSize;
