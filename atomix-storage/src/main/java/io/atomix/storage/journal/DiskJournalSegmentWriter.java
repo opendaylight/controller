@@ -20,6 +20,7 @@ import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 
 import com.esotericsoftware.kryo.KryoException;
 import com.google.common.annotations.VisibleForTesting;
+import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -51,32 +52,30 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private static final Logger LOG = LoggerFactory.getLogger(DiskJournalSegmentWriter.class);
   private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[HEADER_BYTES]);
 
-  private final ByteBuffer memory;
+  private final JournalSegmentReader<E> reader;
+  private final ByteBuffer buffer;
+
   private Indexed<E> lastEntry;
   private long currentPosition;
 
-  DiskJournalSegmentWriter(
-      FileChannel channel,
-      JournalSegment<E> segment,
-      int maxEntrySize,
-      JournalIndex index,
-      JournalSerdes namespace) {
+  DiskJournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
+          final JournalIndex index, final JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
-    memory = allocMemory(maxEntrySize);
+
+    buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
+    final var fileReader = new DiskFileReader(segment.file().file().toPath(), channel, maxSegmentSize, maxEntrySize);
+    reader = new JournalSegmentReader<>(segment, fileReader, maxEntrySize, namespace);
     reset(0);
   }
 
-  DiskJournalSegmentWriter(JournalSegmentWriter<E> previous, int position) {
+  DiskJournalSegmentWriter(final JournalSegmentWriter<E> previous, final int position) {
     super(previous);
-    memory = allocMemory(maxEntrySize);
+
+    buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
+    final var fileReader = new DiskFileReader(segment.file().file().toPath(), channel, maxSegmentSize, maxEntrySize);
+    reader = new JournalSegmentReader<>(segment, fileReader, maxEntrySize, namespace);
     lastEntry = previous.getLastEntry();
     currentPosition = position;
-  }
-
-  private static ByteBuffer allocMemory(int maxEntrySize) {
-    final var buf = ByteBuffer.allocate((maxEntrySize + HEADER_BYTES) * 2);
-    buf.limit(0);
-    return buf;
   }
 
   @Override
@@ -96,41 +95,35 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   void reset(final long index) {
+      // acquire ownership of cache and make sure reader does not see anything we've done once we're done
+      reader.invalidateCache();
+      try {
+          resetWithBuffer(index);
+      } finally {
+          // Make sure reader does not see anything we've done
+          reader.invalidateCache();
+      }
+  }
+
+  private void resetWithBuffer(final long index) {
       long nextIndex = firstIndex;
 
-      // Clear the buffer indexes.
+      // Clear the buffer indexes and acquire ownership of the buffer
       currentPosition = JournalSegmentDescriptor.BYTES;
+      reader.setPosition(JournalSegmentDescriptor.BYTES);
 
-      try {
-          // Clear memory buffer and read fist chunk
-          channel.read(memory.clear(), JournalSegmentDescriptor.BYTES);
-          memory.flip();
-
-          while (index == 0 || nextIndex <= index) {
-              final var entry = prepareNextEntry(channel, memory, maxEntrySize);
-              if (entry == null) {
-                  break;
-              }
-
-              final var bytes = entry.bytes();
-              final var length = bytes.remaining();
-              try {
-                  lastEntry = new Indexed<>(nextIndex, namespace.<E>deserialize(bytes), length);
-              } catch (KryoException e) {
-                  // No-op, position is only updated on success
-                  LOG.debug("Failed to deserialize entry", e);
-                  break;
-              }
-
-              this.index.index(nextIndex, (int) currentPosition);
-              nextIndex++;
-
-              // Update the current position for indexing.
-              currentPosition = currentPosition + HEADER_BYTES + length;
-              memory.position(memory.position() + length);
+      while (index == 0 || nextIndex <= index) {
+          final var entry = reader.readEntry(nextIndex);
+          if (entry == null) {
+              break;
           }
-      } catch (IOException e) {
-          throw new StorageException(e);
+
+          lastEntry = entry;
+          this.index.index(nextIndex, (int) currentPosition);
+          nextIndex++;
+
+          // Update the current position for indexing.
+          currentPosition = currentPosition + HEADER_BYTES + entry.size();
       }
   }
 
@@ -208,54 +201,52 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   @SuppressWarnings("unchecked")
-  <T extends E> Indexed<T> append(T entry) {
-    // Store the entry index.
-    final long index = getNextIndex();
+  <T extends E> Indexed<T> append(final T entry) {
+      // Store the entry index.
+      final long index = getNextIndex();
 
-    // Serialize the entry.
-    try {
-      namespace.serialize(entry, memory.clear().position(HEADER_BYTES));
-    } catch (KryoException e) {
-      throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
-    }
-    memory.flip();
+      // Serialize the entry.
+      try {
+          namespace.serialize(entry, buffer.clear().position(HEADER_BYTES));
+      } catch (KryoException e) {
+          throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
+      }
+      buffer.flip();
 
-    final int length = memory.limit() - HEADER_BYTES;
+      final int length = buffer.limit() - HEADER_BYTES;
+      // Ensure there's enough space left in the buffer to store the entry.
+      if (maxSegmentSize - currentPosition < length + HEADER_BYTES) {
+          throw new BufferOverflowException();
+      }
 
-    // Ensure there's enough space left in the buffer to store the entry.
-    if (maxSegmentSize - currentPosition < length + HEADER_BYTES) {
-      throw new BufferOverflowException();
-    }
+      // If the entry length exceeds the maximum entry size then throw an exception.
+      if (length > maxEntrySize) {
+          throw new TooLarge("Entry size " + length + " exceeds maximum allowed bytes (" + maxEntrySize + ")");
+      }
 
-    // If the entry length exceeds the maximum entry size then throw an exception.
-    if (length > maxEntrySize) {
-      throw new StorageException.TooLarge("Entry size " + length + " exceeds maximum allowed bytes (" + maxEntrySize + ")");
-    }
+      // Compute the checksum for the entry.
+      final var crc32 = new CRC32();
+      crc32.update(buffer.slice(HEADER_BYTES, length));
 
-    // Compute the checksum for the entry.
-    final CRC32 crc32 = new CRC32();
-    crc32.update(memory.array(), HEADER_BYTES, memory.limit() - HEADER_BYTES);
-    final long checksum = crc32.getValue();
+      // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
+      buffer.putInt(0, length).putInt(Integer.BYTES, (int) crc32.getValue());
+      try {
+          channel.write(buffer, currentPosition);
+      } catch (IOException e) {
+          throw new StorageException(e);
+      }
 
-    // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-    memory.putInt(0, length).putInt(Integer.BYTES, (int) checksum);
-    try {
-      channel.write(memory, currentPosition);
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
+      // Update the last entry with the correct index/term/length.
+      final var indexedEntry = new Indexed<E>(index, entry, length);
+      lastEntry = indexedEntry;
+      this.index.index(index, (int) currentPosition);
 
-    // Update the last entry with the correct index/term/length.
-    Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
-    this.lastEntry = indexedEntry;
-    this.index.index(index, (int) currentPosition);
-
-    currentPosition = currentPosition + HEADER_BYTES + length;
-    return (Indexed<T>) indexedEntry;
+      currentPosition = currentPosition + HEADER_BYTES + length;
+      return (Indexed<T>) indexedEntry;
   }
 
   @Override
-  void truncate(long index) {
+  void truncate(final long index) {
     // If the index is greater than or equal to the last index, skip the truncate.
     if (index >= getLastIndex()) {
       return;
