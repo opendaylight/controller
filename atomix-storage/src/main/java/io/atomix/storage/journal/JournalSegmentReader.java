@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
-import java.util.NoSuchElementException;
 import org.eclipse.jdt.annotation.Nullable;
 
 abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, MappedJournalSegmentReader {
@@ -60,23 +59,16 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
     }
 
     /**
-     * Returns whether the reader has a next entry to read.
-     *
-     * @return Whether the reader has a next entry to read.
-     */
-    final boolean hasNext() {
-        return nextEntry != null || (nextEntry = readNext()) != null;
-    }
-
-    /**
      * Returns the next entry in the reader.
      *
-     * @return The next entry in the reader.
-     * @throws UnsupportedOperationException if there is no such entry
+     * @return The next entry in the reader, or {@code null}
      */
-    final Indexed<E> next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException();
+    final @Nullable Indexed<E> tryNext() {
+        if (nextEntry == null) {
+            nextEntry = readNext();
+        }
+        if (nextEntry == null) {
+            return null;
         }
 
         // Set the current entry to the next entry.
@@ -116,8 +108,8 @@ abstract sealed class JournalSegmentReader<E> permits DiskJournalSegmentReader, 
             setPosition(position.position());
             nextEntry = readNext();
         }
-        while (getNextIndex() < index && hasNext()) {
-            next();
+        while (getNextIndex() < index && tryNext() != null) {
+            // Nothing else
         }
     }
 
