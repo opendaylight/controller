@@ -16,11 +16,12 @@
  */
 package io.atomix.storage.journal;
 
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.zip.CRC32;
 
 /**
  * Log segment reader.
@@ -28,74 +29,71 @@ import java.util.zip.CRC32;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 final class DiskJournalSegmentReader<E> extends JournalSegmentReader<E> {
-  private final FileChannel channel;
-  private final ByteBuffer memory;
-  private long currentPosition;
+    private final FileChannel channel;
+    private final ByteBuffer buffer;
 
-  DiskJournalSegmentReader(
-      FileChannel channel,
-      JournalSegment<E> segment,
-      int maxEntrySize,
-      JournalSerdes namespace) {
-    super(segment, maxEntrySize, namespace);
-    this.channel = channel;
-    this.memory = ByteBuffer.allocate((maxEntrySize + SegmentEntry.HEADER_BYTES) * 2);
-  }
+    // tracks where memory's first available byte maps to in terms of FileChannel.position()
+    private int bufferPosition;
 
-  @Override
-  void setPosition(int position) {
-    currentPosition = position;
-    memory.clear().flip();
-  }
-
-  @Override
-  Indexed<E> readEntry(final long index) {
-    try {
-      // Read more bytes from the segment if necessary.
-      if (memory.remaining() < maxEntrySize) {
-        long position = currentPosition + memory.position();
-        channel.read(memory.clear(), position);
-        currentPosition = position;
-        memory.flip();
-      }
-
-      // Mark the buffer so it can be reset if necessary.
-      memory.mark();
-
-      try {
-        // Read the length of the entry.
-        final int length = memory.getInt();
-
-        // If the buffer length is zero then return.
-        if (length <= 0 || length > maxEntrySize) {
-          memory.reset().limit(memory.position());
-          return null;
-        }
-
-        // Read the checksum of the entry.
-        long checksum = memory.getInt() & 0xFFFFFFFFL;
-
-        // Compute the checksum for the entry bytes.
-        final CRC32 crc32 = new CRC32();
-        crc32.update(memory.array(), memory.position(), length);
-
-        // If the stored checksum equals the computed checksum, return the entry.
-        if (checksum == crc32.getValue()) {
-          int limit = memory.limit();
-          memory.limit(memory.position() + length);
-          E entry = namespace.deserialize(memory);
-          memory.limit(limit);
-          return new Indexed<>(index, entry, length);
-        } else {
-          memory.reset().limit(memory.position());
-          return null;
-        }
-      } catch (BufferUnderflowException e) {
-        memory.reset().limit(memory.position());
-        return null;
-      }
-    } catch (IOException e) {
-      throw new StorageException(e);
+    DiskJournalSegmentReader(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
+            final JournalSerdes namespace) {
+        super(segment, maxEntrySize, namespace);
+        this.channel = requireNonNull(channel);
+        buffer = ByteBuffer.allocate((maxEntrySize + SegmentEntry.HEADER_BYTES) * 2).flip();
+        bufferPosition = 0;
     }
-  }
+
+    @Override void invalidateCache() {
+        buffer.clear().flip();
+        bufferPosition = 0;
+    }
+
+    @Override ByteBuffer read(final int position, final int size) {
+        // calculate logical seek distance between buffer's first byte and position and split flow between
+        // forward-moving and backwards-moving code paths.
+        final int seek = bufferPosition - position;
+        return seek >= 0 ? forwardAndRead(seek, position, size) : rewindAndRead(-seek, position, size);
+    }
+
+    private ByteBuffer forwardAndRead(final int seek, final int position, final int size) {
+        final int missing = buffer.limit() - seek - size;
+        if (missing <= 0) {
+            // fast path: we have the requested region
+            return buffer.slice(seek, size).asReadOnlyBuffer();
+        }
+
+        // We need to read more data, but let's salvage what we can:
+        // - set buffer position to seek, which means it points to the same as position
+        // - run compact, which moves everything between position and limit onto the beginning of buffer and
+        //   sets it up to receive more bytes
+        // - start the read accounting for the seek
+        buffer.position(seek).compact();
+        readAtLeast(position + seek, missing);
+        return setAndSlice(position, size);
+    }
+
+    ByteBuffer rewindAndRead(final int rewindBy, final int position, final int size) {
+        // TODO: Lazy solution. To be super crisp, we want to find out how much of the buffer we can salvage and
+        //       do all the limit/position fiddling before and after read. Right now let's just flow the buffer up and
+        //       read it.
+        buffer.clear();
+        readAtLeast(position, size);
+        return setAndSlice(position, size);
+    }
+
+    void readAtLeast(final int readPosition, final int readAtLeast) {
+        final int bytesRead;
+        try {
+            bytesRead = channel.read(buffer, readPosition);
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
+        verify(bytesRead >= readAtLeast, "Short read %s, expected %s", bytesRead, readAtLeast);
+        buffer.flip();
+    }
+
+    private ByteBuffer setAndSlice(final int position, final int size) {
+        bufferPosition = position;
+        return buffer.slice(0, size).asReadOnlyBuffer();
+    }
 }
