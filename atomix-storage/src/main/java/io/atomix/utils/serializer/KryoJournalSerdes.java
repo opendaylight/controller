@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.pool.KryoCallback;
 import com.esotericsoftware.kryo.pool.KryoFactory;
@@ -145,7 +146,7 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
         Kryo kryo = borrow();
         try {
             @SuppressWarnings("unchecked")
-            T obj = (T) kryo.readClassAndObject(new ByteBufferInput(buffer));
+            T obj = (T) kryo.readClassAndObject(new Kryo505ByteBufferInput(buffer));
             return obj;
         } finally {
             release(kryo);
@@ -162,7 +163,7 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
         Kryo kryo = borrow();
         try {
             @SuppressWarnings("unchecked")
-            T obj = (T) kryo.readClassAndObject(new com.esotericsoftware.kryo.io.ByteBufferInput(stream, bufferSize));
+            T obj = (T) kryo.readClassAndObject(new ByteBufferInput(stream, bufferSize));
             return obj;
         } finally {
             release(kryo);
