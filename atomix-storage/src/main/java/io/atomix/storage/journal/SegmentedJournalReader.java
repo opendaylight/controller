@@ -43,11 +43,6 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     }
 
     @Override
-    public final long getCurrentIndex() {
-        return currentEntry != null ? currentEntry.index() : 0;
-    }
-
-    @Override
     public final Indexed<E> getCurrentEntry() {
         return currentEntry;
     }
