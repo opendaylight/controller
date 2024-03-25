@@ -642,12 +642,12 @@ public class ByteBufferInput extends Input {
 			end++;
 			b = niobuffer.get();
 		} while ((b & 0x80) == 0);
-		niobuffer.put(end - 1, (byte)(niobuffer.get(end - 1) & 0x7F)); // Mask end of ascii bit.
-		byte[] tmp = new byte[end - start];
+		int count = end - start;
+		byte[] tmp = new byte[count];
 		niobuffer.position(start);
 		niobuffer.get(tmp);
-		String value = new String(tmp, 0, 0, end - start);
-		niobuffer.put(end - 1, (byte)(niobuffer.get(end - 1) | 0x80));
+		tmp[count - 1] &= 0x7F;  // Mask end of ascii bit.
+		String value = new String(tmp, 0, 0, count);
 		position = end;
 		niobuffer.position(position);
 		return value;
