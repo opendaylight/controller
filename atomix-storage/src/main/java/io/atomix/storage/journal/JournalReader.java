@@ -45,13 +45,6 @@ public interface JournalReader<E> extends AutoCloseable {
     long getFirstIndex();
 
     /**
-     * Returns the current reader index.
-     *
-     * @return The current reader index.
-     */
-    long getCurrentIndex();
-
-    /**
      * Returns the last read entry.
      *
      * @return The last read entry.
