@@ -143,15 +143,14 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
 
     @Override
     public <T> T deserialize(final ByteBuffer buffer) {
-        ByteBufferInput in = new ByteBufferInput(buffer);
-        Kryo kryo = borrow();
-        try {
-            @SuppressWarnings("unchecked")
-            T obj = (T) kryo.readClassAndObject(in);
-            return obj;
-        } finally {
-            release(kryo);
-        }
+        return kryoInputPool.run(input -> {
+            input.setInputStream(new ByteBufferInputStream(buffer));
+            return kryoPool.run(kryo -> {
+                @SuppressWarnings("unchecked")
+                T obj = (T) kryo.readClassAndObject(input);
+                return obj;
+            });
+        }, DEFAULT_BUFFER_SIZE);
     }
 
     @Override
@@ -161,11 +160,10 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
 
     @Override
     public <T> T deserialize(final InputStream stream, final int bufferSize) {
-        ByteBufferInput in = new ByteBufferInput(stream, bufferSize);
         Kryo kryo = borrow();
         try {
             @SuppressWarnings("unchecked")
-            T obj = (T) kryo.readClassAndObject(in);
+            T obj = (T) kryo.readClassAndObject(new ByteBufferInput(stream, bufferSize));
             return obj;
         } finally {
             release(kryo);
