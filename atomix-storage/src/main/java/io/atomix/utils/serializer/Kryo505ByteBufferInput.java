@@ -19,6 +19,7 @@
 
 package io.atomix.utils.serializer;
 
+import com.esotericsoftware.kryo.io.ByteBufferInput;
 import java.nio.ByteBuffer;
 
 /**
@@ -27,8 +28,8 @@ import java.nio.ByteBuffer;
  * @author Roman Levenstein &lt;romixlev@gmail.com&gt;
  * @author Robert Varga
  */
-public class ByteBufferInput extends com.esotericsoftware.kryo.io.ByteBufferInput {
-	public ByteBufferInput (ByteBuffer buffer) {
+public final class Kryo505ByteBufferInput extends ByteBufferInput {
+	Kryo505ByteBufferInput (ByteBuffer buffer) {
 		super(buffer);
 	}
 
