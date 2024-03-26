@@ -50,6 +50,10 @@ public class StorageException extends RuntimeException {
         public TooLarge(final String message) {
             super(message);
         }
+
+        public TooLarge(final String message, final Throwable cause) {
+            super(message, cause);
+        }
     }
 
     /**

@@ -20,15 +20,18 @@ import static java.util.Objects.requireNonNull;
 
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, MappedJournalSegmentWriter {
+    private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentWriter.class);
+
     final @NonNull FileChannel channel;
     final @NonNull JournalSegment<E> segment;
     private final @NonNull JournalIndex index;
@@ -88,12 +91,12 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     }
 
     /**
-     * Appends an entry to the journal.
+     * Tries to append an entry to the journal.
      *
      * @param entry The entry to append.
-     * @return The appended indexed entry.
+     * @return The appended indexed entry, or {@code null} if there is not enough space available
      */
-    final <T extends E> Indexed<T> append(final T entry) {
+    final <T extends E> @Nullable Indexed<T> append(final T entry) {
         // Store the entry index.
         final long index = getNextIndex();
         final int position = currentPosition;
@@ -102,7 +105,8 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         final int bodyPosition = position + HEADER_BYTES;
         final int avail = maxSegmentSize - bodyPosition;
         if (avail < 0) {
-          throw new BufferOverflowException();
+            LOG.trace("Not enough space for {} at {}", index, position);
+            return null;
         }
 
         final var writeLimit = Math.min(avail, maxEntrySize);
@@ -112,11 +116,12 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         } catch (KryoException e) {
             if (writeLimit != maxEntrySize) {
                 // We have not provided enough capacity, signal to roll to next segment
-                throw new BufferOverflowException();
+                LOG.trace("Tail serialization with {} bytes available failed", writeLimit, e);
+                return null;
             }
 
             // Just reset the buffer. There's no need to zero the bytes since we haven't written the length or checksum.
-            throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
+            throw new StorageException.TooLarge("Entry size exceeds maximum allowed bytes (" + maxEntrySize + ")", e);
         }
 
         final int length = diskEntry.position() - HEADER_BYTES;
