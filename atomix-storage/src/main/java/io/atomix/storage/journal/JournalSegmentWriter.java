@@ -63,7 +63,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      * @return The last written index.
      */
     final long getLastIndex() {
-        return lastEntry != null ? lastEntry.index() : segment.index() - 1;
+        return lastEntry != null ? lastEntry.index() : segment.firstIndex() - 1;
     }
 
     /**
@@ -81,7 +81,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      * @return The next index to be written.
      */
     final long getNextIndex() {
-        return lastEntry != null ? lastEntry.index() + 1 : segment.index();
+        return lastEntry != null ? lastEntry.index() + 1 : segment.firstIndex();
     }
 
     /**
@@ -112,7 +112,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     abstract JournalSegmentReader<E> reader();
 
     private void resetWithBuffer(final JournalSegmentReader<E> reader, final long index) {
-        long nextIndex = segment.index();
+        long nextIndex = segment.firstIndex();
 
         // Clear the buffer indexes and acquire ownership of the buffer
         currentPosition = JournalSegmentDescriptor.BYTES;
@@ -150,7 +150,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         // Truncate the index.
         this.index.truncate(index);
 
-        if (index < segment.index()) {
+        if (index < segment.firstIndex()) {
           // Reset the writer to the first entry.
           currentPosition = JournalSegmentDescriptor.BYTES;
         } else {
