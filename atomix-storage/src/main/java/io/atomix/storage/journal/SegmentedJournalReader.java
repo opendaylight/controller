@@ -33,13 +33,13 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
         this.journal = requireNonNull(journal);
         currentSegment = requireNonNull(segment);
         currentReader = segment.createReader();
-        nextIndex = currentSegment.index();
+        nextIndex = currentSegment.firstIndex();
         currentEntry = null;
     }
 
     @Override
     public final long getFirstIndex() {
-        return journal.getFirstSegment().index();
+        return journal.getFirstSegment().firstIndex();
     }
 
     @Override
@@ -58,7 +58,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
         currentSegment = journal.getFirstSegment();
         currentReader = currentSegment.createReader();
-        nextIndex = currentSegment.index();
+        nextIndex = currentSegment.firstIndex();
         currentEntry = null;
     }
 
@@ -86,7 +86,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
             nextIndex = position.index();
             currentReader.setPosition(position.position());
         } else {
-            nextIndex = currentSegment.index();
+            nextIndex = currentSegment.firstIndex();
             currentReader.setPosition(JournalSegmentDescriptor.BYTES);
         }
         while (nextIndex < index && tryNext() != null) {
@@ -98,7 +98,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
      * Rewinds the journal to the given index.
      */
     private void rewind(final long index) {
-        if (currentSegment.index() >= index) {
+        if (currentSegment.firstIndex() >= index) {
             JournalSegment<E> segment = journal.getSegment(index - 1);
             if (segment != null) {
                 currentReader.close();
@@ -115,8 +115,8 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     public Indexed<E> tryNext() {
         var next = currentReader.readEntry(nextIndex);
         if (next == null) {
-            final var nextSegment = journal.getNextSegment(currentSegment.index());
-            if (nextSegment == null || nextSegment.index() != nextIndex) {
+            final var nextSegment = journal.getNextSegment(currentSegment.firstIndex());
+            if (nextSegment == null || nextSegment.firstIndex() != nextIndex) {
                 return null;
             }
 

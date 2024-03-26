@@ -79,7 +79,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return The segment's starting index.
    */
-  long index() {
+  long firstIndex() {
     return descriptor.index();
   }
 
@@ -264,7 +264,7 @@ final class JournalSegment<E> implements AutoCloseable {
     return MoreObjects.toStringHelper(this)
         .add("id", descriptor.id())
         .add("version", descriptor.version())
-        .add("index", index())
+        .add("index", firstIndex())
         .toString();
   }
 }
