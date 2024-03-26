@@ -142,29 +142,9 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  void truncate(final long index) {
-    // If the index is greater than or equal to the last index, skip the truncate.
-    if (index >= getLastIndex()) {
-      return;
-    }
-
-    // Reset the last entry.
-    lastEntry = null;
-
-    // Truncate the index.
-    this.index.truncate(index);
-
-    if (index < firstIndex) {
-      // Reset the writer to the first entry.
-      currentPosition = JournalSegmentDescriptor.BYTES;
-    } else {
-      // Reset the writer to the given index.
-      reset(index);
-    }
-
-    // Zero the entry header at current buffer position.
-    // Note: we issue a single putLong() instead of two putInt()s.
-    buffer.putLong(currentPosition, 0L);
+  void writeEmptyHeader(final int position) {
+      // Note: we issue a single putLong() instead of two putInt()s.
+      buffer.putLong(position, 0L);
   }
 
   @Override
