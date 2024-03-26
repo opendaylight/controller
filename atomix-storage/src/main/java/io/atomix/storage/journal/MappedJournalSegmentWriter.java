@@ -45,29 +45,27 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private final @NonNull MappedByteBuffer mappedBuffer;
+  private final JournalSegmentReader<E> reader;
   private final ByteBuffer buffer;
 
-  private Indexed<E> lastEntry;
-  private int currentPosition;
-
-  MappedJournalSegmentWriter(
-      final FileChannel channel,
-      final JournalSegment<E> segment,
-      final int maxEntrySize,
-      final JournalIndex index,
-      final JournalSerdes namespace) {
+  MappedJournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
+      final JournalIndex index, final JournalSerdes namespace) {
     super(channel, segment, maxEntrySize, index, namespace);
+
     mappedBuffer = mapBuffer(channel, maxSegmentSize);
     buffer = mappedBuffer.slice();
+    reader = new JournalSegmentReader<>(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
+        maxEntrySize, namespace);
     reset(0);
   }
 
-  MappedJournalSegmentWriter(final JournalSegmentWriter<E> previous, final int position) {
+  MappedJournalSegmentWriter(final JournalSegmentWriter<E> previous) {
     super(previous);
+
     mappedBuffer = mapBuffer(channel, maxSegmentSize);
     buffer = mappedBuffer.slice();
-    currentPosition = position;
-    lastEntry = previous.getLastEntry();
+    reader = new JournalSegmentReader<>(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
+        maxEntrySize, namespace);
   }
 
   private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
@@ -91,55 +89,12 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   @Override
   DiskJournalSegmentWriter<E> toFileChannel() {
     close();
-    return new DiskJournalSegmentWriter<>(this, currentPosition);
+    return new DiskJournalSegmentWriter<>(this);
   }
 
   @Override
-  void reset(final long index) {
-    long nextIndex = firstIndex;
-
-    // Clear the buffer indexes.
-    currentPosition = JournalSegmentDescriptor.BYTES;
-
-    int length = buffer.getInt(currentPosition);
-
-    // If the length is non-zero, read the entry.
-    while (0 < length && length <= maxEntrySize && (index == 0 || nextIndex <= index)) {
-
-      // Read the checksum of the entry.
-      final long checksum = buffer.getInt(currentPosition + Integer.BYTES);
-
-      // Slice off the entry's bytes
-      final var entryBytes = buffer.slice(currentPosition + SegmentEntry.HEADER_BYTES, length);
-
-      // Compute the checksum for the entry bytes.
-      final var crc32 = new CRC32();
-      crc32.update(entryBytes);
-
-      // If the stored checksum does not equal the computed checksum, do not proceed further
-      if (checksum != (int) crc32.getValue()) {
-          break;
-      }
-
-      entryBytes.rewind();
-      final E entry = namespace.deserialize(entryBytes);
-      lastEntry = new Indexed<>(nextIndex, entry, length);
-      this.index.index(nextIndex, currentPosition);
-      nextIndex++;
-
-      // Update the current position for indexing.
-      currentPosition = currentPosition + SegmentEntry.HEADER_BYTES + length;
-
-      if (currentPosition + SegmentEntry.HEADER_BYTES >= maxSegmentSize) {
-          break;
-      }
-      length = buffer.getInt(currentPosition);
-    }
-  }
-
-  @Override
-  Indexed<E> getLastEntry() {
-    return lastEntry;
+  JournalSegmentReader<E> reader() {
+    return reader;
   }
 
   @Override
