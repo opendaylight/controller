@@ -48,7 +48,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
 
   @Override
   public void reset(long index) {
-    if (index > currentSegment.index()) {
+    if (index > currentSegment.firstIndex()) {
       currentSegment.releaseWriter();
       currentSegment = journal.resetSegments(index);
       currentWriter = currentSegment.acquireWriter();
@@ -73,7 +73,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     try {
       return currentWriter.append(entry);
     } catch (BufferOverflowException e) {
-      if (currentSegment.index() == currentWriter.getNextIndex()) {
+      if (currentSegment.firstIndex() == currentWriter.getNextIndex()) {
         throw e;
       }
     }
@@ -92,7 +92,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     }
 
     // Delete all segments with first indexes greater than the given index.
-    while (index < currentSegment.index() && currentSegment != journal.getFirstSegment()) {
+    while (index < currentSegment.firstIndex() && currentSegment != journal.getFirstSegment()) {
       currentSegment.releaseWriter();
       journal.removeSegment(currentSegment);
       currentSegment = journal.getLastSegment();

@@ -24,7 +24,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentNavigableMap;
@@ -303,7 +302,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
     // If the index already equals the first segment index, skip the reset.
     JournalSegment<E> firstSegment = getFirstSegment();
-    if (index == firstSegment.index()) {
+    if (index == firstSegment.firstIndex()) {
       return firstSegment;
     }
 
@@ -390,7 +389,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   synchronized JournalSegment<E> getSegment(long index) {
     assertOpen();
     // Check if the current segment contains the given index first in order to prevent an unnecessary map lookup.
-    if (currentSegment != null && index > currentSegment.index()) {
+    if (currentSegment != null && index > currentSegment.firstIndex()) {
       return currentSegment;
     }
 
@@ -408,7 +407,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param segment The segment to remove.
    */
   synchronized void removeSegment(JournalSegment<E> segment) {
-    segments.remove(segment.index());
+    segments.remove(segment.firstIndex());
     segment.close();
     segment.delete();
     resetCurrentSegment();
@@ -518,7 +517,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         // Add the segment to the segments list.
         LOG.debug("Found segment: {} ({})", segment.descriptor().id(), segmentFile.file().getName());
-        segments.put(segment.index(), segment);
+        segments.put(segment.firstIndex(), segment);
       }
     }
 
@@ -528,7 +527,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     Iterator<Map.Entry<Long, JournalSegment<E>>> iterator = segments.entrySet().iterator();
     while (iterator.hasNext()) {
       JournalSegment<E> segment = iterator.next().getValue();
-      if (previousSegment != null && previousSegment.lastIndex() != segment.index() - 1) {
+      if (previousSegment != null && previousSegment.lastIndex() != segment.firstIndex() - 1) {
         LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(), previousSegment.file().file());
         corrupted = true;
       }
@@ -586,7 +585,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    */
   public boolean isCompactable(long index) {
     Map.Entry<Long, JournalSegment<E>> segmentEntry = segments.floorEntry(index);
-    return segmentEntry != null && segments.headMap(segmentEntry.getValue().index()).size() > 0;
+    return segmentEntry != null && segments.headMap(segmentEntry.getValue().firstIndex()).size() > 0;
   }
 
   /**
@@ -597,7 +596,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    */
   public long getCompactableIndex(long index) {
     Map.Entry<Long, JournalSegment<E>> segmentEntry = segments.floorEntry(index);
-    return segmentEntry != null ? segmentEntry.getValue().index() : 0;
+    return segmentEntry != null ? segmentEntry.getValue().firstIndex() : 0;
   }
 
   /**
@@ -608,9 +607,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param index The index up to which to compact the journal.
    */
   public void compact(long index) {
-    Map.Entry<Long, JournalSegment<E>> segmentEntry = segments.floorEntry(index);
+    final var segmentEntry = segments.floorEntry(index);
     if (segmentEntry != null) {
-      SortedMap<Long, JournalSegment<E>> compactSegments = segments.headMap(segmentEntry.getValue().index());
+      final var compactSegments = segments.headMap(segmentEntry.getValue().firstIndex());
       if (!compactSegments.isEmpty()) {
         LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
         for (JournalSegment<E> segment : compactSegments.values()) {
@@ -619,7 +618,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
           segment.delete();
         }
         compactSegments.clear();
-        resetHead(segmentEntry.getValue().index());
+        resetHead(segmentEntry.getValue().firstIndex());
       }
     }
   }
