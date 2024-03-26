@@ -134,29 +134,9 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   }
 
   @Override
-  void truncate(final long index) {
-    // If the index is greater than or equal to the last index, skip the truncate.
-    if (index >= getLastIndex()) {
-      return;
-    }
-
-    // Reset the last entry.
-    lastEntry = null;
-
-    // Truncate the index.
-    this.index.truncate(index);
-
+  void writeEmptyHeader(final int position) {
     try {
-      if (index < firstIndex) {
-        // Reset the writer to the first entry.
-        currentPosition = JournalSegmentDescriptor.BYTES;
-      } else {
-        // Reset the writer to the given index.
-        reset(index);
-      }
-
-      // Zero the entry header at current channel position.
-      channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), currentPosition);
+      channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), position);
     } catch (IOException e) {
       throw new StorageException(e);
     }
