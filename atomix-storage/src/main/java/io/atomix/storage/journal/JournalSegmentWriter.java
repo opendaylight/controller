@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
@@ -31,6 +32,10 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     final int maxSegmentSize;
     final int maxEntrySize;
     final long firstIndex;
+
+    // FIXME: hide these two fields
+    Indexed<E> lastEntry;
+    int currentPosition;
 
     JournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
             final JournalIndex index, final JournalSerdes namespace) {
@@ -51,6 +56,8 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         maxSegmentSize = previous.maxSegmentSize;
         maxEntrySize = previous.maxEntrySize;
         firstIndex = previous.firstIndex;
+        lastEntry = previous.lastEntry;
+        currentPosition = previous.currentPosition;
     }
 
     /**
@@ -59,8 +66,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      * @return The last written index.
      */
     final long getLastIndex() {
-        final Indexed<?> lastEntry;
-        return (lastEntry = getLastEntry()) != null ? lastEntry.index() : firstIndex - 1;
+        return lastEntry != null ? lastEntry.index() : firstIndex - 1;
     }
 
     /**
@@ -68,7 +74,9 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @return The last entry written.
      */
-    abstract Indexed<E> getLastEntry();
+    final Indexed<E> getLastEntry() {
+        return lastEntry;
+    }
 
     /**
      * Returns the next index to be written.
@@ -76,8 +84,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      * @return The next index to be written.
      */
     final long getNextIndex() {
-        final Indexed<?> lastEntry;
-        return (lastEntry = getLastEntry()) != null ? lastEntry.index() + 1 : firstIndex;
+        return lastEntry != null ? lastEntry.index() + 1 : firstIndex;
     }
 
     /**
@@ -93,7 +100,41 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @param index the index to which to reset the head of the segment
      */
-    abstract void reset(long index);
+    final void reset(final long index) {
+        // acquire ownership of cache and make sure reader does not see anything we've done once we're done
+        final var reader = reader();
+        reader.invalidateCache();
+        try {
+            resetWithBuffer(reader, index);
+        } finally {
+            // Make sure reader does not see anything we've done
+            reader.invalidateCache();
+        }
+    }
+
+    abstract JournalSegmentReader<E> reader();
+
+    private void resetWithBuffer(final JournalSegmentReader<E> reader, final long index) {
+        long nextIndex = firstIndex;
+
+        // Clear the buffer indexes and acquire ownership of the buffer
+        currentPosition = JournalSegmentDescriptor.BYTES;
+        reader.setPosition(JournalSegmentDescriptor.BYTES);
+
+        while (index == 0 || nextIndex <= index) {
+            final var entry = reader.readEntry(nextIndex);
+            if (entry == null) {
+                break;
+            }
+
+            lastEntry = entry;
+            this.index.index(nextIndex, currentPosition);
+            nextIndex++;
+
+            // Update the current position for indexing.
+            currentPosition = currentPosition + HEADER_BYTES + entry.size();
+        }
+    }
 
     /**
      * Truncates the log to the given index.
