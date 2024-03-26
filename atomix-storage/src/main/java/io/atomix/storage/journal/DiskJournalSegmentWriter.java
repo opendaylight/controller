@@ -50,7 +50,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
   private final ByteBuffer buffer;
 
   private Indexed<E> lastEntry;
-  private long currentPosition;
+  private int currentPosition;
 
   DiskJournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
           final JournalIndex index, final JournalSerdes namespace) {
@@ -79,7 +79,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
 
   @Override
   MappedJournalSegmentWriter<E> toMapped() {
-    return new MappedJournalSegmentWriter<>(this, (int) currentPosition);
+    return new MappedJournalSegmentWriter<>(this, currentPosition);
   }
 
   @Override
@@ -113,7 +113,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
           }
 
           lastEntry = entry;
-          this.index.index(nextIndex, (int) currentPosition);
+          this.index.index(nextIndex, currentPosition);
           nextIndex++;
 
           // Update the current position for indexing.
@@ -166,7 +166,7 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
       // Update the last entry with the correct index/term/length.
       final var indexedEntry = new Indexed<E>(index, entry, length);
       lastEntry = indexedEntry;
-      this.index.index(index, (int) currentPosition);
+      this.index.index(index, currentPosition);
 
       currentPosition = currentPosition + HEADER_BYTES + length;
       return (Indexed<T>) indexedEntry;
