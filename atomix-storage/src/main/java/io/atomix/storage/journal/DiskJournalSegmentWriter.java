@@ -57,8 +57,8 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     super(channel, segment, maxEntrySize, index, namespace);
 
     buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
-    final var fileReader = new DiskFileReader(segment.file().file().toPath(), channel, maxSegmentSize, maxEntrySize);
-    reader = new JournalSegmentReader<>(segment, fileReader, maxEntrySize, namespace);
+    reader = new JournalSegmentReader<>(segment,
+        new DiskFileReader(segment.file().file().toPath(), channel, buffer), maxEntrySize, namespace);
     reset(0);
   }
 
@@ -66,8 +66,8 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     super(previous);
 
     buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
-    final var fileReader = new DiskFileReader(segment.file().file().toPath(), channel, maxSegmentSize, maxEntrySize);
-    reader = new JournalSegmentReader<>(segment, fileReader, maxEntrySize, namespace);
+    reader = new JournalSegmentReader<>(segment,
+        new DiskFileReader(segment.file().file().toPath(), channel, buffer), maxEntrySize, namespace);
     lastEntry = previous.getLastEntry();
     currentPosition = position;
   }
