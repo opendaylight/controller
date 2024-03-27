@@ -14,10 +14,7 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentRepr;
-import akka.testkit.CallingThreadDispatcher;
 import akka.testkit.javadsl.TestKit;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.UniformReservoir;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import io.atomix.storage.journal.StorageLevel;
@@ -27,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.io.FileUtils;
+import org.awaitility.Awaitility;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,6 +35,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
+import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
+import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -103,9 +104,13 @@ class PerformanceTest {
         LOG.info("Test {} entrySize={} segmentSize={} payload={} count={}", storage, maxEntrySize, maxSegmentSize,
             payloadSize, requestCount);
 
+        // reset metrics
+        final var metricsRegistry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
+        final var keys = metricsRegistry.getMetrics().keySet();
+        keys.forEach(metricsRegistry::remove);
+
         actor = kit.childActorOf(
-            SegmentedJournalActor.props("perf", DIRECTORY, storage, maxEntrySize, maxSegmentSize, maxEntrySize)
-            .withDispatcher(CallingThreadDispatcher.Id()));
+            SegmentedJournalActor.props("perf", DIRECTORY, storage, maxEntrySize, maxSegmentSize, maxEntrySize * 8));
 
         final var random = ThreadLocalRandom.current();
         final var sw = Stopwatch.createStarted();
@@ -123,32 +128,61 @@ class PerformanceTest {
         }
         LOG.info("{} requests created in {}", requests.length, sw.stop());
 
-        final var histogram = new Histogram(new UniformReservoir(requests.length));
+        // send all requests asynchronously
         sw.reset().start();
-        long started = System.nanoTime();
         for (var req : requests) {
             actor.tell(req.write, ActorRef.noSender());
-            assertTrue(req.future.isCompleted());
-            assertTrue(req.future.value().get().get().isEmpty());
-
-            final long now = System.nanoTime();
-            histogram.update(now - started);
-            started = now;
         }
-        sw.stop();
-        final var snap = histogram.getSnapshot();
+        LOG.info("All requests sent in {}", sw.stop());
 
-        LOG.info("{} requests completed in {}", requests.length, sw);
-        LOG.info("Minimum: {}", formatNanos(snap.getMin()));
-        LOG.info("Maximum: {}", formatNanos(snap.getMax()));
-        LOG.info("Mean:    {}", formatNanos(snap.getMean()));
-        LOG.info("StdDev:  {}", formatNanos(snap.getStdDev()));
-        LOG.info("Median:  {}", formatNanos(snap.getMedian()));
-        LOG.info("75th:    {}", formatNanos(snap.get75thPercentile()));
-        LOG.info("95th:    {}", formatNanos(snap.get95thPercentile()));
-        LOG.info("98th:    {}", formatNanos(snap.get98thPercentile()));
-        LOG.info("99th:    {}", formatNanos(snap.get99thPercentile()));
-        LOG.info("99.9th:  {}", formatNanos(snap.get999thPercentile()));
+        // retrieve results
+        sw.reset().start();
+        for (var req : requests) {
+            Awaitility.await().atMost(Durations.FIVE_HUNDRED_MILLISECONDS).until(req.future::isCompleted);
+            assertTrue(req.future.value().get().get().isEmpty());
+        }
+        LOG.info("All results gathered in {}", sw.stop());
+
+        // Log metrics collected
+        // meters
+        metricsRegistry.getMeters().forEach((key, meter) -> {
+            final var meterId = toMetricId(key);
+            LOG.info("{}: Count =       {}", meterId, meter.getCount());
+            LOG.info("{}: Mean Rate =   {}", meterId, meter.getMeanRate());
+            LOG.info("{}: 1 Min Rate =  {}", meterId, meter.getOneMinuteRate());
+            LOG.info("{}: 5 Min Rate =  {}", meterId, meter.getFiveMinuteRate());
+            LOG.info("{}: 15 Min Rate = {}", meterId, meter.getFifteenMinuteRate());
+        });
+        // timers
+        metricsRegistry.getTimers().forEach((key, timer) -> {
+            final var meterId = toMetricId(key);
+            final var snap = timer.getSnapshot();
+            LOG.info("{}: Min =    {}", meterId, formatNanos(snap.getMin()));
+            LOG.info("{}: Max =    {}", meterId, formatNanos(snap.getMax()));
+            LOG.info("{}: Mean =   {}", meterId, formatNanos(snap.getMean()));
+            LOG.info("{}: StdDev = {}", meterId, formatNanos(snap.getStdDev()));
+            LOG.info("{}: Median = {}", meterId, formatNanos(snap.getMedian()));
+            LOG.info("{}: 75th =   {}", meterId, formatNanos(snap.get75thPercentile()));
+            LOG.info("{}: 95th:    {}", meterId, formatNanos(snap.get95thPercentile()));
+            LOG.info("{}: 98th:    {}", meterId, formatNanos(snap.get98thPercentile()));
+            LOG.info("{}: 99th:    {}", meterId, formatNanos(snap.get99thPercentile()));
+            LOG.info("{}: 99.9th:  {}", meterId, formatNanos(snap.get999thPercentile()));
+        });
+        // histograms
+        metricsRegistry.getHistograms().forEach((key, histogram) -> {
+            final var meterId = toMetricId(key);
+            final var snap = histogram.getSnapshot();
+            LOG.info("{}: Min =    {}", meterId, snap.getMin());
+            LOG.info("{}: Max =    {}", meterId, snap.getMax());
+            LOG.info("{}: Mean =   {}", meterId, snap.getMean());
+            LOG.info("{}: StdDev = {}", meterId, snap.getStdDev());
+            LOG.info("{}: Median = {}", meterId, snap.getMedian());
+            LOG.info("{}: 75th =   {}", meterId, snap.get75thPercentile());
+            LOG.info("{}: 95th:    {}", meterId, snap.get95thPercentile());
+            LOG.info("{}: 98th:    {}", meterId, snap.get98thPercentile());
+            LOG.info("{}: 99th:    {}", meterId, snap.get99thPercentile());
+            LOG.info("{}: 99.9th:  {}", meterId, snap.get999thPercentile());
+        });
     }
 
     private static List<Arguments> writeRequests() {
@@ -192,5 +226,9 @@ class PerformanceTest {
                 return 0;
             }
         }).toString();
+    }
+
+    private static String toMetricId(final String metricKey) {
+        return metricKey.substring(metricKey.lastIndexOf('.') + 1);
     }
 }
