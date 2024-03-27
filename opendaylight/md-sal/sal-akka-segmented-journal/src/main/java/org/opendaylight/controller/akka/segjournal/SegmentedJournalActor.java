@@ -148,10 +148,18 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     }
 
     // responses == null on success, Exception on failure
-    record WrittenMessages(WriteMessages message, List<Object> responses, long writtenBytes) {
-        WrittenMessages {
+    static final class WrittenMessages {
+        final WriteMessages message;
+        final List<Object> responses;
+        final long writtenBytes;
+        Runnable onComplete;
+
+        WrittenMessages(final WriteMessages message, final List<Object> responses, final long writtenBytes) {
             verify(responses.size() == message.size(), "Mismatched %s and %s", message, responses);
             verify(writtenBytes >= 0, "Unexpected length %s", writtenBytes);
+            this.message = message;
+            this.responses = responses;
+            this.writtenBytes = writtenBytes;
         }
 
         private void complete() {
@@ -161,6 +169,9 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
                 } else {
                     message.setSuccess(i);
                 }
+            }
+            if (onComplete != null) {
+                onComplete.run();
             }
         }
     }
@@ -456,10 +467,13 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         final var sw = Stopwatch.createStarted();
         final long start = dataJournal.lastWrittenSequenceNr();
         final var writtenMessages = dataJournal.handleWriteMessages(message);
-        sw.stop();
+        final var writeCount = dataJournal.lastWrittenSequenceNr() - start;
 
-        batchWriteTime.update(sw.elapsed(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
-        messageWriteCount.mark(dataJournal.lastWrittenSequenceNr() - start);
+        writtenMessages.onComplete = () -> {
+            sw.stop();
+            batchWriteTime.update(sw.elapsed(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
+            messageWriteCount.mark(writeCount);
+        };
 
         // log message after statistics are updated
         LOG.debug("{}: write of {} bytes completed in {}", persistenceId, writtenMessages.writtenBytes, sw);
