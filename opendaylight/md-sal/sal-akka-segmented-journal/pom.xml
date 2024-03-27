@@ -71,6 +71,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <artifactId>junit-4-13_2.13</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <scm>
