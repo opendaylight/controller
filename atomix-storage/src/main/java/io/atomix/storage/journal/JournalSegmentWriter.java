@@ -20,19 +20,17 @@ import static java.util.Objects.requireNonNull;
 
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
-import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, MappedJournalSegmentWriter {
+final class JournalSegmentWriter<E> {
     private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentWriter.class);
 
-    final @NonNull FileChannel channel;
+    private final FileWriter fileWriter;
     final @NonNull JournalSegment<E> segment;
     private final @NonNull JournalIndex index;
     final @NonNull JournalSerdes namespace;
@@ -42,9 +40,9 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
     private Indexed<E> lastEntry;
     private int currentPosition;
 
-    JournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
+    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment<E> segment, final int maxEntrySize,
             final JournalIndex index, final JournalSerdes namespace) {
-        this.channel = requireNonNull(channel);
+        this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);
         this.index = requireNonNull(index);
         this.namespace = requireNonNull(namespace);
@@ -52,8 +50,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         this.maxEntrySize = maxEntrySize;
     }
 
-    JournalSegmentWriter(final JournalSegmentWriter<E> previous) {
-        channel = previous.channel;
+    JournalSegmentWriter(final JournalSegmentWriter<E> previous, final FileWriter fileWriter) {
         segment = previous.segment;
         index = previous.index;
         namespace = previous.namespace;
@@ -61,6 +58,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         maxEntrySize = previous.maxEntrySize;
         lastEntry = previous.lastEntry;
         currentPosition = previous.currentPosition;
+        this.fileWriter = requireNonNull(fileWriter);
     }
 
     /**
@@ -68,7 +66,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @return The last written index.
      */
-    final long getLastIndex() {
+    long getLastIndex() {
         return lastEntry != null ? lastEntry.index() : segment.firstIndex() - 1;
     }
 
@@ -77,7 +75,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @return The last entry written.
      */
-    final Indexed<E> getLastEntry() {
+    Indexed<E> getLastEntry() {
         return lastEntry;
     }
 
@@ -86,7 +84,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @return The next index to be written.
      */
-    final long getNextIndex() {
+    long getNextIndex() {
         return lastEntry != null ? lastEntry.index() + 1 : segment.firstIndex();
     }
 
@@ -96,7 +94,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      * @param entry The entry to append.
      * @return The appended indexed entry, or {@code null} if there is not enough space available
      */
-    final <T extends E> @Nullable Indexed<T> append(final T entry) {
+    <T extends E> @Nullable Indexed<T> append(final T entry) {
         // Store the entry index.
         final long index = getNextIndex();
         final int position = currentPosition;
@@ -110,7 +108,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         }
 
         final var writeLimit = Math.min(avail, maxEntrySize);
-        final var diskEntry = startWrite(position, writeLimit + HEADER_BYTES).position(HEADER_BYTES);
+        final var diskEntry = fileWriter.startWrite(position, writeLimit + HEADER_BYTES).position(HEADER_BYTES);
         try {
             namespace.serialize(entry, diskEntry);
         } catch (KryoException e) {
@@ -132,7 +130,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
 
         // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
         diskEntry.putInt(0, length).putInt(Integer.BYTES, (int) crc32.getValue());
-        commitWrite(position, diskEntry.rewind());
+        fileWriter.commitWrite(position, diskEntry.rewind());
 
         // Update the last entry with the correct index/term/length.
         final var indexedEntry = new Indexed<E>(index, entry, length);
@@ -146,34 +144,28 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         return ugly;
     }
 
-    abstract ByteBuffer startWrite(int position, int size);
-
-    abstract void commitWrite(int position, ByteBuffer entry);
-
     /**
      * Resets the head of the segment to the given index.
      *
      * @param index the index to which to reset the head of the segment
      */
-    final void reset(final long index) {
+    void reset(final long index) {
         // acquire ownership of cache and make sure reader does not see anything we've done once we're done
-        final var reader = reader();
-        reader.invalidateCache();
+        final var fileReader = fileWriter.reader();
         try {
-            resetWithBuffer(reader, index);
+            resetWithBuffer(fileReader, index);
         } finally {
             // Make sure reader does not see anything we've done
-            reader.invalidateCache();
+            fileReader.invalidateCache();
         }
     }
 
-    abstract JournalSegmentReader<E> reader();
-
-    private void resetWithBuffer(final JournalSegmentReader<E> reader, final long index) {
+    private void resetWithBuffer(final FileReader fileReader, final long index) {
         long nextIndex = segment.firstIndex();
 
         // Clear the buffer indexes and acquire ownership of the buffer
         currentPosition = JournalSegmentDescriptor.BYTES;
+        final var reader = new JournalSegmentReader<>(segment, fileReader, maxEntrySize, namespace);
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
@@ -196,7 +188,7 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @param index The index to which to truncate the log.
      */
-    final void truncate(final long index) {
+    void truncate(final long index) {
         // If the index is greater than or equal to the last index, skip the truncate.
         if (index >= getLastIndex()) {
             return;
@@ -217,25 +209,22 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
         }
 
         // Zero the entry header at current channel position.
-        writeEmptyHeader(currentPosition);
+        fileWriter.writeEmptyHeader(currentPosition);
     }
-
-    /**
-     * Write {@link SegmentEntry#HEADER_BYTES} worth of zeroes at specified position.
-     *
-     * @param position position to write to
-     */
-    abstract void writeEmptyHeader(int position);
 
     /**
      * Flushes written entries to disk.
      */
-    abstract void flush();
+    void flush() {
+        fileWriter.flush();
+    }
 
     /**
      * Closes this writer.
      */
-    abstract void close();
+    void close() {
+        fileWriter.close();
+    }
 
     /**
      * Returns the mapped buffer underlying the segment writer, or {@code null} if the writer does not have such a
@@ -243,9 +232,17 @@ abstract sealed class JournalSegmentWriter<E> permits DiskJournalSegmentWriter, 
      *
      * @return the mapped buffer underlying the segment writer, or {@code null}.
      */
-    abstract @Nullable MappedByteBuffer buffer();
+    @Nullable MappedByteBuffer buffer() {
+        return fileWriter.buffer();
+    }
 
-    abstract @NonNull MappedJournalSegmentWriter<E> toMapped();
+    @NonNull JournalSegmentWriter<E> toMapped() {
+        final var newWriter = fileWriter.toMapped();
+        return newWriter == null ? this : new JournalSegmentWriter<>(this, newWriter);
+    }
 
-    abstract @NonNull DiskJournalSegmentWriter<E> toFileChannel();
+    @NonNull JournalSegmentWriter<E> toFileChannel() {
+        final var newWriter = fileWriter.toDisk();
+        return newWriter == null ? this : new JournalSegmentWriter<>(this, newWriter);
+    }
 }
