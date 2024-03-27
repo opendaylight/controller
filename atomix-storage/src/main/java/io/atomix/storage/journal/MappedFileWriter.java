@@ -1,6 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
- * Copyright (c) 2024 PANTHEON.tech, s.r.o.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,51 +15,27 @@
  */
 package io.atomix.storage.journal;
 
-import io.atomix.storage.journal.index.JournalIndex;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
- * Segment writer.
- * <p>
- * The format of an entry in the log is as follows:
- * <ul>
- * <li>64-bit index</li>
- * <li>8-bit boolean indicating whether a term change is contained in the entry</li>
- * <li>64-bit optional term</li>
- * <li>32-bit signed entry length, including the entry type ID</li>
- * <li>8-bit signed entry type ID</li>
- * <li>n-bit entry bytes</li>
- * </ul>
- *
- * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
+ * A {@link StorageLevel#MAPPED} {@link FileWriter}.
  */
-final class MappedJournalSegmentWriter extends JournalSegmentWriter {
+final class MappedFileWriter extends FileWriter {
     private final @NonNull MappedByteBuffer mappedBuffer;
-    private final JournalSegmentReader reader;
+    private final MappedFileReader reader;
     private final ByteBuffer buffer;
 
-    MappedJournalSegmentWriter(final FileChannel channel, final JournalSegment segment, final int maxEntrySize,
-            final JournalIndex index) {
-        super(channel, segment, maxEntrySize, index);
+    MappedFileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
+        super(path, channel, maxSegmentSize, maxEntrySize);
 
         mappedBuffer = mapBuffer(channel, maxSegmentSize);
         buffer = mappedBuffer.slice();
-        reader = new JournalSegmentReader(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
-            maxEntrySize);
-        reset(0);
-    }
-
-    MappedJournalSegmentWriter(final JournalSegmentWriter previous) {
-        super(previous);
-
-        mappedBuffer = mapBuffer(channel, maxSegmentSize);
-        buffer = mappedBuffer.slice();
-        reader = new JournalSegmentReader(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
-            maxEntrySize);
+        reader = new MappedFileReader(path, mappedBuffer);
     }
 
     private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
@@ -72,24 +47,30 @@ final class MappedJournalSegmentWriter extends JournalSegmentWriter {
     }
 
     @Override
-    @NonNull MappedByteBuffer buffer() {
+    MappedFileReader reader() {
+        return reader;
+    }
+
+    @Override
+    MappedByteBuffer buffer() {
         return mappedBuffer;
     }
 
     @Override
-    MappedJournalSegmentWriter toMapped() {
-        return this;
+    MappedFileWriter toMapped() {
+        return null;
     }
 
     @Override
-    DiskJournalSegmentWriter toFileChannel() {
+    DiskFileWriter toDisk() {
         close();
-        return new DiskJournalSegmentWriter(this);
+        return new DiskFileWriter(path, channel, maxSegmentSize, maxEntrySize);
     }
 
     @Override
-    JournalSegmentReader reader() {
-        return reader;
+    void writeEmptyHeader(final int position) {
+        // Note: we issue a single putLong() instead of two putInt()s.
+        buffer.putLong(position, 0L);
     }
 
     @Override
@@ -100,12 +81,6 @@ final class MappedJournalSegmentWriter extends JournalSegmentWriter {
     @Override
     void commitWrite(final int position, final ByteBuffer entry) {
         // No-op, buffer is write-through
-    }
-
-    @Override
-    void writeEmptyHeader(final int position) {
-        // Note: we issue a single putLong() instead of two putInt()s.
-        buffer.putLong(position, 0L);
     }
 
     @Override

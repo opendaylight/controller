@@ -48,11 +48,11 @@ final class JournalSegment implements AutoCloseable {
   private boolean open = true;
 
   JournalSegment(
-      JournalSegmentFile file,
-      JournalSegmentDescriptor descriptor,
-      StorageLevel storageLevel,
-      int maxEntrySize,
-      double indexDensity) {
+      final JournalSegmentFile file,
+      final JournalSegmentDescriptor descriptor,
+      final StorageLevel storageLevel,
+      final int maxEntrySize,
+      final double indexDensity) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
@@ -64,10 +64,14 @@ final class JournalSegment implements AutoCloseable {
     } catch (IOException e) {
       throw new StorageException(e);
     }
-    writer = switch (storageLevel) {
-        case DISK -> new DiskJournalSegmentWriter(channel, this, maxEntrySize, journalIndex);
-        case MAPPED -> new MappedJournalSegmentWriter(channel, this, maxEntrySize, journalIndex).toFileChannel();
+
+    final var fileWriter = switch (storageLevel) {
+        case DISK -> new DiskFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
+        case MAPPED -> new MappedFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
     };
+    writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex)
+        // relinquish mapped memory
+        .toFileChannel();
   }
 
   /**
@@ -125,7 +129,7 @@ final class JournalSegment implements AutoCloseable {
    * @param index the index to lookup
    * @return the position of the given index or a lesser index, or {@code null}
    */
-  @Nullable Position lookup(long index) {
+  @Nullable Position lookup(final long index) {
     return journalIndex.lookup(index);
   }
 
@@ -195,7 +199,7 @@ final class JournalSegment implements AutoCloseable {
    *
    * @param reader the closed segment reader
    */
-  void closeReader(JournalSegmentReader reader) {
+  void closeReader(final JournalSegmentReader reader) {
     if (readers.remove(reader)) {
       release();
     }
