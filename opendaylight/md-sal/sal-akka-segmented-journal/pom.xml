@@ -67,6 +67,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.scalatestplus</groupId>
             <artifactId>junit-4-13_2.13</artifactId>
             <scope>test</scope>
