@@ -45,7 +45,6 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     public static final String STORAGE_MAX_SEGMENT_SIZE = "max-segment-size";
     public static final int STORAGE_MAX_SEGMENT_SIZE_DEFAULT = STORAGE_MAX_ENTRY_SIZE_DEFAULT * 8;
     public static final String STORAGE_MAX_UNFLUSHED_BYTES = "max-unflushed-bytes";
-    public static final int STORAGE_MAX_UNFLUSHED_BYTES_DEFAULT = 0;
     public static final String STORAGE_MEMORY_MAPPED = "memory-mapped";
 
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedFileJournal.class);
@@ -67,7 +66,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
 
         maxEntrySize = getBytes(config, STORAGE_MAX_ENTRY_SIZE, STORAGE_MAX_ENTRY_SIZE_DEFAULT);
         maxSegmentSize = getBytes(config, STORAGE_MAX_SEGMENT_SIZE, STORAGE_MAX_SEGMENT_SIZE_DEFAULT);
-        maxUnflushedBytes = getBytes(config, STORAGE_MAX_UNFLUSHED_BYTES, STORAGE_MAX_UNFLUSHED_BYTES_DEFAULT);
+        maxUnflushedBytes = getBytes(config, STORAGE_MAX_UNFLUSHED_BYTES, maxEntrySize);
 
         if (config.hasPath(STORAGE_MEMORY_MAPPED)) {
             storage = config.getBoolean(STORAGE_MEMORY_MAPPED) ? StorageLevel.MAPPED : StorageLevel.DISK;
