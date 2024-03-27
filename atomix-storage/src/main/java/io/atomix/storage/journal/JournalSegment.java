@@ -49,12 +49,12 @@ final class JournalSegment<E> implements AutoCloseable {
   private boolean open = true;
 
   JournalSegment(
-      JournalSegmentFile file,
-      JournalSegmentDescriptor descriptor,
-      StorageLevel storageLevel,
-      int maxEntrySize,
-      double indexDensity,
-      JournalSerdes namespace) {
+      final JournalSegmentFile file,
+      final JournalSegmentDescriptor descriptor,
+      final StorageLevel storageLevel,
+      final int maxEntrySize,
+      final double indexDensity,
+      final JournalSerdes namespace) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
@@ -67,11 +67,14 @@ final class JournalSegment<E> implements AutoCloseable {
     } catch (IOException e) {
       throw new StorageException(e);
     }
-    writer = switch (storageLevel) {
-        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace);
-        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace)
-            .toFileChannel();
+
+    final var fileWriter = switch (storageLevel) {
+        case DISK -> new DiskFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
+        case MAPPED -> new MappedFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
     };
+    writer = new JournalSegmentWriter<>(fileWriter, this, maxEntrySize, journalIndex, namespace)
+        // relinquish mapped memory
+        .toFileChannel();
   }
 
   /**
@@ -129,7 +132,7 @@ final class JournalSegment<E> implements AutoCloseable {
    * @param index the index to lookup
    * @return the position of the given index or a lesser index, or {@code null}
    */
-  @Nullable Position lookup(long index) {
+  @Nullable Position lookup(final long index) {
     return journalIndex.lookup(index);
   }
 
@@ -199,7 +202,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @param reader the closed segment reader
    */
-  void closeReader(JournalSegmentReader<E> reader) {
+  void closeReader(final JournalSegmentReader<E> reader) {
     if (readers.remove(reader)) {
       release();
     }
