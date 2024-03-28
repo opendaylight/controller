@@ -22,6 +22,30 @@
       },
       "revId": "bf926bf40c3135cff7e6849f2ac92e0e417d151d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fd92380_8a053aba",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/DataJournalV0.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-03-28T14:27:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ac3c455_8b567f50",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 17
+      },
+      "revId": "bf926bf40c3135cff7e6849f2ac92e0e417d151d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
