@@ -19,7 +19,7 @@ package io.atomix.storage.journal;
  * A {@link JournalReader} traversing only committed entries.
  */
 final class CommitsSegmentJournalReader<E> extends SegmentedJournalReader<E> {
-    CommitsSegmentJournalReader(SegmentedJournal<E> journal, JournalSegment<E> segment) {
+    CommitsSegmentJournalReader(SegmentedJournal<E> journal, JournalSegment segment) {
         super(journal, segment);
     }
 

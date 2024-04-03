@@ -34,18 +34,17 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class JournalSegment<E> implements AutoCloseable {
+final class JournalSegment implements AutoCloseable {
   private final JournalSegmentFile file;
   private final JournalSegmentDescriptor descriptor;
   private final StorageLevel storageLevel;
   private final int maxEntrySize;
   private final JournalIndex journalIndex;
-  private final JournalSerdes namespace;
-  private final Set<JournalSegmentReader<E>> readers = ConcurrentHashMap.newKeySet();
+  private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
   private final FileChannel channel;
 
-  private JournalSegmentWriter<E> writer;
+  private JournalSegmentWriter writer;
   private boolean open = true;
 
   JournalSegment(
@@ -53,13 +52,11 @@ final class JournalSegment<E> implements AutoCloseable {
       JournalSegmentDescriptor descriptor,
       StorageLevel storageLevel,
       int maxEntrySize,
-      double indexDensity,
-      JournalSerdes namespace) {
+      double indexDensity) {
     this.file = file;
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
     this.maxEntrySize = maxEntrySize;
-    this.namespace = namespace;
     journalIndex = new SparseJournalIndex(indexDensity);
     try {
       channel = FileChannel.open(file.file().toPath(),
@@ -68,9 +65,8 @@ final class JournalSegment<E> implements AutoCloseable {
       throw new StorageException(e);
     }
     writer = switch (storageLevel) {
-        case DISK -> new DiskJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace);
-        case MAPPED -> new MappedJournalSegmentWriter<>(channel, this, maxEntrySize, journalIndex, namespace)
-            .toFileChannel();
+        case DISK -> new DiskJournalSegmentWriter(channel, this, maxEntrySize, journalIndex);
+        case MAPPED -> new MappedJournalSegmentWriter(channel, this, maxEntrySize, journalIndex).toFileChannel();
     };
   }
 
@@ -161,7 +157,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return The segment writer.
    */
-  JournalSegmentWriter<E> acquireWriter() {
+  JournalSegmentWriter acquireWriter() {
     checkOpen();
     acquire();
 
@@ -180,7 +176,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @return A new segment reader.
    */
-  JournalSegmentReader<E> createReader() {
+  JournalSegmentReader createReader() {
     checkOpen();
     acquire();
 
@@ -188,7 +184,7 @@ final class JournalSegment<E> implements AutoCloseable {
     final var path = file.file().toPath();
     final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
         : new DiskFileReader(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
-    final var reader = new JournalSegmentReader<>(this, fileReader, maxEntrySize, namespace);
+    final var reader = new JournalSegmentReader(this, fileReader, maxEntrySize);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
     return reader;
@@ -199,7 +195,7 @@ final class JournalSegment<E> implements AutoCloseable {
    *
    * @param reader the closed segment reader
    */
-  void closeReader(JournalSegmentReader<E> reader) {
+  void closeReader(JournalSegmentReader reader) {
     if (readers.remove(reader)) {
       release();
     }
