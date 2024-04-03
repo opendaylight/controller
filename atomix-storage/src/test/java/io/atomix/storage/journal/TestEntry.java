@@ -15,9 +15,9 @@
  */
 package io.atomix.storage.journal;
 
-import java.util.Arrays;
-
 import static com.google.common.base.MoreObjects.toStringHelper;
+
+import java.util.Arrays;
 
 /**
  * Test entry.
@@ -37,6 +37,23 @@ public class TestEntry {
 
   public byte[] bytes() {
     return bytes;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TestEntry testEntry = (TestEntry) o;
+    return Arrays.equals(bytes, testEntry.bytes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(bytes);
   }
 
   @Override
