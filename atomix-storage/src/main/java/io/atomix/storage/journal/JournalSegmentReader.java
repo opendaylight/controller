@@ -18,6 +18,8 @@ package io.atomix.storage.journal;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
@@ -74,7 +76,7 @@ final class JournalSegmentReader {
      * @param index entry index
      * @return The binary data, or {@code null}
      */
-    @Nullable byte[] readBytes(final long index) {
+    @Nullable ByteBuf readBytes(final long index) {
         // Check if there is enough in the buffer remaining
         final int remaining = maxSegmentSize - position - SegmentEntry.HEADER_BYTES;
         if (remaining < 0) {
@@ -98,10 +100,10 @@ final class JournalSegmentReader {
         final int checksum = buffer.getInt(Integer.BYTES);
 
         // Slice off the entry's bytes
-        final var entryBytes = buffer.slice(SegmentEntry.HEADER_BYTES, length);
+        final var entryBuffer = buffer.slice(SegmentEntry.HEADER_BYTES, length);
         // Compute the checksum for the entry bytes.
         final var crc32 = new CRC32();
-        crc32.update(entryBytes);
+        crc32.update(entryBuffer);
 
         // If the stored checksum does not equal the computed checksum, do not proceed further
         final var computed = (int) crc32.getValue();
@@ -115,10 +117,8 @@ final class JournalSegmentReader {
         position += SegmentEntry.HEADER_BYTES + length;
 
         // return bytes
-        final var bytes = new byte[length];
-        entryBytes.rewind();
-        entryBytes.get(bytes);
-        return bytes;
+        entryBuffer.rewind();
+        return Unpooled.buffer(length).writeBytes(entryBuffer);
     }
 
     /**
