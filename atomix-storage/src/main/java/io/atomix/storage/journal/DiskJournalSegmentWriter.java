@@ -39,28 +39,28 @@ import java.nio.channels.FileChannel;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
+final class DiskJournalSegmentWriter extends JournalSegmentWriter {
     private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[HEADER_BYTES]);
 
-    private final JournalSegmentReader<E> reader;
+    private final JournalSegmentReader reader;
     private final ByteBuffer buffer;
 
-    DiskJournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
-        final JournalIndex index, final JournalSerdes namespace) {
-        super(channel, segment, maxEntrySize, index, namespace);
+    DiskJournalSegmentWriter(final FileChannel channel, final JournalSegment segment, final int maxEntrySize,
+            final JournalIndex index) {
+        super(channel, segment, maxEntrySize, index);
 
         buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
-        reader = new JournalSegmentReader<>(segment,
-            new DiskFileReader(segment.file().file().toPath(), channel, buffer), maxEntrySize, namespace);
+        reader = new JournalSegmentReader(segment,
+            new DiskFileReader(segment.file().file().toPath(), channel, buffer), maxEntrySize);
         reset(0);
     }
 
-    DiskJournalSegmentWriter(final JournalSegmentWriter<E> previous) {
+    DiskJournalSegmentWriter(final JournalSegmentWriter previous) {
         super(previous);
 
         buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
-        reader = new JournalSegmentReader<>(segment,
-            new DiskFileReader(segment.file().file().toPath(), channel, buffer), maxEntrySize, namespace);
+        reader = new JournalSegmentReader(segment,
+            new DiskFileReader(segment.file().file().toPath(), channel, buffer), maxEntrySize);
     }
 
     @Override
@@ -69,17 +69,17 @@ final class DiskJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     }
 
     @Override
-    MappedJournalSegmentWriter<E> toMapped() {
-        return new MappedJournalSegmentWriter<>(this);
+    MappedJournalSegmentWriter toMapped() {
+        return new MappedJournalSegmentWriter(this);
     }
 
     @Override
-    DiskJournalSegmentWriter<E> toFileChannel() {
+    DiskJournalSegmentWriter toFileChannel() {
         return this;
     }
 
     @Override
-    JournalSegmentReader<E> reader() {
+    JournalSegmentReader reader() {
         return reader;
     }
 

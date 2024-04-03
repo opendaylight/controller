@@ -38,29 +38,29 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
+final class MappedJournalSegmentWriter extends JournalSegmentWriter {
     private final @NonNull MappedByteBuffer mappedBuffer;
-    private final JournalSegmentReader<E> reader;
+    private final JournalSegmentReader reader;
     private final ByteBuffer buffer;
 
-    MappedJournalSegmentWriter(final FileChannel channel, final JournalSegment<E> segment, final int maxEntrySize,
-        final JournalIndex index, final JournalSerdes namespace) {
-        super(channel, segment, maxEntrySize, index, namespace);
+    MappedJournalSegmentWriter(final FileChannel channel, final JournalSegment segment, final int maxEntrySize,
+            final JournalIndex index) {
+        super(channel, segment, maxEntrySize, index);
 
         mappedBuffer = mapBuffer(channel, maxSegmentSize);
         buffer = mappedBuffer.slice();
-        reader = new JournalSegmentReader<>(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
-            maxEntrySize, namespace);
+        reader = new JournalSegmentReader(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
+            maxEntrySize);
         reset(0);
     }
 
-    MappedJournalSegmentWriter(final JournalSegmentWriter<E> previous) {
+    MappedJournalSegmentWriter(final JournalSegmentWriter previous) {
         super(previous);
 
         mappedBuffer = mapBuffer(channel, maxSegmentSize);
         buffer = mappedBuffer.slice();
-        reader = new JournalSegmentReader<>(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
-            maxEntrySize, namespace);
+        reader = new JournalSegmentReader(segment, new MappedFileReader(segment.file().file().toPath(), mappedBuffer),
+            maxEntrySize);
     }
 
     private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
@@ -77,18 +77,18 @@ final class MappedJournalSegmentWriter<E> extends JournalSegmentWriter<E> {
     }
 
     @Override
-    MappedJournalSegmentWriter<E> toMapped() {
+    MappedJournalSegmentWriter toMapped() {
         return this;
     }
 
     @Override
-    DiskJournalSegmentWriter<E> toFileChannel() {
+    DiskJournalSegmentWriter toFileChannel() {
         close();
-        return new DiskJournalSegmentWriter<>(this);
+        return new DiskJournalSegmentWriter(this);
     }
 
     @Override
-    JournalSegmentReader<E> reader() {
+    JournalSegmentReader reader() {
         return reader;
     }
 

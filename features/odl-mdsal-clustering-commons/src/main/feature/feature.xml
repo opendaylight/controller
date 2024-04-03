@@ -10,6 +10,7 @@
     <feature name="odl-mdsal-clustering-commons" version="${project.version}">
         <feature version="[13,14)">odl-apache-commons-lang3</feature>
         <feature version="[13,14)">odl-dropwizard-metrics</feature>
+        <feature version="[13,14)">odl-netty-4</feature>
         <feature version="[13,14)">odl-servlet-api</feature>
         <feature version="[13,14)">odl-yangtools-data</feature>
         <feature version="[13,14)">odl-yangtools-codec</feature>

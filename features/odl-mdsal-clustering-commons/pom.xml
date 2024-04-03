@@ -41,6 +41,12 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>odl-netty-4</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.odlparent</groupId>
             <artifactId>odl-servlet-api</artifactId>
             <type>xml</type>
             <classifier>features</classifier>

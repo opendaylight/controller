@@ -15,6 +15,10 @@
  */
 package io.atomix.storage.journal;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -30,10 +34,6 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Segmented journal.
@@ -54,7 +54,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   private final String name;
   private final StorageLevel storageLevel;
   private final File directory;
-  private final JournalSerdes namespace;
+  private final JournalSerializer<E> serializer;
   private final int maxSegmentSize;
   private final int maxEntrySize;
   private final int maxEntriesPerSegment;
@@ -63,9 +63,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
   private final SegmentedJournalWriter<E> writer;
   private volatile long commitIndex;
 
-  private final ConcurrentNavigableMap<Long, JournalSegment<E>> segments = new ConcurrentSkipListMap<>();
-  private final Collection<SegmentedJournalReader<E>> readers = ConcurrentHashMap.newKeySet();
-  private JournalSegment<E> currentSegment;
+  private final ConcurrentNavigableMap<Long, JournalSegment> segments = new ConcurrentSkipListMap<>();
+  private final Collection<SegmentedJournalReader> readers = ConcurrentHashMap.newKeySet();
+  private JournalSegment currentSegment;
 
   private volatile boolean open = true;
 
@@ -82,7 +82,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     this.name = requireNonNull(name, "name cannot be null");
     this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
     this.directory = requireNonNull(directory, "directory cannot be null");
-    this.namespace = requireNonNull(namespace, "namespace cannot be null");
+    this.serializer = JournalSerializer.wrap(requireNonNull(namespace, "namespace cannot be null"));
     this.maxSegmentSize = maxSegmentSize;
     this.maxEntrySize = maxEntrySize;
     this.maxEntriesPerSegment = maxEntriesPerSegment;
@@ -166,7 +166,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    *
    * @return the collection of journal segments
    */
-  public Collection<JournalSegment<E>> segments() {
+  public Collection<JournalSegment> segments() {
     return segments.values();
   }
 
@@ -176,8 +176,17 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param index the starting index
    * @return the journal segments starting with indexes greater than or equal to the given index
    */
-  public Collection<JournalSegment<E>> segments(long index) {
+  public Collection<JournalSegment> segments(long index) {
     return segments.tailMap(index).values();
+  }
+
+  /**
+   * Returns serializer instance.
+   *
+   * @return serializer instance
+   */
+  JournalSerializer<E> serializer() {
+    return serializer;
   }
 
   /**
@@ -230,7 +239,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    */
   private synchronized void open() {
     // Load existing log segments from disk.
-    for (JournalSegment<E> segment : loadSegments()) {
+    for (JournalSegment segment : loadSegments()) {
       segments.put(segment.descriptor().index(), segment);
     }
 
@@ -274,7 +283,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * Resets the current segment, creating a new segment if necessary.
    */
   private synchronized void resetCurrentSegment() {
-    JournalSegment<E> lastSegment = getLastSegment();
+    JournalSegment lastSegment = getLastSegment();
     if (lastSegment != null) {
       currentSegment = lastSegment;
     } else {
@@ -297,16 +306,16 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param index the starting index of the journal
    * @return the first segment
    */
-  JournalSegment<E> resetSegments(long index) {
+  JournalSegment resetSegments(long index) {
     assertOpen();
 
     // If the index already equals the first segment index, skip the reset.
-    JournalSegment<E> firstSegment = getFirstSegment();
+    JournalSegment firstSegment = getFirstSegment();
     if (index == firstSegment.firstIndex()) {
       return firstSegment;
     }
 
-    for (JournalSegment<E> segment : segments.values()) {
+    for (JournalSegment segment : segments.values()) {
       segment.close();
       segment.delete();
     }
@@ -328,9 +337,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
    *
    * @throws IllegalStateException if the segment manager is not open
    */
-  JournalSegment<E> getFirstSegment() {
+  JournalSegment getFirstSegment() {
     assertOpen();
-    Map.Entry<Long, JournalSegment<E>> segment = segments.firstEntry();
+    Map.Entry<Long, JournalSegment> segment = segments.firstEntry();
     return segment != null ? segment.getValue() : null;
   }
 
@@ -339,9 +348,9 @@ public final class SegmentedJournal<E> implements Journal<E> {
    *
    * @throws IllegalStateException if the segment manager is not open
    */
-  JournalSegment<E> getLastSegment() {
+  JournalSegment getLastSegment() {
     assertOpen();
-    Map.Entry<Long, JournalSegment<E>> segment = segments.lastEntry();
+    Map.Entry<Long, JournalSegment> segment = segments.lastEntry();
     return segment != null ? segment.getValue() : null;
   }
 
@@ -351,11 +360,11 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @return The next segment.
    * @throws IllegalStateException if the segment manager is not open
    */
-  synchronized JournalSegment<E> getNextSegment() {
+  synchronized JournalSegment getNextSegment() {
     assertOpen();
     assertDiskSpace();
 
-    JournalSegment<E> lastSegment = getLastSegment();
+    JournalSegment lastSegment = getLastSegment();
     JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
         .withId(lastSegment != null ? lastSegment.descriptor().id() + 1 : 1)
         .withIndex(currentSegment.lastIndex() + 1)
@@ -375,8 +384,8 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param index The segment index with which to look up the next segment.
    * @return The next segment for the given index.
    */
-  JournalSegment<E> getNextSegment(long index) {
-    Map.Entry<Long, JournalSegment<E>> nextSegment = segments.higherEntry(index);
+  JournalSegment getNextSegment(long index) {
+    Map.Entry<Long, JournalSegment> nextSegment = segments.higherEntry(index);
     return nextSegment != null ? nextSegment.getValue() : null;
   }
 
@@ -386,7 +395,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param index The index for which to return the segment.
    * @throws IllegalStateException if the segment manager is not open
    */
-  synchronized JournalSegment<E> getSegment(long index) {
+  synchronized JournalSegment getSegment(long index) {
     assertOpen();
     // Check if the current segment contains the given index first in order to prevent an unnecessary map lookup.
     if (currentSegment != null && index > currentSegment.firstIndex()) {
@@ -394,7 +403,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     // If the index is in another segment, get the entry with the next lowest first index.
-    Map.Entry<Long, JournalSegment<E>> segment = segments.floorEntry(index);
+    Map.Entry<Long, JournalSegment> segment = segments.floorEntry(index);
     if (segment != null) {
       return segment.getValue();
     }
@@ -406,7 +415,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    *
    * @param segment The segment to remove.
    */
-  synchronized void removeSegment(JournalSegment<E> segment) {
+  synchronized void removeSegment(JournalSegment segment) {
     segments.remove(segment.firstIndex());
     segment.close();
     segment.delete();
@@ -416,7 +425,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
   /**
    * Creates a new segment.
    */
-  JournalSegment<E> createSegment(JournalSegmentDescriptor descriptor) {
+  JournalSegment createSegment(JournalSegmentDescriptor descriptor) {
     File segmentFile = JournalSegmentFile.createSegmentFile(name, directory, descriptor.id());
 
     RandomAccessFile raf;
@@ -443,7 +452,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       } catch (IOException e) {
       }
     }
-    JournalSegment<E> segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
+    JournalSegment segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
     LOG.debug("Created segment: {}", segment);
     return segment;
   }
@@ -455,21 +464,21 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @param descriptor The segment descriptor.
    * @return The segment instance.
    */
-  protected JournalSegment<E> newSegment(JournalSegmentFile segmentFile, JournalSegmentDescriptor descriptor) {
-    return new JournalSegment<>(segmentFile, descriptor, storageLevel, maxEntrySize, indexDensity, namespace);
+  protected JournalSegment newSegment(JournalSegmentFile segmentFile, JournalSegmentDescriptor descriptor) {
+    return new JournalSegment(segmentFile, descriptor, storageLevel, maxEntrySize, indexDensity);
   }
 
   /**
    * Loads a segment.
    */
-  private JournalSegment<E> loadSegment(long segmentId) {
+  private JournalSegment loadSegment(long segmentId) {
     File segmentFile = JournalSegmentFile.createSegmentFile(name, directory, segmentId);
     ByteBuffer buffer = ByteBuffer.allocate(JournalSegmentDescriptor.BYTES);
     try (FileChannel channel = openChannel(segmentFile)) {
       channel.read(buffer);
       buffer.flip();
       JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
-      JournalSegment<E> segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
+      JournalSegment segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
       LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), segmentFile.getName());
       return segment;
     } catch (IOException e) {
@@ -490,11 +499,11 @@ public final class SegmentedJournal<E> implements Journal<E> {
    *
    * @return A collection of segments for the log.
    */
-  protected Collection<JournalSegment<E>> loadSegments() {
+  protected Collection<JournalSegment> loadSegments() {
     // Ensure log directories are created.
     directory.mkdirs();
 
-    TreeMap<Long, JournalSegment<E>> segments = new TreeMap<>();
+    TreeMap<Long, JournalSegment> segments = new TreeMap<>();
 
     // Iterate through all files in the log directory.
     for (File file : directory.listFiles(File::isFile)) {
@@ -513,7 +522,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
         JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
 
         // Load the segment.
-        JournalSegment<E> segment = loadSegment(descriptor.id());
+        JournalSegment segment = loadSegment(descriptor.id());
 
         // Add the segment to the segments list.
         LOG.debug("Found segment: {} ({})", segment.descriptor().id(), segmentFile.file().getName());
@@ -522,11 +531,11 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     // Verify that all the segments in the log align with one another.
-    JournalSegment<E> previousSegment = null;
+    JournalSegment previousSegment = null;
     boolean corrupted = false;
-    Iterator<Map.Entry<Long, JournalSegment<E>>> iterator = segments.entrySet().iterator();
+    Iterator<Map.Entry<Long, JournalSegment>> iterator = segments.entrySet().iterator();
     while (iterator.hasNext()) {
-      JournalSegment<E> segment = iterator.next().getValue();
+      JournalSegment segment = iterator.next().getValue();
       if (previousSegment != null && previousSegment.lastIndex() != segment.firstIndex() - 1) {
         LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(), previousSegment.file().file());
         corrupted = true;
@@ -584,7 +593,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @return indicates whether a segment can be removed from the journal
    */
   public boolean isCompactable(long index) {
-    Map.Entry<Long, JournalSegment<E>> segmentEntry = segments.floorEntry(index);
+    Map.Entry<Long, JournalSegment> segmentEntry = segments.floorEntry(index);
     return segmentEntry != null && segments.headMap(segmentEntry.getValue().firstIndex()).size() > 0;
   }
 
@@ -595,7 +604,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * @return the starting index of the last segment in the log
    */
   public long getCompactableIndex(long index) {
-    Map.Entry<Long, JournalSegment<E>> segmentEntry = segments.floorEntry(index);
+    Map.Entry<Long, JournalSegment> segmentEntry = segments.floorEntry(index);
     return segmentEntry != null ? segmentEntry.getValue().firstIndex() : 0;
   }
 
@@ -612,7 +621,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       final var compactSegments = segments.headMap(segmentEntry.getValue().firstIndex());
       if (!compactSegments.isEmpty()) {
         LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
-        for (JournalSegment<E> segment : compactSegments.values()) {
+        for (JournalSegment segment : compactSegments.values()) {
           LOG.trace("Deleting segment: {}", segment);
           segment.close();
           segment.delete();
