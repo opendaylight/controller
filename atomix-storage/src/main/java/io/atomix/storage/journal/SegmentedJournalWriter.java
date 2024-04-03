@@ -22,8 +22,8 @@ import static com.google.common.base.Verify.verifyNotNull;
  */
 final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   private final SegmentedJournal<E> journal;
-  private JournalSegment<E> currentSegment;
-  private JournalSegmentWriter<E> currentWriter;
+  private JournalSegment currentSegment;
+  private JournalSegmentWriter currentWriter;
 
   SegmentedJournalWriter(SegmentedJournal<E> journal) {
     this.journal = journal;
@@ -38,7 +38,12 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
 
   @Override
   public Indexed<E> getLastEntry() {
-    return currentWriter.getLastEntry();
+    final var lastBytes = currentWriter.getLastBytes();
+    if (lastBytes == null) {
+      return null;
+    }
+    final E deserialized = journal.serializer().deserialize(lastBytes);
+    return new Indexed<>(currentWriter.getLastIndex(), deserialized, lastBytes.length) ;
   }
 
   @Override
@@ -70,9 +75,10 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
 
   @Override
   public <T extends E> Indexed<T> append(T entry) {
-    var indexed = currentWriter.append(entry);
-    if (indexed != null) {
-      return indexed;
+    final var bytes = journal.serializer().serialize(entry);
+    var index = currentWriter.append(bytes);
+    if (index != null) {
+      return new Indexed<>(index, entry, bytes.length);
     }
 
     //  Slow path: we do not have enough capacity
@@ -80,7 +86,8 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     currentSegment.releaseWriter();
     currentSegment = journal.getNextSegment();
     currentWriter = currentSegment.acquireWriter();
-    return verifyNotNull(currentWriter.append(entry));
+    final var newIndex = verifyNotNull(currentWriter.append(bytes));
+    return new Indexed<>(newIndex, entry, bytes.length);
   }
 
   @Override

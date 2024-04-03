@@ -18,30 +18,26 @@ package io.atomix.storage.journal;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import com.esotericsoftware.kryo.KryoException;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class JournalSegmentReader<E> {
+final class JournalSegmentReader {
     private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentReader.class);
 
-    private final JournalSegment<E> segment;
-    private final JournalSerdes namespace;
+    private final JournalSegment segment;
     private final FileReader fileReader;
     private final int maxSegmentSize;
     private final int maxEntrySize;
 
     private int position;
 
-    JournalSegmentReader(final JournalSegment<E> segment, final FileReader fileReader,
-            final int maxEntrySize, final JournalSerdes namespace) {
+    JournalSegmentReader(final JournalSegment segment, final FileReader fileReader, final int maxEntrySize) {
         this.segment = requireNonNull(segment);
         this.fileReader = requireNonNull(fileReader);
         maxSegmentSize = segment.descriptor().maxSegmentSize();
         this.maxEntrySize = maxEntrySize;
-        this.namespace = requireNonNull(namespace);
     }
 
     /**
@@ -73,12 +69,12 @@ final class JournalSegmentReader<E> {
     }
 
     /**
-     * Reads the next entry, assigning it specified index.
+     * Reads the next binary data block
      *
      * @param index entry index
-     * @return The entry, or {@code null}
+     * @return The binary data, or {@code null}
      */
-    @Nullable Indexed<E> readEntry(final long index) {
+    @Nullable byte[] readBytes(final long index) {
         // Check if there is enough in the buffer remaining
         final int remaining = maxSegmentSize - position - SegmentEntry.HEADER_BYTES;
         if (remaining < 0) {
@@ -115,20 +111,14 @@ final class JournalSegmentReader<E> {
             return null;
         }
 
-        // Attempt to deserialize
-        final E entry;
-        try {
-            entry = namespace.deserialize(entryBytes.rewind());
-        } catch (KryoException e) {
-            // TODO: promote this to a hard error, as it should never happen
-            LOG.debug("Failed to deserialize entry", e);
-            invalidateCache();
-            return null;
-        }
+        // update position
+        position += SegmentEntry.HEADER_BYTES + length;
 
-        // We are all set. Update the position.
-        position = position + SegmentEntry.HEADER_BYTES + length;
-        return new Indexed<>(index, entry, length);
+        // return bytes
+        final var bytes = new byte[length];
+        entryBytes.rewind();
+        entryBytes.get(bytes);
+        return bytes;
     }
 
     /**
