@@ -26,7 +26,10 @@ import java.nio.ByteBuffer;
 
 /**
  * Support for serialization of {@link Journal} entries.
+ *
+ * @deprecated due to dependency on outdated Kryo library, {@link JournalSerializer} to be used instead.
  */
+@Deprecated(forRemoval = true, since="9.0.3")
 public interface JournalSerdes {
     /**
      * Serializes given object to byte array.

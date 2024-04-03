@@ -19,6 +19,7 @@ import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
+import io.netty.buffer.ByteBuf;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -39,7 +40,7 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
 
     private int currentPosition;
     private Long lastIndex;
-    private byte[] lastBytes;
+    private ByteBuf lastWritten;
 
     JournalSegmentWriter(final FileChannel channel, final JournalSegment segment, final int maxEntrySize,
             final JournalIndex index) {
@@ -56,7 +57,7 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
         index = previous.index;
         maxSegmentSize = previous.maxSegmentSize;
         maxEntrySize = previous.maxEntrySize;
-        lastBytes = previous.lastBytes;
+        lastWritten = previous.lastWritten;
         lastIndex = previous.lastIndex;
         currentPosition = previous.currentPosition;
     }
@@ -75,8 +76,8 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
      *
      * @return The last data written.
      */
-    final byte[] getLastBytes() {
-        return lastBytes;
+    final ByteBuf getLastWritten() {
+        return lastWritten;
     }
 
     /**
@@ -91,11 +92,12 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
     /**
      * Tries to append a binary data to the journal.
      *
-     * @param bytes binary data to append
+     * @param buf binary data to append
      * @return The index of appended data, or {@code null} if segment has no space
      */
-    final Long append(final byte[] bytes) {
-        if (bytes.length > maxEntrySize) {
+    final Long append(final ByteBuf buf) {
+        final var length = buf.readableBytes();
+        if (length > maxEntrySize) {
             throw new StorageException.TooLarge("Serialized entry size exceeds maximum allowed bytes ("
                 + maxEntrySize + ")");
         }
@@ -105,27 +107,27 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
         final int position = currentPosition;
 
         // check space available
-        final int nextPosition = position + HEADER_BYTES + bytes.length;
+        final int nextPosition = position + HEADER_BYTES + length;
         if (nextPosition >= maxSegmentSize) {
             LOG.trace("Not enough space for {} at {}", index, position);
             return null;
         }
 
         // allocate buffer and write data
-        final var writeBuffer = startWrite(position, bytes.length + HEADER_BYTES).position(HEADER_BYTES);
-        writeBuffer.put(bytes);
+        final var writeBuffer = startWrite(position, length + HEADER_BYTES).position(HEADER_BYTES);
+        writeBuffer.put(buf.nioBuffer());
 
         // Compute the checksum for the entry.
         final var crc32 = new CRC32();
         crc32.update(writeBuffer.flip().position(HEADER_BYTES));
 
         // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-        writeBuffer.putInt(0, bytes.length).putInt(Integer.BYTES, (int) crc32.getValue());
+        writeBuffer.putInt(0, length).putInt(Integer.BYTES, (int) crc32.getValue());
         commitWrite(position, writeBuffer.rewind());
 
         // Update the last entry with the correct index/term/length.
         currentPosition = nextPosition;
-        lastBytes = bytes;
+        lastWritten = buf;
         lastIndex = index;
         this.index.index(index, position);
 
@@ -163,18 +165,18 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
-            final var bytes = reader.readBytes(nextIndex);
-            if (bytes == null) {
+            final var buf = reader.readBytes(nextIndex);
+            if (buf == null) {
                 break;
             }
 
-            lastBytes = bytes;
+            lastWritten = buf;
             lastIndex = nextIndex;
             this.index.index(nextIndex, currentPosition);
             nextIndex++;
 
             // Update the current position for indexing.
-            currentPosition += HEADER_BYTES + bytes.length;
+            currentPosition += HEADER_BYTES + buf.readableBytes();
         }
     }
 
@@ -191,7 +193,7 @@ abstract sealed class JournalSegmentWriter permits DiskJournalSegmentWriter, Map
 
         // Reset the last written
         lastIndex = null;
-        lastBytes = null;
+        lastWritten = null;
 
         // Truncate the index.
         this.index.truncate(index);

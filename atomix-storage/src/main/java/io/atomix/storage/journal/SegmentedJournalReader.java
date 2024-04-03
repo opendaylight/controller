@@ -16,128 +16,58 @@
  */
 package io.atomix.storage.journal;
 
-import static java.util.Objects.requireNonNull;
+import io.netty.buffer.ByteBuf;
 
 /**
  * A {@link JournalReader} traversing all entries.
  */
-sealed class SegmentedJournalReader<E> implements JournalReader<E> permits CommitsSegmentJournalReader {
-    final SegmentedJournal<E> journal;
+final class SegmentedJournalReader<E> implements JournalReader<E> {
+    private final ByteJournalReader byteJournalReader;
+    private final JournalSerializer<E> serializer;
 
-    private JournalSegment currentSegment;
-    private JournalSegmentReader currentReader;
-    private Indexed<E> currentEntry;
-    private long nextIndex;
-
-    SegmentedJournalReader(final SegmentedJournal<E> journal, final JournalSegment segment) {
-        this.journal = requireNonNull(journal);
-        currentSegment = requireNonNull(segment);
-        currentReader = segment.createReader();
-        nextIndex = currentSegment.firstIndex();
-        currentEntry = null;
+    SegmentedJournalReader(final ByteJournalReader byteJournalReader, final JournalSerializer<E> serializer) {
+        this.byteJournalReader = byteJournalReader;
+        this.serializer = serializer;
     }
 
     @Override
     public final long getFirstIndex() {
-        return journal.getFirstSegment().firstIndex();
+        return byteJournalReader.firstIndex();
     }
 
     @Override
     public final Indexed<E> getCurrentEntry() {
-        return currentEntry;
+        final var buf =  byteJournalReader.lastRead();
+        return buf == null ? null : indexed(byteJournalReader.lastIndex(), buf);
     }
 
     @Override
     public final long getNextIndex() {
-        return nextIndex;
+        return byteJournalReader.nextIndex();
     }
 
     @Override
     public final void reset() {
-        currentReader.close();
-
-        currentSegment = journal.getFirstSegment();
-        currentReader = currentSegment.createReader();
-        nextIndex = currentSegment.firstIndex();
-        currentEntry = null;
+        byteJournalReader.reset();
     }
 
     @Override
     public final void reset(final long index) {
-        // If the current segment is not open, it has been replaced. Reset the segments.
-        if (!currentSegment.isOpen()) {
-            reset();
-        }
-
-        if (index < nextIndex) {
-            rewind(index);
-        } else if (index > nextIndex) {
-            while (index > nextIndex && tryNext() != null) {
-                // Nothing else
-            }
-        } else {
-            resetCurrentReader(index);
-        }
-    }
-
-    private void resetCurrentReader(final long index) {
-        final var position = currentSegment.lookup(index - 1);
-        if (position != null) {
-            nextIndex = position.index();
-            currentReader.setPosition(position.position());
-        } else {
-            nextIndex = currentSegment.firstIndex();
-            currentReader.setPosition(JournalSegmentDescriptor.BYTES);
-        }
-        while (nextIndex < index && tryNext() != null) {
-            // Nothing else
-        }
-    }
-
-    /**
-     * Rewinds the journal to the given index.
-     */
-    private void rewind(final long index) {
-        if (currentSegment.firstIndex() >= index) {
-            JournalSegment segment = journal.getSegment(index - 1);
-            if (segment != null) {
-                currentReader.close();
-
-                currentSegment = segment;
-                currentReader = currentSegment.createReader();
-            }
-        }
-
-        resetCurrentReader(index);
+        byteJournalReader.reset(index);
     }
 
     @Override
     public Indexed<E> tryNext() {
-        var bytes = currentReader.readBytes(nextIndex);
-        if (bytes == null) {
-            final var nextSegment = journal.getNextSegment(currentSegment.firstIndex());
-            if (nextSegment == null || nextSegment.firstIndex() != nextIndex) {
-                return null;
-            }
-
-            currentReader.close();
-
-            currentSegment = nextSegment;
-            currentReader = currentSegment.createReader();
-            bytes = currentReader.readBytes(nextIndex);
-            if (bytes == null) {
-                return null;
-            }
-        }
-
-        final var entry = journal.serializer().deserialize(bytes);
-        currentEntry = new Indexed<>(nextIndex++, entry, bytes.length);
-        return currentEntry;
+        final var buf = byteJournalReader.tryNext();
+        return buf == null ? null : indexed(byteJournalReader.lastIndex(), buf);
     }
 
     @Override
-    public final void close() {
-        currentReader.close();
-        journal.closeReader(this);
+    public void close() {
+        byteJournalReader.close();
+    }
+
+    private Indexed<E> indexed(final long index, final ByteBuf buf) {
+        return new Indexed<>(index, serializer.deserialize(buf), buf.readableBytes());
     }
 }

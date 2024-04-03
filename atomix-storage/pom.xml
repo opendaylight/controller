@@ -71,6 +71,11 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava-testlib</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-buffer</artifactId>
+      <version>4.1.104.Final</version>
+    </dependency>
   </dependencies>
 
   <build>

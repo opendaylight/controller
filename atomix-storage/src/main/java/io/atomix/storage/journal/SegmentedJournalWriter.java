@@ -1,5 +1,6 @@
 /*
  * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2024 PANTHEON.tech s.r.o. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,104 +16,59 @@
  */
 package io.atomix.storage.journal;
 
-import static com.google.common.base.Verify.verifyNotNull;
-
 /**
- * Raft log writer.
+ * Segmented Journal Writer.
  */
 final class SegmentedJournalWriter<E> implements JournalWriter<E> {
-  private final SegmentedJournal<E> journal;
-  private JournalSegment currentSegment;
-  private JournalSegmentWriter currentWriter;
+    private final ByteJournalWriter byteJournalWriter;
+    private final JournalSerializer<E> serializer;
 
-  SegmentedJournalWriter(SegmentedJournal<E> journal) {
-    this.journal = journal;
-    this.currentSegment = journal.getLastSegment();
-    this.currentWriter = currentSegment.acquireWriter();
-  }
-
-  @Override
-  public long getLastIndex() {
-    return currentWriter.getLastIndex();
-  }
-
-  @Override
-  public Indexed<E> getLastEntry() {
-    final var lastBytes = currentWriter.getLastBytes();
-    if (lastBytes == null) {
-      return null;
-    }
-    final E deserialized = journal.serializer().deserialize(lastBytes);
-    return new Indexed<>(currentWriter.getLastIndex(), deserialized, lastBytes.length) ;
-  }
-
-  @Override
-  public long getNextIndex() {
-    return currentWriter.getNextIndex();
-  }
-
-  @Override
-  public void reset(long index) {
-    if (index > currentSegment.firstIndex()) {
-      currentSegment.releaseWriter();
-      currentSegment = journal.resetSegments(index);
-      currentWriter = currentSegment.acquireWriter();
-    } else {
-      truncate(index - 1);
-    }
-    journal.resetHead(index);
-  }
-
-  @Override
-  public void commit(long index) {
-    if (index > journal.getCommitIndex()) {
-      journal.setCommitIndex(index);
-      if (journal.isFlushOnCommit()) {
-        flush();
-      }
-    }
-  }
-
-  @Override
-  public <T extends E> Indexed<T> append(T entry) {
-    final var bytes = journal.serializer().serialize(entry);
-    var index = currentWriter.append(bytes);
-    if (index != null) {
-      return new Indexed<>(index, entry, bytes.length);
+    public SegmentedJournalWriter(final ByteJournalWriter byteJournalWriter,
+            final JournalSerializer<E> serializer) {
+        this.byteJournalWriter = byteJournalWriter;
+        this.serializer = serializer;
     }
 
-    //  Slow path: we do not have enough capacity
-    currentWriter.flush();
-    currentSegment.releaseWriter();
-    currentSegment = journal.getNextSegment();
-    currentWriter = currentSegment.acquireWriter();
-    final var newIndex = verifyNotNull(currentWriter.append(bytes));
-    return new Indexed<>(newIndex, entry, bytes.length);
-  }
-
-  @Override
-  public void truncate(long index) {
-    if (index < journal.getCommitIndex()) {
-      throw new IndexOutOfBoundsException("Cannot truncate committed index: " + index);
+    @Override
+    public long getLastIndex() {
+        return byteJournalWriter.lastIndex();
     }
 
-    // Delete all segments with first indexes greater than the given index.
-    while (index < currentSegment.firstIndex() && currentSegment != journal.getFirstSegment()) {
-      currentSegment.releaseWriter();
-      journal.removeSegment(currentSegment);
-      currentSegment = journal.getLastSegment();
-      currentWriter = currentSegment.acquireWriter();
+    @Override
+    public Indexed<E> getLastEntry() {
+        final var buf = byteJournalWriter.lastWritten();
+        return buf == null ? null
+            : new Indexed<>(byteJournalWriter.lastIndex(), serializer.deserialize(buf), buf.readableBytes());
     }
 
-    // Truncate the current index.
-    currentWriter.truncate(index);
+    @Override
+    public long getNextIndex() {
+        return byteJournalWriter.nextIndex();
+    }
 
-    // Reset segment readers.
-    journal.resetTail(index + 1);
-  }
+    @Override
+    public void reset(long index) {
+        byteJournalWriter.reset(index);
+    }
 
-  @Override
-  public void flush() {
-    currentWriter.flush();
-  }
+    @Override
+    public void commit(long index) {
+        byteJournalWriter.commit(index);
+    }
+
+    @Override
+    public <T extends E> Indexed<T> append(T entry) {
+        final var buf = serializer.serialize(entry);
+        return new Indexed<>(byteJournalWriter.append(buf), entry, buf.readableBytes());
+    }
+
+    @Override
+    public void truncate(long index) {
+        byteJournalWriter.truncate(index);
+    }
+
+    @Override
+    public void flush() {
+        byteJournalWriter.flush();
+    }
 }

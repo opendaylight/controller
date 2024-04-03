@@ -7,6 +7,10 @@
  */
 package io.atomix.storage.journal;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+
 /**
  * Support for serialization of {@link Journal} entries.
  */
@@ -16,28 +20,28 @@ public interface JournalSerializer<T> {
      * Serializes given object to byte array.
      *
      * @param obj Object to serialize
-     *
+     * @return serialized bytes as {@link ByteBuf}
      */
-    byte[] serialize(T obj) ;
+    ByteBuf serialize(T obj) ;
 
     /**
      * Deserializes given byte array to Object.
      *
-     * @param bytes serialized bytes
+     * @param buf serialized bytes as {@link ByteBuf}
      * @return deserialized Object
      */
-    T deserialize(final byte[] bytes);
+    T deserialize(final ByteBuf buf);
 
     static <E> JournalSerializer<E> wrap(final JournalSerdes serdes) {
         return new JournalSerializer<>() {
             @Override
-            public byte[] serialize(final E obj) {
-                return serdes.serialize(obj);
+            public ByteBuf serialize(final E obj) {
+                return Unpooled.wrappedBuffer(serdes.serialize(obj));
             }
 
             @Override
-            public E deserialize(final byte[] bytes) {
-                return serdes.deserialize(bytes) ;
+            public E deserialize(final ByteBuf buf) {
+                return serdes.deserialize(ByteBufUtil.getBytes(buf));
             }
         };
     }
