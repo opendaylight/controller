@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7eb565b6_25b9cd97",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentDescriptor.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-04-04T13:51:18Z",
+      "side": 1,
+      "message": "never used??",
+      "revId": "2d315ade3590d05354bff482b05a95f1d4c4c9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a4ce0c6_3844f2c9",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentDescriptor.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-04-04T13:51:18Z",
+      "side": 1,
+      "message": "end up never used",
+      "revId": "2d315ade3590d05354bff482b05a95f1d4c4c9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a0afb783_bd52f1d4",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentDescriptor.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-04-04T13:51:18Z",
+      "side": 1,
+      "message": "is this done fore backwards compatibility? maybe document it?",
+      "revId": "2d315ade3590d05354bff482b05a95f1d4c4c9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5df73736_f7b1abf5",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/SegmentedJournal.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-04-04T13:51:18Z",
+      "side": 1,
+      "message": "remove?",
+      "revId": "2d315ade3590d05354bff482b05a95f1d4c4c9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8f3d1908_5382cd9b",
+        "filename": "atomix-storage/src/test/java/io/atomix/storage/journal/JournalSegmentDescriptorTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 9074
+      },
+      "writtenOn": "2024-04-04T13:51:18Z",
+      "side": 1,
+      "message": "update javadoc too",
+      "revId": "2d315ade3590d05354bff482b05a95f1d4c4c9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
