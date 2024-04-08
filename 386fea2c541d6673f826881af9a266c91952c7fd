@@ -33,6 +33,24 @@
       "message": "is the required important here?",
       "revId": "386fea2c541d6673f826881af9a266c91952c7fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f102facf_57d23ff6",
+        "filename": "benchmark/segjournal-benchmark/src/main/java/org/opendaylight/controller/akka/segjournal/BenchmarkUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-04-08T15:31:23Z",
+      "side": 1,
+      "message": "i left 1 parameter required so when program executed without parameters\nit prints usage instead of launching benchmark with all defaults",
+      "parentUuid": "a28b7de9_1dc491cf",
+      "revId": "386fea2c541d6673f826881af9a266c91952c7fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
