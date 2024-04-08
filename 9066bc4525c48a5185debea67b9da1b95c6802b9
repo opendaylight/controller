@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26086cc8_4abd60a7",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/ByteJournalReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-04-08T13:43:12Z",
+      "side": 1,
+      "message": "java.nio.ByteBuffer as an intermediate, netty.ByteBuf is the target -- due to obvious reasons",
+      "range": {
+        "startLine": 43,
+        "startChar": 5,
+        "endLine": 43,
+        "endChar": 11
+      },
+      "revId": "9066bc4525c48a5185debea67b9da1b95c6802b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
