@@ -201,7 +201,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @After
     public void tearDown() {
         if (followerDistributedDataStore != null) {
-            leaderDistributedDataStore.close();
+            followerDistributedDataStore.close();
         }
         if (leaderDistributedDataStore != null) {
             leaderDistributedDataStore.close();
