@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a47f84aa_9ab9aaaa",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9063
+      },
+      "writtenOn": "2024-04-12T15:10:40Z",
+      "side": 1,
+      "message": "and others",
+      "range": {
+        "startLine": 2,
+        "startChar": 3,
+        "endLine": 2,
+        "endChar": 42
+      },
+      "revId": "510952b3e41707540f44038eeb7c53d73a58917a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
