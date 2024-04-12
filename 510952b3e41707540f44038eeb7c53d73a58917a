@@ -39,6 +39,29 @@
       },
       "revId": "510952b3e41707540f44038eeb7c53d73a58917a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e67f159b_9a1f2369",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-04-12T15:53:48Z",
+      "side": 1,
+      "message": "use java.nio.Files operations, not java.nio.File operations, please.",
+      "range": {
+        "startLine": 128,
+        "startChar": 16,
+        "endLine": 128,
+        "endChar": 88
+      },
+      "revId": "510952b3e41707540f44038eeb7c53d73a58917a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
