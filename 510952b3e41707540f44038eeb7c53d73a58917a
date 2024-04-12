@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1f7818c4_e30fec71",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-04-12T15:17:55Z",
+      "side": 1,
+      "message": "Please mind the upgrade compatibility. This patch needs to be split into two:\n- first one which still works with akka-persistence, but creates the file on first start\n- the second to ditch persistence",
+      "revId": "510952b3e41707540f44038eeb7c53d73a58917a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a47f84aa_9ab9aaaa",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
         "patchSetId": 9
