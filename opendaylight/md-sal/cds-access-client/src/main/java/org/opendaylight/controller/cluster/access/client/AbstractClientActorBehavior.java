@@ -66,12 +66,4 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      * @return Behavior which should be used with the next message. Return null if this actor should shut down.
      */
     abstract @Nullable AbstractClientActorBehavior<?> onReceiveCommand(@NonNull Object command);
-
-    /**
-     * Implementation-internal method for handling an incoming recovery message coming from persistence.
-     *
-     * @param recover Recover message
-     * @return Behavior which should be used with the next message. Return null if this actor should shut down.
-     */
-    abstract @Nullable AbstractClientActorBehavior<?> onReceiveRecover(@NonNull Object recover);
 }
