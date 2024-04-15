@@ -145,11 +145,6 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         return connections.get(extractCookie(response.getMessage().getTarget()));
     }
 
-    @Override
-    final AbstractClientActorBehavior<?> onReceiveRecover(Object recover) {
-        throw new IllegalStateException("Frontend has been recovered");
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     final ClientActorBehavior<T> onReceiveCommand(final Object command) {
