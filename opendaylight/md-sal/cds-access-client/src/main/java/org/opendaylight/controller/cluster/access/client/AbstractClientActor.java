@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
-import akka.persistence.AbstractPersistentActor;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,18 +18,27 @@ import org.slf4j.LoggerFactory;
 /**
  * Frontend actor which takes care of persisting generations and creates an appropriate ClientIdentifier.
  */
-public abstract class AbstractClientActor extends AbstractPersistentActor {
+public abstract class AbstractClientActor extends AbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
+    private final ClientIdentifier clientId;
+    private final String persistenceId;
     private AbstractClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
-        currentBehavior = new RecoveringClientActorBehavior(
-                new InitialClientActorContext(this, frontendId), frontendId);
+        clientId = ClientStateUtils.currentClientIdentifier(frontendId);
+        persistenceId = frontendId.toPersistentId();
+    }
+
+    public final String persistenceId() {
+        return persistenceId;
     }
 
     @Override
-    public final String persistenceId() {
-        return currentBehavior.persistenceId();
+    public void preStart() throws Exception {
+        super.preStart();
+        final var context = new ClientActorContext(self(), persistenceId, getContext().system(), clientId,
+            getClientActorConfig());
+        currentBehavior = initialBehavior(context);
     }
 
     @Override
@@ -36,7 +46,6 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
         if (currentBehavior != null) {
             currentBehavior.close();
         }
-
         super.postStop();
     }
 
@@ -59,11 +68,6 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
         return receiveBuilder().matchAny(this::onReceiveCommand).build();
     }
 
-    @Override
-    public Receive createReceiveRecover() {
-        return receiveBuilder().matchAny(this::onReceiveRecover).build();
-    }
-
     private void onReceiveCommand(final Object command) {
         if (command == null) {
             LOG.debug("{}: ignoring null command", persistenceId());
@@ -75,10 +79,6 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
         } else {
             LOG.debug("{}: shutting down, ignoring command {}", persistenceId(), command);
         }
-    }
-
-    private void onReceiveRecover(final Object recover) {
-        switchBehavior(currentBehavior.onReceiveRecover(recover));
     }
 
     protected abstract ClientActorBehavior<?> initialBehavior(ClientActorContext context);
