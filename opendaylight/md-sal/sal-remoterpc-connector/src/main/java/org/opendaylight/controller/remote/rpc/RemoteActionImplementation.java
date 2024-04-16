@@ -11,8 +11,8 @@ import akka.actor.ActorRef;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteAction;
 import org.opendaylight.mdsal.dom.api.DOMActionImplementation;
-import org.opendaylight.mdsal.dom.api.DOMActionResult;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 import org.slf4j.Logger;
@@ -33,8 +33,8 @@ final class RemoteActionImplementation extends AbstractRemoteImplementation<Exec
      * Routes action request to a remote invoker, which will execute the action and return with result.
      */
     @Override
-    public ListenableFuture<DOMActionResult> invokeAction(final Absolute type, final DOMDataTreeIdentifier path,
-                                                          final ContainerNode input) {
+    public ListenableFuture<DOMRpcResult> invokeAction(final Absolute type, final DOMDataTreeIdentifier path,
+            final ContainerNode input) {
         LOG.debug("invoking action {} with path {}", type, path);
         return new RemoteDOMActionFuture(type, ask(ExecuteAction.from(type, path, input)));
     }

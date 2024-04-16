@@ -24,7 +24,6 @@ import org.opendaylight.controller.remote.rpc.messages.ActionResponse;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteAction;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
-import org.opendaylight.mdsal.dom.api.DOMActionResult;
 import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
@@ -117,7 +116,7 @@ final class OpsInvoker extends AbstractUntypedActor {
 
         final ActorRef sender = getSender();
 
-        final ListenableFuture<? extends DOMActionResult> future;
+        final ListenableFuture<? extends DOMRpcResult> future;
         try {
             future = actionService.invokeAction(msg.getType(), msg.getPath(), msg.getInput());
         } catch (final RuntimeException e) {
@@ -126,16 +125,16 @@ final class OpsInvoker extends AbstractUntypedActor {
             return;
         }
 
-        Futures.addCallback(future, new AbstractCallback<Absolute, DOMActionResult>(getSender(), msg.getType()) {
+        Futures.addCallback(future, new AbstractCallback<Absolute, DOMRpcResult>(getSender(), msg.getType()) {
             @Override
             Object nullResponse(final Absolute type) {
                 throw new IllegalStateException("Null invocation result of action " + type);
             }
 
             @Override
-            Object response(final Absolute type, final DOMActionResult result) {
-                final Collection<? extends RpcError> errors = result.getErrors();
-                return errors.isEmpty() ? new ActionResponse(result.getOutput(), result.getErrors())
+            Object response(final Absolute type, final DOMRpcResult result) {
+                final var errors = result.errors();
+                return errors.isEmpty() ? new ActionResponse(result.value(), errors)
                     // This is legacy (wrong) behavior, which ignores the fact that errors may be just warnings,
                     // discarding any output
                     : new Failure(new RpcErrorsException(String.format("Execution of action %s failed", type),
