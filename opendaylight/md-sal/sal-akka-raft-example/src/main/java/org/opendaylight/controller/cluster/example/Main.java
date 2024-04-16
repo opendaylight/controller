@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
@@ -49,11 +48,10 @@ public final class Main {
                 withoutPeer("example-3"), Optional.empty()), "example-3");
 
 
-        List<ActorRef> examples = Arrays.asList(example1Actor, example2Actor, example3Actor);
+        final var examples = Arrays.asList(example1Actor, example2Actor, example3Actor);
 
-        ActorRef clientActor = ACTOR_SYSTEM.actorOf(ClientActor.props(example1Actor));
-        BufferedReader br =
-            new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));
+        final var clientActor = ACTOR_SYSTEM.actorOf(ClientActor.props(example1Actor));
+        final var br = new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));
 
         System.out.println("Usage :");
         System.out.println("s <1-3> to start a peer");
