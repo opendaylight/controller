@@ -9,8 +9,7 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.AbstractOpsTest;
@@ -26,17 +25,15 @@ public class OpsResponseTest {
     public void testSerialization() {
         RpcResponse expectedRpc = new RpcResponse(AbstractOpsTest.makeRPCOutput("serialization-test"));
 
-        ActionResponse expectedAction = new ActionResponse(
-            Optional.of(AbstractOpsTest.makeRPCOutput("serialization-test")), Collections.emptyList());
+        ActionResponse expectedAction = new ActionResponse(AbstractOpsTest.makeRPCOutput("serialization-test"),
+            List.of());
 
         RpcResponse actualRpc = SerializationUtils.clone(expectedRpc);
 
         ActionResponse actualAction = SerializationUtils.clone(expectedAction);
 
-        assertEquals("getResultNormalizedNode", expectedRpc.getOutput(),
-                actualRpc.getOutput());
+        assertEquals("getResultNormalizedNode", expectedRpc.getOutput(), actualRpc.getOutput());
 
-        assertEquals("getResultNormalizedNode", expectedAction.getOutput(),
-                actualAction.getOutput());
+        assertEquals("getResultNormalizedNode", expectedAction.getOutput(), actualAction.getOutput());
     }
 }
