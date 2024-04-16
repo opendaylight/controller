@@ -16,21 +16,21 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Collection;
-import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 @SuppressFBWarnings({"SE_TRANSIENT_FIELD_NOT_RESTORED", "DMI_NONSERIALIZABLE_OBJECT_WRITTEN"})
 public class ActionResponse extends AbstractResponse<ContainerNode> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final transient @NonNull ImmutableList<@NonNull RpcError> errors;
 
-    public ActionResponse(final @NonNull Optional<ContainerNode> output, @NonNull final Collection<RpcError> errors) {
-        super(output.orElse(null));
+    public ActionResponse(final @Nullable ContainerNode output, @NonNull final Collection<? extends RpcError> errors) {
+        super(output);
         this.errors = ImmutableList.copyOf(errors);
     }
 
@@ -67,9 +67,9 @@ public class ActionResponse extends AbstractResponse<ContainerNode> {
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             @SuppressWarnings("unchecked")
-            final ImmutableList<RpcError> errors = (ImmutableList<RpcError>) in.readObject();
-            final Optional<NormalizedNode> output = SerializationUtils.readNormalizedNode(in);
-            actionResponse = new ActionResponse(output.map(ContainerNode.class::cast), errors);
+            final var errors = (ImmutableList<RpcError>) in.readObject();
+            final var output = SerializationUtils.readNormalizedNode(in);
+            actionResponse = new ActionResponse(output.map(ContainerNode.class::cast).orElse(null), errors);
         }
 
         private Object readResolve() {
