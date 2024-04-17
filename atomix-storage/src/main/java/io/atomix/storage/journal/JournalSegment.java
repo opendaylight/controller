@@ -21,8 +21,10 @@ import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.storage.journal.index.SparseJournalIndex;
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +44,9 @@ final class JournalSegment implements AutoCloseable {
   private final JournalIndex journalIndex;
   private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
+  private final Path path;
   private final FileChannel channel;
+  private final MappedByteBuffer mappedBuffer;
 
   private JournalSegmentWriter writer;
   private boolean open = true;
@@ -54,24 +58,24 @@ final class JournalSegment implements AutoCloseable {
       final int maxEntrySize,
       final double indexDensity) {
     this.file = file;
+    this.path = file.file().toPath();
     this.descriptor = descriptor;
     this.storageLevel = storageLevel;
     this.maxEntrySize = maxEntrySize;
     journalIndex = new SparseJournalIndex(indexDensity);
     try {
-      channel = FileChannel.open(file.file().toPath(),
-        StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+      channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+      mappedBuffer = storageLevel == StorageLevel.MAPPED
+          ? channel.map(FileChannel.MapMode.READ_WRITE, 0, descriptor.maxSegmentSize()) : null;
     } catch (IOException e) {
       throw new StorageException(e);
     }
 
     final var fileWriter = switch (storageLevel) {
-        case DISK -> new DiskFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
-        case MAPPED -> new MappedFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
+      case DISK -> new DiskFileWriter(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
+      case MAPPED -> new MappedFileWriter(path, channel, mappedBuffer, descriptor.maxSegmentSize(), maxEntrySize);
     };
-    writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex)
-        // relinquish mapped memory
-        .toFileChannel();
+    writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex);
   }
 
   /**
@@ -137,22 +141,15 @@ final class JournalSegment implements AutoCloseable {
    * Acquires a reference to the log segment.
    */
   private void acquire() {
-    if (references.getAndIncrement() == 0 && storageLevel == StorageLevel.MAPPED) {
-      writer = writer.toMapped();
-    }
+    references.incrementAndGet();
   }
 
   /**
    * Releases a reference to the log segment.
    */
   private void release() {
-    if (references.decrementAndGet() == 0) {
-      if (storageLevel == StorageLevel.MAPPED) {
-        writer = writer.toFileChannel();
-      }
-      if (!open) {
+    if (references.decrementAndGet() == 0 && !open) {
         finishClose();
-      }
     }
   }
 
@@ -164,7 +161,6 @@ final class JournalSegment implements AutoCloseable {
   JournalSegmentWriter acquireWriter() {
     checkOpen();
     acquire();
-
     return writer;
   }
 
@@ -184,10 +180,10 @@ final class JournalSegment implements AutoCloseable {
     checkOpen();
     acquire();
 
-    final var buffer = writer.buffer();
-    final var path = file.file().toPath();
-    final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
-        : new DiskFileReader(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
+    final var fileReader = switch (storageLevel) {
+      case DISK -> new DiskFileReader(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
+      case MAPPED -> new MappedFileReader(path, mappedBuffer);
+    };
     final var reader = new JournalSegmentReader(this, fileReader, maxEntrySize);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
@@ -242,6 +238,9 @@ final class JournalSegment implements AutoCloseable {
   private void finishClose() {
     writer.close();
     try {
+      if (mappedBuffer != null) {
+        BufferCleaner.freeBuffer(mappedBuffer);
+      }
       channel.close();
     } catch (IOException e) {
       throw new StorageException(e);
